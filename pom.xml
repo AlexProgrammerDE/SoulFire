@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.games647</groupId>
-    <artifactId>minecraftstresstester</artifactId>
+    <artifactId>lambdaattack</artifactId>
     <inceptionYear>2016</inceptionYear>
     <packaging>jar</packaging>
 
-    <name>MinecraftStressTester</name>
+    <name>LambdaAttack</name>
     <version>1.0</version>
     <description>Stress tester for minecraft servers</description>
-    <url>https://github.com/games647/MinecraftStressTester</url>
+    <url>https://github.com/games647/LambdaAttack</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,13 +18,13 @@
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/games647/MinecraftStressTester/issues</url>
+        <url>https://github.com/games647/LambdaAttack/issues</url>
     </issueManagement>
 
     <scm>
-        <url>https://github.com/games647/MinecraftStressTester</url>
-        <connection>scm:git:git://github.com/games647/MinecraftStressTester.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:games647/MinecraftStressTester.git</developerConnection>
+        <url>https://github.com/games647/LambdaAttack</url>
+        <connection>scm:git:git://github.com/games647/LambdaAttack.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:games647/LambdaAttack.git</developerConnection>
     </scm>
 
     <licenses>

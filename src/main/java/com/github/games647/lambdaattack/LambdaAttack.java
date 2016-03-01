@@ -1,11 +1,11 @@
-package com.github.games647.minecraftstresstester;
+package com.github.games647.lambdaattack;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.spacehq.mc.auth.exception.request.RequestException;
 
-public class StressTester {
+public class LambdaAttack {
 
     private static final String DEFAULT_HOST = "127.0.0.1";
     private static final int DEFAULT_PORT = 25565;
@@ -14,7 +14,7 @@ public class StressTester {
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0) {
-            new StressTester().start(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_AMOUNT, DEFAULT_DELAY);
+            new LambdaAttack().start(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_AMOUNT, DEFAULT_DELAY);
         } else if (args.length < 4) {
             System.out.println("Not enough arguments");
         } else {
@@ -23,7 +23,7 @@ public class StressTester {
             int amount = Integer.parseInt(args[2]);
             int delay = Integer.parseInt(args[3]);
 
-            new StressTester().start(host, port, amount, delay);
+            new LambdaAttack().start(host, port, amount, delay);
         }
     }
 

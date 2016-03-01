@@ -1,4 +1,4 @@
-package com.github.games647.minecraftstresstester;
+package com.github.games647.lambdaattack;
 
 import org.spacehq.mc.protocol.data.message.Message;
 import org.spacehq.mc.protocol.packet.ingame.server.ServerChatPacket;

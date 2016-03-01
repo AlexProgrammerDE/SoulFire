@@ -1,4 +1,4 @@
-package com.github.games647.minecraftstresstester;
+package com.github.games647.lambdaattack;
 
 import java.net.Proxy;
 
