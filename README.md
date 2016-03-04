@@ -15,7 +15,7 @@ Maybe more feature will come
 ## Requirement
 
 * Java 8
-* Minecraft 1.8 server
+* Minecraft 1.9 server
 
 ## Usage
 
