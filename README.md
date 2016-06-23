@@ -11,6 +11,8 @@ Maybe more feature will come
 * Join delay
 * Configurable amount
 * Disconnects gracefully after the end
+* Free
+* Open source
 
 ## Requirement
 

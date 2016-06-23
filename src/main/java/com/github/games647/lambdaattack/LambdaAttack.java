@@ -8,8 +8,8 @@ import org.spacehq.mc.auth.exception.request.RequestException;
 public class LambdaAttack {
 
     private static final String DEFAULT_HOST = "127.0.0.1";
-    private static final int DEFAULT_PORT = 25565;
-    private static final int DEFAULT_AMOUNT = 3;
+    private static final int DEFAULT_PORT = 25_565;
+    private static final int DEFAULT_AMOUNT = 10;
     private static final int DEFAULT_DELAY = 0;
 
     public static void main(String[] args) throws Exception {
@@ -29,17 +29,22 @@ public class LambdaAttack {
 
     private final List<Bot> clients = new ArrayList<>();
 
-    public void start(String host, int port, int amount, int delay) throws InterruptedException, RequestException {
+    public void start(String host, int port, int amount, int delay) throws RequestException {
         for (int i = 1; i <= amount; i++) {
-            //in seconds
-            Thread.sleep(delay * 1_000);
+            try {
+                //in seconds
+                Thread.sleep(delay * 1_000);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
 
-            Bot bot = new Bot("Bot " + i);
+            Bot bot = new Bot("Bot" + i);
             bot.connect(host, port);
             this.clients.add(bot);
         }
+    }
 
-        Thread.sleep(3 * 1_000);
-        clients.stream().forEach((client) -> client.getSession().disconnect("Disconnect"));
+    public void stop() {
+        clients.stream().forEach((client) -> client.getSession().disconnect("Disconnect", true));
     }
 }

@@ -10,7 +10,7 @@ import org.spacehq.packetlib.tcp.TcpSessionFactory;
 
 public class Bot {
 
-    private static final Proxy PROXY = Proxy.NO_PROXY;
+    private final Proxy proxy;
 
     private final String username;
     private final String password;
@@ -18,8 +18,14 @@ public class Bot {
     private Session session;
 
     public Bot(String username, String password) {
+        this(username, password, Proxy.NO_PROXY);
+    }
+
+    public Bot(String username, String password, Proxy proxy) {
         this.username = username;
         this.password = password;
+
+        this.proxy = proxy;
     }
 
     public Bot(String username) {
@@ -29,44 +35,13 @@ public class Bot {
     public MinecraftProtocol authenticate() throws RequestException {
         MinecraftProtocol protocol;
         if (!password.isEmpty()) {
-            protocol = new MinecraftProtocol(username, password, false);
+            protocol = new MinecraftProtocol(username, password);
             System.out.println("Successfully authenticated user.");
         } else {
             protocol = new MinecraftProtocol(username);
         }
 
         return protocol;
-    }
-
-    public void query(String host, int port) {
-//        MinecraftProtocol protocol = new MinecraftProtocol(SubProtocol.STATUS);
-//        Client client = new Client(host, port, protocol, new TcpSessionFactory());
-//        client.getSession().setFlag(MinecraftConstants.SERVER_INFO_HANDLER_KEY, new ServerInfoHandler() {
-//            @Override
-//            public void handle(Session session, ServerStatusInfo info) {
-//                System.out.println("Version: " + info.getVersionInfo().getVersionName() + ", " + info.getVersionInfo().getProtocolVersion());
-//                System.out.println("Player Count: " + info.getPlayerInfo().getOnlinePlayers() + " / " + info.getPlayerInfo().getMaxPlayers());
-//                System.out.println("Players: " + Arrays.toString(info.getPlayerInfo().getPlayers()));
-//                System.out.println("Description: " + info.getDescription().getFullText());
-//                System.out.println("Icon: " + info.getIcon());
-//            }
-//        });
-//
-//        client.getSession().setFlag(MinecraftConstants.SERVER_PING_TIME_HANDLER_KEY, new ServerPingTimeHandler() {
-//            @Override
-//            public void handle(Session session, long pingTime) {
-//                System.out.println("Server ping took " + pingTime + "ms");
-//            }
-//        });
-//
-//        client.getSession().connect();
-//        while(client.getSession().isConnected()) {
-//            try {
-//                Thread.sleep(5);
-//            } catch(InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
     }
 
     public Session getSession() {
@@ -76,7 +51,7 @@ public class Bot {
     public void connect(String host, int port) throws RequestException {
         MinecraftProtocol account = authenticate();
 
-        Client client = new Client(host, port, account, new TcpSessionFactory(PROXY));
+        Client client = new Client(host, port, account, new TcpSessionFactory(proxy));
         this.session = client.getSession();
         client.getSession().addListener(new SessionListener());
 
