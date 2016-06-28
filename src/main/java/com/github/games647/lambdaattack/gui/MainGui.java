@@ -3,6 +3,8 @@ package com.github.games647.lambdaattack.gui;
 import com.github.games647.lambdaattack.LambdaAttack;
 
 import java.awt.FlowLayout;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
@@ -18,15 +20,13 @@ import javax.swing.WindowConstants;
 import org.spacehq.mc.auth.exception.request.RequestException;
 
 public class MainGui {
-
-    private static final String PROJECT_NAME = "LambdaAttack v2.0";
     
     public static void main(String[] args) {
         new MainGui();
     }
 
-    private final JFrame frame = new JFrame(PROJECT_NAME);
-    private final Logger logger = Logger.getLogger(PROJECT_NAME);
+    private final JFrame frame = new JFrame(LambdaAttack.PROJECT_NAME);
+    private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final LambdaAttack botManager = new LambdaAttack();
 
     public MainGui() {
@@ -68,13 +68,16 @@ public class MainGui {
         JButton stopButton = new JButton("Stop");
 
         startButton.addActionListener((action) -> {
-            try {
-                String host = hostInput.getText();
-                int port = Integer.parseInt(portInput.getText());
-                botManager.start(host, port, (int) amount.getValue(), (int) delay.getValue());
-            } catch (RequestException ex) {
-                logger.log(Level.SEVERE, null, ex);
-            }
+            String host = hostInput.getText();
+            int port = Integer.parseInt(portInput.getText());
+
+            threadPool.submit(() -> {
+                try {
+                    botManager.start(host, port, (int) amount.getValue(), (int) delay.getValue());
+                } catch (RequestException ex) {
+                    botManager.getLogger().log(Level.SEVERE, null, ex);
+                }
+            });
         });
         
         stopButton.addActionListener((action) -> botManager.stop());
@@ -86,9 +89,5 @@ public class MainGui {
         this.frame.add(panel);
         this.frame.pack();
         this.frame.setVisible(true);
-    }
-
-    public Logger getLogger() {
-        return logger;
     }
 }
