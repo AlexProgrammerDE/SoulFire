@@ -1,18 +1,20 @@
 package com.github.games647.lambdaattack.gui;
 
 import com.github.games647.lambdaattack.LambdaAttack;
+
 import java.awt.FlowLayout;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
-
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
+
 import org.spacehq.mc.auth.exception.request.RequestException;
 
 public class MainGui {
@@ -44,23 +46,39 @@ public class MainGui {
         }
 
         JPanel panel = new JPanel(new FlowLayout());
-        JLabel amountLabel = new JLabel("Amount: ");
+        panel.add(new JLabel("Host: "));
+        JTextField hostInput = new JTextField("127.0.0.1");
+        panel.add(hostInput);
+        panel.add(new JLabel("Port: "));
+        JTextField portInput = new JTextField("25565");
+        panel.add(portInput);
+
+
+        panel.add(new JLabel("Join delay (ms): "));
+        JSpinner delay = new JSpinner();
+        delay.setValue(1000);
+        panel.add(delay);
+
+        panel.add(new JLabel("Amount: "));
         JSpinner amount = new JSpinner();
         amount.setValue(20);
+        panel.add(amount);
 
         JButton startButton = new JButton("Start");
         JButton stopButton = new JButton("Stop");
 
         startButton.addActionListener((action) -> {
             try {
-                botManager.start("127.0.0.1", 25565, (int) amount.getValue(), 0);
+                String host = hostInput.getText();
+                int port = Integer.parseInt(portInput.getText());
+                botManager.start(host, port, (int) amount.getValue(), (int) delay.getValue());
             } catch (RequestException ex) {
                 logger.log(Level.SEVERE, null, ex);
             }
         });
+        
         stopButton.addActionListener((action) -> botManager.stop());
 
-        panel.add(amountLabel);
         panel.add(amount);
         panel.add(startButton);
         panel.add(stopButton);

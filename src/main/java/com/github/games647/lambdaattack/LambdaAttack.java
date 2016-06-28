@@ -21,7 +21,7 @@ public class LambdaAttack {
             String host = args[0];
             int port = Integer.parseInt(args[1]);
             int amount = Integer.parseInt(args[2]);
-            int delay = Integer.parseInt(args[3]);
+            int delay = Integer.parseInt(args[3]) * 1000;
 
             new LambdaAttack().start(host, port, amount, delay);
         }
@@ -33,7 +33,7 @@ public class LambdaAttack {
         for (int i = 1; i <= amount; i++) {
             try {
                 //in seconds
-                Thread.sleep(delay * 1_000);
+                Thread.sleep(delay);
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
@@ -45,6 +45,6 @@ public class LambdaAttack {
     }
 
     public void stop() {
-        clients.stream().forEach((client) -> client.getSession().disconnect("Disconnect", true));
+        clients.stream().forEach((client) -> client.getSession().disconnect("Disconnect"));
     }
 }

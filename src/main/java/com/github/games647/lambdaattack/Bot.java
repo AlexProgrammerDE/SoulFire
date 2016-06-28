@@ -44,6 +44,10 @@ public class Bot {
         return protocol;
     }
 
+    public boolean isOnline() {
+        return session != null && session.isConnected();
+    }
+
     public Session getSession() {
         return session;
     }
