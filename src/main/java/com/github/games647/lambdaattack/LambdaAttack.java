@@ -15,21 +15,20 @@ public class LambdaAttack {
     private static final int DEFAULT_AMOUNT = 10;
     private static final int DEFAULT_DELAY = 0;
 
-
-    public static void main(String[] args) throws Exception {
-        if (args.length == 0) {
-            new LambdaAttack().start(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_AMOUNT, DEFAULT_DELAY);
-        } else if (args.length < 4) {
-            System.out.println("Not enough arguments");
-        } else {
-            String host = args[0];
-            int port = Integer.parseInt(args[1]);
-            int amount = Integer.parseInt(args[2]);
-            int delay = Integer.parseInt(args[3]) * 1000;
-
-            new LambdaAttack().start(host, port, amount, delay);
-        }
-    }
+//    public static void main(String[] args) throws Exception {
+//        if (args.length == 0) {
+//            new LambdaAttack().start(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_AMOUNT, DEFAULT_DELAY);
+//        } else if (args.length < 4) {
+//            System.out.println("Not enough arguments");
+//        } else {
+//            String host = args[0];
+//            int port = Integer.parseInt(args[1]);
+//            int amount = Integer.parseInt(args[2]);
+//            int delay = Integer.parseInt(args[3]) * 1000;
+//
+//            new LambdaAttack().start(host, port, amount, delay);
+//        }
+//    }
 
     private final Logger logger = Logger.getLogger(PROJECT_NAME);
     private boolean running = true;
