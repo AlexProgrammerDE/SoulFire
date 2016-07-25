@@ -34,9 +34,9 @@ public class LambdaAttack {
     private boolean running = true;
     private final List<Bot> clients = new ArrayList<>();
 
-    public void start(String host, int port, int amount, int delay) throws RequestException {
+    public void start(String host, int port, int amount, int delay, String nameFormat) throws RequestException {
         for (int i = 0; i < amount; i++) {
-            Bot bot = new Bot("Bot" + i);
+            Bot bot = new Bot(String.format(nameFormat, i));
             this.clients.add(bot);
         }
 
@@ -51,7 +51,7 @@ public class LambdaAttack {
             if (!running) {
                 break;
             }
-            
+
             client.connect(host, port);
         }
     }

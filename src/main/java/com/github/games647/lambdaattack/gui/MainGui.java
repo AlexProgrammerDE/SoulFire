@@ -64,6 +64,10 @@ public class MainGui {
         amount.setValue(20);
         panel.add(amount);
 
+        panel.add(new JLabel("NameFormat: "));
+        JTextField nameFormat = new JTextField("Bot-%d");
+        panel.add(nameFormat);
+
         JButton startButton = new JButton("Start");
         JButton stopButton = new JButton("Stop");
 
@@ -73,7 +77,7 @@ public class MainGui {
 
             threadPool.submit(() -> {
                 try {
-                    botManager.start(host, port, (int) amount.getValue(), (int) delay.getValue());
+                    botManager.start(host, port, (int) amount.getValue(), (int) delay.getValue(), nameFormat.getText());
                 } catch (RequestException ex) {
                     botManager.getLogger().log(Level.SEVERE, null, ex);
                 }
@@ -82,7 +86,6 @@ public class MainGui {
         
         stopButton.addActionListener((action) -> botManager.stop());
 
-        panel.add(amount);
         panel.add(startButton);
         panel.add(stopButton);
 
