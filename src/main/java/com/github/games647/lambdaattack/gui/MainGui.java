@@ -1,8 +1,9 @@
 package com.github.games647.lambdaattack.gui;
 
 import com.github.games647.lambdaattack.LambdaAttack;
+import com.github.games647.lambdaattack.logging.LogHandler;
+import java.awt.BorderLayout;
 
-import java.awt.FlowLayout;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -11,13 +12,14 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
-import org.spacehq.mc.auth.exception.request.RequestException;
 
 public class MainGui {
     
@@ -45,31 +47,47 @@ public class MainGui {
            Logger.getLogger(MainGui.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        JPanel panel = new JPanel(new FlowLayout());
-        panel.add(new JLabel("Host: "));
+        JPanel topPanel = new JPanel();
+        topPanel.add(new JLabel("Host: "));
         JTextField hostInput = new JTextField("127.0.0.1");
-        panel.add(hostInput);
-        panel.add(new JLabel("Port: "));
+        topPanel.add(hostInput);
+        topPanel.add(new JLabel("Port: "));
         JTextField portInput = new JTextField("25565");
-        panel.add(portInput);
+        topPanel.add(portInput);
 
 
-        panel.add(new JLabel("Join delay (ms): "));
+        topPanel.add(new JLabel("Join delay (ms): "));
         JSpinner delay = new JSpinner();
         delay.setValue(1000);
-        panel.add(delay);
+        topPanel.add(delay);
 
-        panel.add(new JLabel("Amount: "));
+        topPanel.add(new JLabel("Amount: "));
         JSpinner amount = new JSpinner();
         amount.setValue(20);
-        panel.add(amount);
+        topPanel.add(amount);
 
-        panel.add(new JLabel("NameFormat: "));
+        topPanel.add(new JLabel("NameFormat: "));
         JTextField nameFormat = new JTextField("Bot-%d");
-        panel.add(nameFormat);
+        topPanel.add(nameFormat);
 
         JButton startButton = new JButton("Start");
         JButton stopButton = new JButton("Stop");
+        topPanel.add(startButton);
+        topPanel.add(stopButton);
+
+        JTextArea logArea = new JTextArea(10, 1);
+
+        JScrollPane buttonPane = new JScrollPane();
+        buttonPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        buttonPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+        buttonPane.getViewport().setView(logArea);
+        
+        Logger logger = LambdaAttack.getLogger();
+
+        logger.addHandler(new LogHandler(logArea));
+
+        logger.info("Starting program " + LambdaAttack.PROJECT_NAME);
 
         startButton.addActionListener((action) -> {
             String host = hostInput.getText();
@@ -78,7 +96,7 @@ public class MainGui {
             threadPool.submit(() -> {
                 try {
                     botManager.start(host, port, (int) amount.getValue(), (int) delay.getValue(), nameFormat.getText());
-                } catch (RequestException ex) {
+                } catch (Exception ex) {
                     botManager.getLogger().log(Level.SEVERE, null, ex);
                 }
             });
@@ -86,10 +104,8 @@ public class MainGui {
         
         stopButton.addActionListener((action) -> botManager.stop());
 
-        panel.add(startButton);
-        panel.add(stopButton);
-
-        this.frame.add(panel);
+        this.frame.add(topPanel, BorderLayout.PAGE_START);
+        this.frame.add(buttonPane, BorderLayout.CENTER);
         this.frame.pack();
         this.frame.setVisible(true);
     }

@@ -1,6 +1,7 @@
 package com.github.games647.lambdaattack;
 
 import java.net.Proxy;
+import java.util.logging.Logger;
 
 import org.spacehq.mc.auth.exception.request.RequestException;
 import org.spacehq.mc.protocol.MinecraftProtocol;
@@ -11,6 +12,8 @@ import org.spacehq.packetlib.tcp.TcpSessionFactory;
 public class Bot implements AutoCloseable {
 
     private final Proxy proxy;
+
+    private final Logger logger;
 
     private final String username;
     private final String password;
@@ -26,6 +29,8 @@ public class Bot implements AutoCloseable {
         this.password = password;
 
         this.proxy = proxy;
+        this.logger = Logger.getLogger(username);
+        this.logger.setParent(LambdaAttack.getLogger());
     }
 
     public Bot(String username) {
@@ -57,9 +62,13 @@ public class Bot implements AutoCloseable {
 
         Client client = new Client(host, port, account, new TcpSessionFactory(proxy));
         this.session = client.getSession();
-        client.getSession().addListener(new SessionListener());
+        client.getSession().addListener(new SessionListener(this));
 
         client.getSession().connect();
+    }
+
+    public Logger getLogger() {
+        return logger;
     }
 
     @Override
