@@ -59,7 +59,7 @@ public class LambdaAttack {
     public void stop() {
         this.running = false;
 
-        clients.stream().forEach((client) -> client.getSession().disconnect("Disconnect"));
+        clients.stream().forEach((client) -> client.close());
     }
 
     public Logger getLogger() {

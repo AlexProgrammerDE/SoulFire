@@ -8,7 +8,7 @@ import org.spacehq.packetlib.Client;
 import org.spacehq.packetlib.Session;
 import org.spacehq.packetlib.tcp.TcpSessionFactory;
 
-public class Bot {
+public class Bot implements AutoCloseable {
 
     private final Proxy proxy;
 
@@ -60,5 +60,12 @@ public class Bot {
         client.getSession().addListener(new SessionListener());
 
         client.getSession().connect();
+    }
+
+    @Override
+    public void close() {
+        if (session != null) {
+            session.disconnect("Disconnect");
+        }
     }
 }
