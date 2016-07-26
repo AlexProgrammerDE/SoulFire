@@ -20,7 +20,6 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
-
 public class MainGui {
     
     public static void main(String[] args) {
@@ -87,7 +86,7 @@ public class MainGui {
 
         logger.addHandler(new LogHandler(logArea));
 
-        logger.info("Starting program " + LambdaAttack.PROJECT_NAME);
+        logger.info("Starting program");
 
         startButton.addActionListener((action) -> {
             String host = hostInput.getText();

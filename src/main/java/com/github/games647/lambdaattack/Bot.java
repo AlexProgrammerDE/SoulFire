@@ -41,7 +41,7 @@ public class Bot implements AutoCloseable {
         MinecraftProtocol protocol;
         if (!password.isEmpty()) {
             protocol = new MinecraftProtocol(username, password);
-            System.out.println("Successfully authenticated user.");
+            logger.info("Successfully authenticated user");
         } else {
             protocol = new MinecraftProtocol(username);
         }

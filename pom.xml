@@ -36,7 +36,6 @@
     </licenses>
 
     <build>
-        <finalName>StressTester</finalName>
         <defaultGoal>install</defaultGoal>
         <plugins>
             <plugin>

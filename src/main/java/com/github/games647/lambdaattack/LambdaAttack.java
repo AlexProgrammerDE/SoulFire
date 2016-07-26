@@ -16,6 +16,11 @@ public class LambdaAttack {
     private static final int DEFAULT_DELAY = 0;
 
     private static final Logger logger = Logger.getLogger(PROJECT_NAME);
+
+    public static Logger getLogger() {
+        return logger;
+    }
+    
     private boolean running = true;
     private final List<Bot> clients = new ArrayList<>();
 
@@ -44,9 +49,5 @@ public class LambdaAttack {
         this.running = false;
 
         clients.stream().forEach((client) -> client.close());
-    }
-
-    public static Logger getLogger() {
-        return logger;
     }
 }
