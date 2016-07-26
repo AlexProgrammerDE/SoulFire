@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import org.spacehq.mc.protocol.data.message.Message;
 import org.spacehq.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.ServerChatPacket;
+import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import org.spacehq.packetlib.event.session.DisconnectedEvent;
 import org.spacehq.packetlib.event.session.PacketReceivedEvent;
@@ -37,6 +38,10 @@ public class SessionListener extends SessionAdapter {
             //send confirm packet to the server
             int teleportId = posPacket.getTeleportId();
             owner.getSession().send(new ClientTeleportConfirmPacket(teleportId));
+        } else if (receiveEvent.getPacket() instanceof ServerPlayerHealthPacket) {
+            ServerPlayerHealthPacket healthPacket = receiveEvent.<ServerPlayerHealthPacket>getPacket();
+            owner.setHealth(healthPacket.getHealth());
+            owner.setFood(healthPacket.getFood());
         }
     }
 
