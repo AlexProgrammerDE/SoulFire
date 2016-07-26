@@ -19,6 +19,11 @@ Maybe more feature will come
 * Java 8
 * Minecraft 1.10 server
 
+## Dependencies
+
+* Java 8
+* McProtocolLib: https://github.com/Steveice10/MCProtocolLib
+
 ## Usage
 
     Host Port Amount Delay

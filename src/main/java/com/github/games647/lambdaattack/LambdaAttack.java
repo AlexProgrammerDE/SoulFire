@@ -10,11 +10,6 @@ public class LambdaAttack {
 
     public static final String PROJECT_NAME = "LambdaAttack";
 
-    private static final String DEFAULT_HOST = "127.0.0.1";
-    private static final int DEFAULT_PORT = 25_565;
-    private static final int DEFAULT_AMOUNT = 10;
-    private static final int DEFAULT_DELAY = 0;
-
     private static final Logger logger = Logger.getLogger(PROJECT_NAME);
 
     public static Logger getLogger() {

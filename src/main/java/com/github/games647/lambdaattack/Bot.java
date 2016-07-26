@@ -5,11 +5,14 @@ import java.util.logging.Logger;
 
 import org.spacehq.mc.auth.exception.request.RequestException;
 import org.spacehq.mc.protocol.MinecraftProtocol;
+import org.spacehq.mc.protocol.packet.ingame.client.ClientChatPacket;
 import org.spacehq.packetlib.Client;
 import org.spacehq.packetlib.Session;
 import org.spacehq.packetlib.tcp.TcpSessionFactory;
 
 public class Bot implements AutoCloseable {
+
+    public static char COMMAND_IDENTIFIER = '/';
 
     private final Proxy proxy;
 
@@ -19,6 +22,7 @@ public class Bot implements AutoCloseable {
     private final String password;
 
     private Session session;
+    private EntitiyLocation location;
 
     public Bot(String username, String password) {
         this(username, password, Proxy.NO_PROXY);
@@ -35,6 +39,10 @@ public class Bot implements AutoCloseable {
 
     public Bot(String username) {
         this(username, "");
+    }
+
+    public Bot(String username, Proxy proxy) {
+        this(username, "", proxy);
     }
 
     public MinecraftProtocol authenticate() throws RequestException {
@@ -65,6 +73,21 @@ public class Bot implements AutoCloseable {
         client.getSession().addListener(new SessionListener(this));
 
         client.getSession().connect();
+    }
+
+    public void sendMessage(String message) {
+        if (session != null) {
+            ClientChatPacket chatPacket = new ClientChatPacket(message);
+            session.send(chatPacket);
+        }
+    }
+
+    public EntitiyLocation getLocation() {
+        return location;
+    }
+
+    protected void setLocation(EntitiyLocation location) {
+        this.location = location;
     }
 
     public Logger getLogger() {

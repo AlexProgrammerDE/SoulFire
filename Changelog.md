@@ -1,5 +1,14 @@
 #Changelog
 
-# 0.1
+# 2.1
 
-+ First release
+* Keep track of the current position of the bot
+
+# 2.0
+
+* First release
+* Graphical user interface
+* Configurable amount and join delay
+* Configurable target
+* Configurable name format
+* LogPanel to see errors directly
