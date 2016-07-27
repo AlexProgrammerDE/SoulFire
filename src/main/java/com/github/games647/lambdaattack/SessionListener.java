@@ -42,7 +42,7 @@ public class SessionListener extends SessionAdapter {
             ServerPlayerHealthPacket healthPacket = receiveEvent.<ServerPlayerHealthPacket>getPacket();
             owner.setHealth(healthPacket.getHealth());
             owner.setFood(healthPacket.getFood());
-        }
+        } 
     }
 
     @Override

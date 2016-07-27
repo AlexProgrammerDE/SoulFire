@@ -4,12 +4,15 @@
 
 Minecraft bot. Currently used for stress testing.
 
-Maybe more feature will come
-
 ## Features
 
-* Join delay
-* Configurable amount
+* Graphical user interface
+* Configurable amount and join delay
+* Configurable target
+* Configurable name format
+* LogPanel to see errors directly
+* Compatible 1.10 servers
+* Test with Spigot, PaperSpigot and TacoSpigot
 * Disconnects gracefully after the end
 * Free
 * Open source
@@ -23,8 +26,3 @@ Maybe more feature will come
 
 * Java 8
 * McProtocolLib: https://github.com/Steveice10/MCProtocolLib
-
-## Usage
-
-    Host Port Amount Delay
-    java -jar StressTester.jar 127.0.0.1 25565 100 3

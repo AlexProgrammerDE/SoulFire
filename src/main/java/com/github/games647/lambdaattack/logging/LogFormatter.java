@@ -8,6 +8,7 @@ import java.util.logging.LogRecord;
 
 public class LogFormatter extends Formatter {
 
+    //displays the hour and am/pm
     private final DateFormat dateFormat = new SimpleDateFormat("h:mm a");
     private final Date date = new Date();
 

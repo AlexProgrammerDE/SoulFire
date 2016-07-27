@@ -4,6 +4,7 @@
 
 * Keep track of the current position of the bot
 * Track the food and health level of a bot
+* Add proxy support
 
 # 2.0
 
