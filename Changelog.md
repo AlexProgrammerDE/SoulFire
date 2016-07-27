@@ -5,6 +5,7 @@
 * Keep track of the current position of the bot
 * Track the food and health level of a bot
 * Add proxy support
+* Automatically accept teleport requests by the server
 
 # 2.0
 
