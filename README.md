@@ -18,10 +18,14 @@ Minecraft bot. Currently used for stress testing.
 * Free
 * Open source
 
-## Requirement
+## Requirements
 
 * Java 8
 * Minecraft 1.10 server
+
+## Images
+
+![Gui](http://i.imgur.com/6U00ZwA.png)
 
 ## Dependencies
 
