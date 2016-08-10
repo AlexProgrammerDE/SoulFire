@@ -113,6 +113,10 @@ public class Bot {
         return account.getGameProfile();
     }
 
+    public Proxy getProxy() {
+        return proxy;
+    }
+
     public void disconnect() {
         if (session != null) {
             session.disconnect("Disconnect");
