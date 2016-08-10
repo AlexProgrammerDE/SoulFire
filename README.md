@@ -9,9 +9,9 @@ Minecraft bot. Currently used for stress testing.
 * Graphical user interface
 * Configurable amount and join delay
 * Configurable target
-* Configurable name format
+* Configurable name format or name list
 * LogPanel to see errors directly
-* Compatible 1.10 servers
+* Compatible 1.7-1.10 servers
 * Test with Spigot, PaperSpigot and TacoSpigot
 * Disconnects gracefully after the end
 * Supports SOCKS proxies
@@ -21,7 +21,7 @@ Minecraft bot. Currently used for stress testing.
 ## Requirements
 
 * Java 8
-* Minecraft 1.10 server
+* Minecraft 1.7-1.10 server
 
 ## Images
 
