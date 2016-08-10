@@ -9,7 +9,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>lambdaattack-version-1-7</artifactId>
+    <artifactId>lambdaattack-version-1-8</artifactId>
     <packaging>jar</packaging>
 
     <build>
@@ -23,7 +23,7 @@
                     <relocations>
                         <relocation>
                             <pattern>org.spacehq.mc.protocol</pattern>
-                            <shadedPattern>org.spacehq.mc.protocol.v1_7</shadedPattern>
+                            <shadedPattern>org.spacehq.mc.protocol.v1_8</shadedPattern>
                         </relocation>
                     </relocations>
 
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.spacehq</groupId>
             <artifactId>mcprotocollib</artifactId>
-            <version>1.7.7-SNAPSHOT</version>
+            <version>1.8.8-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

@@ -43,3 +43,6 @@ gradle-app.setting
 !gradle-wrapper.jar
 /version_1_10/target/
 /core/target/
+/version_1_7/target/
+/version_1_9/target/
+/version_1_8/target/
