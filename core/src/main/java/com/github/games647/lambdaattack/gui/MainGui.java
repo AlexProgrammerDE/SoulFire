@@ -1,9 +1,11 @@
 package com.github.games647.lambdaattack.gui;
 
+import com.github.games647.lambdaattack.GameVersion;
 import com.github.games647.lambdaattack.LambdaAttack;
 import com.github.games647.lambdaattack.logging.LogHandler;
 
 import java.awt.BorderLayout;
+import java.awt.event.ItemEvent;
 import java.io.File;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetSocketAddress;
@@ -18,6 +20,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -38,6 +41,7 @@ public class MainGui {
     }
 
     private final JFrame frame = new JFrame(LambdaAttack.PROJECT_NAME);
+    
     private final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
         @Override
         public Thread newThread(Runnable task) {
@@ -96,6 +100,14 @@ public class MainGui {
         topPanel.add(new JLabel("NameFormat: "));
         JTextField nameFormat = new JTextField("Bot-%d");
         topPanel.add(nameFormat);
+
+        JComboBox<String> versionBox = new JComboBox<>(new String[]{"1.10", "1.9", "1.8", "1.7"});
+        versionBox.addItemListener((itemEvent) -> {
+            if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
+                botManager.setGameVersion(GameVersion.findByName((String) itemEvent.getItem()));
+            }
+        });
+        topPanel.add(versionBox);
 
         JButton startButton = new JButton("Start");
         JButton stopButton = new JButton("Stop");
