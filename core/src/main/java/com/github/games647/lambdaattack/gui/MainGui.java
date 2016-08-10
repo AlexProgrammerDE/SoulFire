@@ -41,7 +41,7 @@ public class MainGui {
     }
 
     private final JFrame frame = new JFrame(LambdaAttack.PROJECT_NAME);
-    
+
     private final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
         @Override
         public Thread newThread(Runnable task) {
@@ -56,7 +56,7 @@ public class MainGui {
             return newThread;
         }
     });
-    
+
     private final LambdaAttack botManager = new LambdaAttack();
 
     public MainGui() {
@@ -77,7 +77,6 @@ public class MainGui {
     }
 
     private JPanel setTopPane() {
-        //top pane
         JPanel topPanel = new JPanel();
         topPanel.add(new JLabel("Host: "));
         JTextField hostInput = new JTextField("127.0.0.1");
@@ -107,6 +106,7 @@ public class MainGui {
                 botManager.setGameVersion(GameVersion.findByName((String) itemEvent.getItem()));
             }
         });
+
         topPanel.add(versionBox);
 
         JButton startButton = new JButton("Start");
@@ -114,14 +114,37 @@ public class MainGui {
         topPanel.add(startButton);
         topPanel.add(stopButton);
 
+        JButton loadNames = new JButton("Load Names");
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("", "txt"));
+        loadNames.addActionListener((action) -> {
+            int returnVal = fileChooser.showOpenDialog(frame);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File proxyFile = fileChooser.getSelectedFile();
+                LambdaAttack.getLogger().log(Level.INFO, "Opening: {0}.", proxyFile.getName());
+
+                threadPool.submit(() -> {
+                    try {
+                        List<String> lines = Files.readAllLines(proxyFile.toPath());
+                        List<String> names = lines.stream().collect(Collectors.toList());
+
+                        LambdaAttack.getLogger().log(Level.INFO, "Loaded {0} names", names.size());
+                        botManager.setNames(names);
+                    } catch (Exception ex) {
+                        LambdaAttack.getLogger().log(Level.SEVERE, null, ex);
+                    }
+                });
+            }
+        });
+
+        topPanel.add(loadNames);
+
         JButton loadProxies = new JButton("Load proxies");
-        JFileChooser proxyFileChooser = new JFileChooser();
-        proxyFileChooser.addChoosableFileFilter(new FileNameExtensionFilter("", "txt"));
 
         loadProxies.addActionListener((action) -> {
-            int returnVal = proxyFileChooser.showOpenDialog(frame);
+            int returnVal = fileChooser.showOpenDialog(frame);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File proxyFile = proxyFileChooser.getSelectedFile();
+                File proxyFile = fileChooser.getSelectedFile();
                 LambdaAttack.getLogger().log(Level.INFO, "Opening: {0}.", proxyFile.getName());
 
                 threadPool.submit(() -> {
@@ -165,7 +188,6 @@ public class MainGui {
     }
 
     private JScrollPane setButtonPane() throws SecurityException {
-        //button pane
         JScrollPane buttonPane = new JScrollPane();
         buttonPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         buttonPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -186,8 +208,7 @@ public class MainGui {
                     break;
                 }
             }
-        } catch (ClassNotFoundException | InstantiationException
-                | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
             LambdaAttack.getLogger().log(Level.SEVERE, null, ex);
         }
     }

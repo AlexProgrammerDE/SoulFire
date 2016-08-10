@@ -23,10 +23,21 @@ public class LambdaAttack {
     private GameVersion gameVersion = GameVersion.VERSION_1_10;
     private final List<Bot> clients = new ArrayList<>();
     private List<Proxy> proxies;
+    private List<String> names;
 
     public void start(String host, int port, int amount, int delay, String nameFormat) throws RequestException {
         for (int i = 0; i < amount; i++) {
-            UniversalProtocol account = authenticate(String.format(nameFormat, i), "");
+            String username = String.format(nameFormat, i);
+            if (names != null) {
+                if (names.size() <= i) {
+                    LOGGER.warning("Amount is higher than the name list size. Limitting amount size now...");
+                    break;
+                }
+
+                username = names.get(i);
+            }
+
+            UniversalProtocol account = authenticate(username, "");
             
             Bot bot;
             if (proxies != null) {
@@ -69,6 +80,10 @@ public class LambdaAttack {
 
     public void setProxies(List<Proxy> proxies) {
         this.proxies = proxies;
+    }
+
+    public void setNames(List<String> names) {
+        this.names = names;
     }
 
     public GameVersion getGameVersion() {
