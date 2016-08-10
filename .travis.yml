@@ -1,8 +1,0 @@
-# Use https://travis-ci.org/ for automatic testing
-
-# This is a java project
-language: java
-
-script: mvn compile test
-
-jdk: [oraclejdk8]

@@ -5,7 +5,13 @@
     <groupId>com.github.games647</groupId>
     <artifactId>lambdaattack</artifactId>
     <inceptionYear>2016</inceptionYear>
-    <packaging>jar</packaging>
+
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>core</module>
+        <module>version_1_10</module>
+    </modules>
 
     <name>LambdaAttack</name>
     <version>2.1</version>
@@ -49,36 +55,6 @@
                     <showDeprecation>true</showDeprecation>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.github.games647.lambdaattack.gui.MainGui</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
-                <configuration>
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
-                    <!--Remove unneeded server specifications-->
-                    <minimizeJar>true</minimizeJar>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
 
         <resources>
@@ -94,21 +70,18 @@
 
     <repositories>
         <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+
+        <repository>
             <id>spacehq</id>
             <url>https://repo.spacehq.org/content/repositories/snapshots/</url>
         </repository>
+        
         <repository>
             <id>spacehq-releases</id>
             <url>https://repo.spacehq.org/content/repositories/releases/</url>
         </repository>
     </repositories>
-
-    <dependencies>
-        <!--ProtocolLib for clients-->
-        <dependency>
-            <groupId>org.spacehq</groupId>
-            <artifactId>mcprotocollib</artifactId>
-            <version>1.10.2-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
 </project>

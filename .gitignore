@@ -41,3 +41,5 @@ gradle-app.setting
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
+/version_1_10/target/
+/core/target/

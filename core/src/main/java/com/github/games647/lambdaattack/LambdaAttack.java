@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.spacehq.mc.auth.exception.request.RequestException;
-import org.spacehq.mc.protocol.MinecraftProtocol;
+import org.spacehq.mc.protocol.v1_10.MinecraftProtocol;
 
 public class LambdaAttack {
 
@@ -70,7 +70,6 @@ public class LambdaAttack {
 
     public void stop() {
         this.running = false;
-
-        clients.stream().forEach((client) -> client.close());
+        clients.stream().forEach(Bot::disconnect);
     }
 }

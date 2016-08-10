@@ -5,13 +5,13 @@ import java.util.logging.Logger;
 
 import org.spacehq.mc.auth.data.GameProfile;
 import org.spacehq.mc.auth.exception.request.RequestException;
-import org.spacehq.mc.protocol.MinecraftProtocol;
-import org.spacehq.mc.protocol.packet.ingame.client.ClientChatPacket;
+import org.spacehq.mc.protocol.v1_10.MinecraftProtocol;
+import org.spacehq.mc.protocol.v1_10.packet.ingame.client.ClientChatPacket;
 import org.spacehq.packetlib.Client;
 import org.spacehq.packetlib.Session;
 import org.spacehq.packetlib.tcp.TcpSessionFactory;
 
-public class Bot implements AutoCloseable {
+public class Bot {
 
     public static final char COMMAND_IDENTIFIER = '/';
 
@@ -91,8 +91,7 @@ public class Bot implements AutoCloseable {
         return account.getProfile();
     }
 
-    @Override
-    public void close() {
+    public void disconnect() {
         if (session != null) {
             session.disconnect("Disconnect");
         }

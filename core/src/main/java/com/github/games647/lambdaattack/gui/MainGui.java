@@ -174,7 +174,8 @@ public class MainGui {
                     break;
                 }
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException
+                | IllegalAccessException | UnsupportedLookAndFeelException ex) {
             LambdaAttack.getLogger().log(Level.SEVERE, null, ex);
         }
     }

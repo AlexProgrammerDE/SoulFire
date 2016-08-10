@@ -2,11 +2,11 @@ package com.github.games647.lambdaattack;
 
 import java.util.logging.Level;
 
-import org.spacehq.mc.protocol.data.message.Message;
-import org.spacehq.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket;
-import org.spacehq.mc.protocol.packet.ingame.server.ServerChatPacket;
-import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
-import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
+import org.spacehq.mc.protocol.v1_10.data.message.Message;
+import org.spacehq.mc.protocol.v1_10.packet.ingame.client.world.ClientTeleportConfirmPacket;
+import org.spacehq.mc.protocol.v1_10.packet.ingame.server.ServerChatPacket;
+import org.spacehq.mc.protocol.v1_10.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
+import org.spacehq.mc.protocol.v1_10.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import org.spacehq.packetlib.event.session.DisconnectedEvent;
 import org.spacehq.packetlib.event.session.PacketReceivedEvent;
 import org.spacehq.packetlib.event.session.SessionAdapter;
