@@ -1,11 +1,17 @@
-package com.github.games647.lambdaattack;
+package com.github.games647.lambdaattack.bot;
+
+import com.github.games647.lambdaattack.LambdaAttack;
+import com.github.games647.lambdaattack.UniversalProtocol;
+import com.github.games647.lambdaattack.bot.listener.SessionListener110;
+import com.github.games647.lambdaattack.bot.listener.SessionListener17;
+import com.github.games647.lambdaattack.bot.listener.SessionListener18;
+import com.github.games647.lambdaattack.bot.listener.SessionListener19;
 
 import java.net.Proxy;
 import java.util.logging.Logger;
 
 import org.spacehq.mc.auth.data.GameProfile;
 import org.spacehq.mc.auth.exception.request.RequestException;
-import org.spacehq.mc.protocol.v1_10.MinecraftProtocol;
 import org.spacehq.mc.protocol.v1_10.packet.ingame.client.ClientChatPacket;
 import org.spacehq.packetlib.Client;
 import org.spacehq.packetlib.Session;
@@ -17,29 +23,45 @@ public class Bot {
 
     private final Proxy proxy;
     private final Logger logger;
-    private final MinecraftProtocol account;
+    private final UniversalProtocol account;
 
     private Session session;
     private EntitiyLocation location;
     private float health = -1;
     private float food = -1;
 
-    public Bot(MinecraftProtocol account) {
+    public Bot(UniversalProtocol account) {
         this(account, Proxy.NO_PROXY);
     }
     
-    public Bot(MinecraftProtocol account, Proxy proxy) {
+    public Bot(UniversalProtocol account, Proxy proxy) {
         this.account = account;
         this.proxy = proxy;
 
-        this.logger = Logger.getLogger(account.getProfile().getName());
+        this.logger = Logger.getLogger(account.getGameProfile().getName());
         this.logger.setParent(LambdaAttack.getLogger());
     }
 
     public void connect(String host, int port) throws RequestException {
-        Client client = new Client(host, port, account, new TcpSessionFactory(proxy));
+        Client client = new Client(host, port, account.getProtocol(), new TcpSessionFactory(proxy));
         this.session = client.getSession();
-        client.getSession().addListener(new SessionListener(this));
+
+        switch (account.getGameVersion()) {
+            case VERSION_1_10:
+                client.getSession().addListener(new SessionListener110(this));
+                break;
+            case VERSION_1_9:
+                client.getSession().addListener(new SessionListener19(this));
+                break;
+            case VERSION_1_8:
+                client.getSession().addListener(new SessionListener18(this));
+                break;
+            case VERSION_1_7:
+                client.getSession().addListener(new SessionListener17(this));
+                break;
+            default:
+                throw new IllegalStateException();
+        }
 
         client.getSession().connect();
     }
@@ -63,7 +85,7 @@ public class Bot {
         return location;
     }
 
-    protected void setLocation(EntitiyLocation location) {
+    public void setLocation(EntitiyLocation location) {
         this.location = location;
     }
 
@@ -71,7 +93,7 @@ public class Bot {
         return health;
     }
 
-    protected void setHealth(float health) {
+    public void setHealth(float health) {
         this.health = health;
     }
 
@@ -79,7 +101,7 @@ public class Bot {
         return food;
     }
 
-    protected void setFood(float food) {
+    public void setFood(float food) {
         this.food = food;
     }
 
@@ -88,7 +110,7 @@ public class Bot {
     }
 
     public GameProfile getGameProfile() {
-        return account.getProfile();
+        return account.getGameProfile();
     }
 
     public void disconnect() {

@@ -10,6 +10,7 @@
 
     <modules>
         <module>core</module>
+        <module>version</module>
         <module>version_1_7</module>
         <module>version_1_8</module>
         <module>version_1_9</module>
@@ -72,11 +73,6 @@
     </build>
 
     <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-
         <repository>
             <id>spacehq</id>
             <url>https://repo.spacehq.org/content/repositories/snapshots/</url>

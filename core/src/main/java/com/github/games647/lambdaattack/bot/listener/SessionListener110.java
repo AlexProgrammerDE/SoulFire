@@ -1,22 +1,20 @@
-package com.github.games647.lambdaattack;
+package com.github.games647.lambdaattack.bot.listener;
+
+import com.github.games647.lambdaattack.bot.Bot;
+import com.github.games647.lambdaattack.bot.EntitiyLocation;
 
 import java.util.logging.Level;
 
 import org.spacehq.mc.protocol.v1_10.data.message.Message;
-import org.spacehq.mc.protocol.v1_10.packet.ingame.client.world.ClientTeleportConfirmPacket;
 import org.spacehq.mc.protocol.v1_10.packet.ingame.server.ServerChatPacket;
 import org.spacehq.mc.protocol.v1_10.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import org.spacehq.mc.protocol.v1_10.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
-import org.spacehq.packetlib.event.session.DisconnectedEvent;
 import org.spacehq.packetlib.event.session.PacketReceivedEvent;
-import org.spacehq.packetlib.event.session.SessionAdapter;
 
-public class SessionListener extends SessionAdapter {
+public class SessionListener110 extends SessionListener {
 
-    private final Bot owner;
-
-    public SessionListener(Bot owner) {
-        this.owner = owner;
+    public SessionListener110(Bot owner) {
+        super(owner);
     }
 
     @Override
@@ -26,7 +24,7 @@ public class SessionListener extends SessionAdapter {
             owner.getLogger().log(Level.INFO, "Received Message: {0}", message.getFullText());
         } else if (receiveEvent.getPacket() instanceof ServerPlayerPositionRotationPacket) {
             ServerPlayerPositionRotationPacket posPacket = receiveEvent.<ServerPlayerPositionRotationPacket>getPacket();
-            
+
             double posX = posPacket.getX();
             double posY = posPacket.getY();
             double posZ = posPacket.getZ();
@@ -34,20 +32,10 @@ public class SessionListener extends SessionAdapter {
             float yaw = posPacket.getYaw();
             EntitiyLocation location = new EntitiyLocation(posX, posY, posZ, pitch, yaw);
             owner.setLocation(location);
-
-            //send confirm packet to the server
-            int teleportId = posPacket.getTeleportId();
-            owner.getSession().send(new ClientTeleportConfirmPacket(teleportId));
         } else if (receiveEvent.getPacket() instanceof ServerPlayerHealthPacket) {
             ServerPlayerHealthPacket healthPacket = receiveEvent.<ServerPlayerHealthPacket>getPacket();
             owner.setHealth(healthPacket.getHealth());
             owner.setFood(healthPacket.getFood());
-        } 
-    }
-
-    @Override
-    public void disconnected(DisconnectedEvent disconnectedEvent) {
-        String message = Message.fromString(disconnectedEvent.getReason()).getFullText();
-        owner.getLogger().log(Level.INFO, "Disconnected: {0}", message);
+        }
     }
 }

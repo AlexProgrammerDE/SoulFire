@@ -61,5 +61,11 @@
             <artifactId>mcprotocollib</artifactId>
             <version>1.8.8-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.games647</groupId>
+            <artifactId>lambdaattack-version</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

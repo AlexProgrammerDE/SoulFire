@@ -49,17 +49,31 @@
     </build>
 
     <dependencies>
-        <!--ProtocolLib for clients-->
+        <!--Protocol definitions for clients-->
+        <dependency>
+            <groupId>com.github.games647</groupId>
+            <artifactId>lambdaattack-version</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.github.games647</groupId>
             <artifactId>lambdaattack-version-1-10</artifactId>
             <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.games647</groupId>
+            <artifactId>lambdaattack-version-1-9</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.games647</groupId>
+            <artifactId>lambdaattack-version-1-8</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.games647</groupId>
+            <artifactId>lambdaattack-version-1-7</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

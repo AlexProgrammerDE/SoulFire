@@ -1,12 +1,13 @@
 package com.github.games647.lambdaattack;
 
+import com.github.games647.lambdaattack.bot.Bot;
+
 import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import org.spacehq.mc.auth.exception.request.RequestException;
-import org.spacehq.mc.protocol.v1_10.MinecraftProtocol;
 
 public class LambdaAttack {
 
@@ -19,12 +20,13 @@ public class LambdaAttack {
     }
     
     private boolean running = true;
+    private GameVersion gameVersion = GameVersion.VERSION_1_10;
     private final List<Bot> clients = new ArrayList<>();
     private List<Proxy> proxies;
 
     public void start(String host, int port, int amount, int delay, String nameFormat) throws RequestException {
         for (int i = 0; i < amount; i++) {
-            MinecraftProtocol account = authenticate(String.format(nameFormat, i), "");
+            UniversalProtocol account = authenticate(String.format(nameFormat, i), "");
             
             Bot bot;
             if (proxies != null) {
@@ -52,13 +54,14 @@ public class LambdaAttack {
         }
     }
 
-    public MinecraftProtocol authenticate(String username, String password) throws RequestException {
-        MinecraftProtocol protocol;
+    public UniversalProtocol authenticate(String username, String password) throws RequestException {
+        UniversalProtocol protocol;
         if (!password.isEmpty()) {
-            protocol = new MinecraftProtocol(username, password);
-            LOGGER.info("Successfully authenticated user");
+            throw new UnsupportedOperationException("Not implemented");
+//            protocol = new MinecraftProtocol(username, password);
+//            LOGGER.info("Successfully authenticated user");
         } else {
-            protocol = new MinecraftProtocol(username);
+            protocol = UniversalFactory.authenticate(gameVersion, username);
         }
 
         return protocol;
@@ -66,6 +69,14 @@ public class LambdaAttack {
 
     public void setProxies(List<Proxy> proxies) {
         this.proxies = proxies;
+    }
+
+    public GameVersion getGameVersion() {
+        return gameVersion;
+    }
+
+    public void setGameVersion(GameVersion gameVersion) {
+        this.gameVersion = gameVersion;
     }
 
     public void stop() {
