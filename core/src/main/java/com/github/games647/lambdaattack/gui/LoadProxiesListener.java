@@ -40,7 +40,7 @@ public class LoadProxiesListener implements ActionListener {
             botManager.getThreadPool().submit(() -> {
                 try {
                     List<String> lines = Files.readAllLines(proxyFile.toPath());
-                    List<Proxy> proxies = lines.stream().map((line) -> {
+                    List<Proxy> proxies = lines.stream().distinct().map((line) -> {
                         String host = line.split(":")[0];
                         int port = Integer.parseInt(line.split(":")[1]);
 

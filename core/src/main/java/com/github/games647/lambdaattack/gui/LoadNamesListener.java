@@ -37,7 +37,7 @@ public class LoadNamesListener implements ActionListener {
             botManager.getThreadPool().submit(() -> {
                 try {
                     List<String> lines = Files.readAllLines(proxyFile.toPath());
-                    List<String> names = lines.stream().collect(Collectors.toList());
+                    List<String> names = lines.stream().distinct().collect(Collectors.toList());
 
                     LambdaAttack.getLogger().log(Level.INFO, "Loaded {0} names", names.size());
                     botManager.setNames(names);

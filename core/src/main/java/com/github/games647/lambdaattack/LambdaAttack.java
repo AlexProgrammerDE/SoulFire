@@ -59,6 +59,7 @@ public class LambdaAttack {
             Bot bot;
             if (proxies != null) {
                 Proxy proxy = proxies.get(i % proxies.size());
+                LOGGER.info("USING PROXY " + proxy);
                 bot = new Bot(account, proxy);
             } else {
                 bot = new Bot(account);
