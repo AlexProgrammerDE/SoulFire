@@ -7,13 +7,13 @@ public class UniversalFactory {
     public static UniversalProtocol authenticate(GameVersion gameVersion, String username) {
         switch (gameVersion) {
             case VERSION_1_10:
-                return new com.github.games647.lambdaattack.v1_10.ProtocolWrapper(username);
+                return new com.github.games647.lambdaattack.version.v1_10.ProtocolWrapper(username);
             case VERSION_1_9:
-                return new com.github.games647.lambdaattack.v1_9.ProtocolWrapper(username);
+                return new com.github.games647.lambdaattack.version.v1_9.ProtocolWrapper(username);
             case VERSION_1_8:
-                return new com.github.games647.lambdaattack.v1_8.ProtocolWrapper(username);
+                return new com.github.games647.lambdaattack.version.v1_8.ProtocolWrapper(username);
             case VERSION_1_7:
-                return new com.github.games647.lambdaattack.v1_7.ProtocolWrapper(username);
+                return new com.github.games647.lambdaattack.version.v1_7.ProtocolWrapper(username);
             default:
                 throw new IllegalArgumentException("Invalid game version");
         }

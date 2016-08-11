@@ -22,7 +22,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.github.games647.lambdaattack.gui.MainGui</mainClass>
+                            <mainClass>com.github.games647.lambdaattack.LambdaAttack</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -1,4 +1,4 @@
-package com.github.games647.lambdaattack.v1_9;
+package com.github.games647.lambdaattack.version.v1_9;
 
 import com.github.games647.lambdaattack.GameVersion;
 import com.github.games647.lambdaattack.UniversalProtocol;

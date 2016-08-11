@@ -6,18 +6,7 @@ import com.github.games647.lambdaattack.logging.LogHandler;
 
 import java.awt.BorderLayout;
 import java.awt.event.ItemEvent;
-import java.io.File;
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.Proxy.Type;
-import java.nio.file.Files;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -36,30 +25,13 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class MainGui {
 
-    public static void main(String[] args) {
-        new MainGui();
-    }
-
     private final JFrame frame = new JFrame(LambdaAttack.PROJECT_NAME);
 
-    private final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable task) {
-            Thread newThread = Executors.defaultThreadFactory().newThread(task);
-            newThread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-                @Override
-                public void uncaughtException(Thread thread, Throwable throwable) {
-                    LambdaAttack.getLogger().log(Level.SEVERE, null, throwable);
-                }
-            });
+    private final LambdaAttack botManager;
 
-            return newThread;
-        }
-    });
+    public MainGui(LambdaAttack botManager) {
+        this.botManager = botManager;
 
-    private final LambdaAttack botManager = new LambdaAttack();
-
-    public MainGui() {
         this.frame.setResizable(false);
         this.frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -117,56 +89,13 @@ public class MainGui {
         JButton loadNames = new JButton("Load Names");
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("", "txt"));
-        loadNames.addActionListener((action) -> {
-            int returnVal = fileChooser.showOpenDialog(frame);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File proxyFile = fileChooser.getSelectedFile();
-                LambdaAttack.getLogger().log(Level.INFO, "Opening: {0}.", proxyFile.getName());
-
-                threadPool.submit(() -> {
-                    try {
-                        List<String> lines = Files.readAllLines(proxyFile.toPath());
-                        List<String> names = lines.stream().collect(Collectors.toList());
-
-                        LambdaAttack.getLogger().log(Level.INFO, "Loaded {0} names", names.size());
-                        botManager.setNames(names);
-                    } catch (Exception ex) {
-                        LambdaAttack.getLogger().log(Level.SEVERE, null, ex);
-                    }
-                });
-            }
-        });
+        loadNames.addActionListener(new LoadNamesListener(botManager, frame, fileChooser));
 
         topPanel.add(loadNames);
 
         JButton loadProxies = new JButton("Load proxies");
 
-        loadProxies.addActionListener((action) -> {
-            int returnVal = fileChooser.showOpenDialog(frame);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File proxyFile = fileChooser.getSelectedFile();
-                LambdaAttack.getLogger().log(Level.INFO, "Opening: {0}.", proxyFile.getName());
-
-                threadPool.submit(() -> {
-                    try {
-                        List<String> lines = Files.readAllLines(proxyFile.toPath());
-                        List<Proxy> proxies = lines.parallelStream().map((line) -> {
-                            String host = line.split(":")[0];
-                            int port = Integer.parseInt(line.split(":")[1]);
-
-                            InetSocketAddress address = new InetSocketAddress(host, port);
-                            return new Proxy(Type.SOCKS, address);
-                        }).collect(Collectors.toList());
-
-                        LambdaAttack.getLogger().log(Level.INFO, "Loaded {0} proxies", proxies.size());
-
-                        botManager.setProxies(proxies);
-                    } catch (Exception ex) {
-                        LambdaAttack.getLogger().log(Level.SEVERE, null, ex);
-                    }
-                });
-            }
-        });
+        loadProxies.addActionListener(new LoadProxiesListener(botManager, frame, fileChooser));
 
         topPanel.add(loadProxies);
 
@@ -174,7 +103,7 @@ public class MainGui {
             String host = hostInput.getText();
             int port = Integer.parseInt(portInput.getText());
 
-            threadPool.submit(() -> {
+            botManager.getThreadPool().submit(() -> {
                 try {
                     botManager.start(host, port, (int) amount.getValue(), (int) delay.getValue(), nameFormat.getText());
                 } catch (Exception ex) {
@@ -208,7 +137,8 @@ public class MainGui {
                     break;
                 }
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException
+                | IllegalAccessException | UnsupportedLookAndFeelException ex) {
             LambdaAttack.getLogger().log(Level.SEVERE, null, ex);
         }
     }

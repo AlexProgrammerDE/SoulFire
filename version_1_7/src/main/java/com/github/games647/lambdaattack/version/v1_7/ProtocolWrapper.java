@@ -1,12 +1,10 @@
-package com.github.games647.lambdaattack.v1_10;
+package com.github.games647.lambdaattack.version.v1_7;
 
 import com.github.games647.lambdaattack.GameVersion;
 import com.github.games647.lambdaattack.UniversalProtocol;
 
-import java.net.Proxy;
-
 import org.spacehq.mc.auth.data.GameProfile;
-import org.spacehq.mc.auth.exception.request.RequestException;
+import org.spacehq.mc.auth.exception.AuthenticationException;
 import org.spacehq.mc.protocol.MinecraftProtocol;
 import org.spacehq.packetlib.packet.PacketProtocol;
 
@@ -16,20 +14,12 @@ public class ProtocolWrapper extends MinecraftProtocol implements UniversalProto
         super(username);
     }
 
-    public ProtocolWrapper(String username, String password) throws RequestException {
-        super(username, password);
-    }
-
-    public ProtocolWrapper(String username, String using, boolean token) throws RequestException {
+    public ProtocolWrapper(String username, String using, boolean token) throws AuthenticationException {
         super(username, using, token);
     }
 
-    public ProtocolWrapper(String username, String using, boolean token, Proxy authProxy) throws RequestException {
-        super(username, using, token, authProxy);
-    }
-
     public ProtocolWrapper(GameProfile profile, String accessToken) {
-        super(profile, accessToken);
+        super(new org.spacehq.mc.auth.GameProfile(profile.getId(), profile.getName()), accessToken);
     }
 
     @Override
@@ -39,11 +29,12 @@ public class ProtocolWrapper extends MinecraftProtocol implements UniversalProto
 
     @Override
     public GameProfile getGameProfile() {
-        return super.getProfile();
+        org.spacehq.mc.auth.GameProfile profile = super.getProfile();
+        return new GameProfile(profile.getId(), profile.getName());
     }
 
     @Override
     public GameVersion getGameVersion() {
-        return GameVersion.VERSION_1_10;
+        return GameVersion.VERSION_1_7;
     }
 }

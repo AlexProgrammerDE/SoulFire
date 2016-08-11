@@ -1,10 +1,14 @@
 package com.github.games647.lambdaattack;
 
 import com.github.games647.lambdaattack.bot.Bot;
+import com.github.games647.lambdaattack.gui.MainGui;
 
 import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.spacehq.mc.auth.exception.request.RequestException;
@@ -18,12 +22,25 @@ public class LambdaAttack {
     public static Logger getLogger() {
         return LOGGER;
     }
-    
+
+    public static void main(String[] args) {
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            LOGGER.log(Level.SEVERE, null, throwable);
+        });
+
+        new LambdaAttack();
+    }
+
+    private final MainGui mainGui = new MainGui(this);
+
     private boolean running = true;
     private GameVersion gameVersion = GameVersion.VERSION_1_10;
-    private final List<Bot> clients = new ArrayList<>();
+
     private List<Proxy> proxies;
     private List<String> names;
+
+    private final List<Bot> clients = new ArrayList<>();
+    private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     public void start(String host, int port, int amount, int delay, String nameFormat) throws RequestException {
         for (int i = 0; i < amount; i++) {
@@ -38,7 +55,7 @@ public class LambdaAttack {
             }
 
             UniversalProtocol account = authenticate(username, "");
-            
+
             Bot bot;
             if (proxies != null) {
                 Proxy proxy = proxies.get(i % proxies.size());
@@ -97,5 +114,9 @@ public class LambdaAttack {
     public void stop() {
         this.running = false;
         clients.stream().forEach(Bot::disconnect);
+    }
+
+    public ExecutorService getThreadPool() {
+        return threadPool;
     }
 }
