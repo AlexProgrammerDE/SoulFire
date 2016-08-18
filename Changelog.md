@@ -1,5 +1,11 @@
 #Changelog
 
+# 2.2
+
+* Add custom name list support
+* Fix rotating proxy list
+* Added support for 1.7-10 servers
+
 # 2.1
 
 * Keep track of the current position of the bot

@@ -23,6 +23,10 @@ Minecraft bot. Currently used for stress testing.
 * Java 8
 * Minecraft 1.7-1.10 server
 
+## Downloads
+
+https://github.com/games647/LambdaAttack/releases
+
 ## Images
 
 ![Gui](http://i.imgur.com/6U00ZwA.png)
