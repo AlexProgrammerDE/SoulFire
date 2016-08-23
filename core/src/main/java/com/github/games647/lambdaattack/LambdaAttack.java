@@ -33,7 +33,7 @@ public class LambdaAttack {
 
     private final MainGui mainGui = new MainGui(this);
 
-    private boolean running = true;
+    private boolean running = false;
     private GameVersion gameVersion = GameVersion.VERSION_1_10;
 
     private List<Proxy> proxies;
@@ -43,6 +43,8 @@ public class LambdaAttack {
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     public void start(String host, int port, int amount, int delay, String nameFormat) throws RequestException {
+        running = true;
+        
         for (int i = 0; i < amount; i++) {
             String username = String.format(nameFormat, i);
             if (names != null) {
@@ -59,7 +61,6 @@ public class LambdaAttack {
             Bot bot;
             if (proxies != null) {
                 Proxy proxy = proxies.get(i % proxies.size());
-                LOGGER.info("USING PROXY " + proxy);
                 bot = new Bot(account, proxy);
             } else {
                 bot = new Bot(account);
@@ -115,6 +116,7 @@ public class LambdaAttack {
     public void stop() {
         this.running = false;
         clients.stream().forEach(Bot::disconnect);
+        clients.clear();
     }
 
     public ExecutorService getThreadPool() {
