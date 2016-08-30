@@ -9,6 +9,7 @@ import org.spacehq.mc.protocol.v1_9.data.message.Message;
 import org.spacehq.mc.protocol.v1_9.packet.ingame.server.ServerChatPacket;
 import org.spacehq.mc.protocol.v1_9.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import org.spacehq.mc.protocol.v1_9.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
+import org.spacehq.mc.protocol.v1_9.packet.login.server.LoginSuccessPacket;
 import org.spacehq.packetlib.event.session.PacketReceivedEvent;
 
 public class SessionListener19 extends SessionListener {
@@ -36,6 +37,9 @@ public class SessionListener19 extends SessionListener {
             ServerPlayerHealthPacket healthPacket = receiveEvent.<ServerPlayerHealthPacket>getPacket();
             owner.setHealth(healthPacket.getHealth());
             owner.setFood(healthPacket.getFood());
+        } else if (receiveEvent.getPacket() instanceof LoginSuccessPacket) {
+            LoginSuccessPacket loginSuccessPacket = receiveEvent.<LoginSuccessPacket>getPacket();
+            super.onJoin(loginSuccessPacket.getProfile());
         }
     }
 }

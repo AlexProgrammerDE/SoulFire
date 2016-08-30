@@ -4,11 +4,12 @@ import com.github.games647.lambdaattack.bot.Bot;
 import com.github.games647.lambdaattack.bot.EntitiyLocation;
 
 import java.util.logging.Level;
-import org.spacehq.mc.protocol.v1_7.packet.ingame.server.entity.player.ServerUpdateHealthPacket;
 
 import org.spacehq.mc.protocol.v1_8.data.message.Message;
 import org.spacehq.mc.protocol.v1_8.packet.ingame.server.ServerChatPacket;
 import org.spacehq.mc.protocol.v1_8.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
+import org.spacehq.mc.protocol.v1_8.packet.ingame.server.entity.player.ServerUpdateHealthPacket;
+import org.spacehq.mc.protocol.v1_8.packet.login.server.LoginSuccessPacket;
 import org.spacehq.packetlib.event.session.PacketReceivedEvent;
 
 public class SessionListener18 extends SessionListener {
@@ -36,6 +37,9 @@ public class SessionListener18 extends SessionListener {
             ServerUpdateHealthPacket healthPacket = receiveEvent.<ServerUpdateHealthPacket>getPacket();
             owner.setHealth(healthPacket.getHealth());
             owner.setFood(healthPacket.getFood());
+        } else if (receiveEvent.getPacket() instanceof LoginSuccessPacket) {
+            LoginSuccessPacket loginSuccessPacket = receiveEvent.<LoginSuccessPacket>getPacket();
+            super.onJoin(loginSuccessPacket.getProfile());
         }
     }
 }

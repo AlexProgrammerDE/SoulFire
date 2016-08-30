@@ -9,6 +9,7 @@ import java.awt.event.ItemEvent;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -62,6 +63,10 @@ public class MainGui {
         JSpinner delay = new JSpinner();
         delay.setValue(1000);
         topPanel.add(delay);
+
+        topPanel.add(new JLabel("Auto Register: "));
+        JCheckBox autoRegister = new JCheckBox();
+        topPanel.add(autoRegister);
 
         topPanel.add(new JLabel("Amount: "));
         JSpinner amount = new JSpinner();

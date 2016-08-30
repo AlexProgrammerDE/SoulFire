@@ -17,10 +17,15 @@ public class LambdaAttack {
 
     public static final String PROJECT_NAME = "LambdaAttack";
 
+    private static LambdaAttack instance;
     private static final Logger LOGGER = Logger.getLogger(PROJECT_NAME);
 
     public static Logger getLogger() {
         return LOGGER;
+    }
+
+    public static LambdaAttack getInstance() {
+        return instance;
     }
 
     public static void main(String[] args) {
@@ -28,7 +33,7 @@ public class LambdaAttack {
             LOGGER.log(Level.SEVERE, null, throwable);
         });
 
-        new LambdaAttack();
+        instance = new LambdaAttack();
     }
 
     private final MainGui mainGui = new MainGui(this);
@@ -38,6 +43,8 @@ public class LambdaAttack {
 
     private List<Proxy> proxies;
     private List<String> names;
+
+    private boolean autoRegister = false;
 
     private final List<Bot> clients = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
@@ -121,5 +128,13 @@ public class LambdaAttack {
 
     public ExecutorService getThreadPool() {
         return threadPool;
+    }
+
+    public boolean isAutoRegister() {
+        return autoRegister;
+    }
+
+    public void setAutoRegister(boolean autoRegister) {
+        this.autoRegister = autoRegister;
     }
 }

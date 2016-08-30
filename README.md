@@ -14,6 +14,7 @@ Minecraft bot. Currently used for stress testing.
 * Compatible 1.7-1.10 servers
 * Test with Spigot, PaperSpigot and TacoSpigot
 * Disconnects gracefully after the end
+* Automatically registers for cracked servers
 * Supports SOCKS proxies
 * Free
 * Open source

@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import org.spacehq.mc.protocol.v1_7.data.message.Message;
 import org.spacehq.mc.protocol.v1_7.packet.ingame.server.ServerChatPacket;
 import org.spacehq.mc.protocol.v1_7.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
+import org.spacehq.mc.protocol.v1_7.packet.login.server.LoginSuccessPacket;
 import org.spacehq.mc.protocol.v1_8.packet.ingame.server.entity.player.ServerUpdateHealthPacket;
 import org.spacehq.packetlib.event.session.PacketReceivedEvent;
 
@@ -36,6 +37,9 @@ public class SessionListener17 extends SessionListener {
             ServerUpdateHealthPacket healthPacket = receiveEvent.<ServerUpdateHealthPacket>getPacket();
             owner.setHealth(healthPacket.getHealth());
             owner.setFood(healthPacket.getFood());
+        } else if (receiveEvent.getPacket() instanceof LoginSuccessPacket) {
+            LoginSuccessPacket loginSuccessPacket = receiveEvent.<LoginSuccessPacket>getPacket();
+            super.onJoin(null);
         }
     }
 }
