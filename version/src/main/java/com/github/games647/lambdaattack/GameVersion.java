@@ -5,7 +5,8 @@ public enum GameVersion {
     VERSION_1_7,
     VERSION_1_8,
     VERSION_1_9,
-    VERSION_1_10;
+    VERSION_1_10,
+    VERSION_1_11;
 
     public static GameVersion findByName(String name) {
         switch (name) {
@@ -17,6 +18,8 @@ public enum GameVersion {
                 return VERSION_1_9;
             case "1.10":
                 return VERSION_1_10;
+            case "1.11":
+                return VERSION_1_11;
         }
 
         return null;

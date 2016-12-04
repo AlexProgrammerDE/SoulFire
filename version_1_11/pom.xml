@@ -1,0 +1,71 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.github.games647</groupId>
+        <artifactId>lambdaattack</artifactId>
+        <version>2.2</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>lambdaattack-version-1-11</artifactId>
+    <packaging>jar</packaging>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <relocations>
+                        <relocation>
+                            <pattern>org.spacehq.mc.protocol</pattern>
+                            <shadedPattern>org.spacehq.mc.protocol.v1_11</shadedPattern>
+                        </relocation>
+                    </relocations>
+
+                    <artifactSet>
+                        <includes>
+                            <include>org.spacehq:mcprotocollib</include>
+                        </includes>
+                    </artifactSet>
+
+                    <filters>
+                        <filter>
+                            <artifact>org.spacehq:mcprotocollib</artifact>
+                            <includes>
+                                <include>org/spacehq/mc/protocol/**</include>
+                            </includes>
+                        </filter>
+                    </filters>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <!--ProtocolLib for clients-->
+        <dependency>
+            <groupId>org.spacehq</groupId>
+            <artifactId>mcprotocollib</artifactId>
+            <version>1.11-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.games647</groupId>
+            <artifactId>lambdaattack-version</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+</project>

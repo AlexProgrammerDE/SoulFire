@@ -57,6 +57,11 @@
         </dependency>
         <dependency>
             <groupId>com.github.games647</groupId>
+            <artifactId>lambdaattack-version-1-11</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.games647</groupId>
             <artifactId>lambdaattack-version-1-10</artifactId>
             <version>${project.version}</version>
         </dependency>
