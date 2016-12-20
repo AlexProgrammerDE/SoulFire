@@ -77,7 +77,7 @@ public class MainGui {
         JTextField nameFormat = new JTextField("Bot-%d");
         topPanel.add(nameFormat);
 
-        JComboBox<String> versionBox = new JComboBox<>(new String[]{"1.10", "1.9", "1.8", "1.7"});
+        JComboBox<String> versionBox = new JComboBox<>(new String[]{"1.11", "1.10", "1.9", "1.8", "1.7"});
         versionBox.addItemListener((itemEvent) -> {
             if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
                 botManager.setGameVersion(GameVersion.findByName((String) itemEvent.getItem()));
