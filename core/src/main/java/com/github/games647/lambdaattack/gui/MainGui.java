@@ -78,7 +78,7 @@ public class MainGui {
         topPanel.add(nameFormat);
 
         JComboBox<String> versionBox = new JComboBox<>(new String[]{"1.11", "1.10", "1.9", "1.8", "1.7"});
-        versionBox.addItemListener((itemEvent) -> {
+        versionBox.addItemListener(itemEvent -> {
             if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
                 botManager.setGameVersion(GameVersion.findByName((String) itemEvent.getItem()));
             }
@@ -112,12 +112,12 @@ public class MainGui {
                 try {
                     botManager.start(host, port, (int) amount.getValue(), (int) delay.getValue(), nameFormat.getText());
                 } catch (Exception ex) {
-                    LambdaAttack.getLogger().log(Level.SEVERE, null, ex);
+                    LambdaAttack.getLogger().log(Level.INFO, ex.getMessage(), ex);
                 }
             });
         });
 
-        stopButton.addActionListener((action) -> botManager.stop());
+        stopButton.addActionListener(action -> botManager.stop());
         return topPanel;
     }
 

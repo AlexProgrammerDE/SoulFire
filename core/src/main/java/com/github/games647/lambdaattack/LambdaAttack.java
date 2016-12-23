@@ -39,7 +39,7 @@ public class LambdaAttack {
     private final MainGui mainGui = new MainGui(this);
 
     private boolean running = false;
-    private GameVersion gameVersion = GameVersion.VERSION_1_10;
+    private GameVersion gameVersion = GameVersion.VERSION_1_11;
 
     private List<Proxy> proxies;
     private List<String> names;
@@ -51,7 +51,7 @@ public class LambdaAttack {
 
     public void start(String host, int port, int amount, int delay, String nameFormat) throws RequestException {
         running = true;
-        
+
         for (int i = 0; i < amount; i++) {
             String username = String.format(nameFormat, i);
             if (names != null) {

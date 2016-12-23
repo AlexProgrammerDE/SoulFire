@@ -3,6 +3,7 @@ package com.github.games647.lambdaattack.bot;
 import com.github.games647.lambdaattack.LambdaAttack;
 import com.github.games647.lambdaattack.UniversalProtocol;
 import com.github.games647.lambdaattack.bot.listener.SessionListener110;
+import com.github.games647.lambdaattack.bot.listener.SessionListener111;
 import com.github.games647.lambdaattack.bot.listener.SessionListener17;
 import com.github.games647.lambdaattack.bot.listener.SessionListener18;
 import com.github.games647.lambdaattack.bot.listener.SessionListener19;
@@ -33,7 +34,7 @@ public class Bot {
     public Bot(UniversalProtocol account) {
         this(account, Proxy.NO_PROXY);
     }
-    
+
     public Bot(UniversalProtocol account, Proxy proxy) {
         this.account = account;
         this.proxy = proxy;
@@ -47,6 +48,9 @@ public class Bot {
         this.session = client.getSession();
 
         switch (account.getGameVersion()) {
+            case VERSION_1_11:
+                client.getSession().addListener(new SessionListener111(this));
+                break;
             case VERSION_1_10:
                 client.getSession().addListener(new SessionListener110(this));
                 break;
@@ -60,7 +64,7 @@ public class Bot {
                 client.getSession().addListener(new SessionListener17(this));
                 break;
             default:
-                throw new IllegalStateException();
+                throw new IllegalStateException("Unknown session listener");
         }
 
         client.getSession().connect();
