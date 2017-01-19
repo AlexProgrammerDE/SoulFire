@@ -25,6 +25,10 @@
                             <pattern>org.spacehq.mc.protocol</pattern>
                             <shadedPattern>org.spacehq.mc.protocol.v1_11</shadedPattern>
                         </relocation>
+                        <relocation>
+                            <pattern>org.spacehq.opennbt</pattern>
+                            <shadedPattern>org.spacehq.opennbt.v1_11</shadedPattern>
+                        </relocation>
                     </relocations>
 
                     <artifactSet>
@@ -36,8 +40,10 @@
                     <filters>
                         <filter>
                             <artifact>org.spacehq:mcprotocollib</artifact>
+                            <artifact>org.spacehq:opennbt</artifact>
                             <includes>
                                 <include>org/spacehq/mc/protocol/**</include>
+                                <include>org/spacehq/opennbt/**</include>
                             </includes>
                         </filter>
                     </filters>
