@@ -2,6 +2,7 @@ package com.github.games647.lambdaattack.gui;
 
 import com.github.games647.lambdaattack.LambdaAttack;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -9,9 +10,6 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 
 public class LoadNamesListener implements ActionListener {
 
@@ -36,8 +34,7 @@ public class LoadNamesListener implements ActionListener {
 
             botManager.getThreadPool().submit(() -> {
                 try {
-                    List<String> lines = Files.readAllLines(proxyFile.toPath());
-                    List<String> names = lines.stream().distinct().collect(Collectors.toList());
+                    List<String> names = Files.lines(proxyFile.toPath()).distinct().collect(Collectors.toList());
 
                     LambdaAttack.getLogger().log(Level.INFO, "Loaded {0} names", names.size());
                     botManager.setNames(names);

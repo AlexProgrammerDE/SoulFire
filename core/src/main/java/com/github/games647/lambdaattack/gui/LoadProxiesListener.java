@@ -2,6 +2,7 @@ package com.github.games647.lambdaattack.gui;
 
 import com.github.games647.lambdaattack.LambdaAttack;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -13,9 +14,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-
 public class LoadProxiesListener implements ActionListener {
 
     private final LambdaAttack botManager;
@@ -25,7 +23,7 @@ public class LoadProxiesListener implements ActionListener {
 
     public LoadProxiesListener(LambdaAttack botManager, JFrame frame, JFileChooser fileChooser) {
         this.botManager = botManager;
-        
+
         this.frame = frame;
         this.fileChooser = fileChooser;
     }
@@ -39,8 +37,7 @@ public class LoadProxiesListener implements ActionListener {
 
             botManager.getThreadPool().submit(() -> {
                 try {
-                    List<String> lines = Files.readAllLines(proxyFile.toPath());
-                    List<Proxy> proxies = lines.stream().distinct().map((line) -> {
+                    List<Proxy> proxies = Files.lines(proxyFile.toPath()).distinct().map((line) -> {
                         String host = line.split(":")[0];
                         int port = Integer.parseInt(line.split(":")[1]);
 
