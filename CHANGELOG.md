@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.3
+
+* Update to 1.12
+
 # 2.2
 
 * Add custom name list support

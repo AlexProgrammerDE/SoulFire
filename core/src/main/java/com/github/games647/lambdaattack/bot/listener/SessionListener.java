@@ -2,12 +2,11 @@ package com.github.games647.lambdaattack.bot.listener;
 
 import com.github.games647.lambdaattack.LambdaAttack;
 import com.github.games647.lambdaattack.bot.Bot;
+import com.github.steveice10.mc.auth.data.GameProfile;
+import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
+import com.github.steveice10.packetlib.event.session.SessionAdapter;
 
 import java.util.logging.Level;
-
-import org.spacehq.mc.auth.data.GameProfile;
-import org.spacehq.packetlib.event.session.DisconnectedEvent;
-import org.spacehq.packetlib.event.session.SessionAdapter;
 
 public abstract class SessionListener extends SessionAdapter {
 

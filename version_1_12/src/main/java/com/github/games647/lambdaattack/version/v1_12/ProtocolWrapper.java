@@ -1,14 +1,13 @@
-package com.github.games647.lambdaattack.version.v1_8;
+package com.github.games647.lambdaattack.version.v1_12;
 
 import com.github.games647.lambdaattack.GameVersion;
 import com.github.games647.lambdaattack.UniversalProtocol;
+import com.github.steveice10.mc.auth.data.GameProfile;
+import com.github.steveice10.mc.auth.exception.request.RequestException;
+import com.github.steveice10.mc.protocol.MinecraftProtocol;
+import com.github.steveice10.packetlib.packet.PacketProtocol;
 
 import java.net.Proxy;
-
-import org.spacehq.mc.auth.data.GameProfile;
-import org.spacehq.mc.auth.exception.request.RequestException;
-import org.spacehq.mc.protocol.MinecraftProtocol;
-import org.spacehq.packetlib.packet.PacketProtocol;
 
 public class ProtocolWrapper extends MinecraftProtocol implements UniversalProtocol {
 
@@ -38,12 +37,7 @@ public class ProtocolWrapper extends MinecraftProtocol implements UniversalProto
     }
 
     @Override
-    public GameProfile getGameProfile() {
-        return super.getProfile();
-    }
-
-    @Override
     public GameVersion getGameVersion() {
-        return GameVersion.VERSION_1_8;
+        return GameVersion.VERSION_1_11;
     }
 }

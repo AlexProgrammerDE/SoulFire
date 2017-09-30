@@ -1,11 +1,11 @@
 package com.github.games647.lambdaattack;
 
-import org.spacehq.mc.auth.data.GameProfile;
-import org.spacehq.packetlib.packet.PacketProtocol;
+import com.github.steveice10.mc.auth.data.GameProfile;
+import com.github.steveice10.packetlib.packet.PacketProtocol;
 
 public interface UniversalProtocol {
 
-    GameProfile getGameProfile();
+    GameProfile getProfile();
 
     PacketProtocol getProtocol();
 

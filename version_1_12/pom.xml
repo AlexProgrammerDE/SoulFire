@@ -5,11 +5,11 @@
     <parent>
         <groupId>com.github.games647</groupId>
         <artifactId>lambdaattack</artifactId>
-        <version>2.2</version>
+        <version>2.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>lambdaattack-version-1-8</artifactId>
+    <artifactId>lambdaattack-version-1-12</artifactId>
     <packaging>jar</packaging>
 
     <build>
@@ -17,27 +17,27 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
+                <version>3.1.0</version>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <relocations>
                         <relocation>
-                            <pattern>org.spacehq.mc.protocol</pattern>
-                            <shadedPattern>org.spacehq.mc.protocol.v1_8</shadedPattern>
+                            <pattern>com.github.steveice10.mc.protocol</pattern>
+                            <shadedPattern>com.github.steveice10.mc.protocol.v1_12</shadedPattern>
                         </relocation>
                     </relocations>
 
                     <artifactSet>
                         <includes>
-                            <include>org.spacehq:mcprotocollib</include>
+                            <include>com.github.Steveice10:MCProtocolLib</include>
                         </includes>
                     </artifactSet>
 
                     <filters>
                         <filter>
-                            <artifact>org.spacehq:mcprotocollib</artifact>
+                            <artifact>com.github.Steveice10:MCProtocolLib</artifact>
                             <includes>
-                                <include>org/spacehq/mc/protocol/**</include>
+                                <include>com/github/steveice10/mc/protocol/**</include>
                             </includes>
                         </filter>
                     </filters>
@@ -57,9 +57,9 @@
     <dependencies>
         <!--ProtocolLib for clients-->
         <dependency>
-            <groupId>org.spacehq</groupId>
-            <artifactId>mcprotocollib</artifactId>
-            <version>1.8.8-SNAPSHOT</version>
+            <groupId>com.github.Steveice10</groupId>
+            <artifactId>MCProtocolLib</artifactId>
+            <version>1.12.1-1</version>
         </dependency>
 
         <dependency>

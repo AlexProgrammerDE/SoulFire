@@ -1,22 +1,18 @@
 package com.github.games647.lambdaattack.bot;
 
 import com.github.games647.lambdaattack.LambdaAttack;
+import com.github.games647.lambdaattack.UniversalFactory;
 import com.github.games647.lambdaattack.UniversalProtocol;
-import com.github.games647.lambdaattack.bot.listener.SessionListener110;
 import com.github.games647.lambdaattack.bot.listener.SessionListener111;
-import com.github.games647.lambdaattack.bot.listener.SessionListener17;
-import com.github.games647.lambdaattack.bot.listener.SessionListener18;
-import com.github.games647.lambdaattack.bot.listener.SessionListener19;
+import com.github.games647.lambdaattack.bot.listener.SessionListener112;
+import com.github.steveice10.mc.auth.data.GameProfile;
+import com.github.steveice10.mc.auth.exception.request.RequestException;
+import com.github.steveice10.packetlib.Client;
+import com.github.steveice10.packetlib.Session;
+import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 
 import java.net.Proxy;
 import java.util.logging.Logger;
-
-import org.spacehq.mc.auth.data.GameProfile;
-import org.spacehq.mc.auth.exception.request.RequestException;
-import org.spacehq.mc.protocol.v1_10.packet.ingame.client.ClientChatPacket;
-import org.spacehq.packetlib.Client;
-import org.spacehq.packetlib.Session;
-import org.spacehq.packetlib.tcp.TcpSessionFactory;
 
 public class Bot {
 
@@ -39,7 +35,7 @@ public class Bot {
         this.account = account;
         this.proxy = proxy;
 
-        this.logger = Logger.getLogger(account.getGameProfile().getName());
+        this.logger = Logger.getLogger(account.getProfile().getName());
         this.logger.setParent(LambdaAttack.getLogger());
     }
 
@@ -51,17 +47,8 @@ public class Bot {
             case VERSION_1_11:
                 client.getSession().addListener(new SessionListener111(this));
                 break;
-            case VERSION_1_10:
-                client.getSession().addListener(new SessionListener110(this));
-                break;
-            case VERSION_1_9:
-                client.getSession().addListener(new SessionListener19(this));
-                break;
-            case VERSION_1_8:
-                client.getSession().addListener(new SessionListener18(this));
-                break;
-            case VERSION_1_7:
-                client.getSession().addListener(new SessionListener17(this));
+            case VERSION_1_12:
+                client.getSession().addListener(new SessionListener112(this));
                 break;
             default:
                 throw new IllegalStateException("Unknown session listener");
@@ -72,8 +59,7 @@ public class Bot {
 
     public void sendMessage(String message) {
         if (session != null) {
-            ClientChatPacket chatPacket = new ClientChatPacket(message);
-            session.send(chatPacket);
+            UniversalFactory.sendChatMessage(account.getGameVersion(), message, getSession());
         }
     }
 
@@ -114,7 +100,7 @@ public class Bot {
     }
 
     public GameProfile getGameProfile() {
-        return account.getGameProfile();
+        return account.getProfile();
     }
 
     public Proxy getProxy() {

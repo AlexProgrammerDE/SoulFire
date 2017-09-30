@@ -2,16 +2,16 @@ package com.github.games647.lambdaattack;
 
 import com.github.games647.lambdaattack.bot.Bot;
 import com.github.games647.lambdaattack.gui.MainGui;
+import com.github.steveice10.mc.auth.exception.request.RequestException;
 
 import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.spacehq.mc.auth.exception.request.RequestException;
 
 public class LambdaAttack {
 
@@ -39,7 +39,7 @@ public class LambdaAttack {
     private final MainGui mainGui = new MainGui(this);
 
     private boolean running = false;
-    private GameVersion gameVersion = GameVersion.VERSION_1_11;
+    private GameVersion gameVersion = GameVersion.VERSION_1_12;
 
     private List<Proxy> proxies;
     private List<String> names;
@@ -78,7 +78,7 @@ public class LambdaAttack {
 
         for (Bot client : clients) {
             try {
-                Thread.sleep(delay);
+                TimeUnit.MILLISECONDS.sleep(delay);
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }

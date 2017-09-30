@@ -2,19 +2,18 @@ package com.github.games647.lambdaattack.bot.listener;
 
 import com.github.games647.lambdaattack.bot.Bot;
 import com.github.games647.lambdaattack.bot.EntitiyLocation;
+import com.github.steveice10.packetlib.event.session.PacketReceivedEvent;
+import com.github.steveice10.mc.protocol.v1_12.packet.login.server.LoginSuccessPacket;
+import com.github.steveice10.mc.protocol.v1_12.data.message.Message;
+import com.github.steveice10.mc.protocol.v1_12.packet.ingame.server.ServerChatPacket;
+import com.github.steveice10.mc.protocol.v1_12.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
+import com.github.steveice10.mc.protocol.v1_12.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 
 import java.util.logging.Level;
 
-import org.spacehq.mc.protocol.v1_8.data.message.Message;
-import org.spacehq.mc.protocol.v1_8.packet.ingame.server.ServerChatPacket;
-import org.spacehq.mc.protocol.v1_8.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
-import org.spacehq.mc.protocol.v1_8.packet.ingame.server.entity.player.ServerUpdateHealthPacket;
-import org.spacehq.mc.protocol.v1_8.packet.login.server.LoginSuccessPacket;
-import org.spacehq.packetlib.event.session.PacketReceivedEvent;
+public class SessionListener112 extends SessionListener {
 
-public class SessionListener18 extends SessionListener {
-
-    public SessionListener18(Bot owner) {
+    public SessionListener112(Bot owner) {
         super(owner);
     }
 
@@ -33,8 +32,8 @@ public class SessionListener18 extends SessionListener {
             float yaw = posPacket.getYaw();
             EntitiyLocation location = new EntitiyLocation(posX, posY, posZ, pitch, yaw);
             owner.setLocation(location);
-        } else if (receiveEvent.getPacket() instanceof ServerUpdateHealthPacket) {
-            ServerUpdateHealthPacket healthPacket = receiveEvent.<ServerUpdateHealthPacket>getPacket();
+        } else if (receiveEvent.getPacket() instanceof ServerPlayerHealthPacket) {
+            ServerPlayerHealthPacket healthPacket = receiveEvent.<ServerPlayerHealthPacket>getPacket();
             owner.setHealth(healthPacket.getHealth());
             owner.setFood(healthPacket.getFood());
         } else if (receiveEvent.getPacket() instanceof LoginSuccessPacket) {
