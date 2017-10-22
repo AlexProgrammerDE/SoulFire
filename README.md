@@ -11,7 +11,6 @@ Minecraft bot. Currently used for stress testing.
 * Configurable target
 * Configurable name format or name list
 * LogPanel to see errors directly
-* Compatible 1.7-1.10 servers
 * Test with Spigot, Paper
 * Disconnects gracefully after the end
 * Automatically registers for cracked servers
@@ -22,7 +21,7 @@ Minecraft bot. Currently used for stress testing.
 ## Requirements
 
 * Java 8
-* Minecraft 1.7-1.10 server
+* Minecraft 1.11-1.12 server
 
 ## Downloads
 

@@ -59,7 +59,8 @@
         <dependency>
             <groupId>com.github.Steveice10</groupId>
             <artifactId>MCProtocolLib</artifactId>
-            <version>1.12.1-1</version>
+            <!-- 1.12.2 -->
+            <version>299efaf248</version>
         </dependency>
 
         <dependency>
