@@ -1,13 +1,14 @@
 package com.github.games647.lambdaattack.bot.listener;
 
+import com.github.games647.lambdaattack.LambdaAttack;
 import com.github.games647.lambdaattack.bot.Bot;
 import com.github.games647.lambdaattack.bot.EntitiyLocation;
 import com.github.steveice10.packetlib.event.session.PacketReceivedEvent;
-import com.github.steveice10.mc.protocol.v1_12.packet.login.server.LoginSuccessPacket;
-import com.github.steveice10.mc.protocol.v1_12.data.message.Message;
-import com.github.steveice10.mc.protocol.v1_12.packet.ingame.server.ServerChatPacket;
-import com.github.steveice10.mc.protocol.v1_12.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
-import com.github.steveice10.mc.protocol.v1_12.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
+import com.github.steveice10.protocol.v1_12.packet.ingame.server.ServerJoinGamePacket;
+import com.github.steveice10.protocol.v1_12.data.message.Message;
+import com.github.steveice10.protocol.v1_12.packet.ingame.server.ServerChatPacket;
+import com.github.steveice10.protocol.v1_12.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
+import com.github.steveice10.protocol.v1_12.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 
 import java.util.logging.Level;
 
@@ -36,9 +37,9 @@ public class SessionListener112 extends SessionListener {
             ServerPlayerHealthPacket healthPacket = receiveEvent.<ServerPlayerHealthPacket>getPacket();
             owner.setHealth(healthPacket.getHealth());
             owner.setFood(healthPacket.getFood());
-        } else if (receiveEvent.getPacket() instanceof LoginSuccessPacket) {
-            LoginSuccessPacket loginSuccessPacket = receiveEvent.<LoginSuccessPacket>getPacket();
-            super.onJoin(loginSuccessPacket.getProfile());
+        } else if (receiveEvent.getPacket() instanceof ServerJoinGamePacket) {
+            ServerJoinGamePacket loginSuccessPacket = receiveEvent.<ServerJoinGamePacket>getPacket();
+            super.onJoin();
         }
     }
 }

@@ -38,6 +38,6 @@ public class ProtocolWrapper extends MinecraftProtocol implements UniversalProto
 
     @Override
     public GameVersion getGameVersion() {
-        return GameVersion.VERSION_1_11;
+        return GameVersion.VERSION_1_12;
     }
 }

@@ -6,6 +6,8 @@ import com.github.games647.lambdaattack.logging.LogHandler;
 
 import java.awt.BorderLayout;
 import java.awt.event.ItemEvent;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
@@ -66,6 +68,7 @@ public class MainGui {
 
         topPanel.add(new JLabel("Auto Register: "));
         JCheckBox autoRegister = new JCheckBox();
+        autoRegister.addActionListener(e -> botManager.setAutoRegister(!botManager.isAutoRegister()));
         topPanel.add(autoRegister);
 
         topPanel.add(new JLabel("Amount: "));
@@ -77,7 +80,11 @@ public class MainGui {
         JTextField nameFormat = new JTextField("Bot-%d");
         topPanel.add(nameFormat);
 
-        JComboBox<String> versionBox = new JComboBox<>(new String[]{"1.11", "1.10", "1.9", "1.8", "1.7"});
+        JComboBox<String> versionBox = new JComboBox<>();
+        Arrays.stream(GameVersion.values())
+                .sorted(Comparator.reverseOrder())
+                .map(GameVersion::getVersion)
+                .forEach(versionBox::addItem);
         versionBox.addItemListener(itemEvent -> {
             if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
                 botManager.setGameVersion(GameVersion.findByName((String) itemEvent.getItem()));

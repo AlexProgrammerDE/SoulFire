@@ -34,9 +34,8 @@ public class LambdaAttack {
         });
 
         instance = new LambdaAttack();
+        new MainGui(instance);
     }
-
-    private final MainGui mainGui = new MainGui(this);
 
     private boolean running = false;
     private GameVersion gameVersion = GameVersion.VERSION_1_12;
