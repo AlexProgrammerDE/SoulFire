@@ -16,15 +16,15 @@
     </modules>
 
     <name>LambdaAttack</name>
-    <version>2.3</version>
+    <version>2.3.1</version>
     <description>Stress tester for minecraft servers</description>
     <url>https://github.com/games647/LambdaAttack</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.9</maven.compiler.source>
+        <maven.compiler.target>1.9</maven.compiler.target>
     </properties>
 
     <repositories>

@@ -20,7 +20,7 @@ Minecraft bot. Currently used for stress testing.
 
 ## Requirements
 
-* Java 8
+* Java 9
 * Minecraft 1.11-1.12 server
 
 ## Downloads
