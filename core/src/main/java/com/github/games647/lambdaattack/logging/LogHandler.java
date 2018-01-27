@@ -18,7 +18,8 @@ public class LogHandler extends Handler {
 
     @Override
     public void publish(LogRecord record) {
-        SwingUtilities.invokeLater(() -> logArea.append(formatter.format(record)));
+        String formatted = formatter.format(record);
+        SwingUtilities.invokeLater(() -> logArea.append(formatted));
     }
 
     @Override

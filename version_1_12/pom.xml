@@ -60,7 +60,7 @@
             <groupId>com.github.Steveice10</groupId>
             <artifactId>MCProtocolLib</artifactId>
             <!-- 1.12.2 -->
-            <version>6de0593ca1</version>
+            <version>1.12.2-1</version>
         </dependency>
 
         <dependency>

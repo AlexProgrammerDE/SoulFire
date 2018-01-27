@@ -1,12 +1,11 @@
 package com.github.games647.lambdaattack.bot.listener;
 
-import com.github.games647.lambdaattack.LambdaAttack;
 import com.github.games647.lambdaattack.bot.Bot;
 import com.github.games647.lambdaattack.bot.EntitiyLocation;
 import com.github.steveice10.packetlib.event.session.PacketReceivedEvent;
-import com.github.steveice10.protocol.v1_12.packet.ingame.server.ServerJoinGamePacket;
 import com.github.steveice10.protocol.v1_12.data.message.Message;
 import com.github.steveice10.protocol.v1_12.packet.ingame.server.ServerChatPacket;
+import com.github.steveice10.protocol.v1_12.packet.ingame.server.ServerJoinGamePacket;
 import com.github.steveice10.protocol.v1_12.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import com.github.steveice10.protocol.v1_12.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 
@@ -24,7 +23,7 @@ public class SessionListener112 extends SessionListener {
             Message message = receiveEvent.<ServerChatPacket>getPacket().getMessage();
             owner.getLogger().log(Level.INFO, "Received Message: {0}", message.getFullText());
         } else if (receiveEvent.getPacket() instanceof ServerPlayerPositionRotationPacket) {
-            ServerPlayerPositionRotationPacket posPacket = receiveEvent.<ServerPlayerPositionRotationPacket>getPacket();
+            ServerPlayerPositionRotationPacket posPacket = receiveEvent.getPacket();
 
             double posX = posPacket.getX();
             double posY = posPacket.getY();
@@ -34,11 +33,11 @@ public class SessionListener112 extends SessionListener {
             EntitiyLocation location = new EntitiyLocation(posX, posY, posZ, pitch, yaw);
             owner.setLocation(location);
         } else if (receiveEvent.getPacket() instanceof ServerPlayerHealthPacket) {
-            ServerPlayerHealthPacket healthPacket = receiveEvent.<ServerPlayerHealthPacket>getPacket();
+            ServerPlayerHealthPacket healthPacket = receiveEvent.getPacket();
             owner.setHealth(healthPacket.getHealth());
             owner.setFood(healthPacket.getFood());
         } else if (receiveEvent.getPacket() instanceof ServerJoinGamePacket) {
-            ServerJoinGamePacket loginSuccessPacket = receiveEvent.<ServerJoinGamePacket>getPacket();
+            ServerJoinGamePacket loginSuccessPacket = receiveEvent.getPacket();
             super.onJoin();
         }
     }

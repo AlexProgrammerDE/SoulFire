@@ -23,7 +23,7 @@ public class SessionListener111 extends SessionListener {
             Message message = receiveEvent.<ServerChatPacket>getPacket().getMessage();
             owner.getLogger().log(Level.INFO, "Received Message: {0}", message.getFullText());
         } else if (receiveEvent.getPacket() instanceof ServerPlayerPositionRotationPacket) {
-            ServerPlayerPositionRotationPacket posPacket = receiveEvent.<ServerPlayerPositionRotationPacket>getPacket();
+            ServerPlayerPositionRotationPacket posPacket = receiveEvent.getPacket();
 
             double posX = posPacket.getX();
             double posY = posPacket.getY();
@@ -33,11 +33,11 @@ public class SessionListener111 extends SessionListener {
             EntitiyLocation location = new EntitiyLocation(posX, posY, posZ, pitch, yaw);
             owner.setLocation(location);
         } else if (receiveEvent.getPacket() instanceof ServerPlayerHealthPacket) {
-            ServerPlayerHealthPacket healthPacket = receiveEvent.<ServerPlayerHealthPacket>getPacket();
+            ServerPlayerHealthPacket healthPacket = receiveEvent.getPacket();
             owner.setHealth(healthPacket.getHealth());
             owner.setFood(healthPacket.getFood());
         } else if (receiveEvent.getPacket() instanceof ServerJoinGamePacket) {
-            ServerJoinGamePacket loginSuccessPacket = receiveEvent.<ServerJoinGamePacket>getPacket();
+            ServerJoinGamePacket loginSuccessPacket = receiveEvent.getPacket();
             super.onJoin();
         }
     }
