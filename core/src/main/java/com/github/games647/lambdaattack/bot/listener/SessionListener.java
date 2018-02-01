@@ -24,7 +24,7 @@ public abstract class SessionListener extends SessionAdapter {
     public void onJoin() {
         if (LambdaAttack.getInstance().isAutoRegister()) {
             String password = LambdaAttack.PROJECT_NAME;
-            owner.sendMessage(Bot.COMMAND_IDENTIFIER + "register " + password + password);
+            owner.sendMessage(Bot.COMMAND_IDENTIFIER + "register " + password + ' ' + password);
             owner.sendMessage(Bot.COMMAND_IDENTIFIER + "login " + password);
         }
     }
