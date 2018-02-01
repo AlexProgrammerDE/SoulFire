@@ -4,11 +4,11 @@ import com.github.games647.lambdaattack.LambdaAttack;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Proxy.Type;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -34,12 +34,12 @@ public class LoadProxiesListener implements ActionListener {
     public void actionPerformed(ActionEvent actionEvent) {
         int returnVal = fileChooser.showOpenDialog(frame);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File proxyFile = fileChooser.getSelectedFile();
-            LambdaAttack.getLogger().log(Level.INFO, "Opening: {0}.", proxyFile.getName());
+            Path proxyFile = fileChooser.getSelectedFile().toPath();
+            LambdaAttack.getLogger().log(Level.INFO, "Opening: {0}.", proxyFile.getFileName());
 
             botManager.getThreadPool().submit(() -> {
                 try {
-                    List<Proxy> proxies = Files.lines(proxyFile.toPath()).distinct().map((line) -> {
+                    List<Proxy> proxies = Files.lines(proxyFile).distinct().map((line) -> {
                         String host = line.split(":")[0];
                         int port = Integer.parseInt(line.split(":")[1]);
 

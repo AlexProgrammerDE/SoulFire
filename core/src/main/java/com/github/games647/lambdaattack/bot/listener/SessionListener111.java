@@ -20,7 +20,8 @@ public class SessionListener111 extends SessionListener {
     @Override
     public void packetReceived(PacketReceivedEvent receiveEvent) {
         if (receiveEvent.getPacket() instanceof ServerChatPacket) {
-            Message message = receiveEvent.<ServerChatPacket>getPacket().getMessage();
+            ServerChatPacket chatPacket = receiveEvent.getPacket();
+            Message message = chatPacket.getMessage();
             owner.getLogger().log(Level.INFO, "Received Message: {0}", message.getFullText());
         } else if (receiveEvent.getPacket() instanceof ServerPlayerPositionRotationPacket) {
             ServerPlayerPositionRotationPacket posPacket = receiveEvent.getPacket();
@@ -37,7 +38,6 @@ public class SessionListener111 extends SessionListener {
             owner.setHealth(healthPacket.getHealth());
             owner.setFood(healthPacket.getFood());
         } else if (receiveEvent.getPacket() instanceof ServerJoinGamePacket) {
-            ServerJoinGamePacket loginSuccessPacket = receiveEvent.getPacket();
             super.onJoin();
         }
     }
