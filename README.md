@@ -43,5 +43,5 @@ https://github.com/games647/LambdaAttack/releases
 
 ## Dependencies
 
-* Java 8
+* Java 9
 * McProtocolLib: https://github.com/Steveice10/MCProtocolLib
