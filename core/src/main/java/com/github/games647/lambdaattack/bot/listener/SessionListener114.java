@@ -11,10 +11,6 @@ import com.github.steveice10.protocol.v1_14.packet.ingame.server.entity.player.S
 
 import java.util.logging.Level;
 
-// ------------------------------
-// Copyright (c) PiggyPiglet 2019
-// https://www.piggypiglet.me
-// ------------------------------
 public class SessionListener114 extends SessionListener {
 
     public SessionListener114(Bot owner) {
