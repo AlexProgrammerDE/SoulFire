@@ -12,11 +12,12 @@
         <module>version</module>
         <module>version_1_11</module>
         <module>version_1_12</module>
+        <module>version_1_14</module>
         <module>core</module>
     </modules>
 
     <name>LambdaAttack</name>
-    <version>2.3.1</version>
+    <version>2.3.2</version>
     <description>Stress tester for minecraft servers</description>
     <url>https://github.com/games647/LambdaAttack</url>
 
