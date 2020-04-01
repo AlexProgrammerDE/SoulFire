@@ -9,7 +9,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>lambdaattack-version-1-14</artifactId>
+    <artifactId>lambdaattack-version-1-15</artifactId>
     <packaging>jar</packaging>
 
     <build>
@@ -23,7 +23,7 @@
                     <relocations>
                         <relocation>
                             <pattern>com.github.steveice10.mc.protocol</pattern>
-                            <shadedPattern>com.github.steveice10.protocol.v1_14</shadedPattern>
+                            <shadedPattern>com.github.steveice10.protocol.v1_15</shadedPattern>
                         </relocation>
                     </relocations>
 
@@ -59,8 +59,8 @@
         <dependency>
             <groupId>com.github.Steveice10</groupId>
             <artifactId>MCProtocolLib</artifactId>
-            <!-- 1.14.4 -->
-            <version>1.14.4-2</version>
+            <!-- 1.15.2 (no GitHub release yet) -->
+            <version>456613c</version>
         </dependency>
 
         <dependency>
