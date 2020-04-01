@@ -1,5 +1,6 @@
 package com.github.games647.lambdaattack.bot.listener;
 
+import com.github.games647.lambdaattack.Options;
 import com.github.games647.lambdaattack.bot.Bot;
 import com.github.games647.lambdaattack.bot.EntitiyLocation;
 import com.github.steveice10.packetlib.event.session.PacketReceivedEvent;
@@ -12,8 +13,8 @@ import java.util.logging.Level;
 
 public class SessionListener115 extends SessionListener {
 
-    public SessionListener115(Bot owner) {
-        super(owner);
+    public SessionListener115(Options options, Bot owner) {
+        super(options, owner);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.github.games647.lambdaattack.bot.listener;
 
+import com.github.games647.lambdaattack.Options;
 import com.github.games647.lambdaattack.bot.Bot;
 import com.github.games647.lambdaattack.bot.EntitiyLocation;
 import com.github.steveice10.packetlib.event.session.PacketReceivedEvent;
@@ -8,13 +9,12 @@ import com.github.steveice10.protocol.v1_12.packet.ingame.server.ServerChatPacke
 import com.github.steveice10.protocol.v1_12.packet.ingame.server.ServerJoinGamePacket;
 import com.github.steveice10.protocol.v1_12.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import com.github.steveice10.protocol.v1_12.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
-
 import java.util.logging.Level;
 
 public class SessionListener112 extends SessionListener {
 
-    public SessionListener112(Bot owner) {
-        super(owner);
+    public SessionListener112(Options options, Bot owner) {
+        super(options, owner);
     }
 
     @Override

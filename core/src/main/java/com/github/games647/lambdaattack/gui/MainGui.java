@@ -2,14 +2,12 @@ package com.github.games647.lambdaattack.gui;
 
 import com.github.games647.lambdaattack.GameVersion;
 import com.github.games647.lambdaattack.LambdaAttack;
+import com.github.games647.lambdaattack.Options;
 import com.github.games647.lambdaattack.logging.LogHandler;
-
 import java.awt.BorderLayout;
-import java.awt.event.ItemEvent;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.logging.Level;
-
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -69,7 +67,6 @@ public class MainGui {
 
         topPanel.add(new JLabel("Auto Register: "));
         JCheckBox autoRegister = new JCheckBox();
-        autoRegister.addActionListener(e -> botManager.setAutoRegister(!botManager.isAutoRegister()));
         topPanel.add(autoRegister);
 
         topPanel.add(new JLabel("Amount: "));
@@ -86,11 +83,6 @@ public class MainGui {
                 .sorted(Comparator.reverseOrder())
                 .map(GameVersion::getVersion)
                 .forEach(versionBox::addItem);
-        versionBox.addItemListener(itemEvent -> {
-            if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
-                botManager.setGameVersion(GameVersion.findByName((String) itemEvent.getItem()));
-            }
-        });
 
         topPanel.add(versionBox);
 
@@ -113,12 +105,20 @@ public class MainGui {
         topPanel.add(loadProxies);
 
         startButton.addActionListener((action) -> {
-            String host = hostInput.getText();
-            int port = Integer.parseInt(portInput.getText());
+            // collect the options on the gui thread
+            // for thread-safety
+            Options options = new Options(
+                    hostInput.getText(),
+                    Integer.parseInt(portInput.getText()),
+                    (int) amount.getValue(),
+                    (int) delay.getValue(),
+                    nameFormat.getText(),
+                    GameVersion.findByName((String) versionBox.getSelectedItem()),
+                    autoRegister.isSelected());
 
             botManager.getThreadPool().submit(() -> {
                 try {
-                    botManager.start(host, port, (int) amount.getValue(), (int) delay.getValue(), nameFormat.getText());
+                    botManager.start(options);
                 } catch (Exception ex) {
                     LambdaAttack.getLogger().log(Level.INFO, ex.getMessage(), ex);
                 }
