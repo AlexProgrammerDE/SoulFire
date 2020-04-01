@@ -7,6 +7,7 @@ Minecraft bot. Currently used for stress testing.
 ## Features
 
 * Graphical user interface
+* Command line interface
 * Configurable amount and join delay
 * Configurable target
 * Configurable name format or name list
@@ -40,6 +41,11 @@ https://github.com/games647/LambdaAttack/releases
 ## Images
 
 ![Gui](https://i.imgur.com/6U00ZwA.png)
+
+## Command Line Usage
+LambdaAttack can be used from the command line without a GUI.  
+To get a list of all available options, run
+`java -jar lambdaattack.jar --help`.
 
 ## Dependencies
 
