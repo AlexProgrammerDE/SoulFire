@@ -38,7 +38,7 @@ public class LambdaAttack {
     }
 
     private boolean running = false;
-    private GameVersion gameVersion = GameVersion.VERSION_1_14;
+    private GameVersion gameVersion = GameVersion.VERSION_1_15;
 
     private List<Proxy> proxies;
     private List<String> names;
