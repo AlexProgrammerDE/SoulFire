@@ -43,9 +43,21 @@ https://github.com/games647/LambdaAttack/releases
 ![Gui](https://i.imgur.com/6U00ZwA.png)
 
 ## Command Line Usage
-LambdaAttack can be used from the command line without a GUI.  
-To get a list of all available options, run
-`java -jar lambdaattack.jar --help`.
+To run LambdaAttack from the command line without a GUI, enter  
+`java -jar lambdaattack.jar <options>`.
+
+These are the available options:
+
+| Name                  | Description                                                                                                   |
+|-----------------------|---------------------------------------------------------------------------------------------------------------|
+| -h, --host \<arg\>    | The hostname to connect to. Defaults to `127.0.0.1`                                                           |
+| -p, --port \<arg\>    | The port to connect to. Defaults to `25565`                                                                   |
+| -c, --count \<arg\>   | The amount of bots to connect to the server. Defaults to 20                                                   |
+| -d, --delay \<arg\>   | The delay between bot spawns, in milliseconds. Defaults to 1000                                               |
+| -n, --name \<arg\>    | The format for bot names. Requires exactly one integer placeholder `%d`. Defaults to `Bot-%d`                 |
+| -v, --version \<arg\> | The Minecraft version of the server to connect to. Defaults to 1.15.2                                         |
+| -r, --register        | Makes Bots run the /register and /login command after joining with username and password being `LambdaAttack` |
+| --help                | Displays a help page                                                                                          |
 
 ## Dependencies
 
