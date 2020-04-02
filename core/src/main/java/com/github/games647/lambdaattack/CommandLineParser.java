@@ -81,7 +81,7 @@ public class CommandLineParser {
         autoRegisterOption = new Option("r", "register", false, "Makes Bots run the /register and /login command after joining with username and password being " + LambdaAttack.PROJECT_NAME);
         options.addOption(autoRegisterOption);
 
-        helpOption = new Option("h", "help", false, "Displays this help page");
+        helpOption = new Option(null, "help", false, "Displays this help page");
         options.addOption(helpOption);
     }
 
@@ -91,7 +91,7 @@ public class CommandLineParser {
     }
 
     private boolean shouldPrintHelp() {
-        return cmd.hasOption(helpOption.getOpt());
+        return cmd.hasOption(helpOption.getLongOpt());
     }
 
     private String getHostname() throws ParseException {
