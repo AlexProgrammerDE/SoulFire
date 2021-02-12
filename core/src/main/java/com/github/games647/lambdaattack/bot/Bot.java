@@ -4,12 +4,10 @@ import com.github.games647.lambdaattack.LambdaAttack;
 import com.github.games647.lambdaattack.Options;
 import com.github.games647.lambdaattack.UniversalFactory;
 import com.github.games647.lambdaattack.UniversalProtocol;
-import com.github.games647.lambdaattack.bot.listener.SessionListener111;
-import com.github.games647.lambdaattack.bot.listener.SessionListener112;
-import com.github.games647.lambdaattack.bot.listener.SessionListener114;
-import com.github.games647.lambdaattack.bot.listener.SessionListener115;
+import com.github.games647.lambdaattack.bot.listener.*;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.packetlib.Client;
+import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 import java.net.Proxy;
@@ -20,7 +18,7 @@ public class Bot {
     public static final char COMMAND_IDENTIFIER = '/';
 
     private final Options options;
-    private final Proxy proxy;
+    private final ProxyInfo proxyInfo;
     private final Logger logger;
     private final UniversalProtocol account;
 
@@ -30,20 +28,25 @@ public class Bot {
     private float food = -1;
 
     public Bot(Options options, UniversalProtocol account) {
-        this(options, account, Proxy.NO_PROXY);
+        this(options, account, null);
     }
 
-    public Bot(Options options, UniversalProtocol account, Proxy proxy) {
+    public Bot(Options options, UniversalProtocol account, ProxyInfo proxyInfo) {
         this.options = options;
         this.account = account;
-        this.proxy = proxy;
+        this.proxyInfo = proxyInfo;
 
         this.logger = Logger.getLogger(account.getProfile().getName());
         this.logger.setParent(LambdaAttack.getLogger());
     }
 
     public void connect(String host, int port) {
-        Client client = new Client(host, port, account.getProtocol(), new TcpSessionFactory(proxy));
+        Client client;
+        if (proxyInfo == null) {
+            client = new Client(host, port, account.getProtocol(), new TcpSessionFactory());
+        } else {
+            client = new Client(host, port, account.getProtocol(), new TcpSessionFactory(proxyInfo));
+        }
         this.session = client.getSession();
 
         switch (account.getGameVersion()) {
@@ -58,6 +61,9 @@ public class Bot {
                 break;
             case VERSION_1_15:
                 client.getSession().addListener(new SessionListener115(options, this));
+                break;
+            case VERSION_1_16:
+                client.getSession().addListener(new SessionListener116(options, this));
                 break;
             default:
                 throw new IllegalStateException("Unknown session listener");
@@ -112,8 +118,8 @@ public class Bot {
         return account.getProfile();
     }
 
-    public Proxy getProxy() {
-        return proxy;
+    public ProxyInfo getProxy() {
+        return proxyInfo;
     }
 
     public void disconnect() {

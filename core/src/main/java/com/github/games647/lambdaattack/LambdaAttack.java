@@ -1,6 +1,8 @@
 package com.github.games647.lambdaattack;
 
 import com.github.games647.lambdaattack.bot.Bot;
+import com.github.steveice10.packetlib.ProxyInfo;
+
 import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +28,7 @@ public class LambdaAttack {
 
     private boolean running = false;
 
-    private List<Proxy> proxies;
+    private List<ProxyInfo> proxies;
     private List<String> names;
 
     private final List<Bot> clients = new ArrayList<>();
@@ -50,7 +52,7 @@ public class LambdaAttack {
 
             Bot bot;
             if (proxies != null) {
-                Proxy proxy = proxies.get(i % proxies.size());
+                ProxyInfo proxy = proxies.get(i % proxies.size());
                 bot = new Bot(options, account, proxy);
             } else {
                 bot = new Bot(options, account);
@@ -87,7 +89,7 @@ public class LambdaAttack {
         return protocol;
     }
 
-    public void setProxies(List<Proxy> proxies) {
+    public void setProxies(List<ProxyInfo> proxies) {
         this.proxies = proxies;
     }
 
@@ -97,7 +99,7 @@ public class LambdaAttack {
 
     public void stop() {
         this.running = false;
-        clients.stream().forEach(Bot::disconnect);
+        clients.forEach(Bot::disconnect);
         clients.clear();
     }
 
