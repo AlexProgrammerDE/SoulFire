@@ -5,6 +5,8 @@ import com.github.games647.lambdaattack.version.v1_11.ChatPacket1_11;
 import com.github.games647.lambdaattack.version.v1_11.SessionListener1_11;
 import com.github.games647.lambdaattack.version.v1_12.ChatPacket1_12;
 import com.github.games647.lambdaattack.version.v1_12.SessionListener1_12;
+import com.github.games647.lambdaattack.version.v1_13.ChatPacket1_13;
+import com.github.games647.lambdaattack.version.v1_13.SessionListener1_13;
 import com.github.games647.lambdaattack.version.v1_14.ChatPacket1_14;
 import com.github.games647.lambdaattack.version.v1_14.SessionListener1_14;
 import com.github.games647.lambdaattack.version.v1_15.ChatPacket1_15;
@@ -62,6 +64,9 @@ public class Bot implements IBot {
             case VERSION_1_12:
                 client.getSession().addListener(new SessionListener1_12(bus));
                 break;
+            case VERSION_1_13:
+                client.getSession().addListener(new SessionListener1_13(bus));
+                break;
             case VERSION_1_14:
                 client.getSession().addListener(new SessionListener1_14(bus));
                 break;
@@ -88,6 +93,9 @@ public class Bot implements IBot {
                 break;
             case VERSION_1_12:
                 session.send(new ChatPacket1_12(message));
+                break;
+                case VERSION_1_13:
+                session.send(new ChatPacket1_13(message));
                 break;
             case VERSION_1_14:
                 session.send(new ChatPacket1_14(message));

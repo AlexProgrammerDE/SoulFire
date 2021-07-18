@@ -2,7 +2,6 @@ package com.github.games647.lambdaattack;
 
 import com.github.games647.lambdaattack.common.GameVersion;
 import com.github.games647.lambdaattack.common.IPacketWrapper;
-import com.github.games647.lambdaattack.version.v1_16.ProtocolWrapper;
 
 public class UniversalFactory {
     public static IPacketWrapper authenticate(GameVersion gameVersion, String username) {
@@ -11,6 +10,8 @@ public class UniversalFactory {
                 return new com.github.games647.lambdaattack.version.v1_11.ProtocolWrapper(username);
             case VERSION_1_12:
                 return new com.github.games647.lambdaattack.version.v1_12.ProtocolWrapper(username);
+            case VERSION_1_13:
+                return new com.github.games647.lambdaattack.version.v1_13.ProtocolWrapper(username);
             case VERSION_1_14:
                 return new com.github.games647.lambdaattack.version.v1_14.ProtocolWrapper(username);
             case VERSION_1_15:

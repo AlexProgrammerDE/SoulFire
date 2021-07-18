@@ -10,13 +10,22 @@
 
     <modules>
         <module>common</module>
+        <!--
+        <module>version_1_7</module>
+        <module>version_1_8</module>
+        <module>version_1_9</module>
+        <module>version_1_10</module>
+        -->
         <module>version_1_11</module>
         <module>version_1_12</module>
+        <module>version_1_13</module>
         <module>version_1_14</module>
         <module>version_1_15</module>
         <module>version_1_16</module>
         <module>version_1_17</module>
         <module>core</module>
+        <module>protocol</module>
+        <module>protocol-legacy</module>
     </modules>
 
     <name>LambdaAttack</name>

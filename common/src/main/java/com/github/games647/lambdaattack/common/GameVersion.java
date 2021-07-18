@@ -6,6 +6,8 @@ public enum GameVersion {
 
     VERSION_1_12("1.12.2"),
 
+    VERSION_1_13("1.13.2"),
+
     VERSION_1_14("1.14.4"),
 
     VERSION_1_15("1.15.2"),

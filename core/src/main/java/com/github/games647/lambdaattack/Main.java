@@ -43,5 +43,4 @@ public class Main {
 
         LambdaAttack.getInstance().start(result.options);
     }
-
 }
