@@ -18,7 +18,7 @@ public class UniversalFactory {
             case VERSION_1_16:
                 return new com.github.games647.lambdaattack.version.v1_16.ProtocolWrapper(username);
             case VERSION_1_17:
-                return new ProtocolWrapper(username);
+                return new com.github.games647.lambdaattack.version.v1_17.ProtocolWrapper(username);
             default:
                 throw new IllegalArgumentException("Invalid game version");
         }

@@ -44,7 +44,6 @@
         <dependency>
             <groupId>com.github.Steveice10</groupId>
             <artifactId>MCProtocolLib</artifactId>
-            <!-- 1.15.2 (no GitHub release yet) -->
             <version>1.15.2-1</version>
         </dependency>
         <dependency>

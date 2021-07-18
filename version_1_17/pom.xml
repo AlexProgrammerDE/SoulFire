@@ -23,7 +23,7 @@
                     <relocations>
                         <relocation>
                             <pattern>com.github.steveice10.mc.protocol</pattern>
-                            <shadedPattern>com.github.steveice10.protocol.v1_16</shadedPattern>
+                            <shadedPattern>com.github.steveice10.protocol.v1_17</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
@@ -50,6 +50,11 @@
             <groupId>com.github.games647</groupId>
             <artifactId>lambdaattack-common</artifactId>
             <version>2.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Steveice10</groupId>
+            <artifactId>packetlib</artifactId>
+            <version>1.8</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

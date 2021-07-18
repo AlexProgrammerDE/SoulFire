@@ -44,13 +44,17 @@
         <dependency>
             <groupId>com.github.Steveice10</groupId>
             <artifactId>MCProtocolLib</artifactId>
-            <!-- 1.16.5 -->
             <version>1.16.5-2</version>
         </dependency>
         <dependency>
             <groupId>com.github.games647</groupId>
             <artifactId>lambdaattack-common</artifactId>
             <version>2.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.steveice10</groupId>
+            <artifactId>packetlib</artifactId>
+            <version>1.8</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
