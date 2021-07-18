@@ -2,8 +2,7 @@ package com.github.games647.lambdaattack;
 
 import com.github.games647.lambdaattack.common.GameVersion;
 import com.github.games647.lambdaattack.common.IPacketWrapper;
-import com.github.steveice10.mc.protocol.MinecraftProtocol;
-import com.github.steveice10.packetlib.packet.PacketProtocol;
+import com.github.games647.lambdaattack.version.v1_16.ProtocolWrapper;
 
 public class UniversalFactory {
     public static IPacketWrapper authenticate(GameVersion gameVersion, String username) {
@@ -18,6 +17,8 @@ public class UniversalFactory {
                 return new com.github.games647.lambdaattack.version.v1_15.ProtocolWrapper(username);
             case VERSION_1_16:
                 return new com.github.games647.lambdaattack.version.v1_16.ProtocolWrapper(username);
+            case VERSION_1_17:
+                return new ProtocolWrapper(username);
             default:
                 throw new IllegalArgumentException("Invalid game version");
         }

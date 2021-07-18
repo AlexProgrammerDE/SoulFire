@@ -11,9 +11,8 @@ import com.github.games647.lambdaattack.version.v1_15.ChatPacket1_15;
 import com.github.games647.lambdaattack.version.v1_15.SessionListener1_15;
 import com.github.games647.lambdaattack.version.v1_16.ChatPacket1_16;
 import com.github.games647.lambdaattack.version.v1_16.SessionListener1_16;
-import com.github.steveice10.mc.auth.data.GameProfile;
-import com.github.steveice10.mc.protocol.MinecraftProtocol;
-import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
+import com.github.games647.lambdaattack.version.v1_17.ChatPacket1_17;
+import com.github.games647.lambdaattack.version.v1_17.SessionListener1_17;
 import com.github.steveice10.packetlib.Client;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
@@ -72,6 +71,9 @@ public class Bot implements IBot {
             case VERSION_1_16:
                 client.getSession().addListener(new SessionListener1_16(bus));
                 break;
+            case VERSION_1_17:
+                client.getSession().addListener(new SessionListener1_17(bus));
+                break;
             default:
                 throw new IllegalStateException("Unknown session listener");
         }
@@ -95,6 +97,9 @@ public class Bot implements IBot {
                 break;
             case VERSION_1_16:
                 session.send(new ChatPacket1_16(message));
+                break;
+            case VERSION_1_17:
+                session.send(new ChatPacket1_17(message));
                 break;
             default:
                 throw new IllegalArgumentException("Invalid game version");

@@ -3,9 +3,7 @@ package com.github.games647.lambdaattack;
 import com.github.games647.lambdaattack.common.GameVersion;
 import com.github.games647.lambdaattack.common.IPacketWrapper;
 import com.github.games647.lambdaattack.common.Options;
-import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.packetlib.ProxyInfo;
-import com.github.steveice10.packetlib.packet.PacketProtocol;
 
 import java.util.ArrayList;
 import java.util.List;
