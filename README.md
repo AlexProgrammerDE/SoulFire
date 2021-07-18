@@ -1,8 +1,8 @@
-# LambdaAttack
+# WireBot
 
 ## Description
 
-Minecraft bot. Currently used for stress testing.
+Next level minecraft server botting software.
 
 ## Features
 
@@ -21,12 +21,8 @@ Minecraft bot. Currently used for stress testing.
 
 ## Requirements
 
-* Java 9
+* Java 15
 * Minecraft 1.11+ server
-
-## Downloads
-
-https://github.com/games647/LambdaAttack/releases
 
 ## Building
 
@@ -63,5 +59,5 @@ These are the available options:
 
 ## Dependencies
 
-* Java 9
+* Java 15
 * McProtocolLib: https://github.com/Steveice10/MCProtocolLib
