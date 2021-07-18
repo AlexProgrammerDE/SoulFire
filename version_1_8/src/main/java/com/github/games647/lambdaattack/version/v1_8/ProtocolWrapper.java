@@ -1,7 +1,7 @@
-package com.github.games647.lambdaattack.version.v1_8;
+package net.pistonmaster.wirebot.version.v1_8;
 
-import com.github.games647.lambdaattack.GameVersion;
-import com.github.games647.lambdaattack.UniversalProtocol;
+import net.pistonmaster.wirebot.GameVersion;
+import net.pistonmaster.wirebot.UniversalProtocol;
 
 import java.net.Proxy;
 

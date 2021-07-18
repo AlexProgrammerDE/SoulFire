@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.games647</groupId>
-        <artifactId>lambdaattack</artifactId>
+        <groupId>net.pistonmaster</groupId>
+        <artifactId>wirebot</artifactId>
         <version>2.5.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>lambdaattack-common</artifactId>
+    <artifactId>wirebot-common</artifactId>
     <packaging>jar</packaging>
 
     <properties>

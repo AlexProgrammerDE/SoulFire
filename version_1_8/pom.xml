@@ -1,15 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.games647</groupId>
-        <artifactId>lambdaattack</artifactId>
+        <groupId>net.pistonmaster</groupId>
+        <artifactId>wirebot</artifactId>
         <version>2.5.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>lambdaattack-version-1-8</artifactId>
+    <artifactId>wirebot-version-1-8</artifactId>
     <packaging>jar</packaging>
 
     <build>
@@ -63,8 +63,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.games647</groupId>
-            <artifactId>lambdaattack-common</artifactId>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-common</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

@@ -1,7 +1,7 @@
-package com.github.games647.lambdaattack.version.v1_7;
+package net.pistonmaster.wirebot.version.v1_7;
 
-import com.github.games647.lambdaattack.GameVersion;
-import com.github.games647.lambdaattack.UniversalProtocol;
+import net.pistonmaster.wirebot.GameVersion;
+import net.pistonmaster.wirebot.UniversalProtocol;
 
 import org.spacehq.mc.auth.data.GameProfile;
 import org.spacehq.mc.auth.exception.AuthenticationException;

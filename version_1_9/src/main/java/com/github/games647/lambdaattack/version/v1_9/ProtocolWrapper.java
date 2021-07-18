@@ -1,7 +1,7 @@
-package com.github.games647.lambdaattack.version.v1_9;
+package net.pistonmaster.wirebot.version.v1_9;
 
-import com.github.games647.lambdaattack.GameVersion;
-import com.github.games647.lambdaattack.UniversalProtocol;
+import net.pistonmaster.wirebot.GameVersion;
+import net.pistonmaster.wirebot.UniversalProtocol;
 
 import java.net.Proxy;
 
@@ -36,7 +36,7 @@ public class ProtocolWrapper extends MinecraftProtocol implements UniversalProto
     public PacketProtocol getProtocol() {
         return this;
     }
-    
+
     @Override
     public GameProfile getGameProfile() {
         return super.getProfile();

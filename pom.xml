@@ -2,8 +2,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.games647</groupId>
-    <artifactId>lambdaattack</artifactId>
+    <groupId>net.pistonmaster</groupId>
+    <artifactId>wirebot</artifactId>
     <inceptionYear>2016</inceptionYear>
 
     <packaging>pom</packaging>
@@ -24,14 +24,16 @@
         <module>version_1_16</module>
         <module>version_1_17</module>
         <module>core</module>
+        <!--
         <module>protocol</module>
         <module>protocol-legacy</module>
+        -->
     </modules>
 
-    <name>LambdaAttack</name>
+    <name>WireBot</name>
     <version>2.5.0</version>
     <description>Stress tester for minecraft servers</description>
-    <url>https://github.com/games647/LambdaAttack</url>
+    <url>https://github.com/games647/WireBot</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.games647</groupId>
-        <artifactId>lambdaattack</artifactId>
+        <groupId>net.pistonmaster</groupId>
+        <artifactId>wirebot</artifactId>
         <version>2.5.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>lambdaattack-core</artifactId>
+    <artifactId>wirebot-core</artifactId>
     <packaging>jar</packaging>
 
     <build>
@@ -22,7 +22,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.github.games647.lambdaattack.Main</mainClass>
+                            <mainClass>net.pistonmaster.wirebot.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -35,6 +35,15 @@
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <!--Remove unneeded server specifications-->
                     <minimizeJar>true</minimizeJar>
+
+                    <filters>
+                        <filter>
+                            <artifact>com.formdev:flatlaf</artifact>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </filter>
+                    </filters>
                 </configuration>
                 <executions>
                     <execution>
@@ -48,11 +57,19 @@
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>minecraft-libraries</id>
+            <name>Minecraft Libraries</name>
+            <url>https://libraries.minecraft.net</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!--Protocol definitions for clients-->
         <dependency>
-            <groupId>com.github.games647</groupId>
-            <artifactId>lambdaattack-common</artifactId>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-common</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -87,15 +104,33 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.games647</groupId>
-            <artifactId>lambdaattack-common</artifactId>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-common</artifactId>
             <version>2.5.0</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
-            <groupId>com.github.games647</groupId>
-            <artifactId>lambdaattack-version-1-11</artifactId>
+            <groupId>com.mojang</groupId>
+            <artifactId>brigadier</artifactId>
+            <version>1.0.18</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>1.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-intellij-themes</artifactId>
+            <version>1.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-version-1-11</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -106,8 +141,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.games647</groupId>
-            <artifactId>lambdaattack-version-1-12</artifactId>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-version-1-12</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -118,8 +153,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.games647</groupId>
-            <artifactId>lambdaattack-version-1-13</artifactId>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-version-1-13</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -130,8 +165,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.games647</groupId>
-            <artifactId>lambdaattack-version-1-14</artifactId>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-version-1-14</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -142,8 +177,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.games647</groupId>
-            <artifactId>lambdaattack-version-1-15</artifactId>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-version-1-15</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -154,8 +189,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.games647</groupId>
-            <artifactId>lambdaattack-version-1-16</artifactId>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-version-1-16</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -166,8 +201,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.games647</groupId>
-            <artifactId>lambdaattack-version-1-17</artifactId>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-version-1-17</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>

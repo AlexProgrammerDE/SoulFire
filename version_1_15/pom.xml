@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.games647</groupId>
-        <artifactId>lambdaattack</artifactId>
+        <groupId>net.pistonmaster</groupId>
+        <artifactId>wirebot</artifactId>
         <version>2.5.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>lambdaattack-version-1-15</artifactId>
+    <artifactId>wirebot-version-1-15</artifactId>
     <packaging>jar</packaging>
 
     <build>
@@ -47,8 +47,8 @@
             <version>1.15.2-1</version>
         </dependency>
         <dependency>
-            <groupId>com.github.games647</groupId>
-            <artifactId>lambdaattack-common</artifactId>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-common</artifactId>
             <version>2.5.0</version>
             <scope>compile</scope>
         </dependency>

@@ -41,8 +41,8 @@ Next level minecraft server botting software.
 
 ## Command Line Usage
 
-To run LambdaAttack from the command line without a GUI, enter  
-`java -jar lambdaattack.jar <options>`.
+To run WireBot from the command line without a GUI, enter  
+`java -jar wirebot.jar <options>`.
 
 These are the available options:
 
@@ -54,7 +54,7 @@ These are the available options:
 | -d, --delay \<arg\>   | The delay between bot spawns, in milliseconds. Defaults to 1000                                               |
 | -n, --name \<arg\>    | The format for bot names. Requires exactly one integer placeholder `%d`. Defaults to `Bot-%d`                 |
 | -v, --version \<arg\> | The Minecraft version of the server to connect to. Defaults to 1.15.2                                         |
-| -r, --register        | Makes Bots run the /register and /login command after joining with username and password being `LambdaAttack` |
+| -r, --register        | Makes Bots run the /register and /login command after joining with username and password being `WireBot` |
 | --help                | Displays a help page                                                                                          |
 
 ## Dependencies
