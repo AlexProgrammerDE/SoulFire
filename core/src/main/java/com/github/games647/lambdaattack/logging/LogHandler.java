@@ -1,11 +1,9 @@
 package com.github.games647.lambdaattack.logging;
 
+import javax.swing.*;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
-
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
 
 public class LogHandler extends Handler {
 

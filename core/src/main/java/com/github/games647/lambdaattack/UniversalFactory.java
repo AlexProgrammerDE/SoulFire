@@ -1,10 +1,12 @@
 package com.github.games647.lambdaattack;
 
-import com.github.steveice10.packetlib.Session;
+import com.github.games647.lambdaattack.common.GameVersion;
+import com.github.games647.lambdaattack.common.IPacketWrapper;
+import com.github.steveice10.mc.protocol.MinecraftProtocol;
+import com.github.steveice10.packetlib.packet.PacketProtocol;
 
 public class UniversalFactory {
-
-    public static UniversalProtocol authenticate(GameVersion gameVersion, String username) {
+    public static IPacketWrapper authenticate(GameVersion gameVersion, String username) {
         switch (gameVersion) {
             case VERSION_1_11:
                 return new com.github.games647.lambdaattack.version.v1_11.ProtocolWrapper(username);
@@ -17,28 +19,6 @@ public class UniversalFactory {
             case VERSION_1_16:
                 return new com.github.games647.lambdaattack.version.v1_16.ProtocolWrapper(username);
             default:
-                throw new IllegalArgumentException("Invalid game version");
-        }
-    }
-
-    public static void sendChatMessage(GameVersion gameVersion, String message, Session session) {
-        switch (gameVersion) {
-            case VERSION_1_11:
-                session.send(new com.github.steveice10.protocol.v1_11.packet.ingame.client.ClientChatPacket(message));
-                break;
-            case VERSION_1_12:
-                session.send(new com.github.steveice10.protocol.v1_12.packet.ingame.client.ClientChatPacket(message));
-                break;
-            case VERSION_1_14:
-                session.send(new com.github.steveice10.protocol.v1_14.packet.ingame.client.ClientChatPacket(message));
-                break;
-            case VERSION_1_15:
-                session.send(new com.github.steveice10.protocol.v1_15.packet.ingame.client.ClientChatPacket(message));
-                break;
-            case VERSION_1_16:
-                session.send(new com.github.steveice10.protocol.v1_16.packet.ingame.client.ClientChatPacket(message));
-                break;
-                default:
                 throw new IllegalArgumentException("Invalid game version");
         }
     }

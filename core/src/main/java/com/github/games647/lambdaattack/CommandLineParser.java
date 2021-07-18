@@ -1,13 +1,10 @@
 package com.github.games647.lambdaattack;
 
+import com.github.games647.lambdaattack.common.GameVersion;
+import org.apache.commons.cli.*;
+
 import java.util.Arrays;
 import java.util.stream.Collectors;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 public class CommandLineParser {
 
@@ -25,37 +22,6 @@ public class CommandLineParser {
     private final Option helpOption;
 
     private CommandLine cmd;
-
-    static class ParseResult {
-        final boolean showHelp;
-        final com.github.games647.lambdaattack.Options options;
-
-        ParseResult(boolean showHelp, com.github.games647.lambdaattack.Options options) {
-            this.showHelp = showHelp;
-            this.options = options;
-        }
-    }
-
-    static ParseResult parse(String[] args) throws ParseException {
-        CommandLineParser cli = new CommandLineParser();
-        cli.doParse(args);
-
-        return new ParseResult(
-                cli.shouldPrintHelp(),
-                new com.github.games647.lambdaattack.Options(
-                        cli.getHostname(),
-                        cli.getPort(),
-                        cli.getAmount(),
-                        cli.getJoinDelayMs(),
-                        cli.getBotNameFormat(),
-                        cli.getGameVersion(),
-                        cli.getAutoRegister()));
-    }
-
-    static void printHelp() {
-        HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp(LambdaAttack.PROJECT_NAME, new CommandLineParser().options);
-    }
 
     private CommandLineParser() {
         options = new Options();
@@ -83,6 +49,27 @@ public class CommandLineParser {
 
         helpOption = new Option(null, "help", false, "Displays this help page");
         options.addOption(helpOption);
+    }
+
+    static ParseResult parse(String[] args) throws ParseException {
+        CommandLineParser cli = new CommandLineParser();
+        cli.doParse(args);
+
+        return new ParseResult(
+                cli.shouldPrintHelp(),
+                new com.github.games647.lambdaattack.common.Options(
+                        cli.getHostname(),
+                        cli.getPort(),
+                        cli.getAmount(),
+                        cli.getJoinDelayMs(),
+                        cli.getBotNameFormat(),
+                        cli.getGameVersion(),
+                        cli.getAutoRegister()));
+    }
+
+    static void printHelp() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp(LambdaAttack.PROJECT_NAME, new CommandLineParser().options);
     }
 
     private void doParse(String[] args) throws ParseException {
@@ -130,6 +117,16 @@ public class CommandLineParser {
 
     private boolean getAutoRegister() {
         return cmd.hasOption(autoRegisterOption.getOpt());
+    }
+
+    static class ParseResult {
+        final boolean showHelp;
+        final com.github.games647.lambdaattack.common.Options options;
+
+        ParseResult(boolean showHelp, com.github.games647.lambdaattack.common.Options options) {
+            this.showHelp = showHelp;
+            this.options = options;
+        }
     }
 
     private static class TypedOption<T> {

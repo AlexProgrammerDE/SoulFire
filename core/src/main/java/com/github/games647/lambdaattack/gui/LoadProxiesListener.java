@@ -2,7 +2,9 @@ package com.github.games647.lambdaattack.gui;
 
 import com.github.games647.lambdaattack.LambdaAttack;
 import com.github.steveice10.packetlib.ProxyInfo;
+import lombok.RequiredArgsConstructor;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.InetSocketAddress;
@@ -12,22 +14,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-
+@RequiredArgsConstructor
 public class LoadProxiesListener implements ActionListener {
 
     private final LambdaAttack botManager;
-
     private final JFrame frame;
     private final JFileChooser fileChooser;
-
-    public LoadProxiesListener(LambdaAttack botManager, JFrame frame, JFileChooser fileChooser) {
-        this.botManager = botManager;
-
-        this.frame = frame;
-        this.fileChooser = fileChooser;
-    }
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {

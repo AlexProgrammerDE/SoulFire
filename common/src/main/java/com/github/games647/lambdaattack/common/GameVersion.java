@@ -1,4 +1,4 @@
-package com.github.games647.lambdaattack;
+package com.github.games647.lambdaattack.common;
 
 public enum GameVersion {
 
@@ -12,6 +12,12 @@ public enum GameVersion {
 
     VERSION_1_16("1.16.5");
 
+    private final String version;
+
+    GameVersion(String version) {
+        this.version = version;
+    }
+
     public static GameVersion findByName(String name) {
         for (GameVersion version : values()) {
             if (version.version.equals(name)) {
@@ -22,11 +28,6 @@ public enum GameVersion {
         return null;
     }
 
-    private final String version;
-
-    GameVersion(String version) {
-        this.version = version;
-    }
 
     public String getVersion() {
         return version;

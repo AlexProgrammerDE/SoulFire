@@ -1,11 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.github.games647</groupId>
         <artifactId>lambdaattack</artifactId>
-        <version>2.4.0</version>
+        <version>2.5.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -17,7 +17,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.2.4</version>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <relocations>
@@ -26,21 +26,6 @@
                             <shadedPattern>com.github.steveice10.protocol.v1_11</shadedPattern>
                         </relocation>
                     </relocations>
-
-                    <artifactSet>
-                        <includes>
-                            <include>com.github.Steveice10:MCProtocolLib</include>
-                        </includes>
-                    </artifactSet>
-
-                    <filters>
-                        <filter>
-                            <artifact>com.github.Steveice10:MCProtocolLib</artifact>
-                            <includes>
-                                <include>com/github/steveice10/mc/protocol/**</include>
-                            </includes>
-                        </filter>
-                    </filters>
                 </configuration>
                 <executions>
                     <execution>
@@ -61,11 +46,11 @@
             <artifactId>MCProtocolLib</artifactId>
             <version>1.11.2-1</version>
         </dependency>
-
         <dependency>
             <groupId>com.github.games647</groupId>
-            <artifactId>lambdaattack-version</artifactId>
-            <version>${project.version}</version>
+            <artifactId>lambdaattack-common</artifactId>
+            <version>2.5.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

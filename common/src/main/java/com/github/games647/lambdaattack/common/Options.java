@@ -1,4 +1,4 @@
-package com.github.games647.lambdaattack;
+package com.github.games647.lambdaattack.common;
 
 public class Options {
 

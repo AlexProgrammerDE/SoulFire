@@ -1,9 +1,10 @@
 package com.github.games647.lambdaattack;
 
 import com.github.games647.lambdaattack.gui.MainGui;
-import java.awt.GraphicsEnvironment;
-import java.util.logging.Level;
 import org.apache.commons.cli.ParseException;
+
+import java.awt.*;
+import java.util.logging.Level;
 
 public class Main {
 

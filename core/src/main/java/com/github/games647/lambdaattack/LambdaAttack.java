@@ -1,9 +1,12 @@
 package com.github.games647.lambdaattack;
 
-import com.github.games647.lambdaattack.bot.Bot;
+import com.github.games647.lambdaattack.common.GameVersion;
+import com.github.games647.lambdaattack.common.IPacketWrapper;
+import com.github.games647.lambdaattack.common.Options;
+import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.packetlib.ProxyInfo;
+import com.github.steveice10.packetlib.packet.PacketProtocol;
 
-import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -17,6 +20,12 @@ public class LambdaAttack {
 
     private static final Logger LOGGER = Logger.getLogger(PROJECT_NAME);
     private static final LambdaAttack instance = new LambdaAttack();
+    private final List<Bot> clients = new ArrayList<>();
+    private final ExecutorService threadPool = Executors.newCachedThreadPool();
+    private boolean running = false;
+
+    private List<ProxyInfo> proxies;
+    private List<String> names;
 
     public static Logger getLogger() {
         return LOGGER;
@@ -25,14 +34,6 @@ public class LambdaAttack {
     public static LambdaAttack getInstance() {
         return instance;
     }
-
-    private boolean running = false;
-
-    private List<ProxyInfo> proxies;
-    private List<String> names;
-
-    private final List<Bot> clients = new ArrayList<>();
-    private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     public void start(Options options) {
         running = true;
@@ -48,14 +49,14 @@ public class LambdaAttack {
                 username = names.get(i);
             }
 
-            UniversalProtocol account = authenticate(options.gameVersion, username, "");
+            IPacketWrapper account = authenticate(options.gameVersion, username, "");
 
             Bot bot;
             if (proxies != null) {
                 ProxyInfo proxy = proxies.get(i % proxies.size());
-                bot = new Bot(options, account, proxy);
+                bot = new Bot(options, account, proxy, LOGGER);
             } else {
-                bot = new Bot(options, account);
+                bot = new Bot(options, account, LOGGER);
             }
 
             this.clients.add(bot);
@@ -76,17 +77,14 @@ public class LambdaAttack {
         }
     }
 
-    public UniversalProtocol authenticate(GameVersion gameVersion, String username, String password) {
-        UniversalProtocol protocol;
+    public IPacketWrapper authenticate(GameVersion gameVersion, String username, String password) {
         if (!password.isEmpty()) {
             throw new UnsupportedOperationException("Not implemented");
-//            protocol = new MinecraftProtocol(username, password);
+//            return new MinecraftProtocol(username, password);
 //            LOGGER.info("Successfully authenticated user");
         } else {
-            protocol = UniversalFactory.authenticate(gameVersion, username);
+            return UniversalFactory.authenticate(gameVersion, username);
         }
-
-        return protocol;
     }
 
     public void setProxies(List<ProxyInfo> proxies) {
