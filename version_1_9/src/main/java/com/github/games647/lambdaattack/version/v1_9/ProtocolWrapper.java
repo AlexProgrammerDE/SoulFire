@@ -16,8 +16,8 @@ public class ProtocolWrapper extends MinecraftProtocol implements UniversalProto
         super(username);
     }
 
-    public ProtocolWrapper(String username, String password) throws RequestException {
-        super(username, password);
+    public ProtocolWrapper(GameProfile profile, String accessToken) throws RequestException {
+        super(profile, accessToken);
     }
 
     public ProtocolWrapper(String username, String using, boolean token) throws RequestException {

@@ -13,7 +13,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class LoadNamesListener implements ActionListener {
+public class LoadAccountsListener implements ActionListener {
     private final WireBot botManager;
     private final JFrame frame;
     private final JFileChooser fileChooser;
@@ -22,12 +22,12 @@ public class LoadNamesListener implements ActionListener {
     public void actionPerformed(ActionEvent actionEvent) {
         int returnVal = fileChooser.showOpenDialog(frame);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            Path proxyFile = fileChooser.getSelectedFile().toPath();
-            WireBot.getLogger().log(Level.INFO, "Opening: {0}.", proxyFile.getFileName());
+            Path accountFile = fileChooser.getSelectedFile().toPath();
+            WireBot.getLogger().log(Level.INFO, "Opening: {0}.", accountFile.getFileName());
 
             botManager.getThreadPool().submit(() -> {
                 try {
-                    List<String> names = Files.lines(proxyFile).distinct().collect(Collectors.toList());
+                    List<String> names = Files.lines(accountFile).distinct().collect(Collectors.toList());
 
                     WireBot.getLogger().log(Level.INFO, "Loaded {0} names", names.size());
                     botManager.setNames(names);

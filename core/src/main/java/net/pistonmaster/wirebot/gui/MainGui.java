@@ -89,7 +89,7 @@ public class MainGui {
         JButton loadNames = new JButton("Load Names");
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("", "txt"));
-        loadNames.addActionListener(new LoadNamesListener(botManager, frame, fileChooser));
+        loadNames.addActionListener(new LoadAccountsListener(botManager, frame, fileChooser));
 
         loadPanel.add(loadNames);
 
