@@ -129,6 +129,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.thealtening.api</groupId>
+            <artifactId>api</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>net.pistonmaster</groupId>
             <artifactId>wirebot-version-1-11</artifactId>
             <version>${project.version}</version>

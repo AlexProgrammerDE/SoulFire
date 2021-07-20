@@ -27,10 +27,10 @@ public class LoadAccountsListener implements ActionListener {
 
             botManager.getThreadPool().submit(() -> {
                 try {
-                    List<String> names = Files.lines(accountFile).distinct().collect(Collectors.toList());
+                    List<String> accounts = Files.lines(accountFile).distinct().collect(Collectors.toList());
 
-                    WireBot.getLogger().log(Level.INFO, "Loaded {0} names", names.size());
-                    botManager.setNames(names);
+                    WireBot.getLogger().log(Level.INFO, "Loaded {0} accounts", accounts.size());
+                    botManager.setNames(accounts);
                 } catch (Exception ex) {
                     WireBot.getLogger().log(Level.SEVERE, null, ex);
                 }

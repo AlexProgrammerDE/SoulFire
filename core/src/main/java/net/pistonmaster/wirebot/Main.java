@@ -1,6 +1,6 @@
 package net.pistonmaster.wirebot;
 
-import net.pistonmaster.wirebot.gui.MainGui;
+import net.pistonmaster.wirebot.gui.MainFrame;
 import org.apache.commons.cli.ParseException;
 
 import java.awt.*;
@@ -16,7 +16,7 @@ public class Main {
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
             runHeadless(args);
         } else {
-            new MainGui(WireBot.getInstance());
+            new MainFrame(WireBot.getInstance());
         }
     }
 
