@@ -1,5 +1,8 @@
 package net.pistonmaster.wirebot;
 
+import com.github.steveice10.mc.auth.exception.request.RequestException;
+import com.github.steveice10.mc.auth.service.SessionService;
+import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.packetlib.ProxyInfo;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -7,17 +10,19 @@ import lombok.Setter;
 import net.pistonmaster.wirebot.common.GameVersion;
 import net.pistonmaster.wirebot.common.IPacketWrapper;
 import net.pistonmaster.wirebot.common.Options;
+import net.pistonmaster.wirebot.common.Pair;
 
 import javax.swing.*;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class WireBot {
-
     public static final String PROJECT_NAME = "WireBot";
 
     private static final Logger LOGGER = Logger.getLogger(PROJECT_NAME);
@@ -45,17 +50,28 @@ public class WireBot {
         running = true;
 
         for (int i = 0; i < options.amount; i++) {
-            String username = String.format(options.botNameFormat, i);
-            if (names != null) {
+            Pair<String, String> userPassword;
+
+            if (names == null) {
+                userPassword = new Pair<>(String.format(options.botNameFormat, i), "");
+            } else {
                 if (names.size() <= i) {
-                    LOGGER.warning("Amount is higher than the name list size. Limitting amount size now...");
+                    LOGGER.warning("Amount is higher than the name list size. Limiting amount size now...");
                     break;
                 }
 
-                username = names.get(i);
+                String lines[] = names.get(i).split(":");
+
+                if (lines.length == 1) {
+                    userPassword = new Pair<>(lines[0], "");
+                } else if (lines.length == 2) {
+                    userPassword = new Pair<>(lines[0], lines[1]);
+                } else {
+                    userPassword = new Pair<>(String.format(options.botNameFormat, i), "");
+                }
             }
 
-            IPacketWrapper account = authenticate(options.gameVersion, username, "");
+            IPacketWrapper account = authenticate(options.gameVersion, userPassword.getLeft(), userPassword.getRight(), Proxy.NO_PROXY);
 
             Bot bot;
             if (proxies != null) {
@@ -64,6 +80,10 @@ public class WireBot {
             } else {
                 bot = new Bot(options, account, LOGGER);
             }
+
+            SessionService sessionService = new SessionService();
+            sessionService.setBaseUri(ServiceServer.MOJANG.getSession());
+            bot.getSession().setFlag(MinecraftConstants.SESSION_SERVICE_KEY, sessionService);
 
             this.clients.add(bot);
         }
@@ -83,13 +103,16 @@ public class WireBot {
         }
     }
 
-    public IPacketWrapper authenticate(GameVersion gameVersion, String username, String password) {
-        if (!password.isEmpty()) {
-            throw new UnsupportedOperationException("Not implemented");
-//            return new MinecraftProtocol(username, password);
-//            LOGGER.info("Successfully authenticated user");
-        } else {
+    public IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, Proxy proxy) {
+        if (password.isEmpty()) {
             return UniversalFactory.authenticate(gameVersion, username);
+        } else {
+            try {
+                return UniversalFactory.authenticate(gameVersion, username, password, proxy, ServiceServer.MOJANG);
+            } catch (RequestException e) {
+                LOGGER.log(Level.WARNING, "Failed to authenticate " + username + "!", e);
+                return null;
+            }
         }
     }
 

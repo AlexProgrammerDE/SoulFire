@@ -14,36 +14,25 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.logging.Level;
 
-public class MainGui {
-    @Getter
-    private final JFrame frame;
+public class AttackPanel extends JPanel {
     private final WireBot botManager;
     private final ShellSender shellSender = new ShellSender(WireBot.getLogger());
+    private final JFrame parent;
 
-    public MainGui(WireBot botManager) {
+    public AttackPanel(WireBot botManager, JFrame parent) {
+        super();
         this.botManager = botManager;
-
-        setLookAndFeel();
-
-        frame = new JFrame(WireBot.PROJECT_NAME);
-        this.frame.setResizable(true);
-        this.frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.parent = parent;
 
         JPanel leftPanel = setLogPane();
-        JPanel rightPanel = setTopPane();
+        JPanel rightPanel = setRightPanel();
 
-        frame.setLayout(new BorderLayout());
-        this.frame.add(leftPanel, BorderLayout.CENTER);
-        this.frame.add(rightPanel, BorderLayout.EAST);
-
-        this.frame.pack();
-
-        this.frame.setVisible(true);
-
-        WireBot.getLogger().info("Started program");
+        setLayout(new BorderLayout());
+        add(leftPanel, BorderLayout.CENTER);
+        add(rightPanel, BorderLayout.EAST);
     }
 
-    private JPanel setTopPane() {
+    private JPanel setRightPanel() {
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new GridLayout(0, 2));
 
@@ -89,16 +78,16 @@ public class MainGui {
         rightPanel.add(startStopPanel);
 
         JPanel loadPanel = new JPanel();
-        JButton loadNames = new JButton("Load Names");
+        JButton loadNames = new JButton("Load Accounts");
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("", "txt"));
-        loadNames.addActionListener(new LoadNamesListener(botManager, frame, fileChooser));
+        loadNames.addActionListener(new LoadAccountsListener(botManager, parent, fileChooser));
 
         loadPanel.add(loadNames);
 
         JButton loadProxies = new JButton("Load proxies");
 
-        loadProxies.addActionListener(new LoadProxiesListener(botManager, frame, fileChooser));
+        loadProxies.addActionListener(new LoadProxiesListener(botManager, parent, fileChooser));
 
         loadPanel.add(loadProxies);
 
@@ -127,6 +116,8 @@ public class MainGui {
 
         stopButton.addActionListener(action -> botManager.stop());
 
+        rightPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+
         return rightPanel;
     }
 
@@ -152,13 +143,5 @@ public class MainGui {
         leftPanel.add(commands, BorderLayout.SOUTH);
 
         return leftPanel;
-    }
-
-    private void setLookAndFeel() {
-        try {
-            UIManager.setLookAndFeel(new FlatDarculaLaf());
-        } catch (Exception ex) {
-            System.err.println("Failed to initialize LaF");
-        }
     }
 }
