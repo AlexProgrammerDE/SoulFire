@@ -1,6 +1,8 @@
 package net.pistonmaster.wirebot;
 
 import com.github.steveice10.mc.auth.exception.request.RequestException;
+import com.github.steveice10.mc.auth.service.SessionService;
+import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.packetlib.ProxyInfo;
 import net.pistonmaster.wirebot.common.GameVersion;
 import net.pistonmaster.wirebot.common.IPacketWrapper;
@@ -71,6 +73,10 @@ public class WireBot {
                 bot = new Bot(options, account, LOGGER);
             }
 
+            SessionService sessionService = new SessionService();
+            sessionService.setBaseUri(ServiceServer.MOJANG.getSession());
+            bot.getSession().setFlag(MinecraftConstants.SESSION_SERVICE_KEY, sessionService);
+
             this.clients.add(bot);
         }
 
@@ -94,7 +100,7 @@ public class WireBot {
             return UniversalFactory.authenticate(gameVersion, username);
         } else {
             try {
-                return UniversalFactory.authenticate(gameVersion, username, password, proxy, AuthServers.MOJANG);
+                return UniversalFactory.authenticate(gameVersion, username, password, proxy, ServiceServer.MOJANG);
             } catch (RequestException e) {
                 LOGGER.log(Level.WARNING, "Failed to authenticate " + username + "!", e);
                 return null;

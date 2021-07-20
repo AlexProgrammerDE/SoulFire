@@ -6,7 +6,6 @@ import com.github.steveice10.mc.auth.service.AuthenticationService;
 import net.pistonmaster.wirebot.common.GameVersion;
 import net.pistonmaster.wirebot.common.IPacketWrapper;
 
-import java.lang.reflect.Field;
 import java.net.Proxy;
 
 public class UniversalFactory {
@@ -31,22 +30,14 @@ public class UniversalFactory {
         }
     }
 
-    public static IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, AuthServers authServers) throws RequestException {
-        return authenticate(gameVersion, username, password, Proxy.NO_PROXY, authServers);
+    public static IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, ServiceServer serviceServer) throws RequestException {
+        return authenticate(gameVersion, username, password, Proxy.NO_PROXY, serviceServer);
     }
 
-    public static IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, Proxy proxy, AuthServers authServers) throws RequestException {
+    public static IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, Proxy proxy, ServiceServer serviceServer) throws RequestException {
         AuthenticationService authService = new AuthenticationService();
 
-        try {
-            Field uriField = authService.getClass().getSuperclass().getDeclaredField("baseUri");
-
-            uriField.setAccessible(true);
-
-            uriField.set(authService, authServers.getServer());
-        } catch (Exception e) {
-            throw new RuntimeException("Could not find baseUri field!", e);
-        }
+        authService.setBaseUri(serviceServer.getAuth());
 
         authService.setUsername(username);
         authService.setPassword(password);
