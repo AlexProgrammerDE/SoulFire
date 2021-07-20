@@ -2,6 +2,8 @@ package net.pistonmaster.wirebot;
 
 import net.pistonmaster.wirebot.gui.MainGui;
 import org.apache.commons.cli.ParseException;
+import org.pf4j.JarPluginManager;
+import org.pf4j.PluginManager;
 
 import java.awt.*;
 import java.util.logging.Level;
@@ -16,8 +18,19 @@ public class Main {
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
             runHeadless(args);
         } else {
-            new MainGui(WireBot.getInstance());
+            WireBot.getInstance().setWindow(new MainGui(WireBot.getInstance()).getFrame());
         }
+
+        initPlugins();
+    }
+
+    private static void initPlugins() {
+        // create the plugin manager
+        PluginManager pluginManager = new JarPluginManager(); // or "new ZipPluginManager() / new DefaultPluginManager()"
+
+        // start and load all plugins of application
+        pluginManager.loadPlugins();
+        pluginManager.startPlugins();
     }
 
     private static void runHeadless(String[] args) {

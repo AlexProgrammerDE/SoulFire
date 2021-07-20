@@ -1,10 +1,14 @@
 package net.pistonmaster.wirebot;
 
 import com.github.steveice10.packetlib.ProxyInfo;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import net.pistonmaster.wirebot.common.GameVersion;
 import net.pistonmaster.wirebot.common.IPacketWrapper;
 import net.pistonmaster.wirebot.common.Options;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -24,6 +28,10 @@ public class WireBot {
 
     private List<ProxyInfo> proxies;
     private List<String> names;
+
+    @Getter
+    @Setter(value = AccessLevel.PROTECTED)
+    private JFrame window;
 
     public static Logger getLogger() {
         return LOGGER;

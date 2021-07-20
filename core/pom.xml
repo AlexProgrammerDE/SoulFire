@@ -96,6 +96,7 @@
             <artifactId>commons-cli</artifactId>
             <version>1.4</version>
         </dependency>
+
         <dependency>
             <groupId>com.github.Steveice10</groupId>
             <artifactId>MCProtocolLib</artifactId>
@@ -127,6 +128,14 @@
             <artifactId>flatlaf-intellij-themes</artifactId>
             <version>1.4</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.pf4j</groupId>
+            <artifactId>pf4j</artifactId>
+            <version>3.6.0</version>
+        </dependency>
+
+
 
         <dependency>
             <groupId>net.pistonmaster</groupId>

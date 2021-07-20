@@ -1,6 +1,7 @@
 package net.pistonmaster.wirebot.gui;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
+import lombok.Getter;
 import net.pistonmaster.wirebot.WireBot;
 import net.pistonmaster.wirebot.common.GameVersion;
 import net.pistonmaster.wirebot.common.Options;
@@ -14,8 +15,10 @@ import java.util.Comparator;
 import java.util.logging.Level;
 
 public class MainGui {
+    @Getter
     private final JFrame frame;
     private final WireBot botManager;
+    private final ShellSender shellSender = new ShellSender(WireBot.getLogger());
 
     public MainGui(WireBot botManager) {
         this.botManager = botManager;
@@ -101,7 +104,7 @@ public class MainGui {
 
         rightPanel.add(loadPanel);
 
-        startButton.addActionListener((action) -> {
+        startButton.addActionListener(action -> {
             // collect the options on the gui thread
             // for thread-safety
             Options options = new Options(
@@ -140,6 +143,8 @@ public class MainGui {
         WireBot.getLogger().addHandler(new LogHandler(logArea));
 
         JTextField commands = new JTextField();
+
+        commands.addActionListener(shellSender);
         new GhostText(commands, "Type WireBot commands here...");
 
         leftPanel.setLayout(new BorderLayout());
