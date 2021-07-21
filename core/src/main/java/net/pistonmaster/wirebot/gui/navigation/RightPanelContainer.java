@@ -23,17 +23,21 @@ public class RightPanelContainer extends JPanel {
         panels.add(new SettingsPanel(wireBot));
         panels.add(new AddonPanel());
         panels.add(new AccountPanel(wireBot, parent));
-        panels.add(new ControlPanel());
+        panels.add(new ControlPanel(this, wireBot));
 
         setLayout(new CardLayout());
 
         NavigationPanel navigationPanel = new NavigationPanel(this);
         add(navigationPanel, NAVIGATION_MENU);
 
-        for (NavigationItem item : panels)  {
+        for (NavigationItem item : panels) {
             add(NavigationWrapper.createWrapper(this, item), item.getRightPanelContainerConstant());
         }
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    }
+
+    public <A> A getPanel(Class<A> aClass) {
+        return panels.stream().filter(aClass::isInstance).map(aClass::cast).findFirst().orElse(null);
     }
 }

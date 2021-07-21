@@ -1,8 +1,6 @@
 package net.pistonmaster.wirebot;
 
 import com.github.steveice10.mc.auth.exception.request.RequestException;
-import com.github.steveice10.mc.auth.service.SessionService;
-import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.packetlib.ProxyInfo;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -29,7 +27,11 @@ public class WireBot {
     private static final WireBot instance = new WireBot();
     private final List<Bot> clients = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
+    @Getter
     private boolean running = false;
+    @Getter
+    @Setter
+    private boolean paused = false;
 
     private List<ProxyInfo> proxies;
     private List<String> names;
@@ -81,14 +83,18 @@ public class WireBot {
                 bot = new Bot(options, account, LOGGER);
             }
 
-            SessionService sessionService = new SessionService();
-            sessionService.setBaseUri(ServiceServer.MOJANG.getSession());
-            bot.getSession().setFlag(MinecraftConstants.SESSION_SERVICE_KEY, sessionService);
-
             this.clients.add(bot);
         }
 
         for (Bot client : clients) {
+            while (paused) {
+                try {
+                    TimeUnit.MILLISECONDS.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+
             try {
                 TimeUnit.MILLISECONDS.sleep(options.joinDelayMs);
             } catch (InterruptedException ex) {

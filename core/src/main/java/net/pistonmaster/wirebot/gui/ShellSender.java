@@ -13,11 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
-import static com.mojang.brigadier.builder.RequiredArgumentBuilder.argument;
-
 @RequiredArgsConstructor
 public class ShellSender extends AbstractAction {
     @Getter
@@ -45,7 +40,7 @@ public class ShellSender extends AbstractAction {
         if (command.isEmpty())
             return;
 
-        ((JTextField)e.getSource()).setText(null);
+        ((JTextField) e.getSource()).setText(null);
 
         commandHistory.add(command);
         try {

@@ -6,7 +6,6 @@ import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
 
 import java.awt.*;
-import java.io.File;
 import java.util.logging.Level;
 
 public class Main {

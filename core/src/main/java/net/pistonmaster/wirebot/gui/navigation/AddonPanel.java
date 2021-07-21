@@ -1,6 +1,5 @@
 package net.pistonmaster.wirebot.gui.navigation;
 
-import javax.swing.*;
 import java.awt.*;
 
 public class AddonPanel extends NavigationItem {

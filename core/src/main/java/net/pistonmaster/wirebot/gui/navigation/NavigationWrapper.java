@@ -14,12 +14,14 @@ public class NavigationWrapper {
         JButton back = new JButton("Back");
 
         back.addActionListener(action -> {
-            ((CardLayout)container.getLayout()).show(container, RightPanelContainer.NAVIGATION_MENU);
+            ((CardLayout) container.getLayout()).show(container, RightPanelContainer.NAVIGATION_MENU);
         });
 
         topBar.add(back, BorderLayout.PAGE_END);
 
         topBar.setSize(new Dimension(topBar.getWidth(), 20));
+
+        topBar.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         panel.add(topBar, BorderLayout.NORTH);
 
@@ -27,4 +29,6 @@ public class NavigationWrapper {
 
         return panel;
     }
+
+
 }

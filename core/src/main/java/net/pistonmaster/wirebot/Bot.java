@@ -1,5 +1,7 @@
 package net.pistonmaster.wirebot;
 
+import com.github.steveice10.mc.auth.service.SessionService;
+import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.packetlib.Client;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
@@ -55,35 +57,40 @@ public class Bot implements IBot {
             client = new Client(host, port, (PacketProtocol) account, new TcpSessionFactory(proxyInfo));
         }
         this.session = client.getSession();
+
+        SessionService sessionService = new SessionService();
+        sessionService.setBaseUri(ServiceServer.MOJANG.getSession());
+        session.setFlag(MinecraftConstants.SESSION_SERVICE_KEY, sessionService);
+
         SessionEventBus bus = new SessionEventBus(options, logger, this);
 
         switch (options.gameVersion) {
             case VERSION_1_11:
-                client.getSession().addListener(new SessionListener1_11(bus));
+                session.addListener(new SessionListener1_11(bus));
                 break;
             case VERSION_1_12:
-                client.getSession().addListener(new SessionListener1_12(bus));
+                session.addListener(new SessionListener1_12(bus));
                 break;
             case VERSION_1_13:
-                client.getSession().addListener(new SessionListener1_13(bus));
+                session.addListener(new SessionListener1_13(bus));
                 break;
             case VERSION_1_14:
-                client.getSession().addListener(new SessionListener1_14(bus));
+                session.addListener(new SessionListener1_14(bus));
                 break;
             case VERSION_1_15:
-                client.getSession().addListener(new SessionListener1_15(bus));
+                session.addListener(new SessionListener1_15(bus));
                 break;
             case VERSION_1_16:
-                client.getSession().addListener(new SessionListener1_16(bus));
+                session.addListener(new SessionListener1_16(bus));
                 break;
             case VERSION_1_17:
-                client.getSession().addListener(new SessionListener1_17(bus));
+                session.addListener(new SessionListener1_17(bus));
                 break;
             default:
                 throw new IllegalStateException("Unknown session listener");
         }
 
-        client.getSession().connect();
+        session.connect();
     }
 
     public void sendMessage(String message) {

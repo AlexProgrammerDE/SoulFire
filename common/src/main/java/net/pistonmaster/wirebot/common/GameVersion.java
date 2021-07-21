@@ -36,13 +36,13 @@ public enum GameVersion {
         return null;
     }
 
-    public String getVersion() {
-        return version;
-    }
-
     public static GameVersion getNewest() {
         return Arrays.stream(GameVersion.values())
                 .sorted(Comparator.reverseOrder())
                 .collect(Collectors.toUnmodifiableList()).get(0);
+    }
+
+    public String getVersion() {
+        return version;
     }
 }
