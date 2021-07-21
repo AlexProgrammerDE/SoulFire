@@ -30,10 +30,6 @@ public class UniversalFactory {
         }
     }
 
-    public static IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, ServiceServer serviceServer) throws RequestException {
-        return authenticate(gameVersion, username, password, Proxy.NO_PROXY, serviceServer);
-    }
-
     public static IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, Proxy proxy, ServiceServer serviceServer) throws RequestException {
         AuthenticationService authService = new AuthenticationService();
 

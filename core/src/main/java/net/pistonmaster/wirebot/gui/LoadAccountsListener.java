@@ -30,7 +30,7 @@ public class LoadAccountsListener implements ActionListener {
                     List<String> accounts = Files.lines(accountFile).distinct().collect(Collectors.toList());
 
                     WireBot.getLogger().log(Level.INFO, "Loaded {0} accounts", accounts.size());
-                    botManager.setNames(accounts);
+                    botManager.setAccounts(accounts);
                 } catch (Exception ex) {
                     WireBot.getLogger().log(Level.SEVERE, null, ex);
                 }

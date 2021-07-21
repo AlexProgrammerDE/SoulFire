@@ -59,7 +59,7 @@ public class Bot implements IBot {
         this.session = client.getSession();
 
         SessionService sessionService = new SessionService();
-        sessionService.setBaseUri(ServiceServer.MOJANG.getSession());
+        sessionService.setBaseUri(WireBot.getInstance().getServiceServer().getSession());
         session.setFlag(MinecraftConstants.SESSION_SERVICE_KEY, sessionService);
 
         SessionEventBus bus = new SessionEventBus(options, logger, this);

@@ -34,11 +34,15 @@ public class WireBot {
     private boolean paused = false;
 
     private List<ProxyInfo> proxies;
-    private List<String> names;
+    private List<String> accounts;
 
     @Getter
     @Setter(value = AccessLevel.PROTECTED)
     private JFrame window;
+
+    @Getter
+    @Setter
+    private ServiceServer serviceServer = ServiceServer.MOJANG;
 
     public static Logger getLogger() {
         return LOGGER;
@@ -54,15 +58,15 @@ public class WireBot {
         for (int i = 0; i < options.amount; i++) {
             Pair<String, String> userPassword;
 
-            if (names == null) {
+            if (accounts == null) {
                 userPassword = new Pair<>(String.format(options.botNameFormat, i), "");
             } else {
-                if (names.size() <= i) {
+                if (accounts.size() <= i) {
                     LOGGER.warning("Amount is higher than the name list size. Limiting amount size now...");
                     break;
                 }
 
-                String lines[] = names.get(i).split(":");
+                String lines[] = accounts.get(i).split(":");
 
                 if (lines.length == 1) {
                     userPassword = new Pair<>(lines[0], "");
@@ -114,7 +118,7 @@ public class WireBot {
             return UniversalFactory.authenticate(gameVersion, username);
         } else {
             try {
-                return UniversalFactory.authenticate(gameVersion, username, password, proxy, ServiceServer.MOJANG);
+                return UniversalFactory.authenticate(gameVersion, username, password, proxy, serviceServer);
             } catch (RequestException e) {
                 LOGGER.log(Level.WARNING, "Failed to authenticate " + username + "!", e);
                 return null;
@@ -126,8 +130,8 @@ public class WireBot {
         this.proxies = proxies;
     }
 
-    public void setNames(List<String> names) {
-        this.names = names;
+    public void setAccounts(List<String> accounts) {
+        this.accounts = accounts;
     }
 
     public void stop() {
