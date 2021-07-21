@@ -3,10 +3,14 @@ package net.pistonmaster.wirebot.gui;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
@@ -16,8 +20,14 @@ import static com.mojang.brigadier.builder.RequiredArgumentBuilder.argument;
 
 @RequiredArgsConstructor
 public class ShellSender extends AbstractAction {
+    @Getter
     private final CommandDispatcher<ShellSender> dispatcher = new CommandDispatcher<>();
     private final Logger logger;
+    @Getter
+    private final List<String> commandHistory = new ArrayList<>();
+    @Getter
+    @Setter
+    private int pointer = -1;
 
     {
         dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("test").executes(c -> {
@@ -28,6 +38,8 @@ public class ShellSender extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        pointer = -1;
+
         String command = e.getActionCommand();
 
         if (command.isEmpty())
@@ -35,6 +47,7 @@ public class ShellSender extends AbstractAction {
 
         ((JTextField)e.getSource()).setText(null);
 
+        commandHistory.add(command);
         try {
             dispatcher.execute(command, this);
         } catch (CommandSyntaxException commandSyntaxException) {

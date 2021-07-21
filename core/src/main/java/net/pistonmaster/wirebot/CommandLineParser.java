@@ -41,7 +41,8 @@ public class CommandLineParser {
         nameFormatOption = new StringOption(new Option("n", "name", true, "The format for bot names. Requires exactly one integer placeholder '%d'. Defaults to 'Bot-%d'"), "Bot-%d");
         options.addOption(nameFormatOption.option);
 
-        versionOption = new StringOption(new Option("v", "version", true, "The Minecraft version of the server to connect to. Defaults to 1.15.2"), GameVersion.VERSION_1_15.getVersion());
+        GameVersion latestVer = GameVersion.getNewest();
+        versionOption = new StringOption(new Option("v", "version", true, "The Minecraft version of the server to connect to. Defaults to " + latestVer.getVersion()), latestVer.getVersion());
         options.addOption(versionOption.option);
 
         autoRegisterOption = new Option("r", "register", false, "Makes Bots run the /register and /login command after joining with username and password being " + WireBot.PROJECT_NAME);

@@ -8,7 +8,7 @@ import java.awt.*;
 
 public class MainFrame extends JFrame {
     public static final String AUTH_MENU = "AuthMenu";
-    public static final String ATTACK_MENU = "AttackMenu";
+    public static final String MAIN_MENU = "MainMenu";
     private final WireBot botManager;
 
     public MainFrame(WireBot botManager) {
@@ -20,7 +20,7 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         setLayout(new CardLayout());
-        add(new AttackPanel(botManager, this), ATTACK_MENU);
+        add(new MainPanel(botManager, this), MAIN_MENU);
         add(new AuthPanel(botManager, this), AUTH_MENU);
 
         pack();

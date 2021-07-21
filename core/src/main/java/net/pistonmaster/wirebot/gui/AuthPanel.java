@@ -17,8 +17,6 @@ public class AuthPanel extends JPanel {
 
         setLayout(new GridBagLayout());
         add(centerPanel());
-
-
     }
 
     private JPanel centerPanel() {

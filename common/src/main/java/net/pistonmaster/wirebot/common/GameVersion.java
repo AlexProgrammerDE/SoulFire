@@ -1,5 +1,9 @@
 package net.pistonmaster.wirebot.common;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+
 public enum GameVersion {
 
     VERSION_1_11("1.11"),
@@ -32,8 +36,13 @@ public enum GameVersion {
         return null;
     }
 
-
     public String getVersion() {
         return version;
+    }
+
+    public static GameVersion getNewest() {
+        return Arrays.stream(GameVersion.values())
+                .sorted(Comparator.reverseOrder())
+                .collect(Collectors.toUnmodifiableList()).get(0);
     }
 }

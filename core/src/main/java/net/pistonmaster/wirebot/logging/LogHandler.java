@@ -6,7 +6,6 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 public class LogHandler extends Handler {
-
     private final JTextArea logArea;
     private final Formatter formatter = new LogFormatter();
 

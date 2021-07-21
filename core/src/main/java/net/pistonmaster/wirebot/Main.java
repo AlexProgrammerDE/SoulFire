@@ -6,10 +6,10 @@ import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
 
 import java.awt.*;
+import java.io.File;
 import java.util.logging.Level;
 
 public class Main {
-
     public static void main(String[] args) {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             WireBot.getLogger().log(Level.SEVERE, throwable.getMessage(), throwable);
