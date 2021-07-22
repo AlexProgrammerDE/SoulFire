@@ -1,16 +1,13 @@
 package net.pistonmaster.wirebot;
 
-import com.github.steveice10.mc.auth.exception.request.RequestException;
-import com.github.steveice10.packetlib.ProxyInfo;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import net.pistonmaster.wirebot.common.GameVersion;
-import net.pistonmaster.wirebot.common.IPacketWrapper;
-import net.pistonmaster.wirebot.common.Options;
-import net.pistonmaster.wirebot.common.Pair;
+import net.pistonmaster.wirebot.common.*;
+import net.pistonmaster.wirebot.protocol.Bot;
 
 import javax.swing.*;
+import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +30,7 @@ public class WireBot {
     @Setter
     private boolean paused = false;
 
-    private List<ProxyInfo> proxies;
+    private List<InetSocketAddress> proxies;
     private List<String> accounts;
 
     @Getter
@@ -81,7 +78,7 @@ public class WireBot {
 
             Bot bot;
             if (proxies != null) {
-                ProxyInfo proxy = proxies.get(i % proxies.size());
+                InetSocketAddress proxy = proxies.get(i % proxies.size());
                 bot = new Bot(options, account, proxy, LOGGER);
             } else {
                 bot = new Bot(options, account, LOGGER);
@@ -119,14 +116,14 @@ public class WireBot {
         } else {
             try {
                 return UniversalFactory.authenticate(gameVersion, username, password, proxy, serviceServer);
-            } catch (RequestException e) {
+            } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to authenticate " + username + "!", e);
                 return null;
             }
         }
     }
 
-    public void setProxies(List<ProxyInfo> proxies) {
+    public void setProxies(List<InetSocketAddress> proxies) {
         this.proxies = proxies;
     }
 

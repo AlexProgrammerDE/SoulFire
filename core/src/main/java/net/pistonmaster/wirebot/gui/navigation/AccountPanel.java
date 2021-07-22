@@ -1,6 +1,6 @@
 package net.pistonmaster.wirebot.gui.navigation;
 
-import net.pistonmaster.wirebot.ServiceServer;
+import net.pistonmaster.wirebot.common.ServiceServer;
 import net.pistonmaster.wirebot.WireBot;
 import net.pistonmaster.wirebot.gui.LoadAccountsListener;
 import net.pistonmaster.wirebot.gui.LoadProxiesListener;

@@ -5,6 +5,7 @@ import com.github.steveice10.mc.auth.exception.request.RequestException;
 import com.github.steveice10.mc.auth.service.AuthenticationService;
 import net.pistonmaster.wirebot.common.GameVersion;
 import net.pistonmaster.wirebot.common.IPacketWrapper;
+import net.pistonmaster.wirebot.common.ServiceServer;
 
 import java.net.Proxy;
 
@@ -38,7 +39,8 @@ public class UniversalFactory {
         authService.setUsername(username);
         authService.setPassword(password);
         authService.setProxy(proxy);
-        authService.login();
+
+            authService.login();
 
         GameProfile profile = authService.getSelectedProfile();
         String accessToken = authService.getAccessToken();

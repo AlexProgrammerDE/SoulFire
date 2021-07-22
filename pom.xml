@@ -24,8 +24,8 @@
         <module>version_1_16</module>
         <module>version_1_17</module>
         <module>core</module>
-        <!--
         <module>protocol</module>
+        <!--
         <module>protocol-legacy</module>
         -->
     </modules>

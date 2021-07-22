@@ -1,7 +1,6 @@
-package net.pistonmaster.wirebot;
+package net.pistonmaster.wirebot.protocol;
 
 import com.github.steveice10.mc.auth.service.SessionService;
-import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.packetlib.Client;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
@@ -23,6 +22,7 @@ import net.pistonmaster.wirebot.version.v1_16.SessionListener1_16;
 import net.pistonmaster.wirebot.version.v1_17.ChatPacket1_17;
 import net.pistonmaster.wirebot.version.v1_17.SessionListener1_17;
 
+import java.net.InetSocketAddress;
 import java.util.logging.Logger;
 
 public class Bot implements IBot {
@@ -35,15 +35,17 @@ public class Bot implements IBot {
     private EntitiyLocation location;
     private float health = -1;
     private float food = -1;
+    private final ServiceServer serviceServer;
 
-    public Bot(Options options, IPacketWrapper account, Logger log) {
-        this(options, account, null, log);
+    public Bot(Options options, IPacketWrapper account, Logger log, ServiceServer serviceServer) {
+        this(options, account, null, log, serviceServer);
     }
 
-    public Bot(Options options, IPacketWrapper account, ProxyInfo proxyInfo, Logger log) {
+    public Bot(Options options, IPacketWrapper account, InetSocketAddress proxyInfo, Logger log, ServiceServer serviceServer) {
         this.options = options;
         this.account = account;
-        this.proxyInfo = proxyInfo;
+        this.proxyInfo = new ProxyInfo(ProxyInfo.Type.SOCKS5, proxyInfo);
+        this.serviceServer = serviceServer;
 
         this.logger = Logger.getLogger(account.getProfileName());
         this.logger.setParent(log);
@@ -59,8 +61,8 @@ public class Bot implements IBot {
         this.session = client.getSession();
 
         SessionService sessionService = new SessionService();
-        sessionService.setBaseUri(WireBot.getInstance().getServiceServer().getSession());
-        session.setFlag(MinecraftConstants.SESSION_SERVICE_KEY, sessionService);
+        sessionService.setBaseUri(serviceServer.getSession());
+        // session.setFlag(MinecraftConstants.SESSION_SERVICE_KEY, sessionService); // TODO
 
         SessionEventBus bus = new SessionEventBus(options, logger, this);
 

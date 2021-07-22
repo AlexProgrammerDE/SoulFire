@@ -1,4 +1,4 @@
-package net.pistonmaster.wirebot;
+package net.pistonmaster.wirebot.common;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

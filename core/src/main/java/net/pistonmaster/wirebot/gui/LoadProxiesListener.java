@@ -1,6 +1,5 @@
 package net.pistonmaster.wirebot.gui;
 
-import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.packetlib.ProxyInfo;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.wirebot.WireBot;
@@ -30,12 +29,11 @@ public class LoadProxiesListener implements ActionListener {
 
             botManager.getThreadPool().submit(() -> {
                 try {
-                    List<ProxyInfo> proxies = Files.lines(proxyFile).distinct().map((line) -> {
+                    List<InetSocketAddress> proxies = Files.lines(proxyFile).distinct().map((line) -> {
                         String host = line.split(":")[0];
                         int port = Integer.parseInt(line.split(":")[1]);
 
-                        InetSocketAddress address = new InetSocketAddress(host, port);
-                        return new ProxyInfo(ProxyInfo.Type.SOCKS5, address);
+                        return new InetSocketAddress(host, port);
                     }).collect(Collectors.toList());
 
                     WireBot.getLogger().log(Level.INFO, "Loaded {0} proxies", proxies.size());
