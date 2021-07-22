@@ -2,6 +2,7 @@ package net.pistonmaster.wirebot.gui.navigation;
 
 import lombok.Getter;
 import net.pistonmaster.wirebot.WireBot;
+import net.pistonmaster.wirebot.gui.AuthPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RightPanelContainer extends JPanel {
+    public static final String AUTH_MENU = "AuthMenu";
     public static final String NAVIGATION_MENU = "NavigationMenu";
     public static final String SETTINGS_MENU = "SettingsMenu";
     public static final String ADDON_MENU = "AddonMenu";
@@ -26,6 +28,9 @@ public class RightPanelContainer extends JPanel {
         panels.add(new ControlPanel(this, wireBot));
 
         setLayout(new CardLayout());
+
+        AuthPanel authPanel = new AuthPanel(this);
+        add(authPanel, AUTH_MENU);
 
         NavigationPanel navigationPanel = new NavigationPanel(this);
         add(navigationPanel, NAVIGATION_MENU);

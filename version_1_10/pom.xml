@@ -57,9 +57,9 @@
     <dependencies>
         <!--ProtocolLib for clients-->
         <dependency>
-            <groupId>com.github.Steveice10</groupId>
+            <groupId>com.github.wirefect</groupId>
             <artifactId>MCProtocolLib</artifactId>
-            <version>d4e40375e9</version>
+            <version>1.10-SNAPSHOT</version>
         </dependency>
 
         <dependency>

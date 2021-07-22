@@ -21,7 +21,6 @@ public class MainFrame extends JFrame {
 
         setLayout(new CardLayout());
         add(new MainPanel(botManager, this), MAIN_MENU);
-        add(new AuthPanel(botManager, this), AUTH_MENU);
 
         pack();
 
@@ -31,7 +30,6 @@ public class MainFrame extends JFrame {
 
         WireBot.getLogger().info("Started program");
     }
-
 
     private void setLookAndFeel() {
         try {

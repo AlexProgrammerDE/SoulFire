@@ -1,5 +1,6 @@
 package net.pistonmaster.wirebot.gui;
 
+import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.packetlib.ProxyInfo;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.wirebot.WireBot;

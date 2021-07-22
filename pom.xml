@@ -12,10 +12,10 @@
         <module>common</module>
         <!--
         <module>version_1_7</module>
+        -->
         <module>version_1_8</module>
         <module>version_1_9</module>
         <module>version_1_10</module>
-        -->
         <module>version_1_11</module>
         <module>version_1_12</module>
         <module>version_1_13</module>
