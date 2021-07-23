@@ -62,10 +62,5 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.github.Steveice10</groupId>
-            <artifactId>packetlib</artifactId>
-            <version>1.8</version>
-        </dependency>
     </dependencies>
 </project>

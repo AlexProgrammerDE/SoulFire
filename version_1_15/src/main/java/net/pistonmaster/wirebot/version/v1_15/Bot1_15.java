@@ -1,5 +1,6 @@
 package net.pistonmaster.wirebot.version.v1_15;
 
+import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.github.steveice10.packetlib.Client;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
@@ -55,7 +56,7 @@ public class Bot1_15 extends AbstractBot {
     }
 
     public void sendMessage(String message) {
-        session.send(new ChatPacket1_15(message));
+        session.send(new ClientChatPacket(message));
     }
 
     public boolean isOnline() {

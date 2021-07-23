@@ -1,10 +1,10 @@
 package net.pistonmaster.wirebot.version.v1_16;
 
-import com.github.steveice10.packetlib.Client;
+import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
-import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
+import com.github.steveice10.packetlib.tcp.TcpClientSession;
 import net.pistonmaster.wirebot.common.*;
 
 import java.net.InetSocketAddress;
@@ -35,13 +35,11 @@ public class Bot1_16 extends AbstractBot {
     }
 
     public void connect(String host, int port) {
-        Client client;
         if (proxyInfo == null) {
-            client = new Client(host, port, (PacketProtocol) account, new TcpSessionFactory());
+            session = new TcpClientSession(host, port, (PacketProtocol) account);
         } else {
-            client = new Client(host, port, (PacketProtocol) account, new TcpSessionFactory(proxyInfo));
+            session = new TcpClientSession(host, port, (PacketProtocol) account, proxyInfo);
         }
-        this.session = client.getSession();
 
         // SessionService sessionService = new SessionService();
         // sessionService.setBaseUri(serviceServer.getSession());
@@ -55,7 +53,7 @@ public class Bot1_16 extends AbstractBot {
     }
 
     public void sendMessage(String message) {
-        session.send(new ChatPacket1_16(message));
+        session.send(new ClientChatPacket(message));
     }
 
     public boolean isOnline() {
