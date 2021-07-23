@@ -22,7 +22,7 @@
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <relocations>
                         <relocation>
-                            <pattern>com.github.steveice10.mc.protocol</pattern>
+                            <pattern>com.github.steveice10</pattern>
                             <shadedPattern>com.github.steveice10.protocol.v1_17</shadedPattern>
                         </relocation>
                     </relocations>
@@ -66,7 +66,6 @@
             <groupId>com.github.Steveice10</groupId>
             <artifactId>packetlib</artifactId>
             <version>1.8</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

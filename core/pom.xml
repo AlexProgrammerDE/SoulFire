@@ -65,7 +65,6 @@
     </repositories>
 
     <dependencies>
-        <!--Protocol definitions for clients-->
         <dependency>
             <groupId>net.pistonmaster</groupId>
             <artifactId>wirebot-common</artifactId>

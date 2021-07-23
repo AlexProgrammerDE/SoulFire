@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.wirebot.common.*;
-import net.pistonmaster.wirebot.protocol.Bot;
+import net.pistonmaster.wirebot.protocol.BotFactory;
 import net.pistonmaster.wirebot.protocol_legacy.BotLegacy;
 
 import javax.swing.*;
@@ -23,7 +23,7 @@ public class WireBot {
 
     private static final Logger LOGGER = Logger.getLogger(PROJECT_NAME);
     private static final WireBot instance = new WireBot();
-    private final List<IBot> clients = new ArrayList<>();
+    private final List<AbstractBot> clients = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     @Getter
     private boolean running = false;
@@ -77,23 +77,23 @@ public class WireBot {
 
             IPacketWrapper account = authenticate(options.gameVersion, userPassword.getLeft(), userPassword.getRight(), Proxy.NO_PROXY);
 
-            IBot bot;
+            AbstractBot bot;
 
             switch (options.gameVersion) {
                 case VERSION_1_8, VERSION_1_9, VERSION_1_10:
                     if (proxies != null) {
                         InetSocketAddress proxy = proxies.get(i % proxies.size());
-                        bot = new BotLegacy(options, account, proxy, LOGGER, serviceServer);
+                        bot = new BotLegacy(options, account, proxy, LOGGER);
                     } else {
-                        bot = new BotLegacy(options, account, LOGGER, serviceServer);
+                        bot = new BotLegacy(options, account, LOGGER);
                     }
                     break;
                 case VERSION_1_11, VERSION_1_12, VERSION_1_13, VERSION_1_14, VERSION_1_15, VERSION_1_16, VERSION_1_17:
                     if (proxies != null) {
                         InetSocketAddress proxy = proxies.get(i % proxies.size());
-                        bot = new Bot(options, account, proxy, LOGGER, serviceServer);
+                        bot = new BotFactory().createBot(options, account, proxy, LOGGER, serviceServer);
                     } else {
-                        bot = new Bot(options, account, LOGGER, serviceServer);
+                        bot = new BotFactory().createBot(options, account, LOGGER, serviceServer);
                     }
                     break;
                 default:
@@ -103,7 +103,7 @@ public class WireBot {
             this.clients.add(bot);
         }
 
-        for (IBot client : clients) {
+        for (AbstractBot client : clients) {
             while (paused) {
                 try {
                     TimeUnit.MILLISECONDS.sleep(100);
@@ -149,7 +149,7 @@ public class WireBot {
 
     public void stop() {
         this.running = false;
-        clients.forEach(IBot::disconnect);
+        clients.forEach(AbstractBot::disconnect);
         clients.clear();
     }
 

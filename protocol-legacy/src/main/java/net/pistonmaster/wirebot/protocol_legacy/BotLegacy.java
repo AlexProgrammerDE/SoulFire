@@ -15,25 +15,20 @@ import org.spacehq.packetlib.tcp.TcpSessionFactory;
 import java.net.InetSocketAddress;
 import java.util.logging.Logger;
 
-public class BotLegacy implements IBot {
+public class BotLegacy extends AbstractBot {
     private final Options options;
     private final Logger logger;
     private final IPacketWrapper account;
 
     private Session session;
-    private EntitiyLocation location;
-    private float health = -1;
-    private float food = -1;
-    private final ServiceServer serviceServer;
 
-    public BotLegacy(Options options, IPacketWrapper account, Logger log, ServiceServer serviceServer) {
-        this(options, account, null, log, serviceServer);
+    public BotLegacy(Options options, IPacketWrapper account, Logger log) {
+        this(options, account, null, log);
     }
 
-    public BotLegacy(Options options, IPacketWrapper account, InetSocketAddress proxyInfo, Logger log, ServiceServer serviceServer) {
+    public BotLegacy(Options options, IPacketWrapper account, InetSocketAddress proxyInfo, Logger log) {
         this.options = options;
         this.account = account;
-        this.serviceServer = serviceServer;
         // TODO reverse implement proxy system
 
         this.logger = Logger.getLogger(account.getProfileName());
@@ -75,30 +70,6 @@ public class BotLegacy implements IBot {
 
     public Session getSession() {
         return session;
-    }
-
-    public EntitiyLocation getLocation() {
-        return location;
-    }
-
-    public void setLocation(EntitiyLocation location) {
-        this.location = location;
-    }
-
-    public double getHealth() {
-        return health;
-    }
-
-    public void setHealth(float health) {
-        this.health = health;
-    }
-
-    public float getFood() {
-        return food;
-    }
-
-    public void setFood(float food) {
-        this.food = food;
     }
 
     public Logger getLogger() {

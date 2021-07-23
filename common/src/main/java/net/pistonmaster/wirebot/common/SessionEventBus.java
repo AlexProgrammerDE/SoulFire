@@ -11,7 +11,7 @@ public class SessionEventBus {
 
     private final Options options;
     private final Logger log;
-    private final IBot bot;
+    private final AbstractBot bot;
 
     public void onChat(String message) {
         log.log(Level.INFO, "Received Message: {0}", message);
