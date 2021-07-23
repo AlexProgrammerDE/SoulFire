@@ -9,11 +9,62 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>protocol-legacy</artifactId>
+    <artifactId>wirebot-protocol-legacy</artifactId>
 
     <properties>
         <maven.compiler.source>15</maven.compiler.source>
         <maven.compiler.target>15</maven.compiler.target>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-version-1-8</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-version-1-9</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-version-1-10</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Steveice10</groupId>
+            <artifactId>PacketLib</artifactId>
+            <version>885d03759d</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Steveice10</groupId>
+            <artifactId>MCAuthLib</artifactId>
+            <version>4aecadde85</version>
+        </dependency>
+        <dependency>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-common</artifactId>
+            <version>2.5.0</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 </project>

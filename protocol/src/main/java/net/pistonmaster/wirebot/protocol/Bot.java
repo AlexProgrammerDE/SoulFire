@@ -67,29 +67,14 @@ public class Bot implements IBot {
         SessionEventBus bus = new SessionEventBus(options, logger, this);
 
         switch (options.gameVersion) {
-            case VERSION_1_11:
-                session.addListener(new SessionListener1_11(bus));
-                break;
-            case VERSION_1_12:
-                session.addListener(new SessionListener1_12(bus));
-                break;
-            case VERSION_1_13:
-                session.addListener(new SessionListener1_13(bus));
-                break;
-            case VERSION_1_14:
-                session.addListener(new SessionListener1_14(bus));
-                break;
-            case VERSION_1_15:
-                session.addListener(new SessionListener1_15(bus));
-                break;
-            case VERSION_1_16:
-                session.addListener(new SessionListener1_16(bus));
-                break;
-            case VERSION_1_17:
-                session.addListener(new SessionListener1_17(bus));
-                break;
-            default:
-                throw new IllegalStateException("Unknown session listener");
+            case VERSION_1_11 -> session.addListener(new SessionListener1_11(bus));
+            case VERSION_1_12 -> session.addListener(new SessionListener1_12(bus));
+            case VERSION_1_13 -> session.addListener(new SessionListener1_13(bus));
+            case VERSION_1_14 -> session.addListener(new SessionListener1_14(bus));
+            case VERSION_1_15 -> session.addListener(new SessionListener1_15(bus));
+            case VERSION_1_16 -> session.addListener(new SessionListener1_16(bus));
+            case VERSION_1_17 -> session.addListener(new SessionListener1_17(bus));
+            default -> throw new IllegalStateException("Unknown session listener");
         }
 
         session.connect();
@@ -97,29 +82,14 @@ public class Bot implements IBot {
 
     public void sendMessage(String message) {
         switch (options.gameVersion) {
-            case VERSION_1_11:
-                session.send(new ChatPacket1_11(message));
-                break;
-            case VERSION_1_12:
-                session.send(new ChatPacket1_12(message));
-                break;
-            case VERSION_1_13:
-                session.send(new ChatPacket1_13(message));
-                break;
-            case VERSION_1_14:
-                session.send(new ChatPacket1_14(message));
-                break;
-            case VERSION_1_15:
-                session.send(new ChatPacket1_15(message));
-                break;
-            case VERSION_1_16:
-                session.send(new ChatPacket1_16(message));
-                break;
-            case VERSION_1_17:
-                session.send(new ChatPacket1_17(message));
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid game version");
+            case VERSION_1_11 -> session.send(new ChatPacket1_11(message));
+            case VERSION_1_12 -> session.send(new ChatPacket1_12(message));
+            case VERSION_1_13 -> session.send(new ChatPacket1_13(message));
+            case VERSION_1_14 -> session.send(new ChatPacket1_14(message));
+            case VERSION_1_15 -> session.send(new ChatPacket1_15(message));
+            case VERSION_1_16 -> session.send(new ChatPacket1_16(message));
+            case VERSION_1_17 -> session.send(new ChatPacket1_17(message));
+            default -> throw new IllegalArgumentException("Invalid game version");
         }
     }
 

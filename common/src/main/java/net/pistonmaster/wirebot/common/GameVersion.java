@@ -6,7 +6,13 @@ import java.util.stream.Collectors;
 
 public enum GameVersion {
 
-    VERSION_1_11("1.11"),
+    VERSION_1_8("1.8.9"),
+
+    VERSION_1_9("1.9.4"),
+
+    VERSION_1_10("1.10.2"),
+
+    VERSION_1_11("1.11.2"),
 
     VERSION_1_12("1.12.2"),
 

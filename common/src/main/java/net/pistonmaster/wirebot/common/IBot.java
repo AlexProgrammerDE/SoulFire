@@ -8,4 +8,8 @@ public interface IBot {
     void setFood(float food);
 
     void sendMessage(String message);
+
+    void connect(String host, int port);
+
+    void disconnect();
 }

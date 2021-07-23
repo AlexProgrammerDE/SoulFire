@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.wirebot.common.*;
 import net.pistonmaster.wirebot.protocol.Bot;
+import net.pistonmaster.wirebot.protocol_legacy.BotLegacy;
 
 import javax.swing.*;
 import java.net.InetSocketAddress;
@@ -22,7 +23,7 @@ public class WireBot {
 
     private static final Logger LOGGER = Logger.getLogger(PROJECT_NAME);
     private static final WireBot instance = new WireBot();
-    private final List<Bot> clients = new ArrayList<>();
+    private final List<IBot> clients = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     @Getter
     private boolean running = false;
@@ -63,7 +64,7 @@ public class WireBot {
                     break;
                 }
 
-                String lines[] = accounts.get(i).split(":");
+                String[] lines = accounts.get(i).split(":");
 
                 if (lines.length == 1) {
                     userPassword = new Pair<>(lines[0], "");
@@ -76,18 +77,33 @@ public class WireBot {
 
             IPacketWrapper account = authenticate(options.gameVersion, userPassword.getLeft(), userPassword.getRight(), Proxy.NO_PROXY);
 
-            Bot bot;
-            if (proxies != null) {
-                InetSocketAddress proxy = proxies.get(i % proxies.size());
-                bot = new Bot(options, account, proxy, LOGGER);
-            } else {
-                bot = new Bot(options, account, LOGGER);
+            IBot bot;
+
+            switch (options.gameVersion) {
+                case VERSION_1_8, VERSION_1_9, VERSION_1_10:
+                    if (proxies != null) {
+                        InetSocketAddress proxy = proxies.get(i % proxies.size());
+                        bot = new BotLegacy(options, account, proxy, LOGGER, serviceServer);
+                    } else {
+                        bot = new BotLegacy(options, account, LOGGER, serviceServer);
+                    }
+                    break;
+                case VERSION_1_11, VERSION_1_12, VERSION_1_13, VERSION_1_14, VERSION_1_15, VERSION_1_16, VERSION_1_17:
+                    if (proxies != null) {
+                        InetSocketAddress proxy = proxies.get(i % proxies.size());
+                        bot = new Bot(options, account, proxy, LOGGER, serviceServer);
+                    } else {
+                        bot = new Bot(options, account, LOGGER, serviceServer);
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + options.gameVersion);
             }
 
             this.clients.add(bot);
         }
 
-        for (Bot client : clients) {
+        for (IBot client : clients) {
             while (paused) {
                 try {
                     TimeUnit.MILLISECONDS.sleep(100);
@@ -133,7 +149,7 @@ public class WireBot {
 
     public void stop() {
         this.running = false;
-        clients.forEach(Bot::disconnect);
+        clients.forEach(IBot::disconnect);
         clients.clear();
     }
 

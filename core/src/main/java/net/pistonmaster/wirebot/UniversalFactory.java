@@ -1,68 +1,35 @@
 package net.pistonmaster.wirebot;
 
-import com.github.steveice10.mc.auth.data.GameProfile;
-import com.github.steveice10.mc.auth.exception.request.RequestException;
-import com.github.steveice10.mc.auth.service.AuthenticationService;
 import net.pistonmaster.wirebot.common.GameVersion;
 import net.pistonmaster.wirebot.common.IPacketWrapper;
 import net.pistonmaster.wirebot.common.ServiceServer;
+import net.pistonmaster.wirebot.protocol.AuthFactory;
+import net.pistonmaster.wirebot.protocol_legacy.AuthFactoryLegacy;
 
 import java.net.Proxy;
 
 public class UniversalFactory {
     public static IPacketWrapper authenticate(GameVersion gameVersion, String username) {
-        switch (gameVersion) {
-            case VERSION_1_11:
-                return new net.pistonmaster.wirebot.version.v1_11.ProtocolWrapper(username);
-            case VERSION_1_12:
-                return new net.pistonmaster.wirebot.version.v1_12.ProtocolWrapper(username);
-            case VERSION_1_13:
-                return new net.pistonmaster.wirebot.version.v1_13.ProtocolWrapper(username);
-            case VERSION_1_14:
-                return new net.pistonmaster.wirebot.version.v1_14.ProtocolWrapper(username);
-            case VERSION_1_15:
-                return new net.pistonmaster.wirebot.version.v1_15.ProtocolWrapper(username);
-            case VERSION_1_16:
-                return new net.pistonmaster.wirebot.version.v1_16.ProtocolWrapper(username);
-            case VERSION_1_17:
-                return new net.pistonmaster.wirebot.version.v1_17.ProtocolWrapper(username);
-            default:
-                throw new IllegalArgumentException("Invalid game version");
-        }
+        return switch (gameVersion) {
+            case VERSION_1_8 -> new net.pistonmaster.wirebot.version.v1_8.ProtocolWrapper(username);
+            case VERSION_1_9 -> new net.pistonmaster.wirebot.version.v1_9.ProtocolWrapper(username);
+            case VERSION_1_10 -> new net.pistonmaster.wirebot.version.v1_10.ProtocolWrapper(username);
+            case VERSION_1_11 -> new net.pistonmaster.wirebot.version.v1_11.ProtocolWrapper(username);
+            case VERSION_1_12 -> new net.pistonmaster.wirebot.version.v1_12.ProtocolWrapper(username);
+            case VERSION_1_13 -> new net.pistonmaster.wirebot.version.v1_13.ProtocolWrapper(username);
+            case VERSION_1_14 -> new net.pistonmaster.wirebot.version.v1_14.ProtocolWrapper(username);
+            case VERSION_1_15 -> new net.pistonmaster.wirebot.version.v1_15.ProtocolWrapper(username);
+            case VERSION_1_16 -> new net.pistonmaster.wirebot.version.v1_16.ProtocolWrapper(username);
+            case VERSION_1_17 -> new net.pistonmaster.wirebot.version.v1_17.ProtocolWrapper(username);
+            default -> throw new IllegalArgumentException("Invalid game version");
+        };
     }
 
-    public static IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, Proxy proxy, ServiceServer serviceServer) throws RequestException {
-        AuthenticationService authService = new AuthenticationService();
-
-        authService.setBaseUri(serviceServer.getAuth());
-
-        authService.setUsername(username);
-        authService.setPassword(password);
-        authService.setProxy(proxy);
-
-            authService.login();
-
-        GameProfile profile = authService.getSelectedProfile();
-        String accessToken = authService.getAccessToken();
-        String clientToken = authService.getClientToken();
-
-        switch (gameVersion) {
-            case VERSION_1_11:
-                return new net.pistonmaster.wirebot.version.v1_11.ProtocolWrapper(profile, accessToken);
-            case VERSION_1_12:
-                return new net.pistonmaster.wirebot.version.v1_12.ProtocolWrapper(profile, accessToken);
-            case VERSION_1_13:
-                return new net.pistonmaster.wirebot.version.v1_13.ProtocolWrapper(profile, clientToken, accessToken);
-            case VERSION_1_14:
-                return new net.pistonmaster.wirebot.version.v1_14.ProtocolWrapper(profile, clientToken, accessToken);
-            case VERSION_1_15:
-                return new net.pistonmaster.wirebot.version.v1_15.ProtocolWrapper(profile, clientToken, accessToken);
-            case VERSION_1_16:
-                return new net.pistonmaster.wirebot.version.v1_16.ProtocolWrapper(profile, accessToken);
-            case VERSION_1_17:
-                return new net.pistonmaster.wirebot.version.v1_17.ProtocolWrapper(profile, accessToken);
-            default:
-                throw new IllegalArgumentException("Invalid game version");
-        }
+    public static IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, Proxy proxy, ServiceServer serviceServer) throws Exception {
+        return switch (gameVersion) {
+            case VERSION_1_8, VERSION_1_9, VERSION_1_10 -> AuthFactoryLegacy.authenticate(gameVersion, username, password, proxy, serviceServer);
+            case VERSION_1_11, VERSION_1_12, VERSION_1_13, VERSION_1_14, VERSION_1_15, VERSION_1_16, VERSION_1_17 -> AuthFactory.authenticate(gameVersion, username, password, proxy, serviceServer);
+            default -> throw new IllegalArgumentException("Invalid game version");
+        };
     }
 }

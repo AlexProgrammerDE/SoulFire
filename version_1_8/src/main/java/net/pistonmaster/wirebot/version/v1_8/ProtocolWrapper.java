@@ -12,7 +12,7 @@ public class ProtocolWrapper extends MinecraftProtocol implements IPacketWrapper
         super(username);
     }
 
-    public ProtocolWrapper(GameProfile profile, String accessToken) throws RequestException {
+    public ProtocolWrapper(GameProfile profile, String accessToken) {
         super(profile, accessToken);
     }
 
