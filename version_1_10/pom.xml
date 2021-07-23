@@ -34,6 +34,17 @@
                             <shadedPattern>org.spacehq.mc.protocol.v1_10.shade.gson</shadedPattern>
                         </relocation>
                     </relocations>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>**/*.java</exclude>
+                                <exclude>**/*.SF</exclude>
+                                <exclude>**/*.DSA</exclude>
+                                <exclude>META-INF/MANIFEST.MF</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
                 </configuration>
                 <executions>
                     <execution>
@@ -48,17 +59,16 @@
     </build>
 
     <dependencies>
-        <!--ProtocolLib for clients-->
         <dependency>
             <groupId>com.github.wirefect</groupId>
             <artifactId>MCProtocolLib</artifactId>
             <version>1.10-07cbe00fde-1</version>
         </dependency>
-
         <dependency>
             <groupId>net.pistonmaster</groupId>
             <artifactId>wirebot-common</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
