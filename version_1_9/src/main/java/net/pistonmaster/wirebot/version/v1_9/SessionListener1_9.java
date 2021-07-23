@@ -40,6 +40,6 @@ public class SessionListener1_9 extends SessionAdapter {
 
     @Override
     public void disconnected(DisconnectedEvent event) {
-        bus.onDisconnect(event.getReason());
+        bus.onDisconnect(event.getReason(), event.getCause());
     }
 }

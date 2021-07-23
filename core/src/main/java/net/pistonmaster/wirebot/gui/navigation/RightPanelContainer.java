@@ -16,6 +16,7 @@ public class RightPanelContainer extends JPanel {
     public static final String ADDON_MENU = "AddonMenu";
     public static final String ACCOUNT_MENU = "AccountMenu";
     public static final String CONTROL_MENU = "ControlMenu";
+    public static final String DEV_MENU = "DeveloperMenu";
     @Getter
     private final List<NavigationItem> panels = new ArrayList<>();
 
@@ -26,14 +27,15 @@ public class RightPanelContainer extends JPanel {
         panels.add(new AddonPanel());
         panels.add(new AccountPanel(wireBot, parent));
         panels.add(new ControlPanel(this, wireBot));
+        panels.add(new DeveloperPanel());
 
         setLayout(new CardLayout());
 
-        AuthPanel authPanel = new AuthPanel(this);
-        add(authPanel, AUTH_MENU);
-
         NavigationPanel navigationPanel = new NavigationPanel(this);
         add(navigationPanel, NAVIGATION_MENU);
+
+        AuthPanel authPanel = new AuthPanel(this);
+        add(authPanel, AUTH_MENU);
 
         for (NavigationItem item : panels) {
             add(NavigationWrapper.createWrapper(this, item), item.getRightPanelContainerConstant());

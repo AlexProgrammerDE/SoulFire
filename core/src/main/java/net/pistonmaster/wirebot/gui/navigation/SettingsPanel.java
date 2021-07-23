@@ -76,6 +76,7 @@ public class SettingsPanel extends NavigationItem {
                 (int) delay.getValue(),
                 nameFormat.getText(),
                 GameVersion.findByName((String) versionBox.getSelectedItem()),
-                autoRegister.isSelected());
+                autoRegister.isSelected(),
+                DeveloperPanel.debug.isSelected());
     }
 }

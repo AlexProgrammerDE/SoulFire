@@ -20,6 +20,7 @@ public class CommandLineParser {
 
     private final Option autoRegisterOption;
     private final Option helpOption;
+    private final Option debugOption;
 
     private CommandLine cmd;
 
@@ -50,6 +51,9 @@ public class CommandLineParser {
 
         helpOption = new Option(null, "help", false, "Displays this help page");
         options.addOption(helpOption);
+
+        debugOption = new Option(null, "debug", false, "Logs additional information useful for debugging");
+        options.addOption(debugOption);
     }
 
     static ParseResult parse(String[] args) throws ParseException {
@@ -65,7 +69,8 @@ public class CommandLineParser {
                         cli.getJoinDelayMs(),
                         cli.getBotNameFormat(),
                         cli.getGameVersion(),
-                        cli.getAutoRegister()));
+                        cli.getAutoRegister(),
+                        cli.getDebug()));
     }
 
     static void printHelp() {
@@ -118,6 +123,10 @@ public class CommandLineParser {
 
     private boolean getAutoRegister() {
         return cmd.hasOption(autoRegisterOption.getOpt());
+    }
+
+    private boolean getDebug() {
+        return cmd.hasOption(debugOption.getOpt());
     }
 
     static class ParseResult {

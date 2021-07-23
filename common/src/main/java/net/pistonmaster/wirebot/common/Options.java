@@ -11,4 +11,5 @@ public class Options {
     public final String botNameFormat;
     public final GameVersion gameVersion;
     public final boolean autoRegister;
+    public final boolean debug;
 }

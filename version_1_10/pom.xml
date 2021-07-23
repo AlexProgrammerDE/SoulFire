@@ -25,22 +25,15 @@
                             <pattern>org.spacehq.mc.protocol</pattern>
                             <shadedPattern>org.spacehq.mc.protocol.v1_10</shadedPattern>
                         </relocation>
+                        <relocation>
+                            <pattern>io.netty</pattern>
+                            <shadedPattern>org.spacehq.mc.protocol.v1_10.shade.netty</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.google.gson</pattern>
+                            <shadedPattern>org.spacehq.mc.protocol.v1_10.shade.gson</shadedPattern>
+                        </relocation>
                     </relocations>
-
-                    <artifactSet>
-                        <includes>
-                            <include>org.spacehq:mcprotocollib</include>
-                        </includes>
-                    </artifactSet>
-
-                    <filters>
-                        <filter>
-                            <artifact>org.spacehq:mcprotocollib</artifact>
-                            <includes>
-                                <include>org/spacehq/mc/protocol/**</include>
-                            </includes>
-                        </filter>
-                    </filters>
                 </configuration>
                 <executions>
                     <execution>
@@ -59,7 +52,7 @@
         <dependency>
             <groupId>com.github.wirefect</groupId>
             <artifactId>MCProtocolLib</artifactId>
-            <version>1.10-SNAPSHOT</version>
+            <version>1.10-07cbe00fde-1</version>
         </dependency>
 
         <dependency>
