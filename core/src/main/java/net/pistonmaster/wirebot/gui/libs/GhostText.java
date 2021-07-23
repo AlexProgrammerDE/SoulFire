@@ -1,4 +1,4 @@
-package net.pistonmaster.wirebot.gui;
+package net.pistonmaster.wirebot.gui.libs;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -16,7 +16,7 @@ public class GhostText implements FocusListener, DocumentListener, PropertyChang
     private Color ghostColor;
     private Color foregroundColor;
 
-    protected GhostText(final JTextField textfield, String ghostText) {
+    public GhostText(final JTextField textfield, String ghostText) {
         super();
         this.textfield = textfield;
         this.ghostText = ghostText;

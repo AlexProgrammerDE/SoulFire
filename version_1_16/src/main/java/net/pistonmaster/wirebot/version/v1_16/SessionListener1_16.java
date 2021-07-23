@@ -7,8 +7,11 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.Serv
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.github.steveice10.packetlib.event.session.PacketReceivedEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.pistonmaster.wirebot.common.SessionEventBus;
 
 @RequiredArgsConstructor
@@ -21,7 +24,7 @@ public class SessionListener1_16 extends SessionAdapter {
             ServerChatPacket chatPacket = receiveEvent.getPacket();
             // Message API was replaced in version 1.16
             Component message = chatPacket.getMessage();
-            bus.onChat(message.toString());
+            bus.onChat(PlainTextComponentSerializer.plainText().serialize(message));
         } else if (receiveEvent.getPacket() instanceof ServerPlayerPositionRotationPacket) {
             ServerPlayerPositionRotationPacket posPacket = receiveEvent.getPacket();
 

@@ -1,6 +1,8 @@
 package net.pistonmaster.wirebot.gui;
 
 import net.pistonmaster.wirebot.WireBot;
+import net.pistonmaster.wirebot.gui.libs.GhostText;
+import net.pistonmaster.wirebot.gui.libs.SmartScroller;
 import net.pistonmaster.wirebot.gui.navigation.RightPanelContainer;
 import net.pistonmaster.wirebot.logging.LogHandler;
 
@@ -39,6 +41,8 @@ public class MainPanel extends JPanel {
         logArea.setEditable(false);
 
         logPane.setViewportView(logArea);
+
+        new SmartScroller(logPane);
 
         WireBot.getLogger().addHandler(new LogHandler(logArea));
 

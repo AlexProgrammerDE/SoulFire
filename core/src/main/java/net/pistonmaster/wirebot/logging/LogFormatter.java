@@ -24,4 +24,13 @@ public class LogFormatter extends Formatter {
         builder.append("\n");
         return builder.toString();
     }
+
+    @Override
+    public String formatMessage(LogRecord record) {
+        String simpleFormattedMessage = super.formatMessage(record);
+
+        simpleFormattedMessage = ChatColor.stripColor(simpleFormattedMessage);
+
+        return simpleFormattedMessage;
+    }
 }
