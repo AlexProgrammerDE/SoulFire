@@ -1,6 +1,7 @@
 package net.pistonmaster.wirebot.gui.navigation;
 
 import lombok.Getter;
+import net.pistonmaster.wirebot.WireBot;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,5 +27,7 @@ public class NavigationPanel extends JPanel {
 
             add(button);
         }
+
+        add(new ControlPanel(container, WireBot.getInstance()));
     }
 }

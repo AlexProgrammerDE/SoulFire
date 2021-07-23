@@ -4,11 +4,11 @@ import net.pistonmaster.wirebot.WireBot;
 import net.pistonmaster.wirebot.common.Options;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.logging.Level;
 
-public class ControlPanel extends NavigationItem {
+public class ControlPanel extends JPanel {
     public ControlPanel(RightPanelContainer container, WireBot wireBot) {
-        JPanel startStopPanel = new JPanel();
         JButton startButton = new JButton("Start");
         JButton pauseButton = new JButton("Pause");
         JButton stopButton = new JButton("Stop");
@@ -17,9 +17,10 @@ public class ControlPanel extends NavigationItem {
         pauseButton.setEnabled(false);
         stopButton.setEnabled(false);
 
-        startStopPanel.add(startButton);
-        startStopPanel.add(pauseButton);
-        startStopPanel.add(stopButton);
+        setLayout(new GridLayout(3, 3));
+        add(startButton);
+        add(pauseButton);
+        add(stopButton);
 
         startButton.addActionListener(action -> {
             Options options = container.getPanel(SettingsPanel.class).generateOptions();
@@ -61,17 +62,5 @@ public class ControlPanel extends NavigationItem {
 
             wireBot.stop();
         });
-
-        add(startStopPanel);
-    }
-
-    @Override
-    public String getNavigationName() {
-        return "Controls";
-    }
-
-    @Override
-    public String getRightPanelContainerConstant() {
-        return RightPanelContainer.CONTROL_MENU;
     }
 }

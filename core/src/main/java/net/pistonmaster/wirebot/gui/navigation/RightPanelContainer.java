@@ -15,7 +15,6 @@ public class RightPanelContainer extends JPanel {
     public static final String SETTINGS_MENU = "SettingsMenu";
     public static final String ADDON_MENU = "AddonMenu";
     public static final String ACCOUNT_MENU = "AccountMenu";
-    public static final String CONTROL_MENU = "ControlMenu";
     public static final String DEV_MENU = "DeveloperMenu";
     @Getter
     private final List<NavigationItem> panels = new ArrayList<>();
@@ -26,7 +25,6 @@ public class RightPanelContainer extends JPanel {
         panels.add(new SettingsPanel(wireBot));
         panels.add(new AddonPanel());
         panels.add(new AccountPanel(wireBot, parent));
-        panels.add(new ControlPanel(this, wireBot));
         panels.add(new DeveloperPanel());
 
         setLayout(new CardLayout());
