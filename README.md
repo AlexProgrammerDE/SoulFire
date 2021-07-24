@@ -12,17 +12,15 @@ Next level minecraft server botting software.
 * Configurable target
 * Configurable name format or name list
 * LogPanel to see errors directly
-* Test with Spigot, Paper
+* Test with Spigot, Paper, Purpur, Bungeecord, Velocity
 * Disconnects gracefully after the end
 * Automatically registers for cracked servers
 * Supports SOCKS proxies
-* Free
-* Open source
 
 ## Requirements
 
 * Java 15
-* Minecraft 1.11+ server
+* Minecraft 1.8+ server
 
 ## Building
 
@@ -37,7 +35,7 @@ Next level minecraft server botting software.
 
 ## Images
 
-![Gui](https://i.imgur.com/6U00ZwA.png)
+![Gui](./images/img.png)
 
 ## Command Line Usage
 
