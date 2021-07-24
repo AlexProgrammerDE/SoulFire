@@ -51,4 +51,9 @@ public enum GameVersion {
     public String getVersion() {
         return version;
     }
+
+    @Override
+    public String toString() {
+        return getVersion();
+    }
 }
