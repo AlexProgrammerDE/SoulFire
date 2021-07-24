@@ -11,10 +11,13 @@ import javax.swing.*;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,6 +56,10 @@ public class WireBot {
     public void start(Options options) {
         running = true;
 
+        List<InetSocketAddress> proxyCache = new ArrayList<>(proxies);
+
+        Map<InetSocketAddress, AtomicInteger> proxyUseMap = new HashMap<>();
+
         for (int i = 0; i < options.amount; i++) {
             Pair<String, String> userPassword;
 
@@ -77,27 +84,52 @@ public class WireBot {
 
             IPacketWrapper account = authenticate(options.gameVersion, userPassword.getLeft(), userPassword.getRight(), Proxy.NO_PROXY);
 
-            AbstractBot bot;
+            AbstractBot bot = null;
 
             switch (options.gameVersion) {
                 case VERSION_1_8, VERSION_1_9, VERSION_1_10:
-                    if (proxies != null) {
-                        InetSocketAddress proxy = proxies.get(i % proxies.size());
-                        bot = new BotLegacy(options, account, proxy, LOGGER);
-                    } else {
-                        bot = new BotLegacy(options, account, LOGGER);
-                    }
+                    bot = new BotLegacy(options, account, LOGGER);
                     break;
                 case VERSION_1_11, VERSION_1_12, VERSION_1_13, VERSION_1_14, VERSION_1_15, VERSION_1_16, VERSION_1_17:
                     if (proxies != null) {
-                        InetSocketAddress proxy = proxies.get(i % proxies.size());
-                        bot = new BotFactory().createBot(options, account, proxy, LOGGER, serviceServer);
+                        InetSocketAddress proxy;
+
+                        if (options.accountsPreProxy <= 0) {
+                            proxy = proxyCache.get(i % proxyCache.size());
+                        } else {
+                            if (proxyUseMap.size() == proxies.size() && isFull(proxyUseMap, options.accountsPreProxy)) {
+                                LOGGER.warning("All proxies in use now! Limiting amount size now...");
+                                break;
+                            }
+
+                            proxy = proxyCache.get(i % proxyCache.size());
+
+                            proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
+
+                            AtomicInteger proxyUse = proxyUseMap.get(proxy);
+
+                            while (proxyUse.get() >= options.accountsPreProxy) {
+                                proxy = proxyCache.get(i % proxyCache.size());
+
+                                proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
+
+                                proxyUse = proxyUseMap.get(proxy);
+                            }
+
+                            proxyUseMap.get(proxy).incrementAndGet();
+                        }
+
+                        bot = new BotFactory().createBot(options, account, proxy, LOGGER, serviceServer, options.proxyType);
                     } else {
                         bot = new BotFactory().createBot(options, account, LOGGER, serviceServer);
                     }
                     break;
                 default:
                     throw new IllegalStateException("Unexpected value: " + options.gameVersion);
+            }
+
+            if (bot == null) {
+                continue;
             }
 
             this.clients.add(bot);
@@ -155,5 +187,15 @@ public class WireBot {
 
     public ExecutorService getThreadPool() {
         return threadPool;
+    }
+
+    private boolean isFull(Map<InetSocketAddress, AtomicInteger> map, int limit) {
+        for (Map.Entry<InetSocketAddress, AtomicInteger> entry : map.entrySet()) {
+            if (entry.getValue().get() < limit) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

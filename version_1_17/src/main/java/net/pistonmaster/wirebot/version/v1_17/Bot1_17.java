@@ -19,13 +19,13 @@ public class Bot1_17 extends AbstractBot {
     private Session session;
     private final ServiceServer serviceServer;
 
-    public Bot1_17(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer) {
+    public Bot1_17(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType) {
         this.options = options;
         this.account = account;
         if (address == null) {
             this.proxyInfo = null;
         } else {
-            this.proxyInfo = new ProxyInfo(ProxyInfo.Type.SOCKS5, address);
+            this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address);
         }
 
         this.serviceServer = serviceServer;

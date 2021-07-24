@@ -20,13 +20,13 @@ public class Bot1_14 extends AbstractBot {
     private Session session;
     private final ServiceServer serviceServer;
 
-    public Bot1_14(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer) {
+    public Bot1_14(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType) {
         this.options = options;
         this.account = account;
         if (address == null) {
             this.proxyInfo = null;
         } else {
-            this.proxyInfo = new Proxy(Proxy.Type.SOCKS, address);
+            this.proxyInfo = new Proxy(convertType(proxyType), address);
         }
 
         this.serviceServer = serviceServer;
@@ -79,5 +79,12 @@ public class Bot1_14 extends AbstractBot {
         if (session != null) {
             session.disconnect("Disconnect");
         }
+    }
+
+    public Proxy.Type convertType(ProxyType type) {
+        return switch (type) {
+            case HTTP -> Proxy.Type.HTTP;
+            case SOCKS4, SOCKS5 -> Proxy.Type.SOCKS;
+        };
     }
 }

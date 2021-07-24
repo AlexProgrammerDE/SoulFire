@@ -3,6 +3,7 @@ package net.pistonmaster.wirebot.gui.navigation;
 import net.pistonmaster.wirebot.WireBot;
 import net.pistonmaster.wirebot.common.GameVersion;
 import net.pistonmaster.wirebot.common.Options;
+import net.pistonmaster.wirebot.common.ProxyType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +17,7 @@ public class SettingsPanel extends NavigationItem {
     private final JCheckBox autoRegister;
     private final JSpinner amount;
     private final JTextField nameFormat;
-    private final JComboBox<String> versionBox;
+    private final JComboBox<GameVersion> versionBox;
 
     public SettingsPanel(WireBot botManager) {
         super();
@@ -52,7 +53,6 @@ public class SettingsPanel extends NavigationItem {
         versionBox = new JComboBox<>();
         Arrays.stream(GameVersion.values())
                 .sorted(Comparator.reverseOrder())
-                .map(GameVersion::getVersion)
                 .forEach(versionBox::addItem);
 
         add(versionBox);
@@ -75,8 +75,10 @@ public class SettingsPanel extends NavigationItem {
                 (int) amount.getValue(),
                 (int) delay.getValue(),
                 nameFormat.getText(),
-                GameVersion.findByName((String) versionBox.getSelectedItem()),
+                (GameVersion) versionBox.getSelectedItem(),
                 autoRegister.isSelected(),
-                DeveloperPanel.debug.isSelected());
+                DeveloperPanel.debug.isSelected(),
+                (ProxyType) AccountPanel.proxyTypeCombo.getSelectedItem(),
+                (Integer) AccountPanel.accPerProxy.getValue());
     }
 }

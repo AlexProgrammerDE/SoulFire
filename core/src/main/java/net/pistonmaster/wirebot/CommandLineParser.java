@@ -1,6 +1,7 @@
 package net.pistonmaster.wirebot;
 
 import net.pistonmaster.wirebot.common.GameVersion;
+import net.pistonmaster.wirebot.common.ProxyType;
 import org.apache.commons.cli.*;
 
 import java.util.Arrays;
@@ -13,10 +14,13 @@ public class CommandLineParser {
     private final StringOption hostOption;
     private final IntOption portOption;
     private final StringOption versionOption;
+    private final StringOption proxyOption;
 
     private final IntOption amountOption;
     private final IntOption joinDelayOption;
     private final StringOption nameFormatOption;
+
+    private final IntOption accountsPerProxyOption;
 
     private final Option autoRegisterOption;
     private final Option helpOption;
@@ -54,6 +58,12 @@ public class CommandLineParser {
 
         debugOption = new Option(null, "debug", false, "Logs additional information useful for debugging");
         options.addOption(debugOption);
+
+        proxyOption = new StringOption(new Option(null, "proxytype", true, "The proxies type. Defaults to " + ProxyType.SOCKS5.name()), ProxyType.SOCKS5.name());
+        options.addOption(proxyOption.option);
+
+        accountsPerProxyOption = new IntOption(new Option(null, "accountsperproxy", true, "How many accounts can be on a single proxy. Defaults to -1"), -1);
+        options.addOption(accountsPerProxyOption.option);
     }
 
     static ParseResult parse(String[] args) throws ParseException {
@@ -70,7 +80,9 @@ public class CommandLineParser {
                         cli.getBotNameFormat(),
                         cli.getGameVersion(),
                         cli.getAutoRegister(),
-                        cli.getDebug()));
+                        cli.getDebug(),
+                        cli.getProxyType(),
+                        cli.getAccountsPerProxy()));
     }
 
     static void printHelp() {
@@ -127,6 +139,24 @@ public class CommandLineParser {
 
     private boolean getDebug() {
         return cmd.hasOption(debugOption.getOpt());
+    }
+
+    private ProxyType getProxyType() throws ParseException {
+        String value = versionOption.get(cmd);
+        ProxyType gameVersion = ProxyType.findByName(value);
+
+        if (gameVersion == null) {
+            throw new ParseException(String.format("Unsupported Minecraft version: %s.%nSupported versions are: %s", value,
+                    Arrays.stream(ProxyType.values())
+                            .map(ProxyType::name)
+                            .collect(Collectors.joining(", "))));
+        }
+
+        return gameVersion;
+    }
+
+    private int getAccountsPerProxy() throws ParseException {
+        return accountsPerProxyOption.get(cmd);
     }
 
     static class ParseResult {

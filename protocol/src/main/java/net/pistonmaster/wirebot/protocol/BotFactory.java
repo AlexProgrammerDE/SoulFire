@@ -1,9 +1,6 @@
 package net.pistonmaster.wirebot.protocol;
 
-import net.pistonmaster.wirebot.common.AbstractBot;
-import net.pistonmaster.wirebot.common.IPacketWrapper;
-import net.pistonmaster.wirebot.common.Options;
-import net.pistonmaster.wirebot.common.ServiceServer;
+import net.pistonmaster.wirebot.common.*;
 import net.pistonmaster.wirebot.version.v1_11.Bot1_11;
 import net.pistonmaster.wirebot.version.v1_12.Bot1_12;
 import net.pistonmaster.wirebot.version.v1_13.Bot1_13;
@@ -17,21 +14,21 @@ import java.util.logging.Logger;
 
 public class BotFactory {
     public AbstractBot createBot(Options options, IPacketWrapper account, Logger log, ServiceServer serviceServer) {
-        return createBot(options, account, null, log, serviceServer);
+        return createBot(options, account, null, log, serviceServer, null);
     }
 
-    public AbstractBot createBot(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer) {
+    public AbstractBot createBot(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType) {
         Logger botLogger = Logger.getLogger(account.getProfileName());
         botLogger.setParent(log);
 
         return switch (options.gameVersion) {
-            case VERSION_1_11 -> new Bot1_11(options, account, address, log, serviceServer);
-            case VERSION_1_12 -> new Bot1_12(options, account, address, log, serviceServer);
-            case VERSION_1_13 -> new Bot1_13(options, account, address, log, serviceServer);
-            case VERSION_1_14 -> new Bot1_14(options, account, address, log, serviceServer);
-            case VERSION_1_15 -> new Bot1_15(options, account, address, log, serviceServer);
-            case VERSION_1_16 -> new Bot1_16(options, account, address, log, serviceServer);
-            case VERSION_1_17 -> new Bot1_17(options, account, address, log, serviceServer);
+            case VERSION_1_11 -> new Bot1_11(options, account, address, log, serviceServer, proxyType);
+            case VERSION_1_12 -> new Bot1_12(options, account, address, log, serviceServer, proxyType);
+            case VERSION_1_13 -> new Bot1_13(options, account, address, log, serviceServer, proxyType);
+            case VERSION_1_14 -> new Bot1_14(options, account, address, log, serviceServer, proxyType);
+            case VERSION_1_15 -> new Bot1_15(options, account, address, log, serviceServer, proxyType);
+            case VERSION_1_16 -> new Bot1_16(options, account, address, log, serviceServer, proxyType);
+            case VERSION_1_17 -> new Bot1_17(options, account, address, log, serviceServer, proxyType);
             default -> throw new IllegalStateException("Unexpected value: " + options.gameVersion);
         };
     }

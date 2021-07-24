@@ -12,4 +12,6 @@ public class Options {
     public final GameVersion gameVersion;
     public final boolean autoRegister;
     public final boolean debug;
+    public final ProxyType proxyType;
+    public final int accountsPreProxy;
 }
