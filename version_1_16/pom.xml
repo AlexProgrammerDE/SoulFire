@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.pistonmaster</groupId>
         <artifactId>wirebot</artifactId>
-        <version>2.5.0</version>
+        <version>0.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>net.pistonmaster</groupId>
             <artifactId>wirebot-common</artifactId>
-            <version>2.5.0</version>
+            <version>0.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
