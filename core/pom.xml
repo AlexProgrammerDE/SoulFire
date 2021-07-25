@@ -34,7 +34,6 @@
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <minimizeJar>true</minimizeJar>
-
                     <filters>
                         <filter>
                             <artifact>com.formdev:flatlaf</artifact>
