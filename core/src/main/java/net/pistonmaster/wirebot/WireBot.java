@@ -56,7 +56,7 @@ public class WireBot {
     public void start(Options options) {
         running = true;
 
-        List<InetSocketAddress> proxyCache = new ArrayList<>(proxies);
+        List<InetSocketAddress> proxyCache = proxies == null ? null : new ArrayList<>(proxies);
 
         Map<InetSocketAddress, AtomicInteger> proxyUseMap = new HashMap<>();
 
@@ -83,6 +83,11 @@ public class WireBot {
             }
 
             IPacketWrapper account = authenticate(options.gameVersion, userPassword.getLeft(), userPassword.getRight(), Proxy.NO_PROXY);
+
+            if (account == null) {
+                LOGGER.warning("The account " + userPassword.getLeft() + " failed to authenticate! (skipping it) Check above logs for further information.");
+                continue;
+            }
 
             AbstractBot bot = null;
 
@@ -165,7 +170,7 @@ public class WireBot {
             try {
                 return UniversalFactory.authenticate(gameVersion, username, password, proxy, serviceServer);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to authenticate " + username + "!", e);
+                LOGGER.log(Level.WARNING, "Failed to authenticate " + username + "! (" + e.getMessage() + ")", e);
                 return null;
             }
         }

@@ -29,7 +29,7 @@
     </modules>
 
     <name>WireBot</name>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <description>Stress tester for minecraft servers</description>
     <url>https://github.com/games647/WireBot</url>
 

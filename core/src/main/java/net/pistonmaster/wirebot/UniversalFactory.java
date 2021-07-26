@@ -21,7 +21,6 @@ public class UniversalFactory {
             case VERSION_1_15 -> new net.pistonmaster.wirebot.version.v1_15.ProtocolWrapper(username);
             case VERSION_1_16 -> new net.pistonmaster.wirebot.version.v1_16.ProtocolWrapper(username);
             case VERSION_1_17 -> new net.pistonmaster.wirebot.version.v1_17.ProtocolWrapper(username);
-            default -> throw new IllegalArgumentException("Invalid game version");
         };
     }
 
@@ -29,7 +28,6 @@ public class UniversalFactory {
         return switch (gameVersion) {
             case VERSION_1_8, VERSION_1_9, VERSION_1_10 -> AuthFactoryLegacy.authenticate(gameVersion, username, password, proxy, serviceServer);
             case VERSION_1_11, VERSION_1_12, VERSION_1_13, VERSION_1_14, VERSION_1_15, VERSION_1_16, VERSION_1_17 -> AuthFactory.authenticate(gameVersion, username, password, proxy, serviceServer);
-            default -> throw new IllegalArgumentException("Invalid game version");
         };
     }
 }
