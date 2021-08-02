@@ -51,14 +51,16 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.github.Steveice10</groupId>
-            <artifactId>PacketLib</artifactId>
-            <version>885d03759d</version>
+            <groupId>com.github.steveice10</groupId>
+            <artifactId>packetlib</artifactId>
+            <version>1.2</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.Steveice10</groupId>
-            <artifactId>MCAuthLib</artifactId>
-            <version>4aecadde85</version>
+            <groupId>com.github.steveice10</groupId>
+            <artifactId>mcauthlib</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>net.pistonmaster</groupId>

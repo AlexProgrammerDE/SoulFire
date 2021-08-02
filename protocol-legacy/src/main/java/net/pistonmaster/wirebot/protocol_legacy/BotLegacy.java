@@ -1,5 +1,9 @@
 package net.pistonmaster.wirebot.protocol_legacy;
 
+import com.github.steveice10.packetlib.Client;
+import com.github.steveice10.packetlib.Session;
+import com.github.steveice10.packetlib.packet.PacketProtocol;
+import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 import net.pistonmaster.wirebot.common.*;
 import net.pistonmaster.wirebot.version.v1_10.ChatPacket1_10;
 import net.pistonmaster.wirebot.version.v1_10.SessionListener1_10;
@@ -7,10 +11,6 @@ import net.pistonmaster.wirebot.version.v1_8.ChatPacket1_8;
 import net.pistonmaster.wirebot.version.v1_8.SessionListener1_8;
 import net.pistonmaster.wirebot.version.v1_9.ChatPacket1_9;
 import net.pistonmaster.wirebot.version.v1_9.SessionListener1_9;
-import org.spacehq.packetlib.Client;
-import org.spacehq.packetlib.Session;
-import org.spacehq.packetlib.packet.PacketProtocol;
-import org.spacehq.packetlib.tcp.TcpSessionFactory;
 
 import java.net.InetSocketAddress;
 import java.util.logging.Logger;

@@ -1,15 +1,15 @@
 package net.pistonmaster.wirebot.version.v1_8;
 
+import com.github.steveice10.mc.protocol.data.message.Message;
+import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerUpdateHealthPacket;
+import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
+import com.github.steveice10.packetlib.event.session.PacketReceivedEvent;
+import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.wirebot.common.SessionEventBus;
-import org.spacehq.mc.protocol.data.message.Message;
-import org.spacehq.mc.protocol.packet.ingame.server.ServerChatPacket;
-import org.spacehq.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
-import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
-import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerUpdateHealthPacket;
-import org.spacehq.packetlib.event.session.DisconnectedEvent;
-import org.spacehq.packetlib.event.session.PacketReceivedEvent;
-import org.spacehq.packetlib.event.session.SessionAdapter;
 
 @RequiredArgsConstructor
 public class SessionListener1_8 extends SessionAdapter {

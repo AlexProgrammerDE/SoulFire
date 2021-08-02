@@ -62,9 +62,8 @@
         <dependency>
             <groupId>com.github.wirefect</groupId>
             <artifactId>MCProtocolLib</artifactId>
-            <version>1.8-8d0bbbe20c-1</version>
+            <version>1.8-3afe3850da-1</version>
         </dependency>
-
         <dependency>
             <groupId>net.pistonmaster</groupId>
             <artifactId>wirebot-common</artifactId>

@@ -9,7 +9,6 @@ public class AddonPanel extends NavigationItem {
         setLayout(new GridLayout(5, 6, 5, 5));
     }
 
-
     @Override
     public String getNavigationName() {
         return "Addons";

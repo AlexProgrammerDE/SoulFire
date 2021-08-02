@@ -62,7 +62,7 @@
         <dependency>
             <groupId>com.github.wirefect</groupId>
             <artifactId>MCProtocolLib</artifactId>
-            <version>1.9-071c193128-1</version>
+            <version>1.9-f844b7d7a6-1</version>
         </dependency>
         <dependency>
             <groupId>net.pistonmaster</groupId>

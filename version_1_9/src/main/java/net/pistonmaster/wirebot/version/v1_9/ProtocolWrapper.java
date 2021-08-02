@@ -1,11 +1,11 @@
 package net.pistonmaster.wirebot.version.v1_9;
 
-import net.pistonmaster.wirebot.common.IPacketWrapper;
-import org.spacehq.mc.auth.data.GameProfile;
-import org.spacehq.mc.auth.exception.request.RequestException;
-import org.spacehq.mc.protocol.MinecraftProtocol;
-
 import java.net.Proxy;
+
+import com.github.steveice10.mc.auth.data.GameProfile;
+import com.github.steveice10.mc.auth.exception.request.RequestException;
+import com.github.steveice10.mc.protocol.MinecraftProtocol;
+import net.pistonmaster.wirebot.common.IPacketWrapper;
 
 public class ProtocolWrapper extends MinecraftProtocol implements IPacketWrapper {
     public ProtocolWrapper(String username) {

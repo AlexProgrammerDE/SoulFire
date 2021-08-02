@@ -1,11 +1,10 @@
 package net.pistonmaster.wirebot.protocol_legacy;
 
+import com.github.steveice10.mc.auth.data.GameProfile;
+import com.github.steveice10.mc.auth.service.AuthenticationService;
 import net.pistonmaster.wirebot.common.GameVersion;
 import net.pistonmaster.wirebot.common.IPacketWrapper;
 import net.pistonmaster.wirebot.common.ServiceServer;
-import org.spacehq.mc.auth.data.GameProfile;
-import org.spacehq.mc.auth.exception.request.RequestException;
-import org.spacehq.mc.auth.service.AuthenticationService;
 
 import java.net.Proxy;
 

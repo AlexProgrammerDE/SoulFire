@@ -51,7 +51,6 @@
     </build>
 
     <dependencies>
-        <!--ProtocolLib for clients-->
         <dependency>
             <groupId>com.github.Steveice10</groupId>
             <artifactId>MCProtocolLib</artifactId>
