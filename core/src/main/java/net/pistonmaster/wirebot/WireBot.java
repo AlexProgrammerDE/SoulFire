@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.wirebot.common.*;
 import net.pistonmaster.wirebot.protocol.BotFactory;
-import net.pistonmaster.wirebot.protocol_legacy.BotLegacy;
 
 import javax.swing.*;
 import java.net.InetSocketAddress;
@@ -89,48 +88,38 @@ public class WireBot {
                 continue;
             }
 
-            AbstractBot bot = null;
+            AbstractBot bot;
+            if (proxies != null) {
+                InetSocketAddress proxy;
 
-            switch (options.gameVersion) {
-                case VERSION_1_8, VERSION_1_9, VERSION_1_10:
-                    bot = new BotLegacy(options, account, LOGGER);
-                    break;
-                case VERSION_1_11, VERSION_1_12, VERSION_1_13, VERSION_1_14, VERSION_1_15, VERSION_1_16, VERSION_1_17:
-                    if (proxies != null) {
-                        InetSocketAddress proxy;
-
-                        if (options.accountsPreProxy <= 0) {
-                            proxy = proxyCache.get(i % proxyCache.size());
-                        } else {
-                            if (proxyUseMap.size() == proxies.size() && isFull(proxyUseMap, options.accountsPreProxy)) {
-                                LOGGER.warning("All proxies in use now! Limiting amount size now...");
-                                break;
-                            }
-
-                            proxy = proxyCache.get(i % proxyCache.size());
-
-                            proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
-
-                            AtomicInteger proxyUse = proxyUseMap.get(proxy);
-
-                            while (proxyUse.get() >= options.accountsPreProxy) {
-                                proxy = proxyCache.get(i % proxyCache.size());
-
-                                proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
-
-                                proxyUse = proxyUseMap.get(proxy);
-                            }
-
-                            proxyUseMap.get(proxy).incrementAndGet();
-                        }
-
-                        bot = new BotFactory().createBot(options, account, proxy, LOGGER, serviceServer, options.proxyType);
-                    } else {
-                        bot = new BotFactory().createBot(options, account, LOGGER, serviceServer);
+                if (options.accountsPreProxy <= 0) {
+                    proxy = proxyCache.get(i % proxyCache.size());
+                } else {
+                    if (proxyUseMap.size() == proxies.size() && isFull(proxyUseMap, options.accountsPreProxy)) {
+                        LOGGER.warning("All proxies in use now! Limiting amount size now...");
+                        break;
                     }
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + options.gameVersion);
+
+                    proxy = proxyCache.get(i % proxyCache.size());
+
+                    proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
+
+                    AtomicInteger proxyUse = proxyUseMap.get(proxy);
+
+                    while (proxyUse.get() >= options.accountsPreProxy) {
+                        proxy = proxyCache.get(i % proxyCache.size());
+
+                        proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
+
+                        proxyUse = proxyUseMap.get(proxy);
+                    }
+
+                    proxyUseMap.get(proxy).incrementAndGet();
+                }
+
+                bot = new BotFactory().createBot(options, account, proxy, LOGGER, serviceServer, options.proxyType);
+            } else {
+                bot = new BotFactory().createBot(options, account, LOGGER, serviceServer);
             }
 
             if (bot == null) {
