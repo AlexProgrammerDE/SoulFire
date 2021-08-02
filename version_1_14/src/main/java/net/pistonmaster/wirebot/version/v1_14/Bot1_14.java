@@ -16,9 +16,8 @@ public class Bot1_14 extends AbstractBot {
     private final Proxy proxyInfo;
     private final Logger logger;
     private final IPacketWrapper account;
-
-    private Session session;
     private final ServiceServer serviceServer;
+    private Session session;
 
     public Bot1_14(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType) {
         this.options = options;

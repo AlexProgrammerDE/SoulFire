@@ -36,7 +36,7 @@ public class SessionEventBus {
 
     public void onDisconnect(String reason, Throwable cause) {
         log.log(Level.INFO, "Disconnected: {0}", reason);
-        if (options.debug)  {
+        if (options.debug) {
             log.log(Level.WARNING, "Bot disconnected with cause: ", cause);
         }
     }

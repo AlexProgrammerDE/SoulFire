@@ -1,19 +1,19 @@
 package net.pistonmaster.wirebot.logging;
 
 import com.google.common.base.Preconditions;
-import java.awt.Color;
+import lombok.Getter;
+
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import lombok.Getter;
 
 /**
  * Simplistic enumeration of all supported color values for chat.
  */
-public final class ChatColor
-{
+public final class ChatColor {
 
     /**
      * The special character which prefixes all chat colour codes. Use this if
@@ -24,7 +24,95 @@ public final class ChatColor
     /**
      * Pattern to remove all colour codes.
      */
-    public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile( "(?i)" + String.valueOf( COLOR_CHAR ) + "[0-9A-FK-ORX]" );
+    public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf(COLOR_CHAR) + "[0-9A-FK-ORX]");
+    /**
+     * Represents black.
+     */
+    public static final ChatColor BLACK = new ChatColor('0', "black", new Color(0x000000));
+    /**
+     * Represents dark blue.
+     */
+    public static final ChatColor DARK_BLUE = new ChatColor('1', "dark_blue", new Color(0x0000AA));
+    /**
+     * Represents dark green.
+     */
+    public static final ChatColor DARK_GREEN = new ChatColor('2', "dark_green", new Color(0x00AA00));
+    /**
+     * Represents dark blue (aqua).
+     */
+    public static final ChatColor DARK_AQUA = new ChatColor('3', "dark_aqua", new Color(0x00AAAA));
+    /**
+     * Represents dark red.
+     */
+    public static final ChatColor DARK_RED = new ChatColor('4', "dark_red", new Color(0xAA0000));
+    /**
+     * Represents dark purple.
+     */
+    public static final ChatColor DARK_PURPLE = new ChatColor('5', "dark_purple", new Color(0xAA00AA));
+    /**
+     * Represents gold.
+     */
+    public static final ChatColor GOLD = new ChatColor('6', "gold", new Color(0xFFAA00));
+    /**
+     * Represents gray.
+     */
+    public static final ChatColor GRAY = new ChatColor('7', "gray", new Color(0xAAAAAA));
+    /**
+     * Represents dark gray.
+     */
+    public static final ChatColor DARK_GRAY = new ChatColor('8', "dark_gray", new Color(0x555555));
+    /**
+     * Represents blue.
+     */
+    public static final ChatColor BLUE = new ChatColor('9', "blue", new Color(0x5555FF));
+    /**
+     * Represents green.
+     */
+    public static final ChatColor GREEN = new ChatColor('a', "green", new Color(0x55FF55));
+    /**
+     * Represents aqua.
+     */
+    public static final ChatColor AQUA = new ChatColor('b', "aqua", new Color(0x55FFFF));
+    /**
+     * Represents red.
+     */
+    public static final ChatColor RED = new ChatColor('c', "red", new Color(0xFF5555));
+    /**
+     * Represents light purple.
+     */
+    public static final ChatColor LIGHT_PURPLE = new ChatColor('d', "light_purple", new Color(0xFF55FF));
+    /**
+     * Represents yellow.
+     */
+    public static final ChatColor YELLOW = new ChatColor('e', "yellow", new Color(0xFFFF55));
+    /**
+     * Represents white.
+     */
+    public static final ChatColor WHITE = new ChatColor('f', "white", new Color(0xFFFFFF));
+    /**
+     * Represents magical characters that change around randomly.
+     */
+    public static final ChatColor MAGIC = new ChatColor('k', "obfuscated");
+    /**
+     * Makes the text bold.
+     */
+    public static final ChatColor BOLD = new ChatColor('l', "bold");
+    /**
+     * Makes a line appear through the text.
+     */
+    public static final ChatColor STRIKETHROUGH = new ChatColor('m', "strikethrough");
+    /**
+     * Makes the text appear underlined.
+     */
+    public static final ChatColor UNDERLINE = new ChatColor('n', "underline");
+    /**
+     * Makes the text italic.
+     */
+    public static final ChatColor ITALIC = new ChatColor('o', "italic");
+    /**
+     * Resets all previous chat colors or formats.
+     */
+    public static final ChatColor RESET = new ChatColor('r', "reset");
     /**
      * Colour instances keyed by their active character.
      */
@@ -33,94 +121,6 @@ public final class ChatColor
      * Colour instances keyed by their name.
      */
     private static final Map<String, ChatColor> BY_NAME = new HashMap<String, ChatColor>();
-    /**
-     * Represents black.
-     */
-    public static final ChatColor BLACK = new ChatColor( '0', "black", new Color( 0x000000 ) );
-    /**
-     * Represents dark blue.
-     */
-    public static final ChatColor DARK_BLUE = new ChatColor( '1', "dark_blue", new Color( 0x0000AA ) );
-    /**
-     * Represents dark green.
-     */
-    public static final ChatColor DARK_GREEN = new ChatColor( '2', "dark_green", new Color( 0x00AA00 ) );
-    /**
-     * Represents dark blue (aqua).
-     */
-    public static final ChatColor DARK_AQUA = new ChatColor( '3', "dark_aqua", new Color( 0x00AAAA ) );
-    /**
-     * Represents dark red.
-     */
-    public static final ChatColor DARK_RED = new ChatColor( '4', "dark_red", new Color( 0xAA0000 ) );
-    /**
-     * Represents dark purple.
-     */
-    public static final ChatColor DARK_PURPLE = new ChatColor( '5', "dark_purple", new Color( 0xAA00AA ) );
-    /**
-     * Represents gold.
-     */
-    public static final ChatColor GOLD = new ChatColor( '6', "gold", new Color( 0xFFAA00 ) );
-    /**
-     * Represents gray.
-     */
-    public static final ChatColor GRAY = new ChatColor( '7', "gray", new Color( 0xAAAAAA ) );
-    /**
-     * Represents dark gray.
-     */
-    public static final ChatColor DARK_GRAY = new ChatColor( '8', "dark_gray", new Color( 0x555555 ) );
-    /**
-     * Represents blue.
-     */
-    public static final ChatColor BLUE = new ChatColor( '9', "blue", new Color( 0x5555FF ) );
-    /**
-     * Represents green.
-     */
-    public static final ChatColor GREEN = new ChatColor( 'a', "green", new Color( 0x55FF55 ) );
-    /**
-     * Represents aqua.
-     */
-    public static final ChatColor AQUA = new ChatColor( 'b', "aqua", new Color( 0x55FFFF ) );
-    /**
-     * Represents red.
-     */
-    public static final ChatColor RED = new ChatColor( 'c', "red", new Color( 0xFF5555 ) );
-    /**
-     * Represents light purple.
-     */
-    public static final ChatColor LIGHT_PURPLE = new ChatColor( 'd', "light_purple", new Color( 0xFF55FF ) );
-    /**
-     * Represents yellow.
-     */
-    public static final ChatColor YELLOW = new ChatColor( 'e', "yellow", new Color( 0xFFFF55 ) );
-    /**
-     * Represents white.
-     */
-    public static final ChatColor WHITE = new ChatColor( 'f', "white", new Color( 0xFFFFFF ) );
-    /**
-     * Represents magical characters that change around randomly.
-     */
-    public static final ChatColor MAGIC = new ChatColor( 'k', "obfuscated" );
-    /**
-     * Makes the text bold.
-     */
-    public static final ChatColor BOLD = new ChatColor( 'l', "bold" );
-    /**
-     * Makes a line appear through the text.
-     */
-    public static final ChatColor STRIKETHROUGH = new ChatColor( 'm', "strikethrough" );
-    /**
-     * Makes the text appear underlined.
-     */
-    public static final ChatColor UNDERLINE = new ChatColor( 'n', "underline" );
-    /**
-     * Makes the text italic.
-     */
-    public static final ChatColor ITALIC = new ChatColor( 'o', "italic" );
-    /**
-     * Resets all previous chat colors or formats.
-     */
-    public static final ChatColor RESET = new ChatColor( 'r', "reset" );
     /**
      * Count used for populating legacy ordinal.
      */
@@ -138,61 +138,28 @@ public final class ChatColor
     @Getter
     private final Color color;
 
-    private ChatColor(char code, String name)
-    {
-        this( code, name, null );
+    private ChatColor(char code, String name) {
+        this(code, name, null);
     }
 
-    private ChatColor(char code, String name, Color color)
-    {
+    private ChatColor(char code, String name, Color color) {
         this.name = name;
-        this.toString = new String( new char[]
+        this.toString = new String(new char[]
                 {
                         COLOR_CHAR, code
-                } );
+                });
         this.ordinal = count++;
         this.color = color;
 
-        BY_CHAR.put( code, this );
-        BY_NAME.put( name.toUpperCase( Locale.ROOT ), this );
+        BY_CHAR.put(code, this);
+        BY_NAME.put(name.toUpperCase(Locale.ROOT), this);
     }
 
-    private ChatColor(String name, String toString, int rgb)
-    {
+    private ChatColor(String name, String toString, int rgb) {
         this.name = name;
         this.toString = toString;
         this.ordinal = -1;
-        this.color = new Color( rgb );
-    }
-
-    @Override
-    public int hashCode()
-    {
-        int hash = 7;
-        hash = 53 * hash + Objects.hashCode( this.toString );
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj)
-    {
-        if ( this == obj )
-        {
-            return true;
-        }
-        if ( obj == null || getClass() != obj.getClass() )
-        {
-            return false;
-        }
-        final ChatColor other = (ChatColor) obj;
-
-        return Objects.equals( this.toString, other.toString );
-    }
-
-    @Override
-    public String toString()
-    {
-        return toString;
+        this.color = new Color(rgb);
     }
 
     /**
@@ -201,28 +168,23 @@ public final class ChatColor
      * @param input String to strip of color
      * @return A copy of the input string, without any coloring
      */
-    public static String stripColor(final String input)
-    {
-        if ( input == null )
-        {
+    public static String stripColor(final String input) {
+        if (input == null) {
             return null;
         }
 
-        return STRIP_COLOR_PATTERN.matcher( input ).replaceAll( "" );
+        return STRIP_COLOR_PATTERN.matcher(input).replaceAll("");
     }
 
-    public static String translateAlternateColorCodes(char altColorChar, String textToTranslate)
-    {
+    public static String translateAlternateColorCodes(char altColorChar, String textToTranslate) {
         char[] b = textToTranslate.toCharArray();
-        for ( int i = 0; i < b.length - 1; i++ )
-        {
-            if ( b[i] == altColorChar && ALL_CODES.indexOf( b[i + 1] ) > -1 )
-            {
+        for (int i = 0; i < b.length - 1; i++) {
+            if (b[i] == altColorChar && ALL_CODES.indexOf(b[i + 1]) > -1) {
                 b[i] = ChatColor.COLOR_CHAR;
-                b[i + 1] = Character.toLowerCase( b[i + 1] );
+                b[i + 1] = Character.toLowerCase(b[i + 1]);
             }
         }
-        return new String( b );
+        return new String(b);
     }
 
     /**
@@ -231,46 +193,38 @@ public final class ChatColor
      * @param code the code to search for
      * @return the mapped colour, or null if non exists
      */
-    public static ChatColor getByChar(char code)
-    {
-        return BY_CHAR.get( code );
+    public static ChatColor getByChar(char code) {
+        return BY_CHAR.get(code);
     }
 
-    public static ChatColor of(Color color)
-    {
-        return of( "#" + String.format( "%08x", color.getRGB() ).substring( 2 ) );
+    public static ChatColor of(Color color) {
+        return of("#" + String.format("%08x", color.getRGB()).substring(2));
     }
 
-    public static ChatColor of(String string)
-    {
-        Preconditions.checkArgument( string != null, "string cannot be null" );
-        if ( string.startsWith( "#" ) && string.length() == 7 )
-        {
+    public static ChatColor of(String string) {
+        Preconditions.checkArgument(string != null, "string cannot be null");
+        if (string.startsWith("#") && string.length() == 7) {
             int rgb;
-            try
-            {
-                rgb = Integer.parseInt( string.substring( 1 ), 16 );
-            } catch ( NumberFormatException ex )
-            {
-                throw new IllegalArgumentException( "Illegal hex string " + string );
+            try {
+                rgb = Integer.parseInt(string.substring(1), 16);
+            } catch (NumberFormatException ex) {
+                throw new IllegalArgumentException("Illegal hex string " + string);
             }
 
-            StringBuilder magic = new StringBuilder( COLOR_CHAR + "x" );
-            for ( char c : string.substring( 1 ).toCharArray() )
-            {
-                magic.append( COLOR_CHAR ).append( c );
+            StringBuilder magic = new StringBuilder(COLOR_CHAR + "x");
+            for (char c : string.substring(1).toCharArray()) {
+                magic.append(COLOR_CHAR).append(c);
             }
 
-            return new ChatColor( string, magic.toString(), rgb );
+            return new ChatColor(string, magic.toString(), rgb);
         }
 
-        ChatColor defined = BY_NAME.get( string.toUpperCase( Locale.ROOT ) );
-        if ( defined != null )
-        {
+        ChatColor defined = BY_NAME.get(string.toUpperCase(Locale.ROOT));
+        if (defined != null) {
             return defined;
         }
 
-        throw new IllegalArgumentException( "Could not parse ChatColor " + string );
+        throw new IllegalArgumentException("Could not parse ChatColor " + string);
     }
 
     /**
@@ -281,12 +235,11 @@ public final class ChatColor
      * @deprecated holdover from when this class was an enum
      */
     @Deprecated
-    public static ChatColor valueOf(String name)
-    {
-        Preconditions.checkNotNull( name, "Name is null" );
+    public static ChatColor valueOf(String name) {
+        Preconditions.checkNotNull(name, "Name is null");
 
-        ChatColor defined = BY_NAME.get( name );
-        Preconditions.checkArgument( defined != null, "No enum constant " + ChatColor.class.getName() + "." + name );
+        ChatColor defined = BY_NAME.get(name);
+        Preconditions.checkArgument(defined != null, "No enum constant " + ChatColor.class.getName() + "." + name);
 
         return defined;
     }
@@ -298,9 +251,33 @@ public final class ChatColor
      * @deprecated holdover from when this class was an enum
      */
     @Deprecated
-    public static ChatColor[] values()
-    {
-        return BY_CHAR.values().toArray( new ChatColor[ 0 ] );
+    public static ChatColor[] values() {
+        return BY_CHAR.values().toArray(new ChatColor[0]);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + Objects.hashCode(this.toString);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final ChatColor other = (ChatColor) obj;
+
+        return Objects.equals(this.toString, other.toString);
+    }
+
+    @Override
+    public String toString() {
+        return toString;
     }
 
     /**
@@ -310,9 +287,8 @@ public final class ChatColor
      * @deprecated holdover from when this class was an enum
      */
     @Deprecated
-    public String name()
-    {
-        return getName().toUpperCase( Locale.ROOT );
+    public String name() {
+        return getName().toUpperCase(Locale.ROOT);
     }
 
     /**
@@ -322,9 +298,8 @@ public final class ChatColor
      * @deprecated holdover from when this class was an enum
      */
     @Deprecated
-    public int ordinal()
-    {
-        Preconditions.checkArgument( ordinal >= 0, "Cannot get ordinal of hex color" );
+    public int ordinal() {
+        Preconditions.checkArgument(ordinal >= 0, "Cannot get ordinal of hex color");
         return ordinal;
     }
 }

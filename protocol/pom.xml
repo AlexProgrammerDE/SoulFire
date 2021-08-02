@@ -39,6 +39,42 @@
 
         <dependency>
             <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-version-1-8</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-version-1-9</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>net.pistonmaster</groupId>
+            <artifactId>wirebot-version-1-10</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>net.pistonmaster</groupId>
             <artifactId>wirebot-version-1-11</artifactId>
             <version>${project.version}</version>
             <exclusions>

@@ -1,4 +1,4 @@
-package net.pistonmaster.wirebot.version.v1_11;
+package net.pistonmaster.wirebot.version.v1_10;
 
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.github.steveice10.packetlib.Client;
@@ -11,15 +11,15 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.logging.Logger;
 
-public class Bot1_11 extends AbstractBot {
+public class Bot1_10 extends AbstractBot {
     private final Options options;
     private final Proxy proxyInfo;
     private final Logger logger;
     private final IPacketWrapper account;
-    private final ServiceServer serviceServer;
+
     private Session session;
 
-    public Bot1_11(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType) {
+    public Bot1_10(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType) {
         this.options = options;
         this.account = account;
         if (address == null) {
@@ -27,8 +27,6 @@ public class Bot1_11 extends AbstractBot {
         } else {
             this.proxyInfo = new Proxy(convertType(proxyType), address);
         }
-
-        this.serviceServer = serviceServer;
 
         this.logger = Logger.getLogger(account.getProfileName());
         this.logger.setParent(log);
@@ -49,7 +47,7 @@ public class Bot1_11 extends AbstractBot {
 
         SessionEventBus bus = new SessionEventBus(options, logger, this);
 
-        session.addListener(new SessionListener1_11(bus));
+        session.addListener(new SessionListener1_10(bus));
 
         session.connect();
     }
@@ -68,10 +66,6 @@ public class Bot1_11 extends AbstractBot {
 
     public Logger getLogger() {
         return logger;
-    }
-
-    public Proxy getProxy() {
-        return proxyInfo;
     }
 
     public void disconnect() {

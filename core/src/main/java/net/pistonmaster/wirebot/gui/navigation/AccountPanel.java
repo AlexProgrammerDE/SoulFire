@@ -1,8 +1,8 @@
 package net.pistonmaster.wirebot.gui.navigation;
 
+import net.pistonmaster.wirebot.WireBot;
 import net.pistonmaster.wirebot.common.ProxyType;
 import net.pistonmaster.wirebot.common.ServiceServer;
-import net.pistonmaster.wirebot.WireBot;
 import net.pistonmaster.wirebot.gui.LoadAccountsListener;
 import net.pistonmaster.wirebot.gui.LoadProxiesListener;
 
@@ -16,7 +16,7 @@ public class AccountPanel extends NavigationItem {
     public static final JSpinner accPerProxy = new JSpinner();
 
     public AccountPanel(WireBot wireBot, JFrame parent) {
-        JPanel accounts =new JPanel();
+        JPanel accounts = new JPanel();
 
         JButton loadAccounts = new JButton("Load Accounts");
 
