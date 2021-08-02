@@ -9,11 +9,9 @@ import java.awt.*;
 public class MainFrame extends JFrame {
     public static final String AUTH_MENU = "AuthMenu";
     public static final String MAIN_MENU = "MainMenu";
-    private final WireBot botManager;
 
     public MainFrame(WireBot botManager) {
         super(WireBot.PROJECT_NAME);
-        this.botManager = botManager;
 
         setLookAndFeel();
         setResizable(true);

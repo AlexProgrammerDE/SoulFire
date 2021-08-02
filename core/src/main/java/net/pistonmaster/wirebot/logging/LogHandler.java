@@ -17,6 +17,8 @@ public class LogHandler extends Handler {
     public void publish(LogRecord record) {
         String formatted = formatter.format(record);
 
+        record.setMessage(formatted);
+
         if (formatted.isEmpty())
             return;
 

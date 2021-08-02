@@ -16,7 +16,6 @@ public class MainPanel extends JPanel {
     private final ShellSender shellSender = new ShellSender(WireBot.getLogger());
     private final JFrame parent;
 
-
     public MainPanel(WireBot botManager, JFrame parent) {
         super();
         this.botManager = botManager;
