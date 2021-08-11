@@ -88,8 +88,8 @@ public class WireBot {
             AbstractBot bot;
             if (proxyCache != null) {
                 proxyIterator = fromStartIfNoNext(proxyIterator, proxyCache);
-
                 InetSocketAddress proxy = proxyIterator.next();
+
                 if (options.accountsPerProxy > 0) {
                     proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
                     while (proxyUseMap.get(proxy).get() >= options.accountsPerProxy) {
@@ -101,6 +101,7 @@ public class WireBot {
                             break;
                         }
                     }
+
                     proxyUseMap.get(proxy).incrementAndGet();
 
                     if (proxyUseMap.size() == proxyCache.size() && isFull(proxyUseMap, options.accountsPerProxy)) {
