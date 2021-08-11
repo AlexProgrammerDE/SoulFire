@@ -10,6 +10,7 @@ import java.net.Proxy;
 public class UniversalFactory {
     public static IPacketWrapper authenticate(GameVersion gameVersion, String username) {
         return switch (gameVersion) {
+            case VERSION_1_7 -> new net.pistonmaster.wirebot.version.v1_7.ProtocolWrapper(username);
             case VERSION_1_8 -> new net.pistonmaster.wirebot.version.v1_8.ProtocolWrapper(username);
             case VERSION_1_9 -> new net.pistonmaster.wirebot.version.v1_9.ProtocolWrapper(username);
             case VERSION_1_10 -> new net.pistonmaster.wirebot.version.v1_10.ProtocolWrapper(username);

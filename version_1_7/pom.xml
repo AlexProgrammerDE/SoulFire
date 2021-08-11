@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.pistonmaster</groupId>
         <artifactId>wirebot</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -55,13 +55,11 @@
     </build>
 
     <dependencies>
-        <!--ProtocolLib for clients-->
         <dependency>
-            <groupId>com.github.Steveice10</groupId>
+            <groupId>com.github.wirefect</groupId>
             <artifactId>MCProtocolLib</artifactId>
-            <version>a73654861f</version>
+            <version>1.7-ce17689bae-1</version>
         </dependency>
-
         <dependency>
             <groupId>net.pistonmaster</groupId>
             <artifactId>wirebot-common</artifactId>

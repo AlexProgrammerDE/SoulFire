@@ -11,6 +11,7 @@ import net.pistonmaster.wirebot.version.v1_14.Auth1_14;
 import net.pistonmaster.wirebot.version.v1_15.Auth1_15;
 import net.pistonmaster.wirebot.version.v1_16.Auth1_16;
 import net.pistonmaster.wirebot.version.v1_17.Auth1_17;
+import net.pistonmaster.wirebot.version.v1_7.Auth1_7;
 import net.pistonmaster.wirebot.version.v1_8.Auth1_8;
 import net.pistonmaster.wirebot.version.v1_9.Auth1_9;
 
@@ -19,6 +20,7 @@ import java.net.Proxy;
 public class AuthFactory {
     public static IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, Proxy proxy, ServiceServer serviceServer) throws Exception {
         return switch (gameVersion) {
+            case VERSION_1_7 -> new Auth1_7().authenticate(gameVersion, username, password, proxy, serviceServer);
             case VERSION_1_8 -> new Auth1_8().authenticate(gameVersion, username, password, proxy, serviceServer);
             case VERSION_1_9 -> new Auth1_9().authenticate(gameVersion, username, password, proxy, serviceServer);
             case VERSION_1_10 -> new Auth1_10().authenticate(gameVersion, username, password, proxy, serviceServer);
