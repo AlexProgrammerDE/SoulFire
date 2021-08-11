@@ -25,7 +25,7 @@ public class Main {
 
     private static void initPlugins() {
         // create the plugin manager
-        PluginManager pluginManager = new JarPluginManager(); // or "new ZipPluginManager() / new DefaultPluginManager()"
+        PluginManager pluginManager = new JarPluginManager();
 
         // start and load all plugins of application
         pluginManager.loadPlugins();

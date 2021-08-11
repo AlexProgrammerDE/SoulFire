@@ -13,5 +13,5 @@ public class Options {
     public final boolean autoRegister;
     public final boolean debug;
     public final ProxyType proxyType;
-    public final int accountsPreProxy;
+    public final int accountsPerProxy;
 }

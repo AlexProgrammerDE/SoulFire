@@ -1,5 +1,6 @@
 package net.pistonmaster.wirebot;
 
+import com.google.common.collect.ImmutableList;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,10 +10,7 @@ import net.pistonmaster.wirebot.protocol.BotFactory;
 import javax.swing.*;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -55,8 +53,8 @@ public class WireBot {
     public void start(Options options) {
         running = true;
 
-        List<InetSocketAddress> proxyCache = proxies == null ? null : new ArrayList<>(proxies);
-
+        List<InetSocketAddress> proxyCache = proxies == null ? null : ImmutableList.copyOf(proxies);
+        Iterator<InetSocketAddress> proxyIterator = proxyCache == null ? null : proxyCache.listIterator();
         Map<InetSocketAddress, AtomicInteger> proxyUseMap = new HashMap<>();
 
         for (int i = 0; i < options.amount; i++) {
@@ -82,39 +80,33 @@ public class WireBot {
             }
 
             IPacketWrapper account = authenticate(options.gameVersion, userPassword.getLeft(), userPassword.getRight(), Proxy.NO_PROXY);
-
             if (account == null) {
                 LOGGER.warning("The account " + userPassword.getLeft() + " failed to authenticate! (skipping it) Check above logs for further information.");
                 continue;
             }
 
             AbstractBot bot;
-            if (proxies != null) {
-                InetSocketAddress proxy;
+            if (proxyCache != null) {
+                proxyIterator = fromStartIfNoNext(proxyIterator, proxyCache);
 
-                if (options.accountsPreProxy <= 0) {
-                    proxy = proxyCache.get(i % proxyCache.size());
-                } else {
-                    if (proxyUseMap.size() == proxies.size() && isFull(proxyUseMap, options.accountsPreProxy)) {
+                InetSocketAddress proxy = proxyIterator.next();
+                if (options.accountsPerProxy > 0) {
+                    proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
+                    while (proxyUseMap.get(proxy).get() >= options.accountsPerProxy) {
+                        proxyIterator = fromStartIfNoNext(proxyIterator, proxyCache);
+                        proxy = proxyIterator.next();
+                        proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
+
+                        if (!proxyIterator.hasNext() && proxyUseMap.get(proxy).get() >= options.accountsPerProxy) {
+                            break;
+                        }
+                    }
+                    proxyUseMap.get(proxy).incrementAndGet();
+
+                    if (proxyUseMap.size() == proxyCache.size() && isFull(proxyUseMap, options.accountsPerProxy)) {
                         LOGGER.warning("All proxies in use now! Limiting amount size now...");
                         break;
                     }
-
-                    proxy = proxyCache.get(i % proxyCache.size());
-
-                    proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
-
-                    AtomicInteger proxyUse = proxyUseMap.get(proxy);
-
-                    while (proxyUse.get() >= options.accountsPreProxy) {
-                        proxy = proxyCache.get(i % proxyCache.size());
-
-                        proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
-
-                        proxyUse = proxyUseMap.get(proxy);
-                    }
-
-                    proxyUseMap.get(proxy).incrementAndGet();
                 }
 
                 bot = new BotFactory().createBot(options, account, proxy, LOGGER, serviceServer, options.proxyType);
@@ -191,5 +183,9 @@ public class WireBot {
         }
 
         return true;
+    }
+
+    private Iterator<InetSocketAddress> fromStartIfNoNext(Iterator<InetSocketAddress> iterator, List<InetSocketAddress> proxyList) {
+        return iterator.hasNext() ? iterator : proxyList.listIterator();
     }
 }
