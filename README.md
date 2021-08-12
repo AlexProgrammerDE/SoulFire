@@ -4,7 +4,7 @@
 
 ## Description
 
-Next level minecraft server botting software.
+Advanced Minecraft Server-Stresser Tool
 
 ## Features
 
