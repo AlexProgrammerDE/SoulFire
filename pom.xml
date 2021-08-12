@@ -47,43 +47,6 @@
                     <generateBackupPoms>false</generateBackupPoms>
                 </configuration>
             </plugin>
-
-            <!--
-            <plugin>
-                <groupId>com.github.wvengen</groupId>
-                <artifactId>proguard-maven-plugin</artifactId>
-                <version>2.4.0</version>
-                <executions>
-                    <execution>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>proguard</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <obfuscate>true</obfuscate>
-                    <injar>${project.build.finalName}.jar</injar>
-                    <outjar>${project.build.finalName}-small.jar</outjar>
-                    <includeDependency>true</includeDependency>
-                    <options>
-                        <option>-keep public class net.pistonmaster.Main { *; }</option>
-                    </options>
-                    <libs>
-                        <lib>${java.home}/lib/rt.jar</lib>
-                        <lib>${java.home}/lib/jce.jar</lib>
-                    </libs>
-                    <archive>
-                        <manifest>
-                            <mainClass>Main</mainClass>
-                            <packageName>net.pistonmaster.wirebot</packageName>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <dependencies>
-
-                </dependencies>
-            </plugin>-->
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
                 <version>3.0.0</version>

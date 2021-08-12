@@ -10,9 +10,7 @@ import java.util.logging.Level;
 
 public class Main {
     public static void main(String[] args) {
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            WireBot.getLogger().log(Level.SEVERE, throwable.getMessage(), throwable);
-        });
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> WireBot.getLogger().log(Level.SEVERE, throwable.getMessage(), throwable));
 
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
             runHeadless(args);
