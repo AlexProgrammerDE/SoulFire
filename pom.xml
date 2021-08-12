@@ -3,8 +3,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.pistonmaster</groupId>
-    <artifactId>wirebot</artifactId>
-    <inceptionYear>2016</inceptionYear>
+    <artifactId>serverwrecker</artifactId>
+    <inceptionYear>2021</inceptionYear>
 
     <packaging>pom</packaging>
 
@@ -25,10 +25,10 @@
         <module>protocol</module>
     </modules>
 
-    <name>WireBot</name>
+    <name>ServerWrecker</name>
     <version>0.0.2</version>
     <description>Stress tester for minecraft servers</description>
-    <url>https://github.com/games647/WireBot</url>
+    <url>https://github.com/games647/ServerWrecker</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

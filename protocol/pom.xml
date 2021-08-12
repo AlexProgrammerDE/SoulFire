@@ -3,13 +3,13 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>wirebot</artifactId>
+        <artifactId>serverwrecker</artifactId>
         <groupId>net.pistonmaster</groupId>
         <version>0.0.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>wirebot-protocol</artifactId>
+    <artifactId>serverwrecker-protocol</artifactId>
 
     <properties>
         <maven.compiler.source>15</maven.compiler.source>
@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-common</artifactId>
+            <artifactId>serverwrecker-common</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -39,7 +39,7 @@
 
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-version-1-7</artifactId>
+            <artifactId>serverwrecker-version-1-7</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -51,7 +51,7 @@
 
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-version-1-8</artifactId>
+            <artifactId>serverwrecker-version-1-8</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -63,7 +63,7 @@
 
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-version-1-9</artifactId>
+            <artifactId>serverwrecker-version-1-9</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -75,7 +75,7 @@
 
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-version-1-10</artifactId>
+            <artifactId>serverwrecker-version-1-10</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -87,7 +87,7 @@
 
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-version-1-11</artifactId>
+            <artifactId>serverwrecker-version-1-11</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -99,7 +99,7 @@
 
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-version-1-12</artifactId>
+            <artifactId>serverwrecker-version-1-12</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -111,7 +111,7 @@
 
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-version-1-13</artifactId>
+            <artifactId>serverwrecker-version-1-13</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -123,7 +123,7 @@
 
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-version-1-14</artifactId>
+            <artifactId>serverwrecker-version-1-14</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -135,7 +135,7 @@
 
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-version-1-15</artifactId>
+            <artifactId>serverwrecker-version-1-15</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -147,7 +147,7 @@
 
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-version-1-16</artifactId>
+            <artifactId>serverwrecker-version-1-16</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -159,7 +159,7 @@
 
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-version-1-17</artifactId>
+            <artifactId>serverwrecker-version-1-17</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>

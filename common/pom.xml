@@ -6,12 +6,12 @@
 
     <parent>
         <groupId>net.pistonmaster</groupId>
-        <artifactId>wirebot</artifactId>
+        <artifactId>serverwrecker</artifactId>
         <version>0.0.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>wirebot-common</artifactId>
+    <artifactId>serverwrecker-common</artifactId>
     <packaging>jar</packaging>
 
     <properties>

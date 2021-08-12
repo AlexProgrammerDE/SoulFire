@@ -4,12 +4,12 @@
 
     <parent>
         <groupId>net.pistonmaster</groupId>
-        <artifactId>wirebot</artifactId>
+        <artifactId>serverwrecker</artifactId>
         <version>0.0.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>wirebot-version-1-17</artifactId>
+    <artifactId>serverwrecker-version-1-17</artifactId>
     <packaging>jar</packaging>
 
     <build>
@@ -58,7 +58,7 @@
         </dependency>
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-common</artifactId>
+            <artifactId>serverwrecker-common</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

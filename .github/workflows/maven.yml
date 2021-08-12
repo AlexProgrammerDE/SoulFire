@@ -34,6 +34,6 @@ jobs:
         uses: actions/upload-artifact@v2.2.4
         with:
           # Artifact name
-          name: WireBot
+          name: ServerWrecker
           # A file, directory or wildcard pattern that describes what to upload
           path: core/target/*.jar

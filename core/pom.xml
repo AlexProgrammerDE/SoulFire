@@ -4,12 +4,12 @@
 
     <parent>
         <groupId>net.pistonmaster</groupId>
-        <artifactId>wirebot</artifactId>
+        <artifactId>serverwrecker</artifactId>
         <version>0.0.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>wirebot-core</artifactId>
+    <artifactId>serverwrecker-core</artifactId>
     <packaging>jar</packaging>
 
     <build>
@@ -22,7 +22,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>net.pistonmaster.wirebot.Main</mainClass>
+                            <mainClass>net.pistonmaster.serverwrecker.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -66,13 +66,13 @@
     <dependencies>
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-common</artifactId>
+            <artifactId>serverwrecker-common</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>net.pistonmaster</groupId>
-            <artifactId>wirebot-protocol</artifactId>
+            <artifactId>serverwrecker-protocol</artifactId>
             <version>${project.version}</version>
         </dependency>
 
