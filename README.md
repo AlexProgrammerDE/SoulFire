@@ -35,6 +35,10 @@ Next level minecraft server botting software.
 6. Run `mvn clean install`
 7. The final version is inside the core/target folder
 
+## Community
+Feel free to join our discord community server:
+[![Discord Banner](https://discord.com/api/guilds/875362748756787210/widget.png?style=banner2)](https://discord.gg/d8A4RgxfjM)
+
 ## Images
 
 ![Gui](./images/img.png)
