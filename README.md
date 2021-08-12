@@ -37,6 +37,7 @@ Next level minecraft server botting software.
 
 ## Community
 Feel free to join our discord community server:
+
 [![Discord Banner](https://discord.com/api/guilds/875362748756787210/widget.png?style=banner2)](https://discord.gg/d8A4RgxfjM)
 
 ## Images
