@@ -23,7 +23,7 @@
                     <relocations>
                         <relocation>
                             <pattern>com.github.steveice10</pattern>
-                            <shadedPattern>com.github.steveice10.protocol.v1_11</shadedPattern>
+                            <shadedPattern>com.github.steveice10.v1_11</shadedPattern>
                         </relocation>
                     </relocations>
                     <filters>
