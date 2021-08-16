@@ -36,6 +36,7 @@ Advanced Minecraft Server-Stresser Tool
 7. The final version is inside the core/target folder
 
 ## Community
+
 Feel free to join our discord community server:
 
 [![Discord Banner](https://discord.com/api/guilds/875362748756787210/widget.png?style=banner2)](https://discord.gg/d8A4RgxfjM)

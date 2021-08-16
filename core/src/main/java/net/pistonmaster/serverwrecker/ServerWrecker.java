@@ -8,7 +8,9 @@ import net.pistonmaster.serverwrecker.common.*;
 import net.pistonmaster.serverwrecker.protocol.BotFactory;
 
 import javax.swing.*;
+import java.net.Authenticator;
 import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -26,21 +28,33 @@ public class ServerWrecker {
     private final List<AbstractBot> clients = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     @Getter
+    private final Map<InetSocketAddress, PasswordAuthentication> passWordProxies = new HashMap<>();
+    @Getter
     private boolean running = false;
     @Getter
     @Setter
     private boolean paused = false;
-
-    private List<InetSocketAddress> proxies;
+    @Setter
     private List<String> accounts;
-
     @Getter
     @Setter(value = AccessLevel.PROTECTED)
     private JFrame window;
-
     @Getter
     @Setter
     private ServiceServer serviceServer = ServiceServer.MOJANG;
+
+    public ServerWrecker() {
+        Authenticator.setDefault(new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                if (getRequestorType() != RequestorType.PROXY)
+                    return null;
+
+                Optional<InetSocketAddress> optional = passWordProxies.keySet().stream().filter(address -> address.getAddress().equals(getRequestingSite())).findFirst();
+                return optional.map(passWordProxies::get).orElse(null);
+            }
+        });
+    }
 
     public static Logger getLogger() {
         return LOGGER;
@@ -53,8 +67,8 @@ public class ServerWrecker {
     public void start(Options options) {
         running = true;
 
-        List<InetSocketAddress> proxyCache = proxies == null ? null : ImmutableList.copyOf(proxies);
-        Iterator<InetSocketAddress> proxyIterator = proxyCache == null ? null : proxyCache.listIterator();
+        List<InetSocketAddress> proxyCache = passWordProxies.isEmpty() ? Collections.emptyList() : ImmutableList.copyOf(passWordProxies.keySet());
+        Iterator<InetSocketAddress> proxyIterator = proxyCache.listIterator();
         Map<InetSocketAddress, AtomicInteger> proxyUseMap = new HashMap<>();
 
         for (int i = 0; i < options.amount; i++) {
@@ -86,7 +100,7 @@ public class ServerWrecker {
             }
 
             AbstractBot bot;
-            if (proxyCache != null) {
+            if (!proxyCache.isEmpty()) {
                 proxyIterator = fromStartIfNoNext(proxyIterator, proxyCache);
                 InetSocketAddress proxy = proxyIterator.next();
 
@@ -156,14 +170,6 @@ public class ServerWrecker {
                 return null;
             }
         }
-    }
-
-    public void setProxies(List<InetSocketAddress> proxies) {
-        this.proxies = proxies;
-    }
-
-    public void setAccounts(List<String> accounts) {
-        this.accounts = accounts;
     }
 
     public void stop() {

@@ -22,16 +22,16 @@
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <relocations>
                         <relocation>
-                            <pattern>org.spacehq.mc.protocol</pattern>
-                            <shadedPattern>org.spacehq.mc.protocol.v1_10</shadedPattern>
+                            <pattern>com.github.steveice10</pattern>
+                            <shadedPattern>com.github.steveice10.v1_10</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>io.netty</pattern>
-                            <shadedPattern>org.spacehq.mc.protocol.v1_10.shade.netty</shadedPattern>
+                            <shadedPattern>com.github.steveice10.v1_10.shade.netty</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>com.google.gson</pattern>
-                            <shadedPattern>org.spacehq.mc.protocol.v1_10.shade.gson</shadedPattern>
+                            <shadedPattern>com.github.steveice10.v1_10.shade.gson</shadedPattern>
                         </relocation>
                     </relocations>
                     <filters>

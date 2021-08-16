@@ -22,23 +22,19 @@
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <relocations>
                         <relocation>
-                            <pattern>org.spacehq.mc.protocol</pattern>
-                            <shadedPattern>org.spacehq.mc.protocol.v1_7</shadedPattern>
+                            <pattern>com.github.steveice10</pattern>
+                            <shadedPattern>com.github.steveice10.v1_7</shadedPattern>
                         </relocation>
                     </relocations>
-
-                    <artifactSet>
-                        <includes>
-                            <include>org.spacehq:mcprotocollib</include>
-                        </includes>
-                    </artifactSet>
-
                     <filters>
                         <filter>
-                            <artifact>org.spacehq:mcprotocollib</artifact>
-                            <includes>
-                                <include>org/spacehq/mc/protocol/**</include>
-                            </includes>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>**/*.java</exclude>
+                                <exclude>**/*.SF</exclude>
+                                <exclude>**/*.DSA</exclude>
+                                <exclude>META-INF/MANIFEST.MF</exclude>
+                            </excludes>
                         </filter>
                     </filters>
                 </configuration>

@@ -59,7 +59,7 @@
         <dependency>
             <groupId>net.pistonmaster</groupId>
             <artifactId>serverwrecker-common</artifactId>
-            <version>0.0.2</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

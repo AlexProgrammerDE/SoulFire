@@ -1,5 +1,7 @@
 package net.pistonmaster.serverwrecker.version.v1_16;
 
+import com.github.steveice10.mc.auth.service.SessionService;
+import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
@@ -40,9 +42,9 @@ public class Bot1_16 extends AbstractBot {
             session = new TcpClientSession(host, port, (PacketProtocol) account, proxyInfo);
         }
 
-        // SessionService sessionService = new SessionService();
-        // sessionService.setBaseUri(serviceServer.getSession());
-        // session.setFlag(MinecraftConstants.SESSION_SERVICE_KEY, sessionService); // TODO
+        SessionService sessionService = new SessionService();
+        sessionService.setBaseUri(serviceServer.getSession());
+        session.setFlag(MinecraftConstants.SESSION_SERVICE_KEY, sessionService);
 
         SessionEventBus bus = new SessionEventBus(options, logger, this);
 
