@@ -23,7 +23,7 @@ public class SessionEventBus {
 
     public void onHealth(float health, float food) {
         bot.setHealth(health);
-        bot.setFood(health);
+        bot.setFood(food);
     }
 
     public void onJoin() {

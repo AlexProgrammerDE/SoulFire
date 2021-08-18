@@ -1,5 +1,7 @@
 package net.pistonmaster.serverwrecker.logging;
 
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -16,8 +18,6 @@ public class LogHandler extends Handler {
     @Override
     public void publish(LogRecord record) {
         String formatted = formatter.format(record);
-
-        record.setMessage(formatted);
 
         if (formatted.isEmpty())
             return;

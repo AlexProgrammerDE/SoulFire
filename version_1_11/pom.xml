@@ -52,9 +52,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.Steveice10</groupId>
+            <groupId>com.github.wirefect</groupId>
             <artifactId>MCProtocolLib</artifactId>
-            <version>1.11.2-1</version>
+            <version>1.11-6fc80e17c8-1</version>
         </dependency>
         <dependency>
             <groupId>net.pistonmaster</groupId>

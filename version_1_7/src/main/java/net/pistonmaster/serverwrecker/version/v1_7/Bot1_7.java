@@ -1,10 +1,10 @@
 package net.pistonmaster.serverwrecker.version.v1_7;
 
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
-import com.github.steveice10.packetlib.Client;
+import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
-import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
+import com.github.steveice10.packetlib.tcp.TcpClientSession;
 import net.pistonmaster.serverwrecker.common.*;
 
 import java.net.InetSocketAddress;
@@ -13,19 +13,21 @@ import java.util.logging.Logger;
 
 public class Bot1_7 extends AbstractBot {
     private final Options options;
-    private final Proxy proxyInfo;
+    private final ProxyInfo proxyInfo;
     private final Logger logger;
     private final IPacketWrapper account;
 
     private Session session;
 
-    public Bot1_7(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType) {
+    public Bot1_7(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
         this.options = options;
         this.account = account;
         if (address == null) {
             this.proxyInfo = null;
+        } else if (username != null && password != null){
+            this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address, username, password);
         } else {
-            this.proxyInfo = new Proxy(convertType(proxyType), address);
+            this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address);
         }
 
         this.logger = Logger.getLogger(account.getProfileName());
@@ -33,13 +35,11 @@ public class Bot1_7 extends AbstractBot {
     }
 
     public void connect(String host, int port) {
-        Client client;
         if (proxyInfo == null) {
-            client = new Client(host, port, (PacketProtocol) account, new TcpSessionFactory());
+            session = new TcpClientSession(host, port, (PacketProtocol) account);
         } else {
-            client = new Client(host, port, (PacketProtocol) account, new TcpSessionFactory(proxyInfo));
+            session = new TcpClientSession(host, port, (PacketProtocol) account, proxyInfo);
         }
-        this.session = client.getSession();
 
         // SessionService sessionService = new SessionService();
         // sessionService.setBaseUri(serviceServer.getSession());

@@ -21,6 +21,7 @@
             <groupId>net.pistonmaster</groupId>
             <artifactId>serverwrecker-common</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

@@ -8,9 +8,6 @@ import net.pistonmaster.serverwrecker.common.*;
 import net.pistonmaster.serverwrecker.protocol.BotFactory;
 
 import javax.swing.*;
-import java.net.Authenticator;
-import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -28,7 +25,7 @@ public class ServerWrecker {
     private final List<AbstractBot> clients = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     @Getter
-    private final Map<InetSocketAddress, PasswordAuthentication> passWordProxies = new HashMap<>();
+    private final List<BotProxy> passWordProxies = new ArrayList<>();
     @Getter
     private boolean running = false;
     @Getter
@@ -44,6 +41,7 @@ public class ServerWrecker {
     private ServiceServer serviceServer = ServiceServer.MOJANG;
 
     public ServerWrecker() {
+        /*
         Authenticator.setDefault(new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -53,7 +51,7 @@ public class ServerWrecker {
                 Optional<InetSocketAddress> optional = passWordProxies.keySet().stream().filter(address -> address.getAddress().equals(getRequestingSite())).findFirst();
                 return optional.map(passWordProxies::get).orElse(null);
             }
-        });
+        });*/
     }
 
     public static Logger getLogger() {
@@ -67,9 +65,9 @@ public class ServerWrecker {
     public void start(Options options) {
         running = true;
 
-        List<InetSocketAddress> proxyCache = passWordProxies.isEmpty() ? Collections.emptyList() : ImmutableList.copyOf(passWordProxies.keySet());
-        Iterator<InetSocketAddress> proxyIterator = proxyCache.listIterator();
-        Map<InetSocketAddress, AtomicInteger> proxyUseMap = new HashMap<>();
+        List<BotProxy> proxyCache = passWordProxies.isEmpty() ? Collections.emptyList() : ImmutableList.copyOf(passWordProxies);
+        Iterator<BotProxy> proxyIterator = proxyCache.listIterator();
+        Map<BotProxy, AtomicInteger> proxyUseMap = new HashMap<>();
 
         for (int i = 0; i < options.amount; i++) {
             Pair<String, String> userPassword;
@@ -102,7 +100,7 @@ public class ServerWrecker {
             AbstractBot bot;
             if (!proxyCache.isEmpty()) {
                 proxyIterator = fromStartIfNoNext(proxyIterator, proxyCache);
-                InetSocketAddress proxy = proxyIterator.next();
+                BotProxy proxy = proxyIterator.next();
 
                 if (options.accountsPerProxy > 0) {
                     proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
@@ -124,7 +122,7 @@ public class ServerWrecker {
                     }
                 }
 
-                bot = new BotFactory().createBot(options, account, proxy, LOGGER, serviceServer, options.proxyType);
+                bot = new BotFactory().createBot(options, account, proxy.getAddress(), LOGGER, serviceServer, options.proxyType, proxy.getUsername(), proxy.getPassword());
             } else {
                 bot = new BotFactory().createBot(options, account, LOGGER, serviceServer);
             }
@@ -182,8 +180,8 @@ public class ServerWrecker {
         return threadPool;
     }
 
-    private boolean isFull(Map<InetSocketAddress, AtomicInteger> map, int limit) {
-        for (Map.Entry<InetSocketAddress, AtomicInteger> entry : map.entrySet()) {
+    private boolean isFull(Map<BotProxy, AtomicInteger> map, int limit) {
+        for (Map.Entry<BotProxy, AtomicInteger> entry : map.entrySet()) {
             if (entry.getValue().get() < limit) {
                 return false;
             }
@@ -192,7 +190,7 @@ public class ServerWrecker {
         return true;
     }
 
-    private Iterator<InetSocketAddress> fromStartIfNoNext(Iterator<InetSocketAddress> iterator, List<InetSocketAddress> proxyList) {
+    private Iterator<BotProxy> fromStartIfNoNext(Iterator<BotProxy> iterator, List<BotProxy> proxyList) {
         return iterator.hasNext() ? iterator : proxyList.listIterator();
     }
 }

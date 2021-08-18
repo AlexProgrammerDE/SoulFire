@@ -19,11 +19,13 @@ public class Bot1_15 extends AbstractBot {
     private final ServiceServer serviceServer;
     private Session session;
 
-    public Bot1_15(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType) {
+    public Bot1_15(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
         this.options = options;
         this.account = account;
         if (address == null) {
             this.proxyInfo = null;
+        } else if (username != null && password != null){
+            this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address, username, password);
         } else {
             this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address);
         }

@@ -3,6 +3,7 @@ package net.pistonmaster.serverwrecker.version.v1_16;
 import com.github.steveice10.mc.auth.service.SessionService;
 import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
@@ -20,11 +21,13 @@ public class Bot1_16 extends AbstractBot {
     private final ServiceServer serviceServer;
     private Session session;
 
-    public Bot1_16(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType) {
+    public Bot1_16(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
         this.options = options;
         this.account = account;
         if (address == null) {
             this.proxyInfo = null;
+        } else if (username != null && password != null){
+            this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address, username, password);
         } else {
             this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address);
         }
@@ -71,6 +74,10 @@ public class Bot1_16 extends AbstractBot {
 
     public ProxyInfo getProxy() {
         return proxyInfo;
+    }
+
+    public void sendPosition(double x, double y, double z) {
+        session.send(new ClientPlayerPositionPacket(true, x, y, z));
     }
 
     public void disconnect() {

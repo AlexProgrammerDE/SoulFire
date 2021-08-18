@@ -2,6 +2,7 @@ package net.pistonmaster.serverwrecker.gui;
 
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.common.BotProxy;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -10,7 +11,9 @@ import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -29,7 +32,7 @@ public class LoadProxiesListener implements ActionListener {
 
             botManager.getThreadPool().submit(() -> {
                 try {
-                    Map<InetSocketAddress, PasswordAuthentication> proxies = new HashMap<>();
+                    List<BotProxy> proxies = new ArrayList<>();
 
                     Files.lines(proxyFile).distinct().forEach((line) -> {
                         String[] split = line.split(":");
@@ -38,16 +41,16 @@ public class LoadProxiesListener implements ActionListener {
                         int port = Integer.parseInt(split[1]);
 
                         if (split.length > 3) {
-                            proxies.put(new InetSocketAddress(host, port), new PasswordAuthentication(split[2], split[3].toCharArray()));
+                            proxies.add(new BotProxy(new InetSocketAddress(host, port), split[2], split[3]));
                         } else {
-                            proxies.put(new InetSocketAddress(host, port), null);
+                            proxies.add(new BotProxy(new InetSocketAddress(host, port), null, null));
                         }
                     });
 
                     ServerWrecker.getLogger().log(Level.INFO, "Loaded {0} proxies", proxies.size());
 
                     botManager.getPassWordProxies().clear();
-                    botManager.getPassWordProxies().putAll(proxies);
+                    botManager.getPassWordProxies().addAll(proxies);
                 } catch (Exception ex) {
                     ServerWrecker.getLogger().log(Level.SEVERE, null, ex);
                 }
