@@ -134,6 +134,12 @@ public class ServerWrecker {
             this.clients.add(bot);
         }
 
+        if (proxyCache.isEmpty()) {
+            LOGGER.info("Starting attack at {} with {} bots", options.hostname, clients.size());
+        } else {
+            LOGGER.info("Starting attack at {} with {} bots and {} proxies", options.hostname, clients.size(), proxyUseMap.size());
+        }
+
         int i = 0;
         for (AbstractBot client : clients) {
             i++;
