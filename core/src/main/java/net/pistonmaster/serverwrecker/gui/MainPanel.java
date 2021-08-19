@@ -4,7 +4,7 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.libs.GhostText;
 import net.pistonmaster.serverwrecker.gui.libs.SmartScroller;
 import net.pistonmaster.serverwrecker.gui.navigation.RightPanelContainer;
-import net.pistonmaster.serverwrecker.logging.LogHandler;
+import net.pistonmaster.serverwrecker.logging.LogAppender;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,7 +43,7 @@ public class MainPanel extends JPanel {
 
         new SmartScroller(logPane);
 
-        ServerWrecker.getLogger().addHandler(new LogHandler(logArea));
+        ((ch.qos.logback.classic.Logger) ServerWrecker.getLogger()).addAppender(new LogAppender(logArea));
 
         JTextField commands = new JTextField();
 

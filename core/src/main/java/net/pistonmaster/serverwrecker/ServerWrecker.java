@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.common.*;
 import net.pistonmaster.serverwrecker.protocol.BotFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.net.Proxy;
@@ -14,13 +16,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ServerWrecker {
     public static final String PROJECT_NAME = "ServerWrecker";
 
-    private static final Logger LOGGER = Logger.getLogger(PROJECT_NAME);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PROJECT_NAME);
     private static final ServerWrecker instance = new ServerWrecker();
     private final List<AbstractBot> clients = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
@@ -76,7 +76,7 @@ public class ServerWrecker {
                 userPassword = new Pair<>(String.format(options.botNameFormat, i), "");
             } else {
                 if (accounts.size() <= i) {
-                    LOGGER.warning("Amount is higher than the name list size. Limiting amount size now...");
+                    LOGGER.warn("Amount is higher than the name list size. Limiting amount size now...");
                     break;
                 }
 
@@ -93,7 +93,7 @@ public class ServerWrecker {
 
             IPacketWrapper account = authenticate(options.gameVersion, userPassword.getLeft(), userPassword.getRight(), Proxy.NO_PROXY);
             if (account == null) {
-                LOGGER.warning("The account " + userPassword.getLeft() + " failed to authenticate! (skipping it) Check above logs for further information.");
+                LOGGER.warn("The account " + userPassword.getLeft() + " failed to authenticate! (skipping it) Check above logs for further information.");
                 continue;
             }
 
@@ -117,7 +117,7 @@ public class ServerWrecker {
                     proxyUseMap.get(proxy).incrementAndGet();
 
                     if (proxyUseMap.size() == proxyCache.size() && isFull(proxyUseMap, options.accountsPerProxy)) {
-                        LOGGER.warning("All proxies in use now! Limiting amount size now...");
+                        LOGGER.warn("All proxies in use now! Limiting amount size now...");
                         break;
                     }
                 }
@@ -164,7 +164,7 @@ public class ServerWrecker {
             try {
                 return UniversalFactory.authenticate(gameVersion, username, password, proxy, serviceServer);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to authenticate " + username + "! (" + e.getMessage() + ")", e);
+                LOGGER.warn("Failed to authenticate " + username + "! (" + e.getMessage() + ")", e);
                 return null;
             }
         }

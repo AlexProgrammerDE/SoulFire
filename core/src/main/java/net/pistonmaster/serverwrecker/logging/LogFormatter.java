@@ -1,13 +1,13 @@
 package net.pistonmaster.serverwrecker.logging;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
 import java.util.regex.Pattern;
 
-public class LogFormatter extends Formatter {
+public class LogFormatter {
     public static final char COLOR_CHAR = '\u00A7';
     public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + COLOR_CHAR + "[0-9A-FK-ORX]");
 
@@ -15,22 +15,20 @@ public class LogFormatter extends Formatter {
     private final DateFormat dateFormat = new SimpleDateFormat("h:mm a");
     private final Date date = new Date();
 
-    @Override
-    public String format(LogRecord record) {
+    public String format(ILoggingEvent event) {
         StringBuilder builder = new StringBuilder();
 
-        date.setTime(record.getMillis());
+        date.setTime(event.getTimeStamp());
         builder.append(dateFormat.format(date)).append(' ');
-        builder.append(record.getLevel()).append(' ');
-        builder.append('[').append(record.getLoggerName()).append(']').append(' ');
-        builder.append(formatMessage(record));
+        builder.append(event.getLevel()).append(' ');
+        builder.append('[').append(event.getLoggerName()).append(']').append(' ');
+        builder.append(formatMessage(event));
         builder.append("\n");
         return builder.toString();
     }
 
-    @Override
-    public String formatMessage(LogRecord record) {
-        String simpleFormattedMessage = super.formatMessage(record);
+    public String formatMessage(ILoggingEvent record) {
+        String simpleFormattedMessage = record.getFormattedMessage();
 
         simpleFormattedMessage = STRIP_COLOR_PATTERN.matcher(simpleFormattedMessage).replaceAll("");
 

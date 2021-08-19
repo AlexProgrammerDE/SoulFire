@@ -12,9 +12,10 @@ import net.pistonmaster.serverwrecker.version.v1_17.Bot1_17;
 import net.pistonmaster.serverwrecker.version.v1_7.Bot1_7;
 import net.pistonmaster.serverwrecker.version.v1_8.Bot1_8;
 import net.pistonmaster.serverwrecker.version.v1_9.Bot1_9;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.logging.Logger;
 
 public class BotFactory {
     public AbstractBot createBot(Options options, IPacketWrapper account, Logger log, ServiceServer serviceServer) {
@@ -22,8 +23,7 @@ public class BotFactory {
     }
 
     public AbstractBot createBot(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
-        Logger botLogger = Logger.getLogger(account.getProfileName());
-        botLogger.setParent(log);
+        Logger botLogger = LoggerFactory.getLogger(account.getProfileName());
 
         return switch (options.gameVersion) {
             case VERSION_1_7 -> new Bot1_7(options, account, address, log, serviceServer, proxyType, username, password);

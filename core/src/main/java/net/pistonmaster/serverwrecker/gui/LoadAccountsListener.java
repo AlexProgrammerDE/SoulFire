@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -23,16 +22,16 @@ public class LoadAccountsListener implements ActionListener {
         int returnVal = fileChooser.showOpenDialog(frame);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             Path accountFile = fileChooser.getSelectedFile().toPath();
-            ServerWrecker.getLogger().log(Level.INFO, "Opening: {0}.", accountFile.getFileName());
+            ServerWrecker.getLogger().info("Opening: {}.", accountFile.getFileName());
 
             botManager.getThreadPool().submit(() -> {
                 try {
                     List<String> accounts = Files.lines(accountFile).distinct().collect(Collectors.toList());
 
-                    ServerWrecker.getLogger().log(Level.INFO, "Loaded {0} accounts", accounts.size());
+                    ServerWrecker.getLogger().info("Loaded {} accounts", accounts.size());
                     botManager.setAccounts(accounts);
                 } catch (Exception ex) {
-                    ServerWrecker.getLogger().log(Level.SEVERE, null, ex);
+                    ServerWrecker.getLogger().error(null, ex);
                 }
             });
         }

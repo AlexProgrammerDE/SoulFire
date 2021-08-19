@@ -6,10 +6,11 @@ import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpClientSession;
 import net.pistonmaster.serverwrecker.common.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.util.logging.Logger;
 
 public class Bot1_10 extends AbstractBot {
     private final Options options;
@@ -24,14 +25,13 @@ public class Bot1_10 extends AbstractBot {
         this.account = account;
         if (address == null) {
             this.proxyInfo = null;
-        } else if (username != null && password != null){
+        } else if (username != null && password != null) {
             this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address, username, password);
         } else {
             this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address);
         }
 
-        this.logger = Logger.getLogger(account.getProfileName());
-        this.logger.setParent(log);
+        this.logger = LoggerFactory.getLogger(account.getProfileName());
     }
 
     public void connect(String host, int port) {

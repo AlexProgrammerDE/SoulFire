@@ -1,9 +1,7 @@
 package net.pistonmaster.serverwrecker.common;
 
 import lombok.RequiredArgsConstructor;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 @RequiredArgsConstructor
 public class SessionEventBus {
@@ -14,7 +12,7 @@ public class SessionEventBus {
     private final AbstractBot bot;
 
     public void onChat(String message) {
-        log.log(Level.INFO, "Received Message: {0}", message);
+        log.info("Received Message: {}", message);
     }
 
     public void onPosition(double x, double y, double z, float pitch, float yaw) {
@@ -35,9 +33,9 @@ public class SessionEventBus {
     }
 
     public void onDisconnect(String reason, Throwable cause) {
-        log.log(Level.INFO, "Disconnected: {0}", reason);
+        log.info("Disconnected: {}", reason);
         if (options.debug) {
-            log.log(Level.WARNING, "Bot disconnected with cause: ", cause);
+            log.warn("Bot disconnected with cause: ", cause);
         }
     }
 }

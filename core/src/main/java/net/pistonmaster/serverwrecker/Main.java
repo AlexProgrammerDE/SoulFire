@@ -6,11 +6,10 @@ import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
 
 import java.awt.*;
-import java.util.logging.Level;
 
 public class Main {
     public static void main(String[] args) {
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> ServerWrecker.getLogger().log(Level.SEVERE, throwable.getMessage(), throwable));
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> ServerWrecker.getLogger().error(throwable.getMessage(), throwable));
 
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
             runHeadless(args);

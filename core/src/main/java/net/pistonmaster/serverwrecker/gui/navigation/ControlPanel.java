@@ -5,7 +5,6 @@ import net.pistonmaster.serverwrecker.common.Options;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.logging.Level;
 
 public class ControlPanel extends JPanel {
     public ControlPanel(RightPanelContainer container, ServerWrecker wireBot) {
@@ -37,7 +36,7 @@ public class ControlPanel extends JPanel {
 
                     wireBot.start(options);
                 } catch (Exception ex) {
-                    ServerWrecker.getLogger().log(Level.INFO, ex.getMessage(), ex);
+                    ServerWrecker.getLogger().info(ex.getMessage(), ex);
                 }
             });
         });

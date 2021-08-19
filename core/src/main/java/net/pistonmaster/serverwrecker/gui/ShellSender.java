@@ -6,12 +6,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.slf4j.Logger;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 @RequiredArgsConstructor
 public class ShellSender extends AbstractAction {
@@ -46,7 +46,7 @@ public class ShellSender extends AbstractAction {
         try {
             dispatcher.execute(command, this);
         } catch (CommandSyntaxException commandSyntaxException) {
-            logger.warning("Invalid command syntax");
+            logger.warn("Invalid command syntax");
         }
     }
 
