@@ -134,7 +134,10 @@ public class ServerWrecker {
             this.clients.add(bot);
         }
 
+        int i = 0;
         for (AbstractBot client : clients) {
+            i++;
+
             while (paused) {
                 try {
                     TimeUnit.MILLISECONDS.sleep(100);
@@ -151,6 +154,10 @@ public class ServerWrecker {
 
             if (!running) {
                 break;
+            }
+
+            if (options.debug) {
+                LOGGER.debug("Connecting bot {}", i);
             }
 
             client.connect(options.hostname, options.port);

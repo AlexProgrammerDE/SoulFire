@@ -6,10 +6,13 @@ import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
 
 import java.awt.*;
+import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> ServerWrecker.getLogger().error(throwable.getMessage(), throwable));
+
+        File dataFolder = initConfigDir();
 
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
             runHeadless(args);
@@ -17,12 +20,26 @@ public class Main {
             new MainFrame(ServerWrecker.getInstance());
         }
 
-        initPlugins();
+        initPlugins(dataFolder);
     }
 
-    private static void initPlugins() {
+    private static File initConfigDir() {
+        File dataDirectory = new File(System.getProperty("user.home"), ".serverwrecker");
+
+        //noinspection ResultOfMethodCallIgnored
+        dataDirectory.mkdirs();
+
+        return dataDirectory;
+    }
+
+    private static void initPlugins(File dataFolder) {
+        File pluginDir = new File(dataFolder, "plugins");
+
+        //noinspection ResultOfMethodCallIgnored
+        pluginDir.mkdirs();
+
         // create the plugin manager
-        PluginManager pluginManager = new JarPluginManager();
+        PluginManager pluginManager = new JarPluginManager(pluginDir.toPath());
 
         // start and load all plugins of application
         pluginManager.loadPlugins();
