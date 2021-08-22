@@ -1,10 +1,12 @@
 package net.pistonmaster.serverwrecker.gui;
 
+import ch.qos.logback.classic.Logger;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.libs.GhostText;
 import net.pistonmaster.serverwrecker.gui.libs.SmartScroller;
 import net.pistonmaster.serverwrecker.gui.navigation.RightPanelContainer;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,7 +45,7 @@ public class MainPanel extends JPanel {
 
         new SmartScroller(logPane);
 
-        ((ch.qos.logback.classic.Logger) ServerWrecker.getLogger()).addAppender(new LogAppender(logArea));
+        ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).addAppender(new LogAppender(logArea));
 
         JTextField commands = new JTextField();
 

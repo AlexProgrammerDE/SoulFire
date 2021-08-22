@@ -1,9 +1,12 @@
 package net.pistonmaster.serverwrecker.common;
 
+import lombok.RequiredArgsConstructor;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 public enum GameVersion {
 
     VERSION_1_7("1.7.4"),
@@ -29,10 +32,6 @@ public enum GameVersion {
     VERSION_1_17("1.17.1");
 
     private final String version;
-
-    GameVersion(String version) {
-        this.version = version;
-    }
 
     public static GameVersion findByName(String name) {
         for (GameVersion version : values()) {

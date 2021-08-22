@@ -7,17 +7,15 @@ import ch.qos.logback.core.LogbackException;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.status.Status;
+import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class LogAppender implements Appender<ILoggingEvent> {
     private final JTextArea logArea;
     private final LogFormatter formatter = new LogFormatter();
-
-    public LogAppender(JTextArea logArea) {
-        this.logArea = logArea;
-    }
 
     @Override
     public void doAppend(ILoggingEvent iLoggingEvent) throws LogbackException {

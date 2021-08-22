@@ -173,7 +173,7 @@ public class CommandLineParser {
         final Option option;
         final T defaultValue;
 
-        TypedOption(Option option, T defaultValue, Class typeClass) {
+        TypedOption(Option option, T defaultValue, Class<T> typeClass) {
             this.option = option;
             this.option.setType(typeClass);
 
@@ -199,7 +199,7 @@ public class CommandLineParser {
 
     private static class IntOption extends TypedOption<Integer> {
         IntOption(Option option, int defaultValue) {
-            super(option, defaultValue, Number.class);
+            super(option, defaultValue, Integer.class);
         }
 
         @Override

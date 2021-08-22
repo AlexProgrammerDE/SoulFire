@@ -1,5 +1,6 @@
 package net.pistonmaster.serverwrecker;
 
+import ch.qos.logback.classic.Level;
 import com.google.common.collect.ImmutableList;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -17,30 +18,31 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Getter
 public class ServerWrecker {
     public static final String PROJECT_NAME = "ServerWrecker";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PROJECT_NAME);
+    @Getter
+    private static final Logger logger = LoggerFactory.getLogger(PROJECT_NAME);
+    @Getter
     private static final ServerWrecker instance = new ServerWrecker();
     private final List<AbstractBot> clients = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
-    @Getter
     private final List<BotProxy> passWordProxies = new ArrayList<>();
-    @Getter
     private boolean running = false;
-    @Getter
     @Setter
     private boolean paused = false;
     @Setter
     private List<String> accounts;
-    @Getter
     @Setter(value = AccessLevel.PROTECTED)
     private JFrame window;
-    @Getter
     @Setter
     private ServiceServer serviceServer = ServiceServer.MOJANG;
 
     public ServerWrecker() {
+        ((ch.qos.logback.classic.Logger) logger).setLevel(Level.INFO);
+        ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("io.netty")).setLevel(Level.INFO);
+        ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.pf4j")).setLevel(Level.INFO);
+
         /*
         Authenticator.setDefault(new Authenticator() {
             @Override
@@ -52,14 +54,6 @@ public class ServerWrecker {
                 return optional.map(passWordProxies::get).orElse(null);
             }
         });*/
-    }
-
-    public static Logger getLogger() {
-        return LOGGER;
-    }
-
-    public static ServerWrecker getInstance() {
-        return instance;
     }
 
     public void start(Options options) {
@@ -76,7 +70,7 @@ public class ServerWrecker {
                 userPassword = new Pair<>(String.format(options.botNameFormat, i), "");
             } else {
                 if (accounts.size() <= i) {
-                    LOGGER.warn("Amount is higher than the name list size. Limiting amount size now...");
+                    logger.warn("Amount is higher than the name list size. Limiting amount size now...");
                     break;
                 }
 
@@ -93,7 +87,7 @@ public class ServerWrecker {
 
             IPacketWrapper account = authenticate(options.gameVersion, userPassword.getLeft(), userPassword.getRight(), Proxy.NO_PROXY);
             if (account == null) {
-                LOGGER.warn("The account " + userPassword.getLeft() + " failed to authenticate! (skipping it) Check above logs for further information.");
+                logger.warn("The account " + userPassword.getLeft() + " failed to authenticate! (skipping it) Check above logs for further information.");
                 continue;
             }
 
@@ -117,14 +111,14 @@ public class ServerWrecker {
                     proxyUseMap.get(proxy).incrementAndGet();
 
                     if (proxyUseMap.size() == proxyCache.size() && isFull(proxyUseMap, options.accountsPerProxy)) {
-                        LOGGER.warn("All proxies in use now! Limiting amount size now...");
+                        logger.warn("All proxies in use now! Limiting amount size now...");
                         break;
                     }
                 }
 
-                bot = new BotFactory().createBot(options, account, proxy.getAddress(), LOGGER, serviceServer, options.proxyType, proxy.getUsername(), proxy.getPassword());
+                bot = new BotFactory().createBot(options, account, proxy.getAddress(), logger, serviceServer, options.proxyType, proxy.getUsername(), proxy.getPassword());
             } else {
-                bot = new BotFactory().createBot(options, account, LOGGER, serviceServer);
+                bot = new BotFactory().createBot(options, account, logger, serviceServer);
             }
 
             if (bot == null) {
@@ -135,9 +129,9 @@ public class ServerWrecker {
         }
 
         if (proxyCache.isEmpty()) {
-            LOGGER.info("Starting attack at {} with {} bots", options.hostname, clients.size());
+            logger.info("Starting attack at {} with {} bots", options.hostname, clients.size());
         } else {
-            LOGGER.info("Starting attack at {} with {} bots and {} proxies", options.hostname, clients.size(), proxyUseMap.size());
+            logger.info("Starting attack at {} with {} bots and {} proxies", options.hostname, clients.size(), proxyUseMap.size());
         }
 
         int i = 0;
@@ -163,7 +157,7 @@ public class ServerWrecker {
             }
 
             if (options.debug) {
-                LOGGER.debug("Connecting bot {}", i);
+                logger.debug("Connecting bot {}", i);
             }
 
             client.connect(options.hostname, options.port);
@@ -177,7 +171,7 @@ public class ServerWrecker {
             try {
                 return UniversalFactory.authenticate(gameVersion, username, password, proxy, serviceServer);
             } catch (Exception e) {
-                LOGGER.warn("Failed to authenticate " + username + "! (" + e.getMessage() + ")", e);
+                logger.warn("Failed to authenticate " + username + "! (" + e.getMessage() + ")", e);
                 return null;
             }
         }
@@ -187,10 +181,6 @@ public class ServerWrecker {
         this.running = false;
         clients.forEach(AbstractBot::disconnect);
         clients.clear();
-    }
-
-    public ExecutorService getThreadPool() {
-        return threadPool;
     }
 
     private boolean isFull(Map<BotProxy, AtomicInteger> map, int limit) {
