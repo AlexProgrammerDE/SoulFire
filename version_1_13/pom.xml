@@ -54,7 +54,7 @@
         <dependency>
             <groupId>com.github.Steveice10</groupId>
             <artifactId>MCProtocolLib</artifactId>
-            <version>e9307442db</version>
+            <version>1.18-2</version>
         </dependency>
         <dependency>
             <groupId>net.pistonmaster</groupId>
