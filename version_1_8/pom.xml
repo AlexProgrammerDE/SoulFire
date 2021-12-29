@@ -54,7 +54,7 @@
         <dependency>
             <groupId>com.github.wirefect</groupId>
             <artifactId>MCProtocolLib</artifactId>
-            <version>1.8-d76a51675e-1</version>
+            <version>1.16.5-2</version>
         </dependency>
         <dependency>
             <groupId>net.pistonmaster</groupId>
