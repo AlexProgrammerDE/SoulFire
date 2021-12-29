@@ -7,3 +7,5 @@ dependencies {
     compileOnly(projects.serverwreckerCommon)
     compileOnly("net.kyori:adventure-text-serializer-plain:4.9.3")
 }
+
+setupVersion("v1_18")

@@ -6,3 +6,5 @@ dependencies {
     implementation("com.github.AlexProgrammerDE:MCProtocolLib:1.11-SNAPSHOT")
     compileOnly(projects.serverwreckerCommon)
 }
+
+setupVersion("v1_11")

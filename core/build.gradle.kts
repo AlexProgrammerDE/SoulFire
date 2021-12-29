@@ -15,3 +15,7 @@ dependencies {
     implementation("net.kyori:adventure-text-serializer-plain:4.9.3")
     implementation("net.kyori:adventure-text-serializer-gson:4.9.3")
 }
+
+tasks.named<Jar>("jar").get().manifest {
+    attributes["Main-Class"] = "net.pistonmaster.serverwrecker.Main"
+}
