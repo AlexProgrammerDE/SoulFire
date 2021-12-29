@@ -5,7 +5,7 @@ plugins {
 dependencies {
     implementation(projects.serverwreckerCommon)
     implementation(projects.serverwreckerProtocol)
-    implementation("commons-cli:commons-cli:1.4")
+    implementation("commons-cli:commons-cli:1.5.0")
     implementation("com.mojang:brigadier:1.0.18")
     implementation("com.formdev:flatlaf:1.4")
     implementation("com.formdev:flatlaf-intellij-themes:1.4")
