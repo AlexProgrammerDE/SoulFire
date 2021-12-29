@@ -29,10 +29,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Getter
 public enum ServiceServer {
-    //
     // , URI.create("https://login.microsoftonline.com/"), URI.create("https://login.microsoftonline.com/")
-    MOJANG("Mojang"),
-    MICROSOFT("Microsoft", List.of("clientId"));
+    MOJANG("Mojang");
+    // MICROSOFT("Microsoft", List.of("clientId"));
     // THE_ALTENING("The Altening (1.16+ only)", URI.create("https://authserver.thealtening.com/"), URI.create("https://sessionserver.thealtening.com/"));
 
     private final String name;

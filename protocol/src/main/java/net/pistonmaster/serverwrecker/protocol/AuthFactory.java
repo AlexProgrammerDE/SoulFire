@@ -63,7 +63,7 @@ public class AuthFactory {
         AuthenticationService authService = null;
         switch (serviceServer) {
             case MOJANG -> authService = new MojangAuthenticationService();
-            case MICROSOFT -> authService = new MsaAuthenticationService(""); // TODO: Add MSA support
+            // case MICROSOFT -> authService = new MsaAuthenticationService(""); // TODO: Add MSA support
         }
 
         authService.setUsername(username);
