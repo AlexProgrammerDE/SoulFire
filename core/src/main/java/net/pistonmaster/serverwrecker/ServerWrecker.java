@@ -83,11 +83,11 @@ public class ServerWrecker {
         Iterator<BotProxy> proxyIterator = proxyCache.listIterator();
         Map<BotProxy, AtomicInteger> proxyUseMap = new HashMap<>();
 
-        for (int i = 0; i < options.amount; i++) {
+        for (int i = 0; i < options.amount(); i++) {
             Pair<String, String> userPassword;
 
             if (accounts == null) {
-                userPassword = new Pair<>(String.format(options.botNameFormat, i), "");
+                userPassword = new Pair<>(String.format(options.botNameFormat(), i), "");
             } else {
                 if (accounts.size() <= i) {
                     logger.warn("Amount is higher than the name list size. Limiting amount size now...");
@@ -101,11 +101,11 @@ public class ServerWrecker {
                 } else if (lines.length == 2) {
                     userPassword = new Pair<>(lines[0], lines[1]);
                 } else {
-                    userPassword = new Pair<>(String.format(options.botNameFormat, i), "");
+                    userPassword = new Pair<>(String.format(options.botNameFormat(), i), "");
                 }
             }
 
-            IPacketWrapper account = authenticate(options.gameVersion, userPassword.getLeft(), userPassword.getRight(), Proxy.NO_PROXY);
+            IPacketWrapper account = authenticate(options.gameVersion(), userPassword.getLeft(), userPassword.getRight(), Proxy.NO_PROXY);
             if (account == null) {
                 logger.warn("The account " + userPassword.getLeft() + " failed to authenticate! (skipping it) Check above logs for further information.");
                 continue;
@@ -116,27 +116,27 @@ public class ServerWrecker {
                 proxyIterator = fromStartIfNoNext(proxyIterator, proxyCache);
                 BotProxy proxy = proxyIterator.next();
 
-                if (options.accountsPerProxy > 0) {
+                if (options.accountsPerProxy() > 0) {
                     proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
-                    while (proxyUseMap.get(proxy).get() >= options.accountsPerProxy) {
+                    while (proxyUseMap.get(proxy).get() >= options.accountsPerProxy()) {
                         proxyIterator = fromStartIfNoNext(proxyIterator, proxyCache);
                         proxy = proxyIterator.next();
                         proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
 
-                        if (!proxyIterator.hasNext() && proxyUseMap.get(proxy).get() >= options.accountsPerProxy) {
+                        if (!proxyIterator.hasNext() && proxyUseMap.get(proxy).get() >= options.accountsPerProxy()) {
                             break;
                         }
                     }
 
                     proxyUseMap.get(proxy).incrementAndGet();
 
-                    if (proxyUseMap.size() == proxyCache.size() && isFull(proxyUseMap, options.accountsPerProxy)) {
+                    if (proxyUseMap.size() == proxyCache.size() && isFull(proxyUseMap, options.accountsPerProxy())) {
                         logger.warn("All proxies in use now! Limiting amount size now...");
                         break;
                     }
                 }
 
-                bot = new BotFactory().createBot(options, account, proxy.getAddress(), logger, serviceServer, options.proxyType, proxy.getUsername(), proxy.getPassword());
+                bot = new BotFactory().createBot(options, account, proxy.address(), logger, serviceServer, options.proxyType(), proxy.username(), proxy.password());
             } else {
                 bot = new BotFactory().createBot(options, account, logger, serviceServer);
             }
@@ -149,9 +149,9 @@ public class ServerWrecker {
         }
 
         if (proxyCache.isEmpty()) {
-            logger.info("Starting attack at {} with {} bots", options.hostname, clients.size());
+            logger.info("Starting attack at {} with {} bots", options.hostname(), clients.size());
         } else {
-            logger.info("Starting attack at {} with {} bots and {} proxies", options.hostname, clients.size(), proxyUseMap.size());
+            logger.info("Starting attack at {} with {} bots and {} proxies", options.hostname(), clients.size(), proxyUseMap.size());
         }
 
         int i = 0;
@@ -167,7 +167,7 @@ public class ServerWrecker {
             }
 
             try {
-                TimeUnit.MILLISECONDS.sleep(options.joinDelayMs);
+                TimeUnit.MILLISECONDS.sleep(options.joinDelayMs());
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
@@ -176,11 +176,11 @@ public class ServerWrecker {
                 break;
             }
 
-            if (options.debug) {
+            if (options.debug()) {
                 logger.debug("Connecting bot {}", i);
             }
 
-            client.connect(options.hostname, options.port);
+            client.connect(options.hostname(), options.port());
         }
     }
 

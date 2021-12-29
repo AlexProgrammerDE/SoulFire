@@ -45,7 +45,7 @@ public class BotFactory {
     public AbstractBot createBot(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
         Logger botLogger = LoggerFactory.getLogger(account.getProfileName());
 
-        return switch (options.gameVersion) {
+        return switch (options.gameVersion()) {
             case VERSION_1_7 -> new Bot1_7(options, account, address, log, serviceServer, proxyType, username, password);
             case VERSION_1_8 -> new Bot1_8(options, account, address, log, serviceServer, proxyType, username, password);
             case VERSION_1_9 -> new Bot1_9(options, account, address, log, serviceServer, proxyType, username, password);

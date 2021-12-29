@@ -21,6 +21,8 @@ package net.pistonmaster.serverwrecker.protocol;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.auth.service.AuthenticationService;
+import com.github.steveice10.mc.auth.service.MojangAuthenticationService;
+import com.github.steveice10.mc.auth.service.MsaAuthenticationService;
 import net.pistonmaster.serverwrecker.common.GameVersion;
 import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 import net.pistonmaster.serverwrecker.common.ServiceServer;
@@ -58,9 +60,11 @@ public class AuthFactory {
     }
 
     public static IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, Proxy proxy, ServiceServer serviceServer) throws Exception {
-        AuthenticationService authService = new AuthenticationService();
-
-        authService.setBaseUri(serviceServer.getAuth());
+        AuthenticationService authService = null;
+        switch (serviceServer) {
+            case MOJANG -> authService = new MojangAuthenticationService();
+            case MICROSOFT -> authService = new MsaAuthenticationService(""); // TODO: Add MSA support
+        }
 
         authService.setUsername(username);
         authService.setPassword(password);
@@ -70,7 +74,6 @@ public class AuthFactory {
 
         GameProfile profile = authService.getSelectedProfile();
         String accessToken = authService.getAccessToken();
-        String clientToken = authService.getClientToken();
 
         return switch (gameVersion) {
             case VERSION_1_7 -> new ProtocolWrapper1_7(profile, accessToken);
@@ -79,9 +82,9 @@ public class AuthFactory {
             case VERSION_1_10 -> new ProtocolWrapper1_10(profile, accessToken);
             case VERSION_1_11 -> new ProtocolWrapper1_11(profile, accessToken);
             case VERSION_1_12 -> new ProtocolWrapper1_12(profile, accessToken);
-            case VERSION_1_13 -> new ProtocolWrapper1_13(profile, accessToken, clientToken);
-            case VERSION_1_14 -> new ProtocolWrapper1_14(profile, accessToken, clientToken);
-            case VERSION_1_15 -> new ProtocolWrapper1_15(profile, accessToken, clientToken);
+            case VERSION_1_13 -> new ProtocolWrapper1_13(profile, accessToken);
+            case VERSION_1_14 -> new ProtocolWrapper1_14(profile, accessToken);
+            case VERSION_1_15 -> new ProtocolWrapper1_15(profile, accessToken);
             case VERSION_1_16 -> new ProtocolWrapper1_16(profile, accessToken);
             case VERSION_1_17 -> new ProtocolWrapper1_17(profile, accessToken);
             case VERSION_1_18 -> new ProtocolWrapper1_18(profile, accessToken);

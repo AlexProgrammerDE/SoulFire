@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation("com.github.GeyserMC:mcauthlib:1.4")
+    implementation("com.github.GeyserMC:mcauthlib:6f3d6aada5")
     implementation("com.github.GeyserMC:packetlib:2.1")
     setOf(
         "version_1_7",

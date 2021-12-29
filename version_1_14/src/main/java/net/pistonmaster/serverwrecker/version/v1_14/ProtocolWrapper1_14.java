@@ -28,8 +28,8 @@ public class ProtocolWrapper1_14 extends MinecraftProtocol implements IPacketWra
         super(username);
     }
 
-    public ProtocolWrapper1_14(GameProfile profile, String clientToken, String accessToken) {
-        super(profile, clientToken, accessToken);
+    public ProtocolWrapper1_14(GameProfile profile, String accessToken) {
+        super(profile, "", accessToken);
     }
 
     @Override

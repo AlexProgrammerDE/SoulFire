@@ -14,12 +14,10 @@ pluginManagement {
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
-        maven {
-            url = uri("https://jitpack.io")
-        }
-        maven {
-            url = uri("https://libraries.minecraft.net")
-        }
+        maven("https://jitpack.io")
+        maven("https://libraries.minecraft.net")
+        maven("https://repo.opencollab.dev/maven-releases")
+        maven("https://repo.opencollab.dev/maven-snapshots")
     }
 }
 

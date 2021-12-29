@@ -53,7 +53,7 @@ public class ControlPanel extends JPanel {
 
                     stopButton.setEnabled(true);
 
-                    ServerWrecker.getLogger().info("Preparing bot attack at {}", options.hostname);
+                    ServerWrecker.getLogger().info("Preparing bot attack at {}", options.hostname());
                     wireBot.start(options);
                 } catch (Exception ex) {
                     ServerWrecker.getLogger().info(ex.getMessage(), ex);

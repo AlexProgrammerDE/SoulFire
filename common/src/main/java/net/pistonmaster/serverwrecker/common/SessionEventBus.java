@@ -22,13 +22,9 @@ package net.pistonmaster.serverwrecker.common;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 
-@RequiredArgsConstructor
-public class SessionEventBus {
+public record SessionEventBus(Options options, Logger log,
+                              AbstractBot bot) {
     public static final char COMMAND_IDENTIFIER = '/';
-
-    private final Options options;
-    private final Logger log;
-    private final AbstractBot bot;
 
     public void onChat(String message) {
         log.info("Received Message: {}", message);
@@ -44,7 +40,7 @@ public class SessionEventBus {
     }
 
     public void onJoin() {
-        if (options.autoRegister) {
+        if (options.autoRegister()) {
             String password = "ServerWrecker"; // TODO
             bot.sendMessage(COMMAND_IDENTIFIER + "register " + password + ' ' + password);
             bot.sendMessage(COMMAND_IDENTIFIER + "login " + password);
@@ -53,7 +49,7 @@ public class SessionEventBus {
 
     public void onDisconnect(String reason, Throwable cause) {
         log.info("Disconnected: {}", reason);
-        if (options.debug) {
+        if (options.debug()) {
             log.warn("Bot disconnected with cause: ", cause);
         }
     }

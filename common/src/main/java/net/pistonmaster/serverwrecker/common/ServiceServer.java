@@ -23,16 +23,24 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Getter
 public enum ServiceServer {
-    MOJANG("Mojang", URI.create("https://authserver.mojang.com/"), URI.create("https://sessionserver.mojang.com/session/minecraft/"));
+    //
+    // , URI.create("https://login.microsoftonline.com/"), URI.create("https://login.microsoftonline.com/")
+    MOJANG("Mojang"),
+    MICROSOFT("Microsoft", List.of("clientId"));
     // THE_ALTENING("The Altening (1.16+ only)", URI.create("https://authserver.thealtening.com/"), URI.create("https://sessionserver.thealtening.com/"));
 
     private final String name;
-    private final URI auth;
-    private final URI session;
+    private final List<String> configKeys;
+
+    ServiceServer(String name) {
+        this(name, List.of());
+    }
 
     @Override
     public String toString() {
