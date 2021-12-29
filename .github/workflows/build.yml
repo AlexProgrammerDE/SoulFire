@@ -1,7 +1,7 @@
 # This workflow will build a Java project with Maven
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: Java CI with Maven
+name: Java CI with Gradle
 
 on:
   push:
@@ -16,24 +16,25 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 16
+      - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
-          java-version: '16'
-          distribution: 'adopt'
-      - name: Cache local Maven repository
-        uses: actions/cache@v2
+          java-version: '17'
+          distribution: 'temurin'
+      - uses: actions/cache@v2
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
+            ${{ runner.os }}-gradle-
+      - name: Build with Gradle
+        run: ./gradlew build
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.4
         with:
           # Artifact name
           name: ServerWrecker
           # A file, directory or wildcard pattern that describes what to upload
-          path: core/target/*.jar
+          path: core/build/libs/serverwrecker-core-all.jar
