@@ -1,5 +1,5 @@
 plugins {
-    id("sw.java-conventions")
+    id("sw.version-conventions")
 }
 
 dependencies {

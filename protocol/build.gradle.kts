@@ -1,21 +1,25 @@
 plugins {
-    id("sw.java-conventions")
+    id("sw.shadow-conventions")
 }
 
 dependencies {
     implementation("com.github.GeyserMC:mcauthlib:1.4")
     implementation("com.github.GeyserMC:packetlib:2.1")
-    implementation(projects.serverwreckerVersion17)
-    implementation(projects.serverwreckerVersion18)
-    implementation(projects.serverwreckerVersion19)
-    implementation(projects.serverwreckerVersion110)
-    implementation(projects.serverwreckerVersion111)
-    implementation(projects.serverwreckerVersion112)
-    implementation(projects.serverwreckerVersion113)
-    implementation(projects.serverwreckerVersion114)
-    implementation(projects.serverwreckerVersion115)
-    implementation(projects.serverwreckerVersion116)
-    implementation(projects.serverwreckerVersion117)
-    implementation(projects.serverwreckerVersion118)
+    setOf(
+        "version_1_7",
+        "version_1_8",
+        "version_1_9",
+        "version_1_10",
+        "version_1_11",
+        "version_1_12",
+        "version_1_13",
+        "version_1_14",
+        "version_1_15",
+        "version_1_16",
+        "version_1_17",
+        "version_1_18",
+    ).forEach {
+        implementation(project(":serverwrecker-$it", "shadow"))
+    }
     compileOnly(projects.serverwreckerCommon)
 }
