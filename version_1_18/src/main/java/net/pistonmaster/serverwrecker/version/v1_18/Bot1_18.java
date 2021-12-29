@@ -1,4 +1,4 @@
-package net.pistonmaster.serverwrecker.version.v1_17;
+package net.pistonmaster.serverwrecker.version.v1_18;
 
 import com.github.steveice10.mc.auth.service.SessionService;
 import com.github.steveice10.mc.protocol.MinecraftConstants;
@@ -9,13 +9,12 @@ import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpClientSession;
 import net.pistonmaster.serverwrecker.common.*;
-import net.pistonmaster.serverwrecker.version.v1_17.SessionListener1_17;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
-public class Bot1_17 extends AbstractBot {
+public class Bot1_18 extends AbstractBot {
     private final Options options;
     private final ProxyInfo proxyInfo;
     private final Logger logger;
@@ -23,7 +22,7 @@ public class Bot1_17 extends AbstractBot {
     private final ServiceServer serviceServer;
     private Session session;
 
-    public Bot1_17(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
+    public Bot1_18(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
         this.options = options;
         this.account = account;
         if (address == null) {
@@ -52,7 +51,7 @@ public class Bot1_17 extends AbstractBot {
 
         SessionEventBus bus = new SessionEventBus(options, logger, this);
 
-        session.addListener(new SessionListener1_17(bus));
+        session.addListener(new SessionListener1_18(bus));
 
         session.connect();
     }

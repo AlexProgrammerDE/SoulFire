@@ -1,19 +1,17 @@
-package net.pistonmaster.serverwrecker.version.v1_17;
+package net.pistonmaster.serverwrecker.version.v1_18;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.auth.service.AuthenticationService;
-import com.github.steveice10.mc.auth.service.MojangAuthenticationService;
 import net.pistonmaster.serverwrecker.common.GameVersion;
 import net.pistonmaster.serverwrecker.common.IAuth;
 import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 import net.pistonmaster.serverwrecker.common.ServiceServer;
-import net.pistonmaster.serverwrecker.version.v1_17.ProtocolWrapper;
 
 import java.net.Proxy;
 
-public class Auth1_17 implements IAuth {
+public class Auth1_18 implements IAuth {
     public IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, Proxy proxy, ServiceServer serviceServer) throws Exception {
-        MojangAuthenticationService authService = new MojangAuthenticationService();
+        AuthenticationService authService = new AuthenticationService();
 
         authService.setBaseUri(serviceServer.getAuth());
 

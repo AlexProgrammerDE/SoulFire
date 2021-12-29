@@ -4,6 +4,7 @@ import net.pistonmaster.serverwrecker.common.GameVersion;
 import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 import net.pistonmaster.serverwrecker.common.ServiceServer;
 import net.pistonmaster.serverwrecker.protocol.AuthFactory;
+import net.pistonmaster.serverwrecker.version.v1_18.ProtocolWrapper;
 
 import java.net.Proxy;
 
@@ -20,7 +21,7 @@ public class UniversalFactory {
             case VERSION_1_14 -> new net.pistonmaster.serverwrecker.version.v1_14.ProtocolWrapper(username);
             case VERSION_1_15 -> new net.pistonmaster.serverwrecker.version.v1_15.ProtocolWrapper(username);
             case VERSION_1_16 -> new net.pistonmaster.serverwrecker.version.v1_16.ProtocolWrapper(username);
-            case VERSION_1_17 -> new net.pistonmaster.serverwrecker.version.v1_17.ProtocolWrapper(username);
+            case VERSION_1_17 -> new ProtocolWrapper(username);
         };
     }
 

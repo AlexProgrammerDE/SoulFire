@@ -8,7 +8,7 @@ import net.pistonmaster.serverwrecker.version.v1_13.Bot1_13;
 import net.pistonmaster.serverwrecker.version.v1_14.Bot1_14;
 import net.pistonmaster.serverwrecker.version.v1_15.Bot1_15;
 import net.pistonmaster.serverwrecker.version.v1_16.Bot1_16;
-import net.pistonmaster.serverwrecker.version.v1_17.Bot1_17;
+import net.pistonmaster.serverwrecker.version.v1_18.Bot1_18;
 import net.pistonmaster.serverwrecker.version.v1_7.Bot1_7;
 import net.pistonmaster.serverwrecker.version.v1_8.Bot1_8;
 import net.pistonmaster.serverwrecker.version.v1_9.Bot1_9;
@@ -36,7 +36,7 @@ public class BotFactory {
             case VERSION_1_14 -> new Bot1_14(options, account, address, log, serviceServer, proxyType, username, password);
             case VERSION_1_15 -> new Bot1_15(options, account, address, log, serviceServer, proxyType, username, password);
             case VERSION_1_16 -> new Bot1_16(options, account, address, log, serviceServer, proxyType, username, password);
-            case VERSION_1_17 -> new Bot1_17(options, account, address, log, serviceServer, proxyType, username, password);
+            case VERSION_1_17 -> new Bot1_18(options, account, address, log, serviceServer, proxyType, username, password);
         };
     }
 }

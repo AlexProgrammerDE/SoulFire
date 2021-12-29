@@ -21,6 +21,7 @@
         <module>version_1_15</module>
         <module>version_1_16</module>
         <module>version_1_17</module>
+        <module>version_1_18</module>
         <module>core</module>
         <module>protocol</module>
     </modules>
