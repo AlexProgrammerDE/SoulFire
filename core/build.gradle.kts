@@ -13,5 +13,5 @@ dependencies {
     implementation("com.thealtening.api:api:4.1.0")
     implementation("com.google.guava:guava:21.0")
     implementation("net.kyori:adventure-text-serializer-plain:4.8.1")
-    implementation("net.kyori:adventure-text-serializer-gson:4.8.1")
+    implementation("net.kyori:adventure-text-serializer-gson:4.9.3")
 }
