@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation("com.github.Steveice10:mcauthlib:1.3")
+    implementation("com.github.Steveice10:mcauthlib:1.4")
     implementation("com.github.steveice10:packetlib:1.8")
     implementation(projects.serverwreckerVersion17)
     implementation(projects.serverwreckerVersion18)
