@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation("com.github.AlexProgrammerDE:MCProtocolLib:1.8-SNAPSHOT")
+    implementation("com.github.AlexProgrammerDE:MCProtocolLib:1.16.5-2")
     compileOnly(projects.serverwreckerCommon)
 }
 
