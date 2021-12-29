@@ -6,8 +6,6 @@ import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 
 public class ProtocolWrapper extends MinecraftProtocol implements IPacketWrapper {
-    private AuthenticationService cache = null;
-
     public ProtocolWrapper(String username) {
         super(username);
     }

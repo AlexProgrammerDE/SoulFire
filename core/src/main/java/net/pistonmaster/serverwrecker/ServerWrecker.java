@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.common.*;
+import net.pistonmaster.serverwrecker.protocol.AuthFactory;
 import net.pistonmaster.serverwrecker.protocol.BotFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,10 +167,10 @@ public class ServerWrecker {
 
     public IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, Proxy proxy) {
         if (password.isEmpty()) {
-            return UniversalFactory.authenticate(gameVersion, username);
+            return AuthFactory.authenticate(gameVersion, username);
         } else {
             try {
-                return UniversalFactory.authenticate(gameVersion, username, password, proxy, serviceServer);
+                return AuthFactory.authenticate(gameVersion, username, password, proxy, serviceServer);
             } catch (Exception e) {
                 logger.warn("Failed to authenticate " + username + "! (" + e.getMessage() + ")", e);
                 return null;

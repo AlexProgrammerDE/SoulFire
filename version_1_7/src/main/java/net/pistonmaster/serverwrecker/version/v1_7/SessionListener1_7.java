@@ -17,21 +17,17 @@ public class SessionListener1_7 extends SessionAdapter {
 
     @Override
     public void packetReceived(PacketReceivedEvent receiveEvent) {
-        if (receiveEvent.getPacket() instanceof ServerChatPacket) {
-            ServerChatPacket chatPacket = receiveEvent.getPacket();
+        if (receiveEvent.getPacket() instanceof ServerChatPacket chatPacket) {
             Message message = chatPacket.getMessage();
             bus.onChat(message.getFullText());
-        } else if (receiveEvent.getPacket() instanceof ServerPlayerPositionRotationPacket) {
-            ServerPlayerPositionRotationPacket posPacket = receiveEvent.getPacket();
-
+        } else if (receiveEvent.getPacket() instanceof ServerPlayerPositionRotationPacket posPacket) {
             double posX = posPacket.getX();
             double posY = posPacket.getY();
             double posZ = posPacket.getZ();
             float pitch = posPacket.getPitch();
             float yaw = posPacket.getYaw();
             bus.onPosition(posX, posY, posZ, pitch, yaw);
-        } else if (receiveEvent.getPacket() instanceof ServerUpdateHealthPacket) {
-            ServerUpdateHealthPacket healthPacket = receiveEvent.getPacket();
+        } else if (receiveEvent.getPacket() instanceof ServerUpdateHealthPacket healthPacket) {
             bus.onHealth(healthPacket.getHealth(), healthPacket.getFood());
         } else if (receiveEvent.getPacket() instanceof ServerJoinGamePacket) {
             bus.onJoin();

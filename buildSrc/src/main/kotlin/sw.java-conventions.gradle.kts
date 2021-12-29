@@ -11,7 +11,7 @@ dependencies {
 
 group = "net.pistonmaster"
 version = "0.0.2"
-java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 publishing {
     publications.create<MavenPublication>("maven") {

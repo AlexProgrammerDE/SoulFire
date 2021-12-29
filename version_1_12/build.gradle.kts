@@ -1,8 +1,8 @@
 plugins {
-    id("net.pistonmaster.java-conventions")
+    id("sw.java-conventions")
 }
 
 dependencies {
-    implementation("com.github.AlexProgrammerDE:MCProtocolLib:1.12-1.12.1-1-g98ee556-15")
+    implementation("com.github.AlexProgrammerDE:MCProtocolLib:1.12-SNAPSHOT")
     compileOnly(projects.serverwreckerCommon)
 }

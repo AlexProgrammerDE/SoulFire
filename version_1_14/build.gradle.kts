@@ -1,5 +1,5 @@
 plugins {
-    id("net.pistonmaster.java-conventions")
+    id("sw.java-conventions")
 }
 
 dependencies {

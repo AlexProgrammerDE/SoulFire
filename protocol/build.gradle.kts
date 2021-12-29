@@ -1,10 +1,10 @@
 plugins {
-    id("net.pistonmaster.java-conventions")
+    id("sw.java-conventions")
 }
 
 dependencies {
-    implementation("com.github.Steveice10:mcauthlib:1.3")
-    implementation("com.github.steveice10:packetlib:1.8")
+    implementation("com.github.GeyserMC:mcauthlib:1.4")
+    implementation("com.github.GeyserMC:packetlib:2.1")
     implementation(projects.serverwreckerVersion17)
     implementation(projects.serverwreckerVersion18)
     implementation(projects.serverwreckerVersion19)
@@ -16,5 +16,6 @@ dependencies {
     implementation(projects.serverwreckerVersion115)
     implementation(projects.serverwreckerVersion116)
     implementation(projects.serverwreckerVersion117)
+    implementation(projects.serverwreckerVersion118)
     compileOnly(projects.serverwreckerCommon)
 }

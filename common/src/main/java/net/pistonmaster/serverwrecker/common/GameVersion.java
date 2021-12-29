@@ -29,7 +29,9 @@ public enum GameVersion {
 
     VERSION_1_16("1.16.5"),
 
-    VERSION_1_17("1.17.1");
+    VERSION_1_17("1.17.1"),
+
+    VERSION_1_18("1.18.1");
 
     private final String version;
 
