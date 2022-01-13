@@ -68,7 +68,7 @@ public class Bot1_18 extends AbstractBot {
 
         SessionEventBus bus = new SessionEventBus(options, logger, this);
 
-        session.addListener(new SessionListener1_18(bus));
+        session.addListener(new SessionListener1_18(bus, (ProtocolWrapper1_18) account));
 
         session.connect();
     }

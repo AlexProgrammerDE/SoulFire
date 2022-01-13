@@ -19,7 +19,10 @@
  */
 package net.pistonmaster.serverwrecker.version.v1_18;
 
+import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerInfoPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddPlayerPacket;
@@ -35,6 +38,7 @@ import net.pistonmaster.serverwrecker.common.SessionEventBus;
 @RequiredArgsConstructor
 public class SessionListener1_18 extends SessionAdapter {
     private final SessionEventBus bus;
+    private final ProtocolWrapper1_18 wrapper;
 
     @Override
     public void packetReceived(Session session, Packet packet) {
@@ -50,8 +54,10 @@ public class SessionListener1_18 extends SessionAdapter {
             bus.onPosition(posX, posY, posZ, pitch, yaw);
         } else if (packet instanceof ClientboundSetHealthPacket healthPacket) {
             bus.onHealth(healthPacket.getHealth(), healthPacket.getFood());
-        } else if (packet instanceof ClientboundAddPlayerPacket) {
-            bus.onJoin();
+        } else if (packet instanceof ClientboundPlayerInfoPacket infoPacket) {
+            if (infoPacket.getAction() == PlayerListEntryAction.ADD_PLAYER && infoPacket.getEntries()[0].getProfile().getName().equals(wrapper.getProfileName())) {
+                bus.onJoin(); // TODO Implement everywhere else
+            }
         }
     }
 

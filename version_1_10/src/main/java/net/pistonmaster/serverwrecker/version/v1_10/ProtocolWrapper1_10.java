@@ -23,6 +23,8 @@ import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 
+import java.util.UUID;
+
 public class ProtocolWrapper1_10 extends MinecraftProtocol implements IPacketWrapper {
     public ProtocolWrapper1_10(String username) {
         super(username);
@@ -35,5 +37,10 @@ public class ProtocolWrapper1_10 extends MinecraftProtocol implements IPacketWra
     @Override
     public String getProfileName() {
         return getProfile().getName();
+    }
+
+    @Override
+    public UUID getUUID() {
+        return getProfile().getId();
     }
 }

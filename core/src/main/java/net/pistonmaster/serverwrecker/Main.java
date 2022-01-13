@@ -81,11 +81,11 @@ public class Main {
             return;
         }
 
-        if (result.showHelp) {
+        if (result.showHelp()) {
             CommandLineParser.printHelp();
             return;
         }
 
-        ServerWrecker.getInstance().start(result.options);
+        ServerWrecker.getInstance().start(result.options());
     }
 }

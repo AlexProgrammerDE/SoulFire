@@ -178,14 +178,7 @@ public class CommandLineParser {
         return accountsPerProxyOption.get(cmd);
     }
 
-    static class ParseResult {
-        final boolean showHelp;
-        final net.pistonmaster.serverwrecker.common.Options options;
-
-        ParseResult(boolean showHelp, net.pistonmaster.serverwrecker.common.Options options) {
-            this.showHelp = showHelp;
-            this.options = options;
-        }
+    record ParseResult(boolean showHelp, net.pistonmaster.serverwrecker.common.Options options) {
     }
 
     private static class TypedOption<T> {

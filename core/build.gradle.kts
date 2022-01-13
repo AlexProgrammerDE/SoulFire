@@ -1,5 +1,10 @@
 plugins {
+    application
     id("sw.shadow-conventions")
+}
+
+application {
+    mainClass.set("net.pistonmaster.serverwrecker.Main")
 }
 
 dependencies {
