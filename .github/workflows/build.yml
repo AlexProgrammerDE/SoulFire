@@ -32,7 +32,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2.3.1
         with:
           # Artifact name
           name: ServerWrecker
