@@ -49,10 +49,6 @@ public class MainFrame extends JFrame {
     }
 
     private void setLookAndFeel() {
-        try {
-            UIManager.setLookAndFeel(new FlatDarculaLaf());
-        } catch (Exception ex) {
-            ServerWrecker.getLogger().error("Failed to initialize LaF");
-        }
+        FlatDarculaLaf.setup();
     }
 }

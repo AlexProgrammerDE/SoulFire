@@ -115,9 +115,9 @@ public class SmartScroller implements AdjustmentListener {
 
         Component view = scrollPane.getViewport().getView();
 
-        if (view instanceof JTextComponent) {
-            JTextComponent textComponent = (JTextComponent) view;
+        if (view instanceof JTextComponent textComponent) {
             DefaultCaret caret = (DefaultCaret) textComponent.getCaret();
+
             caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         }
     }
