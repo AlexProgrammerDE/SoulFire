@@ -14,7 +14,9 @@ tasks {
     }
 
     shadowJar {
-        minimize()
+        minimize() {
+            exclude(dependency("com.formdev:flatlaf"))
+        }
     }
 
     build {
