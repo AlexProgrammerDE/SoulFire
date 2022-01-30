@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation("com.github.GeyserMC:MCProtocolLib:1.14.4-2")
+    implementation("com.github.GeyserMC:MCProtocolLib:1.18-2")
     compileOnly(projects.serverwreckerCommon)
 }
 
