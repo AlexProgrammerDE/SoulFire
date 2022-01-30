@@ -1,5 +1,11 @@
 {
   "extends": [
     "config:base"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["com.github.GeyserMC:MCProtocolLib"],
+      "enabled": false
+    }
   ]
 }
