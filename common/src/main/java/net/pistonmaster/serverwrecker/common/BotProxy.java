@@ -19,9 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.common;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.net.InetSocketAddress;
 
 public record BotProxy(InetSocketAddress address, String username, String password) {

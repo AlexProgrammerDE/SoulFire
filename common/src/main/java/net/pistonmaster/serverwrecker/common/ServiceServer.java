@@ -22,9 +22,7 @@ package net.pistonmaster.serverwrecker.common;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @Getter

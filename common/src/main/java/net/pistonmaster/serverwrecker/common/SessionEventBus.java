@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.common;
 
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 
 public record SessionEventBus(Options options, Logger log,

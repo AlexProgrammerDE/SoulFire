@@ -22,7 +22,6 @@ package net.pistonmaster.serverwrecker.protocol;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.auth.service.AuthenticationService;
 import com.github.steveice10.mc.auth.service.MojangAuthenticationService;
-import com.github.steveice10.mc.auth.service.MsaAuthenticationService;
 import net.pistonmaster.serverwrecker.common.GameVersion;
 import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 import net.pistonmaster.serverwrecker.common.ServiceServer;

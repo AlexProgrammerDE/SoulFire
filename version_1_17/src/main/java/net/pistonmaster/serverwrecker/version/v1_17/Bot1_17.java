@@ -19,8 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.version.v1_17;
 
-import com.github.steveice10.mc.auth.service.SessionService;
-import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
 import com.github.steveice10.packetlib.ProxyInfo;
@@ -28,7 +26,6 @@ import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpClientSession;
 import net.pistonmaster.serverwrecker.common.*;
-import net.pistonmaster.serverwrecker.version.v1_17.SessionListener1_17;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

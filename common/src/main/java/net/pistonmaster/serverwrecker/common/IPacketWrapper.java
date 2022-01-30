@@ -23,5 +23,6 @@ import java.util.UUID;
 
 public interface IPacketWrapper {
     String getProfileName();
+
     UUID getUUID();
 }
