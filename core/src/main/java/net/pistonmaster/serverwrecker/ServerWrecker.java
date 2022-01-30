@@ -136,9 +136,9 @@ public class ServerWrecker {
                     }
                 }
 
-                bot = new BotFactory().createBot(options, account, proxy.address(), logger, serviceServer, options.proxyType(), proxy.username(), proxy.password());
+                bot = new BotFactory().createBot(options, account, proxy.address(), serviceServer, options.proxyType(), proxy.username(), proxy.password());
             } else {
-                bot = new BotFactory().createBot(options, account, logger, serviceServer);
+                bot = new BotFactory().createBot(options, account, serviceServer);
             }
 
             if (bot == null) {

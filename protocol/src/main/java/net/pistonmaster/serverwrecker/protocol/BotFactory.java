@@ -38,26 +38,26 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 
 public class BotFactory {
-    public AbstractBot createBot(Options options, IPacketWrapper account, Logger log, ServiceServer serviceServer) {
-        return createBot(options, account, null, log, serviceServer, null, null, null);
+    public AbstractBot createBot(Options options, IPacketWrapper account, ServiceServer serviceServer) {
+        return createBot(options, account, null, serviceServer, null, null, null);
     }
 
-    public AbstractBot createBot(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
+    public AbstractBot createBot(Options options, IPacketWrapper account, InetSocketAddress address, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
         Logger botLogger = LoggerFactory.getLogger(account.getProfileName());
 
         return switch (options.gameVersion()) {
-            case VERSION_1_7 -> new Bot1_7(options, account, address, log, serviceServer, proxyType, username, password);
-            case VERSION_1_8 -> new Bot1_8(options, account, address, log, serviceServer, proxyType, username, password);
-            case VERSION_1_9 -> new Bot1_9(options, account, address, log, serviceServer, proxyType, username, password);
-            case VERSION_1_10 -> new Bot1_10(options, account, address, log, serviceServer, proxyType, username, password);
-            case VERSION_1_11 -> new Bot1_11(options, account, address, log, serviceServer, proxyType, username, password);
-            case VERSION_1_12 -> new Bot1_12(options, account, address, log, serviceServer, proxyType, username, password);
-            case VERSION_1_13 -> new Bot1_13(options, account, address, log, serviceServer, proxyType, username, password);
-            case VERSION_1_14 -> new Bot1_14(options, account, address, log, serviceServer, proxyType, username, password);
-            case VERSION_1_15 -> new Bot1_15(options, account, address, log, serviceServer, proxyType, username, password);
-            case VERSION_1_16 -> new Bot1_16(options, account, address, log, serviceServer, proxyType, username, password);
-            case VERSION_1_17 -> new Bot1_17(options, account, address, log, serviceServer, proxyType, username, password);
-            case VERSION_1_18 -> new Bot1_18(options, account, address, log, serviceServer, proxyType, username, password);
+            case VERSION_1_7 -> new Bot1_7(options, account, address, serviceServer, proxyType, username, password);
+            case VERSION_1_8 -> new Bot1_8(options, account, address, serviceServer, proxyType, username, password);
+            case VERSION_1_9 -> new Bot1_9(options, account, address, serviceServer, proxyType, username, password);
+            case VERSION_1_10 -> new Bot1_10(options, account, address, serviceServer, proxyType, username, password);
+            case VERSION_1_11 -> new Bot1_11(options, account, address, serviceServer, proxyType, username, password);
+            case VERSION_1_12 -> new Bot1_12(options, account, address, serviceServer, proxyType, username, password);
+            case VERSION_1_13 -> new Bot1_13(options, account, address, serviceServer, proxyType, username, password);
+            case VERSION_1_14 -> new Bot1_14(options, account, address, serviceServer, proxyType, username, password);
+            case VERSION_1_15 -> new Bot1_15(options, account, address, serviceServer, proxyType, username, password);
+            case VERSION_1_16 -> new Bot1_16(options, account, address, serviceServer, proxyType, username, password);
+            case VERSION_1_17 -> new Bot1_17(options, account, address, serviceServer, proxyType, username, password);
+            case VERSION_1_18 -> new Bot1_18(options, account, address, serviceServer, proxyType, username, password);
         };
     }
 }

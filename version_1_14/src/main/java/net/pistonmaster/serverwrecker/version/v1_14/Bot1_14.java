@@ -39,7 +39,7 @@ public class Bot1_14 extends AbstractBot {
     private final ServiceServer serviceServer;
     private Session session;
 
-    public Bot1_14(Options options, IPacketWrapper account, InetSocketAddress address, Logger log, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
+    public Bot1_14(Options options, IPacketWrapper account, InetSocketAddress address, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
         this.options = options;
         this.account = account;
         if (address == null) {
