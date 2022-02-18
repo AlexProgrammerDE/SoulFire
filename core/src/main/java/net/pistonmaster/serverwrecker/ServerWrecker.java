@@ -83,7 +83,7 @@ public class ServerWrecker {
         Iterator<BotProxy> proxyIterator = proxyCache.listIterator();
         Map<BotProxy, AtomicInteger> proxyUseMap = new HashMap<>();
 
-        for (int i = 0; i < options.amount(); i++) {
+        for (int i = 1; i <= options.amount(); i++) {
             Pair<String, String> userPassword;
 
             if (accounts == null) {
@@ -172,13 +172,12 @@ public class ServerWrecker {
                 Thread.currentThread().interrupt();
             }
 
+            // Stop the bot in case the user aborted the attack
             if (!running) {
                 break;
             }
 
-            if (options.debug()) {
-                logger.debug("Connecting bot {}", i);
-            }
+            logger.info("Connecting bot {}", i);
 
             client.connect(options.hostname(), options.port());
         }
