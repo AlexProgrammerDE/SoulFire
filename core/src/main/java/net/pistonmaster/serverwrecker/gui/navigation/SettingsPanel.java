@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.GameVersion;
 import net.pistonmaster.serverwrecker.common.Options;
 import net.pistonmaster.serverwrecker.common.ProxyType;
