@@ -101,7 +101,11 @@ public class CommandLineParser {
                         cli.getAutoRegister(),
                         cli.getDebug(),
                         cli.getProxyType(),
-                        cli.getAccountsPerProxy()));
+                        cli.getAccountsPerProxy(),
+                        30,
+                        0,
+                        30,
+                        -1));
     }
 
     static void printHelp() {

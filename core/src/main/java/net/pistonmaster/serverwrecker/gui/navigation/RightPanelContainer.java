@@ -41,7 +41,7 @@ public class RightPanelContainer extends JPanel {
     public RightPanelContainer(ServerWrecker wireBot, JFrame parent) {
         super();
 
-        panels.add(new SettingsPanel(wireBot));
+        panels.add(new SettingsPanel());
         panels.add(new AddonPanel());
         panels.add(new AccountPanel(wireBot, parent));
         panels.add(new DeveloperPanel());

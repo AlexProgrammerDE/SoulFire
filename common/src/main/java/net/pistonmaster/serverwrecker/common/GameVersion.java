@@ -66,8 +66,7 @@ public enum GameVersion {
 
     public static GameVersion getNewest() {
         return Arrays.stream(GameVersion.values())
-                .sorted(Comparator.reverseOrder())
-                .collect(Collectors.toUnmodifiableList()).get(0);
+                .sorted(Comparator.reverseOrder()).toList().get(0);
     }
 
     public String getVersion() {
@@ -76,6 +75,6 @@ public enum GameVersion {
 
     @Override
     public String toString() {
-        return getVersion();
+        return version;
     }
 }

@@ -62,6 +62,11 @@ public class Bot1_13 extends AbstractBot {
         }
         this.session = client.getSession();
 
+        session.setConnectTimeout(options.connectTimeout());
+        session.setCompressionThreshold(options.compressionThreshold());
+        session.setReadTimeout(options.readTimeout());
+        session.setWriteTimeout(options.writeTimeout());
+
         SessionEventBus bus = new SessionEventBus(options, logger, this);
 
         session.addListener(new SessionListener1_13(bus));

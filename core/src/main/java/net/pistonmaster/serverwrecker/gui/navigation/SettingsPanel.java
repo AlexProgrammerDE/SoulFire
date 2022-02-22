@@ -37,8 +37,12 @@ public class SettingsPanel extends NavigationItem {
     private final JSpinner amount;
     private final JTextField nameFormat;
     private final JComboBox<GameVersion> versionBox;
+    private final JSpinner readTimeout;
+    private final JSpinner writeTimeout;
+    private final JSpinner connectTimeout;
+    private final JSpinner compressionThreshold;
 
-    public SettingsPanel(ServerWrecker botManager) {
+    public SettingsPanel() {
         super();
 
         setLayout(new GridLayout(0, 2));
@@ -65,16 +69,36 @@ public class SettingsPanel extends NavigationItem {
         amount.setValue(20);
         add(amount);
 
-        add(new JLabel("NameFormat: "));
-        nameFormat = new JTextField("Bot-%d");
+        add(new JLabel("Name Format: "));
+        nameFormat = new JTextField("Bot%d");
         add(nameFormat);
 
+        add(new JLabel("Version: "));
         versionBox = new JComboBox<>();
         Arrays.stream(GameVersion.values())
                 .sorted(Comparator.reverseOrder())
                 .forEach(versionBox::addItem);
-
         add(versionBox);
+
+        add(new JLabel("Read Timeout: "));
+        readTimeout = new JSpinner();
+        readTimeout.setValue(30);
+        add(readTimeout);
+
+        add(new JLabel("Write Timeout: "));
+        writeTimeout = new JSpinner();
+        writeTimeout.setValue(0);
+        add(writeTimeout);
+
+        add(new JLabel("Connect Timeout: "));
+        connectTimeout = new JSpinner();
+        connectTimeout.setValue(30);
+        add(connectTimeout);
+
+        add(new JLabel("Compression Threshold: "));
+        compressionThreshold = new JSpinner();
+        compressionThreshold.setValue(-1);
+        add(compressionThreshold);
     }
 
     @Override
@@ -98,6 +122,10 @@ public class SettingsPanel extends NavigationItem {
                 autoRegister.isSelected(),
                 DeveloperPanel.debug.isSelected(),
                 (ProxyType) AccountPanel.proxyTypeCombo.getSelectedItem(),
-                (Integer) AccountPanel.accPerProxy.getValue());
+                (Integer) AccountPanel.accPerProxy.getValue(),
+                (int) readTimeout.getValue(),
+                (int) writeTimeout.getValue(),
+                (int) connectTimeout.getValue(),
+                (int) compressionThreshold.getValue());
     }
 }

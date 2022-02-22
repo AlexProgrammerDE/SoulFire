@@ -62,6 +62,11 @@ public class Bot1_18 extends AbstractBot {
             session = new TcpClientSession(host, port, (PacketProtocol) account, proxyInfo);
         }
 
+        session.setConnectTimeout(options.connectTimeout());
+        session.setCompressionThreshold(options.compressionThreshold(), true);
+        session.setReadTimeout(options.readTimeout());
+        session.setWriteTimeout(options.writeTimeout());
+
         SessionEventBus bus = new SessionEventBus(options, logger, this);
 
         session.addListener(new SessionListener1_18(bus, (ProtocolWrapper1_18) account));
