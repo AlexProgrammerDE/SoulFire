@@ -39,11 +39,11 @@ Advanced Minecraft Server-Stresser Tool
 
 Feel free to join our discord community server:
 
-[![Discord Banner](https://discord.com/api/guilds/875362748756787210/widget.png?style=banner2)](https://discord.gg/d8A4RgxfjM)
+[![Discord Banner](https://discord.com/api/guilds/739784741124833301/widget.png?style=banner2)](https://discord.gg/CDrcxzH)
 
 ## Images
 
-![Gui](./images/img.png)
+![GUI](./images/img.png)
 
 ## Command Line Usage
 
@@ -52,18 +52,18 @@ To run ServerWrecker from the command line without a GUI, enter
 
 These are the available options:
 
-| Name                  | Description                                                                                                   |
-|-----------------------|---------------------------------------------------------------------------------------------------------------|
-| -h, --host \<arg\>    | The hostname to connect to. Defaults to `127.0.0.1`                                                           |
-| -p, --port \<arg\>    | The port to connect to. Defaults to `25565`                                                                   |
-| -c, --count \<arg\>   | The amount of bots to connect to the server. Defaults to 20                                                   |
-| -d, --delay \<arg\>   | The delay between bot spawns, in milliseconds. Defaults to 1000                                               |
-| -n, --name \<arg\>    | The format for bot names. Requires exactly one integer placeholder `%d`. Defaults to `Bot-%d`                 |
-| -v, --version \<arg\> | The Minecraft version of the server to connect to. Defaults to 1.15.2                                         |
+| Name                  | Description                                                                                                    |
+|-----------------------|----------------------------------------------------------------------------------------------------------------|
+| -h, --host \<arg\>    | The hostname to connect to. Defaults to `127.0.0.1`                                                            |
+| -p, --port \<arg\>    | The port to connect to. Defaults to `25565`                                                                    |
+| -c, --count \<arg\>   | The amount of bots to connect to the server. Defaults to 20                                                    |
+| -d, --delay \<arg\>   | The delay between bot spawns, in milliseconds. Defaults to 1000                                                |
+| -n, --name \<arg\>    | The format for bot names. Requires exactly one integer placeholder `%d`. Defaults to `Bot-%d`                  |
+| -v, --version \<arg\> | The Minecraft version of the server to connect to. Defaults to 1.15.2                                          |
 | -r, --register        | Makes Bots run the /register and /login command after joining with username and password being `ServerWrecker` |
-| --help                | Displays a help page                                                                                          |
+| --help                | Displays a help page                                                                                           |
 
 ## Dependencies
 
-* Java 15
+* Java 17
 * McProtocolLib: https://github.com/Steveice10/MCProtocolLib
