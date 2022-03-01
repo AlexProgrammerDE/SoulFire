@@ -21,19 +21,15 @@ Advanced Minecraft Server-Stresser Tool
 
 ## Requirements
 
-* Java 15
-* Minecraft 1.8+ server
+* Java 17
+* Minecraft 1.7.10+ server
 
 ## Building
 
-1. Download Apache [Maven](https://maven.apache.org/download.cgi)
-2. Unpack it
-3. Optionally add the bin folder to your PATH variable to invoke Maven with mvn without specifying the complete path to
-   the bin folder for every command
-4. Download this project with Git (git clone <URL/git@github:...>) or as zip
-5. Move to the top folder of the project conting the pom.xml
-6. Run `mvn clean install`
-7. The final version is inside the core/target folder
+1. Download Gradle
+2. Download the latest version of serverwrecker
+3. Run `gradle build` in the serverwrecker directory
+4. Get the jar files from `core/build/libs`
 
 ## Community
 
