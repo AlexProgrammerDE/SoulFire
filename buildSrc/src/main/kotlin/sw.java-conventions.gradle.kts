@@ -7,7 +7,7 @@ plugins {
 dependencies {
     compileOnly("org.projectlombok:lombok:1.18.22")
     annotationProcessor("org.projectlombok:lombok:1.18.22")
-    implementation("ch.qos.logback:logback-classic:1.2.10")
+    implementation("ch.qos.logback:logback-classic:1.2.11")
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_17
