@@ -19,6 +19,7 @@ dependencies {
         "version_1_17",
         "version_1_18",
     ).forEach {
+        compileOnly(project(":serverwrecker-$it"))
         api(project(":serverwrecker-$it", "shadow"))
     }
     compileOnly(projects.serverwreckerCommon)
