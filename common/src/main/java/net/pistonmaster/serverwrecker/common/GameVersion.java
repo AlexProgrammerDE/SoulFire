@@ -19,11 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.common;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 import java.util.Comparator;
 
+@Getter
 @RequiredArgsConstructor
 public enum GameVersion {
 
@@ -66,10 +68,6 @@ public enum GameVersion {
     public static GameVersion getNewest() {
         return Arrays.stream(GameVersion.values())
                 .sorted(Comparator.reverseOrder()).toList().get(0);
-    }
-
-    public String getVersion() {
-        return version;
     }
 
     @Override

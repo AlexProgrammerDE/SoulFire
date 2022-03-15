@@ -30,7 +30,7 @@ public record SessionEventBus(Options options, Logger log,
     }
 
     public void onPosition(double x, double y, double z, float pitch, float yaw) {
-        bot.setLocation(new EntitiyLocation(x, y, z, pitch, yaw));
+        bot.setLocation(new EntityLocation(x, y, z, pitch, yaw));
     }
 
     public void onHealth(float health, float food) {

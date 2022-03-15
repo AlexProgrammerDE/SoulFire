@@ -25,7 +25,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public abstract class AbstractBot {
-    private EntitiyLocation location;
+    private EntityLocation location;
     private float health = -1;
     private float food = -1;
 

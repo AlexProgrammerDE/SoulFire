@@ -19,5 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.common;
 
-public record Pair<L, R>(L left, R right) {
+public record EntityLocation(
+		double posX,
+		double posY,
+		double posZ,
+		float pitch,
+		float yaw
+) {
 }

@@ -41,6 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Getter
 public class ServerWrecker {
     public static final String PROJECT_NAME = "ServerWrecker";
+    public static final String VERSION = "1.0.0";
     @Getter
     private static final Logger logger = LoggerFactory.getLogger(PROJECT_NAME);
     @Getter
@@ -105,9 +106,9 @@ public class ServerWrecker {
                 }
             }
 
-            IPacketWrapper account = authenticate(options.gameVersion(), userPassword.getLeft(), userPassword.getRight(), Proxy.NO_PROXY);
+            IPacketWrapper account = authenticate(options.gameVersion(), userPassword.left(), userPassword.right(), Proxy.NO_PROXY);
             if (account == null) {
-                logger.warn("The account " + userPassword.getLeft() + " failed to authenticate! (skipping it) Check above logs for further information.");
+                logger.warn("The account " + userPassword.left() + " failed to authenticate! (skipping it) Check above logs for further information.");
                 continue;
             }
 
