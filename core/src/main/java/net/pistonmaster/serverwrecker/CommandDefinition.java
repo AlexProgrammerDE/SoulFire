@@ -19,16 +19,22 @@
  */
 package net.pistonmaster.serverwrecker;
 
+import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.common.GameVersion;
 import net.pistonmaster.serverwrecker.common.Options;
 import net.pistonmaster.serverwrecker.common.ProxyType;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.io.File;
 import java.util.concurrent.Callable;
 
+@SuppressWarnings("FieldMayBeFinal")
+@RequiredArgsConstructor
 @Command(name = "serverwrecker", mixinStandardHelpOptions = true, version = "ServerWrecker v" + ServerWrecker.VERSION, description = "Stress test a minecraft server using bots")
 public class CommandDefinition implements Callable<Integer> {
+	private final File dataFolder;
+
 	@Option(names = {"-h", "--host"}, description = "The hostname to connect to. Defaults to 127.0.0.1")
 	private String host = "127.0.0.1";
 
@@ -41,7 +47,7 @@ public class CommandDefinition implements Callable<Integer> {
 	@Option(names = {"-d", "--delay"}, description = "The delay between bot spawns, in milliseconds. Defaults to 1000")
 	private int joinDelay = 1000;
 
-	@Option(names = {"-n", "--name"}, description = "The format for bot names. Requires exactly one integer placeholder '%d'. Defaults to 'Bot-%d'")
+	@Option(names = {"-n", "--name"}, description = "The format for bot names. Requires exactly one integer placeholder '%%d'. Defaults to 'Bot-%%d'")
 	private String nameFormat = "Bot-%d";
 
 	@Option(names = {"-v", "--mcversion"}, description = "The Minecraft version of the server to connect to. Defaults to latest")
@@ -49,6 +55,9 @@ public class CommandDefinition implements Callable<Integer> {
 
 	@Option(names = {"-r", "--register"}, description = "Makes Bots run the /register and /login command after joining with username and password being " + ServerWrecker.PROJECT_NAME)
 	private boolean autoRegister;
+
+	@Option(names = {"--help"}, usageHelp = true, description = "Shows this help message.")
+	private boolean help;
 
 	@Option(names = {"--debug"}, description = "Logs additional information useful for debugging")
 	private boolean debug;
@@ -60,7 +69,8 @@ public class CommandDefinition implements Callable<Integer> {
 	private int accountsPerProxy = -1;
 
 	@Override
-	public Integer call() throws Exception {
+	public Integer call() {
+		Main.initPlugins(dataFolder);
 		ServerWrecker.getInstance().start(new Options(
 				host,
 				port,

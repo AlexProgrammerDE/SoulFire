@@ -33,11 +33,10 @@ public class Main {
 
         File dataFolder = initConfigDir();
 
-        initPlugins(dataFolder);
-
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
-            runHeadless(args);
+            runHeadless(args, dataFolder);
         } else {
+            initPlugins(dataFolder);
             new MainFrame(ServerWrecker.getInstance());
         }
     }
@@ -51,7 +50,7 @@ public class Main {
         return dataDirectory;
     }
 
-    private static void initPlugins(File dataFolder) {
+    protected static void initPlugins(File dataFolder) {
         File pluginDir = new File(dataFolder, "plugins");
 
         //noinspection ResultOfMethodCallIgnored
@@ -65,8 +64,8 @@ public class Main {
         pluginManager.startPlugins();
     }
 
-    private static void runHeadless(String[] args) {
-        int exitCode = new CommandLine(new CommandDefinition()).execute(args);
+    private static void runHeadless(String[] args, File dataFolder) {
+        int exitCode = new CommandLine(new CommandDefinition(dataFolder)).execute(args);
         System.exit(exitCode);
     }
 }
