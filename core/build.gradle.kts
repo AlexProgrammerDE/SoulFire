@@ -15,7 +15,7 @@ dependencies {
     annotationProcessor("info.picocli:picocli-codegen:4.6.3")
 
     implementation("com.mojang:brigadier:1.0.500")
-    implementation("com.formdev:flatlaf:2.1")
+    implementation("com.formdev:flatlaf:2.2")
     implementation("org.pf4j:pf4j:3.6.0")
     implementation("com.thealtening.api:api:4.1.0")
     implementation("com.google.guava:guava:31.1-jre")
