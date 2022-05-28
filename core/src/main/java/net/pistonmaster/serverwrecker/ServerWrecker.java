@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Getter
 public class ServerWrecker {
     public static final String PROJECT_NAME = "ServerWrecker";
-    public static final String VERSION = "0.0.1";
+    public static final String VERSION = "0.0.2";
     @Getter
     private static final Logger logger = LoggerFactory.getLogger(PROJECT_NAME);
     @Getter
