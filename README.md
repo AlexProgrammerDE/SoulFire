@@ -1,9 +1,5 @@
 # ServerWrecker
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G51M2RK)
-
-## Description
-
 Advanced Minecraft Server-Stresser Tool
 
 ## Features
@@ -14,10 +10,10 @@ Advanced Minecraft Server-Stresser Tool
 * Configurable target
 * Configurable name format or name list
 * LogPanel to see errors directly
-* Test with Spigot, Paper, Purpur, Bungeecord, Velocity
+* Tested with Spigot, Paper, Purpur, Bungeecord, Velocity
 * Disconnects gracefully after the end
 * Automatically registers for cracked servers
-* Supports SOCKS proxies
+* Supports SOCKS4 and 5 proxies
 
 ## Requirements
 
@@ -28,7 +24,7 @@ Advanced Minecraft Server-Stresser Tool
 
 1. Download Gradle
 2. Download the latest version of serverwrecker
-3. Run `gradle build` in the serverwrecker directory
+3. Run `./gradlew build` in the serverwrecker directory
 4. Get the jar files from `core/build/libs`
 
 ## Community
@@ -58,8 +54,3 @@ These are the available options:
 | -v, --version \<arg\> | The Minecraft version of the server to connect to. Defaults to 1.15.2                                          |
 | -r, --register        | Makes Bots run the /register and /login command after joining with username and password being `ServerWrecker` |
 | --help                | Displays a help page                                                                                           |
-
-## Dependencies
-
-* Java 17
-* McProtocolLib: https://github.com/Steveice10/MCProtocolLib
