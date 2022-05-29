@@ -41,9 +41,11 @@ public class Bot1_7 extends AbstractBot {
 
     private Session session;
 
-    public Bot1_7(Options options, IPacketWrapper account, InetSocketAddress address, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
+    public Bot1_7(Options options, IPacketWrapper account, InetSocketAddress address, ServiceServer serviceServer, ProxyType proxyType, String username, String password, Logger logger) {
         this.options = options;
         this.account = account;
+        this.logger = logger;
+
         if (address == null) {
             this.proxyInfo = null;
         } else if (username != null && password != null) {
@@ -51,8 +53,6 @@ public class Bot1_7 extends AbstractBot {
         } else {
             this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address);
         }
-
-        this.logger = LoggerFactory.getLogger(account.getProfileName());
     }
 
     public void connect(String host, int port) {

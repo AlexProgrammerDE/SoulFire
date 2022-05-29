@@ -41,13 +41,13 @@ public class BotFactory {
         Logger botLogger = LoggerFactory.getLogger(account.getProfileName());
 
         return switch (options.gameVersion()) {
-            case VERSION_1_7 -> new Bot1_7(options, account, address, serviceServer, proxyType, username, password);
-            case VERSION_1_8 -> new Bot1_8(options, account, address, serviceServer, proxyType, username, password);
-            case VERSION_1_9 -> new Bot1_9(options, account, address, serviceServer, proxyType, username, password);
-            case VERSION_1_12 -> new Bot1_12(options, account, address, serviceServer, proxyType, username, password);
-            case VERSION_1_16 -> new Bot1_16(options, account, address, serviceServer, proxyType, username, password);
-            case VERSION_1_17 -> new Bot1_17(options, account, address, serviceServer, proxyType, username, password);
-            case VERSION_1_18 -> new Bot1_18(options, account, address, serviceServer, proxyType, username, password);
+            case VERSION_1_7 -> new Bot1_7(options, account, address, serviceServer, proxyType, username, password, botLogger);
+            case VERSION_1_8 -> new Bot1_8(options, account, address, serviceServer, proxyType, username, password, botLogger);
+            case VERSION_1_9 -> new Bot1_9(options, account, address, serviceServer, proxyType, username, password, botLogger);
+            case VERSION_1_12 -> new Bot1_12(options, account, address, serviceServer, proxyType, username, password, botLogger);
+            case VERSION_1_16 -> new Bot1_16(options, account, address, serviceServer, proxyType, username, password, botLogger);
+            case VERSION_1_17 -> new Bot1_17(options, account, address, serviceServer, proxyType, username, password, botLogger);
+            case VERSION_1_18 -> new Bot1_18(options, account, address, serviceServer, proxyType, username, password, botLogger);
         };
     }
 }
