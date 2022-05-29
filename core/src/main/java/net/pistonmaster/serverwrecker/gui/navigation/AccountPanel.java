@@ -50,7 +50,7 @@ public class AccountPanel extends NavigationItem {
 
         serviceBox.addActionListener(action -> {
             ServerWrecker.getInstance().setServiceServer((ServiceServer) serviceBox.getSelectedItem());
-            ServerWrecker.getLogger().info("Switched auth servers to " + ((ServiceServer) Objects.requireNonNull(serviceBox.getSelectedItem())).getName());
+            ServerWrecker.getLogger().info("Switched auth servers to {}", ((ServiceServer) Objects.requireNonNull(serviceBox.getSelectedItem())).getName());
         });
 
         accounts.add(loadAccounts);

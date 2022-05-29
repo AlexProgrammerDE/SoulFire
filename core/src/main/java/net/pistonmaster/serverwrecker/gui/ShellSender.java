@@ -25,6 +25,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.pistonmaster.serverwrecker.ServerWrecker;
 import org.slf4j.Logger;
 
 import javax.swing.*;
@@ -46,6 +47,16 @@ public class ShellSender extends AbstractAction {
     {
         dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("test").executes(c -> {
             sendMessage("test");
+            return 1;
+        }));
+        dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("online").executes(c -> {
+            List<String> online = new ArrayList<>();
+            ServerWrecker.getInstance().getClients().forEach(client -> {
+                if (client.isOnline()) {
+                    online.add(client.getAccount().getProfileName());
+                }
+            });
+            sendMessage(online.size() + " " + String.join(", ", online));
             return 1;
         }));
     }

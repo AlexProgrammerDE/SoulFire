@@ -142,10 +142,6 @@ public class ServerWrecker {
                 bot = new BotFactory().createBot(options, account, serviceServer);
             }
 
-            if (bot == null) {
-                continue;
-            }
-
             this.clients.add(bot);
         }
 

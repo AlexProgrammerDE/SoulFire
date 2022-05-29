@@ -25,12 +25,14 @@ import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpClientSession;
+import lombok.Getter;
 import net.pistonmaster.serverwrecker.common.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
+@Getter
 public class Bot1_17 extends AbstractBot {
     private final Options options;
     private final ProxyInfo proxyInfo;

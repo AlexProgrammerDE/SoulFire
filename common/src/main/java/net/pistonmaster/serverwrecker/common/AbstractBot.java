@@ -36,4 +36,6 @@ public abstract class AbstractBot {
     public abstract void disconnect();
 
     public abstract boolean isOnline();
+
+    public abstract IPacketWrapper getAccount();
 }
