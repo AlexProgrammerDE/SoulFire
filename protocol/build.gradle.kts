@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     api("com.github.GeyserMC:mcauthlib:6f3d6aada5")
-    api("com.github.GeyserMC:packetlib:2.1")
+    api("com.github.GeyserMC:packetlib:3.0")
     setOf(
         "version_1_7",
         "version_1_8",
