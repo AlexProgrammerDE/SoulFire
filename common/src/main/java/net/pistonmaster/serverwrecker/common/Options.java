@@ -23,5 +23,6 @@ public record Options(String hostname, int port,
                       int amount, int joinDelayMs, String botNameFormat,
                       GameVersion gameVersion, boolean autoRegister,
                       boolean debug, ProxyType proxyType, int accountsPerProxy,
-                      int readTimeout, int writeTimeout, int connectTimeout, int compressionThreshold) {
+                      int readTimeout, int writeTimeout, int connectTimeout, int compressionThreshold,
+                      String registerCommand, String loginCommand, String passwordFormat) {
 }

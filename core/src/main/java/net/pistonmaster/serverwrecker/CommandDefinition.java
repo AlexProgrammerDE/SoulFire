@@ -68,6 +68,27 @@ public class CommandDefinition implements Callable<Integer> {
 	@Option(names = {"--accountsperproxy"}, description = "How many accounts can be on a single proxy. Defaults to -1")
 	private int accountsPerProxy = -1;
 
+	@Option(names = {"--readtimeout"}, description = "The client read timeout.")
+	private int readTimeout = 30;
+
+	@Option(names = {"--writetimout"}, description = "The client write timeout.")
+	private int writeTimout = 0;
+
+	@Option(names = {"--connecttimeout"}, description = "The client connect timeout.")
+	private int connectTimeout = 30;
+
+	@Option(names = {"--compressionthreshold"}, description = "The client compression threshold.")
+	private int compressionThreshold = -1;
+
+	@Option(names = {"--registercommand"}, description = "What command should be executed to register?")
+	private String registerCommand = "/register %password% %password%";
+
+	@Option(names = {"--logincommand"}, description = "What command should be executed to log in?")
+	private String loginCommand = "/login %password%";
+
+	@Option(names = {"--passwordformet"}, description = "What the password for registering should be.")
+	private String passwordFormat = "ServerWrecker";
+
 	@Override
 	public Integer call() {
 		Main.initPlugins(dataFolder);
@@ -82,10 +103,13 @@ public class CommandDefinition implements Callable<Integer> {
 				debug,
 				proxy,
 				accountsPerProxy,
-				30,
-				0,
-				30,
-				-1
+				readTimeout,
+				writeTimout,
+				connectTimeout,
+				compressionThreshold,
+				registerCommand,
+				loginCommand,
+				passwordFormat
 		));
 		return 0;
 	}

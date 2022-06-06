@@ -33,6 +33,9 @@ public class SettingsPanel extends NavigationItem {
     private final JTextField portInput;
     private final JSpinner delay;
     private final JCheckBox autoRegister;
+    private final JTextField registerCommand;
+    private final JTextField loginCommand;
+    private final JTextField passwordFormat;
     private final JSpinner amount;
     private final JTextField nameFormat;
     private final JComboBox<GameVersion> versionBox;
@@ -62,6 +65,18 @@ public class SettingsPanel extends NavigationItem {
         add(new JLabel("Auto Register: "));
         autoRegister = new JCheckBox();
         add(autoRegister);
+
+        add(new JLabel("Register Command: "));
+        registerCommand = new JTextField("/register %password% %password%");
+        add(registerCommand);
+
+        add(new JLabel("Login Command: "));
+        loginCommand = new JTextField("/login %password%");
+        add(loginCommand);
+
+        add(new JLabel("Password Format: "));
+        passwordFormat = new JTextField("ServerWrecker");
+        add(passwordFormat);
 
         add(new JLabel("Amount: "));
         amount = new JSpinner();
@@ -125,6 +140,9 @@ public class SettingsPanel extends NavigationItem {
                 (int) readTimeout.getValue(),
                 (int) writeTimeout.getValue(),
                 (int) connectTimeout.getValue(),
-                (int) compressionThreshold.getValue());
+                (int) compressionThreshold.getValue(),
+                registerCommand.getText(),
+                loginCommand.getText(),
+                passwordFormat.getText());
     }
 }

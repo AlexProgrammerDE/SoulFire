@@ -40,9 +40,12 @@ public record SessionEventBus(Options options, Logger log,
 
     public void onJoin() {
         if (options.autoRegister()) {
-            String password = "ServerWrecker"; // TODO
-            bot.sendMessage(COMMAND_IDENTIFIER + "register " + password + ' ' + password);
-            bot.sendMessage(COMMAND_IDENTIFIER + "login " + password);
+            String password = options.passwordFormat();
+
+            // TODO: Listen for messages
+            // TODO: Add more password options
+            bot.sendMessage(options.registerCommand().replace("%password%", password));
+            bot.sendMessage(options.loginCommand().replace("%password%", password));
         }
     }
 

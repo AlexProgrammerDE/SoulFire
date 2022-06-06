@@ -49,7 +49,7 @@ public class LoadProxiesListener implements ActionListener {
                 try {
                     List<BotProxy> proxies = new ArrayList<>();
 
-                    Files.lines(proxyFile).distinct().forEach((line) -> {
+                    Files.lines(proxyFile).distinct().forEach(line -> {
                         String[] split = line.split(":");
 
                         String host = split[0];
