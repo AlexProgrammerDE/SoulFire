@@ -51,13 +51,15 @@ public record SessionEventBus(Options options, Logger log,
 
     public void onDisconnect(String reason, Throwable cause) {
         if (cause.getClass().getSimpleName().equals("UnexpectedEncryptionException")) {
-            log.info("Server is online mode!");
+            log.error("Server is online mode!");
+        } else if (reason.contains("Connection refused")) {
+            log.error("Server is unreachable!");
         } else {
-            log.info("Disconnected: {}", reason);
+            log.error("Disconnected: {}", reason);
         }
 
         if (options.debug()) {
-            log.warn("Bot disconnected with cause: ", cause);
+            log.debug("Bot disconnected with cause: ", cause);
         }
     }
 }
