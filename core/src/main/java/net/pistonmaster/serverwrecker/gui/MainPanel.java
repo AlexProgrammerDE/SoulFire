@@ -57,9 +57,9 @@ public class MainPanel extends JPanel {
         logPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         logPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
-        JTextArea logArea = new JTextArea(10, 1);
-        logArea.setEditable(false);
+        JTextPane logArea = new JTextPane();
 
+        logArea.setEditable(false);
         logPane.setViewportView(logArea);
 
         new SmartScroller(logPane);

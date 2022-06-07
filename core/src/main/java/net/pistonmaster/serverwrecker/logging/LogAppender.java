@@ -33,7 +33,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class LogAppender implements Appender<ILoggingEvent> {
-    private final JTextArea logArea;
+    private final JTextPane logArea;
     private final LogFormatter formatter = new LogFormatter();
 
     @Override
@@ -43,7 +43,7 @@ public class LogAppender implements Appender<ILoggingEvent> {
         if (formatted.isEmpty())
             return;
 
-        SwingUtilities.invokeLater(() -> logArea.append(formatted));
+        SwingUtilities.invokeLater(() -> logArea.setText(logArea.getText() + formatted));
     }
 
     @Override

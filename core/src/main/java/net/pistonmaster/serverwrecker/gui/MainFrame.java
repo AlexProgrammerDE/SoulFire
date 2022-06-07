@@ -41,7 +41,7 @@ public class MainFrame extends JFrame {
 
         pack();
 
-        setSize(new Dimension(getWidth() + 200, getHeight()));
+        setSize(new Dimension(getWidth() + 500, getHeight()));
 
         setVisible(true);
 
