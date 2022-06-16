@@ -58,6 +58,7 @@ public class ServerWrecker {
     private JFrame window;
     @Setter
     private ServiceServer serviceServer = ServiceServer.MOJANG;
+    private final Map<String, String> serviceServerConfig = new HashMap<>();
 
     public ServerWrecker() {
         ((ch.qos.logback.classic.Logger) logger).setLevel(Level.INFO);
@@ -185,7 +186,7 @@ public class ServerWrecker {
             return AuthFactory.authenticate(gameVersion, username);
         } else {
             try {
-                return AuthFactory.authenticate(gameVersion, username, password, proxy, serviceServer);
+                return AuthFactory.authenticate(gameVersion, username, password, proxy, serviceServer, serviceServerConfig);
             } catch (Exception e) {
                 logger.warn("Failed to authenticate " + username + "! (" + e.getMessage() + ")", e);
                 return null;

@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.protocol;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.auth.service.AuthenticationService;
 import com.github.steveice10.mc.auth.service.MojangAuthenticationService;
+import com.github.steveice10.mc.auth.service.MsaAuthenticationService;
 import net.pistonmaster.serverwrecker.common.GameVersion;
 import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 import net.pistonmaster.serverwrecker.common.ServiceServer;
@@ -34,6 +35,7 @@ import net.pistonmaster.serverwrecker.version.v1_8.ProtocolWrapper1_8;
 import net.pistonmaster.serverwrecker.version.v1_9.ProtocolWrapper1_9;
 
 import java.net.Proxy;
+import java.util.Map;
 
 public class AuthFactory {
     public static IPacketWrapper authenticate(GameVersion gameVersion, String username) {
@@ -48,12 +50,11 @@ public class AuthFactory {
         };
     }
 
-    public static IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, Proxy proxy, ServiceServer serviceServer) throws Exception {
-        AuthenticationService authService = null;
-        switch (serviceServer) {
-            case MOJANG -> authService = new MojangAuthenticationService();
-            // case MICROSOFT -> authService = new MsaAuthenticationService(""); // TODO: Add MSA support
-        }
+    public static IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, Proxy proxy, ServiceServer serviceServer, Map<String, String> serviceServerConfig) throws Exception {
+        AuthenticationService authService = switch (serviceServer) {
+            case MOJANG -> new MojangAuthenticationService();
+            case MICROSOFT -> new MsaAuthenticationService(serviceServerConfig.get("clientId"));
+        };
 
         authService.setUsername(username);
         authService.setPassword(password);

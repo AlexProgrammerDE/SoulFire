@@ -27,8 +27,10 @@ import net.pistonmaster.serverwrecker.gui.LoadProxiesListener;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class AccountPanel extends NavigationItem {
     public static final JComboBox<ProxyType> proxyTypeCombo = new JComboBox<>();
@@ -36,6 +38,7 @@ public class AccountPanel extends NavigationItem {
 
     public AccountPanel(ServerWrecker wireBot, JFrame parent) {
         JPanel accounts = new JPanel();
+        accounts.setLayout(new GridBagLayout());
 
         JButton loadAccounts = new JButton("Load Accounts");
 
@@ -43,18 +46,33 @@ public class AccountPanel extends NavigationItem {
         accountChooser.addChoosableFileFilter(new FileNameExtensionFilter("", "txt"));
         loadAccounts.addActionListener(new LoadAccountsListener(wireBot, parent, accountChooser));
 
+        JPanel serviceSettingsPanel = new JPanel();
+
+        serviceSettingsPanel.setLayout(new GridLayout(0, 1));
+
         JComboBox<ServiceServer> serviceBox = new JComboBox<>();
         Arrays.stream(ServiceServer.values()).forEach(serviceBox::addItem);
 
         serviceBox.setSelectedItem(ServiceServer.MOJANG);
 
+        AtomicReference<JPanel> serviceSettings = new AtomicReference<>(getServiceSettings(ServiceServer.MOJANG));
+
         serviceBox.addActionListener(action -> {
             ServerWrecker.getInstance().setServiceServer((ServiceServer) serviceBox.getSelectedItem());
+
+            serviceSettingsPanel.remove(serviceSettings.get());
+            serviceSettings.set(getServiceSettings((ServiceServer) serviceBox.getSelectedItem()));
+            serviceSettingsPanel.add(serviceSettings.get());
+            serviceSettingsPanel.revalidate();
+
             ServerWrecker.getLogger().info("Switched auth servers to {}", ((ServiceServer) Objects.requireNonNull(serviceBox.getSelectedItem())).getName());
         });
 
+        serviceSettingsPanel.add(serviceBox);
+        serviceSettingsPanel.add(serviceSettings.get());
+
         accounts.add(loadAccounts);
-        accounts.add(serviceBox);
+        accounts.add(serviceSettingsPanel);
 
         add(accounts);
 
@@ -77,6 +95,21 @@ public class AccountPanel extends NavigationItem {
         proxies.add(accPerProxy);
 
         add(proxies);
+    }
+
+    private JPanel getServiceSettings(ServiceServer service) {
+        JPanel serviceSettingsPanel = new JPanel();
+
+        service.getConfigKeys().forEach(key -> {
+            JLabel label = new JLabel(key);
+            JTextField field = new JTextField();
+            field.setText("");
+            field.setSize(20, 60);
+            serviceSettingsPanel.add(label);
+            serviceSettingsPanel.add(field);
+        });
+
+        return serviceSettingsPanel;
     }
 
     @Override
