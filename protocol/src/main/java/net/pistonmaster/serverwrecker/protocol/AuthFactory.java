@@ -52,6 +52,7 @@ public class AuthFactory {
 
     public static IPacketWrapper authenticate(GameVersion gameVersion, String username, String password, Proxy proxy, ServiceServer serviceServer, Map<String, String> serviceServerConfig) throws Exception {
         AuthenticationService authService = switch (serviceServer) {
+            case OFFLINE -> new OfflineAuthenticationService();
             case MOJANG -> new MojangAuthenticationService();
             case MICROSOFT -> new MsaAuthenticationService(serviceServerConfig.get("clientId"));
         };

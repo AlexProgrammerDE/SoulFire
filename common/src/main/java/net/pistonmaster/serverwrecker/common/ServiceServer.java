@@ -24,12 +24,13 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@RequiredArgsConstructor
 @Getter
+@RequiredArgsConstructor
 public enum ServiceServer {
     // , URI.create("https://login.microsoftonline.com/"), URI.create("https://login.microsoftonline.com/")
     MOJANG("Mojang"),
-    MICROSOFT("Microsoft", List.of("clientId"));
+    MICROSOFT("Microsoft", List.of("clientId")),
+    OFFLINE("Offline");
     // THE_ALTENING("The Altening (1.16+ only)", URI.create("https://authserver.thealtening.com/"), URI.create("https://sessionserver.thealtening.com/"));
 
     private final String name;
