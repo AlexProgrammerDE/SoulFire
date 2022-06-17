@@ -4,7 +4,10 @@
   ],
   "packageRules": [
     {
-      "matchPackageNames": ["com.github.GeyserMC:MCProtocolLib"],
+      "matchPackageNames": [
+        "com.github.GeyserMC:MCProtocolLib",
+        "com.github.GeyserMC:mcauthlib"
+      ],
       "enabled": false
     },
     {
