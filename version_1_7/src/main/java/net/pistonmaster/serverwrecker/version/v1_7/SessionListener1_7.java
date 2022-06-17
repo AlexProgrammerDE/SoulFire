@@ -21,9 +21,12 @@ package net.pistonmaster.serverwrecker.version.v1_7;
 
 import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.ServerDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPlayerListEntryPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerUpdateHealthPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.github.steveice10.packetlib.event.session.PacketReceivedEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
@@ -33,6 +36,7 @@ import net.pistonmaster.serverwrecker.common.SessionEventBus;
 @RequiredArgsConstructor
 public class SessionListener1_7 extends SessionAdapter {
     private final SessionEventBus bus;
+    private final ProtocolWrapper1_7 wrapper;
 
     @Override
     public void packetReceived(PacketReceivedEvent receiveEvent) {
@@ -50,6 +54,8 @@ public class SessionListener1_7 extends SessionAdapter {
             bus.onHealth(healthPacket.getHealth(), healthPacket.getFood());
         } else if (receiveEvent.getPacket() instanceof ServerJoinGamePacket) {
             bus.onJoin();
+        } else if (receiveEvent.getPacket() instanceof ServerDisconnectPacket disconnectPacket) {
+            bus.onDisconnect(disconnectPacket.getReason().getFullText(), null);
         }
     }
 

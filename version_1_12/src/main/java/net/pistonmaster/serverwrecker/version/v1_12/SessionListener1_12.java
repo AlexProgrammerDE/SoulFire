@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.version.v1_12;
 
 import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.ServerDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
@@ -33,27 +34,26 @@ import net.pistonmaster.serverwrecker.common.SessionEventBus;
 @RequiredArgsConstructor
 public class SessionListener1_12 extends SessionAdapter {
     private final SessionEventBus bus;
+    private final ProtocolWrapper1_12 wrapper;
 
     @Override
     public void packetReceived(PacketReceivedEvent receiveEvent) {
-        if (receiveEvent.getPacket() instanceof ServerChatPacket) {
-            ServerChatPacket chatPacket = receiveEvent.getPacket();
+        if (receiveEvent.getPacket() instanceof ServerChatPacket chatPacket) {
             Message message = chatPacket.getMessage();
             bus.onChat(message.getFullText());
-        } else if (receiveEvent.getPacket() instanceof ServerPlayerPositionRotationPacket) {
-            ServerPlayerPositionRotationPacket posPacket = receiveEvent.getPacket();
-
+        } else if (receiveEvent.getPacket() instanceof ServerPlayerPositionRotationPacket posPacket) {
             double posX = posPacket.getX();
             double posY = posPacket.getY();
             double posZ = posPacket.getZ();
             float pitch = posPacket.getPitch();
             float yaw = posPacket.getYaw();
             bus.onPosition(posX, posY, posZ, pitch, yaw);
-        } else if (receiveEvent.getPacket() instanceof ServerPlayerHealthPacket) {
-            ServerPlayerHealthPacket healthPacket = receiveEvent.getPacket();
+        } else if (receiveEvent.getPacket() instanceof ServerPlayerHealthPacket healthPacket) {
             bus.onHealth(healthPacket.getHealth(), healthPacket.getFood());
         } else if (receiveEvent.getPacket() instanceof ServerJoinGamePacket) {
             bus.onJoin();
+        } else if (receiveEvent.getPacket() instanceof ServerDisconnectPacket disconnectPacket) {
+            bus.onDisconnect(disconnectPacket.getReason().getFullText(), null);
         }
     }
 

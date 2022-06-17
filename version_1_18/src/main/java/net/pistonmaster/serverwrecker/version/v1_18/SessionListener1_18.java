@@ -21,6 +21,8 @@ package net.pistonmaster.serverwrecker.version.v1_18;
 
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDisconnectPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerInfoPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
@@ -52,10 +54,10 @@ public class SessionListener1_18 extends SessionAdapter {
             bus.onPosition(posX, posY, posZ, pitch, yaw);
         } else if (packet instanceof ClientboundSetHealthPacket healthPacket) {
             bus.onHealth(healthPacket.getHealth(), healthPacket.getFood());
-        } else if (packet instanceof ClientboundPlayerInfoPacket infoPacket) {
-            if (infoPacket.getAction() == PlayerListEntryAction.ADD_PLAYER && infoPacket.getEntries()[0].getProfile().getName().equals(wrapper.getProfileName())) {
-                bus.onJoin(); // TODO Implement everywhere else
-            }
+        } else if (packet instanceof ClientboundLoginPacket) {
+            bus.onJoin();
+        } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
+            bus.onDisconnect(PlainTextComponentSerializer.plainText().serialize(disconnectPacket.getReason()), null);
         }
     }
 

@@ -50,7 +50,7 @@ public record SessionEventBus(Options options, Logger log,
     }
 
     public void onDisconnect(String reason, Throwable cause) {
-        if (cause.getClass().getSimpleName().equals("UnexpectedEncryptionException")) {
+        if (cause != null && cause.getClass().getSimpleName().equals("UnexpectedEncryptionException")) {
             log.error("Server is online mode!");
         } else if (reason.contains("Connection refused")) {
             log.error("Server is unreachable!");
