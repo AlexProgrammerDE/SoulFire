@@ -37,7 +37,7 @@ public class OfflineAuthenticationService extends AuthenticationService {
         // No login procedure needed
         setAccessToken("");
         selectedProfile = new GameProfile(
-                UUID.nameUUIDFromBytes(username.getBytes(StandardCharsets.UTF_8)),
+                UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8)),
                 username
         );
     }
