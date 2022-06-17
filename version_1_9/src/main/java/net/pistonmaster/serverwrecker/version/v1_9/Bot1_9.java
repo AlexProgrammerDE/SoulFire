@@ -27,7 +27,6 @@ import com.github.steveice10.packetlib.tcp.TcpClientSession;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.common.*;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -69,7 +68,7 @@ public class Bot1_9 extends AbstractBot {
 
         SessionEventBus bus = new SessionEventBus(options, logger, this);
 
-        session.addListener(new SessionListener1_9(bus));
+        session.addListener(new SessionListener1_9(bus, account));
 
         session.connect();
     }

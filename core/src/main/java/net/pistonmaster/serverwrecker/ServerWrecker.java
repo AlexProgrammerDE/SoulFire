@@ -49,6 +49,7 @@ public class ServerWrecker {
     private final List<AbstractBot> clients = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final List<BotProxy> passWordProxies = new ArrayList<>();
+    private final Map<String, String> serviceServerConfig = new HashMap<>();
     private boolean running = false;
     @Setter
     private boolean paused = false;
@@ -58,7 +59,6 @@ public class ServerWrecker {
     private JFrame window;
     @Setter
     private ServiceServer serviceServer = ServiceServer.MOJANG;
-    private final Map<String, String> serviceServerConfig = new HashMap<>();
 
     public ServerWrecker() {
         ((ch.qos.logback.classic.Logger) logger).setLevel(Level.INFO);

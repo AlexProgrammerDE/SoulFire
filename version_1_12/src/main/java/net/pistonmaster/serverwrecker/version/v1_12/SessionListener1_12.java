@@ -29,12 +29,13 @@ import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.github.steveice10.packetlib.event.session.PacketReceivedEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 import net.pistonmaster.serverwrecker.common.SessionEventBus;
 
 @RequiredArgsConstructor
 public class SessionListener1_12 extends SessionAdapter {
     private final SessionEventBus bus;
-    private final ProtocolWrapper1_12 wrapper;
+    private final IPacketWrapper wrapper;
 
     @Override
     public void packetReceived(PacketReceivedEvent receiveEvent) {

@@ -17,44 +17,45 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.version.v1_16;
+package net.pistonmaster.serverwrecker.version.v1_19;
 
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerDisconnectPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDisconnectPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
+import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
-import com.github.steveice10.packetlib.event.session.PacketReceivedEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
+import com.github.steveice10.packetlib.packet.Packet;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 import net.pistonmaster.serverwrecker.common.SessionEventBus;
 
 @RequiredArgsConstructor
-public class SessionListener1_16 extends SessionAdapter {
+public class SessionListener1_19 extends SessionAdapter {
     private final SessionEventBus bus;
-    private final ProtocolWrapper1_16 wrapper;
+    private final IPacketWrapper wrapper;
 
     @Override
-    public void packetReceived(PacketReceivedEvent receiveEvent) {
-        if (receiveEvent.getPacket() instanceof ServerChatPacket chatPacket) {
-            // Message API was replaced in version 1.16
-            Component message = chatPacket.getMessage();
+    public void packetReceived(Session session, Packet packet) {
+        if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
+            Component message = chatPacket.getSignedContent();
             bus.onChat(PlainTextComponentSerializer.plainText().serialize(message));
-        } else if (receiveEvent.getPacket() instanceof ServerPlayerPositionRotationPacket posPacket) {
+        } else if (packet instanceof ClientboundPlayerPositionPacket posPacket) {
             double posX = posPacket.getX();
             double posY = posPacket.getY();
             double posZ = posPacket.getZ();
             float pitch = posPacket.getPitch();
             float yaw = posPacket.getYaw();
             bus.onPosition(posX, posY, posZ, pitch, yaw);
-        } else if (receiveEvent.getPacket() instanceof ServerPlayerHealthPacket healthPacket) {
+        } else if (packet instanceof ClientboundSetHealthPacket healthPacket) {
             bus.onHealth(healthPacket.getHealth(), healthPacket.getFood());
-        } else if (receiveEvent.getPacket() instanceof ServerJoinGamePacket) {
+        } else if (packet instanceof ClientboundLoginPacket) {
             bus.onJoin();
-        } else if (receiveEvent.getPacket() instanceof ServerDisconnectPacket disconnectPacket) {
+        } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
             bus.onDisconnect(PlainTextComponentSerializer.plainText().serialize(disconnectPacket.getReason()), null);
         }
     }

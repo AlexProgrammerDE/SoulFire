@@ -28,9 +28,9 @@ setOf(
     "version_1_8",
     "version_1_9",
     "version_1_12",
-    "version_1_16",
     "version_1_17",
     "version_1_18",
+    "version_1_19",
 ).forEach {
     setupSWSubproject(it)
 }

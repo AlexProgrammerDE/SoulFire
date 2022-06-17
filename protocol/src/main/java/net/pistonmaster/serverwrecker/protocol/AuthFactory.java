@@ -27,9 +27,9 @@ import net.pistonmaster.serverwrecker.common.GameVersion;
 import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 import net.pistonmaster.serverwrecker.common.ServiceServer;
 import net.pistonmaster.serverwrecker.version.v1_12.ProtocolWrapper1_12;
-import net.pistonmaster.serverwrecker.version.v1_16.ProtocolWrapper1_16;
 import net.pistonmaster.serverwrecker.version.v1_17.ProtocolWrapper1_17;
 import net.pistonmaster.serverwrecker.version.v1_18.ProtocolWrapper1_18;
+import net.pistonmaster.serverwrecker.version.v1_19.ProtocolWrapper1_19;
 import net.pistonmaster.serverwrecker.version.v1_7.ProtocolWrapper1_7;
 import net.pistonmaster.serverwrecker.version.v1_8.ProtocolWrapper1_8;
 import net.pistonmaster.serverwrecker.version.v1_9.ProtocolWrapper1_9;
@@ -44,9 +44,9 @@ public class AuthFactory {
             case VERSION_1_8 -> new ProtocolWrapper1_8(username);
             case VERSION_1_9 -> new ProtocolWrapper1_9(username);
             case VERSION_1_12 -> new ProtocolWrapper1_12(username);
-            case VERSION_1_16 -> new ProtocolWrapper1_16(username);
             case VERSION_1_17 -> new ProtocolWrapper1_17(username);
             case VERSION_1_18 -> new ProtocolWrapper1_18(username);
+            case VERSION_1_19 -> new ProtocolWrapper1_19(username);
         };
     }
 
@@ -71,9 +71,9 @@ public class AuthFactory {
             case VERSION_1_8 -> new ProtocolWrapper1_8(profile, accessToken);
             case VERSION_1_9 -> new ProtocolWrapper1_9(profile, accessToken);
             case VERSION_1_12 -> new ProtocolWrapper1_12(profile, accessToken);
-            case VERSION_1_16 -> new ProtocolWrapper1_16(profile, accessToken);
             case VERSION_1_17 -> new ProtocolWrapper1_17(profile, accessToken);
             case VERSION_1_18 -> new ProtocolWrapper1_18(profile, accessToken);
+            case VERSION_1_19 -> new ProtocolWrapper1_19(profile, accessToken);
         };
     }
 }

@@ -21,9 +21,9 @@ package net.pistonmaster.serverwrecker.protocol;
 
 import net.pistonmaster.serverwrecker.common.*;
 import net.pistonmaster.serverwrecker.version.v1_12.Bot1_12;
-import net.pistonmaster.serverwrecker.version.v1_16.Bot1_16;
 import net.pistonmaster.serverwrecker.version.v1_17.Bot1_17;
 import net.pistonmaster.serverwrecker.version.v1_18.Bot1_18;
+import net.pistonmaster.serverwrecker.version.v1_19.Bot1_19;
 import net.pistonmaster.serverwrecker.version.v1_7.Bot1_7;
 import net.pistonmaster.serverwrecker.version.v1_8.Bot1_8;
 import net.pistonmaster.serverwrecker.version.v1_9.Bot1_9;
@@ -41,13 +41,20 @@ public class BotFactory {
         Logger botLogger = LoggerFactory.getLogger(account.getProfileName());
 
         return switch (options.gameVersion()) {
-            case VERSION_1_7 -> new Bot1_7(options, account, address, serviceServer, proxyType, username, password, botLogger);
-            case VERSION_1_8 -> new Bot1_8(options, account, address, serviceServer, proxyType, username, password, botLogger);
-            case VERSION_1_9 -> new Bot1_9(options, account, address, serviceServer, proxyType, username, password, botLogger);
-            case VERSION_1_12 -> new Bot1_12(options, account, address, serviceServer, proxyType, username, password, botLogger);
-            case VERSION_1_16 -> new Bot1_16(options, account, address, serviceServer, proxyType, username, password, botLogger);
-            case VERSION_1_17 -> new Bot1_17(options, account, address, serviceServer, proxyType, username, password, botLogger);
-            case VERSION_1_18 -> new Bot1_18(options, account, address, serviceServer, proxyType, username, password, botLogger);
+            case VERSION_1_7 ->
+                    new Bot1_7(options, account, address, serviceServer, proxyType, username, password, botLogger);
+            case VERSION_1_8 ->
+                    new Bot1_8(options, account, address, serviceServer, proxyType, username, password, botLogger);
+            case VERSION_1_9 ->
+                    new Bot1_9(options, account, address, serviceServer, proxyType, username, password, botLogger);
+            case VERSION_1_12 ->
+                    new Bot1_12(options, account, address, serviceServer, proxyType, username, password, botLogger);
+            case VERSION_1_17 ->
+                    new Bot1_17(options, account, address, serviceServer, proxyType, username, password, botLogger);
+            case VERSION_1_18 ->
+                    new Bot1_18(options, account, address, serviceServer, proxyType, username, password, botLogger);
+            case VERSION_1_19 ->
+                    new Bot1_19(options, account, address, serviceServer, proxyType, username, password, botLogger);
         };
     }
 }

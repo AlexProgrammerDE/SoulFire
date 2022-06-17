@@ -19,11 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.version.v1_18;
 
-import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerInfoPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
 import com.github.steveice10.packetlib.Session;
@@ -33,12 +31,13 @@ import com.github.steveice10.packetlib.packet.Packet;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 import net.pistonmaster.serverwrecker.common.SessionEventBus;
 
 @RequiredArgsConstructor
 public class SessionListener1_18 extends SessionAdapter {
     private final SessionEventBus bus;
-    private final ProtocolWrapper1_18 wrapper;
+    private final IPacketWrapper wrapper;
 
     @Override
     public void packetReceived(Session session, Packet packet) {

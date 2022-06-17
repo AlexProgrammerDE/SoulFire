@@ -17,10 +17,10 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.version.v1_16;
+package net.pistonmaster.serverwrecker.version.v1_19;
 
-import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
@@ -28,12 +28,12 @@ import com.github.steveice10.packetlib.tcp.TcpClientSession;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.common.*;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.time.Instant;
 
 @Getter
-public class Bot1_16 extends AbstractBot {
+public class Bot1_19 extends AbstractBot {
     private final Options options;
     private final ProxyInfo proxyInfo;
     private final Logger logger;
@@ -41,7 +41,7 @@ public class Bot1_16 extends AbstractBot {
     private final ServiceServer serviceServer;
     private Session session;
 
-    public Bot1_16(Options options, IPacketWrapper account, InetSocketAddress address, ServiceServer serviceServer, ProxyType proxyType, String username, String password, Logger logger) {
+    public Bot1_19(Options options, IPacketWrapper account, InetSocketAddress address, ServiceServer serviceServer, ProxyType proxyType, String username, String password, Logger logger) {
         this.options = options;
         this.account = account;
         this.logger = logger;
@@ -64,19 +64,19 @@ public class Bot1_16 extends AbstractBot {
         }
 
         session.setConnectTimeout(options.connectTimeout());
-        session.setCompressionThreshold(options.compressionThreshold());
+        session.setCompressionThreshold(options.compressionThreshold(), true);
         session.setReadTimeout(options.readTimeout());
         session.setWriteTimeout(options.writeTimeout());
 
         SessionEventBus bus = new SessionEventBus(options, logger, this);
 
-        session.addListener(new SessionListener1_16(bus));
+        session.addListener(new SessionListener1_19(bus, account));
 
         session.connect();
     }
 
     public void sendMessage(String message) {
-        session.send(new ClientChatPacket(message));
+        session.send(new ServerboundChatPacket(message, Instant.now().toEpochMilli(), 0, new byte[0], false));
     }
 
     public boolean isOnline() {
@@ -96,7 +96,7 @@ public class Bot1_16 extends AbstractBot {
     }
 
     public void sendPosition(double x, double y, double z) {
-        session.send(new ClientPlayerPositionPacket(true, x, y, z));
+        session.send(new ServerboundMovePlayerPosPacket(true, x, y, z));
     }
 
     public void disconnect() {

@@ -33,84 +33,84 @@ import java.util.concurrent.Callable;
 @RequiredArgsConstructor
 @Command(name = "serverwrecker", mixinStandardHelpOptions = true, version = "ServerWrecker v" + ServerWrecker.VERSION, description = "Stress test a minecraft server using bots")
 public class CommandDefinition implements Callable<Integer> {
-	private final File dataFolder;
+    private final File dataFolder;
 
-	@Option(names = {"-h", "--host"}, description = "The hostname to connect to. Defaults to 127.0.0.1")
-	private String host = "127.0.0.1";
+    @Option(names = {"-h", "--host"}, description = "The hostname to connect to. Defaults to 127.0.0.1")
+    private String host = "127.0.0.1";
 
-	@Option(names = {"-p", "--port"}, description = "The port to connect to. Defaults to 25565")
-	private int port = 25565;
+    @Option(names = {"-p", "--port"}, description = "The port to connect to. Defaults to 25565")
+    private int port = 25565;
 
-	@Option(names = {"-a", "--amount"}, description = "The amount of bots to connect to the server. Defaults to 20")
-	private int amount = 20;
+    @Option(names = {"-a", "--amount"}, description = "The amount of bots to connect to the server. Defaults to 20")
+    private int amount = 20;
 
-	@Option(names = {"-d", "--delay"}, description = "The delay between bot spawns, in milliseconds. Defaults to 1000")
-	private int joinDelay = 1000;
+    @Option(names = {"-d", "--delay"}, description = "The delay between bot spawns, in milliseconds. Defaults to 1000")
+    private int joinDelay = 1000;
 
-	@Option(names = {"-n", "--name"}, description = "The format for bot names. Requires exactly one integer placeholder '%%d'. Defaults to 'Bot-%%d'")
-	private String nameFormat = "Bot-%d";
+    @Option(names = {"-n", "--name"}, description = "The format for bot names. Requires exactly one integer placeholder '%%d'. Defaults to 'Bot-%%d'")
+    private String nameFormat = "Bot-%d";
 
-	@Option(names = {"-v", "--mcversion"}, description = "The Minecraft version of the server to connect to. Defaults to latest")
-	private GameVersion version = GameVersion.getNewest();
+    @Option(names = {"-v", "--mcversion"}, description = "The Minecraft version of the server to connect to. Defaults to latest")
+    private GameVersion version = GameVersion.getNewest();
 
-	@Option(names = {"-r", "--register"}, description = "Makes Bots run the /register and /login command after joining with username and password being " + ServerWrecker.PROJECT_NAME)
-	private boolean autoRegister;
+    @Option(names = {"-r", "--register"}, description = "Makes Bots run the /register and /login command after joining with username and password being " + ServerWrecker.PROJECT_NAME)
+    private boolean autoRegister;
 
-	@Option(names = {"--help"}, usageHelp = true, description = "Shows this help message.")
-	private boolean help;
+    @Option(names = {"--help"}, usageHelp = true, description = "Shows this help message.")
+    private boolean help;
 
-	@Option(names = {"--debug"}, description = "Logs additional information useful for debugging")
-	private boolean debug;
+    @Option(names = {"--debug"}, description = "Logs additional information useful for debugging")
+    private boolean debug;
 
-	@Option(names = {"--proxytype"}, description = "The proxies type. Defaults to socks5")
-	private ProxyType proxy = ProxyType.SOCKS5;
+    @Option(names = {"--proxytype"}, description = "The proxies type. Defaults to socks5")
+    private ProxyType proxy = ProxyType.SOCKS5;
 
-	@Option(names = {"--accountsperproxy"}, description = "How many accounts can be on a single proxy. Defaults to -1")
-	private int accountsPerProxy = -1;
+    @Option(names = {"--accountsperproxy"}, description = "How many accounts can be on a single proxy. Defaults to -1")
+    private int accountsPerProxy = -1;
 
-	@Option(names = {"--readtimeout"}, description = "The client read timeout.")
-	private int readTimeout = 30;
+    @Option(names = {"--readtimeout"}, description = "The client read timeout.")
+    private int readTimeout = 30;
 
-	@Option(names = {"--writetimout"}, description = "The client write timeout.")
-	private int writeTimout = 0;
+    @Option(names = {"--writetimout"}, description = "The client write timeout.")
+    private int writeTimout = 0;
 
-	@Option(names = {"--connecttimeout"}, description = "The client connect timeout.")
-	private int connectTimeout = 30;
+    @Option(names = {"--connecttimeout"}, description = "The client connect timeout.")
+    private int connectTimeout = 30;
 
-	@Option(names = {"--compressionthreshold"}, description = "The client compression threshold.")
-	private int compressionThreshold = -1;
+    @Option(names = {"--compressionthreshold"}, description = "The client compression threshold.")
+    private int compressionThreshold = -1;
 
-	@Option(names = {"--registercommand"}, description = "What command should be executed to register?")
-	private String registerCommand = "/register %password% %password%";
+    @Option(names = {"--registercommand"}, description = "What command should be executed to register?")
+    private String registerCommand = "/register %password% %password%";
 
-	@Option(names = {"--logincommand"}, description = "What command should be executed to log in?")
-	private String loginCommand = "/login %password%";
+    @Option(names = {"--logincommand"}, description = "What command should be executed to log in?")
+    private String loginCommand = "/login %password%";
 
-	@Option(names = {"--passwordformet"}, description = "What the password for registering should be.")
-	private String passwordFormat = "ServerWrecker";
+    @Option(names = {"--passwordformet"}, description = "What the password for registering should be.")
+    private String passwordFormat = "ServerWrecker";
 
-	@Override
-	public Integer call() {
-		Main.initPlugins(dataFolder);
-		ServerWrecker.getInstance().start(new Options(
-				host,
-				port,
-				amount,
-				joinDelay,
-				nameFormat,
-				version,
-				autoRegister,
-				debug,
-				proxy,
-				accountsPerProxy,
-				readTimeout,
-				writeTimout,
-				connectTimeout,
-				compressionThreshold,
-				registerCommand,
-				loginCommand,
-				passwordFormat
-		));
-		return 0;
-	}
+    @Override
+    public Integer call() {
+        Main.initPlugins(dataFolder);
+        ServerWrecker.getInstance().start(new Options(
+                host,
+                port,
+                amount,
+                joinDelay,
+                nameFormat,
+                version,
+                autoRegister,
+                debug,
+                proxy,
+                accountsPerProxy,
+                readTimeout,
+                writeTimout,
+                connectTimeout,
+                compressionThreshold,
+                registerCommand,
+                loginCommand,
+                passwordFormat
+        ));
+        return 0;
+    }
 }

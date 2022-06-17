@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.version.v1_16;
+package net.pistonmaster.serverwrecker.version.v1_19;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
@@ -25,12 +25,12 @@ import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 
 import java.util.UUID;
 
-public class ProtocolWrapper1_16 extends MinecraftProtocol implements IPacketWrapper {
-    public ProtocolWrapper1_16(String username) {
+public class ProtocolWrapper1_19 extends MinecraftProtocol implements IPacketWrapper {
+    public ProtocolWrapper1_19(String username) {
         super(username);
     }
 
-    public ProtocolWrapper1_16(GameProfile profile, String accessToken) {
+    public ProtocolWrapper1_19(GameProfile profile, String accessToken) {
         super(profile, accessToken);
     }
 
