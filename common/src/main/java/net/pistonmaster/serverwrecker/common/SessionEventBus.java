@@ -23,51 +23,81 @@ import org.slf4j.Logger;
 
 public record SessionEventBus(Options options, Logger log,
                               AbstractBot bot) {
-    public static final char COMMAND_IDENTIFIER = '/';
-
     public void onChat(String message) {
-        log.info("Received Message: {}", message);
+        try {
+            log.info("Received Message: {}", message);
+        } catch (Exception e) {
+            log.error("Error while logging message", e);
+        }
     }
 
     public void onPosition(double x, double y, double z, float pitch, float yaw) {
-        bot.setLocation(new EntityLocation(x, y, z, pitch, yaw));
+        try {
+            bot.setLocation(new EntityLocation(x, y, z, pitch, yaw));
+        } catch (Exception e) {
+            log.error("Error while logging position", e);
+        }
     }
 
     public void onHealth(float health, float food) {
-        bot.setHealth(health);
-        bot.setFood(food);
+        try {
+            bot.setHealth(health);
+            bot.setFood(food);
+        } catch (Exception e) {
+            log.error("Error while logging health", e);
+        }
     }
 
     public void onJoin() {
-        if (options.autoRegister()) {
-            String password = options.passwordFormat();
+        try {
+            if (options.autoRegister()) {
+                String password = options.passwordFormat();
 
-            // TODO: Listen for messages
-            // TODO: Add more password options
-            bot.sendMessage(options.registerCommand().replace("%password%", password));
-            bot.sendMessage(options.loginCommand().replace("%password%", password));
+                // TODO: Listen for messages
+                // TODO: Add more password options
+                bot.sendMessage(options.registerCommand().replace("%password%", password));
+                bot.sendMessage(options.loginCommand().replace("%password%", password));
+            }
+        } catch (Exception e) {
+            log.error("Error while logging join", e);
+        }
+    }
+
+    public void onLoginDisconnectPacket(String reason) {
+        try {
+            log.error("Login failed: {}", reason);
+        } catch (Exception e) {
+            log.error("Error while logging login failed", e);
         }
     }
 
     public void onDisconnectPacket(String reason) {
-        if (reason.contains("Connection refused")) {
-            log.error("Server is unreachable!");
-        } else {
+        try {
             log.error("Disconnected: {}", reason);
+        } catch (Exception e) {
+            log.error("Error while logging disconnect", e);
         }
     }
 
     public void onDisconnectEvent(String reason, Throwable cause) {
-        if (cause != null && cause.getClass().getSimpleName().equals("UnexpectedEncryptionException")) {
-            log.error("Server is online mode!");
-        } else if (reason.contains("Connection refused")) {
-            log.error("Server is unreachable!");
-        } else {
-            log.error("Disconnected: {}", reason);
-        }
+        try {
+            if (cause == null) { // Packet wise disconnects have no cause
+                return;
+            }
 
-        if (options.debug()) {
-            log.debug("Bot disconnected with cause: ", cause);
+            if (cause.getClass().getSimpleName().equals("UnexpectedEncryptionException")) {
+                log.error("Server is online mode!");
+            } else if (reason.contains("Connection refused")) {
+                log.error("Server is not reachable!");
+            } else {
+                log.error("Disconnected: {}", reason);
+            }
+
+            if (options.debug()) {
+                log.debug("Bot disconnected with cause: ", cause);
+            }
+        } catch (Exception e) {
+            log.error("Error while logging disconnect", e);
         }
     }
 }

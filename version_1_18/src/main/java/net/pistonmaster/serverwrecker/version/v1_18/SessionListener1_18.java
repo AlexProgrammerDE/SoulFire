@@ -24,6 +24,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDi
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
+import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
@@ -57,6 +58,8 @@ public class SessionListener1_18 extends SessionAdapter {
             bus.onJoin();
         } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
             bus.onDisconnectPacket(PlainTextComponentSerializer.plainText().serialize(disconnectPacket.getReason()));
+        } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {
+            bus.onLoginDisconnectPacket(PlainTextComponentSerializer.plainText().serialize(loginDisconnectPacket.getReason()));
         }
     }
 

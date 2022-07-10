@@ -25,6 +25,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.ServerDisconnectPa
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
+import com.github.steveice10.mc.protocol.packet.login.server.LoginDisconnectPacket;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.github.steveice10.packetlib.event.session.PacketReceivedEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
@@ -55,6 +56,8 @@ public class SessionListener1_9 extends SessionAdapter {
             bus.onJoin();
         } else if (receiveEvent.getPacket() instanceof ServerDisconnectPacket disconnectPacket) {
             bus.onDisconnectPacket(disconnectPacket.getReason().getFullText());
+        } else if (receiveEvent.getPacket() instanceof LoginDisconnectPacket loginDisconnectPacket) {
+            bus.onLoginDisconnectPacket(loginDisconnectPacket.getReason().getFullText());
         }
     }
 
