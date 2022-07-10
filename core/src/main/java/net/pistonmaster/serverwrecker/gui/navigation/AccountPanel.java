@@ -36,7 +36,7 @@ public class AccountPanel extends NavigationItem {
     public static final JComboBox<ProxyType> proxyTypeCombo = new JComboBox<>();
     public static final JSpinner accPerProxy = new JSpinner();
 
-    public AccountPanel(ServerWrecker wireBot, JFrame parent) {
+    public AccountPanel(ServerWrecker serverWrecker, JFrame parent) {
         JPanel accounts = new JPanel();
         accounts.setLayout(new GridBagLayout());
 
@@ -44,7 +44,7 @@ public class AccountPanel extends NavigationItem {
 
         JFileChooser accountChooser = new JFileChooser();
         accountChooser.addChoosableFileFilter(new FileNameExtensionFilter("", "txt"));
-        loadAccounts.addActionListener(new LoadAccountsListener(wireBot, parent, accountChooser));
+        loadAccounts.addActionListener(new LoadAccountsListener(serverWrecker, parent, accountChooser));
 
         JPanel serviceSettingsPanel = new JPanel();
 
@@ -81,7 +81,7 @@ public class AccountPanel extends NavigationItem {
         JFileChooser proxiesChooser = new JFileChooser();
 
         proxiesChooser.addChoosableFileFilter(new FileNameExtensionFilter("", "txt"));
-        loadProxies.addActionListener(new LoadProxiesListener(wireBot, parent, proxiesChooser));
+        loadProxies.addActionListener(new LoadProxiesListener(serverWrecker, parent, proxiesChooser));
 
         Arrays.stream(ProxyType.values()).forEach(proxyTypeCombo::addItem);
 

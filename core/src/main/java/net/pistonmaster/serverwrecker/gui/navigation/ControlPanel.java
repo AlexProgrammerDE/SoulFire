@@ -26,7 +26,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ControlPanel extends JPanel {
-    public ControlPanel(RightPanelContainer container, ServerWrecker wireBot) {
+    public ControlPanel(RightPanelContainer container, ServerWrecker serverWrecker) {
         JButton startButton = new JButton("Start");
         JButton pauseButton = new JButton("Pause");
         JButton stopButton = new JButton("Stop");
@@ -43,18 +43,18 @@ public class ControlPanel extends JPanel {
         startButton.addActionListener(action -> {
             Options options = container.getPanel(SettingsPanel.class).generateOptions();
 
-            wireBot.getThreadPool().submit(() -> {
+            serverWrecker.getThreadPool().submit(() -> {
                 try {
                     startButton.setEnabled(false);
 
                     pauseButton.setEnabled(true);
                     pauseButton.setText("Pause");
-                    wireBot.setPaused(false);
+                    serverWrecker.setPaused(false);
 
                     stopButton.setEnabled(true);
 
                     ServerWrecker.getLogger().info("Preparing bot attack at {}", options.hostname());
-                    wireBot.start(options);
+                    serverWrecker.start(options);
                 } catch (Exception ex) {
                     ServerWrecker.getLogger().info(ex.getMessage(), ex);
                 }
@@ -62,8 +62,8 @@ public class ControlPanel extends JPanel {
         });
 
         pauseButton.addActionListener(action -> {
-            wireBot.setPaused(!wireBot.isPaused());
-            if (wireBot.isPaused()) {
+            serverWrecker.setPaused(!serverWrecker.isPaused());
+            if (serverWrecker.isPaused()) {
                 ServerWrecker.getLogger().info("Paused bot attack");
                 pauseButton.setText("Resume");
             } else {
@@ -77,12 +77,12 @@ public class ControlPanel extends JPanel {
 
             pauseButton.setEnabled(false);
             pauseButton.setText("Pause");
-            wireBot.setPaused(false);
+            serverWrecker.setPaused(false);
 
             stopButton.setEnabled(false);
 
             ServerWrecker.getLogger().info("Stopping bot attack");
-            wireBot.stop();
+            serverWrecker.stop();
         });
     }
 }

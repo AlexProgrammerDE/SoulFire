@@ -38,12 +38,12 @@ public class RightPanelContainer extends JPanel {
     @Getter
     private final List<NavigationItem> panels = new ArrayList<>();
 
-    public RightPanelContainer(ServerWrecker wireBot, JFrame parent) {
+    public RightPanelContainer(ServerWrecker serverWrecker, JFrame parent) {
         super();
 
         panels.add(new SettingsPanel());
         panels.add(new AddonPanel());
-        panels.add(new AccountPanel(wireBot, parent));
+        panels.add(new AccountPanel(serverWrecker, parent));
         panels.add(new DeveloperPanel());
 
         setLayout(new CardLayout());

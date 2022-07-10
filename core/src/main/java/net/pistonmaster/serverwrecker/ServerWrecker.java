@@ -156,18 +156,18 @@ public class ServerWrecker {
         for (AbstractBot client : clients) {
             i++;
 
+            try {
+                TimeUnit.MILLISECONDS.sleep(options.joinDelayMs());
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+
             while (paused) {
                 try {
                     TimeUnit.MILLISECONDS.sleep(100);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-            }
-
-            try {
-                TimeUnit.MILLISECONDS.sleep(options.joinDelayMs());
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
             }
 
             // Stop the bot in case the user aborted the attack
