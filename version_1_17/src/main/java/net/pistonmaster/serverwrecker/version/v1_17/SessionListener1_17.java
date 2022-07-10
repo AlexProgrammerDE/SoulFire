@@ -56,12 +56,12 @@ public class SessionListener1_17 extends SessionAdapter {
         } else if (receiveEvent.getPacket() instanceof ServerJoinGamePacket) {
             bus.onJoin();
         } else if (receiveEvent.getPacket() instanceof ServerDisconnectPacket disconnectPacket) {
-            bus.onDisconnect(PlainTextComponentSerializer.plainText().serialize(disconnectPacket.getReason()), null);
+            bus.onDisconnectPacket(PlainTextComponentSerializer.plainText().serialize(disconnectPacket.getReason()));
         }
     }
 
     @Override
     public void disconnected(DisconnectedEvent event) {
-        bus.onDisconnect(event.getReason(), event.getCause());
+        bus.onDisconnectEvent(event.getReason(), event.getCause());
     }
 }
