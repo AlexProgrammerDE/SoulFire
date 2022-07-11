@@ -37,5 +37,11 @@ public abstract class AbstractBot {
 
     public abstract boolean isOnline();
 
+    public abstract void sendPositionRotation(boolean onGround, double x, double y, double z, float yaw, float pitch);
+
+    public abstract void sendPosition(boolean onGround, double x, double y, double z);
+
+    public abstract void sendRotation(boolean onGround, float yaw, float pitch);
+
     public abstract IPacketWrapper getAccount();
 }

@@ -20,6 +20,9 @@
 package net.pistonmaster.serverwrecker.version.v1_9;
 
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerRotationPacket;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
@@ -54,6 +57,7 @@ public class Bot1_9 extends AbstractBot {
         }
     }
 
+    @Override
     public void connect(String host, int port) {
         if (proxyInfo == null) {
             session = new TcpClientSession(host, port, (PacketProtocol) account);
@@ -73,24 +77,35 @@ public class Bot1_9 extends AbstractBot {
         session.connect();
     }
 
+    @Override
     public void sendMessage(String message) {
         session.send(new ClientChatPacket(message));
     }
 
+    @Override
     public boolean isOnline() {
         return session != null && session.isConnected();
     }
 
+    @Override
+    public void sendPositionRotation(boolean onGround, double x, double y, double z, float yaw, float pitch) {
+        session.send(new ClientPlayerPositionRotationPacket(onGround, x, y, z, yaw, pitch));
+    }
+
+    @Override
+    public void sendPosition(boolean onGround, double x, double y, double z) {
+        session.send(new ClientPlayerPositionPacket(onGround, x, y, z));
+    }
+
+    @Override
+    public void sendRotation(boolean onGround, float yaw, float pitch) {
+        session.send(new ClientPlayerRotationPacket(onGround, yaw, pitch));
+    }
+
+    @Override
     public void disconnect() {
         if (session != null) {
             session.disconnect("Disconnect");
         }
-    }
-
-    public Proxy.Type convertType(ProxyType type) {
-        return switch (type) {
-            case HTTP -> Proxy.Type.HTTP;
-            case SOCKS4, SOCKS5 -> Proxy.Type.SOCKS;
-        };
     }
 }

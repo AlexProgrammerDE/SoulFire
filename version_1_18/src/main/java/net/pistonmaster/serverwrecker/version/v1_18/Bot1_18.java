@@ -21,6 +21,8 @@ package net.pistonmaster.serverwrecker.version.v1_18;
 
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
@@ -55,6 +57,7 @@ public class Bot1_18 extends AbstractBot {
         }
     }
 
+    @Override
     public void connect(String host, int port) {
         if (proxyInfo == null) {
             session = new TcpClientSession(host, port, (PacketProtocol) account);
@@ -74,18 +77,32 @@ public class Bot1_18 extends AbstractBot {
         session.connect();
     }
 
+    @Override
     public void sendMessage(String message) {
         session.send(new ServerboundChatPacket(message));
     }
 
+    @Override
     public boolean isOnline() {
         return session != null && session.isConnected();
     }
 
-    public void sendPosition(double x, double y, double z) {
-        session.send(new ServerboundMovePlayerPosPacket(true, x, y, z));
+    @Override
+    public void sendPositionRotation(boolean onGround, double x, double y, double z, float yaw, float pitch) {
+        session.send(new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
     }
 
+    @Override
+    public void sendPosition(boolean onGround, double x, double y, double z) {
+        session.send(new ServerboundMovePlayerPosPacket(onGround, x, y, z));
+    }
+
+    @Override
+    public void sendRotation(boolean onGround, float yaw, float pitch) {
+        session.send(new ServerboundMovePlayerRotPacket(onGround, yaw, pitch));
+    }
+
+    @Override
     public void disconnect() {
         if (session != null) {
             session.disconnect("Disconnect");
