@@ -82,18 +82,6 @@ public class Bot1_17 extends AbstractBot {
         return session != null && session.isConnected();
     }
 
-    public Session getSession() {
-        return session;
-    }
-
-    public Logger getLogger() {
-        return logger;
-    }
-
-    public ProxyInfo getProxy() {
-        return proxyInfo;
-    }
-
     public void sendPosition(double x, double y, double z) {
         session.send(new ClientPlayerPositionPacket(true, x, y, z));
     }

@@ -81,14 +81,6 @@ public class Bot1_7 extends AbstractBot {
         return session != null && session.isConnected();
     }
 
-    public Session getSession() {
-        return session;
-    }
-
-    public Logger getLogger() {
-        return logger;
-    }
-
     public void disconnect() {
         if (session != null) {
             session.disconnect("Disconnect");
