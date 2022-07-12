@@ -25,6 +25,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.common.*;
+import net.pistonmaster.serverwrecker.logging.LogUtil;
 import net.pistonmaster.serverwrecker.protocol.AuthFactory;
 import net.pistonmaster.serverwrecker.protocol.BotFactory;
 import org.slf4j.Logger;
@@ -61,9 +62,7 @@ public class ServerWrecker {
     private ServiceServer serviceServer = ServiceServer.MOJANG;
 
     public ServerWrecker() {
-        ((ch.qos.logback.classic.Logger) logger).setLevel(Level.INFO);
-        ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("io.netty")).setLevel(Level.INFO);
-        ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.pf4j")).setLevel(Level.INFO);
+        setupInfo();
 
         /*
         Authenticator.setDefault(new Authenticator() {
@@ -79,7 +78,13 @@ public class ServerWrecker {
     }
 
     public void start(Options options) {
-        running = true;
+        if (options.debug()) {
+            setupDebug();
+        } else {
+            setupInfo();
+        }
+
+        this.running = true;
 
         List<BotProxy> proxyCache = passWordProxies.isEmpty() ? Collections.emptyList() : ImmutableList.copyOf(passWordProxies);
         Iterator<BotProxy> proxyIterator = proxyCache.listIterator();
@@ -212,5 +217,19 @@ public class ServerWrecker {
 
     private Iterator<BotProxy> fromStartIfNoNext(Iterator<BotProxy> iterator, List<BotProxy> proxyList) {
         return iterator.hasNext() ? iterator : proxyList.listIterator();
+    }
+
+    public void setupInfo() {
+        LogUtil.setLevel(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME, Level.INFO);
+        LogUtil.setLevel(logger, Level.INFO);
+        LogUtil.setLevel("io.netty", Level.INFO);
+        LogUtil.setLevel("org.pf4j", Level.INFO);
+    }
+
+    public void setupDebug() {
+        LogUtil.setLevel(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME, Level.DEBUG);
+        LogUtil.setLevel(logger, Level.DEBUG);
+        LogUtil.setLevel("io.netty", Level.DEBUG);
+        LogUtil.setLevel("org.pf4j", Level.DEBUG);
     }
 }

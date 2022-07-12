@@ -40,11 +40,9 @@ public class DeveloperPanel extends NavigationItem {
 
         debug.addActionListener(listener -> {
             if (debug.isSelected()) {
-                ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.DEBUG);
-                ((ch.qos.logback.classic.Logger) ServerWrecker.getLogger()).setLevel(Level.DEBUG);
+                ServerWrecker.getInstance().setupDebug();
             } else {
-                ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.INFO);
-                ((ch.qos.logback.classic.Logger) ServerWrecker.getLogger()).setLevel(Level.INFO);
+                ServerWrecker.getInstance().setupInfo();
             }
         });
     }
