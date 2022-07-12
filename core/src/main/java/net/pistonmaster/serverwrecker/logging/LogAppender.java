@@ -29,6 +29,7 @@ import ch.qos.logback.core.status.Status;
 import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
+import java.util.Arrays;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -43,7 +44,19 @@ public class LogAppender implements Appender<ILoggingEvent> {
         if (formatted.isEmpty())
             return;
 
-        SwingUtilities.invokeLater(() -> logArea.setText(logArea.getText() + formatted));
+        List<String> lines = Arrays.asList(logArea.getText().split("\n"));
+
+        if (lines.size() > 30000) {
+            lines = lines.subList(lines.size() - 500, lines.size());
+        }
+
+        String text = String.join("\n", lines) + "\n" + formatted + "\n";
+
+        if (text.startsWith("\n")) {
+            text = text.substring(1);
+        }
+
+        logArea.setText(text);
     }
 
     @Override

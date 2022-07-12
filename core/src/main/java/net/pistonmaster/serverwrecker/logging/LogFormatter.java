@@ -42,7 +42,6 @@ public class LogFormatter {
         builder.append(event.getLevel()).append(' ');
         builder.append('[').append(event.getLoggerName()).append(']').append(' ');
         builder.append(formatMessage(event));
-        builder.append("\n");
         return builder.toString();
     }
 

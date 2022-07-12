@@ -24,9 +24,9 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import javax.swing.*;
 
 public class ServerWreckerAPI {
-    private static final ServerWrecker wireBpt = ServerWrecker.getInstance();
+    private static final ServerWrecker SERVER_WRECKER = ServerWrecker.getInstance();
 
     public static JFrame getWindow() {
-        return wireBpt.getWindow();
+        return SERVER_WRECKER.getWindow();
     }
 }
