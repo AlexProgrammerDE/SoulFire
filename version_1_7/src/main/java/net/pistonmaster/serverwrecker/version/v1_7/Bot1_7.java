@@ -23,6 +23,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.entity.player.ClientPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.entity.player.ClientPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.entity.player.ClientPlayerRotationPacket;
+import com.github.steveice10.packetlib.BuiltinFlags;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
@@ -32,7 +33,6 @@ import net.pistonmaster.serverwrecker.common.*;
 import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
-import java.net.Proxy;
 
 @Getter
 public class Bot1_7 extends AbstractBot {
@@ -64,6 +64,8 @@ public class Bot1_7 extends AbstractBot {
         } else {
             session = new TcpClientSession(host, port, (PacketProtocol) account, proxyInfo);
         }
+
+        session.setFlag(BuiltinFlags.PRINT_DEBUG, options.debug());
 
         session.setConnectTimeout(options.connectTimeout());
         session.setCompressionThreshold(options.compressionThreshold());

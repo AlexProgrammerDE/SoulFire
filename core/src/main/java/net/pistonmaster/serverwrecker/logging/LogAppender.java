@@ -29,13 +29,29 @@ import ch.qos.logback.core.status.Status;
 import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @RequiredArgsConstructor
 public class LogAppender implements Appender<ILoggingEvent> {
     private final JTextPane logArea;
     private final LogFormatter formatter = new LogFormatter();
+    private final Queue<String> logLines = new ConcurrentLinkedQueue<>();
+    private final Timer timer = new Timer();
+
+    {
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                SwingUtilities.invokeLater(() -> {
+                    logArea.setText(String.join("\n", logLines));
+                });
+            }
+        }, 0, 100);
+    }
 
     @Override
     public void doAppend(ILoggingEvent iLoggingEvent) throws LogbackException {
@@ -44,19 +60,11 @@ public class LogAppender implements Appender<ILoggingEvent> {
         if (formatted.isEmpty())
             return;
 
-        List<String> lines = Arrays.asList(logArea.getText().split("\n"));
-
-        if (lines.size() > 30000) {
-            lines = lines.subList(lines.size() - 500, lines.size());
+        while (logLines.size() > 1000) {
+            logLines.poll();
         }
 
-        String text = String.join("\n", lines) + "\n" + formatted + "\n";
-
-        if (text.startsWith("\n")) {
-            text = text.substring(1);
-        }
-
-        logArea.setText(text);
+        logLines.add(formatted);
     }
 
     @Override

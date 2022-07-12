@@ -23,6 +23,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerRotationPacket;
+import com.github.steveice10.packetlib.BuiltinFlags;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
@@ -64,6 +65,8 @@ public class Bot1_17 extends AbstractBot {
         } else {
             session = new TcpClientSession(host, port, (PacketProtocol) account, proxyInfo);
         }
+
+        session.setFlag(BuiltinFlags.PRINT_DEBUG, options.debug());
 
         session.setConnectTimeout(options.connectTimeout());
         session.setCompressionThreshold(options.compressionThreshold());

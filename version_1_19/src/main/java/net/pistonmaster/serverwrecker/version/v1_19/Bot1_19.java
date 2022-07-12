@@ -19,11 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.version.v1_19;
 
+import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
+import com.github.steveice10.packetlib.BuiltinFlags;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
@@ -67,6 +69,8 @@ public class Bot1_19 extends AbstractBot {
         } else {
             session = new TcpClientSession(host, port, (PacketProtocol) account, proxyInfo);
         }
+
+        session.setFlag(BuiltinFlags.PRINT_DEBUG, options.debug());
 
         session.setConnectTimeout(options.connectTimeout());
         session.setCompressionThreshold(options.compressionThreshold(), true);

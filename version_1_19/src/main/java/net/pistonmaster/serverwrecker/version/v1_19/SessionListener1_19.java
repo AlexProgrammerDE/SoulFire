@@ -25,8 +25,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPl
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
@@ -52,12 +50,7 @@ public class SessionListener1_19 extends SessionAdapter {
             Component message = systemChatPacket.getContent();
             bus.onChat(PlainTextComponentSerializer.plainText().serialize(message));
         } else if (packet instanceof ClientboundPlayerPositionPacket posPacket) {
-            double posX = posPacket.getX();
-            double posY = posPacket.getY();
-            double posZ = posPacket.getZ();
-            float pitch = posPacket.getPitch();
-            float yaw = posPacket.getYaw();
-            bus.onPosition(posX, posY, posZ, pitch, yaw);
+            bus.onPosition(posPacket.getX(), posPacket.getY(), posPacket.getZ(), posPacket.getYaw(), posPacket.getPitch());
         } else if (packet instanceof ClientboundSetHealthPacket healthPacket) {
             bus.onHealth(healthPacket.getHealth(), healthPacket.getFood());
         } else if (packet instanceof ClientboundLoginPacket) {

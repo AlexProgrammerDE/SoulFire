@@ -19,13 +19,39 @@
  */
 package net.pistonmaster.serverwrecker.common;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 
-public record SessionEventBus(Options options, Logger log,
-                              AbstractBot bot) {
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+@RequiredArgsConstructor
+public final class SessionEventBus {
+    private final Options options;
+    private final Logger log;
+    private final AbstractBot bot;
+    private final Set<String> messageQueue = new LinkedHashSet<>();
+    private final Timer timer = new Timer();
+
+    {
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Iterator<String> iter = messageQueue.iterator();
+                while (iter.hasNext()) {
+                    String message = iter.next();
+                    iter.remove();
+                    if (Objects.nonNull(message)) {
+                        log.info("Received Message: {}", message);
+                    }
+                }
+            }
+        }, 0, 2000);
+    }
+
     public void onChat(String message) {
         try {
-            log.info("Received Message: {}", message);
+            messageQueue.add(message);
             if (options.autoRegister()) {
                 String password = options.passwordFormat();
 
@@ -49,9 +75,9 @@ public record SessionEventBus(Options options, Logger log,
         }
     }
 
-    public void onPosition(double x, double y, double z, float pitch, float yaw) {
+    public void onPosition(double x, double y, double z, float yaw, float pitch) {
         try {
-            bot.setLocation(new EntityLocation(x, y, z, pitch, yaw));
+            bot.setLocation(new EntityLocation(x, y, z, yaw, pitch));
         } catch (Exception e) {
             log.error("Error while logging position", e);
         }
@@ -116,4 +142,40 @@ public record SessionEventBus(Options options, Logger log,
         log.info("Sending Message: {}", message);
         bot.sendMessage(message);
     }
+
+    public Options options() {
+        return options;
+    }
+
+    public Logger log() {
+        return log;
+    }
+
+    public AbstractBot bot() {
+        return bot;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (SessionEventBus) obj;
+        return Objects.equals(this.options, that.options) &&
+                Objects.equals(this.log, that.log) &&
+                Objects.equals(this.bot, that.bot);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(options, log, bot);
+    }
+
+    @Override
+    public String toString() {
+        return "SessionEventBus[" +
+                "options=" + options + ", " +
+                "log=" + log + ", " +
+                "bot=" + bot + ']';
+    }
+
 }

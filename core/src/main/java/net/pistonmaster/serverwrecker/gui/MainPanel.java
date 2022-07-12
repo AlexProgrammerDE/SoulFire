@@ -34,11 +34,11 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 public class MainPanel extends JPanel {
+    @Getter
+    private static final JTextPane logArea = new JTextPane();
     private final ServerWrecker botManager;
     private final ShellSender shellSender = new ShellSender(ServerWrecker.getLogger());
     private final JFrame parent;
-    @Getter
-    private static final JTextPane logArea = new JTextPane();
 
     public MainPanel(ServerWrecker botManager, JFrame parent) {
         this.botManager = botManager;

@@ -46,12 +46,7 @@ public class SessionListener1_18 extends SessionAdapter {
             Component message = chatPacket.getMessage();
             bus.onChat(PlainTextComponentSerializer.plainText().serialize(message));
         } else if (packet instanceof ClientboundPlayerPositionPacket posPacket) {
-            double posX = posPacket.getX();
-            double posY = posPacket.getY();
-            double posZ = posPacket.getZ();
-            float pitch = posPacket.getPitch();
-            float yaw = posPacket.getYaw();
-            bus.onPosition(posX, posY, posZ, pitch, yaw);
+            bus.onPosition(posPacket.getX(), posPacket.getY(), posPacket.getZ(), posPacket.getYaw(), posPacket.getPitch());
         } else if (packet instanceof ClientboundSetHealthPacket healthPacket) {
             bus.onHealth(healthPacket.getHealth(), healthPacket.getFood());
         } else if (packet instanceof ClientboundLoginPacket) {
