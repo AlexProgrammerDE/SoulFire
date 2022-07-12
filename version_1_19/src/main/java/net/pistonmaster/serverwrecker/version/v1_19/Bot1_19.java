@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.version.v1_19;
 
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
@@ -33,6 +34,7 @@ import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
+import java.util.Collections;
 
 @Getter
 public class Bot1_19 extends AbstractBot {
@@ -80,7 +82,11 @@ public class Bot1_19 extends AbstractBot {
 
     @Override
     public void sendMessage(String message) {
-        session.send(new ServerboundChatPacket(message, Instant.now().toEpochMilli(), 0, new byte[0], false));
+        if (message.startsWith("/")) {
+            session.send(new ServerboundChatCommandPacket(message.substring(1), Instant.now().toEpochMilli(), 0, Collections.emptyMap(), false));
+        } else {
+            session.send(new ServerboundChatPacket(message, Instant.now().toEpochMilli(), 0, new byte[0], false));
+        }
     }
 
     @Override

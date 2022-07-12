@@ -26,6 +26,24 @@ public record SessionEventBus(Options options, Logger log,
     public void onChat(String message) {
         try {
             log.info("Received Message: {}", message);
+            if (options.autoRegister()) {
+                String password = options.passwordFormat();
+
+                // TODO: Add more password options
+                if (message.contains("/register")) {
+                    sendMessage(options.registerCommand().replace("%password%", password));
+                } else if (message.contains("/login")) {
+                    sendMessage(options.loginCommand().replace("%password%", password));
+                } else if (message.contains("/captcha")) {
+                    String[] split = message.split(" ");
+
+                    for (int i = 0; i < split.length; i++) {
+                        if (split[i].equals("/captcha")) {
+                            sendMessage(options.captchaCommand().replace("%captcha%", split[i + 1]));
+                        }
+                    }
+                }
+            }
         } catch (Exception e) {
             log.error("Error while logging message", e);
         }
@@ -50,14 +68,7 @@ public record SessionEventBus(Options options, Logger log,
 
     public void onJoin() {
         try {
-            if (options.autoRegister()) {
-                String password = options.passwordFormat();
-
-                // TODO: Listen for messages
-                // TODO: Add more password options
-                bot.sendMessage(options.registerCommand().replace("%password%", password));
-                bot.sendMessage(options.loginCommand().replace("%password%", password));
-            }
+            log.info("Joined server");
         } catch (Exception e) {
             log.error("Error while logging join", e);
         }
@@ -99,5 +110,10 @@ public record SessionEventBus(Options options, Logger log,
         } catch (Exception e) {
             log.error("Error while logging disconnect", e);
         }
+    }
+
+    private void sendMessage(String message) {
+        log.info("Sending Message: {}", message);
+        bot.sendMessage(message);
     }
 }

@@ -175,9 +175,9 @@ public class ServerWrecker {
                 break;
             }
 
-            logger.info("Connecting bot {}", i);
+            client.getLogger().info("Connecting...");
 
-            client.connect(options.hostname(), options.port());
+            threadPool.submit(() -> client.connect(options.hostname(), options.port()));
         }
     }
 

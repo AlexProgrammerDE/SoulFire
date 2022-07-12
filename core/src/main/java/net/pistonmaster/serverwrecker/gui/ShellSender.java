@@ -56,7 +56,11 @@ public class ShellSender extends AbstractAction {
                     online.add(client.getAccount().getProfileName());
                 }
             });
-            sendMessage(online.size() + " " + String.join(", ", online));
+            sendMessage(online.size() + " bots online: " + String.join(", ", online));
+            return 1;
+        }));
+        dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("clear").executes(c -> {
+            MainPanel.getLogArea().setText("");
             return 1;
         }));
     }

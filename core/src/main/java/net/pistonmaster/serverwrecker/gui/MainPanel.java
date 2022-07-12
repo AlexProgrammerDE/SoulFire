@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.gui;
 
 import ch.qos.logback.classic.Logger;
+import lombok.Getter;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.libs.GhostText;
 import net.pistonmaster.serverwrecker.gui.libs.SmartScroller;
@@ -36,9 +37,10 @@ public class MainPanel extends JPanel {
     private final ServerWrecker botManager;
     private final ShellSender shellSender = new ShellSender(ServerWrecker.getLogger());
     private final JFrame parent;
+    @Getter
+    private static final JTextPane logArea = new JTextPane();
 
     public MainPanel(ServerWrecker botManager, JFrame parent) {
-        super();
         this.botManager = botManager;
         this.parent = parent;
 
@@ -56,8 +58,6 @@ public class MainPanel extends JPanel {
         JScrollPane logPane = new JScrollPane();
         logPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         logPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-
-        JTextPane logArea = new JTextPane();
 
         logArea.setEditable(false);
         logPane.setViewportView(logArea);

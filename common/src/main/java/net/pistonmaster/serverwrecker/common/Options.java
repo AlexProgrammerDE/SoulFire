@@ -24,5 +24,6 @@ public record Options(String hostname, int port,
                       GameVersion gameVersion, boolean autoRegister,
                       boolean debug, ProxyType proxyType, int accountsPerProxy,
                       int readTimeout, int writeTimeout, int connectTimeout, int compressionThreshold,
-                      String registerCommand, String loginCommand, String passwordFormat) {
+                      String registerCommand, String loginCommand, String captchaCommand,
+                      String passwordFormat) {
 }

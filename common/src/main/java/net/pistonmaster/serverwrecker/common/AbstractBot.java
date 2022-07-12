@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.common;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
 
 @Getter
 @Setter
@@ -42,6 +43,8 @@ public abstract class AbstractBot {
     public abstract void sendPosition(boolean onGround, double x, double y, double z);
 
     public abstract void sendRotation(boolean onGround, float yaw, float pitch);
+
+    public abstract Logger getLogger();
 
     public abstract IPacketWrapper getAccount();
 }

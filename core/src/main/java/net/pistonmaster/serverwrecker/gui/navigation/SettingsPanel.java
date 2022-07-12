@@ -35,6 +35,7 @@ public class SettingsPanel extends NavigationItem {
     private final JCheckBox autoRegister;
     private final JTextField registerCommand;
     private final JTextField loginCommand;
+    private final JTextField captchaCommand;
     private final JTextField passwordFormat;
     private final JSpinner amount;
     private final JTextField nameFormat;
@@ -73,6 +74,10 @@ public class SettingsPanel extends NavigationItem {
         add(new JLabel("Login Command: "));
         loginCommand = new JTextField("/login %password%");
         add(loginCommand);
+
+        add(new JLabel("Captcha Command: "));
+        captchaCommand = new JTextField("/captcha %captcha%");
+        add(captchaCommand);
 
         add(new JLabel("Password Format: "));
         passwordFormat = new JTextField("ServerWrecker");
@@ -143,6 +148,7 @@ public class SettingsPanel extends NavigationItem {
                 (int) compressionThreshold.getValue(),
                 registerCommand.getText(),
                 loginCommand.getText(),
+                captchaCommand.getText(),
                 passwordFormat.getText());
     }
 }

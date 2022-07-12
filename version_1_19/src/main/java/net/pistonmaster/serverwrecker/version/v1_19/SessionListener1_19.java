@@ -22,8 +22,11 @@ package net.pistonmaster.serverwrecker.version.v1_19;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
@@ -44,6 +47,9 @@ public class SessionListener1_19 extends SessionAdapter {
     public void packetReceived(Session session, Packet packet) {
         if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
             Component message = chatPacket.getSignedContent();
+            bus.onChat(PlainTextComponentSerializer.plainText().serialize(message));
+        } else if (packet instanceof ClientboundSystemChatPacket systemChatPacket) {
+            Component message = systemChatPacket.getContent();
             bus.onChat(PlainTextComponentSerializer.plainText().serialize(message));
         } else if (packet instanceof ClientboundPlayerPositionPacket posPacket) {
             double posX = posPacket.getX();

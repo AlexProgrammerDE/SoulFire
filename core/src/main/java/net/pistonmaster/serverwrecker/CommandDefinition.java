@@ -86,6 +86,9 @@ public class CommandDefinition implements Callable<Integer> {
     @Option(names = {"--logincommand"}, description = "What command should be executed to log in?")
     private String loginCommand = "/login %password%";
 
+    @Option(names = {"--captchacommand"}, description = "What command should be executed to confirm the captcha?")
+    private String captchaCommand = "/captcha %captcha%";
+
     @Option(names = {"--passwordformet"}, description = "What the password for registering should be.")
     private String passwordFormat = "ServerWrecker";
 
@@ -109,6 +112,7 @@ public class CommandDefinition implements Callable<Integer> {
                 compressionThreshold,
                 registerCommand,
                 loginCommand,
+                captchaCommand,
                 passwordFormat
         ));
         return 0;
