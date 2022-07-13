@@ -78,6 +78,7 @@ public final class SessionEventBus {
     public void onPosition(double x, double y, double z, float yaw, float pitch) {
         try {
             bot.setLocation(new EntityLocation(x, y, z, yaw, pitch));
+            log.info("Position updated: {}", bot.getLocation());
         } catch (Exception e) {
             log.error("Error while logging position", e);
         }

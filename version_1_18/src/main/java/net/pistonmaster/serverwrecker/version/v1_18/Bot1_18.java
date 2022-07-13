@@ -23,6 +23,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundCh
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
 import com.github.steveice10.packetlib.BuiltinFlags;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
@@ -103,6 +104,11 @@ public class Bot1_18 extends AbstractBot {
     @Override
     public void sendRotation(boolean onGround, float yaw, float pitch) {
         session.send(new ServerboundMovePlayerRotPacket(onGround, yaw, pitch));
+    }
+
+    @Override
+    public void sendGround(boolean onGround) {
+        session.send(new ServerboundMovePlayerStatusOnlyPacket(onGround));
     }
 
     @Override

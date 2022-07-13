@@ -44,6 +44,8 @@ public abstract class AbstractBot {
 
     public abstract void sendRotation(boolean onGround, float yaw, float pitch);
 
+    public abstract void sendGround(boolean onGround);
+
     public abstract Logger getLogger();
 
     public abstract IPacketWrapper getAccount();
