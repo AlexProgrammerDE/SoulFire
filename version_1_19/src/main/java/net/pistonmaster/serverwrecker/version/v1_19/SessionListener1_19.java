@@ -43,6 +43,7 @@ public class SessionListener1_19 extends SessionAdapter {
 
     @Override
     public void packetReceived(Session session, Packet packet) {
+        System.out.println("Packet received: " + packet.getClass().getSimpleName());
         if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
             Component message = chatPacket.getSignedContent();
             bus.onChat(PlainTextComponentSerializer.plainText().serialize(message));
@@ -53,8 +54,11 @@ public class SessionListener1_19 extends SessionAdapter {
             bus.onPosition(posPacket.getX(), posPacket.getY(), posPacket.getZ(), posPacket.getYaw(), posPacket.getPitch());
         } else if (packet instanceof ClientboundSetHealthPacket healthPacket) {
             bus.onHealth(healthPacket.getHealth(), healthPacket.getFood());
-        } else if (packet instanceof ClientboundLoginPacket) {
-            bus.onJoin();
+        } else if (packet instanceof ClientboundLoginPacket playLoginPacket) {
+            bus.onJoin(playLoginPacket.getEntityId(),
+                    playLoginPacket.isHardcore(),
+                    playLoginPacket.getGameMode().name(),
+                    playLoginPacket.getMaxPlayers());
         } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
             bus.onDisconnectPacket(PlainTextComponentSerializer.plainText().serialize(disconnectPacket.getReason()));
         } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {

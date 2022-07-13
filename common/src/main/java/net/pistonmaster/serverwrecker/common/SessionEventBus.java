@@ -19,12 +19,16 @@
  */
 package net.pistonmaster.serverwrecker.common;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.slf4j.Logger;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
+@Getter
+@ToString
 @RequiredArgsConstructor
 public final class SessionEventBus {
     private final Options options;
@@ -93,7 +97,7 @@ public final class SessionEventBus {
         }
     }
 
-    public void onJoin() {
+    public void onJoin(int entityId, boolean hardcore, String gameMode, int maxPlayers) {
         try {
             log.info("Joined server");
         } catch (Exception e) {
@@ -110,6 +114,14 @@ public final class SessionEventBus {
     }
 
     public void onDisconnectPacket(String reason) {
+        try {
+            log.error("Disconnected: {}", reason);
+        } catch (Exception e) {
+            log.error("Error while logging disconnect", e);
+        }
+    }
+
+    public void onPlayLogin(int entityId, boolean hardcore) {
         try {
             log.error("Disconnected: {}", reason);
         } catch (Exception e) {
@@ -143,40 +155,4 @@ public final class SessionEventBus {
         log.info("Sending Message: {}", message);
         bot.sendMessage(message);
     }
-
-    public Options options() {
-        return options;
-    }
-
-    public Logger log() {
-        return log;
-    }
-
-    public AbstractBot bot() {
-        return bot;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (SessionEventBus) obj;
-        return Objects.equals(this.options, that.options) &&
-                Objects.equals(this.log, that.log) &&
-                Objects.equals(this.bot, that.bot);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(options, log, bot);
-    }
-
-    @Override
-    public String toString() {
-        return "SessionEventBus[" +
-                "options=" + options + ", " +
-                "log=" + log + ", " +
-                "bot=" + bot + ']';
-    }
-
 }
