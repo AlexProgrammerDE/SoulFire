@@ -33,6 +33,7 @@ import com.github.steveice10.packetlib.packet.Packet;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.pistonmaster.serverwrecker.common.GameMode;
 import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 import net.pistonmaster.serverwrecker.common.SessionEventBus;
 
@@ -57,7 +58,7 @@ public class SessionListener1_19 extends SessionAdapter {
         } else if (packet instanceof ClientboundLoginPacket playLoginPacket) {
             bus.onJoin(playLoginPacket.getEntityId(),
                     playLoginPacket.isHardcore(),
-                    playLoginPacket.getGameMode().name(),
+                    GameMode.valueOf(playLoginPacket.getGameMode().name()),
                     playLoginPacket.getMaxPlayers());
         } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
             bus.onDisconnectPacket(PlainTextComponentSerializer.plainText().serialize(disconnectPacket.getReason()));

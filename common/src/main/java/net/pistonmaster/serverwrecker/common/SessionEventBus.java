@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.common;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -97,8 +96,13 @@ public final class SessionEventBus {
         }
     }
 
-    public void onJoin(int entityId, boolean hardcore, String gameMode, int maxPlayers) {
+    public void onJoin(int entityId, boolean hardcore, GameMode gameMode, int maxPlayers) {
         try {
+            bot.setEntityId(entityId);
+            bot.setHardcore(hardcore);
+            bot.setGameMode(gameMode);
+            bot.setMaxPlayers(maxPlayers);
+
             log.info("Joined server");
         } catch (Exception e) {
             log.error("Error while logging join", e);

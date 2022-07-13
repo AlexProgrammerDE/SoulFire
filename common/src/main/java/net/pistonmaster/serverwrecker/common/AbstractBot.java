@@ -29,6 +29,10 @@ public abstract class AbstractBot {
     private EntityLocation location;
     private float health = -1;
     private float food = -1;
+    private int entityId = -1;
+    private boolean hardcore = false;
+    private GameMode gameMode = null;
+    private int maxPlayers = -1;
 
     public abstract void sendMessage(String message);
 

@@ -30,6 +30,7 @@ import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.github.steveice10.packetlib.event.session.PacketReceivedEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.common.GameMode;
 import net.pistonmaster.serverwrecker.common.IPacketWrapper;
 import net.pistonmaster.serverwrecker.common.SessionEventBus;
 
@@ -50,7 +51,7 @@ public class SessionListener1_12 extends SessionAdapter {
         } else if (receiveEvent.getPacket() instanceof ServerJoinGamePacket playLoginPacket) {
             bus.onJoin(playLoginPacket.getEntityId(),
                     playLoginPacket.getHardcore(),
-                    playLoginPacket.getGameMode().name(),
+                    GameMode.valueOf(playLoginPacket.getGameMode().name()),
                     playLoginPacket.getMaxPlayers());
         } else if (receiveEvent.getPacket() instanceof ServerDisconnectPacket disconnectPacket) {
             bus.onDisconnectPacket(disconnectPacket.getReason().getFullText());
