@@ -121,14 +121,6 @@ public final class SessionEventBus {
         }
     }
 
-    public void onPlayLogin(int entityId, boolean hardcore) {
-        try {
-            log.error("Disconnected: {}", reason);
-        } catch (Exception e) {
-            log.error("Error while logging disconnect", e);
-        }
-    }
-
     public void onDisconnectEvent(String reason, Throwable cause) {
         try {
             if (cause == null) { // Packet wise disconnects have no cause
