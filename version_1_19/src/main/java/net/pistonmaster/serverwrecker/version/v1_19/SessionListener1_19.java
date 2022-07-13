@@ -54,7 +54,7 @@ public class SessionListener1_19 extends SessionAdapter {
         } else if (packet instanceof ClientboundPlayerPositionPacket posPacket) {
             bus.onPosition(posPacket.getX(), posPacket.getY(), posPacket.getZ(), posPacket.getYaw(), posPacket.getPitch());
         } else if (packet instanceof ClientboundSetHealthPacket healthPacket) {
-            bus.onHealth(healthPacket.getHealth(), healthPacket.getFood());
+            bus.onHealth(healthPacket.getHealth(), healthPacket.getFood(), healthPacket.getSaturation());
         } else if (packet instanceof ClientboundLoginPacket playLoginPacket) {
             bus.onJoin(playLoginPacket.getEntityId(),
                     playLoginPacket.isHardcore(),

@@ -87,10 +87,11 @@ public final class SessionEventBus {
         }
     }
 
-    public void onHealth(float health, float food) {
+    public void onHealth(float health, int food, float saturation) {
         try {
             bot.setHealth(health);
             bot.setFood(food);
+            bot.setSaturation(saturation);
         } catch (Exception e) {
             log.error("Error while logging health", e);
         }

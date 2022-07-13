@@ -28,7 +28,8 @@ import org.slf4j.Logger;
 public abstract class AbstractBot {
     private EntityLocation location;
     private float health = -1;
-    private float food = -1;
+    private int food = -1;
+    private float saturation = -1;
     private int entityId = -1;
     private boolean hardcore = false;
     private GameMode gameMode = null;
