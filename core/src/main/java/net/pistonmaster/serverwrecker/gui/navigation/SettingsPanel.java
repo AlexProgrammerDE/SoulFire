@@ -44,6 +44,8 @@ public class SettingsPanel extends NavigationItem {
     private final JSpinner writeTimeout;
     private final JSpinner connectTimeout;
     private final JSpinner compressionThreshold;
+    private final JCheckBox autoReconnect;
+    private final JCheckBox autoRespawn;
 
     public SettingsPanel() {
         super();
@@ -118,6 +120,14 @@ public class SettingsPanel extends NavigationItem {
         compressionThreshold = new JSpinner();
         compressionThreshold.setValue(-1);
         add(compressionThreshold);
+
+        add(new JLabel("Auto Reconnect: "));
+        autoReconnect = new JCheckBox();
+        add(autoReconnect);
+
+        add(new JLabel("Auto Respawn: "));
+        autoRespawn = new JCheckBox();
+        add(autoRespawn);
     }
 
     @Override
@@ -149,6 +159,8 @@ public class SettingsPanel extends NavigationItem {
                 registerCommand.getText(),
                 loginCommand.getText(),
                 captchaCommand.getText(),
-                passwordFormat.getText());
+                passwordFormat.getText(),
+                autoReconnect.isSelected(),
+                autoRespawn.isSelected());
     }
 }

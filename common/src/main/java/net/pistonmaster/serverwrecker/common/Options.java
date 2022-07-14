@@ -25,5 +25,5 @@ public record Options(String hostname, int port,
                       boolean debug, ProxyType proxyType, int accountsPerProxy,
                       int readTimeout, int writeTimeout, int connectTimeout, int compressionThreshold,
                       String registerCommand, String loginCommand, String captchaCommand,
-                      String passwordFormat) {
+                      String passwordFormat, boolean autoReconnect, boolean autoRespawn) {
 }

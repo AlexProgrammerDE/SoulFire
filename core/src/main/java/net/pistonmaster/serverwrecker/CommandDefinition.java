@@ -92,6 +92,12 @@ public class CommandDefinition implements Callable<Integer> {
     @Option(names = {"--passwordformet"}, description = "What the password for registering should be.")
     private String passwordFormat = "ServerWrecker";
 
+    @Option(names = {"--autoreconnect"}, description = "Reconnect bots after being disconnected.")
+    private boolean autoReconnect;
+
+    @Option(names = {"--autorespawn"}, description = "Respawn bots after death.")
+    private boolean autoRespawn;
+
     @Override
     public Integer call() {
         Main.initPlugins(dataFolder);
@@ -113,7 +119,9 @@ public class CommandDefinition implements Callable<Integer> {
                 registerCommand,
                 loginCommand,
                 captchaCommand,
-                passwordFormat
+                passwordFormat,
+                autoReconnect,
+                autoRespawn
         ));
         return 0;
     }

@@ -53,8 +53,20 @@ public final class SessionEventBus {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                if (bot.isOnline() && bot.getHealth() != -1 && bot.getHealth() < 1) {
-                    bot.sendClientCommand(0);
+                if (options.autoRespawn()) {
+                    if (bot.isOnline() && bot.getHealth() != -1 && bot.getHealth() < 1) {
+                        bot.sendClientCommand(0);
+                    }
+                }
+            }
+        }, 0, 1000);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (options.autoReconnect()) {
+                    if (!bot.isOnline()) {
+                        bot.connect(options.hostname(), options.port());
+                    }
                 }
             }
         }, 0, 1000);
