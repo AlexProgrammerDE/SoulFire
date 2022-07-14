@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.version.v1_18;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityMotionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
@@ -59,6 +60,11 @@ public class SessionListener1_18 extends SessionAdapter {
             bus.onDisconnectPacket(PlainTextComponentSerializer.plainText().serialize(disconnectPacket.getReason()));
         } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {
             bus.onLoginDisconnectPacket(PlainTextComponentSerializer.plainText().serialize(loginDisconnectPacket.getReason()));
+        } else if (packet instanceof ClientboundSetEntityMotionPacket motionPacket) {
+            bus.onEntityMotion(motionPacket.getEntityId(),
+                    motionPacket.getMotionX(),
+                    motionPacket.getMotionY(),
+                    motionPacket.getMotionZ());
         }
     }
 

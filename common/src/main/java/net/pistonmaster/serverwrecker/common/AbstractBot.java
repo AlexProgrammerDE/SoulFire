@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 @Setter
 public abstract class AbstractBot {
     private EntityLocation location;
+    private EntityMotion motion;
     private float health = -1;
     private int food = -1;
     private float saturation = -1;
@@ -50,6 +51,8 @@ public abstract class AbstractBot {
     public abstract void sendRotation(boolean onGround, float yaw, float pitch);
 
     public abstract void sendGround(boolean onGround);
+
+    public abstract void sendClientCommand(int actionId);
 
     public abstract Logger getLogger();
 

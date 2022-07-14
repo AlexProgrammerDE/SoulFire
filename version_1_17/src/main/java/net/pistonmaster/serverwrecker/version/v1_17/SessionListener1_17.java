@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.version.v1_17;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityVelocityPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginDisconnectPacket;
@@ -59,6 +60,11 @@ public class SessionListener1_17 extends SessionAdapter {
             bus.onDisconnectPacket(PlainTextComponentSerializer.plainText().serialize(disconnectPacket.getReason()));
         } else if (receiveEvent.getPacket() instanceof LoginDisconnectPacket loginDisconnectPacket) {
             bus.onLoginDisconnectPacket(PlainTextComponentSerializer.plainText().serialize(loginDisconnectPacket.getReason()));
+        } else if (receiveEvent.getPacket() instanceof ServerEntityVelocityPacket motionPacket) {
+            bus.onEntityMotion(motionPacket.getEntityId(),
+                    motionPacket.getMotionX(),
+                    motionPacket.getMotionY(),
+                    motionPacket.getMotionZ());
         }
     }
 

@@ -19,7 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.version.v1_18;
 
+import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
@@ -109,6 +111,11 @@ public class Bot1_18 extends AbstractBot {
     @Override
     public void sendGround(boolean onGround) {
         session.send(new ServerboundMovePlayerStatusOnlyPacket(onGround));
+    }
+
+    @Override
+    public void sendClientCommand(int actionId) {
+        session.send(new ServerboundClientCommandPacket(ClientCommand.values()[actionId]));
     }
 
     @Override

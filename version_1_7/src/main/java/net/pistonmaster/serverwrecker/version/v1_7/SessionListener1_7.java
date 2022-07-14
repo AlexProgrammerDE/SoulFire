@@ -23,6 +23,7 @@ import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityVelocityPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerUpdateHealthPacket;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginDisconnectPacket;
@@ -57,6 +58,11 @@ public class SessionListener1_7 extends SessionAdapter {
             bus.onDisconnectPacket(disconnectPacket.getReason().getFullText());
         } else if (receiveEvent.getPacket() instanceof LoginDisconnectPacket loginDisconnectPacket) {
             bus.onLoginDisconnectPacket(loginDisconnectPacket.getReason().getFullText());
+        } else if (receiveEvent.getPacket() instanceof ServerEntityVelocityPacket motionPacket) {
+            bus.onEntityMotion(motionPacket.getEntityId(),
+                    motionPacket.getMotionX(),
+                    motionPacket.getMotionY(),
+                    motionPacket.getMotionZ());
         }
     }
 

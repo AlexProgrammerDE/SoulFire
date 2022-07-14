@@ -50,6 +50,14 @@ public final class SessionEventBus {
                 }
             }
         }, 0, 2000);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (bot.isOnline() && bot.getHealth() != -1 && bot.getHealth() < 1) {
+                    bot.sendClientCommand(0);
+                }
+            }
+        }, 0, 1000);
     }
 
     public void onChat(String message) {
@@ -145,6 +153,19 @@ public final class SessionEventBus {
             }
         } catch (Exception e) {
             log.error("Error while logging disconnect", e);
+        }
+    }
+
+    public void onEntityMotion(int entityId, double motionX, double motionY, double motionZ) {
+        try {
+            if (entityId == bot.getEntityId()) {
+                bot.setMotion(new EntityMotion(motionX, motionY, motionZ));
+                log.info("Player moved with motion: {} {} {}", motionX, motionY, motionZ);
+            } else {
+                log.debug("Entity {} moved with motion: {} {} {}", entityId, motionX, motionY, motionZ);
+            }
+        } catch (Exception e) {
+            log.error("Error while logging entity motion", e);
         }
     }
 
