@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.common;
 
 public record Options(String hostname, int port,
-                      int amount, int joinDelayMs, String botNameFormat,
+                      int amount, int joinDelayMs, boolean waitEstablished, String botNameFormat,
                       GameVersion gameVersion, boolean autoRegister,
                       boolean debug, ProxyType proxyType, int accountsPerProxy,
                       int readTimeout, int writeTimeout, int connectTimeout, int compressionThreshold,

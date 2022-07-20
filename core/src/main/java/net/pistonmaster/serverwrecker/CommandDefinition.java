@@ -98,6 +98,9 @@ public class CommandDefinition implements Callable<Integer> {
     @Option(names = {"--autorespawn"}, description = "Respawn bots after death.")
     private boolean autoRespawn;
 
+    @Option(names = {"--disablewaitestablished"}, description = "Make the program halt and wait till a bot was successfully connected before connecting the next bot.")
+    private boolean disableWaitEstablished;
+
     @Override
     public Integer call() {
         Main.initPlugins(dataFolder);
@@ -106,6 +109,7 @@ public class CommandDefinition implements Callable<Integer> {
                 port,
                 amount,
                 joinDelay,
+                !disableWaitEstablished,
                 nameFormat,
                 version,
                 autoRegister,

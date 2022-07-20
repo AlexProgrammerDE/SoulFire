@@ -32,6 +32,7 @@ public class SettingsPanel extends NavigationItem {
     private final JTextField hostInput;
     private final JTextField portInput;
     private final JSpinner delay;
+    private final JCheckBox disableWaitEstablished;
     private final JCheckBox autoRegister;
     private final JTextField registerCommand;
     private final JTextField loginCommand;
@@ -64,6 +65,10 @@ public class SettingsPanel extends NavigationItem {
         delay = new JSpinner();
         delay.setValue(1000);
         add(delay);
+
+        add(new JLabel("Disable wait established: "));
+        disableWaitEstablished = new JCheckBox();
+        add(disableWaitEstablished);
 
         add(new JLabel("Auto Register: "));
         autoRegister = new JCheckBox();
@@ -146,6 +151,7 @@ public class SettingsPanel extends NavigationItem {
                 Integer.parseInt(portInput.getText()),
                 (int) amount.getValue(),
                 (int) delay.getValue(),
+                !disableWaitEstablished.isSelected(),
                 nameFormat.getText(),
                 (GameVersion) versionBox.getSelectedItem(),
                 autoRegister.isSelected(),

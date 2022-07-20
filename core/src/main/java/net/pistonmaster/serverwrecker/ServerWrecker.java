@@ -157,10 +157,7 @@ public class ServerWrecker {
             logger.info("Starting attack at {} with {} bots and {} proxies", options.hostname(), clients.size(), proxyUseMap.size());
         }
 
-        int i = 0;
         for (AbstractBot client : clients) {
-            i++;
-
             try {
                 TimeUnit.MILLISECONDS.sleep(options.joinDelayMs());
             } catch (InterruptedException ex) {
@@ -182,7 +179,7 @@ public class ServerWrecker {
 
             client.getLogger().info("Connecting...");
 
-            threadPool.submit(() -> client.connect(options.hostname(), options.port()));
+            client.connect(options.hostname(), options.port());
         }
     }
 

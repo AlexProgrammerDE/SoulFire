@@ -80,7 +80,7 @@ public class Bot1_17 extends AbstractBot {
 
         session.addListener(new SessionListener1_17(bus, account));
 
-        session.connect();
+        session.connect(options.waitEstablished());
     }
 
     @Override
