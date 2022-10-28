@@ -16,6 +16,7 @@ tasks {
     shadowJar {
         minimize() {
             exclude(dependency("com.formdev:flatlaf"))
+            exclude(dependency("org.fusesource.jansi:jansi"))
         }
     }
 

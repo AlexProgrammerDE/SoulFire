@@ -8,6 +8,7 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.24")
     annotationProcessor("org.projectlombok:lombok:1.18.24")
     implementation("ch.qos.logback:logback-classic:1.4.4")
+    implementation("org.fusesource.jansi:jansi:1.18")
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_17
