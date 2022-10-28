@@ -20,7 +20,9 @@
 package net.pistonmaster.serverwrecker.gui;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +65,17 @@ public class ShellSender extends AbstractAction {
             MainPanel.getLogArea().setText("");
             return 1;
         }));
+        dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("say")
+                .then(RequiredArgumentBuilder.<ShellSender, String>argument("message", StringArgumentType.greedyString()).build())
+                .executes(c -> {
+                    String message = StringArgumentType.getString(c, "message");
+                    ServerWrecker.getInstance().getClients().forEach(client -> {
+                        if (client.isOnline()) {
+                            client.sendMessage(message);
+                        }
+                    });
+                    return 1;
+                }));
     }
 
     @Override
