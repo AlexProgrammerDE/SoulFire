@@ -19,7 +19,7 @@ dependencies {
     implementation("org.pf4j:pf4j:3.8.0")
     implementation("com.thealtening.api:api:4.1.0")
     implementation("com.google.guava:guava:31.1-jre")
-    implementation("net.kyori:adventure-text-serializer-plain:4.11.0")
+    implementation("net.kyori:adventure-text-serializer-plain:4.12.0")
     implementation("net.kyori:adventure-text-serializer-gson:4.12.0")
 }
 
