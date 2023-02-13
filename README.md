@@ -2,6 +2,10 @@
 
 Advanced Minecraft Server-Stresser Tool
 
+## Nightly builds
+
+You can download the latest development version of ServerWrecker through [nightly.link](https://nightly.link/AlexProgrammerDE/ServerWrecker/workflows/build/main/ServerWrecker.zip).
+
 ## Features
 
 * Graphical user interface
