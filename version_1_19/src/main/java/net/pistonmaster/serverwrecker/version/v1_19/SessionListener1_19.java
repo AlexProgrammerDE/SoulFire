@@ -47,7 +47,10 @@ public class SessionListener1_19 extends SessionAdapter {
     public void packetReceived(Session session, Packet packet) {
         System.out.println("Packet received: " + packet.getClass().getSimpleName());
         if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
-            Component message = chatPacket.getSignedContent();
+            Component message = chatPacket.getUnsignedContent();
+            if (message == null) {
+                message = chatPacket.getMessageDecorated();
+            }
             bus.onChat(PlainTextComponentSerializer.plainText().serialize(message));
         } else if (packet instanceof ClientboundSystemChatPacket systemChatPacket) {
             Component message = systemChatPacket.getContent();

@@ -89,9 +89,9 @@ public class Bot1_19 extends AbstractBot {
     @Override
     public void sendMessage(String message) {
         if (message.startsWith("/")) {
-            session.send(new ServerboundChatCommandPacket(message.substring(1), Instant.now().toEpochMilli(), 0, Collections.emptyMap(), false));
+            session.send(new ServerboundChatCommandPacket(message.substring(1), Instant.now().toEpochMilli(), 0, Collections.emptyList(), false, Collections.emptyList(), null));
         } else {
-            session.send(new ServerboundChatPacket(message, Instant.now().toEpochMilli(), 0, new byte[0], false));
+            session.send(new ServerboundChatPacket(message, Instant.now().toEpochMilli(), 0, new byte[0], false, Collections.emptyList(), null));
         }
     }
 
