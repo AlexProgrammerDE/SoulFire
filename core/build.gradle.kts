@@ -16,7 +16,7 @@ dependencies {
 
     implementation("com.mojang:brigadier:1.0.500")
     implementation("com.formdev:flatlaf:3.0")
-    implementation("org.pf4j:pf4j:3.8.0")
+    implementation("org.pf4j:pf4j:3.9.0")
     implementation("com.thealtening.api:api:4.1.0")
     implementation("com.google.guava:guava:31.1-jre")
     implementation("net.kyori:adventure-text-serializer-plain:4.12.0")
