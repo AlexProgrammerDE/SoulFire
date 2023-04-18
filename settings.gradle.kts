@@ -12,11 +12,18 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
-        mavenCentral()
-        maven("https://jitpack.io")
-        maven("https://libraries.minecraft.net")
         maven("https://repo.opencollab.dev/maven-releases")
         maven("https://repo.opencollab.dev/maven-snapshots")
+        maven("https://jitpack.io/") {
+            name = "JitPack Repository"
+        }
+        maven("https://libraries.minecraft.net/") {
+            name = "Minecraft Repository"
+        }
+        maven("https://oss.sonatype.org/content/repositories/snapshots/") {
+            name = "Sonatype Repository"
+        }
+        mavenCentral()
     }
 }
 

@@ -24,6 +24,11 @@ import com.google.common.collect.ImmutableList;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.event.EventBus;
+import net.kyori.event.SimpleEventBus;
+import net.pistonmaster.serverwrecker.api.event.AttackEndEvent;
+import net.pistonmaster.serverwrecker.api.event.AttackStartEvent;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
 import net.pistonmaster.serverwrecker.common.*;
 import net.pistonmaster.serverwrecker.logging.LogUtil;
 import net.pistonmaster.serverwrecker.protocol.AuthFactory;
@@ -47,6 +52,7 @@ public class ServerWrecker {
     private static final Logger logger = LoggerFactory.getLogger(PROJECT_NAME);
     @Getter
     private static final ServerWrecker instance = new ServerWrecker();
+    private final EventBus<ServerWreckerEvent> eventBus = new SimpleEventBus<>(ServerWreckerEvent.class);
     private final List<AbstractBot> clients = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final List<BotProxy> passWordProxies = new ArrayList<>();
@@ -157,6 +163,8 @@ public class ServerWrecker {
             logger.info("Starting attack at {} with {} bots and {} proxies", options.hostname(), clients.size(), proxyUseMap.size());
         }
 
+        eventBus.post(new AttackStartEvent());
+
         for (AbstractBot client : clients) {
             try {
                 TimeUnit.MILLISECONDS.sleep(options.joinDelayMs());
@@ -200,6 +208,7 @@ public class ServerWrecker {
         this.running = false;
         clients.forEach(AbstractBot::disconnect);
         clients.clear();
+        eventBus.post(new AttackEndEvent());
     }
 
     private boolean isFull(Map<BotProxy, AtomicInteger> map, int limit) {

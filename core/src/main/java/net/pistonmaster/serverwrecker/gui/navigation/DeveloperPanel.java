@@ -21,6 +21,8 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import ch.qos.logback.classic.Level;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.event.AttackEndEvent;
+import net.pistonmaster.serverwrecker.api.event.AttackStartEvent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,6 +37,13 @@ public class DeveloperPanel extends NavigationItem {
 
         add(new JLabel("Debug: "));
         add(debug);
+
+        ServerWrecker.getInstance().getEventBus().register(AttackStartEvent.class, event -> {
+            debug.setEnabled(false);
+        });
+        ServerWrecker.getInstance().getEventBus().register(AttackEndEvent.class, event -> {
+            debug.setEnabled(true);
+        });
 
         debug.addActionListener(listener -> {
             if (debug.isSelected()) {
