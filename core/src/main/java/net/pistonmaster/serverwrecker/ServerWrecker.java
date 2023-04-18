@@ -62,7 +62,7 @@ public class ServerWrecker {
     private ServiceServer serviceServer = ServiceServer.MOJANG;
 
     public ServerWrecker() {
-        setupInfo();
+        setupLogging(Level.INFO);
 
         /*
         Authenticator.setDefault(new Authenticator() {
@@ -79,9 +79,9 @@ public class ServerWrecker {
 
     public void start(Options options) {
         if (options.debug()) {
-            setupDebug();
+            setupLogging(Level.DEBUG);
         } else {
-            setupInfo();
+            setupLogging(Level.INFO);
         }
 
         this.running = true;
@@ -216,17 +216,10 @@ public class ServerWrecker {
         return iterator.hasNext() ? iterator : proxyList.listIterator();
     }
 
-    public void setupInfo() {
-        LogUtil.setLevel(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME, Level.INFO);
-        LogUtil.setLevel(logger, Level.INFO);
-        LogUtil.setLevel("io.netty", Level.INFO);
-        LogUtil.setLevel("org.pf4j", Level.INFO);
-    }
-
-    public void setupDebug() {
-        LogUtil.setLevel(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME, Level.DEBUG);
-        LogUtil.setLevel(logger, Level.DEBUG);
-        LogUtil.setLevel("io.netty", Level.DEBUG);
-        LogUtil.setLevel("org.pf4j", Level.DEBUG);
+    public void setupLogging(Level level) {
+        LogUtil.setLevel(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME, level);
+        LogUtil.setLevel(logger, level);
+        LogUtil.setLevel("io.netty", level);
+        LogUtil.setLevel("org.pf4j", level);
     }
 }

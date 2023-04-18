@@ -25,13 +25,15 @@ import org.pf4j.PluginManager;
 import picocli.CommandLine;
 
 import java.awt.*;
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Main {
     public static void main(String[] args) {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> ServerWrecker.getLogger().error(throwable.getMessage(), throwable));
 
-        File dataFolder = initConfigDir();
+        Path dataFolder = initConfigDir();
 
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
             runHeadless(args, dataFolder);
@@ -41,30 +43,36 @@ public class Main {
         }
     }
 
-    private static File initConfigDir() {
-        File dataDirectory = new File(System.getProperty("user.home"), ".serverwrecker");
+    private static Path initConfigDir() {
+        Path dataDirectory = Path.of(System.getProperty("user.home"), ".serverwrecker");
 
-        //noinspection ResultOfMethodCallIgnored
-        dataDirectory.mkdirs();
+        try {
+            Files.createDirectories(dataDirectory);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         return dataDirectory;
     }
 
-    protected static void initPlugins(File dataFolder) {
-        File pluginDir = new File(dataFolder, "plugins");
+    protected static void initPlugins(Path dataFolder) {
+        Path pluginDir = dataFolder.resolve("plugins");
 
-        //noinspection ResultOfMethodCallIgnored
-        pluginDir.mkdirs();
+        try {
+            Files.createDirectories(pluginDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // create the plugin manager
-        PluginManager pluginManager = new JarPluginManager(pluginDir.toPath());
+        PluginManager pluginManager = new JarPluginManager(pluginDir);
 
         // start and load all plugins of application
         pluginManager.loadPlugins();
         pluginManager.startPlugins();
     }
 
-    private static void runHeadless(String[] args, File dataFolder) {
+    private static void runHeadless(String[] args, Path dataFolder) {
         int exitCode = new CommandLine(new CommandDefinition(dataFolder)).execute(args);
         System.exit(exitCode);
     }

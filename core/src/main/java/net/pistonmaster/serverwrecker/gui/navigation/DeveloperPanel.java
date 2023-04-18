@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
+import ch.qos.logback.classic.Level;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 
 import javax.swing.*;
@@ -37,9 +38,9 @@ public class DeveloperPanel extends NavigationItem {
 
         debug.addActionListener(listener -> {
             if (debug.isSelected()) {
-                ServerWrecker.getInstance().setupDebug();
+                ServerWrecker.getInstance().setupLogging(Level.DEBUG);
             } else {
-                ServerWrecker.getInstance().setupInfo();
+                ServerWrecker.getInstance().setupLogging(Level.INFO);
             }
         });
     }

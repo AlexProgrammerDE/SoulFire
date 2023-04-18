@@ -26,14 +26,14 @@ import net.pistonmaster.serverwrecker.common.ProxyType;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 @SuppressWarnings("FieldMayBeFinal")
 @RequiredArgsConstructor
 @Command(name = "serverwrecker", mixinStandardHelpOptions = true, version = "ServerWrecker v" + ServerWrecker.VERSION, description = "Stress test a minecraft server using bots")
 public class CommandDefinition implements Callable<Integer> {
-    private final File dataFolder;
+    private final Path dataFolder;
 
     @Option(names = {"-h", "--host"}, description = "The hostname to connect to. Defaults to 127.0.0.1")
     private String host = "127.0.0.1";

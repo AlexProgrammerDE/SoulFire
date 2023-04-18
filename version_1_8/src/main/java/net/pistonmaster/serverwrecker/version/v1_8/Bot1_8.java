@@ -53,20 +53,14 @@ public class Bot1_8 extends AbstractBot {
 
         if (address == null) {
             this.proxyInfo = null;
-        } else if (username != null && password != null) {
-            this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address, username, password);
         } else {
-            this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address);
+            this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address, username, password);
         }
     }
 
     @Override
     public void connect(String host, int port) {
-        if (proxyInfo == null) {
-            session = new TcpClientSession(host, port, (PacketProtocol) account);
-        } else {
-            session = new TcpClientSession(host, port, (PacketProtocol) account, proxyInfo);
-        }
+        session = new TcpClientSession(host, port, (PacketProtocol) account, proxyInfo);
 
         session.setFlag(BuiltinFlags.PRINT_DEBUG, options.debug());
 
