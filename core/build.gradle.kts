@@ -8,6 +8,21 @@ application {
     mainClass.set("net.pistonmaster.serverwrecker.Main")
 }
 
+repositories {
+    maven("https://repo.opencollab.dev/maven-releases")
+    maven("https://repo.opencollab.dev/maven-snapshots")
+    maven("https://jitpack.io/") {
+        name = "JitPack Repository"
+    }
+    maven("https://libraries.minecraft.net/") {
+        name = "Minecraft Repository"
+    }
+    maven("https://oss.sonatype.org/content/repositories/snapshots/") {
+        name = "Sonatype Repository"
+    }
+    mavenCentral()
+}
+
 dependencies {
     implementation(projects.serverwreckerCommon)
     implementation(projects.serverwreckerProtocol)
@@ -37,5 +52,12 @@ tasks.named<Jar>("jar").get().manifest {
 
 launch4j {
     mainClassName = "net.pistonmaster.serverwrecker.Main"
-    icon = "${projectDir}/assets/robot.ico"
+    icon = "${rootDir}/assets/robot.ico"
+    headerType = "gui"
+    productName = "ServerWrecker"
+    internalName = "ServerWrecker"
+    companyName = "AlexProgrammerDE"
+    copyright = "© 2023 AlexProgrammerDE"
+    copyConfigurable = emptyArray<Any>()
+    jarTask = project.tasks.shadowJar.get()
 }
