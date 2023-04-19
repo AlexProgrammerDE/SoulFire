@@ -12,7 +12,7 @@ dependencies {
     implementation(projects.serverwreckerCommon)
     implementation(projects.serverwreckerProtocol)
 
-    implementation("info.picocli:picocli:4.7.2")
+    implementation("info.picocli:picocli:4.7.3")
     annotationProcessor("info.picocli:picocli-codegen:4.7.3")
 
     implementation("com.mojang:brigadier:1.1.8")
