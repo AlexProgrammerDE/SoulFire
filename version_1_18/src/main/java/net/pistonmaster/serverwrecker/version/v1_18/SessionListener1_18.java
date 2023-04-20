@@ -46,7 +46,7 @@ public class SessionListener1_18 extends SessionAdapter {
     public void packetReceived(Session session, Packet packet) {
         if (packet instanceof ClientboundChatPacket chatPacket) {
             Component message = chatPacket.getMessage();
-            bus.onChat(PlainTextComponentSerializer.plainText().serialize(message));
+            bus.onChat(toPlainText(message));
         } else if (packet instanceof ClientboundPlayerPositionPacket posPacket) {
             bus.onPosition(posPacket.getX(), posPacket.getY(), posPacket.getZ(), posPacket.getYaw(), posPacket.getPitch());
         } else if (packet instanceof ClientboundSetHealthPacket healthPacket) {
@@ -57,9 +57,9 @@ public class SessionListener1_18 extends SessionAdapter {
                     GameMode.valueOf(playLoginPacket.getGameMode().name()),
                     playLoginPacket.getMaxPlayers());
         } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
-            bus.onDisconnectPacket(PlainTextComponentSerializer.plainText().serialize(disconnectPacket.getReason()));
+            bus.onDisconnectPacket(toPlainText(disconnectPacket.getReason()));
         } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {
-            bus.onLoginDisconnectPacket(PlainTextComponentSerializer.plainText().serialize(loginDisconnectPacket.getReason()));
+            bus.onLoginDisconnectPacket(toPlainText(loginDisconnectPacket.getReason()));
         } else if (packet instanceof ClientboundSetEntityMotionPacket motionPacket) {
             bus.onEntityMotion(motionPacket.getEntityId(),
                     motionPacket.getMotionX(),
@@ -71,5 +71,9 @@ public class SessionListener1_18 extends SessionAdapter {
     @Override
     public void disconnected(DisconnectedEvent event) {
         bus.onDisconnectEvent(event.getReason(), event.getCause());
+    }
+
+    private String toPlainText(Component component) {
+        return PlainTextComponentSerializer.plainText().serialize(component);
     }
 }

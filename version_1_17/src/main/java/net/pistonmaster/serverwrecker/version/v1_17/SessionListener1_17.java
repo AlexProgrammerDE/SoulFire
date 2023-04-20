@@ -46,7 +46,7 @@ public class SessionListener1_17 extends SessionAdapter {
         if (receiveEvent.getPacket() instanceof ServerChatPacket chatPacket) {
             // Message API was replaced in version 1.16
             Component message = chatPacket.getMessage();
-            bus.onChat(PlainTextComponentSerializer.plainText().serialize(message));
+            bus.onChat(toPlainText(message));
         } else if (receiveEvent.getPacket() instanceof ServerPlayerPositionRotationPacket posPacket) {
             bus.onPosition(posPacket.getX(), posPacket.getY(), posPacket.getZ(), posPacket.getYaw(), posPacket.getPitch());
         } else if (receiveEvent.getPacket() instanceof ServerPlayerHealthPacket healthPacket) {
@@ -57,9 +57,9 @@ public class SessionListener1_17 extends SessionAdapter {
                     GameMode.valueOf(playLoginPacket.getGameMode().name()),
                     playLoginPacket.getMaxPlayers());
         } else if (receiveEvent.getPacket() instanceof ServerDisconnectPacket disconnectPacket) {
-            bus.onDisconnectPacket(PlainTextComponentSerializer.plainText().serialize(disconnectPacket.getReason()));
+            bus.onDisconnectPacket(toPlainText(disconnectPacket.getReason()));
         } else if (receiveEvent.getPacket() instanceof LoginDisconnectPacket loginDisconnectPacket) {
-            bus.onLoginDisconnectPacket(PlainTextComponentSerializer.plainText().serialize(loginDisconnectPacket.getReason()));
+            bus.onLoginDisconnectPacket(toPlainText(loginDisconnectPacket.getReason()));
         } else if (receiveEvent.getPacket() instanceof ServerEntityVelocityPacket motionPacket) {
             bus.onEntityMotion(motionPacket.getEntityId(),
                     motionPacket.getMotionX(),
@@ -71,5 +71,9 @@ public class SessionListener1_17 extends SessionAdapter {
     @Override
     public void disconnected(DisconnectedEvent event) {
         bus.onDisconnectEvent(event.getReason(), event.getCause());
+    }
+
+    private String toPlainText(Component component) {
+        return PlainTextComponentSerializer.plainText().serialize(component);
     }
 }

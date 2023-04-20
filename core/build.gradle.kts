@@ -42,6 +42,8 @@ dependencies {
 
     implementation("net.kyori:event-api:3.0.0")
     implementation("ch.jalu:injector:1.0")
+
+    implementation("com.google.code.gson:gson:2.10.1")
 }
 
 tasks.compileJava.get().apply {

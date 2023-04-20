@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation("com.github.GeyserMC:MCProtocolLib:1.19.2-1")
+    implementation("com.github.GeyserMC:MCProtocolLib:master-SNAPSHOT")
     compileOnly(projects.serverwreckerCommon)
     compileOnly("net.kyori:adventure-text-serializer-plain:4.13.1")
 }
