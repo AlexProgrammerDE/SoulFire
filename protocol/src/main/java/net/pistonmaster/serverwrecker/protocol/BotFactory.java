@@ -40,21 +40,22 @@ public class BotFactory {
     public AbstractBot createBot(Options options, IPacketWrapper account, InetSocketAddress address, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
         Logger botLogger = LoggerFactory.getLogger(account.getProfileName());
 
+        ProxyBotData proxyBotData = address == null ? null : ProxyBotData.of(username, password, address, proxyType);
         return switch (options.gameVersion()) {
             case VERSION_1_7 ->
-                    new Bot1_7(options, account, address, serviceServer, proxyType, username, password, botLogger);
+                    new Bot1_7(options, botLogger, account, serviceServer, proxyBotData);
             case VERSION_1_8 ->
-                    new Bot1_8(options, account, address, serviceServer, proxyType, username, password, botLogger);
+                    new Bot1_8(options, botLogger, account, serviceServer, proxyBotData);
             case VERSION_1_9 ->
-                    new Bot1_9(options, account, address, serviceServer, proxyType, username, password, botLogger);
+                    new Bot1_9(options, botLogger, account, serviceServer, proxyBotData);
             case VERSION_1_12 ->
-                    new Bot1_12(options, account, address, serviceServer, proxyType, username, password, botLogger);
+                    new Bot1_12(options, botLogger, account, serviceServer, proxyBotData);
             case VERSION_1_17 ->
-                    new Bot1_17(options, account, address, serviceServer, proxyType, username, password, botLogger);
+                    new Bot1_17(options, botLogger, account, serviceServer, proxyBotData);
             case VERSION_1_18 ->
-                    new Bot1_18(options, account, address, serviceServer, proxyType, username, password, botLogger);
+                    new Bot1_18(options, botLogger, account, serviceServer, proxyBotData);
             case VERSION_1_19 ->
-                    new Bot1_19(options, account, address, serviceServer, proxyType, username, password, botLogger);
+                    new Bot1_19(options, botLogger, account, serviceServer, proxyBotData);
         };
     }
 }

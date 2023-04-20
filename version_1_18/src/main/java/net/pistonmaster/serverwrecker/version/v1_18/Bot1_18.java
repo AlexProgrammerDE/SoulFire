@@ -32,36 +32,27 @@ import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpClientSession;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.common.*;
 import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
 
 @Getter
+@RequiredArgsConstructor
 public class Bot1_18 extends AbstractBot {
     private final Options options;
-    private final ProxyInfo proxyInfo;
     private final Logger logger;
     private final IPacketWrapper account;
     private final ServiceServer serviceServer;
+    private final ProxyBotData proxyBotData;
     private Session session;
-
-    public Bot1_18(Options options, IPacketWrapper account, InetSocketAddress address, ServiceServer serviceServer, ProxyType proxyType, String username, String password, Logger logger) {
-        this.options = options;
-        this.account = account;
-        this.logger = logger;
-        this.serviceServer = serviceServer;
-
-        if (address == null) {
-            this.proxyInfo = null;
-        } else {
-            this.proxyInfo = new ProxyInfo(ProxyInfo.Type.valueOf(proxyType.name()), address, username, password);
-        }
-    }
 
     @Override
     public void connect(String host, int port) {
-        session = new TcpClientSession(host, port, (PacketProtocol) account, proxyInfo);
+        session = new TcpClientSession(host, port, (PacketProtocol) account,
+                NullHelper.nullOrConvert(proxyBotData,
+                        data -> new ProxyInfo(ProxyInfo.Type.valueOf(data.getType().name()), data.getAddress(), data.getUsername(), data.getPassword())));
 
         session.setFlag(BuiltinFlags.PRINT_DEBUG, options.debug());
 
