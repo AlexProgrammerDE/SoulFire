@@ -17,26 +17,30 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.gui.navigation;
+package net.pistonmaster.serverwrecker.api;
 
-import javax.inject.Inject;
-import java.awt.*;
+import org.pf4j.JarPluginManager;
+import org.pf4j.PluginManager;
 
-public class AddonPanel extends NavigationItem {
-    @Inject
-    public AddonPanel() {
-        super();
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-        setLayout(new GridLayout(5, 6, 5, 5));
-    }
+public class SWPluginLoader {
+    public static void initPlugins(Path dataFolder) {
+        Path pluginDir = dataFolder.resolve("plugins");
 
-    @Override
-    public String getNavigationName() {
-        return "Addons";
-    }
+        try {
+            Files.createDirectories(pluginDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-    @Override
-    public String getRightPanelContainerConstant() {
-        return RightPanelContainer.ADDON_MENU;
+        // create the plugin manager
+        PluginManager pluginManager = new JarPluginManager(pluginDir);
+
+        // start and load all plugins of application
+        pluginManager.loadPlugins();
+        pluginManager.startPlugins();
     }
 }

@@ -25,6 +25,7 @@ import lombok.ToString;
 import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 @ToString
@@ -35,6 +36,7 @@ public final class SessionEventBus {
     private final AbstractBot bot;
     private final Set<String> messageQueue = new LinkedHashSet<>();
     private final Timer timer = new Timer();
+    private final AtomicBoolean isRejoining = new AtomicBoolean(false);
 
     {
         timer.schedule(new TimerTask() {
@@ -64,8 +66,17 @@ public final class SessionEventBus {
             @Override
             public void run() {
                 if (options.autoReconnect()) {
-                    if (!bot.isOnline()) {
+                    if (bot.isOnline()) {
+                        if (isRejoining.get()) {
+                            isRejoining.set(false);
+                        }
+                    } else {
+                        if (isRejoining.get()) {
+                            return;
+                        }
+
                         bot.connect(options.hostname(), options.port());
+                        isRejoining.set(true);
                     }
                 }
             }

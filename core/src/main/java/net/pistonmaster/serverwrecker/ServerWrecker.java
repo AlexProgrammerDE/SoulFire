@@ -19,6 +19,8 @@
  */
 package net.pistonmaster.serverwrecker;
 
+import ch.jalu.injector.Injector;
+import ch.jalu.injector.InjectorBuilder;
 import ch.qos.logback.classic.Level;
 import com.google.common.collect.ImmutableList;
 import lombok.AccessLevel;
@@ -51,7 +53,9 @@ public class ServerWrecker {
     @Getter
     private static final Logger logger = LoggerFactory.getLogger(PROJECT_NAME);
     @Getter
-    private static final ServerWrecker instance = new ServerWrecker();
+    private final Injector injector = new InjectorBuilder()
+            .addDefaultHandlers("net.pistonmaster.serverwrecker")
+            .create();
     private final EventBus<ServerWreckerEvent> eventBus = new SimpleEventBus<>(ServerWreckerEvent.class);
     private final List<AbstractBot> clients = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
@@ -62,8 +66,6 @@ public class ServerWrecker {
     private boolean paused = false;
     @Setter
     private List<String> accounts;
-    @Setter(value = AccessLevel.PROTECTED)
-    private JFrame window;
     @Setter
     private ServiceServer serviceServer = ServiceServer.MOJANG;
 

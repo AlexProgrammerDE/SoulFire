@@ -23,6 +23,7 @@ import net.pistonmaster.serverwrecker.common.GameVersion;
 import net.pistonmaster.serverwrecker.common.Options;
 import net.pistonmaster.serverwrecker.common.ProxyType;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
@@ -48,6 +49,7 @@ public class SettingsPanel extends NavigationItem {
     private final JCheckBox autoReconnect;
     private final JCheckBox autoRespawn;
 
+    @Inject
     public SettingsPanel() {
         super();
 
@@ -128,10 +130,12 @@ public class SettingsPanel extends NavigationItem {
 
         add(new JLabel("Auto Reconnect: "));
         autoReconnect = new JCheckBox();
+        autoReconnect.setSelected(true);
         add(autoReconnect);
 
         add(new JLabel("Auto Respawn: "));
         autoRespawn = new JCheckBox();
+        autoRespawn.setSelected(true);
         add(autoRespawn);
     }
 

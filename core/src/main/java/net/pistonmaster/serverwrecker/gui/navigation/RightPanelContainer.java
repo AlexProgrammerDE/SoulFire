@@ -19,15 +19,25 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
+import ch.jalu.injector.Injector;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import lombok.Getter;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.gui.AuthPanel;
+import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.gui.MainPanel;
+import net.pistonmaster.serverwrecker.gui.ShellSender;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class RightPanelContainer extends JPanel {
     public static final String AUTH_MENU = "AuthMenu";
     public static final String NAVIGATION_MENU = "NavigationMenu";
@@ -37,18 +47,17 @@ public class RightPanelContainer extends JPanel {
     public static final String DEV_MENU = "DeveloperMenu";
     @Getter
     private final List<NavigationItem> panels = new ArrayList<>();
+    private final Injector injector;
 
-    public RightPanelContainer(ServerWrecker serverWrecker, JFrame parent) {
-        super();
-
-        panels.add(new SettingsPanel());
-        panels.add(new AddonPanel());
-        panels.add(new AccountPanel(serverWrecker, parent));
-        panels.add(new DeveloperPanel());
+    public void create() {
+        panels.add(injector.getSingleton(SettingsPanel.class));
+        panels.add(injector.getSingleton(AddonPanel.class));
+        panels.add(injector.getSingleton(AccountPanel.class));
+        panels.add(injector.getSingleton(DeveloperPanel.class));
 
         setLayout(new CardLayout());
 
-        NavigationPanel navigationPanel = new NavigationPanel(this);
+        NavigationPanel navigationPanel = injector.getSingleton(NavigationPanel.class);
         add(navigationPanel, NAVIGATION_MENU);
 
         AuthPanel authPanel = new AuthPanel(this);

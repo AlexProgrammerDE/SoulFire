@@ -31,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public class LoadProxiesListener implements ActionListener {
@@ -41,15 +42,19 @@ public class LoadProxiesListener implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         int returnVal = fileChooser.showOpenDialog(frame);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            Path proxyFile = fileChooser.getSelectedFile().toPath();
-            ServerWrecker.getLogger().info("Opening: {}.", proxyFile.getFileName());
+        if (returnVal != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
 
-            botManager.getThreadPool().submit(() -> {
-                try {
-                    List<BotProxy> proxies = new ArrayList<>();
+        Path proxyFile = fileChooser.getSelectedFile().toPath();
+        ServerWrecker.getLogger().info("Opening: {}.", proxyFile.getFileName());
 
-                    Files.lines(proxyFile).distinct().forEach(line -> {
+        botManager.getThreadPool().submit(() -> {
+            try {
+                List<BotProxy> proxies = new ArrayList<>();
+
+                try (Stream<String> lines = Files.lines(proxyFile)) {
+                    lines.distinct().forEach(line -> {
                         String[] split = line.split(":");
 
                         String host = split[0];
@@ -61,15 +66,15 @@ public class LoadProxiesListener implements ActionListener {
                             proxies.add(new BotProxy(new InetSocketAddress(host, port), null, null));
                         }
                     });
-
-                    ServerWrecker.getLogger().info("Loaded {} proxies", proxies.size());
-
-                    botManager.getPassWordProxies().clear();
-                    botManager.getPassWordProxies().addAll(proxies);
-                } catch (Exception ex) {
-                    ServerWrecker.getLogger().error(null, ex);
                 }
-            });
-        }
+
+                botManager.getPassWordProxies().clear();
+                botManager.getPassWordProxies().addAll(proxies);
+
+                ServerWrecker.getLogger().info("Loaded {} proxies", proxies.size());
+            } catch (Exception ex) {
+                ServerWrecker.getLogger().error(null, ex);
+            }
+        });
     }
 }

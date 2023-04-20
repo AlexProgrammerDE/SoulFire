@@ -19,12 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
+import net.pistonmaster.serverwrecker.gui.LoadAccountsListener;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.common.ServiceServer;
-import net.pistonmaster.serverwrecker.gui.LoadAccountsListener;
 import net.pistonmaster.serverwrecker.gui.LoadProxiesListener;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -36,6 +37,7 @@ public class AccountPanel extends NavigationItem {
     public static final JComboBox<ProxyType> proxyTypeCombo = new JComboBox<>();
     public static final JSpinner accPerProxy = new JSpinner();
 
+    @Inject
     public AccountPanel(ServerWrecker serverWrecker, JFrame parent) {
         JPanel accounts = new JPanel();
         accounts.setLayout(new GridBagLayout());
@@ -58,7 +60,7 @@ public class AccountPanel extends NavigationItem {
         AtomicReference<JPanel> serviceSettings = new AtomicReference<>(getServiceSettings(ServiceServer.MOJANG));
 
         serviceBox.addActionListener(action -> {
-            ServerWrecker.getInstance().setServiceServer((ServiceServer) serviceBox.getSelectedItem());
+            serverWrecker.setServiceServer((ServiceServer) serviceBox.getSelectedItem());
 
             serviceSettingsPanel.remove(serviceSettings.get());
             serviceSettings.set(getServiceSettings((ServiceServer) serviceBox.getSelectedItem()));

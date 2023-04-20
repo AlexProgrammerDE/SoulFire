@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker;
 
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.api.SWPluginLoader;
 import net.pistonmaster.serverwrecker.common.GameVersion;
 import net.pistonmaster.serverwrecker.common.Options;
 import net.pistonmaster.serverwrecker.common.ProxyType;
@@ -93,18 +94,18 @@ public class CommandDefinition implements Callable<Integer> {
     private String passwordFormat = "ServerWrecker";
 
     @Option(names = {"--autoreconnect"}, description = "Reconnect bots after being disconnected.")
-    private boolean autoReconnect;
+    private boolean autoReconnect = true;
 
     @Option(names = {"--autorespawn"}, description = "Respawn bots after death.")
-    private boolean autoRespawn;
+    private boolean autoRespawn = true;
 
     @Option(names = {"--disablewaitestablished"}, description = "Make the program halt and wait till a bot was successfully connected before connecting the next bot.")
     private boolean disableWaitEstablished;
 
     @Override
     public Integer call() {
-        Main.initPlugins(dataFolder);
-        ServerWrecker.getInstance().start(new Options(
+        SWPluginLoader.initPlugins(dataFolder);
+        new ServerWrecker().start(new Options(
                 host,
                 port,
                 amount,

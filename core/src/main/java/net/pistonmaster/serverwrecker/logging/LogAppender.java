@@ -26,6 +26,8 @@ import ch.qos.logback.core.LogbackException;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.status.Status;
+import com.google.common.collect.ForwardingList;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
@@ -39,6 +41,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class LogAppender implements Appender<ILoggingEvent> {
     private final JTextPane logArea;
     private final LogFormatter formatter = new LogFormatter();
+    @Getter
     private final Queue<String> logLines = new ConcurrentLinkedQueue<>();
     private final Timer timer = new Timer();
 

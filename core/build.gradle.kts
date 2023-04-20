@@ -4,10 +4,6 @@ plugins {
     id("edu.sc.seis.launch4j") version "2.5.4"
 }
 
-application {
-    mainClass.set("net.pistonmaster.serverwrecker.Main")
-}
-
 repositories {
     maven("https://repo.opencollab.dev/maven-releases")
     maven("https://repo.opencollab.dev/maven-snapshots")
@@ -21,6 +17,10 @@ repositories {
         name = "Sonatype Repository"
     }
     mavenCentral()
+}
+
+application {
+    mainClass.set("net.pistonmaster.serverwrecker.Main")
 }
 
 dependencies {
@@ -39,7 +39,9 @@ dependencies {
 
     implementation("net.kyori:adventure-text-serializer-plain:4.13.1")
     implementation("net.kyori:adventure-text-serializer-gson:4.13.1")
+
     implementation("net.kyori:event-api:3.0.0")
+    implementation("ch.jalu:injector:1.0")
 }
 
 tasks.compileJava.get().apply {

@@ -19,9 +19,17 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
+import ch.jalu.injector.Injector;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.gui.MainPanel;
+import net.pistonmaster.serverwrecker.gui.ShellSender;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -31,7 +39,8 @@ public class NavigationPanel extends JPanel {
     @Getter
     private final List<NavigationItem> navigationItemList = new ArrayList<>();
 
-    public NavigationPanel(RightPanelContainer container) {
+    @Inject
+    public NavigationPanel(RightPanelContainer container, Injector injector) {
         super();
 
         setLayout(new GridLayout(3, 3, 10, 10));
@@ -47,6 +56,6 @@ public class NavigationPanel extends JPanel {
             add(button);
         }
 
-        add(new ControlPanel(container, ServerWrecker.getInstance()));
+        add(injector.getSingleton(ControlPanel.class));
     }
 }

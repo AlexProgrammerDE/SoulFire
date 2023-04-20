@@ -28,32 +28,37 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.gui.navigation.RightPanelContainer;
 import org.slf4j.Logger;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ShellSender extends AbstractAction {
+    private final ServerWrecker serverWrecker;
     @Getter
     private final CommandDispatcher<ShellSender> dispatcher = new CommandDispatcher<>();
-    private final Logger logger;
     @Getter
     private final List<String> commandHistory = new ArrayList<>();
     @Getter
     @Setter
     private int pointer = -1;
 
-    {
+    @PostConstruct
+    public void postConstruct() {
         dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("test").executes(c -> {
             sendMessage("test");
             return 1;
         }));
         dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("online").executes(c -> {
             List<String> online = new ArrayList<>();
-            ServerWrecker.getInstance().getClients().forEach(client -> {
+            serverWrecker.getClients().forEach(client -> {
                 if (client.isOnline()) {
                     online.add(client.getAccount().getProfileName());
                 }
@@ -69,7 +74,7 @@ public class ShellSender extends AbstractAction {
                 .then(RequiredArgumentBuilder.<ShellSender, String>argument("message", StringArgumentType.greedyString()).build())
                 .executes(c -> {
                     String message = StringArgumentType.getString(c, "message");
-                    ServerWrecker.getInstance().getClients().forEach(client -> {
+                    serverWrecker.getClients().forEach(client -> {
                         if (client.isOnline()) {
                             client.sendMessage(message);
                         }
@@ -93,11 +98,11 @@ public class ShellSender extends AbstractAction {
         try {
             dispatcher.execute(command, this);
         } catch (CommandSyntaxException commandSyntaxException) {
-            logger.warn("Invalid command syntax");
+            ServerWrecker.getLogger().warn("Invalid command syntax");
         }
     }
 
     public void sendMessage(String message) {
-        logger.info(message);
+        ServerWrecker.getLogger().info(message);
     }
 }

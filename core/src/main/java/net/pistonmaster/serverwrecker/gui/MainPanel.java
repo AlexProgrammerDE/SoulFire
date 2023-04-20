@@ -19,37 +19,42 @@
  */
 package net.pistonmaster.serverwrecker.gui;
 
+import ch.jalu.injector.Injector;
 import ch.qos.logback.classic.Logger;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.gui.navigation.RightPanelContainer;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.libs.GhostText;
 import net.pistonmaster.serverwrecker.gui.libs.SmartScroller;
-import net.pistonmaster.serverwrecker.gui.navigation.RightPanelContainer;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MainPanel extends JPanel {
     @Getter
     private static final JTextPane logArea = new JTextPane();
     private final ServerWrecker botManager;
-    private final ShellSender shellSender = new ShellSender(ServerWrecker.getLogger());
+    private final ShellSender shellSender;
     private final JFrame parent;
+    private final Injector injector;
+    private final RightPanelContainer rightPanelContainer;
 
-    public MainPanel(ServerWrecker botManager, JFrame parent) {
-        this.botManager = botManager;
-        this.parent = parent;
-
+    @PostConstruct
+    public void postConstruct() {
         JPanel leftPanel = setLogPane();
-        JPanel rightPanel = new RightPanelContainer(botManager, parent);
+        rightPanelContainer.create();
 
         setLayout(new BorderLayout());
         add(leftPanel, BorderLayout.CENTER);
-        add(rightPanel, BorderLayout.EAST);
+        add(rightPanelContainer, BorderLayout.EAST);
     }
 
     private JPanel setLogPane() throws SecurityException {
@@ -64,7 +69,9 @@ public class MainPanel extends JPanel {
 
         new SmartScroller(logPane);
 
-        ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).addAppender(new LogAppender(logArea));
+        LogAppender logAppender = new LogAppender(logArea);
+        injector.register(LogAppender.class, logAppender);
+        ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).addAppender(logAppender);
 
         JTextField commands = new JTextField();
 
@@ -82,13 +89,13 @@ public class MainPanel extends JPanel {
 
                 int pointer = shellSender.getPointer();
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_UP:
+                    case KeyEvent.VK_UP -> {
                         if (pointer < shellSender.getCommandHistory().size() - 1) {
                             shellSender.setPointer(pointer + 1);
                             commands.setText(shellSender.getCommandHistory().get(shellSender.getPointer()));
                         }
-                        break;
-                    case KeyEvent.VK_DOWN:
+                    }
+                    case KeyEvent.VK_DOWN -> {
                         if (pointer > -1) {
                             shellSender.setPointer(pointer - 1);
 
@@ -100,10 +107,9 @@ public class MainPanel extends JPanel {
                         } else {
                             commands.setText(cachedText);
                         }
-                        break;
-                    case KeyEvent.VK_ENTER:
-                        cachedText = null;
-                        break;
+                    }
+                    case KeyEvent.VK_ENTER -> cachedText = null;
+
                         /*
                     case KeyEvent.VK_TAB:
                         e.consume();

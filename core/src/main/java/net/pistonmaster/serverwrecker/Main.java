@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker;
 
+import net.pistonmaster.serverwrecker.api.SWPluginLoader;
 import net.pistonmaster.serverwrecker.gui.MainFrame;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
@@ -38,8 +39,8 @@ public class Main {
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
             runHeadless(args, dataFolder);
         } else {
-            initPlugins(dataFolder);
-            new MainFrame(ServerWrecker.getInstance());
+            SWPluginLoader.initPlugins(dataFolder);
+            new ServerWrecker().getInjector().getSingleton(MainFrame.class);
         }
     }
 
@@ -53,23 +54,6 @@ public class Main {
         }
 
         return dataDirectory;
-    }
-
-    protected static void initPlugins(Path dataFolder) {
-        Path pluginDir = dataFolder.resolve("plugins");
-
-        try {
-            Files.createDirectories(pluginDir);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // create the plugin manager
-        PluginManager pluginManager = new JarPluginManager(pluginDir);
-
-        // start and load all plugins of application
-        pluginManager.loadPlugins();
-        pluginManager.startPlugins();
     }
 
     private static void runHeadless(String[] args, Path dataFolder) {

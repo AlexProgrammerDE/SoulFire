@@ -22,10 +22,12 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.Options;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 
 public class ControlPanel extends JPanel {
+    @Inject
     public ControlPanel(RightPanelContainer container, ServerWrecker serverWrecker) {
         JButton startButton = new JButton("Start");
         JButton pauseButton = new JButton("Pause");

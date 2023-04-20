@@ -20,17 +20,27 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import ch.qos.logback.classic.Level;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.event.AttackEndEvent;
 import net.pistonmaster.serverwrecker.api.event.AttackStartEvent;
+import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.logging.LogAppender;
+import javax.swing.filechooser.FileFilter;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class DeveloperPanel extends NavigationItem {
     public static final JCheckBox debug = new JCheckBox();
+    public static final JButton saveLog = new JButton("Save Log");
 
-    public DeveloperPanel() {
+    @Inject
+    public DeveloperPanel(ServerWrecker serverWrecker, LogAppender logAppender) {
         super();
 
         setLayout(new GridLayout(0, 2));
@@ -38,18 +48,60 @@ public class DeveloperPanel extends NavigationItem {
         add(new JLabel("Debug: "));
         add(debug);
 
-        ServerWrecker.getInstance().getEventBus().register(AttackStartEvent.class, event -> {
+        add(new JLabel("Save Log: "));
+        add(saveLog);
+
+        serverWrecker.getEventBus().register(AttackStartEvent.class, event -> {
             debug.setEnabled(false);
         });
-        ServerWrecker.getInstance().getEventBus().register(AttackEndEvent.class, event -> {
+        serverWrecker.getEventBus().register(AttackEndEvent.class, event -> {
             debug.setEnabled(true);
         });
 
         debug.addActionListener(listener -> {
             if (debug.isSelected()) {
-                ServerWrecker.getInstance().setupLogging(Level.DEBUG);
+                serverWrecker.setupLogging(Level.DEBUG);
             } else {
-                ServerWrecker.getInstance().setupLogging(Level.INFO);
+                serverWrecker.setupLogging(Level.INFO);
+            }
+        });
+
+        saveLog.addActionListener(listener -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Save Log");
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.setFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File file) {
+                    return file.getName().endsWith(".log");
+                }
+
+                @Override
+                public String getDescription() {
+                    return "Log Files";
+                }
+            });
+
+            int result = fileChooser.showSaveDialog(null);
+
+            if (result != JFileChooser.APPROVE_OPTION) {
+                return;
+            }
+
+            Path selectedFile = fileChooser.getSelectedFile().toPath();
+
+            try (BufferedWriter writer = Files.newBufferedWriter(selectedFile)) {
+                logAppender.getLogLines().forEach(entry -> {
+                    try {
+                        writer.write(entry);
+                        writer.newLine();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
     }

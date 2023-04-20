@@ -22,10 +22,12 @@ package net.pistonmaster.serverwrecker.gui;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.navigation.RightPanelContainer;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 
 public class AuthPanel extends JPanel {
+    @Inject
     public AuthPanel(RightPanelContainer container) {
         super();
 

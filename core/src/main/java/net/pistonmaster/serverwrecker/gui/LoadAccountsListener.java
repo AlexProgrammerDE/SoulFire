@@ -39,20 +39,22 @@ public class LoadAccountsListener implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         int returnVal = fileChooser.showOpenDialog(frame);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            Path accountFile = fileChooser.getSelectedFile().toPath();
-            ServerWrecker.getLogger().info("Opening: {}.", accountFile.getFileName());
-
-            botManager.getThreadPool().submit(() -> {
-                try {
-                    List<String> accounts = Files.lines(accountFile).distinct().collect(Collectors.toList());
-
-                    ServerWrecker.getLogger().info("Loaded {} accounts", accounts.size());
-                    botManager.setAccounts(accounts);
-                } catch (Exception ex) {
-                    ServerWrecker.getLogger().error(null, ex);
-                }
-            });
+        if (returnVal != JFileChooser.APPROVE_OPTION) {
+            return;
         }
+
+        Path accountFile = fileChooser.getSelectedFile().toPath();
+        ServerWrecker.getLogger().info("Opening: {}.", accountFile.getFileName());
+
+        botManager.getThreadPool().submit(() -> {
+            try {
+                List<String> accounts = Files.lines(accountFile).distinct().collect(Collectors.toList());
+
+                ServerWrecker.getLogger().info("Loaded {} accounts", accounts.size());
+                botManager.setAccounts(accounts);
+            } catch (Exception ex) {
+                ServerWrecker.getLogger().error(null, ex);
+            }
+        });
     }
 }

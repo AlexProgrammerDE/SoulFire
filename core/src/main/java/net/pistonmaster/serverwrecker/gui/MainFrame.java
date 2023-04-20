@@ -19,25 +19,37 @@
  */
 package net.pistonmaster.serverwrecker.gui;
 
+import ch.jalu.injector.Injector;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
     public static final String AUTH_MENU = "AuthMenu";
     public static final String MAIN_MENU = "MainMenu";
+    private final ServerWrecker botManager;
+    private final Injector injector;
 
-    public MainFrame(ServerWrecker botManager) {
+    @Inject
+    public MainFrame(ServerWrecker botManager, Injector injector) {
         super(ServerWrecker.PROJECT_NAME);
+        this.botManager = botManager;
+        this.injector = injector;
+        injector.register(JFrame.class, this);
+    }
 
+    @PostConstruct
+    public void postConstruct() {
         setLookAndFeel();
         setResizable(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         setLayout(new CardLayout());
-        add(new MainPanel(botManager, this), MAIN_MENU);
+        add(injector.getSingleton(MainPanel.class), MAIN_MENU);
 
         pack();
 
