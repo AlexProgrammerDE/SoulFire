@@ -19,10 +19,10 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
-import net.pistonmaster.serverwrecker.gui.LoadAccountsListener;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.common.ServiceServer;
+import net.pistonmaster.serverwrecker.gui.LoadAccountsListener;
 import net.pistonmaster.serverwrecker.gui.LoadProxiesListener;
 
 import javax.inject.Inject;

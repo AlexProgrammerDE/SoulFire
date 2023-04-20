@@ -19,10 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.api;
 
-import net.pistonmaster.serverwrecker.ServerWrecker;
-
-import javax.swing.*;
-
 public class ServerWreckerAPI {
     // TODO: Add API methods
 }

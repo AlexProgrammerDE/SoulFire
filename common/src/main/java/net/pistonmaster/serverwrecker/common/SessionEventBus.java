@@ -20,67 +20,64 @@
 package net.pistonmaster.serverwrecker.common;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.slf4j.Logger;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 @ToString
-@RequiredArgsConstructor
 public final class SessionEventBus {
     private final Options options;
     private final Logger log;
     private final AbstractBot bot;
     private final Set<String> messageQueue = new LinkedHashSet<>();
-    private final Timer timer = new Timer();
+    private final ScheduledThreadPoolExecutor timer = new ScheduledThreadPoolExecutor(3);
     private final AtomicBoolean isRejoining = new AtomicBoolean(false);
 
-    {
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Iterator<String> iter = messageQueue.iterator();
-                while (iter.hasNext()) {
-                    String message = iter.next();
-                    iter.remove();
-                    if (Objects.nonNull(message)) {
-                        log.info("Received Message: {}", message);
-                    }
+    public SessionEventBus(Options options, Logger log, AbstractBot bot) {
+        this.options = options;
+        this.log = log;
+        this.bot = bot;
+        timer.scheduleAtFixedRate(() -> {
+            Iterator<String> iter = messageQueue.iterator();
+            while (!messageQueue.isEmpty()) {
+                String message = iter.next();
+                iter.remove();
+                if (Objects.nonNull(message)) {
+                    log.info("Received Message: {}", message);
                 }
             }
-        }, 0, 2000);
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (options.autoRespawn()) {
-                    if (bot.isOnline() && bot.getHealth() != -1 && bot.getHealth() < 1) {
-                        bot.sendClientCommand(0);
-                    }
+        }, 0, 2000, TimeUnit.MILLISECONDS);
+        timer.scheduleAtFixedRate(() -> {
+            if (options.autoRespawn()) {
+                if (bot.isOnline() && bot.getHealth() != -1 && bot.getHealth() < 1) {
+                    bot.sendClientCommand(0);
                 }
             }
-        }, 0, 1000);
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (options.autoReconnect()) {
-                    if (bot.isOnline()) {
-                        if (isRejoining.get()) {
-                            isRejoining.set(false);
-                        }
-                    } else {
-                        if (isRejoining.get()) {
-                            return;
-                        }
+        }, 0, 1000, TimeUnit.MILLISECONDS);
+        timer.scheduleAtFixedRate(() -> {
+            if (options.autoReconnect()) {
+                if (bot.isOnline()) {
+                    if (isRejoining.get()) {
+                        isRejoining.set(false);
+                    }
+                } else {
+                    if (isRejoining.get()) {
+                        return;
+                    }
 
-                        bot.connect(options.hostname(), options.port());
-                        isRejoining.set(true);
-                    }
+                    bot.connect(options.hostname(), options.port(), this);
+                    isRejoining.set(true);
                 }
             }
-        }, 0, 1000);
+        }, 0, 1000, TimeUnit.MILLISECONDS);
     }
 
     public void onChat(String message) {

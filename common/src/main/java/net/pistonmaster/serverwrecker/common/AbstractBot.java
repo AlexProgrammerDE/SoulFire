@@ -38,7 +38,7 @@ public abstract class AbstractBot {
 
     public abstract void sendMessage(String message);
 
-    public abstract void connect(String host, int port);
+    public abstract void connect(String host, int port, SessionEventBus bus);
 
     public abstract void disconnect();
 

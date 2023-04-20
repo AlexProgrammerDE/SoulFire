@@ -20,14 +20,14 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import ch.qos.logback.classic.Level;
+import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.event.AttackEndEvent;
 import net.pistonmaster.serverwrecker.api.event.AttackStartEvent;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
-import javax.swing.filechooser.FileFilter;
 
 import javax.inject.Inject;
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;

@@ -23,7 +23,6 @@ import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import ch.qos.logback.classic.Level;
 import com.google.common.collect.ImmutableList;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.event.EventBus;
@@ -38,7 +37,6 @@ import net.pistonmaster.serverwrecker.protocol.BotFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
 import java.net.Proxy;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -57,7 +55,7 @@ public class ServerWrecker {
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
     private final EventBus<ServerWreckerEvent> eventBus = new SimpleEventBus<>(ServerWreckerEvent.class);
-    private final List<AbstractBot> clients = new ArrayList<>();
+    private final List<AbstractBot> bots = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final List<BotProxy> passWordProxies = new ArrayList<>();
     private final Map<String, String> serviceServerConfig = new HashMap<>();
@@ -156,18 +154,18 @@ public class ServerWrecker {
                 bot = new BotFactory().createBot(options, account, serviceServer);
             }
 
-            this.clients.add(bot);
+            this.bots.add(bot);
         }
 
         if (proxyCache.isEmpty()) {
-            logger.info("Starting attack at {} with {} bots", options.hostname(), clients.size());
+            logger.info("Starting attack at {} with {} bots", options.hostname(), bots.size());
         } else {
-            logger.info("Starting attack at {} with {} bots and {} proxies", options.hostname(), clients.size(), proxyUseMap.size());
+            logger.info("Starting attack at {} with {} bots and {} proxies", options.hostname(), bots.size(), proxyUseMap.size());
         }
 
         eventBus.post(new AttackStartEvent());
 
-        for (AbstractBot client : clients) {
+        for (AbstractBot bot : bots) {
             try {
                 TimeUnit.MILLISECONDS.sleep(options.joinDelayMs());
             } catch (InterruptedException ex) {
@@ -187,9 +185,9 @@ public class ServerWrecker {
                 break;
             }
 
-            client.getLogger().info("Connecting...");
+            bot.getLogger().info("Connecting...");
 
-            client.connect(options.hostname(), options.port());
+            bot.connect(options.hostname(), options.port(), new SessionEventBus(options, bot.getLogger(), bot));
         }
     }
 
@@ -208,8 +206,8 @@ public class ServerWrecker {
 
     public void stop() {
         this.running = false;
-        clients.forEach(AbstractBot::disconnect);
-        clients.clear();
+        bots.forEach(AbstractBot::disconnect);
+        bots.clear();
         eventBus.post(new AttackEndEvent());
     }
 

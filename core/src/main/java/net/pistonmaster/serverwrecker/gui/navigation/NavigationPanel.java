@@ -20,15 +20,8 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import ch.jalu.injector.Injector;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import lombok.Getter;
-import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.gui.MainPanel;
-import net.pistonmaster.serverwrecker.gui.ShellSender;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;

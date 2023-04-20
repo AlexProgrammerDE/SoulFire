@@ -21,8 +21,6 @@ package net.pistonmaster.serverwrecker;
 
 import net.pistonmaster.serverwrecker.api.SWPluginLoader;
 import net.pistonmaster.serverwrecker.gui.MainFrame;
-import org.pf4j.JarPluginManager;
-import org.pf4j.PluginManager;
 import picocli.CommandLine;
 
 import java.awt.*;

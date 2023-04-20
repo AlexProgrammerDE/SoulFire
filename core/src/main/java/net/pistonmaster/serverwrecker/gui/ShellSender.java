@@ -28,13 +28,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.gui.navigation.RightPanelContainer;
-import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +55,7 @@ public class ShellSender extends AbstractAction {
         }));
         dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("online").executes(c -> {
             List<String> online = new ArrayList<>();
-            serverWrecker.getClients().forEach(client -> {
+            serverWrecker.getBots().forEach(client -> {
                 if (client.isOnline()) {
                     online.add(client.getAccount().getProfileName());
                 }
@@ -74,7 +71,7 @@ public class ShellSender extends AbstractAction {
                 .then(RequiredArgumentBuilder.<ShellSender, String>argument("message", StringArgumentType.greedyString()).build())
                 .executes(c -> {
                     String message = StringArgumentType.getString(c, "message");
-                    serverWrecker.getClients().forEach(client -> {
+                    serverWrecker.getBots().forEach(client -> {
                         if (client.isOnline()) {
                             client.sendMessage(message);
                         }

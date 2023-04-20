@@ -23,10 +23,10 @@ import ch.jalu.injector.Injector;
 import ch.qos.logback.classic.Logger;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.gui.navigation.RightPanelContainer;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.libs.GhostText;
 import net.pistonmaster.serverwrecker.gui.libs.SmartScroller;
+import net.pistonmaster.serverwrecker.gui.navigation.RightPanelContainer;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
 import org.slf4j.LoggerFactory;
 

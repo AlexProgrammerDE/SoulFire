@@ -26,7 +26,6 @@ import ch.qos.logback.core.LogbackException;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.status.Status;
-import com.google.common.collect.ForwardingList;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

@@ -36,8 +36,6 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.common.*;
 import org.slf4j.Logger;
 
-import java.net.InetSocketAddress;
-
 @Getter
 @RequiredArgsConstructor
 public class Bot1_9 extends AbstractBot {
@@ -49,7 +47,7 @@ public class Bot1_9 extends AbstractBot {
     private Session session;
 
     @Override
-    public void connect(String host, int port) {
+    public void connect(String host, int port, SessionEventBus bus) {
         session = new TcpClientSession(host, port, (PacketProtocol) account,
                 NullHelper.nullOrConvert(proxyBotData,
                         data -> new ProxyInfo(ProxyInfo.Type.valueOf(data.getType().name()), data.getAddress(), data.getUsername(), data.getPassword())));
@@ -60,8 +58,6 @@ public class Bot1_9 extends AbstractBot {
         session.setCompressionThreshold(options.compressionThreshold());
         session.setReadTimeout(options.readTimeout());
         session.setWriteTimeout(options.writeTimeout());
-
-        SessionEventBus bus = new SessionEventBus(options, logger, this);
 
         session.addListener(new SessionListener1_9(bus, account));
 
