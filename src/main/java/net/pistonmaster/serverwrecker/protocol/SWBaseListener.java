@@ -15,16 +15,7 @@ public class SWBaseListener extends ClientListener {
     public void connected(ConnectedEvent event) {
         ViaTcpClientSession session = (ViaTcpClientSession) event.getSession();
         if (this.targetState == ProtocolState.LOGIN) {
-            System.out.println(session.getPacketProtocol().getServerboundId(ClientIntentionPacket.class));
-            ClientIntentionPacket packet = new ClientIntentionPacket(session.getOptions().protocolVersion().getVersion(), event.getSession().getHost(), event.getSession().getPort(), HandshakeIntent.LOGIN);
-            System.out.println("By packet: " + session.getPacketProtocol().getServerboundId(packet));
-            try {
-                session.send(packet);
-            } catch (Throwable t) {
-                System.out.println("Failed to send packet, trying id");
-                System.out.println("Here is the id: " + session.getPacketProtocol().getServerboundId(packet));
-            }
-
+            session.send(new ClientIntentionPacket(session.getOptions().protocolVersion().getVersion(), event.getSession().getHost(), event.getSession().getPort(), HandshakeIntent.LOGIN));
         } else if (this.targetState == ProtocolState.STATUS) {
             session.send(new ClientIntentionPacket(session.getOptions().protocolVersion().getVersion(), event.getSession().getHost(), event.getSession().getPort(), HandshakeIntent.STATUS));
         }

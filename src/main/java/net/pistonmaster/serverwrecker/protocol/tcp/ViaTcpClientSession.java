@@ -7,7 +7,6 @@ import com.github.steveice10.packetlib.helper.TransportHelper;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpPacketCodec;
 import com.github.steveice10.packetlib.tcp.TcpPacketCompression;
-import com.github.steveice10.packetlib.tcp.TcpPacketSizer;
 import com.github.steveice10.packetlib.tcp.TcpSession;
 import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
@@ -36,6 +35,7 @@ import io.netty.resolver.dns.DnsNameResolver;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.common.SWOptions;
+import net.pistonmaster.serverwrecker.viaversion.FrameCodec;
 import net.pistonmaster.serverwrecker.viaversion.StorableOptions;
 
 import java.net.Inet4Address;
@@ -107,10 +107,7 @@ public class ViaTcpClientSession extends TcpSession {
 
                     addProxy(pipeline);
 
-                    int size = protocol.getPacketHeader().getLengthSize();
-                    if (size > 0) {
-                        pipeline.addLast("sizer", new TcpPacketSizer(ViaTcpClientSession.this, size));
-                    }
+                    pipeline.addLast("sizer", new FrameCodec());
 
                     // This does the extra magic
                     UserConnectionImpl userConnection = new UserConnectionImpl(channel, true);

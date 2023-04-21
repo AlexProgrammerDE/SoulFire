@@ -71,7 +71,8 @@ public final class SessionEventBus {
         }, 0, 1000, TimeUnit.MILLISECONDS);
         timer.scheduleAtFixedRate(() -> {
             if (options.autoReconnect()) {
-                if (didFirstJoin.get() || rejoinAnywayCounter.getAndIncrement() > (options.connectTimeout() / 1000)) {
+                if (didFirstJoin.get()
+                        || rejoinAnywayCounter.getAndIncrement() > (options.connectTimeout() / 1000)) {
                     if (bot.isOnline()) {
                         if (isRejoining.get()) {
                             isRejoining.set(false);
@@ -84,6 +85,8 @@ public final class SessionEventBus {
                         bot.connect(options.hostname(), options.port(), this);
                         isRejoining.set(true);
                     }
+                } else {
+                    System.out.println(rejoinAnywayCounter.get());
                 }
             }
         }, 0, 1, TimeUnit.SECONDS);

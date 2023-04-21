@@ -19,6 +19,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.SWConstants;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -33,50 +34,11 @@ import java.util.logging.Logger;
 public class SWViaPlatform implements ViaPlatform<UUID> {
     private final Path dataFolder;
     private ViaVersionConfig config;
+    private final JLoggerToLogback logger = new JLoggerToLogback(LoggerFactory.getLogger("ViaVersion"));
     private final ViaAPI<UUID> api = new ViaAPIBase<>() {
     };
     @Getter
-    private final ViaInjector injector = new ViaInjector() {
-        @Override
-        public void inject() {
-        }
-
-        @Override
-        public void uninject() {
-        }
-
-        @Override
-        public IntSortedSet getServerProtocolVersions() {
-            // On client-side we can connect to any server version
-            IntSortedSet versions = new IntLinkedOpenHashSet();
-            versions.add(ProtocolVersion.v1_8.getOriginalVersion());
-            versions.add(SWConstants.getVersionsSorted()
-                    .stream()
-                    .mapToInt(ProtocolVersion::getOriginalVersion)
-                    .max().getAsInt());
-            return versions;
-        }
-
-        @Override
-        public int getServerProtocolVersion() {
-            return getServerProtocolVersions().firstInt();
-        }
-
-        @Override
-        public String getEncoderName() {
-            return getDecoderName();
-        }
-
-        @Override
-        public String getDecoderName() {
-            return "via-codec";
-        }
-
-        @Override
-        public JsonObject getDump() {
-            return new JsonObject();
-        }
-    };
+    private final ViaInjector injector = new SRViaInjector();
     private final EventLoop eventLoop = new DefaultEventLoop();
     private final ExecutorService asyncService = Executors.newFixedThreadPool(4);
 
@@ -109,7 +71,7 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
 
     @Override
     public Logger getLogger() {
-        return Logger.getLogger("ViaVersion");
+        return logger;
     }
 
     @Override
