@@ -19,15 +19,16 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
-import net.pistonmaster.serverwrecker.common.GameVersion;
-import net.pistonmaster.serverwrecker.common.Options;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import net.pistonmaster.serverwrecker.SWConstants;
+import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.common.ProxyType;
 
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.*;
+import java.util.List;
 
 public class SettingsPanel extends NavigationItem {
     private final JTextField hostInput;
@@ -41,7 +42,7 @@ public class SettingsPanel extends NavigationItem {
     private final JTextField passwordFormat;
     private final JSpinner amount;
     private final JTextField nameFormat;
-    private final JComboBox<GameVersion> versionBox;
+    private final JComboBox<ProtocolVersion> versionBox;
     private final JSpinner readTimeout;
     private final JSpinner writeTimeout;
     private final JSpinner connectTimeout;
@@ -103,9 +104,9 @@ public class SettingsPanel extends NavigationItem {
 
         add(new JLabel("Version: "));
         versionBox = new JComboBox<>();
-        Arrays.stream(GameVersion.values())
-                .sorted(Comparator.reverseOrder())
-                .forEach(versionBox::addItem);
+        List<ProtocolVersion> versions = new ArrayList<>(SWConstants.getVersionsSorted());
+        Collections.reverse(versions);
+        versions.forEach(versionBox::addItem);
         add(versionBox);
 
         add(new JLabel("Read Timeout: "));
@@ -149,15 +150,15 @@ public class SettingsPanel extends NavigationItem {
         return RightPanelContainer.SETTINGS_MENU;
     }
 
-    public Options generateOptions() {
-        return new Options(
+    public SWOptions generateOptions() {
+        return new SWOptions(
                 hostInput.getText(),
                 Integer.parseInt(portInput.getText()),
                 (int) amount.getValue(),
                 (int) delay.getValue(),
                 !disableWaitEstablished.isSelected(),
                 nameFormat.getText(),
-                (GameVersion) versionBox.getSelectedItem(),
+                (ProtocolVersion) versionBox.getSelectedItem(),
                 autoRegister.isSelected(),
                 DeveloperPanel.debug.isSelected(),
                 (ProxyType) AccountPanel.proxyTypeCombo.getSelectedItem(),

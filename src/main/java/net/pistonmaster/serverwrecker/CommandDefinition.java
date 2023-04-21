@@ -19,10 +19,10 @@
  */
 package net.pistonmaster.serverwrecker;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.api.SWPluginLoader;
-import net.pistonmaster.serverwrecker.common.GameVersion;
-import net.pistonmaster.serverwrecker.common.Options;
+import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.common.ProxyType;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -52,7 +52,7 @@ public class CommandDefinition implements Callable<Integer> {
     private String nameFormat = "Bot-%d";
 
     @Option(names = {"-v", "--mcversion"}, description = "The Minecraft version of the server to connect to. Defaults to latest")
-    private GameVersion version = GameVersion.getNewest();
+    private String version = SWConstants.LATEST_SHOWN_VERSION.getName();
 
     @Option(names = {"-r", "--register"}, description = "Makes Bots run the /register and /login command after joining with username and password being " + ServerWrecker.PROJECT_NAME)
     private boolean autoRegister;
@@ -105,14 +105,14 @@ public class CommandDefinition implements Callable<Integer> {
     @Override
     public Integer call() {
         SWPluginLoader.initPlugins(dataFolder);
-        new ServerWrecker(dataFolder).start(new Options(
+        new ServerWrecker(dataFolder).start(new SWOptions(
                 host,
                 port,
                 amount,
                 joinDelay,
                 !disableWaitEstablished,
                 nameFormat,
-                version,
+                ProtocolVersion.getClosest(version),
                 autoRegister,
                 debug,
                 proxy,

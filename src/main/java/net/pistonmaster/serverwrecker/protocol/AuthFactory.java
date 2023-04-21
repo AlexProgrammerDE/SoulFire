@@ -23,7 +23,6 @@ import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.auth.service.AuthenticationService;
 import com.github.steveice10.mc.auth.service.MojangAuthenticationService;
 import com.github.steveice10.mc.auth.service.MsaAuthenticationService;
-import net.pistonmaster.serverwrecker.common.GameVersion;
 import net.pistonmaster.serverwrecker.common.ServiceServer;
 
 import java.net.Proxy;

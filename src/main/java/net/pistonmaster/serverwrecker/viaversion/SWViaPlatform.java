@@ -5,26 +5,26 @@ import com.viaversion.viaversion.api.ViaAPI;
 import com.viaversion.viaversion.api.command.ViaCommandSender;
 import com.viaversion.viaversion.api.configuration.ConfigurationProvider;
 import com.viaversion.viaversion.api.configuration.ViaVersionConfig;
-import com.viaversion.viaversion.api.connection.UserConnection;
-import com.viaversion.viaversion.api.legacy.LegacyViaAPI;
-import com.viaversion.viaversion.api.platform.PlatformTask;
 import com.viaversion.viaversion.api.platform.ViaInjector;
 import com.viaversion.viaversion.api.platform.ViaPlatform;
-import com.viaversion.viaversion.api.protocol.version.ServerProtocolVersion;
-import com.viaversion.viaversion.bungee.platform.BungeeViaConfig;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import com.viaversion.viaversion.configuration.AbstractViaConfig;
+import com.viaversion.viaversion.libs.fastutil.ints.IntLinkedOpenHashSet;
+import com.viaversion.viaversion.libs.fastutil.ints.IntSortedSet;
 import com.viaversion.viaversion.libs.gson.JsonObject;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.EventLoop;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.pistonmaster.serverwrecker.SWConstants;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.SortedSet;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
@@ -32,8 +32,9 @@ import java.util.logging.Logger;
 @RequiredArgsConstructor
 public class SWViaPlatform implements ViaPlatform<UUID> {
     private final Path dataFolder;
-    private final ViaVersionConfig config;
-    private final ViaAPI<UUID> api = new ViaAPIBase<>() {};
+    private ViaVersionConfig config;
+    private final ViaAPI<UUID> api = new ViaAPIBase<>() {
+    };
     @Getter
     private final ViaInjector injector = new ViaInjector() {
         @Override
@@ -45,8 +46,20 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
         }
 
         @Override
+        public IntSortedSet getServerProtocolVersions() {
+            // On client-side we can connect to any server version
+            IntSortedSet versions = new IntLinkedOpenHashSet();
+            versions.add(ProtocolVersion.v1_8.getOriginalVersion());
+            versions.add(SWConstants.getVersionsSorted()
+                    .stream()
+                    .mapToInt(ProtocolVersion::getOriginalVersion)
+                    .max().getAsInt());
+            return versions;
+        }
+
+        @Override
         public int getServerProtocolVersion() {
-            return 0;
+            return getServerProtocolVersions().firstInt();
         }
 
         @Override
@@ -67,6 +80,29 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
     private final EventLoop eventLoop = new DefaultEventLoop();
     private final ExecutorService asyncService = Executors.newFixedThreadPool(4);
 
+    public void init() {
+        config = new AbstractViaConfig(dataFolder.resolve("config.yml").toFile()) {
+            {
+                reloadConfig();
+            }
+
+            // Based on Sponge ViaVersion
+            private static final List<String> UNSUPPORTED = Arrays.asList("anti-xray-patch", "bungee-ping-interval",
+                    "bungee-ping-save", "bungee-servers", "quick-move-action-fix", "nms-player-ticking",
+                    "velocity-ping-interval", "velocity-ping-save", "velocity-servers",
+                    "blockconnection-method", "change-1_9-hitbox", "change-1_14-hitbox");
+
+            @Override
+            protected void handleConfig(Map<String, Object> config) {
+            }
+
+            @Override
+            public List<String> getUnsupportedOptions() {
+                return UNSUPPORTED;
+            }
+        };
+    }
+
     protected FutureTaskId runEventLoop(Runnable runnable) {
         return new FutureTaskId(eventLoop.submit(runnable).addListener(errorLogger()));
     }
@@ -84,6 +120,11 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
     @Override
     public String getPlatformVersion() {
         return "1.0.0"; // TODO
+    }
+
+    @Override
+    public boolean isProxy() {
+        return true;
     }
 
     @Override
@@ -198,6 +239,4 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
             }
         };
     }
-
-
 }

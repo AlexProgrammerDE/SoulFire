@@ -35,10 +35,9 @@ import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.pistonmaster.serverwrecker.common.GameMode;
-import net.pistonmaster.serverwrecker.common.SessionEventBus;
 
 @RequiredArgsConstructor
-public class SessionListener extends SessionAdapter {
+public class SWSessionListener extends SessionAdapter {
     private final SessionEventBus bus;
     private final ProtocolWrapper wrapper;
 

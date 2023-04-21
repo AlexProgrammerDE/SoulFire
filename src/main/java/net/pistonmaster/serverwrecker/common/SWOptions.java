@@ -19,11 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.common;
 
-public record Options(String hostname, int port,
-                      int amount, int joinDelayMs, boolean waitEstablished, String botNameFormat,
-                      GameVersion gameVersion, boolean autoRegister,
-                      boolean debug, ProxyType proxyType, int accountsPerProxy,
-                      int readTimeout, int writeTimeout, int connectTimeout, int compressionThreshold,
-                      String registerCommand, String loginCommand, String captchaCommand,
-                      String passwordFormat, boolean autoReconnect, boolean autoRespawn) {
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+
+public record SWOptions(String hostname, int port,
+                        int amount, int joinDelayMs, boolean waitEstablished, String botNameFormat,
+                        ProtocolVersion protocolVersion, boolean autoRegister,
+                        boolean debug, ProxyType proxyType, int accountsPerProxy,
+                        int readTimeout, int writeTimeout, int connectTimeout, int compressionThreshold,
+                        String registerCommand, String loginCommand, String captchaCommand,
+                        String passwordFormat, boolean autoReconnect, boolean autoRespawn) {
 }

@@ -17,11 +17,14 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.common;
+package net.pistonmaster.serverwrecker.protocol;
 
 import lombok.Getter;
 import lombok.ToString;
-import net.pistonmaster.serverwrecker.protocol.Bot;
+import net.pistonmaster.serverwrecker.common.EntityLocation;
+import net.pistonmaster.serverwrecker.common.EntityMotion;
+import net.pistonmaster.serverwrecker.common.GameMode;
+import net.pistonmaster.serverwrecker.common.SWOptions;
 import org.slf4j.Logger;
 
 import java.util.Iterator;
@@ -31,18 +34,21 @@ import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 @ToString
 public final class SessionEventBus {
-    private final Options options;
+    private final SWOptions options;
     private final Logger log;
     private final Bot bot;
     private final Set<String> messageQueue = new LinkedHashSet<>();
     private final ScheduledThreadPoolExecutor timer = new ScheduledThreadPoolExecutor(3);
     private final AtomicBoolean isRejoining = new AtomicBoolean(false);
+    private final AtomicBoolean didFirstJoin = new AtomicBoolean(false);
+    private final AtomicInteger rejoinAnywayCounter = new AtomicInteger(0);
 
-    public SessionEventBus(Options options, Logger log, Bot bot) {
+    public SessionEventBus(SWOptions options, Logger log, Bot bot) {
         this.options = options;
         this.log = log;
         this.bot = bot;
@@ -65,20 +71,22 @@ public final class SessionEventBus {
         }, 0, 1000, TimeUnit.MILLISECONDS);
         timer.scheduleAtFixedRate(() -> {
             if (options.autoReconnect()) {
-                if (bot.isOnline()) {
-                    if (isRejoining.get()) {
-                        isRejoining.set(false);
-                    }
-                } else {
-                    if (isRejoining.get()) {
-                        return;
-                    }
+                if (didFirstJoin.get() || rejoinAnywayCounter.getAndIncrement() > (options.connectTimeout() / 1000)) {
+                    if (bot.isOnline()) {
+                        if (isRejoining.get()) {
+                            isRejoining.set(false);
+                        }
+                    } else {
+                        if (isRejoining.get()) {
+                            return;
+                        }
 
-                    bot.connect(options.hostname(), options.port(), this);
-                    isRejoining.set(true);
+                        bot.connect(options.hostname(), options.port(), this);
+                        isRejoining.set(true);
+                    }
                 }
             }
-        }, 0, 1000, TimeUnit.MILLISECONDS);
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     public void onChat(String message) {
@@ -128,7 +136,8 @@ public final class SessionEventBus {
 
     public void onJoin(int entityId, boolean hardcore, GameMode gameMode, int maxPlayers) {
         try {
-            bot.setEntityId(entityId);
+            didFirstJoin.set(true);
+            bot.setBotEntityId(entityId);
             bot.setHardcore(hardcore);
             bot.setGameMode(gameMode);
             bot.setMaxPlayers(maxPlayers);
@@ -179,11 +188,11 @@ public final class SessionEventBus {
 
     public void onEntityMotion(int entityId, double motionX, double motionY, double motionZ) {
         try {
-            if (entityId == bot.getEntityId()) {
+            if (entityId == bot.getBotEntityId()) {
                 bot.setMotion(new EntityMotion(motionX, motionY, motionZ));
-                log.info("Player moved with motion: {} {} {}", motionX, motionY, motionZ);
+                //log.info("Player moved with motion: {} {} {}", motionX, motionY, motionZ);
             } else {
-                log.debug("Entity {} moved with motion: {} {} {}", entityId, motionX, motionY, motionZ);
+                //log.debug("Entity {} moved with motion: {} {} {}", entityId, motionX, motionY, motionZ);
             }
         } catch (Exception e) {
             log.error("Error while logging entity motion", e);

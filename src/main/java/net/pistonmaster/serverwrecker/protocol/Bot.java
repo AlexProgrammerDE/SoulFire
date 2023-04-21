@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.protocol;
 
+import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
@@ -30,8 +31,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.packetlib.BuiltinFlags;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.Session;
-import com.github.steveice10.packetlib.packet.PacketProtocol;
-import com.github.steveice10.packetlib.tcp.TcpClientSession;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -47,7 +46,7 @@ import java.util.Collections;
 @Setter
 @RequiredArgsConstructor
 public class Bot {
-    private final Options options;
+    private final SWOptions options;
     private final Logger logger;
     private final ProtocolWrapper account;
     private final ServiceServer serviceServer;
@@ -58,15 +57,16 @@ public class Bot {
     private float health = -1;
     private int food = -1;
     private float saturation = -1;
-    private int entityId = -1;
+    private int botEntityId = -1;
     private boolean hardcore = false;
     private GameMode gameMode = null;
     private int maxPlayers = -1;
 
     public void connect(String host, int port, SessionEventBus bus) {
-        session = new ViaTcpClientSession(host, port, account,
+        ViaTcpClientSession session = new ViaTcpClientSession(host, port, account,
                 NullHelper.nullOrConvert(proxyBotData,
-                        data -> new ProxyInfo(ProxyInfo.Type.valueOf(data.getType().name()), data.getAddress(), data.getUsername(), data.getPassword())));
+                        data -> new ProxyInfo(ProxyInfo.Type.valueOf(data.getType().name()), data.getAddress(), data.getUsername(), data.getPassword())),
+                options);
 
         session.setFlag(BuiltinFlags.PRINT_DEBUG, options.debug());
 
@@ -75,9 +75,11 @@ public class Bot {
         session.setReadTimeout(options.readTimeout());
         session.setWriteTimeout(options.writeTimeout());
 
-        session.addListener(new SessionListener(bus, account));
+        session.addListener(new SWBaseListener(ProtocolState.LOGIN));
+        session.addListener(new SWSessionListener(bus, account));
 
         session.connect(options.waitEstablished());
+        this.session = session;
     }
 
     public void sendMessage(String message) {

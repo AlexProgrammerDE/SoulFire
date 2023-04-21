@@ -21,16 +21,20 @@ package net.pistonmaster.serverwrecker.protocol;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
+import com.github.steveice10.mc.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 
 import java.util.UUID;
 
 public class ProtocolWrapper extends MinecraftProtocol {
     public ProtocolWrapper(String username) {
         super(username);
+        setUseDefaultListeners(false);
+        System.out.println("Data: " + getServerboundId(ClientIntentionPacket.class));
     }
 
     public ProtocolWrapper(GameProfile profile, String accessToken) {
         super(profile, accessToken);
+        setUseDefaultListeners(false);
     }
 
     public String getProfileName() {

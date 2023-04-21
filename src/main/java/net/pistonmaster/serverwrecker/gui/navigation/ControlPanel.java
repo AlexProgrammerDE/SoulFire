@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.common.Options;
+import net.pistonmaster.serverwrecker.common.SWOptions;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -43,7 +43,7 @@ public class ControlPanel extends JPanel {
         add(stopButton);
 
         startButton.addActionListener(action -> {
-            Options options = container.getPanel(SettingsPanel.class).generateOptions();
+            SWOptions options = container.getPanel(SettingsPanel.class).generateOptions();
 
             serverWrecker.getThreadPool().submit(() -> {
                 try {

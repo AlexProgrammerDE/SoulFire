@@ -26,11 +26,11 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 
 public class BotFactory {
-    public Bot createBot(Options options, ProtocolWrapper account, ServiceServer serviceServer) {
+    public Bot createBot(SWOptions options, ProtocolWrapper account, ServiceServer serviceServer) {
         return createBot(options, account, null, serviceServer, null, null, null);
     }
 
-    public Bot createBot(Options options, ProtocolWrapper account, InetSocketAddress address, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
+    public Bot createBot(SWOptions options, ProtocolWrapper account, InetSocketAddress address, ServiceServer serviceServer, ProxyType proxyType, String username, String password) {
         Logger botLogger = LoggerFactory.getLogger(account.getProfileName());
 
         ProxyBotData proxyBotData = address == null ? null : ProxyBotData.of(username, password, address, proxyType);

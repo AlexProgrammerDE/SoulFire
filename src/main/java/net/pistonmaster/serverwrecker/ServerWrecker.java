@@ -25,8 +25,10 @@ import ch.qos.logback.classic.Level;
 import com.google.common.collect.ImmutableList;
 import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
-import com.viaversion.viaversion.bungee.platform.BungeeViaConfig;
-import com.viaversion.viaversion.configuration.AbstractViaConfig;
+import com.viaversion.viaversion.api.connection.UserConnection;
+import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
+import com.viaversion.viaversion.api.protocol.version.VersionProvider;
+import com.viaversion.viaversion.protocols.base.BaseVersionProvider;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.event.EventBus;
@@ -36,11 +38,9 @@ import net.pistonmaster.serverwrecker.api.event.AttackStartEvent;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
 import net.pistonmaster.serverwrecker.common.*;
 import net.pistonmaster.serverwrecker.logging.LogUtil;
-import net.pistonmaster.serverwrecker.protocol.AuthFactory;
-import net.pistonmaster.serverwrecker.protocol.Bot;
-import net.pistonmaster.serverwrecker.protocol.BotFactory;
-import net.pistonmaster.serverwrecker.protocol.ProtocolWrapper;
+import net.pistonmaster.serverwrecker.protocol.*;
 import net.pistonmaster.serverwrecker.viaversion.SWViaPlatform;
+import net.pistonmaster.serverwrecker.viaversion.StorableOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,23 +91,40 @@ public class ServerWrecker {
             }
         });*/
         Path viaPath = dataFolder.resolve("viaversion");
-        SWViaPlatform platform = new SWViaPlatform(viaPath, new AbstractViaConfig(viaPath.resolve("config.yml").toFile()) {
+        SWViaPlatform platform = new SWViaPlatform(viaPath);
+        ViaPlatformLoader loader = new ViaPlatformLoader() {
             @Override
-            protected void handleConfig(Map<String, Object> config) {
+            public void load() {
+                Via.getManager().getProviders().use(VersionProvider.class, new BaseVersionProvider() {
+                    @Override
+                    public int getClosestServerProtocol(UserConnection connection) {
+                        StorableOptions options = connection.get(StorableOptions.class);
+                        Objects.requireNonNull(options, "StorableOptions is null");
+                        System.out.println("Protocol: " + options.options().protocolVersion().getVersion());
+
+                        return options.options().protocolVersion().getVersion();
+                    }
+                });
             }
 
             @Override
-            public List<String> getUnsupportedOptions() {
-                return Collections.emptyList();
+            public void unload() {
             }
-        });
+        };
         Via.init(ViaManagerImpl.builder()
                 .platform(platform)
                 .injector(platform.getInjector())
+                        .loader(loader)
                 .build());
+
+        platform.init();
+
+        ViaManagerImpl manager = (ViaManagerImpl) Via.getManager();
+        manager.init();
+        manager.onServerLoaded();
     }
 
-    public void start(Options options) {
+    public void start(SWOptions options) {
         if (options.debug()) {
             setupLogging(Level.DEBUG);
         } else {

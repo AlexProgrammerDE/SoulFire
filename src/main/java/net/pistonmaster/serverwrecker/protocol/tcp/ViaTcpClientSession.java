@@ -6,6 +6,7 @@ import com.github.steveice10.packetlib.codec.PacketCodecHelper;
 import com.github.steveice10.packetlib.helper.TransportHelper;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpPacketCodec;
+import com.github.steveice10.packetlib.tcp.TcpPacketCompression;
 import com.github.steveice10.packetlib.tcp.TcpPacketSizer;
 import com.github.steveice10.packetlib.tcp.TcpSession;
 import com.viaversion.viaversion.connection.UserConnectionImpl;
@@ -33,6 +34,9 @@ import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import io.netty.resolver.dns.DnsNameResolver;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
+import lombok.Getter;
+import net.pistonmaster.serverwrecker.common.SWOptions;
+import net.pistonmaster.serverwrecker.viaversion.StorableOptions;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -49,17 +53,20 @@ public class ViaTcpClientSession extends TcpSession {
     private final int bindPort;
     private final ProxyInfo proxy;
     private final PacketCodecHelper codecHelper;
+    @Getter
+    private final SWOptions options;
 
-    public ViaTcpClientSession(String host, int port, PacketProtocol protocol, ProxyInfo proxy) {
-        this(host, port, "0.0.0.0", 0, protocol, proxy);
+    public ViaTcpClientSession(String host, int port, PacketProtocol protocol, ProxyInfo proxy, SWOptions options) {
+        this(host, port, "0.0.0.0", 0, protocol, proxy, options);
     }
 
-    public ViaTcpClientSession(String host, int port, String bindAddress, int bindPort, PacketProtocol protocol, ProxyInfo proxy) {
+    public ViaTcpClientSession(String host, int port, String bindAddress, int bindPort, PacketProtocol protocol, ProxyInfo proxy, SWOptions options) {
         super(host, port, protocol);
         this.bindAddress = bindAddress;
         this.bindPort = bindPort;
         this.proxy = proxy;
         this.codecHelper = protocol.createHelper();
+        this.options = options;
     }
 
     @Override
@@ -77,7 +84,7 @@ public class ViaTcpClientSession extends TcpSession {
         try {
             final Bootstrap bootstrap = new Bootstrap();
             bootstrap.channel(CHANNEL_CLASS);
-            bootstrap.handler(new ChannelInitializer<Channel>() {
+            bootstrap.handler(new ChannelInitializer<>() {
                 @Override
                 public void initChannel(Channel channel) {
                     PacketProtocol protocol = getPacketProtocol();
@@ -107,6 +114,7 @@ public class ViaTcpClientSession extends TcpSession {
 
                     // This does the extra magic
                     UserConnectionImpl userConnection = new UserConnectionImpl(channel, true);
+                    userConnection.put(new StorableOptions(options));
                     new ProtocolPipelineImpl(userConnection);
                     pipeline.addLast("via-codec", new ViaCodec(userConnection));
 
@@ -263,9 +271,19 @@ public class ViaTcpClientSession extends TcpSession {
         }
     }
 
+
     @Override
-    public void disconnect(String reason, Throwable cause) {
-        super.disconnect(reason, cause);
+    public void setCompressionThreshold(int threshold, boolean validateDecompression) {
+        super.setCompressionThreshold(threshold, validateDecompression);
+        Channel channel = getChannel();
+        if (channel != null) {
+            if (channel.pipeline().get("compression") != null) {
+                channel.pipeline().remove("compression");
+
+                // Via has to run after compression (therefore we add it after compression)
+                channel.pipeline().addBefore("via-codec", "compression", new TcpPacketCompression(this, validateDecompression));
+            }
+        }
     }
 
     private static void createTcpEventLoopGroup() {
