@@ -28,17 +28,27 @@ public class SWConstants {
     public static final String VERSION = "1.0.0";
     public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.v1_19_4;
     public static final ProtocolVersion LATEST_SHOWN_VERSION = ProtocolVersion.v1_19_4;
+    public static final ProtocolVersion MIN_SHOWN_VERSION = ProtocolVersion.v1_8;
 
     public static List<ProtocolVersion> getVersionsSorted() {
         List<ProtocolVersion> versions = new ArrayList<>();
 
         for (ProtocolVersion version : ProtocolVersion.getProtocols()) {
-            versions.add(version);
+            int versionId = version.getVersion();
 
-            // We don't need to add any versions after the latest version (too experimental)
-            if (version == LATEST_SHOWN_VERSION) {
-                break;
+            if (versionId >= ProtocolVersion.v1_4_6.getVersion() && versionId <= ProtocolVersion.v_1_6_4.getVersion()) {
+                continue;
             }
+
+            if (versionId < MIN_SHOWN_VERSION.getVersion()) {
+                continue;
+            }
+
+            if (versionId > LATEST_SHOWN_VERSION.getVersion()) {
+                continue;
+            }
+
+            versions.add(version);
         }
 
         return versions;
