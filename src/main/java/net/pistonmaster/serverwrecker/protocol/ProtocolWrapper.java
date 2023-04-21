@@ -29,7 +29,6 @@ public class ProtocolWrapper extends MinecraftProtocol {
     public ProtocolWrapper(String username) {
         super(username);
         setUseDefaultListeners(false);
-        System.out.println("Data: " + getServerboundId(ClientIntentionPacket.class));
     }
 
     public ProtocolWrapper(GameProfile profile, String accessToken) {

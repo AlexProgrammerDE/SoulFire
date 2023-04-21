@@ -85,8 +85,6 @@ public final class SessionEventBus {
                         bot.connect(options.hostname(), options.port(), this);
                         isRejoining.set(true);
                     }
-                } else {
-                    System.out.println(rejoinAnywayCounter.get());
                 }
             }
         }, 0, 1, TimeUnit.SECONDS);

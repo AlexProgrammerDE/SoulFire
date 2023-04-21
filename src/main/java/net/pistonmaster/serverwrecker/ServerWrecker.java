@@ -100,7 +100,6 @@ public class ServerWrecker {
                     public int getClosestServerProtocol(UserConnection connection) {
                         StorableOptions options = connection.get(StorableOptions.class);
                         Objects.requireNonNull(options, "StorableOptions is null");
-                        System.out.println("Protocol: " + options.options().protocolVersion().getVersion());
 
                         return options.options().protocolVersion().getVersion();
                     }
