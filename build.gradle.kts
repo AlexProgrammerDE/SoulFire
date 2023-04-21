@@ -17,6 +17,7 @@ repositories {
         name = "Sonatype Repository"
     }
     maven("https://repo.viaversion.com/")
+    maven("https://repo.papermc.io/repository/maven-public/")
     mavenCentral()
 }
 
@@ -33,7 +34,6 @@ dependencies {
     implementation("org.pf4j:pf4j:3.9.0")
 
     implementation("com.thealtening.api:api:4.1.0")
-    implementation("com.google.guava:guava:31.1-jre")
 
     implementation("net.kyori:adventure-text-serializer-plain:4.13.1")
     implementation("net.kyori:adventure-text-serializer-gson:4.13.1")
@@ -41,10 +41,13 @@ dependencies {
     implementation("net.kyori:event-api:3.0.0")
     implementation("ch.jalu:injector:1.0")
 
+    implementation("com.google.guava:guava:31.1-jre")
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("org.yaml:snakeyaml:1.29")
+    implementation("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
+    implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
 
     implementation("com.github.GeyserMC:MCProtocolLib:master-SNAPSHOT")
-    implementation("org.yaml:snakeyaml:1.29")
 
     val vvVer = "4.7.0-23w14a-SNAPSHOT"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }

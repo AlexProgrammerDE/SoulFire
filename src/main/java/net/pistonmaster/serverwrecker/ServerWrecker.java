@@ -126,8 +126,10 @@ public class ServerWrecker {
 
     public void start(SWOptions options) {
         if (options.debug()) {
+            Via.getManager().debugHandler().setEnabled(true);
             setupLogging(Level.DEBUG);
         } else {
+            Via.getManager().debugHandler().setEnabled(false);
             setupLogging(Level.INFO);
         }
 

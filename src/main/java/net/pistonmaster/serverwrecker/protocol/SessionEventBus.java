@@ -182,7 +182,8 @@ public final class SessionEventBus {
             }
 
             if (options.debug()) {
-                log.debug("Bot disconnected with cause: ", cause);
+                log.debug("Bot disconnected with cause: ");
+                cause.printStackTrace();
             }
         } catch (Exception e) {
             log.error("Error while logging disconnect", e);

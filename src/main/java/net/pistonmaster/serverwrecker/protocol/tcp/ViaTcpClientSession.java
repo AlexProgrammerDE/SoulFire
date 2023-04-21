@@ -38,6 +38,7 @@ import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.viaversion.FrameCodec;
 import net.pistonmaster.serverwrecker.viaversion.StorableOptions;
 
+import javax.crypto.SecretKey;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -99,6 +100,7 @@ public class ViaTcpClientSession extends TcpSession {
                             e.printStackTrace();
                         }
                     }
+                    channel.config().setOption(ChannelOption.TCP_FASTOPEN_CONNECT, true);
 
                     ChannelPipeline pipeline = channel.pipeline();
 
@@ -278,9 +280,13 @@ public class ViaTcpClientSession extends TcpSession {
                 channel.pipeline().remove("compression");
 
                 // Via has to run after compression (therefore we add it after compression)
-                channel.pipeline().addBefore("via-codec", "compression", new TcpPacketCompression(this, validateDecompression));
+                channel.pipeline().addBefore("via-codec", "compression", new CompressionCodec(getCompressionThreshold()));
             }
         }
+    }
+
+    public void enableEncryption(SecretKey key) {
+        getChannel().pipeline().addBefore("sizer", "encryption", new CryptoCodec(key, key));
     }
 
     private static void createTcpEventLoopGroup() {

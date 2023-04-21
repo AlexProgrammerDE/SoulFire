@@ -1,11 +1,17 @@
 package net.pistonmaster.serverwrecker.protocol.tcp;
 
 
+import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
+import com.viaversion.viaversion.api.protocol.packet.State;
+import com.viaversion.viaversion.exception.CancelCodecException;
 import com.viaversion.viaversion.exception.CancelDecoderException;
 import com.viaversion.viaversion.exception.CancelEncoderException;
+import com.viaversion.viaversion.exception.InformativeException;
+import com.viaversion.viaversion.util.PipelineUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToMessageCodec;
 import lombok.RequiredArgsConstructor;
 
@@ -45,6 +51,23 @@ public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
             out.add(transformedBuf.retain());
         } finally {
             transformedBuf.release();
+        }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        if (PipelineUtil.containsCause(cause, CancelCodecException.class)) return;
+        super.exceptionCaught(ctx, cause);
+
+        if (cause instanceof EncoderException) {
+            return;
+        }
+
+        // Decoder exception
+        if ((PipelineUtil.containsCause(cause, InformativeException.class)
+                && info.getProtocolInfo().getState() != State.HANDSHAKE)
+                || Via.getManager().debugHandler().enabled()) {
+            cause.printStackTrace();
         }
     }
 }
