@@ -49,7 +49,7 @@ dependencies {
 
     implementation("com.github.GeyserMC:MCProtocolLib:master-SNAPSHOT")
 
-    val vvVer = "4.7.0-23w14a-SNAPSHOT"
+    val vvVer = "4.7.0-23w16a-SNAPSHOT"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
 }
 
