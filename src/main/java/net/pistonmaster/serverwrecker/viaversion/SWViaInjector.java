@@ -26,7 +26,7 @@ import com.viaversion.viaversion.libs.fastutil.ints.IntSortedSet;
 import com.viaversion.viaversion.libs.gson.JsonObject;
 import net.pistonmaster.serverwrecker.SWConstants;
 
-public class SRViaInjector implements ViaInjector {
+public class SWViaInjector implements ViaInjector {
     @Override
     public void inject() {
     }
@@ -39,11 +39,8 @@ public class SRViaInjector implements ViaInjector {
     public IntSortedSet getServerProtocolVersions() {
         // On client-side we can connect to any server version
         IntSortedSet versions = new IntLinkedOpenHashSet();
-        versions.add(ProtocolVersion.v1_8.getOriginalVersion());
-        versions.add(SWConstants.getVersionsSorted()
-                .stream()
-                .mapToInt(ProtocolVersion::getOriginalVersion)
-                .max().getAsInt());
+        versions.add(ProtocolVersion.v1_7_1.getOriginalVersion());
+        versions.add(SWConstants.CURRENT_PROTOCOL_VERSION.getOriginalVersion());
         return versions;
     }
 

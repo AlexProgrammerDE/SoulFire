@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.viaversion;
+package net.pistonmaster.serverwrecker.viaversion.platform;
 
 import com.viaversion.viaversion.ViaAPIBase;
 import com.viaversion.viaversion.api.ViaAPI;
@@ -26,11 +26,9 @@ import com.viaversion.viaversion.api.configuration.ConfigurationProvider;
 import com.viaversion.viaversion.api.configuration.ViaVersionConfig;
 import com.viaversion.viaversion.api.platform.ViaInjector;
 import com.viaversion.viaversion.api.platform.ViaPlatform;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.configuration.AbstractViaConfig;
-import com.viaversion.viaversion.libs.fastutil.ints.IntLinkedOpenHashSet;
-import com.viaversion.viaversion.libs.fastutil.ints.IntSortedSet;
 import com.viaversion.viaversion.libs.gson.JsonObject;
+import com.viaversion.viaversion.util.VersionInfo;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.EventLoop;
 import io.netty.util.concurrent.Future;
@@ -38,6 +36,9 @@ import io.netty.util.concurrent.GenericFutureListener;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.SWConstants;
+import net.pistonmaster.serverwrecker.viaversion.FutureTaskId;
+import net.pistonmaster.serverwrecker.viaversion.JLoggerToLogback;
+import net.pistonmaster.serverwrecker.viaversion.SWViaInjector;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -57,7 +58,7 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
     private final ViaAPI<UUID> api = new ViaAPIBase<>() {
     };
     @Getter
-    private final ViaInjector injector = new SRViaInjector();
+    private final ViaInjector injector = new SWViaInjector();
     private final EventLoop eventLoop = new DefaultEventLoop();
     private final ExecutorService asyncService = Executors.newFixedThreadPool(4);
 
@@ -100,7 +101,7 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
 
     @Override
     public String getPlatformVersion() {
-        return "1.0.0"; // TODO
+        return SWConstants.VERSION;
     }
 
     @Override
@@ -110,7 +111,7 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
 
     @Override
     public String getPluginVersion() {
-        return "1.0.0"; // TODO
+        return VersionInfo.VERSION;
     }
 
     @Override

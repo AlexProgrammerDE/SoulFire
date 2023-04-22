@@ -18,6 +18,7 @@ repositories {
     }
     maven("https://repo.viaversion.com/")
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://maven.lenni0451.net/releases/")
     mavenCentral()
 }
 
@@ -50,7 +51,13 @@ dependencies {
     implementation("com.github.GeyserMC:MCProtocolLib:master-SNAPSHOT")
 
     val vvVer = "4.7.0-23w16a-SNAPSHOT"
+    val vbVer = "4.7.0-23w16a-SNAPSHOT"
+    val vrVer = "5f7fdc5"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
+    implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
+    implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
+    implementation("net.raphimc:ViaAprilFools:2.0.6")
+    implementation("net.raphimc:ViaLegacy:2.2.15")
 }
 
 tasks.compileJava.get().apply {

@@ -104,9 +104,7 @@ public class SettingsPanel extends NavigationItem {
 
         add(new JLabel("Version: "));
         versionBox = new JComboBox<>();
-        List<ProtocolVersion> versions = new ArrayList<>(SWConstants.getVersionsSorted());
-        Collections.reverse(versions);
-        versions.forEach(versionBox::addItem);
+        registerVersions();
         add(versionBox);
 
         add(new JLabel("Read Timeout: "));
@@ -138,6 +136,13 @@ public class SettingsPanel extends NavigationItem {
         autoRespawn = new JCheckBox();
         autoRespawn.setSelected(true);
         add(autoRespawn);
+    }
+
+    public void registerVersions() {
+        versionBox.removeAllItems();
+        List<ProtocolVersion> versions = new ArrayList<>(SWConstants.getVersionsSorted());
+        Collections.reverse(versions);
+        versions.forEach(versionBox::addItem);
     }
 
     @Override

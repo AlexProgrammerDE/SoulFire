@@ -20,27 +20,24 @@
 package net.pistonmaster.serverwrecker;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class SWConstants {
     public static final String VERSION = "1.0.0";
     public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.v1_19_4;
     public static final ProtocolVersion LATEST_SHOWN_VERSION = ProtocolVersion.v1_19_4;
-    public static final ProtocolVersion MIN_SHOWN_VERSION = ProtocolVersion.v1_8;
 
     public static List<ProtocolVersion> getVersionsSorted() {
-        List<ProtocolVersion> versions = new ArrayList<>();
-
+        List<ProtocolVersion> normalVersions = new ArrayList<>();
+        List<ProtocolVersion> legacyVersions = new ArrayList<>();
         for (ProtocolVersion version : ProtocolVersion.getProtocols()) {
             int versionId = version.getVersion();
 
-            if (versionId >= ProtocolVersion.v1_4_6.getVersion() && versionId <= ProtocolVersion.v_1_6_4.getVersion()) {
-                continue;
-            }
-
-            if (versionId < MIN_SHOWN_VERSION.getVersion()) {
+            if (versionId == ProtocolVersion.unknown.getVersion()) {
                 continue;
             }
 
@@ -48,9 +45,28 @@ public class SWConstants {
                 continue;
             }
 
-            versions.add(version);
+            if (isLegacy(version)) {
+                legacyVersions.add(version);
+            } else {
+                normalVersions.add(version);
+            }
         }
 
-        return versions;
+        normalVersions.sort(Comparator.comparingInt(ProtocolVersion::getVersion));
+
+        legacyVersions.sort((o1, o2) -> LegacyProtocolVersion.protocolCompare(o1.getVersion(), o2.getVersion()));
+
+        return mergeLists(normalVersions, legacyVersions);
+    }
+
+    private static List<ProtocolVersion> mergeLists(List<ProtocolVersion> normalVersions, List<ProtocolVersion> legacyVersions) {
+        List<ProtocolVersion> mergedList = new ArrayList<>();
+        mergedList.addAll(legacyVersions);
+        mergedList.addAll(normalVersions);
+        return mergedList;
+    }
+
+    public static boolean isLegacy(ProtocolVersion version) {
+        return LegacyProtocolVersion.protocolCompare(version.getVersion(), ProtocolVersion.v_1_6_4.getVersion()) <= 0;
     }
 }

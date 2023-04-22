@@ -23,10 +23,7 @@ package net.pistonmaster.serverwrecker.protocol.tcp;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.packet.State;
-import com.viaversion.viaversion.exception.CancelCodecException;
-import com.viaversion.viaversion.exception.CancelDecoderException;
-import com.viaversion.viaversion.exception.CancelEncoderException;
-import com.viaversion.viaversion.exception.InformativeException;
+import com.viaversion.viaversion.exception.*;
 import com.viaversion.viaversion.util.PipelineUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -75,7 +72,11 @@ public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if (PipelineUtil.containsCause(cause, CancelCodecException.class)) return;
+        if (PipelineUtil.containsCause(cause, CancelCodecException.class)
+                || PipelineUtil.containsCause(cause, CancelException.class)) {
+            return;
+        }
+
         super.exceptionCaught(ctx, cause);
 
         if (cause instanceof EncoderException) {

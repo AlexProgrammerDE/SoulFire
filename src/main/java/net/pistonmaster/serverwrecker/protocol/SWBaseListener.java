@@ -112,7 +112,7 @@ public class SWBaseListener extends SessionAdapter {
             } else if (packet instanceof ClientboundLoginDisconnectPacket) {
                 session.disconnect(((ClientboundLoginDisconnectPacket) packet).getReason());
             } else if (packet instanceof ClientboundLoginCompressionPacket) {
-                session.setCompressionThreshold(((ClientboundLoginCompressionPacket) packet).getThreshold(), false);
+                viaSession.setCompressionThreshold(((ClientboundLoginCompressionPacket) packet).getThreshold());
             }
         } else if (protocol.getState() == ProtocolState.STATUS) {
             if (packet instanceof ClientboundStatusResponsePacket) {

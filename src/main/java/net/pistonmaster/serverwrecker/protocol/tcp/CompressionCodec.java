@@ -30,19 +30,24 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.MessageToMessageCodec;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.zip.DataFormatException;
 
-@RequiredArgsConstructor
 public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
     // stolen from Krypton (GPL) and modified
     // https://github.com/astei/krypton/blob/master/src/main/java/me/steinborn/krypton/mod/shared/network/compression/MinecraftCompressEncoder.java
     private static final int UNCOMPRESSED_CAP = 8 * 1024 * 1024; // 8MiB
     private final int compressionLevel = 6; // TODO: make configurable
-    private final int threshold;
+    @Setter
+    private int threshold;
     private VelocityCompressor compressor;
     private VelocityCompressor candidateCompressor;
+
+    public CompressionCodec(int threshold) {
+        this.threshold = threshold;
+    }
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {

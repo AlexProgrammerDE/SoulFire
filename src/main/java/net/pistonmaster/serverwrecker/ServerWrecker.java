@@ -31,10 +31,7 @@ import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.google.common.collect.ImmutableList;
 import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
-import com.viaversion.viaversion.api.connection.UserConnection;
-import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
-import com.viaversion.viaversion.api.protocol.version.VersionProvider;
-import com.viaversion.viaversion.protocols.base.BaseVersionProvider;
+import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.event.EventBus;
@@ -43,10 +40,13 @@ import net.pistonmaster.serverwrecker.api.event.AttackEndEvent;
 import net.pistonmaster.serverwrecker.api.event.AttackStartEvent;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
 import net.pistonmaster.serverwrecker.common.*;
+import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.LogUtil;
-import net.pistonmaster.serverwrecker.protocol.*;
-import net.pistonmaster.serverwrecker.viaversion.SWViaPlatform;
-import net.pistonmaster.serverwrecker.viaversion.StorableOptions;
+import net.pistonmaster.serverwrecker.protocol.Bot;
+import net.pistonmaster.serverwrecker.protocol.OfflineAuthenticationService;
+import net.pistonmaster.serverwrecker.protocol.SessionEventBus;
+import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
+import net.pistonmaster.serverwrecker.viaversion.platform.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,37 +96,38 @@ public class ServerWrecker {
                 return optional.map(passWordProxies::get).orElse(null);
             }
         });*/
-        Path viaPath = dataFolder.resolve("viaversion");
+        Path viaPath = dataFolder.resolve("ViaVersion");
         SWViaPlatform platform = new SWViaPlatform(viaPath);
-        ViaPlatformLoader loader = new ViaPlatformLoader() {
-            @Override
-            public void load() {
-                Via.getManager().getProviders().use(VersionProvider.class, new BaseVersionProvider() {
-                    @Override
-                    public int getClosestServerProtocol(UserConnection connection) {
-                        StorableOptions options = connection.get(StorableOptions.class);
-                        Objects.requireNonNull(options, "StorableOptions is null");
 
-                        return options.options().protocolVersion().getVersion();
-                    }
-                });
-            }
-
-            @Override
-            public void unload() {
-            }
-        };
         Via.init(ViaManagerImpl.builder()
                 .platform(platform)
                 .injector(platform.getInjector())
-                        .loader(loader)
+                .loader(new SWViaLoader())
                 .build());
 
         platform.init();
 
+        // for ViaLegacy
+        Via.getManager().getProtocolManager().setMaxProtocolPathSize(Integer.MAX_VALUE);
+        Via.getManager().getProtocolManager().setMaxPathDeltaIncrease(-1);
+        ((ProtocolManagerImpl) Via.getManager().getProtocolManager()).refreshVersions();
+
+        Via.getManager().addEnableListener(() -> {
+            new SWViaRewind(dataFolder.resolve("ViaRewind")).init();
+            new SWViaBackwards(dataFolder.resolve("ViaBackwards")).init();
+            new SWViaAprilFools(dataFolder.resolve("ViaAprilFools")).init();
+            new SWViaLegacy(dataFolder.resolve("ViaLegacy")).init();
+        });
+
         ViaManagerImpl manager = (ViaManagerImpl) Via.getManager();
         manager.init();
+
         manager.onServerLoaded();
+
+        SettingsPanel settingsPanel = injector.getIfAvailable(SettingsPanel.class);
+        if (settingsPanel != null) {
+            settingsPanel.registerVersions();
+        }
     }
 
     public void start(SWOptions options) {

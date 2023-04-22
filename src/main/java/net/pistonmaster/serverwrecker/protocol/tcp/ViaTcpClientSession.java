@@ -19,16 +19,26 @@
  */
 package net.pistonmaster.serverwrecker.protocol.tcp;
 
+import com.github.steveice10.mc.protocol.MinecraftProtocol;
+import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.github.steveice10.packetlib.BuiltinFlags;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.codec.PacketCodecHelper;
+import com.github.steveice10.packetlib.crypt.PacketEncryption;
 import com.github.steveice10.packetlib.helper.TransportHelper;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpPacketCodec;
 import com.github.steveice10.packetlib.tcp.TcpPacketCompression;
 import com.github.steveice10.packetlib.tcp.TcpSession;
+import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.api.protocol.packet.State;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.connection.UserConnectionImpl;
+import com.viaversion.viaversion.exception.CancelCodecException;
+import com.viaversion.viaversion.exception.CancelException;
+import com.viaversion.viaversion.exception.InformativeException;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
+import com.viaversion.viaversion.util.PipelineUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -42,6 +52,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.dns.*;
 import io.netty.handler.codec.haproxy.*;
 import io.netty.handler.proxy.HttpProxyHandler;
@@ -53,9 +64,14 @@ import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import io.netty.resolver.dns.DnsNameResolver;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
 import lombok.Getter;
+import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.viaversion.FrameCodec;
 import net.pistonmaster.serverwrecker.viaversion.StorableOptions;
+import net.pistonmaster.serverwrecker.viaversion.StorableSession;
+import net.raphimc.vialegacy.api.LegacyProtocolVersion;
+import net.raphimc.vialegacy.netty.PreNettyLengthCodec;
+import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.baseprotocols.PreNettyBaseProtocol;
 
 import javax.crypto.SecretKey;
 import java.net.Inet4Address;
@@ -128,12 +144,24 @@ public class ViaTcpClientSession extends TcpSession {
 
                     addProxy(pipeline);
 
-                    pipeline.addLast("sizer", new FrameCodec());
-
                     // This does the extra magic
                     UserConnectionImpl userConnection = new UserConnectionImpl(channel, true);
                     userConnection.put(new StorableOptions(options));
-                    new ProtocolPipelineImpl(userConnection);
+                    userConnection.put(new StorableSession(ViaTcpClientSession.this));
+
+                    ProtocolPipelineImpl protocolPipeline = new ProtocolPipelineImpl(userConnection);
+
+                    ProtocolVersion version = options.protocolVersion();
+                    boolean isLegacy = SWConstants.isLegacy(version);
+
+                    if (isLegacy) {
+                        protocolPipeline.add(PreNettyBaseProtocol.INSTANCE);
+                        pipeline.addLast("vl-prenetty", new PreNettyLengthCodec(userConnection));
+                    }
+
+                    pipeline.addLast("sizer", new FrameCodec());
+
+                    // Inject Via codec
                     pipeline.addLast("via-codec", new ViaCodec(userConnection));
 
                     pipeline.addLast("codec", new TcpPacketCodec(ViaTcpClientSession.this, true));
@@ -160,6 +188,21 @@ public class ViaTcpClientSession extends TcpSession {
         } catch (Throwable t) {
             exceptionCaught(null, t);
         }
+    }
+
+    @Override
+    public int getCompressionThreshold() {
+        throw new UnsupportedOperationException("Not supported method.");
+    }
+
+    @Override
+    public void setCompressionThreshold(int threshold, boolean validateDecompression) {
+        throw new UnsupportedOperationException("Not supported method.");
+    }
+
+    @Override
+    public void enableEncryption(PacketEncryption encryption) {
+        throw new UnsupportedOperationException("Not supported method.");
     }
 
     @Override
@@ -289,17 +332,38 @@ public class ViaTcpClientSession extends TcpSession {
         }
     }
 
-
     @Override
-    public void setCompressionThreshold(int threshold, boolean validateDecompression) {
-        super.setCompressionThreshold(threshold, validateDecompression);
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        if (PipelineUtil.containsCause(cause, CancelCodecException.class)) {
+            return;
+        }
+
+        super.exceptionCaught(ctx, cause);
+
+        if (cause instanceof EncoderException) {
+            return;
+        }
+
+        // Decoder exception
+        if ((PipelineUtil.containsCause(cause, InformativeException.class)
+                && ((MinecraftProtocol) getPacketProtocol()).getState() != ProtocolState.HANDSHAKE)
+                || Via.getManager().debugHandler().enabled()) {
+            cause.printStackTrace();
+        }
+    }
+
+    public void setCompressionThreshold(int threshold) {
         Channel channel = getChannel();
         if (channel != null) {
-            if (channel.pipeline().get("compression") != null) {
+            if (threshold >= 0) {
+                ChannelHandler handler = channel.pipeline().get("compression");
+                if (handler == null) {
+                    channel.pipeline().addBefore("via-codec", "compression", new CompressionCodec(threshold));
+                } else {
+                    ((CompressionCodec) handler).setThreshold(threshold);
+                }
+            } else if (channel.pipeline().get("compression") != null) {
                 channel.pipeline().remove("compression");
-
-                // Via has to run after compression (therefore we add it after compression)
-                channel.pipeline().addBefore("via-codec", "compression", new CompressionCodec(getCompressionThreshold()));
             }
         }
     }
