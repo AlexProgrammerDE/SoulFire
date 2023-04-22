@@ -72,7 +72,6 @@ public class Bot {
         session.setFlag(BuiltinFlags.PRINT_DEBUG, options.debug());
 
         session.setConnectTimeout(options.connectTimeout());
-        session.setCompressionThreshold(options.compressionThreshold(), true);
         session.setReadTimeout(options.readTimeout());
         session.setWriteTimeout(options.writeTimeout());
 
