@@ -22,5 +22,5 @@ package net.pistonmaster.serverwrecker.common;
 public enum ProxyType {
     HTTP(),
     SOCKS4(),
-    SOCKS5();
+    SOCKS5()
 }

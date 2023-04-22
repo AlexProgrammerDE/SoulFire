@@ -37,7 +37,7 @@ public class ComponentResizer extends MouseAdapter {
     protected static final int EAST = 8;
     private final static Dimension MINIMUM_SIZE = new Dimension(10, 10);
     private final static Dimension MAXIMUM_SIZE = new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
-    private static Map<Integer, Integer> cursors = new HashMap<Integer, Integer>();
+    private static final Map<Integer, Integer> cursors = new HashMap<Integer, Integer>();
     private Insets dragInsets;
     private Dimension snapSize;
     private int direction;
@@ -300,8 +300,7 @@ public class ComponentResizer extends MouseAdapter {
         //  Making sure autoscrolls is false will allow for smoother resizing
         //  of components
 
-        if (source instanceof JComponent) {
-            JComponent jc = (JComponent) source;
+        if (source instanceof JComponent jc) {
             autoscrolls = jc.getAutoscrolls();
             jc.setAutoscrolls(false);
         }
@@ -332,7 +331,7 @@ public class ComponentResizer extends MouseAdapter {
      */
     @Override
     public void mouseDragged(MouseEvent e) {
-        if (resizing == false) return;
+        if (!resizing) return;
 
         Component source = e.getComponent();
         Point dragged = e.getPoint();

@@ -54,9 +54,9 @@ public class SmartScroller implements AdjustmentListener {
     public final static int START = 0;
     public final static int END = 1;
 
-    private int viewportPosition;
+    private final int viewportPosition;
 
-    private JScrollBar scrollBar;
+    private final JScrollBar scrollBar;
     private boolean adjustScrollBar = true;
 
     private int previousValue = -1;
