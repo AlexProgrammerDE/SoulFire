@@ -35,38 +35,56 @@ public class SWConstants {
         List<ProtocolVersion> normalVersions = new ArrayList<>();
         List<ProtocolVersion> legacyVersions = new ArrayList<>();
         for (ProtocolVersion version : ProtocolVersion.getProtocols()) {
-            int versionId = version.getVersion();
-
-            if (versionId == ProtocolVersion.unknown.getVersion()) {
-                continue;
+            if (version == ProtocolVersion.unknown) {
+                continue; // Exclude unknown versions
             }
 
+            int versionId = version.getVersion();
             if (versionId > LATEST_SHOWN_VERSION.getVersion()) {
-                continue;
+                continue; // Exclude in-development versions
             }
 
             if (isLegacy(version)) {
                 legacyVersions.add(version);
             } else {
+                if (versionId <= ProtocolVersion.v_1_6_4.getVersion()
+                        && versionId >= ProtocolVersion.v1_4_6.getVersion()) {
+                    continue; // Remove built-in legacy versions, so we use ViaLegacy
+                }
+
                 normalVersions.add(version);
             }
         }
 
         normalVersions.sort(Comparator.comparingInt(ProtocolVersion::getVersion));
 
-        legacyVersions.sort((o1, o2) -> LegacyProtocolVersion.protocolCompare(o1.getVersion(), o2.getVersion()));
+        legacyVersions.sort((o1, o2) -> {
+            int index1 = LegacyProtocolVersion.PROTOCOLS.indexOf(o1);
+            int index2 = LegacyProtocolVersion.PROTOCOLS.indexOf(o2);
 
-        return mergeLists(normalVersions, legacyVersions);
+            return Integer.compare(index1, index2);
+        });
+
+        // Sort special case
+        int index = legacyVersions.indexOf(LegacyProtocolVersion.c0_28toc0_30);
+        legacyVersions.remove(LegacyProtocolVersion.c0_30cpe);
+        legacyVersions.add(index + 1, LegacyProtocolVersion.c0_30cpe);
+
+        return mergeLists(legacyVersions, normalVersions);
     }
 
-    private static List<ProtocolVersion> mergeLists(List<ProtocolVersion> normalVersions, List<ProtocolVersion> legacyVersions) {
-        List<ProtocolVersion> mergedList = new ArrayList<>();
-        mergedList.addAll(legacyVersions);
-        mergedList.addAll(normalVersions);
-        return mergedList;
+    @SafeVarargs
+    private static <T> List<T> mergeLists(List<T>... versions) {
+        List<T> result = new ArrayList<>();
+
+        for (List<T> version : versions) {
+            result.addAll(version);
+        }
+
+        return result;
     }
 
     public static boolean isLegacy(ProtocolVersion version) {
-        return LegacyProtocolVersion.protocolCompare(version.getVersion(), ProtocolVersion.v_1_6_4.getVersion()) <= 0;
+        return LegacyProtocolVersion.PROTOCOLS.contains(version);
     }
 }

@@ -242,7 +242,7 @@ public class ServerWrecker {
 
             bot.getLogger().info("Connecting...");
 
-            bot.connect(options.hostname(), options.port(), new SessionEventBus(options, bot.getLogger(), bot));
+            bot.connect(options.hostname(), options.port(), new SessionEventBus(options, bot.getLogger(), bot, this));
         }
     }
 

@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.protocol;
 
 import lombok.Getter;
 import lombok.ToString;
+import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.EntityLocation;
 import net.pistonmaster.serverwrecker.common.EntityMotion;
 import net.pistonmaster.serverwrecker.common.GameMode;
@@ -42,17 +43,23 @@ public final class SessionEventBus {
     private final SWOptions options;
     private final Logger log;
     private final Bot bot;
+    private final ServerWrecker serverWrecker;
     private final Set<String> messageQueue = new LinkedHashSet<>();
     private final ScheduledThreadPoolExecutor timer = new ScheduledThreadPoolExecutor(3);
     private final AtomicBoolean isRejoining = new AtomicBoolean(false);
     private final AtomicBoolean didFirstJoin = new AtomicBoolean(false);
     private final AtomicInteger rejoinAnywayCounter = new AtomicInteger(0);
 
-    public SessionEventBus(SWOptions options, Logger log, Bot bot) {
+    public SessionEventBus(SWOptions options, Logger log, Bot bot, ServerWrecker serverWrecker) {
         this.options = options;
         this.log = log;
         this.bot = bot;
+        this.serverWrecker = serverWrecker;
         timer.scheduleAtFixedRate(() -> {
+            if (isBotAttackOff()) {
+                return;
+            }
+
             Iterator<String> iter = messageQueue.iterator();
             while (!messageQueue.isEmpty()) {
                 String message = iter.next();
@@ -63,6 +70,10 @@ public final class SessionEventBus {
             }
         }, 0, 2000, TimeUnit.MILLISECONDS);
         timer.scheduleAtFixedRate(() -> {
+            if (isBotAttackOff()) {
+                return;
+            }
+
             if (options.autoRespawn()) {
                 if (bot.isOnline() && bot.getHealth() != -1 && bot.getHealth() < 1) {
                     bot.sendClientCommand(0);
@@ -70,6 +81,10 @@ public final class SessionEventBus {
             }
         }, 0, 1000, TimeUnit.MILLISECONDS);
         timer.scheduleAtFixedRate(() -> {
+            if (isBotAttackOff()) {
+                return;
+            }
+
             if (options.autoReconnect()) {
                 if (didFirstJoin.get()
                         || rejoinAnywayCounter.getAndIncrement() > (options.connectTimeout() / 1000)) {
@@ -88,6 +103,10 @@ public final class SessionEventBus {
                 }
             }
         }, 0, 1, TimeUnit.SECONDS);
+    }
+
+    private boolean isBotAttackOff() {
+        return !serverWrecker.isRunning() || serverWrecker.isPaused();
     }
 
     public void onChat(String message) {
