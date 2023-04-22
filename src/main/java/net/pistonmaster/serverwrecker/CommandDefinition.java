@@ -78,9 +78,6 @@ public class CommandDefinition implements Callable<Integer> {
     @Option(names = {"--connecttimeout"}, description = "The client connect timeout.")
     private int connectTimeout = 30;
 
-    @Option(names = {"--compressionthreshold"}, description = "The client compression threshold.")
-    private int compressionThreshold = -1;
-
     @Option(names = {"--registercommand"}, description = "What command should be executed to register?")
     private String registerCommand = "/register %password% %password%";
 
@@ -120,7 +117,6 @@ public class CommandDefinition implements Callable<Integer> {
                 readTimeout,
                 writeTimout,
                 connectTimeout,
-                compressionThreshold,
                 registerCommand,
                 loginCommand,
                 captchaCommand,
