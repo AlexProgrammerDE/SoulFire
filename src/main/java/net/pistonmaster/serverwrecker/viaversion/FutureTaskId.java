@@ -20,12 +20,13 @@
 package net.pistonmaster.serverwrecker.viaversion;
 
 import com.viaversion.viaversion.api.platform.PlatformTask;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.Future;
 
 public record FutureTaskId(Future<?> object) implements PlatformTask<Future<?>> {
     @Override
-    public Future<?> getObject() {
+    public @Nullable Future<?> getObject() {
         return object;
     }
 
