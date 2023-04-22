@@ -18,10 +18,13 @@
     <http://www.gnu.org/licenses/gpl-3.0.html>.
 -->
 <configuration>
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
+    <import class="ch.qos.logback.core.ConsoleAppender"/>
+
+    <appender name="STDOUT" class="ConsoleAppender">
         <withJansi>true</withJansi>
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %level [%logger{36}] %msg%n</pattern>
+        <encoder class="PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss.SSS} %highlight(%level) [%cyan(%logger{20})] %msg%n</pattern>
         </encoder>
     </appender>
 

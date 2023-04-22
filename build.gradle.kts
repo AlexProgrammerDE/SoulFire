@@ -30,9 +30,15 @@ dependencies {
     implementation("info.picocli:picocli:4.7.3")
     annotationProcessor("info.picocli:picocli-codegen:4.7.3")
 
+    compileOnly("org.projectlombok:lombok:1.18.26")
+    annotationProcessor("org.projectlombok:lombok:1.18.26")
+
     implementation("com.mojang:brigadier:1.1.8")
     implementation("com.formdev:flatlaf:3.1.1")
     implementation("org.pf4j:pf4j:3.9.0")
+
+    implementation("ch.qos.logback:logback-classic:1.4.7")
+    implementation("org.fusesource.jansi:jansi:2.4.0")
 
     implementation("com.thealtening.api:api:4.1.0")
 

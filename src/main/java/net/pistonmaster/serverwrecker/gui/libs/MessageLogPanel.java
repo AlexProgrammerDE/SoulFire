@@ -27,13 +27,11 @@ import java.awt.*;
  * Modified version of: https://github.com/SKCraft/Launcher/blob/master/launcher/src/main/java/com/skcraft/launcher/swing/MessageLog.java
  */
 public class MessageLogPanel extends JPanel {
+    protected final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();
     private final int numLines;
     private final boolean colorEnabled;
-
     protected JTextComponent textComponent;
     protected Document document;
-
-    protected final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();
 
     public MessageLogPanel(int numLines, boolean colorEnabled) {
         this.numLines = numLines;

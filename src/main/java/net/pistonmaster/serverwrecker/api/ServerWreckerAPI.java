@@ -19,6 +19,46 @@
  */
 package net.pistonmaster.serverwrecker.api;
 
+import net.kyori.event.EventBus;
+import net.kyori.event.EventSubscriber;
+import net.kyori.event.SimpleEventBus;
+import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+
+import java.util.Objects;
+
 public class ServerWreckerAPI {
-    // TODO: Add API methods
+    private static final EventBus<ServerWreckerEvent> eventBus = new SimpleEventBus<>(ServerWreckerEvent.class);
+    private static ServerWrecker serverWrecker;
+
+    /**
+     * Get the current ServerWrecker instance for access to internals.
+     *
+     * @return The current ServerWrecker instance.
+     */
+    public static ServerWrecker getServerWrecker() {
+        Objects.requireNonNull(serverWrecker, "ServerWreckerAPI not initialized! (Wait for ServerWreckerEnableEvent to fire)");
+        return serverWrecker;
+    }
+
+    /**
+     * Internal method to set the current ServerWrecker instance.
+     *
+     * @param serverWrecker The current ServerWrecker instance.
+     */
+    public static void setServerWrecker(ServerWrecker serverWrecker) {
+        if (ServerWreckerAPI.serverWrecker != null) {
+            throw new IllegalStateException("ServerWreckerAPI already initialized!");
+        }
+
+        ServerWreckerAPI.serverWrecker = serverWrecker;
+    }
+
+    public static void postEvent(ServerWreckerEvent event) {
+        eventBus.post(event);
+    }
+
+    public static <T extends ServerWreckerEvent> void registerListener(Class<T> clazz, EventSubscriber<? super T> subscriber) {
+        eventBus.register(clazz, subscriber);
+    }
 }

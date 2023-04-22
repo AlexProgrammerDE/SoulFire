@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker;
 
 import net.pistonmaster.serverwrecker.api.SWPluginLoader;
 import net.pistonmaster.serverwrecker.gui.MainFrame;
+import org.fusesource.jansi.AnsiConsole;
 import picocli.CommandLine;
 
 import java.awt.*;
@@ -30,6 +31,7 @@ import java.nio.file.Path;
 
 public class Main {
     public static void main(String[] args) {
+        AnsiConsole.systemInstall();
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> ServerWrecker.getLogger().error(throwable.getMessage(), throwable));
 
         Path dataFolder = initConfigDir();

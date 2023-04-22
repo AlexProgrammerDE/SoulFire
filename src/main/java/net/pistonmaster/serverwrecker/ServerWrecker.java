@@ -34,11 +34,10 @@ import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.event.EventBus;
-import net.kyori.event.SimpleEventBus;
+import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.AttackEndEvent;
 import net.pistonmaster.serverwrecker.api.event.AttackStartEvent;
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerEnableEvent;
 import net.pistonmaster.serverwrecker.common.*;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.LogUtil;
@@ -68,7 +67,6 @@ public class ServerWrecker {
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
-    private final EventBus<ServerWreckerEvent> eventBus = new SimpleEventBus<>(ServerWreckerEvent.class);
     private final List<Bot> bots = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final List<BotProxy> passWordProxies = new ArrayList<>();
@@ -82,20 +80,14 @@ public class ServerWrecker {
     private ServiceServer serviceServer = ServiceServer.MOJANG;
 
     public ServerWrecker(Path dataFolder) {
+        // Register into injector
         injector.register(ServerWrecker.class, this);
+
+        // Init API
+        ServerWreckerAPI.setServerWrecker(this);
+
         setupLogging(Level.INFO);
 
-        /*
-        Authenticator.setDefault(new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                if (getRequestorType() != RequestorType.PROXY)
-                    return null;
-
-                Optional<InetSocketAddress> optional = passWordProxies.keySet().stream().filter(address -> address.getAddress().equals(getRequestingSite())).findFirst();
-                return optional.map(passWordProxies::get).orElse(null);
-            }
-        });*/
         Path viaPath = dataFolder.resolve("ViaVersion");
         SWViaPlatform platform = new SWViaPlatform(viaPath);
 
@@ -130,6 +122,8 @@ public class ServerWrecker {
         if (settingsPanel != null) {
             settingsPanel.registerVersions();
         }
+
+        ServerWreckerAPI.postEvent(new ServerWreckerEnableEvent(this));
     }
 
     public void start(SWOptions options) {
@@ -220,7 +214,7 @@ public class ServerWrecker {
             logger.info("Starting attack at {} with {} bots and {} proxies", options.hostname(), bots.size(), proxyUseMap.size());
         }
 
-        eventBus.post(new AttackStartEvent());
+        ServerWreckerAPI.postEvent(new AttackStartEvent());
 
         for (Bot bot : bots) {
             try {
@@ -280,7 +274,7 @@ public class ServerWrecker {
         this.running = false;
         bots.forEach(Bot::disconnect);
         bots.clear();
-        eventBus.post(new AttackEndEvent());
+        ServerWreckerAPI.postEvent(new AttackEndEvent());
     }
 
     private boolean isFull(Map<BotProxy, AtomicInteger> map, int limit) {
