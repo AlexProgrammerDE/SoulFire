@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.protocol;
 
+import com.github.steveice10.mc.protocol.data.UnexpectedEncryptionException;
 import lombok.Getter;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.ServerWrecker;
@@ -190,7 +191,7 @@ public final class SessionEventBus {
                 return;
             }
 
-            if (cause.getClass().getSimpleName().equals("UnexpectedEncryptionException")) {
+            if (cause.getClass() == UnexpectedEncryptionException.class) {
                 log.error("Server is online mode!");
             } else if (reason.contains("Connection refused")) {
                 log.error("Server is not reachable!");

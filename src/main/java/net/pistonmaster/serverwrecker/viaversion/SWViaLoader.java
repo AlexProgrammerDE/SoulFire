@@ -8,6 +8,7 @@ import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.Compressio
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.MovementTransmitterProvider;
 import com.viaversion.viaversion.velocity.providers.VelocityMovementTransmitter;
 import net.pistonmaster.serverwrecker.viaversion.providers.SWViaCompressionProvider;
+import net.pistonmaster.serverwrecker.viaversion.providers.SWViaEncryptionProvider;
 import net.pistonmaster.serverwrecker.viaversion.providers.SWViaVersionProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.model.GameProfile;
@@ -32,15 +33,10 @@ public class SWViaLoader implements ViaPlatformLoader {
 
             @Override
             public GameProfile loadGameProfile(UUID uuid) throws Exception {
-                return null;
+                return new GameProfile("Bot", uuid);
             }
         });
-        Via.getManager().getProviders().use(EncryptionProvider.class, new EncryptionProvider() {
-            @Override
-            public void enableDecryption(UserConnection user) {
-                throw new UnsupportedOperationException("Not supported yet."); // TODO
-            }
-        });
+        Via.getManager().getProviders().use(EncryptionProvider.class, new SWViaEncryptionProvider());
     }
 
     @Override

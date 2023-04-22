@@ -50,9 +50,11 @@ import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.event.session.ConnectedEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import com.github.steveice10.packetlib.packet.Packet;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.protocol.tcp.ViaTcpClientSession;
+import org.slf4j.Logger;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -60,6 +62,7 @@ import java.security.NoSuchAlgorithmException;
 
 @RequiredArgsConstructor
 public class SWBaseListener extends SessionAdapter {
+    private final Logger logger;
     private final @NonNull ProtocolState targetState;
 
     @Override
@@ -70,15 +73,10 @@ public class SWBaseListener extends SessionAdapter {
 
         MinecraftProtocol protocol = (MinecraftProtocol) session.getPacketProtocol();
         if (protocol.getState() == ProtocolState.LOGIN) {
-            if (packet instanceof ClientboundHelloPacket) {
+            if (packet instanceof ClientboundHelloPacket helloPacket) {
                 GameProfile profile = session.getFlag(MinecraftConstants.PROFILE_KEY);
                 String accessToken = session.getFlag(MinecraftConstants.ACCESS_TOKEN_KEY);
 
-                if (profile == null || accessToken == null) {
-                    throw new UnexpectedEncryptionException();
-                }
-
-                ClientboundHelloPacket helloPacket = (ClientboundHelloPacket) packet;
                 SecretKey key;
                 try {
                     KeyGenerator gen = KeyGenerator.getInstance("AES");
@@ -88,23 +86,29 @@ public class SWBaseListener extends SessionAdapter {
                     throw new IllegalStateException("Failed to generate shared key.", e);
                 }
 
-                SessionService sessionService = session.getFlag(MinecraftConstants.SESSION_SERVICE_KEY, new SessionService());
-                String serverId = sessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
-                try {
-                    sessionService.joinServer(profile, accessToken, serverId);
-                } catch (ServiceUnavailableException e) {
-                    session.disconnect("Login failed: Authentication service unavailable.", e);
-                    return;
-                } catch (InvalidCredentialsException e) {
-                    session.disconnect("Login failed: Invalid login session.", e);
-                    return;
-                } catch (RequestException e) {
-                    session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
-                    return;
-                }
-
+                session.setFlag(SWProtocolConstants.ENCRYPTION_SECRET_KEY, key);
                 session.send(new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
-                viaSession.enableEncryption(key);
+
+                if (profile == null || accessToken == null) {
+                    logger.debug("Skipping hello packet due to missing profile or access token.");
+                } else {
+                    SessionService sessionService = session.getFlag(MinecraftConstants.SESSION_SERVICE_KEY, new SessionService());
+                    String serverId = sessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
+                    try {
+                        sessionService.joinServer(profile, accessToken, serverId);
+                    } catch (ServiceUnavailableException e) {
+                        session.disconnect("Login failed: Authentication service unavailable.", e);
+                        return;
+                    } catch (InvalidCredentialsException e) {
+                        session.disconnect("Login failed: Invalid login session.", e);
+                        return;
+                    } catch (RequestException e) {
+                        session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
+                        return;
+                    }
+
+                    viaSession.enableEncryption(key);
+                }
             } else if (packet instanceof ClientboundGameProfilePacket) {
                 protocol.setState(ProtocolState.GAME);
             } else if (packet instanceof ClientboundLoginDisconnectPacket) {

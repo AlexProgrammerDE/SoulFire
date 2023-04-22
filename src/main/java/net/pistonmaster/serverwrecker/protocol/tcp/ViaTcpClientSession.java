@@ -392,6 +392,7 @@ public class ViaTcpClientSession extends TcpSession {
             return;
         }
 
+        System.out.println("Sending packet: " + packet.getClass().getSimpleName());
         PacketSendingEvent sendingEvent = new PacketSendingEvent(this, packet);
         this.callEvent(sendingEvent);
 

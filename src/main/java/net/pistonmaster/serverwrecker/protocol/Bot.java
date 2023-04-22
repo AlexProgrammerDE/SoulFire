@@ -75,7 +75,7 @@ public class Bot {
         session.setReadTimeout(options.readTimeout());
         session.setWriteTimeout(options.writeTimeout());
 
-        session.addListener(new SWBaseListener(ProtocolState.LOGIN));
+        session.addListener(new SWBaseListener(logger, ProtocolState.LOGIN));
         session.addListener(new SWSessionListener(bus, protocol));
 
         session.connect(options.waitEstablished());
