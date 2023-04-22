@@ -43,7 +43,7 @@ dependencies {
 
     implementation("com.google.guava:guava:31.1-jre")
     implementation("com.google.code.gson:gson:2.10.1")
-    implementation("org.yaml:snakeyaml:1.29")
+    implementation("org.yaml:snakeyaml:1.33")
     implementation("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
 
