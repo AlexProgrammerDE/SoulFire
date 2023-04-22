@@ -25,7 +25,9 @@ import com.github.steveice10.packetlib.BuiltinFlags;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.codec.PacketCodecHelper;
 import com.github.steveice10.packetlib.crypt.PacketEncryption;
+import com.github.steveice10.packetlib.event.session.PacketSendingEvent;
 import com.github.steveice10.packetlib.helper.TransportHelper;
+import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpPacketCodec;
 import com.github.steveice10.packetlib.tcp.TcpPacketCompression;
@@ -72,6 +74,8 @@ import net.pistonmaster.serverwrecker.viaversion.StorableSession;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import net.raphimc.vialegacy.netty.PreNettyLengthCodec;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.baseprotocols.PreNettyBaseProtocol;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.SecretKey;
 import java.net.Inet4Address;
@@ -85,6 +89,7 @@ public class ViaTcpClientSession extends TcpSession {
     private static Class<? extends DatagramChannel> DATAGRAM_CHANNEL_CLASS;
     private static EventLoopGroup EVENT_LOOP_GROUP;
 
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final String bindAddress;
     private final int bindPort;
     private final ProxyInfo proxy;
@@ -334,22 +339,46 @@ public class ViaTcpClientSession extends TcpSession {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        if (PipelineUtil.containsCause(cause, CancelCodecException.class)) {
+        if (cause instanceof CancelCodecException) {
             return;
         }
 
         super.exceptionCaught(ctx, cause);
 
-        if (cause instanceof EncoderException) {
+        logger.debug("Exception caught in Netty session.", cause);
+    }
+
+    @Override
+    public void send(Packet packet) {
+        Channel channel = getChannel();
+        if(channel == null) {
             return;
         }
 
-        // Decoder exception
-        if ((PipelineUtil.containsCause(cause, InformativeException.class)
-                && ((MinecraftProtocol) getPacketProtocol()).getState() != ProtocolState.HANDSHAKE)
-                || Via.getManager().debugHandler().enabled()) {
-            cause.printStackTrace();
+        PacketSendingEvent sendingEvent = new PacketSendingEvent(this, packet);
+        this.callEvent(sendingEvent);
+
+        if (!sendingEvent.isCancelled()) {
+            final Packet toSend = sendingEvent.getPacket();
+            channel.writeAndFlush(toSend).addListener((ChannelFutureListener) future -> {
+                if(future.isSuccess()) {
+                    callPacketSent(toSend);
+                } else {
+                    packetExceptionCaught(null, future.cause(), packet);
+                }
+            });
         }
+    }
+
+    public void packetExceptionCaught(ChannelHandlerContext ctx, Throwable cause, Packet packet) {
+        if (cause instanceof CancelCodecException) {
+            callPacketSent(packet);
+            return;
+        }
+
+        super.exceptionCaught(ctx, cause);
+
+        logger.debug("Exception caught in Netty session.", cause);
     }
 
     public void setCompressionThreshold(int threshold) {
