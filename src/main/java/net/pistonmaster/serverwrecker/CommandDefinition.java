@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.api.SWPluginLoader;
 import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.common.SWOptions;
 import picocli.CommandLine.Command;
@@ -101,7 +100,6 @@ public class CommandDefinition implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        SWPluginLoader.initPlugins(dataFolder);
         new ServerWrecker(dataFolder).start(new SWOptions(
                 host,
                 port,

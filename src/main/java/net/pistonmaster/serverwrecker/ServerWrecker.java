@@ -37,7 +37,7 @@ import lombok.Setter;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.AttackEndEvent;
 import net.pistonmaster.serverwrecker.api.event.AttackStartEvent;
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerEnableEvent;
+import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.*;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.LogUtil;
@@ -46,10 +46,14 @@ import net.pistonmaster.serverwrecker.protocol.OfflineAuthenticationService;
 import net.pistonmaster.serverwrecker.protocol.SessionEventBus;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
+import org.pf4j.JarPluginManager;
+import org.pf4j.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.Proxy;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -123,7 +127,24 @@ public class ServerWrecker {
             settingsPanel.registerVersions();
         }
 
-        ServerWreckerAPI.postEvent(new ServerWreckerEnableEvent(this));
+        initPlugins(dataFolder.resolve("plugins"));
+    }
+
+    private void initPlugins(Path pluginDir) {
+        try {
+            Files.createDirectories(pluginDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // create the plugin manager
+        PluginManager pluginManager = new JarPluginManager(pluginDir);
+
+        pluginManager.setSystemVersion(BuildData.VERSION);
+
+        // start and load all plugins of application
+        pluginManager.loadPlugins();
+        pluginManager.startPlugins();
     }
 
     public void start(SWOptions options) {

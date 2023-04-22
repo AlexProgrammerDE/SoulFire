@@ -52,12 +52,10 @@ public class DeveloperPanel extends NavigationItem {
         add(new JLabel("Save Log: "));
         add(saveLog);
 
-        ServerWreckerAPI.registerListener(AttackStartEvent.class, event -> {
-            debug.setEnabled(false);
-        });
-        ServerWreckerAPI.registerListener(AttackEndEvent.class, event -> {
-            debug.setEnabled(true);
-        });
+        ServerWreckerAPI.registerListener(AttackStartEvent.class, event ->
+                debug.setEnabled(false));
+        ServerWreckerAPI.registerListener(AttackEndEvent.class, event ->
+                debug.setEnabled(true));
 
         debug.addActionListener(listener -> {
             if (debug.isSelected()) {

@@ -7,6 +7,7 @@ pluginManagement {
     plugins {
         id("com.github.johnrengelman.shadow") version "8.1.1"
         id("org.cadixdev.licenser") version "0.6.1"
+        id("net.kyori.blossom") version "1.3.1"
     }
 }
 
@@ -26,5 +27,7 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
+
+include("build-data")
 
 rootProject.name = "serverwrecker"

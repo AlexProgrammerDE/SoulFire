@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker;
 
-import net.pistonmaster.serverwrecker.api.SWPluginLoader;
 import net.pistonmaster.serverwrecker.gui.MainFrame;
 import org.fusesource.jansi.AnsiConsole;
 import picocli.CommandLine;
@@ -39,7 +38,6 @@ public class Main {
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
             runHeadless(args, dataFolder);
         } else {
-            SWPluginLoader.initPlugins(dataFolder);
             new ServerWrecker(dataFolder).getInjector().getSingleton(MainFrame.class);
         }
     }

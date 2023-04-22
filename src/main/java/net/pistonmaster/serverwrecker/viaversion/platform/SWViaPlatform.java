@@ -36,6 +36,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.SWConstants;
+import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.viaversion.FutureTaskId;
 import net.pistonmaster.serverwrecker.viaversion.JLoggerToLogback;
 import net.pistonmaster.serverwrecker.viaversion.SWViaInjector;
@@ -101,7 +102,7 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
 
     @Override
     public String getPlatformVersion() {
-        return SWConstants.VERSION;
+        return BuildData.VERSION;
     }
 
     @Override
