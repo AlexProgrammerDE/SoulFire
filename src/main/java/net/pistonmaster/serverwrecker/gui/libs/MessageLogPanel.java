@@ -75,6 +75,8 @@ public class MessageLogPanel extends JPanel {
 
         scrollText.setViewportView(textComponent);
 
+        new SmartScroller(scrollText);
+
         add(scrollText, BorderLayout.CENTER);
     }
 
