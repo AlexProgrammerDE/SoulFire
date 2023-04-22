@@ -19,8 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.protocol.tcp;
 
-import com.github.steveice10.mc.protocol.MinecraftProtocol;
-import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.github.steveice10.packetlib.BuiltinFlags;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.codec.PacketCodecHelper;
@@ -30,17 +28,11 @@ import com.github.steveice10.packetlib.helper.TransportHelper;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpPacketCodec;
-import com.github.steveice10.packetlib.tcp.TcpPacketCompression;
 import com.github.steveice10.packetlib.tcp.TcpSession;
-import com.viaversion.viaversion.api.Via;
-import com.viaversion.viaversion.api.protocol.packet.State;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.exception.CancelCodecException;
-import com.viaversion.viaversion.exception.CancelException;
-import com.viaversion.viaversion.exception.InformativeException;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
-import com.viaversion.viaversion.util.PipelineUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -54,7 +46,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.dns.*;
 import io.netty.handler.codec.haproxy.*;
 import io.netty.handler.proxy.HttpProxyHandler;
@@ -71,7 +62,6 @@ import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.viaversion.FrameCodec;
 import net.pistonmaster.serverwrecker.viaversion.StorableOptions;
 import net.pistonmaster.serverwrecker.viaversion.StorableSession;
-import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import net.raphimc.vialegacy.netty.PreNettyLengthCodec;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.baseprotocols.PreNettyBaseProtocol;
 import org.slf4j.Logger;
@@ -108,6 +98,37 @@ public class ViaTcpClientSession extends TcpSession {
         this.proxy = proxy;
         this.codecHelper = protocol.createHelper();
         this.options = options;
+    }
+
+    private static void createTcpEventLoopGroup() {
+        if (CHANNEL_CLASS != null) {
+            return;
+        }
+
+        switch (TransportHelper.determineTransportMethod()) {
+            case IO_URING -> {
+                EVENT_LOOP_GROUP = new IOUringEventLoopGroup();
+                CHANNEL_CLASS = IOUringSocketChannel.class;
+                DATAGRAM_CHANNEL_CLASS = IOUringDatagramChannel.class;
+            }
+            case EPOLL -> {
+                EVENT_LOOP_GROUP = new EpollEventLoopGroup();
+                CHANNEL_CLASS = EpollSocketChannel.class;
+                DATAGRAM_CHANNEL_CLASS = EpollDatagramChannel.class;
+            }
+            case KQUEUE -> {
+                EVENT_LOOP_GROUP = new KQueueEventLoopGroup();
+                CHANNEL_CLASS = KQueueSocketChannel.class;
+                DATAGRAM_CHANNEL_CLASS = KQueueDatagramChannel.class;
+            }
+            case NIO -> {
+                EVENT_LOOP_GROUP = new NioEventLoopGroup();
+                CHANNEL_CLASS = NioSocketChannel.class;
+                DATAGRAM_CHANNEL_CLASS = NioDatagramChannel.class;
+            }
+        }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> EVENT_LOOP_GROUP.shutdownGracefully()));
     }
 
     @Override
@@ -198,6 +219,22 @@ public class ViaTcpClientSession extends TcpSession {
     @Override
     public int getCompressionThreshold() {
         throw new UnsupportedOperationException("Not supported method.");
+    }
+
+    public void setCompressionThreshold(int threshold) {
+        Channel channel = getChannel();
+        if (channel != null) {
+            if (threshold >= 0) {
+                ChannelHandler handler = channel.pipeline().get("compression");
+                if (handler == null) {
+                    channel.pipeline().addBefore("via-codec", "compression", new CompressionCodec(threshold));
+                } else {
+                    ((CompressionCodec) handler).setThreshold(threshold);
+                }
+            } else if (channel.pipeline().get("compression") != null) {
+                channel.pipeline().remove("compression");
+            }
+        }
     }
 
     @Override
@@ -351,7 +388,7 @@ public class ViaTcpClientSession extends TcpSession {
     @Override
     public void send(Packet packet) {
         Channel channel = getChannel();
-        if(channel == null) {
+        if (channel == null) {
             return;
         }
 
@@ -361,7 +398,7 @@ public class ViaTcpClientSession extends TcpSession {
         if (!sendingEvent.isCancelled()) {
             final Packet toSend = sendingEvent.getPacket();
             channel.writeAndFlush(toSend).addListener((ChannelFutureListener) future -> {
-                if(future.isSuccess()) {
+                if (future.isSuccess()) {
                     callPacketSent(toSend);
                 } else {
                     packetExceptionCaught(null, future.cause(), packet);
@@ -381,54 +418,7 @@ public class ViaTcpClientSession extends TcpSession {
         logger.debug("Exception caught in Netty session.", cause);
     }
 
-    public void setCompressionThreshold(int threshold) {
-        Channel channel = getChannel();
-        if (channel != null) {
-            if (threshold >= 0) {
-                ChannelHandler handler = channel.pipeline().get("compression");
-                if (handler == null) {
-                    channel.pipeline().addBefore("via-codec", "compression", new CompressionCodec(threshold));
-                } else {
-                    ((CompressionCodec) handler).setThreshold(threshold);
-                }
-            } else if (channel.pipeline().get("compression") != null) {
-                channel.pipeline().remove("compression");
-            }
-        }
-    }
-
     public void enableEncryption(SecretKey key) {
         getChannel().pipeline().addBefore("sizer", "encryption", new CryptoCodec(key, key));
-    }
-
-    private static void createTcpEventLoopGroup() {
-        if (CHANNEL_CLASS != null) {
-            return;
-        }
-
-        switch (TransportHelper.determineTransportMethod()) {
-            case IO_URING -> {
-                EVENT_LOOP_GROUP = new IOUringEventLoopGroup();
-                CHANNEL_CLASS = IOUringSocketChannel.class;
-                DATAGRAM_CHANNEL_CLASS = IOUringDatagramChannel.class;
-            }
-            case EPOLL -> {
-                EVENT_LOOP_GROUP = new EpollEventLoopGroup();
-                CHANNEL_CLASS = EpollSocketChannel.class;
-                DATAGRAM_CHANNEL_CLASS = EpollDatagramChannel.class;
-            }
-            case KQUEUE -> {
-                EVENT_LOOP_GROUP = new KQueueEventLoopGroup();
-                CHANNEL_CLASS = KQueueSocketChannel.class;
-                DATAGRAM_CHANNEL_CLASS = KQueueDatagramChannel.class;
-            }
-            case NIO -> {
-                EVENT_LOOP_GROUP = new NioEventLoopGroup();
-                CHANNEL_CLASS = NioSocketChannel.class;
-                DATAGRAM_CHANNEL_CLASS = NioDatagramChannel.class;
-            }
-        }
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> EVENT_LOOP_GROUP.shutdownGracefully()));
     }
 }

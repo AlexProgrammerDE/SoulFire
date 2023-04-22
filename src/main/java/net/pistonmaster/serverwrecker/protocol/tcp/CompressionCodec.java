@@ -29,7 +29,6 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.MessageToMessageCodec;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;

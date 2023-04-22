@@ -21,13 +21,14 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.pistonmaster.serverwrecker.SWConstants;
-import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.common.ProxyType;
+import net.pistonmaster.serverwrecker.common.SWOptions;
 
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SettingsPanel extends NavigationItem {

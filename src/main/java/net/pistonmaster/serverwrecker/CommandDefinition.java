@@ -22,8 +22,8 @@ package net.pistonmaster.serverwrecker;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.api.SWPluginLoader;
-import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.common.ProxyType;
+import net.pistonmaster.serverwrecker.common.SWOptions;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 

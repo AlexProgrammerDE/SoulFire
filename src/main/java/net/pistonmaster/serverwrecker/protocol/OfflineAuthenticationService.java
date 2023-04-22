@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.protocol;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
-import com.github.steveice10.mc.auth.exception.request.RequestException;
 import com.github.steveice10.mc.auth.service.AuthenticationService;
 
 import java.net.URI;

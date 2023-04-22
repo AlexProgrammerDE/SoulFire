@@ -1,6 +1,5 @@
 package net.pistonmaster.serverwrecker.viaversion.platform;
 
-import com.viaversion.viaversion.api.Via;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.viaversion.JLoggerToLogback;
 import net.raphimc.vialegacy.platform.ViaLegacyPlatform;

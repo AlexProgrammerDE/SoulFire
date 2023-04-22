@@ -53,7 +53,6 @@ import java.util.logging.Logger;
 @RequiredArgsConstructor
 public class SWViaPlatform implements ViaPlatform<UUID> {
     private final Path dataFolder;
-    private ViaVersionConfig config;
     private final JLoggerToLogback logger = new JLoggerToLogback(LoggerFactory.getLogger("ViaVersion"));
     private final ViaAPI<UUID> api = new ViaAPIBase<>() {
     };
@@ -61,18 +60,19 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
     private final ViaInjector injector = new SWViaInjector();
     private final EventLoop eventLoop = new DefaultEventLoop();
     private final ExecutorService asyncService = Executors.newFixedThreadPool(4);
+    private ViaVersionConfig config;
 
     public void init() {
         config = new AbstractViaConfig(dataFolder.resolve("config.yml").toFile()) {
-            {
-                reloadConfig();
-            }
-
             // Based on Sponge ViaVersion
             private static final List<String> UNSUPPORTED = Arrays.asList("anti-xray-patch", "bungee-ping-interval",
                     "bungee-ping-save", "bungee-servers", "quick-move-action-fix", "nms-player-ticking",
                     "velocity-ping-interval", "velocity-ping-save", "velocity-servers",
                     "blockconnection-method", "change-1_9-hitbox", "change-1_14-hitbox");
+
+            {
+                reloadConfig();
+            }
 
             @Override
             protected void handleConfig(Map<String, Object> config) {
