@@ -122,6 +122,8 @@ public class ServerWrecker {
         ViaManagerImpl manager = (ViaManagerImpl) Via.getManager();
         manager.init();
 
+        manager.getPlatform().getConf().setCheckForUpdates(false);
+
         manager.onServerLoaded();
 
         SettingsPanel settingsPanel = injector.getIfAvailable(SettingsPanel.class);

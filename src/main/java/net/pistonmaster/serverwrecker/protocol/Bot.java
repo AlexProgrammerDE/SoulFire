@@ -53,15 +53,6 @@ public class Bot {
     private final ServiceServer serviceServer;
     private final ProxyBotData proxyBotData;
     private Session session;
-    private EntityLocation location;
-    private EntityMotion motion;
-    private float health = -1;
-    private int food = -1;
-    private float saturation = -1;
-    private int botEntityId = -1;
-    private boolean hardcore = false;
-    private GameMode gameMode = null;
-    private int maxPlayers = -1;
 
     public void connect(String host, int port, SessionEventBus bus) {
         ViaTcpClientSession session = new ViaTcpClientSession(host, port, protocol,

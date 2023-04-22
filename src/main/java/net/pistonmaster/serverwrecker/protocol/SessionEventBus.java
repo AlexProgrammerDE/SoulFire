@@ -50,6 +50,15 @@ public final class SessionEventBus {
     private final AtomicBoolean isRejoining = new AtomicBoolean(false);
     private final AtomicBoolean didFirstJoin = new AtomicBoolean(false);
     private final AtomicInteger rejoinAnywayCounter = new AtomicInteger(0);
+    private EntityLocation location;
+    private EntityMotion motion;
+    private float health = -1;
+    private int food = -1;
+    private float saturation = -1;
+    private int botEntityId = -1;
+    private boolean hardcore = false;
+    private GameMode gameMode = null;
+    private int maxPlayers = -1;
 
     public SessionEventBus(SWOptions options, Logger log, Bot bot, ServerWrecker serverWrecker) {
         this.options = options;
@@ -76,7 +85,7 @@ public final class SessionEventBus {
             }
 
             if (options.autoRespawn()) {
-                if (bot.isOnline() && bot.getHealth() != -1 && bot.getHealth() < 1) {
+                if (bot.isOnline() && this.health != -1 && this.health < 1) {
                     bot.sendClientCommand(0);
                 }
             }
@@ -138,8 +147,8 @@ public final class SessionEventBus {
 
     public void onPosition(double x, double y, double z, float yaw, float pitch) {
         try {
-            bot.setLocation(new EntityLocation(x, y, z, yaw, pitch));
-            log.info("Position updated: {}", bot.getLocation());
+            location = new EntityLocation(x, y, z, yaw, pitch);
+            log.info("Position updated: {}", location);
         } catch (Exception e) {
             log.error("Error while logging position", e);
         }
@@ -147,9 +156,9 @@ public final class SessionEventBus {
 
     public void onHealth(float health, int food, float saturation) {
         try {
-            bot.setHealth(health);
-            bot.setFood(food);
-            bot.setSaturation(saturation);
+            this.health = health;
+            this.food = food;
+            this.saturation = saturation;
         } catch (Exception e) {
             log.error("Error while logging health", e);
         }
@@ -158,10 +167,10 @@ public final class SessionEventBus {
     public void onJoin(int entityId, boolean hardcore, GameMode gameMode, int maxPlayers) {
         try {
             didFirstJoin.set(true);
-            bot.setBotEntityId(entityId);
-            bot.setHardcore(hardcore);
-            bot.setGameMode(gameMode);
-            bot.setMaxPlayers(maxPlayers);
+            botEntityId = entityId;
+            this.hardcore = hardcore;
+            this.gameMode = gameMode;
+            this.maxPlayers = maxPlayers;
 
             log.info("Joined server");
         } catch (Exception e) {
@@ -210,8 +219,8 @@ public final class SessionEventBus {
 
     public void onEntityMotion(int entityId, double motionX, double motionY, double motionZ) {
         try {
-            if (entityId == bot.getBotEntityId()) {
-                bot.setMotion(new EntityMotion(motionX, motionY, motionZ));
+            if (entityId == this.botEntityId) {
+                motion = new EntityMotion(motionX, motionY, motionZ);
                 //log.info("Player moved with motion: {} {} {}", motionX, motionY, motionZ);
             } else {
                 //log.debug("Entity {} moved with motion: {} {} {}", entityId, motionX, motionY, motionZ);

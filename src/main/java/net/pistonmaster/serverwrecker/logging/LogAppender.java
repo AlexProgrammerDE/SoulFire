@@ -28,6 +28,7 @@ import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.status.Status;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
 
 import javax.swing.*;
 import java.util.List;
@@ -38,35 +39,22 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 @RequiredArgsConstructor
 public class LogAppender implements Appender<ILoggingEvent> {
-    private final JTextPane logArea;
+    private final MessageLogPanel logPanel;
     private final LogFormatter formatter = new LogFormatter();
     @Getter
     private final Queue<String> logLines = new ConcurrentLinkedQueue<>();
-    private final Timer timer = new Timer();
-
-    {
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                SwingUtilities.invokeLater(() -> {
-                    logArea.setText(String.join("\n", logLines));
-                });
-            }
-        }, 0, 100);
-    }
 
     @Override
     public void doAppend(ILoggingEvent iLoggingEvent) throws LogbackException {
         String formatted = formatter.format(iLoggingEvent);
 
-        if (formatted.isEmpty())
+        if (formatted.isEmpty()) {
             return;
-
-        while (logLines.size() > 1000) {
-            logLines.poll();
         }
 
         logLines.add(formatted);
+
+        logPanel.log(formatted + "\n");
     }
 
     @Override

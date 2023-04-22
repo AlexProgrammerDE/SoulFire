@@ -25,7 +25,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.libs.GhostText;
-import net.pistonmaster.serverwrecker.gui.libs.SmartScroller;
+import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
 import net.pistonmaster.serverwrecker.gui.navigation.RightPanelContainer;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ import java.awt.event.KeyEvent;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MainPanel extends JPanel {
     @Getter
-    private static final JTextPane logArea = new JTextPane();
+    private static final MessageLogPanel logPanel = new MessageLogPanel(3000, false);
     private final ServerWrecker botManager;
     private final ShellSender shellSender;
     private final JFrame parent;
@@ -60,16 +60,7 @@ public class MainPanel extends JPanel {
     private JPanel setLogPane() throws SecurityException {
         JPanel leftPanel = new JPanel();
 
-        JScrollPane logPane = new JScrollPane();
-        logPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        logPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-
-        logArea.setEditable(false);
-        logPane.setViewportView(logArea);
-
-        new SmartScroller(logPane);
-
-        LogAppender logAppender = new LogAppender(logArea);
+        LogAppender logAppender = new LogAppender(logPanel);
         injector.register(LogAppender.class, logAppender);
         ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).addAppender(logAppender);
 
@@ -125,7 +116,7 @@ public class MainPanel extends JPanel {
         new GhostText(commands, "Type ServerWrecker commands here...");
 
         leftPanel.setLayout(new BorderLayout());
-        leftPanel.add(logPane, BorderLayout.CENTER);
+        leftPanel.add(logPanel, BorderLayout.CENTER);
         leftPanel.add(commands, BorderLayout.SOUTH);
 
         return leftPanel;

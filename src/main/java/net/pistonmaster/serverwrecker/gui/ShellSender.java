@@ -64,7 +64,7 @@ public class ShellSender extends AbstractAction {
             return 1;
         }));
         dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("clear").executes(c -> {
-            MainPanel.getLogArea().setText("");
+            MainPanel.getLogPanel().clear();
             return 1;
         }));
         dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("say")
