@@ -22,6 +22,12 @@ package net.pistonmaster.serverwrecker;
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import ch.qos.logback.classic.Level;
+import com.github.steveice10.mc.auth.data.GameProfile;
+import com.github.steveice10.mc.auth.exception.request.RequestException;
+import com.github.steveice10.mc.auth.service.AuthenticationService;
+import com.github.steveice10.mc.auth.service.MojangAuthenticationService;
+import com.github.steveice10.mc.auth.service.MsaAuthenticationService;
+import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.google.common.collect.ImmutableList;
 import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
@@ -160,12 +166,17 @@ public class ServerWrecker {
                 }
             }
 
-            ProtocolWrapper account = authenticate(userPassword.left(), userPassword.right(), Proxy.NO_PROXY);
-            if (account == null) {
+            Optional<MinecraftProtocol> optional = authenticate(userPassword.left(), userPassword.right(), Proxy.NO_PROXY);
+            if (optional.isEmpty()) {
                 logger.warn("The account " + userPassword.left() + " failed to authenticate! (skipping it) Check above logs for further information.");
                 continue;
             }
+            MinecraftProtocol protocol = optional.get();
 
+            // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
+            protocol.setUseDefaultListeners(false);
+
+            Logger logger = LoggerFactory.getLogger(protocol.getProfile().getName());
             Bot bot;
             if (!proxyCache.isEmpty()) {
                 proxyIterator = fromStartIfNoNext(proxyIterator, proxyCache);
@@ -191,9 +202,10 @@ public class ServerWrecker {
                     }
                 }
 
-                bot = new BotFactory().createBot(options, account, proxy.address(), serviceServer, options.proxyType(), proxy.username(), proxy.password());
+                ProxyBotData proxyBotData = ProxyBotData.of(proxy.username(), proxy.password(), proxy.address(), options.proxyType());
+                bot = new Bot(options, logger, protocol, serviceServer, proxyBotData);
             } else {
-                bot = new BotFactory().createBot(options, account, serviceServer);
+                bot = new Bot(options, logger, protocol, serviceServer, null);
             }
 
             this.bots.add(bot);
@@ -233,15 +245,30 @@ public class ServerWrecker {
         }
     }
 
-    public ProtocolWrapper authenticate(String username, String password, Proxy proxy) {
+    public Optional<MinecraftProtocol> authenticate(String username, String password, Proxy proxy) {
         if (password.isEmpty()) {
-            return AuthFactory.authenticate(username);
+            return Optional.of(new MinecraftProtocol(username));
         } else {
             try {
-                return AuthFactory.authenticate(username, password, proxy, serviceServer, serviceServerConfig);
-            } catch (Exception e) {
+                AuthenticationService authService = switch (serviceServer) {
+                    case OFFLINE -> new OfflineAuthenticationService();
+                    case MOJANG -> new MojangAuthenticationService();
+                    case MICROSOFT -> new MsaAuthenticationService(serviceServerConfig.get("clientId"));
+                };
+
+                authService.setUsername(username);
+                authService.setPassword(password);
+                authService.setProxy(proxy);
+
+                authService.login();
+
+                GameProfile profile = authService.getSelectedProfile();
+                String accessToken = authService.getAccessToken();
+
+                return Optional.of(new MinecraftProtocol(profile, accessToken));
+            } catch (RequestException e) {
                 logger.warn("Failed to authenticate " + username + "! (" + e.getMessage() + ")", e);
-                return null;
+                return Optional.empty();
             }
         }
     }

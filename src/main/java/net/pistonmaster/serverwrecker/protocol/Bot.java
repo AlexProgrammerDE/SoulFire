@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.protocol;
 
+import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket;
@@ -48,7 +49,7 @@ import java.util.Collections;
 public class Bot {
     private final SWOptions options;
     private final Logger logger;
-    private final ProtocolWrapper account;
+    private final MinecraftProtocol protocol;
     private final ServiceServer serviceServer;
     private final ProxyBotData proxyBotData;
     private Session session;
@@ -63,7 +64,7 @@ public class Bot {
     private int maxPlayers = -1;
 
     public void connect(String host, int port, SessionEventBus bus) {
-        ViaTcpClientSession session = new ViaTcpClientSession(host, port, account,
+        ViaTcpClientSession session = new ViaTcpClientSession(host, port, protocol,
                 NullHelper.nullOrConvert(proxyBotData,
                         data -> new ProxyInfo(ProxyInfo.Type.valueOf(data.getType().name()), data.getAddress(), data.getUsername(), data.getPassword())),
                 options);
@@ -76,7 +77,7 @@ public class Bot {
         session.setWriteTimeout(options.writeTimeout());
 
         session.addListener(new SWBaseListener(ProtocolState.LOGIN));
-        session.addListener(new SWSessionListener(bus, account));
+        session.addListener(new SWSessionListener(bus, protocol));
 
         session.connect(options.waitEstablished());
         this.session = session;

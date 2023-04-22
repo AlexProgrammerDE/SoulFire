@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.protocol;
 
+import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
@@ -39,7 +40,7 @@ import net.pistonmaster.serverwrecker.common.GameMode;
 @RequiredArgsConstructor
 public class SWSessionListener extends SessionAdapter {
     private final SessionEventBus bus;
-    private final ProtocolWrapper wrapper;
+    private final MinecraftProtocol wrapper;
 
     @Override
     public void packetReceived(Session session, Packet packet) {

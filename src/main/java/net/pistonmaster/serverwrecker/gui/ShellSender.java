@@ -57,7 +57,7 @@ public class ShellSender extends AbstractAction {
             List<String> online = new ArrayList<>();
             serverWrecker.getBots().forEach(client -> {
                 if (client.isOnline()) {
-                    online.add(client.getAccount().getProfileName());
+                    online.add(client.getProtocol().getProfile().getName());
                 }
             });
             sendMessage(online.size() + " bots online: " + String.join(", ", online));
