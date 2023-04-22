@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import ch.qos.logback.classic.Level;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.AttackEndEvent;
 import net.pistonmaster.serverwrecker.api.event.AttackStartEvent;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
@@ -51,10 +52,10 @@ public class DeveloperPanel extends NavigationItem {
         add(new JLabel("Save Log: "));
         add(saveLog);
 
-        serverWrecker.getEventBus().register(AttackStartEvent.class, event -> {
+        ServerWreckerAPI.registerListener(AttackStartEvent.class, event -> {
             debug.setEnabled(false);
         });
-        serverWrecker.getEventBus().register(AttackEndEvent.class, event -> {
+        ServerWreckerAPI.registerListener(AttackEndEvent.class, event -> {
             debug.setEnabled(true);
         });
 
