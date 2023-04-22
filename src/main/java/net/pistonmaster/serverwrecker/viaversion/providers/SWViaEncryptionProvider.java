@@ -35,7 +35,6 @@ public class SWViaEncryptionProvider extends EncryptionProvider {
         SecretKey key = session.getFlag(SWProtocolConstants.ENCRYPTION_SECRET_KEY);
         Objects.requireNonNull(key, "Key is null!");
 
-        System.out.println("Enabling decryption for " + user.getProtocolInfo().getUsername() + " with key " + key);
         session.enableEncryption(key);
     }
 }

@@ -34,4 +34,4 @@ jobs:
           # Artifact name
           name: ServerWrecker
           # A file, directory or wildcard pattern that describes what to upload
-          path: core/build/libs/serverwrecker-core-all.jar
+          path: build/libs/serverwrecker-core-all.jar
