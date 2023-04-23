@@ -20,7 +20,11 @@
 package net.pistonmaster.serverwrecker.protocol.bot;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
+import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
 import com.github.steveice10.mc.protocol.data.UnexpectedEncryptionException;
+import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
+import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
+import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.GlobalPos;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.data.game.level.notify.RainStrengthValue;
@@ -35,13 +39,14 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerClosePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetSlotPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheRadiusPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetDefaultSpawnPositionPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetSimulationDistancePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.*;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
+import com.github.steveice10.opennbt.NBTIO;
+import com.github.steveice10.opennbt.tag.builtin.*;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import lombok.Getter;
 import lombok.ToString;
 import net.kyori.adventure.text.Component;
@@ -54,12 +59,15 @@ import net.pistonmaster.serverwrecker.protocol.Bot;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.model.*;
-import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkState;
+import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkData;
+import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.WeatherState;
 import net.pistonmaster.serverwrecker.util.BusHandler;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -101,7 +109,8 @@ public final class SessionDataManager {
     private @Nullable Container openContainer;
     private final WeatherState weatherState = new WeatherState();
     private final Map<Integer, AtomicInteger> itemCoolDowns = new ConcurrentHashMap<>();
-    private final Map<ChunkKey, ChunkState> chunks = new ConcurrentHashMap<>();
+    private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
+    private @Nullable ChunkKey centerChunk;
     private boolean isDead = false;
 
     public SessionDataManager(SWOptions options, Logger log, Bot bot, ServerWrecker serverWrecker) {
@@ -246,6 +255,16 @@ public final class SessionDataManager {
                     packet.getMaxPlayers(),
                     packet.isReducedDebugInfo()
             );
+            CompoundTag registry = loginData.registry().get("minecraft:dimension_type");
+            for (Tag type : registry.<ListTag>get("value").getValue()) {
+                if (type instanceof CompoundTag dimension) {
+                    String name = dimension.<StringTag>get("name").getValue();
+                    int id = dimension.<IntTag>get("id").getValue();
+
+                    levels.put(name, new LevelState(dimension));
+                }
+            }
+            NBTIO.writeFile(loginData.registry(), Path.of("tempdatafile.nbt").toFile());
             doImmediateRespawn = !packet.isEnableRespawnScreen();
             currentDimension = new DimensionData(
                     packet.getDimension(),
@@ -386,6 +405,62 @@ public final class SessionDataManager {
     }
 
     @BusHandler
+    public void onGameEvent(ClientboundSetChunkCacheCenterPacket packet) {
+        centerChunk = new ChunkKey(packet.getChunkX(), packet.getChunkZ());
+    }
+
+    @BusHandler
+    public void onChunkForget(ClientboundForgetLevelChunkPacket packet) {
+        getCurrentLevel().getChunks().remove(new ChunkKey(packet.getX(), packet.getZ()));
+    }
+
+    @BusHandler
+    public void onChunkData(ClientboundLevelChunkWithLightPacket packet) {
+        ChunkKey key = new ChunkKey(packet.getX(), packet.getZ());
+        byte[] data = packet.getChunkData();
+        System.out.println("Chunk data: " + data.length);
+        ByteBuf buf = Unpooled.wrappedBuffer(data);
+
+        List<ChunkSection> sections = new ArrayList<>();
+        try {
+            while (true) {
+                System.out.println("Chunk section: " + buf.readableBytes());
+                sections.add(readChunkSection(buf, bot.getSession().getCodecHelper()));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Chunk sections: " + sections.size());
+
+        getCurrentLevel().getChunks().put(key, new ChunkData(sections.toArray(ChunkSection[]::new)));
+    }
+
+    @BusHandler
+    public void onChunkData(ClientboundSectionBlocksUpdatePacket packet) {
+        // TODO
+    }
+
+    @BusHandler
+    public void onChunkData(ClientboundChunksBiomesPacket packet) {
+        // TODO
+    }
+
+    @BusHandler
+    public void onEntityMotion(ClientboundSetEntityMotionPacket packet) {
+        try {
+            if (loginData.entityId() == packet.getEntityId()) {
+                motion = new EntityMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
+                //log.info("Player moved with motion: {} {} {}", motionX, motionY, motionZ);
+            } else {
+                //log.debug("Entity {} moved with motion: {} {} {}", entityId, motionX, motionY, motionZ);
+            }
+        } catch (Exception e) {
+            log.error("Error while logging entity motion", e);
+        }
+    }
+
+    @BusHandler
     public void onLoginDisconnectPacket(ClientboundLoginDisconnectPacket packet) {
         try {
             log.error("Login failed: {}", toPlainText(packet.getReason()));
@@ -420,7 +495,7 @@ public final class SessionDataManager {
                 log.error("Disconnected: {}", reason);
             }
 
-            if (options.debug()) {
+            if (options.debug() || getRootCause(cause).getClass().getPackageName().startsWith("net.pistonmaster")) {
                 log.debug("Bot disconnected with cause: ");
                 cause.printStackTrace();
             }
@@ -429,18 +504,12 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
-    public void onEntityMotion(ClientboundSetEntityMotionPacket packet) {
-        try {
-            if (loginData.entityId() == packet.getEntityId()) {
-                motion = new EntityMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
-                //log.info("Player moved with motion: {} {} {}", motionX, motionY, motionZ);
-            } else {
-                //log.debug("Entity {} moved with motion: {} {} {}", entityId, motionX, motionY, motionZ);
-            }
-        } catch (Exception e) {
-            log.error("Error while logging entity motion", e);
+    private Throwable getRootCause(Throwable throwable) {
+        Throwable cause;
+        while ((cause = throwable.getCause()) != null) {
+            throwable = cause;
         }
+        return throwable;
     }
 
     private void sendMessage(String message) {
@@ -450,5 +519,20 @@ public final class SessionDataManager {
 
     private String toPlainText(Component component) {
         return PlainTextComponentSerializer.plainText().serialize(component);
+    }
+
+    public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {
+        int blockCount = buf.readShort();
+        System.out.println("Block count: " + blockCount);
+
+        System.out.println("Palette: " + buf.readableBytes());
+
+        DataPalette chunkPalette = codec.readDataPalette(buf, PaletteType.CHUNK, ChunkData.BITS_PER_BLOCK);
+        DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, ChunkData.BITS_PER_BIOME);
+        return new ChunkSection(blockCount, chunkPalette, biomePalette);
+    }
+
+    private LevelState getCurrentLevel() {
+        return levels.get(currentDimension.dimensionType());
     }
 }

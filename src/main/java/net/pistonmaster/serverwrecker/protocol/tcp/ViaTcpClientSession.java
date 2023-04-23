@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.protocol.tcp;
 
+import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
 import com.github.steveice10.packetlib.BuiltinFlags;
 import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.codec.PacketCodecHelper;
@@ -248,8 +249,8 @@ public class ViaTcpClientSession extends TcpSession {
     }
 
     @Override
-    public PacketCodecHelper getCodecHelper() {
-        return this.codecHelper;
+    public MinecraftCodecHelper getCodecHelper() {
+        return (MinecraftCodecHelper) this.codecHelper;
     }
 
     private InetSocketAddress resolveAddress() {

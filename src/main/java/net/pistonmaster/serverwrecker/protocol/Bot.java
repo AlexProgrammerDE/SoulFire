@@ -56,7 +56,7 @@ public class Bot {
     private final MinecraftProtocol protocol;
     private final ServiceServer serviceServer;
     private final ProxyBotData proxyBotData;
-    private Session session;
+    private ViaTcpClientSession session;
 
     public void connect(String host, int port, SessionDataManager bus) {
         ViaTcpClientSession session = new ViaTcpClientSession(host, port, protocol,

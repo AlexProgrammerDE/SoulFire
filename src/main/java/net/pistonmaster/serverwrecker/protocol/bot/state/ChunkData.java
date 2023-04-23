@@ -17,7 +17,14 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol.bot.model;
+package net.pistonmaster.serverwrecker.protocol.bot.state;
 
-public record DimensionData(String dimensionType, String worldName, long hashedSeed, boolean debug, boolean flat) {
+import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class ChunkData {
+    public static final int BITS_PER_BLOCK = 15;
+    public static final int BITS_PER_BIOME = 6;
+    private final ChunkSection[] sections;
 }

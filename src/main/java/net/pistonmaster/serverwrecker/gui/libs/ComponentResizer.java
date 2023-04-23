@@ -97,7 +97,7 @@ public class ComponentResizer extends MouseAdapter {
      *
      * @param dragInsets Insets specifying which borders are eligible to be
      *                   resized.
-     * @param snapSize   Specify the dimension to which the border will snap to
+     * @param snapSize   Specify the dimensionType to which the border will snap to
      *                   when being dragged. Snapping occurs at the halfway mark.
      * @param components components to be automatically registered
      */
