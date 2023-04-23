@@ -39,6 +39,7 @@ import net.pistonmaster.serverwrecker.common.NullHelper;
 import net.pistonmaster.serverwrecker.common.ProxyBotData;
 import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.common.ServiceServer;
+import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.tcp.ViaTcpClientSession;
 import org.slf4j.Logger;
 
@@ -57,7 +58,7 @@ public class Bot {
     private final ProxyBotData proxyBotData;
     private Session session;
 
-    public void connect(String host, int port, SessionEventBus bus) {
+    public void connect(String host, int port, SessionDataManager bus) {
         ViaTcpClientSession session = new ViaTcpClientSession(host, port, protocol,
                 NullHelper.nullOrConvert(proxyBotData,
                         data -> new ProxyInfo(ProxyInfo.Type.valueOf(data.getType().name()), data.getAddress(), data.getUsername(), data.getPassword())),
@@ -70,7 +71,7 @@ public class Bot {
         session.setWriteTimeout(options.writeTimeout());
 
         session.addListener(new SWBaseListener(logger, ProtocolState.LOGIN));
-        session.addListener(new SWSessionListener(bus, protocol));
+        session.addListener(new SWSessionListener(bus, this));
 
         session.connect(options.waitEstablished());
         this.session = session;

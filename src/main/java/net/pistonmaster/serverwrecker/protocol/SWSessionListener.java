@@ -19,67 +19,37 @@
  */
 package net.pistonmaster.serverwrecker.protocol;
 
-import com.github.steveice10.mc.protocol.MinecraftProtocol;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDisconnectPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityMotionPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
-import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
+import com.github.steveice10.mc.protocol.codec.MinecraftPacket;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
+import com.github.steveice10.packetlib.event.session.PacketSendingEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import com.github.steveice10.packetlib.packet.Packet;
 import lombok.RequiredArgsConstructor;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.pistonmaster.serverwrecker.common.GameMode;
+import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.SWPacketReceiveEvent;
+import net.pistonmaster.serverwrecker.api.event.SWPacketSendingEvent;
+import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
+import net.pistonmaster.serverwrecker.util.BusHelper;
 
 @RequiredArgsConstructor
 public class SWSessionListener extends SessionAdapter {
-    private final SessionEventBus bus;
-    private final MinecraftProtocol wrapper;
+    private final SessionDataManager bus;
+    private final Bot bot;
 
     @Override
     public void packetReceived(Session session, Packet packet) {
-        if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
-            Component message = chatPacket.getUnsignedContent();
-            if (message == null) {
-                message = Component.text(chatPacket.getContent());
-            }
-            bus.onChat(toPlainText(message));
-        } else if (packet instanceof ClientboundSystemChatPacket systemChatPacket) {
-            Component message = systemChatPacket.getContent();
-            bus.onChat(toPlainText(message));
-        } else if (packet instanceof ClientboundPlayerPositionPacket posPacket) {
-            bus.onPosition(posPacket.getX(), posPacket.getY(), posPacket.getZ(), posPacket.getYaw(), posPacket.getPitch());
-        } else if (packet instanceof ClientboundSetHealthPacket healthPacket) {
-            bus.onHealth(healthPacket.getHealth(), healthPacket.getFood(), healthPacket.getSaturation());
-        } else if (packet instanceof ClientboundLoginPacket playLoginPacket) {
-            bus.onJoin(playLoginPacket.getEntityId(),
-                    playLoginPacket.isHardcore(),
-                    GameMode.valueOf(playLoginPacket.getGameMode().name()),
-                    playLoginPacket.getMaxPlayers());
-        } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
-            bus.onDisconnectPacket(toPlainText(disconnectPacket.getReason()));
-        } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {
-            bus.onLoginDisconnectPacket(toPlainText(loginDisconnectPacket.getReason()));
-        } else if (packet instanceof ClientboundSetEntityMotionPacket motionPacket) {
-            bus.onEntityMotion(motionPacket.getEntityId(),
-                    motionPacket.getMotionX(),
-                    motionPacket.getMotionY(),
-                    motionPacket.getMotionZ());
-        }
+        ServerWreckerAPI.postEvent(new SWPacketReceiveEvent(bot, (MinecraftPacket) packet));
+        BusHelper.handlePacket(packet, bus);
+    }
+
+    @Override
+    public void packetSending(PacketSendingEvent event) {
+        ServerWreckerAPI.postEvent(new SWPacketSendingEvent(bot, event.getPacket()));
     }
 
     @Override
     public void disconnected(DisconnectedEvent event) {
-        bus.onDisconnectEvent(toPlainText(event.getReason()), event.getCause());
-    }
-
-    private String toPlainText(Component component) {
-        return PlainTextComponentSerializer.plainText().serialize(component);
+        bus.onDisconnectEvent(event);
     }
 }

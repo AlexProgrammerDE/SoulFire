@@ -43,7 +43,7 @@ import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.LogUtil;
 import net.pistonmaster.serverwrecker.protocol.Bot;
 import net.pistonmaster.serverwrecker.protocol.OfflineAuthenticationService;
-import net.pistonmaster.serverwrecker.protocol.SessionEventBus;
+import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
 import org.pf4j.JarPluginManager;
@@ -259,7 +259,7 @@ public class ServerWrecker {
 
             bot.getLogger().info("Connecting...");
 
-            bot.connect(options.hostname(), options.port(), new SessionEventBus(options, bot.getLogger(), bot, this));
+            bot.connect(options.hostname(), options.port(), new SessionDataManager(options, bot.getLogger(), bot, this));
         }
     }
 

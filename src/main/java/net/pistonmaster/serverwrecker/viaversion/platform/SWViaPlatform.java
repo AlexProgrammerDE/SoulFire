@@ -35,7 +35,6 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.viaversion.FutureTaskId;
 import net.pistonmaster.serverwrecker.viaversion.JLoggerToLogback;
