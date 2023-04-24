@@ -59,11 +59,12 @@ public class Bot {
     private final ProxyBotData proxyBotData;
     private ViaTcpClientSession session;
 
-    public void connect(String host, int port, SessionDataManager bus) {
+    public void connect(String host, int port, ServerWrecker serverWrecker) {
         ViaTcpClientSession session = new ViaTcpClientSession(host, port, protocol,
                 NullHelper.nullOrConvert(proxyBotData,
                         data -> new ProxyInfo(ProxyInfo.Type.valueOf(data.getType().name()), data.getAddress(), data.getUsername(), data.getPassword())),
                 options);
+        SessionDataManager sessionDataManager = new SessionDataManager(options, logger, this, serverWrecker, session);
 
         session.setFlag(BuiltinFlags.PRINT_DEBUG, options.debug());
 
@@ -72,7 +73,7 @@ public class Bot {
         session.setWriteTimeout(options.writeTimeout());
 
         session.addListener(new SWBaseListener(logger, ProtocolState.LOGIN));
-        session.addListener(new SWSessionListener(bus, this));
+        session.addListener(new SWSessionListener(sessionDataManager, this));
 
         session.connect(options.waitEstablished());
         this.session = session;
@@ -90,24 +91,8 @@ public class Bot {
         return session != null && session.isConnected();
     }
 
-    public void sendPositionRotation(boolean onGround, double x, double y, double z, float yaw, float pitch) {
-        session.send(new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
-    }
-
-    public void sendPosition(boolean onGround, double x, double y, double z) {
-        session.send(new ServerboundMovePlayerPosPacket(onGround, x, y, z));
-    }
-
-    public void sendRotation(boolean onGround, float yaw, float pitch) {
-        session.send(new ServerboundMovePlayerRotPacket(onGround, yaw, pitch));
-    }
-
-    public void sendGround(boolean onGround) {
-        session.send(new ServerboundMovePlayerStatusOnlyPacket(onGround));
-    }
-
-    public void sendClientCommand(int actionId) {
-        session.send(new ServerboundClientCommandPacket(ClientCommand.values()[actionId]));
+    public void sendClientCommand(ClientCommand clientCommand) {
+        session.send(new ServerboundClientCommandPacket(clientCommand));
     }
 
     public void disconnect() {

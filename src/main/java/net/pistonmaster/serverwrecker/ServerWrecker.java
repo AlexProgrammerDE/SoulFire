@@ -302,7 +302,7 @@ public class ServerWrecker {
 
             bot.getLogger().info("Connecting...");
 
-            bot.connect(options.hostname(), options.port(), new SessionDataManager(options, bot.getLogger(), bot, this));
+            bot.connect(options.hostname(), options.port(), this);
         }
     }
 

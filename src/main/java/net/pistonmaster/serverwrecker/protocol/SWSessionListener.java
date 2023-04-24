@@ -50,6 +50,13 @@ public class SWSessionListener extends SessionAdapter {
 
     @Override
     public void disconnected(DisconnectedEvent event) {
-        bus.onDisconnectEvent(event);
+        try {
+            bus.onDisconnectEvent(event);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+
+        // Make sure bus scheduler shuts down and resources become available again
+        bus.getScheduler().shutdown();
     }
 }

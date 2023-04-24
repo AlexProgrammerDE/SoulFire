@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.protocol.bot;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
 import com.github.steveice10.mc.protocol.data.UnexpectedEncryptionException;
+import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkBiomeData;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
@@ -40,6 +41,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.Cli
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetSlotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.*;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import com.github.steveice10.opennbt.tag.builtin.*;
@@ -68,6 +70,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.BorderState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkData;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.WeatherState;
+import net.pistonmaster.serverwrecker.protocol.tcp.ViaTcpClientSession;
 import net.pistonmaster.serverwrecker.util.BusHandler;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -87,9 +90,11 @@ public final class SessionDataManager {
     private final Logger log;
     private final Bot bot;
     private final ServerWrecker serverWrecker;
+    private final ViaTcpClientSession session;
     private final PlainTextComponentSerializer messageSerializer;
     private final Set<String> messageQueue = new LinkedHashSet<>();
-    private final ScheduledThreadPoolExecutor timer = new ScheduledThreadPoolExecutor(3);
+    @Getter
+    private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(3);
     private final AtomicBoolean isRejoining = new AtomicBoolean(false);
     private final AtomicBoolean didFirstJoin = new AtomicBoolean(false);
     private final AtomicInteger rejoinAnywayCounter = new AtomicInteger(0);
@@ -122,16 +127,17 @@ public final class SessionDataManager {
     private @Nullable ChunkKey centerChunk;
     private boolean isDead = false;
 
-    public SessionDataManager(SWOptions options, Logger log, Bot bot, ServerWrecker serverWrecker) {
+    public SessionDataManager(SWOptions options, Logger log, Bot bot, ServerWrecker serverWrecker, ViaTcpClientSession session) {
         this.options = options;
         this.log = log;
         this.bot = bot;
         this.serverWrecker = serverWrecker;
+        this.session = session;
         this.messageSerializer = PlainTextComponentSerializer.builder().flattener(
                 ComponentFlattener.basic().toBuilder()
                         .mapper(TranslatableComponent.class, new TranslationMapper(bot.getServerWrecker(), bot)).build()
         ).build();
-        timer.scheduleAtFixedRate(() -> {
+        scheduler.scheduleAtFixedRate(() -> {
             if (isBotAttackOff()) {
                 return;
             }
@@ -145,18 +151,18 @@ public final class SessionDataManager {
                 }
             }
         }, 0, 2000, TimeUnit.MILLISECONDS);
-        timer.scheduleAtFixedRate(() -> {
+        scheduler.scheduleAtFixedRate(() -> {
             if (isBotAttackOff()) {
                 return;
             }
 
             if (options.autoRespawn()) {
                 if (bot.isOnline() && isDead) {
-                    bot.sendClientCommand(0);
+                    bot.sendClientCommand(ClientCommand.RESPAWN);
                 }
             }
         }, 0, 1000, TimeUnit.MILLISECONDS);
-        timer.scheduleAtFixedRate(() -> {
+        scheduler.scheduleAtFixedRate(() -> {
             if (isBotAttackOff()) {
                 return;
             }
@@ -173,7 +179,7 @@ public final class SessionDataManager {
                             return;
                         }
 
-                        bot.connect(options.hostname(), options.port(), this);
+                        bot.connect(options.hostname(), options.port(), serverWrecker);
                         isRejoining.set(true);
                     }
                 }
@@ -412,7 +418,7 @@ public final class SessionDataManager {
             }
             case ENTER_CREDITS -> {
                 log.info("Entered credits {} (Repawning now)", packet.getValue());
-                bot.sendClientCommand(0); // Respawns the player
+                session.send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)); // Respawns the player
             }
             case DEMO_MESSAGE -> log.debug("Demo event: {}", packet.getValue());
             case ARROW_HIT_PLAYER -> log.debug("Arrow hit player");
@@ -588,7 +594,6 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
     public void onDisconnectEvent(DisconnectedEvent event) {
         String reason = toPlainText(event.getReason());
         Throwable cause = event.getCause();
@@ -605,21 +610,10 @@ public final class SessionDataManager {
                 log.error("Disconnected: {}", reason);
             }
 
-            if (options.debug() || getRootCause(cause).getClass().getPackageName().startsWith("net.pistonmaster")) {
-                log.debug("Bot disconnected with cause: ");
-                cause.printStackTrace();
-            }
+            cause.printStackTrace();
         } catch (Exception e) {
             log.error("Error while logging disconnect", e);
         }
-    }
-
-    private Throwable getRootCause(Throwable throwable) {
-        Throwable cause;
-        while ((cause = throwable.getCause()) != null) {
-            throwable = cause;
-        }
-        return throwable;
     }
 
     private void sendMessage(String message) {
