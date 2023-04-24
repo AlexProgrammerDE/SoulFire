@@ -14,3 +14,23 @@ GitHub: https://github.com/Heath123/pakkit
 ### SniffCraft
 
 GitHub: https://github.com/adepierre/SniffCraft
+
+## Chunk Data
+How did you come up with `BITS_PER_BLOCK`???
+It's the log2(maxBlockStateId). Download the latest mc server jar and run:
+
+```bash
+java -DbundlerMainClass=net.minecraft.data.Main -jar server.jar --all
+```
+
+Then go into the generated folder `generated/reports`. Then execute:
+```bash
+state_ids=$(jq -r '.[].states[].id' blocks.json)
+
+# Sort the IDs in descending order and get the highest one
+highest_id=$(echo "${state_ids}" | sort -rn | head -n 1)
+
+echo "The highest state ID is ${highest_id}"
+```
+
+Take the ID, log2 it and then round up. That's your `BITS_PER_BLOCK`.

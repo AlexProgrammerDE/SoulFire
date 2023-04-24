@@ -17,17 +17,14 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol.bot.state;
+package net.pistonmaster.serverwrecker.protocol.bot.model;
 
-import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
-import lombok.Getter;
+import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
+import com.github.steveice10.opennbt.tag.builtin.IntTag;
+import com.github.steveice10.opennbt.tag.builtin.StringTag;
 
-public class ChunkData {
-    public static final int BITS_PER_BLOCK = 15;
-    @Getter
-    private final ChunkSection[] sections;
-
-    public ChunkData(LevelState levelState) {
-        sections = new ChunkSection[levelState.getSectionsCount()];
+public record BiomeData(String name, int id) {
+    public BiomeData(CompoundTag data) {
+        this(data.<StringTag>get("name").getValue(), data.<IntTag>get("id").getValue());
     }
 }

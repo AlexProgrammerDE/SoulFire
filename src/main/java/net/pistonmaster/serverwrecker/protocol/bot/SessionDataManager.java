@@ -47,6 +47,8 @@ import com.github.steveice10.opennbt.tag.builtin.*;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.ToString;
 import net.kyori.adventure.text.Component;
@@ -110,6 +112,7 @@ public final class SessionDataManager {
     private final WeatherState weatherState = new WeatherState();
     private final Map<Integer, AtomicInteger> itemCoolDowns = new ConcurrentHashMap<>();
     private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
+    private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
     private @Nullable ChunkKey centerChunk;
     private boolean isDead = false;
 
@@ -255,15 +258,22 @@ public final class SessionDataManager {
                     packet.getMaxPlayers(),
                     packet.isReducedDebugInfo()
             );
-            CompoundTag registry = loginData.registry().get("minecraft:dimension_type");
-            for (Tag type : registry.<ListTag>get("value").getValue()) {
-                if (type instanceof CompoundTag dimension) {
-                    String name = dimension.<StringTag>get("name").getValue();
-                    int id = dimension.<IntTag>get("id").getValue();
+            CompoundTag dimensionRegistry = loginData.registry().get("minecraft:dimension_type");
+            for (Tag type : dimensionRegistry.<ListTag>get("value").getValue()) {
+                CompoundTag dimension = (CompoundTag) type;
+                String name = dimension.<StringTag>get("name").getValue();
+                int id = dimension.<IntTag>get("id").getValue();
 
-                    levels.put(name, new LevelState(name, id, dimension.get("element")));
-                }
+                levels.put(name, new LevelState(name, id, dimension.get("element")));
             }
+            CompoundTag biomeRegistry = loginData.registry().get("minecraft:worldgen/biome");
+            for (Tag type : biomeRegistry.<ListTag>get("value").getValue()) {
+                CompoundTag biome = (CompoundTag) type;
+                BiomeData biomeData = new BiomeData(biome);
+
+                biomes.put(biomeData.id(), biomeData);
+            }
+
             NBTIO.writeFile(loginData.registry(), Path.of("tempdatafile.nbt").toFile());
             doImmediateRespawn = !packet.isEnableRespawnScreen();
             currentDimension = new DimensionData(
@@ -396,11 +406,13 @@ public final class SessionDataManager {
             }
             case DEMO_MESSAGE -> log.debug("Demo event: {}", packet.getValue());
             case ARROW_HIT_PLAYER -> log.debug("Arrow hit player");
-            case RAIN_STRENGTH -> weatherState.setRainStrength(((RainStrengthValue)packet.getValue()).getStrength());
-            case THUNDER_STRENGTH -> weatherState.setThunderStrength(((ThunderStrengthValue)packet.getValue()).getStrength());
+            case RAIN_STRENGTH -> weatherState.setRainStrength(((RainStrengthValue) packet.getValue()).getStrength());
+            case THUNDER_STRENGTH ->
+                    weatherState.setThunderStrength(((ThunderStrengthValue) packet.getValue()).getStrength());
             case PUFFERFISH_STING_SOUND -> log.debug("Pufferfish sting sound");
             case AFFECTED_BY_ELDER_GUARDIAN -> log.debug("Affected by elder guardian");
-            case ENABLE_RESPAWN_SCREEN -> doImmediateRespawn = packet.getValue() == RespawnScreenValue.IMMEDIATE_RESPAWN;
+            case ENABLE_RESPAWN_SCREEN ->
+                    doImmediateRespawn = packet.getValue() == RespawnScreenValue.IMMEDIATE_RESPAWN;
         }
     }
 
@@ -418,7 +430,6 @@ public final class SessionDataManager {
     public void onChunkData(ClientboundLevelChunkWithLightPacket packet) {
         ChunkKey key = new ChunkKey(packet.getX(), packet.getZ());
         byte[] data = packet.getChunkData();
-        System.out.println("Chunk data: " + data.length);
         ByteBuf buf = Unpooled.wrappedBuffer(data);
         LevelState level = getCurrentLevel();
         MinecraftCodecHelper helper = bot.getSession().getCodecHelper();
@@ -433,7 +444,7 @@ public final class SessionDataManager {
             e.printStackTrace();
         }
 
-        System.out.println("Chunk sections: " + chunkData.getSections().length);
+        System.out.println("Left readable: " + buf.readableBytes());
     }
 
     @BusHandler
@@ -523,12 +534,9 @@ public final class SessionDataManager {
 
     public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {
         int blockCount = buf.readShort();
-        System.out.println("Block count: " + blockCount);
-
-        System.out.println("Palette: " + buf.readableBytes());
 
         DataPalette chunkPalette = codec.readDataPalette(buf, PaletteType.CHUNK, ChunkData.BITS_PER_BLOCK);
-        DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, ChunkData.BITS_PER_BIOME);
+        DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, biomes.size());
         return new ChunkSection(blockCount, chunkPalette, biomePalette);
     }
 
