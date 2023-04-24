@@ -65,7 +65,7 @@ dependencies {
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
     implementation("net.raphimc:ViaAprilFools:2.0.6")
-    implementation("net.raphimc:ViaLegacy:2.2.15")
+    implementation("net.raphimc:ViaLegacy:2.2.16")
 }
 
 tasks.compileJava.get().apply {
