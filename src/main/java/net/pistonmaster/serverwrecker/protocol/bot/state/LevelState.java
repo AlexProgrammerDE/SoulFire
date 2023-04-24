@@ -19,9 +19,12 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
-import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
+import com.github.steveice10.opennbt.tag.builtin.*;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
+import net.pistonmaster.serverwrecker.protocol.bot.nbt.MCUniform;
+import net.pistonmaster.serverwrecker.protocol.bot.nbt.UniformOrInt;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,9 +32,57 @@ import java.util.concurrent.ConcurrentHashMap;
 @Getter
 public class LevelState {
     private final Map<ChunkKey, ChunkData> chunks = new ConcurrentHashMap<>();
+    private final String dimensionName;
+    private final int dimensionId;
+    private final UniformOrInt monsterSpawnLightLevel;
+    private final String infiniburn;
+    private final String effects;
+    private final byte ultrawarm;
+    private final int height;
+    private final int logicalHeight;
+    private final byte natural;
+    private final int minY;
+    private final byte bedWorks;
+    private final @Nullable Long fixedTime; // Only nether and end
+    private final double coordinateScale;
+    private final byte piglinSafe;
+    private final byte hasCeiling;
+    private final byte hasSkylight;
+    private final float ambientLight;
+    private final int monsterSpawnBlockLightLimit;
+    private final byte hasRaids;
+    private final byte respawnAnchorWorks;
 
-    public LevelState(CompoundTag levelRegistry) {
+    public LevelState(String dimensionName, int dimensionId, CompoundTag levelRegistry) {
+        this.dimensionName = dimensionName;
+        this.dimensionId = dimensionId;
+        Object lightLevel = levelRegistry.get("monster_spawn_light_level");
+        if (lightLevel instanceof CompoundTag lightCompound) {
+            this.monsterSpawnLightLevel = new MCUniform(lightCompound.get("value"));
+        } else if (lightLevel instanceof IntTag lightInt) {
+            this.monsterSpawnLightLevel = new MCUniform(lightInt.getValue(), lightInt.getValue());
+        } else {
+            throw new IllegalArgumentException("Invalid monster_spawn_light_level: " + lightLevel);
+        }
 
+        this.infiniburn = levelRegistry.<StringTag>get("infiniburn").getValue();
+        this.effects = levelRegistry.<StringTag>get("effects").getValue();
+        this.ultrawarm = levelRegistry.<ByteTag>get("ultrawarm").getValue();
+        this.height = levelRegistry.<IntTag>get("height").getValue();
+        this.logicalHeight = levelRegistry.<IntTag>get("logical_height").getValue();
+        this.natural = levelRegistry.<ByteTag>get("natural").getValue();
+        this.minY = levelRegistry.<IntTag>get("min_y").getValue();
+        this.bedWorks = levelRegistry.<ByteTag>get("bed_works").getValue();
+        LongTag fixedTimeTad = levelRegistry.get("fixed_time");
+        this.fixedTime = fixedTimeTad == null ? null : fixedTimeTad.getValue();
+        this.coordinateScale = levelRegistry.<DoubleTag>get("coordinate_scale").getValue();
+        this.piglinSafe = levelRegistry.<ByteTag>get("piglin_safe").getValue();
+        this.hasCeiling = levelRegistry.<ByteTag>get("has_ceiling").getValue();
+        this.hasSkylight = levelRegistry.<ByteTag>get("has_skylight").getValue();
+        this.ambientLight = levelRegistry.<FloatTag>get("ambient_light").getValue();
+        this.monsterSpawnBlockLightLimit = levelRegistry.<IntTag>get("monster_spawn_block_light_limit").getValue();
+        this.hasRaids = levelRegistry.<ByteTag>get("has_raids").getValue();
+        this.respawnAnchorWorks = levelRegistry.<ByteTag>get("respawn_anchor_works").getValue();
     }
 
     public int getHeight() {

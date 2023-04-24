@@ -261,7 +261,7 @@ public final class SessionDataManager {
                     String name = dimension.<StringTag>get("name").getValue();
                     int id = dimension.<IntTag>get("id").getValue();
 
-                    levels.put(name, new LevelState(dimension));
+                    levels.put(name, new LevelState(name, id, dimension.get("element")));
                 }
             }
             NBTIO.writeFile(loginData.registry(), Path.of("tempdatafile.nbt").toFile());
@@ -300,7 +300,7 @@ public final class SessionDataManager {
             previousGameMode = packet.getPreviousGamemode();
             lastDeathPos = packet.getLastDeathPos();
 
-            log.info("Joined server");
+            log.info("Respawned");
         } catch (Exception e) {
             log.error("Error while logging join", e);
         }
@@ -420,20 +420,20 @@ public final class SessionDataManager {
         byte[] data = packet.getChunkData();
         System.out.println("Chunk data: " + data.length);
         ByteBuf buf = Unpooled.wrappedBuffer(data);
+        LevelState level = getCurrentLevel();
+        MinecraftCodecHelper helper = bot.getSession().getCodecHelper();
 
-        List<ChunkSection> sections = new ArrayList<>();
+        ChunkData chunkData = level.getChunks().computeIfAbsent(key, k -> new ChunkData(level));
+
         try {
-            while (true) {
-                System.out.println("Chunk section: " + buf.readableBytes());
-                sections.add(readChunkSection(buf, bot.getSession().getCodecHelper()));
+            for (int i = 0; i < chunkData.getSections().length; i++) {
+                chunkData.getSections()[i] = readChunkSection(buf, helper);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        System.out.println("Chunk sections: " + sections.size());
-
-        getCurrentLevel().getChunks().put(key, new ChunkData(sections.toArray(ChunkSection[]::new)));
+        System.out.println("Chunk sections: " + chunkData.getSections().length);
     }
 
     @BusHandler

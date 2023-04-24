@@ -17,18 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol.bot.state;
+package net.pistonmaster.serverwrecker.protocol.bot.nbt;
 
-import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
-import lombok.Getter;
-
-public class ChunkData {
-    public static final int BITS_PER_BLOCK = 15;
-    public static final int BITS_PER_BIOME = 6;
-    @Getter
-    private final ChunkSection[] sections;
-
-    public ChunkData(LevelState levelState) {
-        sections = new ChunkSection[levelState.getSectionsCount()];
-    }
+public interface UniformOrInt {
 }
