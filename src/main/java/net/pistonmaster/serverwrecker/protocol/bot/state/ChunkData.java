@@ -22,9 +22,11 @@ package net.pistonmaster.serverwrecker.protocol.bot.state;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.nukkitx.math.vector.Vector3i;
 import lombok.Getter;
+import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
+
+import java.util.Objects;
 
 public class ChunkData {
-    public static final int BITS_PER_BLOCK = 15;
     @Getter
     private final ChunkSection[] sections;
 
@@ -33,7 +35,21 @@ public class ChunkData {
     }
 
     public void setBlock(Vector3i block, int state) {
+        int sectionIndex = SectionUtils.blockToSection(block.getY());
 
+        ChunkSection section = sections[sectionIndex];
+        Objects.requireNonNull(section, "Section " + sectionIndex + " is null!");
+
+        section.setBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF, state);
+    }
+
+    public int getBlock(Vector3i block) {
+        int sectionIndex = SectionUtils.blockToSection(block.getY());
+
+        ChunkSection section = sections[sectionIndex];
+        Objects.requireNonNull(section, "Section " + sectionIndex + " is null!");
+
+        return section.getBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF);
     }
 
     public static int log2RoundUp(int num) {

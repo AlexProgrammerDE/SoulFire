@@ -20,18 +20,24 @@
 package net.pistonmaster.serverwrecker.protocol.bot.block;
 
 import com.viaversion.viaversion.libs.fastutil.objects.Object2ObjectArrayMap;
+import lombok.Getter;
 import lombok.ToString;
+import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkData;
 
 import java.util.Map;
 
 @ToString
 public class GlobalBlockPalette {
+    @Getter
     private final int maxStates;
+    @Getter
+    private final int blockBitsPerEntry;
     private final String[] stateIdToBlockName;
     private final Map<String, Integer> blockNameToStateId;
 
     public GlobalBlockPalette(int maxStates) {
         this.maxStates = maxStates;
+        this.blockBitsPerEntry = ChunkData.log2RoundUp(maxStates);
         stateIdToBlockName = new String[maxStates];
         blockNameToStateId = new Object2ObjectArrayMap<>(maxStates);
     }

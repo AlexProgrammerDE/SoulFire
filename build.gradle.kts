@@ -79,9 +79,9 @@ tasks.named<Jar>("jar").get().manifest {
 tasks {
     processResources {
         excludes += "**/minecraft/**"
-        dependsOn("copMinecraft")
+        dependsOn("copyMinecraft")
     }
-    create("copMinecraft") {
+    create("copyMinecraft") {
         doLast {
             copy {
                 from("${rootDir}/src/main/resources/minecraft")

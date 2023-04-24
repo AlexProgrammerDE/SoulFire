@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.protocol.bot;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
 import com.github.steveice10.mc.protocol.data.UnexpectedEncryptionException;
+import com.github.steveice10.mc.protocol.data.game.chunk.ChunkBiomeData;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
 import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
@@ -40,7 +41,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.Cli
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.*;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
-import com.github.steveice10.opennbt.NBTIO;
 import com.github.steveice10.opennbt.tag.builtin.*;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.nukkitx.math.vector.Vector3i;
@@ -71,7 +71,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -116,6 +115,7 @@ public final class SessionDataManager {
     private final Map<Integer, AtomicInteger> itemCoolDowns = new ConcurrentHashMap<>();
     private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
     private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
+    private int biomesEntryBitsSize = -1;
     private @Nullable ChunkKey centerChunk;
     private boolean isDead = false;
 
@@ -280,8 +280,8 @@ public final class SessionDataManager {
 
                 biomes.put(biomeData.id(), biomeData);
             }
+            biomesEntryBitsSize = ChunkData.log2RoundUp(biomes.size());
 
-            NBTIO.writeFile(loginData.registry(), Path.of("tempdatafile.nbt").toFile());
             doImmediateRespawn = !packet.isEnableRespawnScreen();
             currentDimension = new DimensionData(
                     packet.getDimension(),
@@ -454,7 +454,6 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onSectionBlockUpdate(ClientboundSectionBlocksUpdatePacket packet) {
-        System.out.println("Received section update");
         ChunkKey key = new ChunkKey(packet.getChunkX(), packet.getChunkZ());
         LevelState level = getCurrentLevel();
         ChunkData chunkData = level.getChunks().get(key);
@@ -468,7 +467,7 @@ public final class SessionDataManager {
             Vector3i vector3i = entry.getPosition();
             int newId = entry.getBlock();
 
-            System.out.println(vector3i);
+            getCurrentLevel().setBlock(vector3i, newId);
         }
     }
 
@@ -479,7 +478,7 @@ public final class SessionDataManager {
         Vector3i vector3i = entry.getPosition();
         int newId = entry.getBlock();
 
-        System.out.println(vector3i);
+        getCurrentLevel().setBlock(vector3i, newId);
     }
 
     @BusHandler
@@ -489,11 +488,34 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onBlockChangedAck(ClientboundBlockChangedAckPacket packet) {
+        // TODO: Implement block break
     }
 
     @BusHandler
     public void onChunkData(ClientboundChunksBiomesPacket packet) {
-        // TODO
+        LevelState level = getCurrentLevel();
+        MinecraftCodecHelper codec = bot.getSession().getCodecHelper();
+
+        for (ChunkBiomeData biomeData : packet.getChunkBiomeData()) {
+            ChunkKey key = new ChunkKey(biomeData.getX(), biomeData.getZ());
+            ChunkData chunkData = level.getChunks().get(key);
+
+            if (chunkData == null) {
+                log.warn("Received biome update for unknown chunk: {}", key);
+                return;
+            }
+
+            ByteBuf buf = Unpooled.wrappedBuffer(biomeData.getBuffer());
+            try {
+                for (int i = 0; chunkData.getSections().length > i; i++) {
+                    ChunkSection section = chunkData.getSections()[i];
+                    DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, biomesEntryBitsSize);
+                    chunkData.getSections()[i] = new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @BusHandler
@@ -572,10 +594,16 @@ public final class SessionDataManager {
     }
 
     public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {
+        if (biomesEntryBitsSize == -1) {
+            throw new IllegalStateException("Biome entry bits size is not set");
+        }
+
         int blockCount = buf.readShort();
 
-        DataPalette chunkPalette = codec.readDataPalette(buf, PaletteType.CHUNK, ChunkData.BITS_PER_BLOCK);
-        DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, ChunkData.log2RoundUp(biomes.size()));
+        DataPalette chunkPalette = codec.readDataPalette(buf, PaletteType.CHUNK,
+                serverWrecker.getGlobalBlockPalette().getBlockBitsPerEntry());
+        DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME,
+                biomesEntryBitsSize);
         return new ChunkSection(blockCount, chunkPalette, biomePalette);
     }
 

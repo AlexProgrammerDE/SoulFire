@@ -20,13 +20,16 @@
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import com.github.steveice10.opennbt.tag.builtin.*;
+import com.nukkitx.math.vector.Vector3i;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.MCUniform;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.UniformOrInt;
+import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
@@ -102,14 +105,37 @@ public class LevelState {
     }
 
     public int getMinSection() {
-        return blockToSection(this.getMinBuildHeight());
+        return SectionUtils.blockToSection(this.getMinBuildHeight());
     }
 
     public int getMaxSection() {
-        return blockToSection(this.getMaxBuildHeight() - 1) + 1;
+        return SectionUtils.blockToSection(this.getMaxBuildHeight() - 1) + 1;
     }
 
-    public static int blockToSection(int block) {
-        return block >> 4;
+    public void setBlock(Vector3i block, int state) {
+        ChunkKey chunkKey = new ChunkKey(block);
+        ChunkData chunkData = chunks.get(chunkKey);
+
+        // TODO: Maybe load chunk if not found?
+        Objects.requireNonNull(chunkData, "Chunk not found");
+
+        chunkData.setBlock(block, state);
     }
+
+    public int getBlock(Vector3i block) {
+        ChunkKey chunkKey = new ChunkKey(block);
+        ChunkData chunkData = chunks.get(chunkKey);
+
+        // TODO: Maybe load chunk if not found?
+        Objects.requireNonNull(chunkData, "Chunk not found");
+
+        return chunkData.getBlock(block);
+    }
+
+    public boolean isChunkLoaded(Vector3i block) {
+        ChunkKey chunkKey = new ChunkKey(block);
+        return chunks.containsKey(chunkKey);
+    }
+
+
 }

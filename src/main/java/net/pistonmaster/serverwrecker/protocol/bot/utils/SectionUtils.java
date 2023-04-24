@@ -17,12 +17,15 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol.bot.model;
+package net.pistonmaster.serverwrecker.protocol.bot.utils;
 
-import com.nukkitx.math.vector.Vector3i;
+public class SectionUtils {
 
-public record ChunkKey(int chunkX, int chunkZ) {
-    public ChunkKey(Vector3i block) {
-        this(block.getX() >> 4, block.getZ() >> 4);
+    public static int blockToSection(int block) {
+        return block >> 4;
+    }
+
+    public static int sectionToBlock(int section) {
+        return section << 4;
     }
 }
