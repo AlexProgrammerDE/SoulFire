@@ -31,7 +31,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
 import com.github.steveice10.packetlib.BuiltinFlags;
 import com.github.steveice10.packetlib.ProxyInfo;
-import com.github.steveice10.packetlib.Session;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

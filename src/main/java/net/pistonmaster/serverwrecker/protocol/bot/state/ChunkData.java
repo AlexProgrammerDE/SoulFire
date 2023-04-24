@@ -34,6 +34,10 @@ public class ChunkData {
         sections = new ChunkSection[levelState.getSectionsCount()];
     }
 
+    public static int log2RoundUp(int num) {
+        return (int) Math.ceil(Math.log(num) / Math.log(2));
+    }
+
     public void setBlock(Vector3i block, int state) {
         int sectionIndex = SectionUtils.blockToSection(block.getY());
 
@@ -50,9 +54,5 @@ public class ChunkData {
         Objects.requireNonNull(section, "Section " + sectionIndex + " is null!");
 
         return section.getBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF);
-    }
-
-    public static int log2RoundUp(int num) {
-        return (int) Math.ceil(Math.log(num) / Math.log(2));
     }
 }

@@ -91,6 +91,10 @@ public final class SessionDataManager {
     private final AtomicBoolean isRejoining = new AtomicBoolean(false);
     private final AtomicBoolean didFirstJoin = new AtomicBoolean(false);
     private final AtomicInteger rejoinAnywayCounter = new AtomicInteger(0);
+    private final WeatherState weatherState = new WeatherState();
+    private final Map<Integer, AtomicInteger> itemCoolDowns = new ConcurrentHashMap<>();
+    private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
+    private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
     private EntityLocation location;
     private EntityMotion motion;
     private float health = -1;
@@ -111,10 +115,6 @@ public final class SessionDataManager {
     private @Nullable ExperienceData experienceData;
     private @Nullable PlayerInventoryContainer playerInventoryContainer;
     private @Nullable Container openContainer;
-    private final WeatherState weatherState = new WeatherState();
-    private final Map<Integer, AtomicInteger> itemCoolDowns = new ConcurrentHashMap<>();
-    private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
-    private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
     private int biomesEntryBitsSize = -1;
     private @Nullable ChunkKey centerChunk;
     private boolean isDead = false;

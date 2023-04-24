@@ -22,7 +22,6 @@ package net.pistonmaster.serverwrecker;
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import ch.qos.logback.classic.Level;
-import com.formdev.flatlaf.json.Json;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.auth.exception.request.RequestException;
 import com.github.steveice10.mc.auth.service.AuthenticationService;

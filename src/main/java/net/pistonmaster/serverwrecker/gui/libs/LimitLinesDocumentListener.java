@@ -33,7 +33,7 @@ import javax.swing.text.Element;
  */
 public class LimitLinesDocumentListener implements DocumentListener {
     private int maximumLines;
-    private boolean isRemoveFromStart;
+    private final boolean isRemoveFromStart;
     private volatile boolean isRemoving;
 
     /**
