@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker;
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import ch.qos.logback.classic.Level;
+import com.formdev.flatlaf.json.Json;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.auth.exception.request.RequestException;
 import com.github.steveice10.mc.auth.service.AuthenticationService;
@@ -30,6 +31,7 @@ import com.github.steveice10.mc.auth.service.MsaAuthenticationService;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
@@ -47,6 +49,7 @@ import net.pistonmaster.serverwrecker.mojangdata.AssetData;
 import net.pistonmaster.serverwrecker.protocol.Bot;
 import net.pistonmaster.serverwrecker.protocol.OfflineAuthenticationService;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
+import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
 import org.pf4j.JarPluginManager;
@@ -82,6 +85,7 @@ public class ServerWrecker {
     private final Map<String, String> serviceServerConfig = new HashMap<>();
     private final Gson gson = new Gson();
     private final AssetData assetData;
+    private final GlobalBlockPalette globalBlockPalette;
     private boolean running = false;
     @Setter
     private boolean paused = false;
@@ -115,6 +119,21 @@ public class ServerWrecker {
             throw new RuntimeException(e);
         }
         assetData = new AssetData(blocks, translations);
+
+        // Create global palette
+        Map<Integer, String> stateMap = new HashMap<>();
+        for (Map.Entry<String, JsonElement> blockEntry : blocks.entrySet()) {
+            for (JsonElement state : blockEntry.getValue().getAsJsonObject().get("states").getAsJsonArray()) {
+                stateMap.put(state.getAsJsonObject().get("id").getAsInt(), blockEntry.getKey());
+            }
+        }
+
+        globalBlockPalette = new GlobalBlockPalette(stateMap.size());
+        for (Map.Entry<Integer, String> entry : stateMap.entrySet()) {
+            globalBlockPalette.add(entry.getKey(), entry.getValue());
+        }
+
+        logger.info("Loaded {} block states", stateMap.size());
 
         // Init via
         Path viaPath = dataFolder.resolve("ViaVersion");

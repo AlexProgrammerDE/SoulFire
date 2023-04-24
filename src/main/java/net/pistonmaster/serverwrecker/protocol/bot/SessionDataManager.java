@@ -86,6 +86,7 @@ public final class SessionDataManager {
     private final Logger log;
     private final Bot bot;
     private final ServerWrecker serverWrecker;
+    private final PlainTextComponentSerializer messageSerializer;
     private final Set<String> messageQueue = new LinkedHashSet<>();
     private final ScheduledThreadPoolExecutor timer = new ScheduledThreadPoolExecutor(3);
     private final AtomicBoolean isRejoining = new AtomicBoolean(false);
@@ -123,6 +124,10 @@ public final class SessionDataManager {
         this.log = log;
         this.bot = bot;
         this.serverWrecker = serverWrecker;
+        this.messageSerializer = PlainTextComponentSerializer.builder().flattener(
+                ComponentFlattener.basic().toBuilder()
+                        .mapper(TranslatableComponent.class, new TranslationMapper(bot.getServerWrecker(), bot)).build()
+        ).build();
         timer.scheduleAtFixedRate(() -> {
             if (isBotAttackOff()) {
                 return;
@@ -479,6 +484,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onBlockChangedAck(ClientboundBlockDestructionPacket packet) {
+        // Indicates the ten states of a block-breaking animation
     }
 
     @BusHandler
@@ -562,17 +568,14 @@ public final class SessionDataManager {
     }
 
     private String toPlainText(Component component) {
-        return PlainTextComponentSerializer.builder().flattener(
-                ComponentFlattener.basic().toBuilder()
-                        .mapper(TranslatableComponent.class, new TranslationMapper(bot.getServerWrecker(), bot)).build()
-        ).build().serialize(component);
+        return messageSerializer.serialize(component);
     }
 
     public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {
         int blockCount = buf.readShort();
 
         DataPalette chunkPalette = codec.readDataPalette(buf, PaletteType.CHUNK, ChunkData.BITS_PER_BLOCK);
-        DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, biomes.size());
+        DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, ChunkData.log2RoundUp(biomes.size()));
         return new ChunkSection(blockCount, chunkPalette, biomePalette);
     }
 

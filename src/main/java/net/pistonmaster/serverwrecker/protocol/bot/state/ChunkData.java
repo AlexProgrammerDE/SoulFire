@@ -35,4 +35,8 @@ public class ChunkData {
     public void setBlock(Vector3i block, int state) {
 
     }
+
+    public static int log2RoundUp(int num) {
+        return (int) Math.ceil(Math.log(num) / Math.log(2));
+    }
 }
