@@ -27,15 +27,13 @@ import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
 import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.GlobalPos;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
+import com.github.steveice10.mc.protocol.data.game.level.block.BlockChangeEntry;
 import com.github.steveice10.mc.protocol.data.game.level.notify.RainStrengthValue;
 import com.github.steveice10.mc.protocol.data.game.level.notify.RespawnScreenValue;
 import com.github.steveice10.mc.protocol.data.game.level.notify.ThunderStrengthValue;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityMotionPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetExperiencePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerClosePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetSlotPacket;
@@ -45,6 +43,7 @@ import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLog
 import com.github.steveice10.opennbt.NBTIO;
 import com.github.steveice10.opennbt.tag.builtin.*;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
+import com.nukkitx.math.vector.Vector3i;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -52,11 +51,14 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.ToString;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.EntityLocation;
 import net.pistonmaster.serverwrecker.common.EntityMotion;
 import net.pistonmaster.serverwrecker.common.SWOptions;
+import net.pistonmaster.serverwrecker.mojangdata.TranslationMapper;
 import net.pistonmaster.serverwrecker.protocol.Bot;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
@@ -443,13 +445,44 @@ public final class SessionDataManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        System.out.println("Left readable: " + buf.readableBytes());
     }
 
     @BusHandler
-    public void onChunkData(ClientboundSectionBlocksUpdatePacket packet) {
-        // TODO
+    public void onSectionBlockUpdate(ClientboundSectionBlocksUpdatePacket packet) {
+        System.out.println("Received section update");
+        ChunkKey key = new ChunkKey(packet.getChunkX(), packet.getChunkZ());
+        LevelState level = getCurrentLevel();
+        ChunkData chunkData = level.getChunks().get(key);
+
+        if (chunkData == null) {
+            log.warn("Received section update for unknown chunk: {}", key);
+            return;
+        }
+
+        for (BlockChangeEntry entry : packet.getEntries()) {
+            Vector3i vector3i = entry.getPosition();
+            int newId = entry.getBlock();
+
+            System.out.println(vector3i);
+        }
+    }
+
+    @BusHandler
+    public void onBlockUpdate(ClientboundBlockUpdatePacket packet) {
+        BlockChangeEntry entry = packet.getEntry();
+
+        Vector3i vector3i = entry.getPosition();
+        int newId = entry.getBlock();
+
+        System.out.println(vector3i);
+    }
+
+    @BusHandler
+    public void onBlockChangedAck(ClientboundBlockDestructionPacket packet) {
+    }
+
+    @BusHandler
+    public void onBlockChangedAck(ClientboundBlockChangedAckPacket packet) {
     }
 
     @BusHandler
@@ -529,7 +562,10 @@ public final class SessionDataManager {
     }
 
     private String toPlainText(Component component) {
-        return PlainTextComponentSerializer.plainText().serialize(component);
+        return PlainTextComponentSerializer.builder().flattener(
+                ComponentFlattener.basic().toBuilder()
+                        .mapper(TranslatableComponent.class, new TranslationMapper(bot.getServerWrecker(), bot)).build()
+        ).build().serialize(component);
     }
 
     public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {

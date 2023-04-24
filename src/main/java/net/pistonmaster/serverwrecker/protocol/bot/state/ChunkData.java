@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
+import com.nukkitx.math.vector.Vector3i;
 import lombok.Getter;
 
 public class ChunkData {
@@ -29,5 +30,9 @@ public class ChunkData {
 
     public ChunkData(LevelState levelState) {
         sections = new ChunkSection[levelState.getSectionsCount()];
+    }
+
+    public void setBlock(Vector3i block, int state) {
+
     }
 }

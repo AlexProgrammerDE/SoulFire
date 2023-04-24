@@ -76,6 +76,21 @@ tasks.named<Jar>("jar").get().manifest {
     attributes["Main-Class"] = "net.pistonmaster.serverwrecker.Main"
 }
 
+tasks {
+    processResources {
+        excludes += "**/minecraft/**"
+        dependsOn("copMinecraft")
+    }
+    create("copMinecraft") {
+        doLast {
+            copy {
+                from("${rootDir}/src/main/resources/minecraft")
+                into("${rootDir}/build/resources/main/minecraft")
+            }
+        }
+    }
+}
+
 launch4j {
     mainClassName = "net.pistonmaster.serverwrecker.Main"
     icon = "${rootDir}/assets/robot.ico"

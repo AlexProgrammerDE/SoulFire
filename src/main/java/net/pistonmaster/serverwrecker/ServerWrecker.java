@@ -29,6 +29,8 @@ import com.github.steveice10.mc.auth.service.MojangAuthenticationService;
 import com.github.steveice10.mc.auth.service.MsaAuthenticationService;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
@@ -41,6 +43,7 @@ import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.*;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.LogUtil;
+import net.pistonmaster.serverwrecker.mojangdata.AssetData;
 import net.pistonmaster.serverwrecker.protocol.Bot;
 import net.pistonmaster.serverwrecker.protocol.OfflineAuthenticationService;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
@@ -52,6 +55,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -75,6 +80,8 @@ public class ServerWrecker {
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final List<BotProxy> passWordProxies = new ArrayList<>();
     private final Map<String, String> serviceServerConfig = new HashMap<>();
+    private final Gson gson = new Gson();
+    private final AssetData assetData;
     private boolean running = false;
     @Setter
     private boolean paused = false;
@@ -92,6 +99,24 @@ public class ServerWrecker {
 
         setupLogging(Level.INFO);
 
+        // Load assets
+        JsonObject blocks;
+        try (InputStream stream = ServerWrecker.class.getResourceAsStream("/minecraft/blocks.json")) {
+            assert stream != null;
+            blocks = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        JsonObject translations;
+        try (InputStream stream = ServerWrecker.class.getResourceAsStream("/minecraft/en_us.json")) {
+            assert stream != null;
+            translations = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        assetData = new AssetData(blocks, translations);
+
+        // Init via
         Path viaPath = dataFolder.resolve("ViaVersion");
         SWViaPlatform platform = new SWViaPlatform(viaPath);
 
@@ -221,9 +246,9 @@ public class ServerWrecker {
                 }
 
                 ProxyBotData proxyBotData = ProxyBotData.of(proxy.username(), proxy.password(), proxy.address(), options.proxyType());
-                bot = new Bot(options, logger, protocol, serviceServer, proxyBotData);
+                bot = new Bot(this, options, logger, protocol, serviceServer, proxyBotData);
             } else {
-                bot = new Bot(options, logger, protocol, serviceServer, null);
+                bot = new Bot(this, options, logger, protocol, serviceServer, null);
             }
 
             this.bots.add(bot);

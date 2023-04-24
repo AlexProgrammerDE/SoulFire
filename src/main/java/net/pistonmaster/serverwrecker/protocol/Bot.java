@@ -35,6 +35,7 @@ import com.github.steveice10.packetlib.Session;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.NullHelper;
 import net.pistonmaster.serverwrecker.common.ProxyBotData;
 import net.pistonmaster.serverwrecker.common.SWOptions;
@@ -51,6 +52,7 @@ import java.util.Collections;
 @Setter
 @RequiredArgsConstructor
 public class Bot {
+    private final ServerWrecker serverWrecker;
     private final SWOptions options;
     private final Logger logger;
     private final MinecraftProtocol protocol;

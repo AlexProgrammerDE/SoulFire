@@ -45,7 +45,7 @@ Feel free to join our discord community server:
 
 ## Images
 
-![GUI](./images/img.png)
+![GUI](./assets/img.png)
 
 ## Command Line Usage
 

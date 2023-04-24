@@ -15,7 +15,10 @@ GitHub: https://github.com/Heath123/pakkit
 
 GitHub: https://github.com/adepierre/SniffCraft
 
-## Chunk Data
+## MC Data
+
+### Chunk Data
+
 How did you come up with `BITS_PER_BLOCK`???
 It's the log2(maxBlockStateId). Download the latest mc server jar and run:
 
