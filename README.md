@@ -19,6 +19,12 @@ You can download the latest development version of ServerWrecker through [nightl
 * Automatically registers for cracked servers
 * Supports SOCKS4 and 5 proxies
 
+## Version support
+
+ServerWrecker currently supports every single Minecraft version up to 1.7.__0__. This includes any single subversion, not just a few specific versions. How? Thanks to a built-in implementation of ViaVersion and ViaLegacy a ServerWrecker bot can connect to all these versions even without the server having ViaVersion installed. The packet translation happens "client/bot side".
+This feature takes inspiration from services like ViAaaS and ViaProxy, which include client-side translation externally. ServerWrecker includes a similar implementation as these proxies and is comparable to ViaFabric.
+This implementation is currently in-progress and the potential is huge. Currently the bot can connect to any server up to 1.7.__0__, but in theory ViaLegacy can add support for all classic, alpha, beta and all early releases. Support for these versions is currently not working due to protocol differences.
+
 ## Requirements
 
 * Java 17
