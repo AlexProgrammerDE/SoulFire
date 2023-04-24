@@ -28,7 +28,8 @@ import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
 @Getter
 @AllArgsConstructor
 public class BorderState {
-    private ChunkKey center;
+    private double centerX;
+    private double centerZ;
     private double oldSize;
     private double newSize;
     private long lerpTime;

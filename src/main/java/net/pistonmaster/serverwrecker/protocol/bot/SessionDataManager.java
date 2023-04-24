@@ -39,6 +39,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.Cli
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetSlotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.*;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.*;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import com.github.steveice10.opennbt.tag.builtin.*;
@@ -63,6 +64,7 @@ import net.pistonmaster.serverwrecker.protocol.Bot;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.model.*;
+import net.pistonmaster.serverwrecker.protocol.bot.state.BorderState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkData;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.WeatherState;
@@ -95,6 +97,7 @@ public final class SessionDataManager {
     private final Map<Integer, AtomicInteger> itemCoolDowns = new ConcurrentHashMap<>();
     private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
     private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
+    private BorderState borderState;
     private EntityLocation location;
     private EntityMotion motion;
     private float health = -1;
@@ -482,13 +485,48 @@ public final class SessionDataManager {
     }
 
     @BusHandler
-    public void onBlockChangedAck(ClientboundBlockDestructionPacket packet) {
+    public void onBlockDestruction(ClientboundBlockDestructionPacket packet) {
         // Indicates the ten states of a block-breaking animation
     }
 
     @BusHandler
     public void onBlockChangedAck(ClientboundBlockChangedAckPacket packet) {
         // TODO: Implement block break
+    }
+
+    @BusHandler
+    public void onBorderInit(ClientboundInitializeBorderPacket packet) {
+        borderState = new BorderState(packet.getNewCenterX(), packet.getNewCenterZ(), packet.getOldSize(), packet.getNewSize(),
+                packet.getLerpTime(), packet.getNewAbsoluteMaxSize(), packet.getWarningBlocks(), packet.getWarningTime());
+    }
+
+    @BusHandler
+    public void onBorderCenter(ClientboundSetBorderCenterPacket packet) {
+        borderState.setCenterX(packet.getNewCenterX());
+        borderState.setCenterZ(packet.getNewCenterZ());
+    }
+
+    @BusHandler
+    public void onBorderLerpSize(ClientboundSetBorderLerpSizePacket packet) {
+        borderState.setOldSize(packet.getOldSize());
+        borderState.setNewSize(packet.getNewSize());
+        borderState.setLerpTime(packet.getLerpTime());
+    }
+
+    @BusHandler
+    public void onBorderSize(ClientboundSetBorderSizePacket packet) {
+        borderState.setOldSize(borderState.getNewSize());
+        borderState.setNewSize(packet.getSize());
+    }
+
+    @BusHandler
+    public void onBorderWarningTime(ClientboundSetBorderWarningDelayPacket packet) {
+        borderState.setWarningTime(packet.getWarningDelay());
+    }
+
+    @BusHandler
+    public void onBorderWarningBlocks(ClientboundSetBorderWarningDistancePacket packet) {
+        borderState.setWarningBlocks(packet.getWarningBlocks());
     }
 
     @BusHandler
