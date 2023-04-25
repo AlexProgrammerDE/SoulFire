@@ -19,7 +19,7 @@ GitHub: https://github.com/adepierre/SniffCraft
 
 ### Chunk Data
 
-How did you come up with `BITS_PER_BLOCK`???
+How do you calculate bitPerEntry on chunks???
 It's the log2(maxBlockStateId). Download the latest mc server jar and run:
 
 ```bash
@@ -36,4 +36,4 @@ highest_id=$(echo "${state_ids}" | sort -rn | head -n 1)
 echo "The highest state ID is ${highest_id}"
 ```
 
-Take the ID, log2 it and then round up. That's your `BITS_PER_BLOCK`.
+Take the ID, log2 it and then round up. That's your `bitsPerEntry`.
