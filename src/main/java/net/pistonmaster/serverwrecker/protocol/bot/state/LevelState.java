@@ -89,11 +89,11 @@ public class LevelState {
     }
 
     public int getHeight() {
-        return 256;
+        return this.height;
     }
 
     public int getMinBuildHeight() {
-        return 0;
+        return this.minY;
     }
 
     public int getMaxBuildHeight() {
@@ -148,6 +148,4 @@ public class LevelState {
         ChunkKey chunkKey = new ChunkKey(block);
         return chunks.containsKey(chunkKey);
     }
-
-
 }

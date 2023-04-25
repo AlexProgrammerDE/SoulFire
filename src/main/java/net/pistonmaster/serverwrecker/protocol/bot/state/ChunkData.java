@@ -41,20 +41,21 @@ public class ChunkData {
     }
 
     public void setBlock(Vector3i block, int state) {
-        int sectionIndex = level.getSectionIndex(block.getY());
-
-        ChunkSection section = sections[sectionIndex];
-        Objects.requireNonNull(section, "Section " + sectionIndex + " is null!");
-
-        section.setBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF, state);
+        getSection(block).setBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF, state);
     }
 
     public int getBlock(Vector3i block) {
-        int sectionIndex = SectionUtils.blockToSection(block.getY());
+        return getSection(block).getBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF);
+    }
 
+    private ChunkSection getSection(Vector3i block) {
+        return getSection(level.getSectionIndex(block.getY()));
+    }
+
+    private ChunkSection getSection(int sectionIndex) {
         ChunkSection section = sections[sectionIndex];
         Objects.requireNonNull(section, "Section " + sectionIndex + " is null!");
 
-        return section.getBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF);
+        return section;
     }
 }
