@@ -31,7 +31,10 @@ import java.nio.file.Path;
 public class Main {
     public static void main(String[] args) {
         AnsiConsole.systemInstall();
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> ServerWrecker.getLogger().error(throwable.getMessage(), throwable));
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            throwable.printStackTrace();
+            System.exit(1);
+        });
 
         Path dataFolder = initConfigDir();
 
