@@ -20,9 +20,10 @@
 package net.pistonmaster.serverwrecker.protocol.bot.model;
 
 import com.nukkitx.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
 
 public record ChunkKey(int chunkX, int chunkZ) {
     public ChunkKey(Vector3i block) {
-        this(block.getX() >> 4, block.getZ() >> 4);
+        this(SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
     }
 }

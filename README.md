@@ -22,10 +22,10 @@ You can download the latest development version of ServerWrecker through [nightl
 ## Version support
 
 ServerWrecker currently supports these versions:
-- Classic (c0.0.15 - c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
-- Alpha (a1.0.15 - a1.2.6)
-- Beta (b1.0 - b1.8.1)
 - Release (1.0.0 - 1.19.4 (latest))
+- Beta (b1.0 - b1.8.1)
+- Alpha (a1.0.15 - a1.2.6)
+- Classic (c0.0.15 - c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
 
 This includes every single subversion, not just a few specific versions.
 
@@ -34,6 +34,12 @@ This includes every single subversion, not just a few specific versions.
 Thanks to a built-in implementation of [ViaVersion](https://github.com/ViaVersion/ViaVersion) and [ViaLegacy](https://github.com/RaphiMC/ViaLegacy), a ServerWrecker bot can connect to all these versions even without the server having ViaVersion installed. The packet translation happens "client/bot side".
 This feature takes inspiration from services like [ViAaaS](https://github.com/ViaVersion/VIAaaS) and [ViaProxy](https://github.com/RaphiMC/ViaProxy), which include client-side translation externally.
 ServerWrecker includes a similar implementation as these two proxies and is comparable functionality wise to [ViaFabric](https://github.com/ViaVersion/ViaFabric).
+
+### What's the catch?
+
+Currently only offline-mode legacy servers (version < r1.7.0) work,
+but a future version will support online-mode servers as well.
+All versions newer than r1.7.0 have no online-mode issues.
 
 ## Requirements
 

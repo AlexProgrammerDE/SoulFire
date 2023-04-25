@@ -112,6 +112,18 @@ public class LevelState {
         return SectionUtils.blockToSection(this.getMaxBuildHeight() - 1) + 1;
     }
 
+    public int getSectionIndex(int blockY) {
+        return this.getSectionIndexFromSectionY(SectionUtils.blockToSection(blockY));
+    }
+
+    public int getSectionIndexFromSectionY(int sectionY) {
+        return sectionY - this.getMinSection();
+    }
+
+    public int getSectionYFromSectionIndex(int index) {
+        return index + this.getMinSection();
+    }
+
     public void setBlock(Vector3i block, int state) {
         ChunkKey chunkKey = new ChunkKey(block);
         ChunkData chunkData = chunks.get(chunkKey);

@@ -27,11 +27,13 @@ import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
 import java.util.Objects;
 
 public class ChunkData {
+    private final LevelState level;
     @Getter
     private final ChunkSection[] sections;
 
-    public ChunkData(LevelState levelState) {
-        sections = new ChunkSection[levelState.getSectionsCount()];
+    public ChunkData(LevelState level) {
+        this.level = level;
+        sections = new ChunkSection[level.getSectionsCount()];
     }
 
     public static int log2RoundUp(int num) {
@@ -39,7 +41,7 @@ public class ChunkData {
     }
 
     public void setBlock(Vector3i block, int state) {
-        int sectionIndex = SectionUtils.blockToSection(block.getY());
+        int sectionIndex = level.getSectionIndex(block.getY());
 
         ChunkSection section = sections[sectionIndex];
         Objects.requireNonNull(section, "Section " + sectionIndex + " is null!");
