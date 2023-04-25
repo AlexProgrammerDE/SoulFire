@@ -37,17 +37,21 @@ import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.flattener.ComponentFlattener;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.pistonmaster.serverwrecker.addons.*;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.AttackEndEvent;
-import net.pistonmaster.serverwrecker.api.event.AttackStartEvent;
+import net.pistonmaster.serverwrecker.api.event.state.AttackEndEvent;
+import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.*;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.LogUtil;
-import net.pistonmaster.serverwrecker.mojangdata.AssetData;
-import net.pistonmaster.serverwrecker.protocol.Bot;
+import net.pistonmaster.serverwrecker.mojangdata.TranslationMapper;
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
+import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.OfflineAuthenticationService;
-import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
@@ -63,9 +67,7 @@ import java.net.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
@@ -78,13 +80,20 @@ public class ServerWrecker {
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
-    private final List<Bot> bots = new ArrayList<>();
+    private final Set<InternalAddon> addons = Set.of(
+            new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
+            new ChatMessageLogger(), new ServerListBypass());
+    private final List<BotConnection> botConnections = new ArrayList<>();
+    @Getter
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
     private final List<BotProxy> passWordProxies = new ArrayList<>();
     private final Map<String, String> serviceServerConfig = new HashMap<>();
     private final Gson gson = new Gson();
-    private final AssetData assetData;
+    private final Map<String, String> mojangTranslations = new HashMap<>();
     private final GlobalBlockPalette globalBlockPalette;
+    @Getter
+    private final PlainTextComponentSerializer messageSerializer;
     private boolean running = false;
     @Setter
     private boolean paused = false;
@@ -102,14 +111,6 @@ public class ServerWrecker {
 
         setupLogging(Level.INFO);
 
-        // Load assets
-        JsonObject blocks;
-        try (InputStream stream = ServerWrecker.class.getResourceAsStream("/minecraft/blocks.json")) {
-            assert stream != null;
-            blocks = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         JsonObject translations;
         try (InputStream stream = ServerWrecker.class.getResourceAsStream("/minecraft/en_us.json")) {
             assert stream != null;
@@ -117,7 +118,26 @@ public class ServerWrecker {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        assetData = new AssetData(blocks, translations);
+
+        for (Map.Entry<String, JsonElement> translationEntry : translations.entrySet()) {
+            mojangTranslations.put(translationEntry.getKey(), translationEntry.getValue().getAsString());
+        }
+
+        this.messageSerializer = PlainTextComponentSerializer.builder().flattener(
+                ComponentFlattener.basic().toBuilder()
+                        .mapper(TranslatableComponent.class, new TranslationMapper(this, logger)).build()
+        ).build();
+
+        logger.info("Loaded {} mojang translations", mojangTranslations.size());
+
+        // Load block states
+        JsonObject blocks;
+        try (InputStream stream = ServerWrecker.class.getResourceAsStream("/minecraft/blocks.json")) {
+            assert stream != null;
+            blocks = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         // Create global palette
         Map<Integer, String> stateMap = new HashMap<>();
@@ -170,6 +190,10 @@ public class ServerWrecker {
             settingsPanel.registerVersions();
         }
 
+        for (InternalAddon addon : addons) {
+            addon.init(this);
+        }
+
         initPlugins(dataFolder.resolve("plugins"));
     }
 
@@ -190,6 +214,7 @@ public class ServerWrecker {
         pluginManager.startPlugins();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public void start(SWOptions options) {
         if (options.debug()) {
             Via.getManager().debugHandler().setEnabled(true);
@@ -204,7 +229,7 @@ public class ServerWrecker {
         List<BotProxy> proxyCache = passWordProxies.isEmpty() ? Collections.emptyList() : ImmutableList.copyOf(passWordProxies);
         Iterator<BotProxy> proxyIterator = proxyCache.listIterator();
         Map<BotProxy, AtomicInteger> proxyUseMap = new HashMap<>();
-
+        List<BotConnectionFactory> factories = new ArrayList<>();
         for (int i = 1; i <= options.amount(); i++) {
             Pair<String, String> userPassword;
 
@@ -238,7 +263,7 @@ public class ServerWrecker {
             protocol.setUseDefaultListeners(false);
 
             Logger logger = LoggerFactory.getLogger(protocol.getProfile().getName());
-            Bot bot;
+            ProxyBotData proxyBotData = null;
             if (!proxyCache.isEmpty()) {
                 proxyIterator = fromStartIfNoNext(proxyIterator, proxyCache);
                 BotProxy proxy = proxyIterator.next();
@@ -263,24 +288,21 @@ public class ServerWrecker {
                     }
                 }
 
-                ProxyBotData proxyBotData = ProxyBotData.of(proxy.username(), proxy.password(), proxy.address(), options.proxyType());
-                bot = new Bot(this, options, logger, protocol, serviceServer, proxyBotData);
-            } else {
-                bot = new Bot(this, options, logger, protocol, serviceServer, null);
+                proxyBotData = ProxyBotData.of(proxy.username(), proxy.password(), proxy.address(), options.proxyType());
             }
 
-            this.bots.add(bot);
+            factories.add(new BotConnectionFactory(this, options, logger, protocol, serviceServer, proxyBotData));
         }
 
         if (proxyCache.isEmpty()) {
-            logger.info("Starting attack at {} with {} bots", options.hostname(), bots.size());
+            logger.info("Starting attack at {} with {} bots", options.host(), botConnections.size());
         } else {
-            logger.info("Starting attack at {} with {} bots and {} proxies", options.hostname(), bots.size(), proxyUseMap.size());
+            logger.info("Starting attack at {} with {} bots and {} proxies", options.host(), botConnections.size(), proxyUseMap.size());
         }
 
         ServerWreckerAPI.postEvent(new AttackStartEvent());
 
-        for (Bot bot : bots) {
+        for (BotConnectionFactory botConnectionFactory : factories) {
             try {
                 TimeUnit.MILLISECONDS.sleep(options.joinDelayMs());
             } catch (InterruptedException ex) {
@@ -300,9 +322,15 @@ public class ServerWrecker {
                 break;
             }
 
-            bot.getLogger().info("Connecting...");
+            botConnectionFactory.logger().info("Connecting...");
 
-            bot.connect(options.hostname(), options.port(), this);
+            CompletableFuture<BotConnection> future = botConnectionFactory.connect(options.host(), options.port());
+
+            if (options.waitEstablished()) {
+                this.botConnections.add(future.join());
+            } else {
+                future.thenAccept(this.botConnections::add);
+            }
         }
     }
 
@@ -336,8 +364,8 @@ public class ServerWrecker {
 
     public void stop() {
         this.running = false;
-        bots.forEach(Bot::disconnect);
-        bots.clear();
+        botConnections.forEach(BotConnection::disconnect);
+        botConnections.clear();
         ServerWreckerAPI.postEvent(new AttackEndEvent());
     }
 
@@ -360,5 +388,9 @@ public class ServerWrecker {
         LogUtil.setLevel(logger, level);
         LogUtil.setLevel("io.netty", level);
         LogUtil.setLevel("org.pf4j", level);
+    }
+
+    public boolean isBotAttackInActive() {
+        return !running || paused;
     }
 }

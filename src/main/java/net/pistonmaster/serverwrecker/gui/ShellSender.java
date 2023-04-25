@@ -55,9 +55,9 @@ public class ShellSender extends AbstractAction {
         }));
         dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("online").executes(c -> {
             List<String> online = new ArrayList<>();
-            serverWrecker.getBots().forEach(client -> {
+            serverWrecker.getBotConnections().forEach(client -> {
                 if (client.isOnline()) {
-                    online.add(client.getProtocol().getProfile().getName());
+                    online.add(client.protocol().getProfile().getName());
                 }
             });
             sendMessage(online.size() + " bots online: " + String.join(", ", online));
@@ -71,7 +71,7 @@ public class ShellSender extends AbstractAction {
                 .then(RequiredArgumentBuilder.<ShellSender, String>argument("message", StringArgumentType.greedyString()).build())
                 .executes(c -> {
                     String message = StringArgumentType.getString(c, "message");
-                    serverWrecker.getBots().forEach(client -> {
+                    serverWrecker.getBotConnections().forEach(client -> {
                         if (client.isOnline()) {
                             client.sendMessage(message);
                         }

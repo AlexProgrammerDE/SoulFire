@@ -54,15 +54,13 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.ToString;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.flattener.ComponentFlattener;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.serverwrecker.common.EntityLocation;
 import net.pistonmaster.serverwrecker.common.EntityMotion;
 import net.pistonmaster.serverwrecker.common.SWOptions;
-import net.pistonmaster.serverwrecker.mojangdata.TranslationMapper;
-import net.pistonmaster.serverwrecker.protocol.Bot;
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.model.*;
@@ -76,10 +74,10 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -88,16 +86,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class SessionDataManager {
     private final SWOptions options;
     private final Logger log;
-    private final Bot bot;
     private final ServerWrecker serverWrecker;
     private final ViaTcpClientSession session;
-    private final PlainTextComponentSerializer messageSerializer;
-    private final Set<String> messageQueue = new LinkedHashSet<>();
-    @Getter
-    private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(3);
-    private final AtomicBoolean isRejoining = new AtomicBoolean(false);
-    private final AtomicBoolean didFirstJoin = new AtomicBoolean(false);
-    private final AtomicInteger rejoinAnywayCounter = new AtomicInteger(0);
+    private final BotConnection connection;
     private final WeatherState weatherState = new WeatherState();
     private final Map<Integer, AtomicInteger> itemCoolDowns = new ConcurrentHashMap<>();
     private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
@@ -127,68 +118,12 @@ public final class SessionDataManager {
     private @Nullable ChunkKey centerChunk;
     private boolean isDead = false;
 
-    public SessionDataManager(SWOptions options, Logger log, Bot bot, ServerWrecker serverWrecker, ViaTcpClientSession session) {
-        this.options = options;
-        this.log = log;
-        this.bot = bot;
-        this.serverWrecker = serverWrecker;
-        this.session = session;
-        this.messageSerializer = PlainTextComponentSerializer.builder().flattener(
-                ComponentFlattener.basic().toBuilder()
-                        .mapper(TranslatableComponent.class, new TranslationMapper(bot.getServerWrecker(), bot)).build()
-        ).build();
-        scheduler.scheduleAtFixedRate(() -> {
-            if (isBotAttackOff()) {
-                return;
-            }
-
-            Iterator<String> iter = messageQueue.iterator();
-            while (!messageQueue.isEmpty()) {
-                String message = iter.next();
-                iter.remove();
-                if (Objects.nonNull(message)) {
-                    log.info("Received Message: {}", message);
-                }
-            }
-        }, 0, 2000, TimeUnit.MILLISECONDS);
-        scheduler.scheduleAtFixedRate(() -> {
-            if (isBotAttackOff()) {
-                return;
-            }
-
-            if (options.autoRespawn()) {
-                if (bot.isOnline() && isDead) {
-                    bot.sendClientCommand(ClientCommand.RESPAWN);
-                }
-            }
-        }, 0, 1000, TimeUnit.MILLISECONDS);
-        scheduler.scheduleAtFixedRate(() -> {
-            if (isBotAttackOff()) {
-                return;
-            }
-
-            if (options.autoReconnect()) {
-                if (didFirstJoin.get()
-                        || rejoinAnywayCounter.getAndIncrement() > (options.connectTimeout() / 1000)) {
-                    if (bot.isOnline()) {
-                        if (isRejoining.get()) {
-                            isRejoining.set(false);
-                        }
-                    } else {
-                        if (isRejoining.get()) {
-                            return;
-                        }
-
-                        bot.connect(options.hostname(), options.port(), serverWrecker);
-                        isRejoining.set(true);
-                    }
-                }
-            }
-        }, 0, 1, TimeUnit.SECONDS);
-    }
-
-    private boolean isBotAttackOff() {
-        return !serverWrecker.isRunning() || serverWrecker.isPaused();
+    public SessionDataManager(BotConnection connection) {
+        this.options = connection.options();
+        this.log = connection.logger();
+        this.serverWrecker = connection.serverWrecker();
+        this.session = connection.session();
+        this.connection = connection;
     }
 
     @BusHandler
@@ -199,42 +134,21 @@ public final class SessionDataManager {
     @BusHandler
     public void onPlayerChat(ClientboundPlayerChatPacket packet) {
         Component message = packet.getUnsignedContent();
-        if (message == null) {
-            onChat(packet.getContent());
-        } else {
-            onChat(toPlainText(message));
+        if (message != null) {
+            onChat(message);
+            return;
         }
+
+        onChat(Component.text(packet.getContent()));
     }
 
     @BusHandler
     public void onServerChat(ClientboundSystemChatPacket packet) {
-        onChat(toPlainText(packet.getContent()));
+        onChat(packet.getContent());
     }
 
-    private void onChat(String message) {
-        try {
-            messageQueue.add(message);
-            if (options.autoRegister()) {
-                String password = options.passwordFormat();
-
-                // TODO: Add more password options
-                if (message.contains("/register")) {
-                    sendMessage(options.registerCommand().replace("%password%", password));
-                } else if (message.contains("/login")) {
-                    sendMessage(options.loginCommand().replace("%password%", password));
-                } else if (message.contains("/captcha")) {
-                    String[] split = message.split(" ");
-
-                    for (int i = 0; i < split.length; i++) {
-                        if (split[i].equals("/captcha")) {
-                            sendMessage(options.captchaCommand().replace("%captcha%", split[i + 1]));
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error while logging message", e);
-        }
+    private void onChat(Component message) {
+        ServerWreckerAPI.postEvent(new ChatMessageReceiveEvent(connection, message));
     }
 
     @BusHandler
@@ -255,7 +169,7 @@ public final class SessionDataManager {
             this.saturation = packet.getSaturation();
 
             if (health < 1) {
-                isDead = true;
+                this.isDead = true;
             }
         } catch (Exception e) {
             log.error("Error while logging health", e);
@@ -263,9 +177,13 @@ public final class SessionDataManager {
     }
 
     @BusHandler
+    public void onDeath(ClientboundPlayerCombatKillPacket packet) {
+        this.isDead = true;
+    }
+
+    @BusHandler
     public void onJoin(ClientboundLoginPacket packet) {
         try {
-            didFirstJoin.set(true);
             loginData = new LoginPacketData(
                     packet.getEntityId(),
                     packet.isHardcore(),
@@ -314,7 +232,6 @@ public final class SessionDataManager {
     @BusHandler
     public void onRespawn(ClientboundRespawnPacket packet) {
         try {
-            didFirstJoin.set(true);
             currentDimension = new DimensionData(
                     packet.getDimension(),
                     packet.getWorldName(),
@@ -448,7 +365,7 @@ public final class SessionDataManager {
         byte[] data = packet.getChunkData();
         ByteBuf buf = Unpooled.wrappedBuffer(data);
         LevelState level = getCurrentLevel();
-        MinecraftCodecHelper helper = bot.getSession().getCodecHelper();
+        MinecraftCodecHelper helper = session.getCodecHelper();
 
         ChunkData chunkData = level.getChunks().computeIfAbsent(key, k -> new ChunkData(level));
 
@@ -538,7 +455,7 @@ public final class SessionDataManager {
     @BusHandler
     public void onChunkData(ClientboundChunksBiomesPacket packet) {
         LevelState level = getCurrentLevel();
-        MinecraftCodecHelper codec = bot.getSession().getCodecHelper();
+        MinecraftCodecHelper codec = session.getCodecHelper();
 
         for (ChunkBiomeData biomeData : packet.getChunkBiomeData()) {
             ChunkKey key = new ChunkKey(biomeData.getX(), biomeData.getZ());
@@ -616,13 +533,8 @@ public final class SessionDataManager {
         }
     }
 
-    private void sendMessage(String message) {
-        log.info("Sending Message: {}", message);
-        bot.sendMessage(message);
-    }
-
     private String toPlainText(Component component) {
-        return messageSerializer.serialize(component);
+        return serverWrecker.getMessageSerializer().serialize(component);
     }
 
     public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {

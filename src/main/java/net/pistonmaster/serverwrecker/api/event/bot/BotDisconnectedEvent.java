@@ -17,9 +17,10 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.mojangdata;
+package net.pistonmaster.serverwrecker.api.event.bot;
 
-import com.google.gson.JsonObject;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
-public record AssetData(JsonObject blocks, JsonObject translations) {
+public record BotDisconnectedEvent(BotConnection connection) implements ServerWreckerEvent {
 }

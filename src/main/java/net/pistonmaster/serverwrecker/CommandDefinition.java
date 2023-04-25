@@ -35,7 +35,7 @@ import java.util.concurrent.Callable;
 public class CommandDefinition implements Callable<Integer> {
     private final Path dataFolder;
 
-    @Option(names = {"-h", "--host"}, description = "The hostname to connect to. Defaults to 127.0.0.1")
+    @Option(names = {"-h", "--host"}, description = "The host to connect to. Defaults to 127.0.0.1")
     private String host = "127.0.0.1";
 
     @Option(names = {"-p", "--port"}, description = "The port to connect to. Defaults to 25565")

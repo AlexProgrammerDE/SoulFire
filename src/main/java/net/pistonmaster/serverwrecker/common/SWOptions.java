@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.common;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 
-public record SWOptions(String hostname, int port,
+public record SWOptions(String host, int port,
                         int amount, int joinDelayMs, boolean waitEstablished, String botNameFormat,
                         ProtocolVersion protocolVersion, boolean autoRegister,
                         boolean debug, ProxyType proxyType, int accountsPerProxy,

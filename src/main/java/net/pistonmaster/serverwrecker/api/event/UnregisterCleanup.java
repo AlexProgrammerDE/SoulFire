@@ -17,22 +17,8 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol.bot.state;
+package net.pistonmaster.serverwrecker.api.event;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-@Setter
-@Getter
-@AllArgsConstructor
-public class BorderState {
-    private double centerX;
-    private double centerZ;
-    private double oldSize;
-    private double newSize;
-    private long lerpTime;
-    private int newAbsoluteMaxSize;
-    private int warningBlocks;
-    private int warningTime;
+public interface UnregisterCleanup {
+    void cleanup();
 }

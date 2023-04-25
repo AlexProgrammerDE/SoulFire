@@ -22,8 +22,8 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import ch.qos.logback.classic.Level;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.AttackEndEvent;
-import net.pistonmaster.serverwrecker.api.event.AttackStartEvent;
+import net.pistonmaster.serverwrecker.api.event.state.AttackEndEvent;
+import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
 
 import javax.inject.Inject;

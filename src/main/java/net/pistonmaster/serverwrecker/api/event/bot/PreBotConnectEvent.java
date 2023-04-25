@@ -17,7 +17,16 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event;
+package net.pistonmaster.serverwrecker.api.event.bot;
 
-public class AttackEndEvent implements ServerWreckerEvent {
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
+
+/**
+ * The event is called the moment before we start connecting to the server.
+ * This event is called async, but the user is still waiting for the attack to start.
+ * The BotConnection instance has all fields filled, but most methods are unusable.
+ * This event is recommended for when you want to add a custom MCProtocolLib listener.
+ */
+public record PreBotConnectEvent(BotConnection connection) implements ServerWreckerEvent {
 }

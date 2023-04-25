@@ -58,6 +58,8 @@ import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import io.netty.resolver.dns.DnsNameResolver;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
 import lombok.Getter;
+import lombok.Setter;
+import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.viaversion.FrameCodec;
@@ -87,6 +89,8 @@ public class ViaTcpClientSession extends TcpSession {
     private final PacketCodecHelper codecHelper;
     @Getter
     private final SWOptions options;
+    @Setter
+    private Runnable postDisconnectHook;
 
     public ViaTcpClientSession(String host, int port, PacketProtocol protocol, ProxyInfo proxy, SWOptions options) {
         this(host, port, "0.0.0.0", 0, protocol, proxy, options);
@@ -406,6 +410,11 @@ public class ViaTcpClientSession extends TcpSession {
                 }
             });
         }
+    }
+
+    @Override
+    public void disconnect(Component reason, Throwable cause) {
+        super.disconnect(reason, cause);
     }
 
     public void packetExceptionCaught(ChannelHandlerContext ctx, Throwable cause, Packet packet) {

@@ -17,22 +17,18 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol.bot.state;
+package net.pistonmaster.serverwrecker.api.event.bot;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import net.kyori.adventure.text.Component;
+import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
-@Setter
-@Getter
-@AllArgsConstructor
-public class BorderState {
-    private double centerX;
-    private double centerZ;
-    private double oldSize;
-    private double newSize;
-    private long lerpTime;
-    private int newAbsoluteMaxSize;
-    private int warningBlocks;
-    private int warningTime;
+/**
+ * This event is called when a chat message is received from the server.
+ */
+public record ChatMessageReceiveEvent(BotConnection connection, Component message) implements ServerWreckerEvent {
+    public String parseToText() {
+        return connection.serverWrecker().getMessageSerializer().serialize(message);
+    }
 }

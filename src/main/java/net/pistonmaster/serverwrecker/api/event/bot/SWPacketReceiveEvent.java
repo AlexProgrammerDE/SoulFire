@@ -17,22 +17,26 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event;
+package net.pistonmaster.serverwrecker.api.event.bot;
 
 import com.github.steveice10.mc.protocol.codec.MinecraftPacket;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import net.pistonmaster.serverwrecker.protocol.Bot;
+import net.kyori.event.Cancellable;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
+import net.kyori.event.AbstractCancellable;
 
 /**
- * This event is called when a packet is sent to the connected server.
- * Setter is used to change the packet by a plugin.
+ * This event is called when a packet is received from the connected server.
+ * This event is called before the packet is processed by the default bot listener.
+ * Setter is used to change the packet by a plugin to change the behaviour of the bot.
  */
 @Getter
 @AllArgsConstructor
-public class SWPacketSendingEvent implements ServerWreckerEvent {
-    private final Bot bot;
+public class SWPacketReceiveEvent extends AbstractCancellable implements ServerWreckerEvent, Cancellable {
+    private final BotConnection connection;
     @Setter
     private MinecraftPacket packet;
 }

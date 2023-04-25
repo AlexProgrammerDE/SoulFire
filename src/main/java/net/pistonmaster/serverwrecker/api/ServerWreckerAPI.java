@@ -21,14 +21,16 @@ package net.pistonmaster.serverwrecker.api;
 
 import net.kyori.event.EventBus;
 import net.kyori.event.EventSubscriber;
-import net.kyori.event.SimpleEventBus;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 
+import java.lang.reflect.Method;
 import java.util.Objects;
 
 public class ServerWreckerAPI {
-    private static final EventBus<ServerWreckerEvent> eventBus = new SimpleEventBus<>(ServerWreckerEvent.class);
+    private static final EventBus<ServerWreckerEvent> eventBus = EventBus.create(ServerWreckerEvent.class);
     private static ServerWrecker serverWrecker;
 
     /**
@@ -59,6 +61,41 @@ public class ServerWreckerAPI {
     }
 
     public static <T extends ServerWreckerEvent> void registerListener(Class<T> clazz, EventSubscriber<? super T> subscriber) {
-        eventBus.register(clazz, subscriber);
+         eventBus.subscribe(clazz, subscriber);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void registerListeners(Object listener) {
+        for (Method method : listener.getClass().getDeclaredMethods()) {
+            if (!method.isAnnotationPresent(EventHandler.class)) {
+                continue;
+            }
+
+            if (method.getParameterCount() != 1) {
+                throw new IllegalArgumentException("Listener method must have exactly one parameter!");
+            }
+
+            if (!ServerWreckerEvent.class.isAssignableFrom(method.getParameterTypes()[0])) {
+                throw new IllegalArgumentException("Listener method parameter must be a subclass of ServerWreckerEvent!");
+            }
+
+            method.setAccessible(true);
+
+            registerListener((Class<? extends ServerWreckerEvent>) method.getParameterTypes()[0],
+                    event -> method.invoke(listener, event));
+        }
+    }
+
+    public static void unregisterByListenerClass(Class<?> clazz) {
+        eventBus.unsubscribeIf(subscription -> {
+            if (clazz.isInstance(subscription)) {
+                if (subscription instanceof UnregisterCleanup cleanup) {
+                    cleanup.cleanup();
+                }
+                return true;
+            }
+
+            return false;
+        });
     }
 }

@@ -19,27 +19,26 @@
  */
 package net.pistonmaster.serverwrecker.mojangdata;
 
-import com.google.gson.JsonElement;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.protocol.Bot;
+import org.slf4j.Logger;
 
 import java.util.function.Function;
 
 @RequiredArgsConstructor
 public class TranslationMapper implements Function<TranslatableComponent, String> {
     private final ServerWrecker serverWrecker;
-    private final Bot bot;
+    private final Logger log;
     private final PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
 
     @Override
     public String apply(TranslatableComponent component) {
-        JsonElement element = serverWrecker.getAssetData().translations().get(component.key());
+        String translation = serverWrecker.getMojangTranslations().get(component.key());
 
-        if (element == null) {
-            bot.getLogger().warn("Missing translation for key: " + component.key());
+        if (translation == null) {
+            log.warn("Missing translation for key: " + component.key());
             return component.key();
         }
 
@@ -49,6 +48,6 @@ public class TranslationMapper implements Function<TranslatableComponent, String
             args[i] = plainSerializer.serialize(component.args().get(i));
         }
 
-        return String.format(element.getAsString(), (Object[]) args);
+        return String.format(translation, (Object[]) args);
     }
 }

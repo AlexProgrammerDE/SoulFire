@@ -27,25 +27,34 @@ import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import com.github.steveice10.packetlib.packet.Packet;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.SWPacketReceiveEvent;
-import net.pistonmaster.serverwrecker.api.event.SWPacketSendingEvent;
+import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
+import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
+import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSendingEvent;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.util.BusHelper;
 
 @RequiredArgsConstructor
 public class SWSessionListener extends SessionAdapter {
     private final SessionDataManager bus;
-    private final Bot bot;
+    private final BotConnection botConnection;
 
     @Override
     public void packetReceived(Session session, Packet packet) {
-        ServerWreckerAPI.postEvent(new SWPacketReceiveEvent(bot, (MinecraftPacket) packet));
-        BusHelper.handlePacket(packet, bus);
+        SWPacketReceiveEvent event1 = new SWPacketReceiveEvent(botConnection, (MinecraftPacket) packet);
+        ServerWreckerAPI.postEvent(event1);
+        if (event1.cancelled()) {
+            return;
+        }
+
+        BusHelper.handlePacket(event1.getPacket(), bus);
     }
 
     @Override
     public void packetSending(PacketSendingEvent event) {
-        ServerWreckerAPI.postEvent(new SWPacketSendingEvent(bot, event.getPacket()));
+        SWPacketSendingEvent event1 = new SWPacketSendingEvent(botConnection, event.getPacket());
+        ServerWreckerAPI.postEvent(event1);
+        event.setPacket(event1.getPacket());
+        event.setCancelled(event1.cancelled());
     }
 
     @Override
@@ -56,7 +65,6 @@ public class SWSessionListener extends SessionAdapter {
             t.printStackTrace();
         }
 
-        // Make sure bus scheduler shuts down and resources become available again
-        bus.getScheduler().shutdown();
+        ServerWreckerAPI.postEvent(new BotDisconnectedEvent(botConnection));
     }
 }

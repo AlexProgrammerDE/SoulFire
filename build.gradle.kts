@@ -47,7 +47,7 @@ dependencies {
     implementation("net.kyori:adventure-text-serializer-plain:4.13.1")
     implementation("net.kyori:adventure-text-serializer-gson:4.13.1")
 
-    implementation("net.kyori:event-api:3.0.0")
+    implementation("net.kyori:event-api:5.0.0-SNAPSHOT")
     implementation("ch.jalu:injector:1.0")
 
     implementation("com.google.guava:guava:31.1-jre")
