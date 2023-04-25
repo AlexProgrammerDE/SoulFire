@@ -420,6 +420,13 @@ public class ViaTcpClientSession extends TcpSession {
     }
 
     public void enableEncryption(SecretKey key) {
-        getChannel().pipeline().addBefore("sizer", "encryption", new CryptoCodec(key, key));
+        CryptoCodec codec = new CryptoCodec(key, key);
+        ChannelPipeline pipeline = getChannel().pipeline();
+
+        if (pipeline.get("vl-prenetty") != null) {
+            pipeline.addBefore("vl-prenetty", "encryption", codec);
+        } else {
+            pipeline.addBefore("sizer", "encryption", codec);
+        }
     }
 }
