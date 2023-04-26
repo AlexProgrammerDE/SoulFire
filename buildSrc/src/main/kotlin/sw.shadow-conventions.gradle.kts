@@ -15,11 +15,6 @@ tasks {
 
     shadowJar {
         mergeServiceFiles()
-        minimize() {
-            exclude(dependency("ch.qos.logback:logback-classic"))
-            exclude(dependency("com.formdev:flatlaf"))
-            exclude(dependency("org.fusesource.jansi:jansi"))
-        }
     }
 
     build {

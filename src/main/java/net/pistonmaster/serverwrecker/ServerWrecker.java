@@ -113,7 +113,7 @@ public class ServerWrecker {
 
         JsonObject translations;
         try (InputStream stream = ServerWrecker.class.getResourceAsStream("/minecraft/en_us.json")) {
-            assert stream != null;
+            Objects.requireNonNull(stream, "en_us.json not found");
             translations = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -133,7 +133,7 @@ public class ServerWrecker {
         // Load block states
         JsonObject blocks;
         try (InputStream stream = ServerWrecker.class.getResourceAsStream("/minecraft/blocks.json")) {
-            assert stream != null;
+            Objects.requireNonNull(stream, "blocks.json not found");
             blocks = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
