@@ -7,18 +7,18 @@ plugins {
 repositories {
     maven("https://repo.opencollab.dev/maven-releases")
     maven("https://repo.opencollab.dev/maven-snapshots")
-    maven("https://jitpack.io/") {
-        name = "JitPack Repository"
-    }
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.viaversion.com/")
+    maven("https://maven.lenni0451.net/releases/")
     maven("https://libraries.minecraft.net/") {
         name = "Minecraft Repository"
     }
     maven("https://oss.sonatype.org/content/repositories/snapshots/") {
         name = "Sonatype Repository"
     }
-    maven("https://repo.viaversion.com/")
-    maven("https://repo.papermc.io/repository/maven-public/")
-    maven("https://maven.lenni0451.net/releases/")
+    maven("https://jitpack.io/") {
+        name = "JitPack Repository"
+    }
     mavenCentral()
 }
 
@@ -39,7 +39,9 @@ dependencies {
 
     implementation("com.mojang:brigadier:1.1.8")
     implementation("com.formdev:flatlaf:3.1.1")
-    implementation("org.pf4j:pf4j:3.9.0")
+    implementation("org.pf4j:pf4j:3.9.0") {
+        isTransitive = false
+    }
     implementation("org.fusesource.jansi:jansi:2.4.0")
 
     implementation("com.thealtening.api:api:4.1.0")
