@@ -8,15 +8,14 @@ You can download the latest development version of ServerWrecker through [nightl
 
 ## Features
 
-* Graphical user interface
-* Command line interface
+* Graphical UI & CLI
 * Configurable amount and join delay
 * Configurable target
 * Configurable name format or name list
-* LogPanel to see errors directly
+* Huge version support
 * Tested with Spigot, Paper, Purpur, Folia, Velocity/Bungeecord
 * Disconnects gracefully after the end
-* Automatically registers for cracked servers
+* Multiple modules like AutoRespawn and AutoRegister for cracked servers
 * Supports SOCKS4 and 5 proxies
 
 ## Version support
@@ -37,14 +36,14 @@ ServerWrecker includes a similar implementation as these two proxies and is comp
 
 ### What's the catch?
 
-Currently only offline-mode legacy servers (version < r1.7.0) work,
+Currently versions below r1.7.0 only support offline-mode,
 but a future version will support online-mode servers as well.
-All versions newer than r1.7.0 have no online-mode issues.
+All versions newer than r1.7.0 have support online-mode.
 
 ## Requirements
 
 * Java 17
-* Minecraft 1.7.10+ server
+* Minecraft server
 
 ## Building
 
