@@ -79,15 +79,14 @@ tasks.named<Jar>("jar").get().manifest {
 }
 
 tasks {
-    processResources {
-        excludes += "**/minecraft/**"
-        dependsOn("copyMinecraft")
-    }
-    create("copyMinecraft") {
+    val copyMinecraft = create("copyMinecraft") {
         copy {
-            from(layout.projectDirectory.file("/src/main/resources/minecraft"))
+            from(layout.projectDirectory.file("assets/minecraft"))
             into(layout.buildDirectory.file("resources/main/minecraft"))
         }
+    }
+    processResources {
+        dependsOn(copyMinecraft)
     }
 }
 
