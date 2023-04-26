@@ -43,7 +43,7 @@ All versions newer than r1.7.0 have support online-mode.
 ## Requirements
 
 * Java 17
-* Minecraft 1.7.10+ server
+* Minecraft server
 
 ## Building
 
