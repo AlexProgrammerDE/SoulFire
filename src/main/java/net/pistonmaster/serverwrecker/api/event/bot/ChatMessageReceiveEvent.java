@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.api.event.bot;
 
 import net.kyori.adventure.text.Component;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 

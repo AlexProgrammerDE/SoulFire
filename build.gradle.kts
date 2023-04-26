@@ -84,11 +84,9 @@ tasks {
         dependsOn("copyMinecraft")
     }
     create("copyMinecraft") {
-        doLast {
-            copy {
-                from("${rootDir}/src/main/resources/minecraft")
-                into("${rootDir}/build/resources/main/minecraft")
-            }
+        copy {
+            from(layout.projectDirectory.file("/src/main/resources/minecraft"))
+            into(layout.buildDirectory.file("resources/main/minecraft"))
         }
     }
 }

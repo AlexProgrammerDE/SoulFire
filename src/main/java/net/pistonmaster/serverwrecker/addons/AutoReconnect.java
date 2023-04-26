@@ -42,7 +42,7 @@ public class AutoReconnect implements InternalAddon, EventSubscriber<BotDisconne
         }
 
         event.connection().serverWrecker().getScheduler().schedule(() -> {
-            event.connection().factory().connect(options.host(), options.port())
+            event.connection().factory().connect()
                     .thenAccept(newConnection -> event.connection().serverWrecker().getBotConnections()
                             .replaceAll(connection1 -> connection1 == event.connection() ? newConnection : connection1));
         }, 1, TimeUnit.SECONDS);

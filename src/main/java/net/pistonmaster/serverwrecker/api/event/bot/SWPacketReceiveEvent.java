@@ -23,10 +23,10 @@ import com.github.steveice10.mc.protocol.codec.MinecraftPacket;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.event.AbstractCancellable;
 import net.kyori.event.Cancellable;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
-import net.kyori.event.AbstractCancellable;
 
 /**
  * This event is called when a packet is received from the connected server.

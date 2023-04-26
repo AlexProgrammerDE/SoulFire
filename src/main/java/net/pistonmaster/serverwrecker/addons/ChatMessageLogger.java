@@ -32,7 +32,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ChatMessageLogger implements InternalAddon, EventSubscriber<PreBotConnectEvent> {
     @Override
@@ -47,7 +49,8 @@ public class ChatMessageLogger implements InternalAddon, EventSubscriber<PreBotC
                         Executors.newScheduledThreadPool(1), new LinkedHashSet<>())));
     }
 
-    private record BotChatListener(BotConnection connection, ScheduledExecutorService executor, Set<String> messageQueue)
+    private record BotChatListener(BotConnection connection, ScheduledExecutorService executor,
+                                   Set<String> messageQueue)
             implements EventSubscriber<ChatMessageReceiveEvent>, UnregisterCleanup {
         public BotChatListener {
             executor.scheduleAtFixedRate(() -> {

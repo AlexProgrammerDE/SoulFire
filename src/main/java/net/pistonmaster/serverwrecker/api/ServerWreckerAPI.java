@@ -61,7 +61,7 @@ public class ServerWreckerAPI {
     }
 
     public static <T extends ServerWreckerEvent> void registerListener(Class<T> clazz, EventSubscriber<? super T> subscriber) {
-         eventBus.subscribe(clazz, subscriber);
+        eventBus.subscribe(clazz, subscriber);
     }
 
     @SuppressWarnings("unchecked")

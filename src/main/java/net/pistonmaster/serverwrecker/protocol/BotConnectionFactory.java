@@ -39,12 +39,12 @@ import java.util.concurrent.CompletableFuture;
 
 public record BotConnectionFactory(ServerWrecker serverWrecker, SWOptions options, Logger logger,
                                    MinecraftProtocol protocol, ServiceServer serviceServer, ProxyBotData proxyBotData) {
-    public CompletableFuture<BotConnection> connect(String host, int port) {
-        return CompletableFuture.supplyAsync(() -> connectInternal(host, port));
+    public CompletableFuture<BotConnection> connect() {
+        return CompletableFuture.supplyAsync(this::connectInternal);
     }
 
-    public BotConnection connectInternal(String host, int port) {
-        ViaTcpClientSession session = new ViaTcpClientSession(host, port, protocol,
+    public BotConnection connectInternal() {
+        ViaTcpClientSession session = new ViaTcpClientSession(options.host(), options.port(), protocol,
                 NullHelper.nullOrConvert(proxyBotData,
                         data -> new ProxyInfo(ProxyInfo.Type.valueOf(data.getType().name()), data.getAddress(), data.getUsername(), data.getPassword())),
                 options);

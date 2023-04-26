@@ -324,7 +324,7 @@ public class ServerWrecker {
 
             botConnectionFactory.logger().info("Connecting...");
 
-            CompletableFuture<BotConnection> future = botConnectionFactory.connect(options.host(), options.port());
+            CompletableFuture<BotConnection> future = botConnectionFactory.connect();
 
             if (options.waitEstablished()) {
                 this.botConnections.add(future.join());

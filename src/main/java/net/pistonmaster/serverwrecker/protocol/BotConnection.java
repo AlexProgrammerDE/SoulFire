@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import java.time.Instant;
 import java.util.BitSet;
 import java.util.Collections;
-import java.util.Set;
 
 public record BotConnection(BotConnectionFactory factory, ServerWrecker serverWrecker, SWOptions options, Logger logger,
                             MinecraftProtocol protocol, ViaTcpClientSession session, BotConnectionMeta meta) {

@@ -24,7 +24,6 @@ import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Getter
 public class BotConnectionMeta {

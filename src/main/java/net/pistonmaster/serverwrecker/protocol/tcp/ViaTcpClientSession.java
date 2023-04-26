@@ -415,6 +415,11 @@ public class ViaTcpClientSession extends TcpSession {
     @Override
     public void disconnect(Component reason, Throwable cause) {
         super.disconnect(reason, cause);
+        try {
+            postDisconnectHook.run();
+        } catch (Exception e) {
+            logger.error("Error occurred while running post-disconnect hook", e);
+        }
     }
 
     public void packetExceptionCaught(ChannelHandlerContext ctx, Throwable cause, Packet packet) {

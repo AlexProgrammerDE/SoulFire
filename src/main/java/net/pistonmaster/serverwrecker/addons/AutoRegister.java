@@ -24,14 +24,7 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.serverwrecker.common.SWOptions;
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import org.checkerframework.checker.nullness.qual.NonNull;
-
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class AutoRegister implements InternalAddon, EventSubscriber<ChatMessageReceiveEvent> {
     @Override
