@@ -82,19 +82,30 @@ if (!mcFolder.exists()) {
 }
 
 tasks.named<Jar>("jar").get().apply {
-    registerMC()
+    registerMCJar()
     manifest {
         attributes["Main-Class"] = "net.pistonmaster.serverwrecker.Main"
     }
 }
 
 tasks.named<ShadowJar>("shadowJar").get().apply {
-    registerMC()
+    registerMCJar()
+    excludes.addAll(setOf(
+        "META-INF/*.DSA",
+        "META-INF/*.RSA",
+        "META-INF/*.SF",
+        "META-INF/sponge_plugins.json",
+        "plugin.yml",
+        "bungee.yml",
+        "fabric.mod.json",
+        "velocity-plugin.json"
+    ))
 }
 
-fun CopySpec.registerMC() {
+fun CopySpec.registerMCJar() {
     from(mcFolder) {
         into("minecraft")
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 }
 
