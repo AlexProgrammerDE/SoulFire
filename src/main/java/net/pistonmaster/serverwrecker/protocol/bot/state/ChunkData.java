@@ -20,8 +20,8 @@
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
-import com.nukkitx.math.vector.Vector3i;
 import lombok.Getter;
+import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Objects;
 

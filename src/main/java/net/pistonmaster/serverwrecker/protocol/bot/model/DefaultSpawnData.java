@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.model;
 
-import com.nukkitx.math.vector.Vector3i;
+import org.cloudburstmc.math.vector.Vector3i;
 
 /**
  * Represents the default spawn data. (Where the compass points to)

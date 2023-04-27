@@ -37,12 +37,16 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.26")
     annotationProcessor("org.projectlombok:lombok:1.18.26")
 
+    implementation("com.github.GeyserMC:MCProtocolLib:bcf453c")
+
     implementation("com.mojang:brigadier:1.1.8")
     implementation("com.formdev:flatlaf:3.1.1")
     implementation("org.pf4j:pf4j:3.9.0") {
         isTransitive = false
     }
     implementation("org.fusesource.jansi:jansi:2.4.0")
+    implementation("com.google.guava:guava:31.1-jre")
+    implementation("com.google.code.gson:gson:2.10.1")
 
     implementation("com.thealtening.api:api:4.1.0")
 
@@ -51,14 +55,10 @@ dependencies {
 
     implementation("net.kyori:event-api:5.0.0-SNAPSHOT")
     implementation("ch.jalu:injector:1.0")
-
-    implementation("com.google.guava:guava:31.1-jre")
-    implementation("com.google.code.gson:gson:2.10.1")
     implementation("org.yaml:snakeyaml:2.0")
+
     implementation("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
-
-    implementation("com.github.GeyserMC:MCProtocolLib:master-SNAPSHOT")
 
     val vvVer = "4.7.0-23w17a-SNAPSHOT"
     val vbVer = "4.7.0-23w17a-SNAPSHOT"

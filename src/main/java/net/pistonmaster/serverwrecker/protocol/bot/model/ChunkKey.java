@@ -19,8 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.model;
 
-import com.nukkitx.math.vector.Vector3i;
 import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
+import org.cloudburstmc.math.vector.Vector3i;
 
 public record ChunkKey(int chunkX, int chunkZ) {
     public ChunkKey(Vector3i block) {

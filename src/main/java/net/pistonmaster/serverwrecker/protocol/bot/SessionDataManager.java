@@ -46,7 +46,6 @@ import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGam
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import com.github.steveice10.opennbt.tag.builtin.*;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
-import com.nukkitx.math.vector.Vector3i;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -70,6 +69,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.WeatherState;
 import net.pistonmaster.serverwrecker.protocol.tcp.ViaTcpClientSession;
 import net.pistonmaster.serverwrecker.util.BusHandler;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -390,18 +390,19 @@ public final class SessionDataManager {
             Vector3i vector3i = entry.getPosition();
             int newId = entry.getBlock();
 
-            getCurrentLevel().setBlock(vector3i, newId);
+            level.setBlock(vector3i, newId);
         }
     }
 
     @BusHandler
     public void onBlockUpdate(ClientboundBlockUpdatePacket packet) {
+        LevelState level = getCurrentLevel();
         BlockChangeEntry entry = packet.getEntry();
 
         Vector3i vector3i = entry.getPosition();
         int newId = entry.getBlock();
 
-        getCurrentLevel().setBlock(vector3i, newId);
+        level.setBlock(vector3i, newId);
     }
 
     @BusHandler

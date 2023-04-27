@@ -20,12 +20,12 @@
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import com.github.steveice10.opennbt.tag.builtin.*;
-import com.nukkitx.math.vector.Vector3i;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.MCUniform;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.UniformOrInt;
 import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
