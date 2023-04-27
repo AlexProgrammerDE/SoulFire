@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     application
     id("sw.shadow-conventions")
@@ -74,22 +76,24 @@ tasks.compileJava.get().apply {
     options.compilerArgs.add("-Aproject=${project.name}")
 }
 
-tasks.named<Jar>("jar").get().manifest {
-    attributes["Main-Class"] = "net.pistonmaster.serverwrecker.Main"
+tasks.named<Jar>("jar").get().apply {
+    registerMC()
+    manifest {
+        attributes["Main-Class"] = "net.pistonmaster.serverwrecker.Main"
+    }
 }
 
-tasks {
-    val copyMinecraft = create("copyMinecraft") {
-        doLast {
-            layout.buildDirectory.file("resources/main/minecraft").get().asFile.mkdirs()
-            copy {
-                from(layout.projectDirectory.file("assets/minecraft"))
-                into(layout.buildDirectory.file("resources/main/minecraft"))
-            }
-        }
+tasks.named<ShadowJar>("shadowJar").get().apply {
+    registerMC()
+}
+
+fun CopySpec.registerMC() {
+    val mcFolder = File("${rootDir}/assets/minecraft")
+    if (!mcFolder.exists()) {
+        throw IllegalStateException("Minecraft folder not found!")
     }
-    processResources {
-        dependsOn(copyMinecraft)
+    from(mcFolder) {
+        into("minecraft")
     }
 }
 
