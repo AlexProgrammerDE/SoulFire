@@ -80,9 +80,12 @@ tasks.named<Jar>("jar").get().manifest {
 
 tasks {
     val copyMinecraft = create("copyMinecraft") {
-        copy {
-            from(layout.projectDirectory.file("assets/minecraft"))
-            into(layout.buildDirectory.file("resources/main/minecraft"))
+        doLast {
+            layout.buildDirectory.file("resources/main/minecraft").get().asFile.mkdirs()
+            copy {
+                from(layout.projectDirectory.file("assets/minecraft"))
+                into(layout.buildDirectory.file("resources/main/minecraft"))
+            }
         }
     }
     processResources {
