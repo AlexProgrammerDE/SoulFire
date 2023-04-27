@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.Future;
 
 public record FutureTaskId(Future<?> object) implements PlatformTask<Future<?>> {
+    @Deprecated
     @Override
     public @Nullable Future<?> getObject() {
         return object;
