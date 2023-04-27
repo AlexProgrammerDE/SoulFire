@@ -20,8 +20,8 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.common.AuthService;
 import net.pistonmaster.serverwrecker.common.ProxyType;
-import net.pistonmaster.serverwrecker.common.ServiceServer;
 import net.pistonmaster.serverwrecker.gui.LoadAccountsListener;
 import net.pistonmaster.serverwrecker.gui.LoadProxiesListener;
 
@@ -34,8 +34,10 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AccountPanel extends NavigationItem {
+    // TODO: Redo config flow, this is bad
     public static final JComboBox<ProxyType> proxyTypeCombo = new JComboBox<>();
     public static final JSpinner accPerProxy = new JSpinner();
+    public static final JComboBox<AuthService> serviceBox = new JComboBox<>();
 
     @Inject
     public AccountPanel(ServerWrecker serverWrecker, JFrame parent) {
@@ -52,26 +54,19 @@ public class AccountPanel extends NavigationItem {
 
         serviceSettingsPanel.setLayout(new GridLayout(0, 1));
 
-        JComboBox<ServiceServer> serviceBox = new JComboBox<>();
-        Arrays.stream(ServiceServer.values()).forEach(serviceBox::addItem);
+        Arrays.stream(AuthService.values()).forEach(serviceBox::addItem);
 
-        serviceBox.setSelectedItem(ServiceServer.MOJANG);
+        serviceBox.setSelectedItem(AuthService.OFFLINE);
 
-        AtomicReference<JPanel> serviceSettings = new AtomicReference<>(getServiceSettings(ServiceServer.MOJANG));
-
+        AtomicReference<JPanel> currentServiceSettings = new AtomicReference<>(getServiceSettings(AuthService.OFFLINE));
         serviceBox.addActionListener(action -> {
-            serverWrecker.setServiceServer((ServiceServer) serviceBox.getSelectedItem());
+            refreshSettings(serviceSettingsPanel, currentServiceSettings.get(), (AuthService) serviceBox.getSelectedItem());
 
-            serviceSettingsPanel.remove(serviceSettings.get());
-            serviceSettings.set(getServiceSettings((ServiceServer) serviceBox.getSelectedItem()));
-            serviceSettingsPanel.add(serviceSettings.get());
-            serviceSettingsPanel.revalidate();
-
-            ServerWrecker.getLogger().info("Switched auth servers to {}", ((ServiceServer) Objects.requireNonNull(serviceBox.getSelectedItem())).getName());
+            ServerWrecker.getLogger().info("Switched auth servers to {}", ((AuthService) Objects.requireNonNull(serviceBox.getSelectedItem())).getName());
         });
 
         serviceSettingsPanel.add(serviceBox);
-        serviceSettingsPanel.add(serviceSettings.get());
+        serviceSettingsPanel.add(currentServiceSettings.get());
 
         accounts.add(loadAccounts);
         accounts.add(serviceSettingsPanel);
@@ -99,7 +94,7 @@ public class AccountPanel extends NavigationItem {
         add(proxies);
     }
 
-    private JPanel getServiceSettings(ServiceServer service) {
+    private JPanel getServiceSettings(AuthService service) {
         JPanel serviceSettingsPanel = new JPanel();
 
         service.getConfigKeys().forEach(key -> {
@@ -112,6 +107,15 @@ public class AccountPanel extends NavigationItem {
         });
 
         return serviceSettingsPanel;
+    }
+
+    private void refreshSettings(JPanel serviceSettingsPanel, JPanel currentPanel, AuthService authService) {
+        if (currentPanel != null) {
+            serviceSettingsPanel.remove(currentPanel);
+        }
+
+        serviceSettingsPanel.add(getServiceSettings(authService));
+        serviceSettingsPanel.revalidate();
     }
 
     @Override

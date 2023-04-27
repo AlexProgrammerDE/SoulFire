@@ -37,7 +37,7 @@ public class AutoReconnect implements InternalAddon, EventSubscriber<BotDisconne
     @Override
     public void on(@NonNull BotDisconnectedEvent event) throws Throwable {
         SWOptions options = event.connection().options();
-        if (!options.autoReconnect() || event.connection().serverWrecker().isBotAttackInActive()) {
+        if (!options.autoReconnect() || event.connection().serverWrecker().getAttackState().isInactive()) {
             return;
         }
 

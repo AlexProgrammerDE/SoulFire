@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.common.SWOptions;
 
 import javax.inject.Inject;
@@ -51,7 +52,6 @@ public class ControlPanel extends JPanel {
 
                     pauseButton.setEnabled(true);
                     pauseButton.setText("Pause");
-                    serverWrecker.setPaused(false);
 
                     stopButton.setEnabled(true);
 
@@ -64,8 +64,15 @@ public class ControlPanel extends JPanel {
         });
 
         pauseButton.addActionListener(action -> {
-            serverWrecker.setPaused(!serverWrecker.isPaused());
-            if (serverWrecker.isPaused()) {
+            if (serverWrecker.getAttackState().isRunning()) {
+                serverWrecker.setAttackState(AttackState.PAUSED);
+            } else if (serverWrecker.getAttackState().isPaused()) {
+                serverWrecker.setAttackState(AttackState.RUNNING);
+            } else {
+                throw new IllegalStateException("Attack state is not running or paused!");
+            }
+
+            if (serverWrecker.getAttackState().isPaused()) {
                 ServerWrecker.getLogger().info("Paused bot attack");
                 pauseButton.setText("Resume");
             } else {
@@ -79,7 +86,7 @@ public class ControlPanel extends JPanel {
 
             pauseButton.setEnabled(false);
             pauseButton.setText("Pause");
-            serverWrecker.setPaused(false);
+            serverWrecker.setAttackState(AttackState.PAUSED);
 
             stopButton.setEnabled(false);
 

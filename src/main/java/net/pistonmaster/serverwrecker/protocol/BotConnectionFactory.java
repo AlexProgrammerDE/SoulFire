@@ -27,10 +27,10 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
+import net.pistonmaster.serverwrecker.common.AuthService;
 import net.pistonmaster.serverwrecker.common.NullHelper;
 import net.pistonmaster.serverwrecker.common.ProxyBotData;
 import net.pistonmaster.serverwrecker.common.SWOptions;
-import net.pistonmaster.serverwrecker.common.ServiceServer;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.tcp.ViaTcpClientSession;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import java.util.concurrent.CompletableFuture;
 
 public record BotConnectionFactory(ServerWrecker serverWrecker, SWOptions options, Logger logger,
-                                   MinecraftProtocol protocol, ServiceServer serviceServer, ProxyBotData proxyBotData) {
+                                   MinecraftProtocol protocol, AuthService authService, ProxyBotData proxyBotData) {
     public CompletableFuture<BotConnection> connect() {
         return CompletableFuture.supplyAsync(this::connectInternal);
     }

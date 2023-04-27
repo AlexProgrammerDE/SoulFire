@@ -8,8 +8,8 @@ You can download the latest development version of ServerWrecker through [nightl
 
 ## Features
 
-* Graphical UI & CLI
-* Configurable amount and join delay
+* GUI & CLI
+* Configurable amount of bots and join delay
 * Configurable target
 * Configurable name format or name list
 * Huge version support

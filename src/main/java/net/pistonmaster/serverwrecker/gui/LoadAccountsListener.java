@@ -29,10 +29,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public class LoadAccountsListener implements ActionListener {
-    private final ServerWrecker botManager;
+    private final ServerWrecker serverWrecker;
     private final JFrame frame;
     private final JFileChooser fileChooser;
 
@@ -46,12 +47,12 @@ public class LoadAccountsListener implements ActionListener {
         Path accountFile = fileChooser.getSelectedFile().toPath();
         ServerWrecker.getLogger().info("Opening: {}.", accountFile.getFileName());
 
-        botManager.getThreadPool().submit(() -> {
-            try {
-                List<String> accounts = Files.lines(accountFile).distinct().collect(Collectors.toList());
+        serverWrecker.getThreadPool().submit(() -> {
+            try (Stream<String> stream = Files.lines(accountFile)) {
+                List<String> accounts = stream.distinct().collect(Collectors.toList());
 
                 ServerWrecker.getLogger().info("Loaded {} accounts", accounts.size());
-                botManager.setAccounts(accounts);
+                serverWrecker.setAccounts(accounts);
             } catch (Exception ex) {
                 ServerWrecker.getLogger().error(null, ex);
             }

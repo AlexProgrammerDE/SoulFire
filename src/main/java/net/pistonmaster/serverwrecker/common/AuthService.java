@@ -19,13 +19,27 @@
  */
 package net.pistonmaster.serverwrecker.common;
 
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-public record SWOptions(String host, int port,
-                        int amount, int joinDelayMs, boolean waitEstablished, String botNameFormat,
-                        ProtocolVersion protocolVersion, boolean autoRegister,
-                        boolean debug, ProxyType proxyType, int accountsPerProxy,
-                        int readTimeout, int writeTimeout, int connectTimeout,
-                        String registerCommand, String loginCommand, String captchaCommand,
-                        String passwordFormat, boolean autoReconnect, boolean autoRespawn, AuthService authService) {
+import java.util.List;
+
+@Getter
+@RequiredArgsConstructor
+public enum AuthService {
+    MICROSOFT("Microsoft", List.of("clientId")),
+    OFFLINE("Offline");
+    // THE_ALTENING("The Altening", URI.create("https://authserver.thealtening.com/"), URI.create("https://sessionserver.thealtening.com/"));
+
+    private final String name;
+    private final List<String> configKeys;
+
+    AuthService(String name) {
+        this(name, List.of());
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

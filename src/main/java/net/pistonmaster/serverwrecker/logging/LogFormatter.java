@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.regex.Pattern;
 
 public class LogFormatter {
-    public static final char COLOR_CHAR = '\u00A7';
+    public static final char COLOR_CHAR = '§';
     public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + COLOR_CHAR + "[0-9A-FK-ORX]");
 
     //displays the hour and am/pm

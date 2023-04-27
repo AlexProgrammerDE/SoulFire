@@ -25,7 +25,6 @@ import ch.qos.logback.classic.Level;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.auth.exception.request.RequestException;
 import com.github.steveice10.mc.auth.service.AuthenticationService;
-import com.github.steveice10.mc.auth.service.MojangAuthenticationService;
 import com.github.steveice10.mc.auth.service.MsaAuthenticationService;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.google.common.collect.ImmutableList;
@@ -72,11 +71,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 public class ServerWrecker {
-    public static final String PROJECT_NAME = "ServerWrecker";
-    public static final String VERSION = "0.0.2";
     @Getter
-    private static final Logger logger = LoggerFactory.getLogger(PROJECT_NAME);
-    @Getter
+    private static final Logger logger = LoggerFactory.getLogger("ServerWrecker");
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
@@ -84,7 +80,6 @@ public class ServerWrecker {
             new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
             new ChatMessageLogger(), new ServerListBypass());
     private final List<BotConnection> botConnections = new ArrayList<>();
-    @Getter
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
     private final List<BotProxy> passWordProxies = new ArrayList<>();
@@ -92,15 +87,11 @@ public class ServerWrecker {
     private final Gson gson = new Gson();
     private final Map<String, String> mojangTranslations = new HashMap<>();
     private final GlobalBlockPalette globalBlockPalette;
-    @Getter
     private final PlainTextComponentSerializer messageSerializer;
-    private boolean running = false;
     @Setter
-    private boolean paused = false;
+    private AttackState attackState = AttackState.STOPPED;
     @Setter
     private List<String> accounts;
-    @Setter
-    private ServiceServer serviceServer = ServiceServer.MOJANG;
 
     public ServerWrecker(Path dataFolder) {
         // Register into injector
@@ -216,15 +207,10 @@ public class ServerWrecker {
 
     @SuppressWarnings("UnstableApiUsage")
     public void start(SWOptions options) {
-        if (options.debug()) {
-            Via.getManager().debugHandler().setEnabled(true);
-            setupLogging(Level.DEBUG);
-        } else {
-            Via.getManager().debugHandler().setEnabled(false);
-            setupLogging(Level.INFO);
-        }
+        Via.getManager().debugHandler().setEnabled(options.debug());
+        setupLogging(options.debug() ? Level.DEBUG : Level.INFO);
 
-        this.running = true;
+        this.attackState = AttackState.RUNNING;
 
         List<BotProxy> proxyCache = passWordProxies.isEmpty() ? Collections.emptyList() : ImmutableList.copyOf(passWordProxies);
         Iterator<BotProxy> proxyIterator = proxyCache.listIterator();
@@ -237,7 +223,7 @@ public class ServerWrecker {
                 userPassword = new Pair<>(String.format(options.botNameFormat(), i), "");
             } else {
                 if (accounts.size() <= i) {
-                    logger.warn("Amount is higher than the name list size. Limiting amount size now...");
+                    logger.warn("Bot amount is set higher than accounts are available. Limiting bot amount to {}", accounts.size());
                     break;
                 }
 
@@ -252,7 +238,7 @@ public class ServerWrecker {
                 }
             }
 
-            Optional<MinecraftProtocol> optional = authenticate(userPassword.left(), userPassword.right(), Proxy.NO_PROXY);
+            Optional<MinecraftProtocol> optional = authenticate(options, userPassword.left(), userPassword.right(), Proxy.NO_PROXY);
             if (optional.isEmpty()) {
                 logger.warn("The account " + userPassword.left() + " failed to authenticate! (skipping it) Check above logs for further information.");
                 continue;
@@ -283,7 +269,7 @@ public class ServerWrecker {
                     proxyUseMap.get(proxy).incrementAndGet();
 
                     if (proxyUseMap.size() == proxyCache.size() && isFull(proxyUseMap, options.accountsPerProxy())) {
-                        logger.warn("All proxies in use now! Limiting amount size now...");
+                        logger.warn("All proxies already in use! Limiting amount of bots to {}", i - 1);
                         break;
                     }
                 }
@@ -291,7 +277,7 @@ public class ServerWrecker {
                 proxyBotData = ProxyBotData.of(proxy.username(), proxy.password(), proxy.address(), options.proxyType());
             }
 
-            factories.add(new BotConnectionFactory(this, options, logger, protocol, serviceServer, proxyBotData));
+            factories.add(new BotConnectionFactory(this, options, logger, protocol, options.authService(), proxyBotData));
         }
 
         if (proxyCache.isEmpty()) {
@@ -309,7 +295,7 @@ public class ServerWrecker {
                 Thread.currentThread().interrupt();
             }
 
-            while (paused) {
+            while (attackState.isPaused()) {
                 try {
                     TimeUnit.MILLISECONDS.sleep(100);
                 } catch (InterruptedException e) {
@@ -318,7 +304,7 @@ public class ServerWrecker {
             }
 
             // Stop the bot in case the user aborted the attack
-            if (!running) {
+            if (attackState.isStopped()) {
                 break;
             }
 
@@ -334,20 +320,19 @@ public class ServerWrecker {
         }
     }
 
-    public Optional<MinecraftProtocol> authenticate(String username, String password, Proxy proxy) {
+    public Optional<MinecraftProtocol> authenticate(SWOptions options, String username, String password, Proxy authProxy) {
         if (password.isEmpty()) {
             return Optional.of(new MinecraftProtocol(username));
         } else {
             try {
-                AuthenticationService authService = switch (serviceServer) {
+                AuthenticationService authService = switch (options.authService()) {
                     case OFFLINE -> new OfflineAuthenticationService();
-                    case MOJANG -> new MojangAuthenticationService();
                     case MICROSOFT -> new MsaAuthenticationService(serviceServerConfig.get("clientId"));
                 };
 
                 authService.setUsername(username);
                 authService.setPassword(password);
-                authService.setProxy(proxy);
+                authService.setProxy(authProxy);
 
                 authService.login();
 
@@ -356,14 +341,14 @@ public class ServerWrecker {
 
                 return Optional.of(new MinecraftProtocol(profile, accessToken));
             } catch (RequestException e) {
-                logger.warn("Failed to authenticate " + username + "! (" + e.getMessage() + ")", e);
+                logger.warn("Failed to authenticate {}! ({})", username, e.getMessage(), e);
                 return Optional.empty();
             }
         }
     }
 
     public void stop() {
-        this.running = false;
+        this.attackState = AttackState.STOPPED;
         botConnections.forEach(BotConnection::disconnect);
         botConnections.clear();
         ServerWreckerAPI.postEvent(new AttackEndEvent());
@@ -371,7 +356,7 @@ public class ServerWrecker {
 
     private boolean isFull(Map<BotProxy, AtomicInteger> map, int limit) {
         for (Map.Entry<BotProxy, AtomicInteger> entry : map.entrySet()) {
-            if (entry.getValue().get() < limit) {
+            if (entry.getValue().get() <= limit) {
                 return false;
             }
         }
@@ -388,9 +373,5 @@ public class ServerWrecker {
         LogUtil.setLevel(logger, level);
         LogUtil.setLevel("io.netty", level);
         LogUtil.setLevel("org.pf4j", level);
-    }
-
-    public boolean isBotAttackInActive() {
-        return !running || paused;
     }
 }

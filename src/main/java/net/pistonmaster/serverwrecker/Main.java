@@ -58,7 +58,9 @@ public class Main {
     }
 
     private static void runHeadless(String[] args, Path dataFolder) {
-        int exitCode = new CommandLine(new CommandDefinition(dataFolder)).execute(args);
+        CommandLine commandLine = new CommandLine(new CommandDefinition(dataFolder));
+        commandLine.setCaseInsensitiveEnumValuesAllowed(true);
+        int exitCode = commandLine.execute(args);
         System.exit(exitCode);
     }
 }

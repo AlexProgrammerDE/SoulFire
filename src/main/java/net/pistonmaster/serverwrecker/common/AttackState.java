@@ -19,29 +19,24 @@
  */
 package net.pistonmaster.serverwrecker.common;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+public enum AttackState {
+    RUNNING,
+    PAUSED,
+    STOPPED;
 
-import java.util.List;
-
-@Getter
-@RequiredArgsConstructor
-public enum ServiceServer {
-    // , URI.create("https://login.microsoftonline.com/"), URI.create("https://login.microsoftonline.com/")
-    MOJANG("Mojang"),
-    MICROSOFT("Microsoft", List.of("clientId")),
-    OFFLINE("Offline");
-    // THE_ALTENING("The Altening (1.16+ only)", URI.create("https://authserver.thealtening.com/"), URI.create("https://sessionserver.thealtening.com/"));
-
-    private final String name;
-    private final List<String> configKeys;
-
-    ServiceServer(String name) {
-        this(name, List.of());
+    public boolean isRunning() {
+        return this == RUNNING;
     }
 
-    @Override
-    public String toString() {
-        return name;
+    public boolean isPaused() {
+        return this == PAUSED;
+    }
+
+    public boolean isStopped() {
+        return this == STOPPED;
+    }
+
+    public boolean isInactive() {
+        return isPaused() || isStopped();
     }
 }

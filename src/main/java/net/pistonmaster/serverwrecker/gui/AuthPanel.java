@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.gui;
 
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.navigation.RightPanelContainer;
 
 import javax.inject.Inject;
@@ -58,7 +57,7 @@ public class AuthPanel extends JPanel {
         centerPanel.setPreferredSize(new Dimension(500, 300));
 
         centerPanel.setLayout(new BorderLayout());
-        centerPanel.add(new JLabel(ServerWrecker.PROJECT_NAME), BorderLayout.NORTH);
+        centerPanel.add(new JLabel("ServerWrecker"), BorderLayout.NORTH);
         centerPanel.add(credPanel, BorderLayout.NORTH);
 
         centerPanel.setBorder(BorderFactory.createTitledBorder("Login"));

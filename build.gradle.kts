@@ -6,6 +6,8 @@ plugins {
     id("edu.sc.seis.launch4j") version "2.5.4"
 }
 
+version = "1.0.0"
+
 repositories {
     maven("https://repo.opencollab.dev/maven-releases")
     maven("https://repo.opencollab.dev/maven-snapshots")
@@ -90,16 +92,18 @@ tasks.named<Jar>("jar").get().apply {
 
 tasks.named<ShadowJar>("shadowJar").get().apply {
     registerMCJar()
-    excludes.addAll(setOf(
-        "META-INF/*.DSA",
-        "META-INF/*.RSA",
-        "META-INF/*.SF",
-        "META-INF/sponge_plugins.json",
-        "plugin.yml",
-        "bungee.yml",
-        "fabric.mod.json",
-        "velocity-plugin.json"
-    ))
+    excludes.addAll(
+        setOf(
+            "META-INF/*.DSA",
+            "META-INF/*.RSA",
+            "META-INF/*.SF",
+            "META-INF/sponge_plugins.json",
+            "plugin.yml",
+            "bungee.yml",
+            "fabric.mod.json",
+            "velocity-plugin.json"
+        )
+    )
 }
 
 fun CopySpec.registerMCJar() {
@@ -110,11 +114,9 @@ fun CopySpec.registerMCJar() {
 }
 
 val copyMinecraft = tasks.create("copyMinecraft") {
-    doLast {
-        copy {
-            from(mcFolder)
-            into(layout.buildDirectory.file("resources/main/minecraft"))
-        }
+    copy {
+        from(mcFolder)
+        into(layout.buildDirectory.file("resources/main/minecraft"))
     }
 }
 

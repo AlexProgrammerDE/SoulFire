@@ -36,7 +36,7 @@ public class MainFrame extends JFrame {
 
     @Inject
     public MainFrame(ServerWrecker botManager, Injector injector) {
-        super(ServerWrecker.PROJECT_NAME);
+        super("ServerWrecker");
         this.botManager = botManager;
         this.injector = injector;
         injector.register(JFrame.class, this);

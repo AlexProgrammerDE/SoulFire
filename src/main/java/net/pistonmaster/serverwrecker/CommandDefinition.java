@@ -21,6 +21,8 @@ package net.pistonmaster.serverwrecker;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.builddata.BuildData;
+import net.pistonmaster.serverwrecker.common.AuthService;
 import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.common.SWOptions;
 import picocli.CommandLine.Command;
@@ -31,72 +33,74 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("FieldMayBeFinal")
 @RequiredArgsConstructor
-@Command(name = "serverwrecker", mixinStandardHelpOptions = true, version = "ServerWrecker v" + ServerWrecker.VERSION, description = "Stress test a minecraft server using bots")
+@Command(name = "serverwrecker", mixinStandardHelpOptions = true,
+        version = "ServerWrecker v" + BuildData.VERSION, showDefaultValues = true,
+        description = "Stress test a minecraft server using bots", sortOptions = false)
 public class CommandDefinition implements Callable<Integer> {
     private final Path dataFolder;
 
-    @Option(names = {"-h", "--host"}, description = "The host to connect to. Defaults to 127.0.0.1")
+    @Option(names = {"--host", "--target"}, description = "target url to connect to")
     private String host = "127.0.0.1";
 
-    @Option(names = {"-p", "--port"}, description = "The port to connect to. Defaults to 25565")
+    @Option(names = {"--port"}, description = "target port to connect to")
     private int port = 25565;
 
-    @Option(names = {"-a", "--amount"}, description = "The amount of bots to connect to the server. Defaults to 20")
+    @Option(names = {"-a", "--amount"}, description = "amount of bots to connect to the server")
     private int amount = 20;
 
-    @Option(names = {"-d", "--delay"}, description = "The delay between bot spawns, in milliseconds. Defaults to 1000")
+    @Option(names = {"--join-delay"}, description = "the delay between bot spawns, in milliseconds")
     private int joinDelay = 1000;
 
-    @Option(names = {"-n", "--name"}, description = "The format for bot names. Requires exactly one integer placeholder '%%d'. Defaults to 'Bot-%%d'")
+    @Option(names = {"--name-format"}, description = "format for bot names. allows integer placeholder '%%d'")
     private String nameFormat = "Bot-%d";
 
-    @Option(names = {"-v", "--mcversion"}, description = "The Minecraft version of the server to connect to. Defaults to latest")
+    @Option(names = {"-mc", "--mc-version"}, description = "Minecraft version of the server to connect to")
     private String version = SWConstants.LATEST_SHOWN_VERSION.getName();
 
-    @Option(names = {"-r", "--register"}, description = "Makes Bots run the /register and /login command after joining with username and password being " + ServerWrecker.PROJECT_NAME)
-    private boolean autoRegister;
-
-    @Option(names = {"--help"}, usageHelp = true, description = "Shows this help message.")
-    private boolean help;
-
-    @Option(names = {"--debug"}, description = "Logs additional information useful for debugging")
+    @Option(names = {"--debug"}, description = "log additional information useful for debugging the software")
     private boolean debug;
 
-    @Option(names = {"--proxytype"}, description = "The proxies type. Defaults to socks5")
+    @Option(names = {"--proxy-type"}, description = "type of proxies used")
     private ProxyType proxy = ProxyType.SOCKS5;
 
-    @Option(names = {"--accountsperproxy"}, description = "How many accounts can be on a single proxy. Defaults to -1")
+    @Option(names = {"--accounts-per-proxy"}, description = "amount of accounts that can be on a single proxy")
     private int accountsPerProxy = -1;
 
-    @Option(names = {"--readtimeout"}, description = "The client read timeout.")
+    @Option(names = {"--read-timeout"}, description = "bot read timeout")
     private int readTimeout = 30;
 
-    @Option(names = {"--writetimout"}, description = "The client write timeout.")
+    @Option(names = {"--write-timeout"}, description = "bot write timeout")
     private int writeTimout = 0;
 
-    @Option(names = {"--connecttimeout"}, description = "The client connect timeout.")
+    @Option(names = {"--connect-timeout"}, description = "bot connect timeout")
     private int connectTimeout = 30;
 
-    @Option(names = {"--registercommand"}, description = "What command should be executed to register?")
+    @Option(names = {"--auto-register"}, description = "make bots run the /register and /login command after joining")
+    private boolean autoRegister;
+
+    @Option(names = {"--register-command"}, description = "command to be executed to register")
     private String registerCommand = "/register %password% %password%";
 
-    @Option(names = {"--logincommand"}, description = "What command should be executed to log in?")
+    @Option(names = {"--login-command"}, description = "command to be executed to log in")
     private String loginCommand = "/login %password%";
 
-    @Option(names = {"--captchacommand"}, description = "What command should be executed to confirm the captcha?")
+    @Option(names = {"--captcha-command"}, description = "command to be executed to confirm a captcha")
     private String captchaCommand = "/captcha %captcha%";
 
-    @Option(names = {"--passwordformet"}, description = "What the password for registering should be.")
+    @Option(names = {"--password-format"}, description = "the password for registering")
     private String passwordFormat = "ServerWrecker";
 
-    @Option(names = {"--autoreconnect"}, description = "Reconnect bots after being disconnected.")
+    @Option(names = {"--auto-reconnect"}, description = "reconnect bots after being disconnected")
     private boolean autoReconnect = true;
 
-    @Option(names = {"--autorespawn"}, description = "Respawn bots after death.")
+    @Option(names = {"--auto-respawn"}, description = "respawn bots after death")
     private boolean autoRespawn = true;
 
-    @Option(names = {"--disablewaitestablished"}, description = "Make the program halt and wait till a bot was successfully connected before connecting the next bot.")
+    @Option(names = {"--disable-wait-established"}, description = "make the program halt and wait till a bot was successfully connected before connecting the next bot")
     private boolean disableWaitEstablished;
+
+    @Option(names = {"--auth-service"}, description = "the auth service to use")
+    private AuthService authService = AuthService.OFFLINE;
 
     @Override
     public Integer call() {
@@ -120,7 +124,8 @@ public class CommandDefinition implements Callable<Integer> {
                 captchaCommand,
                 passwordFormat,
                 autoReconnect,
-                autoRespawn
+                autoRespawn,
+                authService
         ));
         return 0;
     }
