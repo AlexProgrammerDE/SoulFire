@@ -38,7 +38,7 @@ ServerWrecker includes a similar implementation as these two proxies and is comp
 
 Currently versions below r1.7.0 only support offline-mode,
 but a future version will support online-mode servers as well.
-All versions newer than r1.7.0 have support online-mode.
+All versions newer than r1.7.0 support online-mode.
 
 ## Requirements
 
