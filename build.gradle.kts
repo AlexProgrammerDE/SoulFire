@@ -76,6 +76,11 @@ tasks.compileJava.get().apply {
     options.compilerArgs.add("-Aproject=${project.name}")
 }
 
+val mcFolder = File("${rootDir}/assets/minecraft")
+if (!mcFolder.exists()) {
+    throw IllegalStateException("Minecraft folder not found!")
+}
+
 tasks.named<Jar>("jar").get().apply {
     registerMC()
     manifest {
@@ -88,14 +93,21 @@ tasks.named<ShadowJar>("shadowJar").get().apply {
 }
 
 fun CopySpec.registerMC() {
-    val mcFolder = File("${rootDir}/assets/minecraft")
-    if (!mcFolder.exists()) {
-        throw IllegalStateException("Minecraft folder not found!")
-    }
     from(mcFolder) {
         into("minecraft")
     }
 }
+
+val copyMinecraft = tasks.create("copyMinecraft") {
+    doLast {
+        copy {
+            from(mcFolder)
+            into(layout.buildDirectory.file("resources/main/minecraft"))
+        }
+    }
+}
+
+tasks.named("processResources").get().dependsOn(copyMinecraft)
 
 launch4j {
     mainClassName = "net.pistonmaster.serverwrecker.Main"
