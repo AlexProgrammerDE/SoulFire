@@ -61,7 +61,7 @@ public record BotConnectionFactory(ServerWrecker serverWrecker, SWOptions option
         session.setReadTimeout(options.readTimeout());
         session.setWriteTimeout(options.writeTimeout());
 
-        session.addListener(new SWBaseListener(logger, ProtocolState.LOGIN));
+        session.addListener(new SWBaseListener(botConnection, ProtocolState.LOGIN));
         session.addListener(new SWSessionListener(sessionDataManager, botConnection));
 
         ServerWreckerAPI.postEvent(new PreBotConnectEvent(botConnection));
