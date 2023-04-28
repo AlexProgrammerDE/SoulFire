@@ -32,9 +32,14 @@ The latest Release and latest Bedrock Edition info may be out of sync with the l
 
 ### How does this work?
 
-Thanks to a built-in implementation of [ViaVersion](https://github.com/ViaVersion/ViaVersion) and [ViaLegacy](https://github.com/RaphiMC/ViaLegacy), a ServerWrecker bot can connect to all these versions even without the server having ViaVersion installed. The packet translation happens "client/bot side".
-This feature takes inspiration from services like [ViAaaS](https://github.com/ViaVersion/VIAaaS) and [ViaProxy](https://github.com/RaphiMC/ViaProxy), which include client-side translation externally.
-ServerWrecker includes a similar implementation as these two proxies and is comparable functionality wise to [ViaFabric](https://github.com/ViaVersion/ViaFabric).
+Thanks to a built-in implementation of [ViaVersion](https://github.com/ViaVersion/ViaVersion),
+[ViaLegacy](https://github.com/RaphiMC/ViaLegacy) and [ViaBedrock](https://github.com/RaphiMC/ViaBedrock),
+a ServerWrecker bot can connect to all these versions even without the server having ViaVersion installed.
+The packet translation happens "client/bot side".
+This feature takes inspiration from services like [ViAaaS](https://github.com/ViaVersion/VIAaaS) and [ViaProxy](https://github.com/RaphiMC/ViaProxy),
+which include client-side translation externally.
+ServerWrecker includes a similar implementation as these two proxies
+and is comparable functionality wise to [ViaFabric](https://github.com/ViaVersion/ViaFabric).
 
 ### What's the catch?
 
