@@ -62,6 +62,7 @@ import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.common.SWOptions;
+import net.pistonmaster.serverwrecker.protocol.SWProtocolConstants;
 import net.pistonmaster.serverwrecker.viaversion.FrameCodec;
 import net.pistonmaster.serverwrecker.viaversion.StorableOptions;
 import net.pistonmaster.serverwrecker.viaversion.StorableSession;
@@ -203,6 +204,8 @@ public class ViaClientSession extends TcpSession {
                     UserConnectionImpl userConnection = new UserConnectionImpl(channel, true);
                     userConnection.put(new StorableOptions(options));
                     userConnection.put(new StorableSession(ViaClientSession.this));
+
+                    setFlag(SWProtocolConstants.VIA_USER_CONNECTION, userConnection);
 
                     ProtocolPipelineImpl protocolPipeline = new ProtocolPipelineImpl(userConnection);
 

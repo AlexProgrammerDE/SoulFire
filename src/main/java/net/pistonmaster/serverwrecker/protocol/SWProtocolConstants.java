@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.protocol;
 
 public class SWProtocolConstants {
-    public static final String PROTOCOL_VERSION = "protocol-version";
     public static final String ENCRYPTION_SECRET_KEY = "encryption-secret-key";
     public static final String SESSION_DATA_MANAGER = "session-data-manager";
+    public static final String VIA_USER_CONNECTION = "via-user-connection";
 }

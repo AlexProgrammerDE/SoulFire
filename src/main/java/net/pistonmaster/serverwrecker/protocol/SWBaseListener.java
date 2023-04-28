@@ -49,18 +49,21 @@ import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.event.session.ConnectedEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import com.github.steveice10.packetlib.packet.Packet;
+import com.viaversion.viaversion.api.connection.UserConnection;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.protocol.tcp.ViaClientSession;
-import org.slf4j.Logger;
+import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 public class SWBaseListener extends SessionAdapter {
-    private final Logger logger;
+    private final BotConnection botConnection;
     private final @NonNull ProtocolState targetState;
 
     @Override
@@ -88,21 +91,27 @@ public class SWBaseListener extends SessionAdapter {
                 session.send(new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
 
                 if (profile == null || accessToken == null) {
-                    logger.debug("Skipping hello packet due to missing profile or access token.");
+                    botConnection.logger().debug("Skipping encrypting due to missing profile or access token.");
                 } else {
-                    SessionService sessionService = session.getFlag(MinecraftConstants.SESSION_SERVICE_KEY, new SessionService());
-                    String serverId = sessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
-                    try {
-                        sessionService.joinServer(profile, accessToken, serverId);
-                    } catch (ServiceUnavailableException e) {
-                        session.disconnect("Login failed: Authentication service unavailable.", e);
-                        return;
-                    } catch (InvalidCredentialsException e) {
-                        session.disconnect("Login failed: Invalid login session.", e);
-                        return;
-                    } catch (RequestException e) {
-                        session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
-                        return;
+                    UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
+                    boolean isLegacy = SWConstants.isLegacy(botConnection.options().protocolVersion());
+                    boolean shouldCallMojang = !isLegacy || Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
+
+                    if (shouldCallMojang) {
+                        SessionService sessionService = session.getFlag(MinecraftConstants.SESSION_SERVICE_KEY, new SessionService());
+                        String serverId = sessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
+                        try {
+                            sessionService.joinServer(profile, accessToken, serverId);
+                        } catch (ServiceUnavailableException e) {
+                            session.disconnect("Login failed: Authentication service unavailable.", e);
+                            return;
+                        } catch (InvalidCredentialsException e) {
+                            session.disconnect("Login failed: Invalid login session.", e);
+                            return;
+                        } catch (RequestException e) {
+                            session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
+                            return;
+                        }
                     }
 
                     viaSession.enableJavaEncryption(key);
