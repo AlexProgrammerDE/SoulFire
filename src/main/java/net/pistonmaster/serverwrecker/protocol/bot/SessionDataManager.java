@@ -392,6 +392,7 @@ public final class SessionDataManager {
             Vector3i vector3i = entry.getPosition();
             int newId = entry.getBlock();
 
+            System.out.println("Updating block at " + vector3i + " to " + newId);
             level.setBlock(vector3i, newId);
         }
     }
