@@ -23,6 +23,7 @@ import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
 import com.github.steveice10.mc.protocol.data.UnexpectedEncryptionException;
 import com.github.steveice10.mc.protocol.data.game.ClientCommand;
+import com.github.steveice10.mc.protocol.data.game.ResourcePackStatus;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkBiomeData;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
@@ -42,6 +43,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.Cli
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.*;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundResourcePackPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import com.github.steveice10.opennbt.tag.builtin.*;
@@ -489,6 +491,12 @@ public final class SessionDataManager {
         } catch (Exception e) {
             log.error("Error while logging entity motion", e);
         }
+    }
+
+    @BusHandler
+    public void onResourcePack(ClientboundResourcePackPacket packet) {
+        // TODO: Implement resource pack
+        connection.session().send(new ServerboundResourcePackPacket(ResourcePackStatus.DECLINED));
     }
 
     @BusHandler
