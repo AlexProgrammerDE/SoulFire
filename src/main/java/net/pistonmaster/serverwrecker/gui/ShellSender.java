@@ -95,11 +95,11 @@ public class ShellSender extends AbstractAction {
         try {
             dispatcher.execute(command, this);
         } catch (CommandSyntaxException commandSyntaxException) {
-            ServerWrecker.getLogger().warn("Invalid command syntax");
+            serverWrecker.getLogger().warn("Invalid command syntax");
         }
     }
 
     public void sendMessage(String message) {
-        ServerWrecker.getLogger().info(message);
+        serverWrecker.getLogger().info(message);
     }
 }

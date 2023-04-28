@@ -73,8 +73,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 public class ServerWrecker {
-    @Getter
-    private static final Logger logger = LoggerFactory.getLogger("ServerWrecker");
+    private final Logger logger = LoggerFactory.getLogger("ServerWrecker");
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
@@ -103,6 +102,8 @@ public class ServerWrecker {
         ServerWreckerAPI.setServerWrecker(this);
 
         setupLogging(Level.INFO);
+
+        logger.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
         JsonObject translations;
         try (InputStream stream = ServerWrecker.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
@@ -189,6 +190,8 @@ public class ServerWrecker {
         }
 
         initPlugins(dataFolder.resolve("plugins"));
+
+        logger.info("Finished loading!");
     }
 
     private void initPlugins(Path pluginDir) {

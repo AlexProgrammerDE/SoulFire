@@ -55,10 +55,10 @@ public class ControlPanel extends JPanel {
 
                     stopButton.setEnabled(true);
 
-                    ServerWrecker.getLogger().info("Preparing bot attack at {}", options.host());
+                    serverWrecker.getLogger().info("Preparing bot attack at {}", options.host());
                     serverWrecker.start(options);
                 } catch (Exception ex) {
-                    ServerWrecker.getLogger().info(ex.getMessage(), ex);
+                    serverWrecker.getLogger().info(ex.getMessage(), ex);
                 }
             });
         });
@@ -73,10 +73,10 @@ public class ControlPanel extends JPanel {
             }
 
             if (serverWrecker.getAttackState().isPaused()) {
-                ServerWrecker.getLogger().info("Paused bot attack");
+                serverWrecker.getLogger().info("Paused bot attack");
                 pauseButton.setText("Resume");
             } else {
-                ServerWrecker.getLogger().info("Resumed bot attack");
+                serverWrecker.getLogger().info("Resumed bot attack");
                 pauseButton.setText("Pause");
             }
         });
@@ -90,7 +90,7 @@ public class ControlPanel extends JPanel {
 
             stopButton.setEnabled(false);
 
-            ServerWrecker.getLogger().info("Stopping bot attack");
+            serverWrecker.getLogger().info("Stopping bot attack");
             serverWrecker.stop();
         });
     }

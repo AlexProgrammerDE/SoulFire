@@ -45,16 +45,16 @@ public class LoadAccountsListener implements ActionListener {
         }
 
         Path accountFile = fileChooser.getSelectedFile().toPath();
-        ServerWrecker.getLogger().info("Opening: {}.", accountFile.getFileName());
+        serverWrecker.getLogger().info("Opening: {}.", accountFile.getFileName());
 
         serverWrecker.getThreadPool().submit(() -> {
             try (Stream<String> stream = Files.lines(accountFile)) {
                 List<String> accounts = stream.distinct().collect(Collectors.toList());
 
-                ServerWrecker.getLogger().info("Loaded {} accounts", accounts.size());
+                serverWrecker.getLogger().info("Loaded {} accounts", accounts.size());
                 serverWrecker.setAccounts(accounts);
             } catch (Exception ex) {
-                ServerWrecker.getLogger().error(null, ex);
+                serverWrecker.getLogger().error(null, ex);
             }
         });
     }

@@ -47,7 +47,7 @@ public class LoadProxiesListener implements ActionListener {
         }
 
         Path proxyFile = fileChooser.getSelectedFile().toPath();
-        ServerWrecker.getLogger().info("Opening: {}.", proxyFile.getFileName());
+        serverWrecker.getLogger().info("Opening: {}.", proxyFile.getFileName());
 
         serverWrecker.getThreadPool().submit(() -> {
             try {
@@ -71,9 +71,9 @@ public class LoadProxiesListener implements ActionListener {
                 serverWrecker.getPassWordProxies().clear();
                 serverWrecker.getPassWordProxies().addAll(proxies);
 
-                ServerWrecker.getLogger().info("Loaded {} proxies", proxies.size());
+                serverWrecker.getLogger().info("Loaded {} proxies", proxies.size());
             } catch (Exception ex) {
-                ServerWrecker.getLogger().error(null, ex);
+                serverWrecker.getLogger().error(null, ex);
             }
         });
     }

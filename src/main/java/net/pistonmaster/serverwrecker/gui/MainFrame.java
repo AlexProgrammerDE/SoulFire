@@ -55,9 +55,9 @@ public class MainFrame extends JFrame {
 
         setSize(new Dimension(getWidth() + 500, getHeight()));
 
-        setVisible(true);
+        serverWrecker.getLogger().info("Opening GUI!");
 
-        ServerWrecker.getLogger().info("Started program");
+        setVisible(true);
     }
 
     private void setLookAndFeel() {
