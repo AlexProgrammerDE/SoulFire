@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public class LoadProxiesListener implements ActionListener {
-    private final ServerWrecker botManager;
+    private final ServerWrecker serverWrecker;
     private final JFrame frame;
     private final JFileChooser fileChooser;
 
@@ -49,7 +49,7 @@ public class LoadProxiesListener implements ActionListener {
         Path proxyFile = fileChooser.getSelectedFile().toPath();
         ServerWrecker.getLogger().info("Opening: {}.", proxyFile.getFileName());
 
-        botManager.getThreadPool().submit(() -> {
+        serverWrecker.getThreadPool().submit(() -> {
             try {
                 List<BotProxy> proxies = new ArrayList<>();
 
@@ -68,8 +68,8 @@ public class LoadProxiesListener implements ActionListener {
                     });
                 }
 
-                botManager.getPassWordProxies().clear();
-                botManager.getPassWordProxies().addAll(proxies);
+                serverWrecker.getPassWordProxies().clear();
+                serverWrecker.getPassWordProxies().addAll(proxies);
 
                 ServerWrecker.getLogger().info("Loaded {} proxies", proxies.size());
             } catch (Exception ex) {

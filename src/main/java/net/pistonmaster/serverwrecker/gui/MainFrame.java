@@ -31,13 +31,13 @@ import java.awt.*;
 public class MainFrame extends JFrame {
     public static final String AUTH_MENU = "AuthMenu";
     public static final String MAIN_MENU = "MainMenu";
-    private final ServerWrecker botManager;
+    private final ServerWrecker serverWrecker;
     private final Injector injector;
 
     @Inject
-    public MainFrame(ServerWrecker botManager, Injector injector) {
+    public MainFrame(ServerWrecker serverWrecker, Injector injector) {
         super("ServerWrecker");
-        this.botManager = botManager;
+        this.serverWrecker = serverWrecker;
         this.injector = injector;
         injector.register(JFrame.class, this);
     }

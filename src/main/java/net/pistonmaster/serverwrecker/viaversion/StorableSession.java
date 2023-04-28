@@ -20,9 +20,9 @@
 package net.pistonmaster.serverwrecker.viaversion;
 
 import com.viaversion.viaversion.api.connection.StorableObject;
-import net.pistonmaster.serverwrecker.protocol.tcp.ViaTcpClientSession;
+import net.pistonmaster.serverwrecker.protocol.tcp.ViaClientSession;
 
-public record StorableSession(ViaTcpClientSession session) implements StorableObject {
+public record StorableSession(ViaClientSession session) implements StorableObject {
     @Override
     public boolean clearOnServerSwitch() {
         return false;

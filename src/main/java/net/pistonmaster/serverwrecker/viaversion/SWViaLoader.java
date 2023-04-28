@@ -27,7 +27,9 @@ import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.MovementTr
 import com.viaversion.viaversion.velocity.providers.VelocityMovementTransmitter;
 import net.pistonmaster.serverwrecker.viaversion.providers.SWViaCompressionProvider;
 import net.pistonmaster.serverwrecker.viaversion.providers.SWViaEncryptionProvider;
+import net.pistonmaster.serverwrecker.viaversion.providers.SWViaNettyPipelineProvider;
 import net.pistonmaster.serverwrecker.viaversion.providers.SWViaVersionProvider;
+import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.model.GameProfile;
 import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.providers.GameProfileFetcher;
@@ -55,6 +57,7 @@ public class SWViaLoader implements ViaPlatformLoader {
             }
         });
         Via.getManager().getProviders().use(EncryptionProvider.class, new SWViaEncryptionProvider());
+        Via.getManager().getProviders().use(NettyPipelineProvider.class, new SWViaNettyPipelineProvider());
     }
 
     @Override

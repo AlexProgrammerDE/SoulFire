@@ -67,7 +67,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.BorderState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkData;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.WeatherState;
-import net.pistonmaster.serverwrecker.protocol.tcp.ViaTcpClientSession;
+import net.pistonmaster.serverwrecker.protocol.tcp.ViaClientSession;
 import net.pistonmaster.serverwrecker.util.BusHandler;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
@@ -84,7 +84,7 @@ public final class SessionDataManager {
     private final SWOptions options;
     private final Logger log;
     private final ServerWrecker serverWrecker;
-    private final ViaTcpClientSession session;
+    private final ViaClientSession session;
     private final BotConnection connection;
     private final WeatherState weatherState = new WeatherState();
     private final Map<Integer, AtomicInteger> itemCoolDowns = new ConcurrentHashMap<>();

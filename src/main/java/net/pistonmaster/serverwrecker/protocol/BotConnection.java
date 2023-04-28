@@ -26,7 +26,7 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
-import net.pistonmaster.serverwrecker.protocol.tcp.ViaTcpClientSession;
+import net.pistonmaster.serverwrecker.protocol.tcp.ViaClientSession;
 import org.slf4j.Logger;
 
 import java.time.Instant;
@@ -34,7 +34,7 @@ import java.util.BitSet;
 import java.util.Collections;
 
 public record BotConnection(BotConnectionFactory factory, ServerWrecker serverWrecker, SWOptions options, Logger logger,
-                            MinecraftProtocol protocol, ViaTcpClientSession session, BotConnectionMeta meta) {
+                            MinecraftProtocol protocol, ViaClientSession session, BotConnectionMeta meta) {
     public void sendMessage(String message) {
         if (message.startsWith("/")) {
             session.send(new ServerboundChatCommandPacket(message.substring(1), Instant.now().toEpochMilli(), 0, Collections.emptyList(), 0, new BitSet()));

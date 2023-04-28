@@ -54,6 +54,8 @@ import net.pistonmaster.serverwrecker.protocol.OfflineAuthenticationService;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
+import net.raphimc.viabedrock.api.BedrockProtocolVersion;
+import net.raphimc.viabedrock.protocol.BedrockProtocol;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
 import org.slf4j.Logger;
@@ -167,6 +169,7 @@ public class ServerWrecker {
             new SWViaBackwards(dataFolder.resolve("ViaBackwards")).init();
             new SWViaAprilFools(dataFolder.resolve("ViaAprilFools")).init();
             new SWViaLegacy(dataFolder.resolve("ViaLegacy")).init();
+            new SWViaBedrock(dataFolder.resolve("ViaBedrock")).init();
         });
 
         ViaManagerImpl manager = (ViaManagerImpl) Via.getManager();

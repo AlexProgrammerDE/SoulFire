@@ -41,7 +41,7 @@ import java.awt.event.KeyEvent;
 public class MainPanel extends JPanel {
     @Getter
     private static final MessageLogPanel logPanel = new MessageLogPanel(3000, false);
-    private final ServerWrecker botManager;
+    private final ServerWrecker serverWrecker;
     private final ShellSender shellSender;
     private final JFrame parent;
     private final Injector injector;

@@ -46,6 +46,8 @@ public class SWSessionListener extends SessionAdapter {
             return;
         }
 
+        botConnection.logger().debug("Received packet: " + packet.getClass().getSimpleName());
+
         BusHelper.handlePacket(event1.getPacket(), bus);
     }
 

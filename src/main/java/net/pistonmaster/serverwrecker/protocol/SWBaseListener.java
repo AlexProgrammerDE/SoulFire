@@ -51,7 +51,7 @@ import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import com.github.steveice10.packetlib.packet.Packet;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.protocol.tcp.ViaTcpClientSession;
+import net.pistonmaster.serverwrecker.protocol.tcp.ViaClientSession;
 import org.slf4j.Logger;
 
 import javax.crypto.KeyGenerator;
@@ -65,7 +65,7 @@ public class SWBaseListener extends SessionAdapter {
 
     @Override
     public void packetReceived(Session session, Packet packet) {
-        if (!(session instanceof ViaTcpClientSession viaSession)) {
+        if (!(session instanceof ViaClientSession viaSession)) {
             return;
         }
 
@@ -105,7 +105,7 @@ public class SWBaseListener extends SessionAdapter {
                         return;
                     }
 
-                    viaSession.enableEncryption(key);
+                    viaSession.enableJavaEncryption(key);
                 }
             } else if (packet instanceof ClientboundGameProfilePacket) {
                 protocol.setState(ProtocolState.GAME);

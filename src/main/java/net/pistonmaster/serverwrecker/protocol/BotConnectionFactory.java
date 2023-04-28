@@ -32,7 +32,7 @@ import net.pistonmaster.serverwrecker.common.NullHelper;
 import net.pistonmaster.serverwrecker.common.ProxyBotData;
 import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
-import net.pistonmaster.serverwrecker.protocol.tcp.ViaTcpClientSession;
+import net.pistonmaster.serverwrecker.protocol.tcp.ViaClientSession;
 import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
@@ -44,7 +44,7 @@ public record BotConnectionFactory(ServerWrecker serverWrecker, SWOptions option
     }
 
     public BotConnection connectInternal() {
-        ViaTcpClientSession session = new ViaTcpClientSession(options.host(), options.port(), protocol,
+        ViaClientSession session = new ViaClientSession(options.host(), options.port(), protocol,
                 NullHelper.nullOrConvert(proxyBotData,
                         data -> new ProxyInfo(ProxyInfo.Type.valueOf(data.getType().name()), data.getAddress(), data.getUsername(), data.getPassword())),
                 options);

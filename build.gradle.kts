@@ -13,7 +13,12 @@ repositories {
     maven("https://repo.opencollab.dev/maven-snapshots")
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.viaversion.com/")
-    maven("https://maven.lenni0451.net/releases/")
+    maven("https://maven.lenni0451.net/releases/") {
+        name = "Lenni0451 Releases"
+    }
+    maven("https://maven.lenni0451.net/snapshots") {
+        name = "Lenni0451 Snapshots"
+    }
     maven("https://libraries.minecraft.net/") {
         name = "Minecraft Repository"
     }
@@ -42,6 +47,27 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.26")
 
     implementation("com.github.GeyserMC:MCProtocolLib:bcf453c")
+    implementation("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
+
+    val vvVer = "4.7.0-23w17a-SNAPSHOT"
+    val vbVer = "4.7.0-23w17a-SNAPSHOT"
+    val vrVer = "5f7fdc5"
+    implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
+    implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
+    implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
+    implementation("net.raphimc:ViaAprilFools:2.0.6")
+    implementation("net.raphimc:ViaLegacy:2.2.16")
+    implementation("net.raphimc:ViaProtocolHack:2.2.4") {
+        exclude("org.slf4j", "slf4j-api")
+        exclude("org.yaml", "snakeyaml")
+    }
+    implementation("net.raphimc:ViaBedrock:0.0.1-SNAPSHOT") {
+        exclude("io.netty", "netty-codec-http")
+        exclude("com.vdurmont", "semver4j")
+    }
+    implementation("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT") {
+        isTransitive = false
+    }
 
     implementation("com.mojang:brigadier:1.1.8")
     implementation("com.formdev:flatlaf:3.1.1")
@@ -60,18 +86,6 @@ dependencies {
     implementation("net.kyori:event-api:5.0.0-SNAPSHOT")
     implementation("ch.jalu:injector:1.0")
     implementation("org.yaml:snakeyaml:2.0")
-
-    implementation("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
-    implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
-
-    val vvVer = "4.7.0-23w17a-SNAPSHOT"
-    val vbVer = "4.7.0-23w17a-SNAPSHOT"
-    val vrVer = "5f7fdc5"
-    implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
-    implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
-    implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
-    implementation("net.raphimc:ViaAprilFools:2.0.6")
-    implementation("net.raphimc:ViaLegacy:2.2.16")
 }
 
 tasks.compileJava.get().apply {

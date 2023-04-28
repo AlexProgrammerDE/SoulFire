@@ -65,8 +65,15 @@ import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.viaversion.FrameCodec;
 import net.pistonmaster.serverwrecker.viaversion.StorableOptions;
 import net.pistonmaster.serverwrecker.viaversion.StorableSession;
+import net.raphimc.viabedrock.netty.BatchLengthCodec;
+import net.raphimc.viabedrock.netty.PacketEncapsulationCodec;
+import net.raphimc.viabedrock.protocol.BedrockBaseProtocol;
 import net.raphimc.vialegacy.netty.PreNettyLengthCodec;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.baseprotocols.PreNettyBaseProtocol;
+import net.raphimc.viaprotocolhack.netty.viabedrock.DisconnectHandler;
+import net.raphimc.viaprotocolhack.netty.viabedrock.RakMessageEncapsulationCodec;
+import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
+import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,8 +82,12 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.ThreadLocalRandom;
 
-public class ViaTcpClientSession extends TcpSession {
+public class ViaClientSession extends TcpSession {
+    public static final String SIZER_NAME = "sizer";
+    public static final String COMPRESSION_NAME = "compression";
+    public static final String ENCRYPTION_NAME = "encryption";
     private static final String IP_REGEX = "\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b";
     private static Class<? extends Channel> CHANNEL_CLASS;
     private static Class<? extends DatagramChannel> DATAGRAM_CHANNEL_CLASS;
@@ -92,11 +103,11 @@ public class ViaTcpClientSession extends TcpSession {
     @Setter
     private Runnable postDisconnectHook;
 
-    public ViaTcpClientSession(String host, int port, PacketProtocol protocol, ProxyInfo proxy, SWOptions options) {
+    public ViaClientSession(String host, int port, PacketProtocol protocol, ProxyInfo proxy, SWOptions options) {
         this(host, port, "0.0.0.0", 0, protocol, proxy, options);
     }
 
-    public ViaTcpClientSession(String host, int port, String bindAddress, int bindPort, PacketProtocol protocol, ProxyInfo proxy, SWOptions options) {
+    public ViaClientSession(String host, int port, String bindAddress, int bindPort, PacketProtocol protocol, ProxyInfo proxy, SWOptions options) {
         super(host, port, protocol);
         this.bindAddress = bindAddress;
         this.bindPort = bindPort;
@@ -142,31 +153,44 @@ public class ViaTcpClientSession extends TcpSession {
             throw new IllegalStateException("Session has already been disconnected.");
         }
 
-        boolean debug = getFlag(BuiltinFlags.PRINT_DEBUG, false);
-
         if (CHANNEL_CLASS == null) {
             createTcpEventLoopGroup();
         }
 
         try {
-            final Bootstrap bootstrap = new Bootstrap();
-            bootstrap.channel(CHANNEL_CLASS);
+            ProtocolVersion version = options.protocolVersion();
+            boolean isLegacy = SWConstants.isLegacy(version);
+            boolean isBedrock = SWConstants.isBedrock(version);
+            Bootstrap bootstrap = new Bootstrap();
+
+            bootstrap.group(EVENT_LOOP_GROUP);
+            if (isBedrock) {
+                bootstrap.channelFactory(RakChannelFactory.client(DATAGRAM_CHANNEL_CLASS));
+            } else {
+                bootstrap.channel(CHANNEL_CLASS);
+            }
+
+            bootstrap
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getConnectTimeout() * 1000)
+                    .option(ChannelOption.IP_TOS, 0x18);
+
+            if (isBedrock) {
+                bootstrap
+                        .option(RakChannelOption.RAK_PROTOCOL_VERSION, 11)
+                        .option(RakChannelOption.RAK_CONNECT_TIMEOUT, 4_000L)
+                        .option(RakChannelOption.RAK_SESSION_TIMEOUT, 30_000L)
+                        .option(RakChannelOption.RAK_GUID, ThreadLocalRandom.current().nextLong());
+            } else {
+                bootstrap
+                        .option(ChannelOption.TCP_NODELAY, true)
+                        .option(ChannelOption.TCP_FASTOPEN_CONNECT, true);
+            }
+
             bootstrap.handler(new ChannelInitializer<>() {
                 @Override
                 public void initChannel(Channel channel) {
                     PacketProtocol protocol = getPacketProtocol();
-                    protocol.newClientSession(ViaTcpClientSession.this);
-
-                    channel.config().setOption(ChannelOption.IP_TOS, 0x18);
-                    try {
-                        channel.config().setOption(ChannelOption.TCP_NODELAY, true);
-                    } catch (ChannelException e) {
-                        if (debug) {
-                            System.out.println("Exception while trying to set TCP_NODELAY");
-                            e.printStackTrace();
-                        }
-                    }
-                    channel.config().setOption(ChannelOption.TCP_FASTOPEN_CONNECT, true);
+                    protocol.newClientSession(ViaClientSession.this);
 
                     ChannelPipeline pipeline = channel.pipeline();
 
@@ -178,29 +202,35 @@ public class ViaTcpClientSession extends TcpSession {
                     // This does the extra magic
                     UserConnectionImpl userConnection = new UserConnectionImpl(channel, true);
                     userConnection.put(new StorableOptions(options));
-                    userConnection.put(new StorableSession(ViaTcpClientSession.this));
+                    userConnection.put(new StorableSession(ViaClientSession.this));
 
                     ProtocolPipelineImpl protocolPipeline = new ProtocolPipelineImpl(userConnection);
-
-                    ProtocolVersion version = options.protocolVersion();
-                    boolean isLegacy = SWConstants.isLegacy(version);
 
                     if (isLegacy) {
                         protocolPipeline.add(PreNettyBaseProtocol.INSTANCE);
                         pipeline.addLast("vl-prenetty", new PreNettyLengthCodec(userConnection));
+                    } else if (isBedrock) {
+                        protocolPipeline.add(BedrockBaseProtocol.INSTANCE);
+                        pipeline.addLast("vp-disconnect", new DisconnectHandler());
+                        pipeline.addLast("vb-frame-encapsulation", new RakMessageEncapsulationCodec());
                     }
 
-                    pipeline.addLast("sizer", new FrameCodec());
+                    if (isBedrock) {
+                        pipeline.addLast(SIZER_NAME, new BatchLengthCodec());
+                        pipeline.addLast("vb-packet-encapsulation", new PacketEncapsulationCodec());
+                    } else {
+                        pipeline.addLast(SIZER_NAME, new FrameCodec());
+                    }
 
                     // Inject Via codec
                     pipeline.addLast("via-codec", new ViaCodec(userConnection));
 
-                    pipeline.addLast("codec", new TcpPacketCodec(ViaTcpClientSession.this, true));
-                    pipeline.addLast("manager", ViaTcpClientSession.this);
+                    pipeline.addLast("codec", new TcpPacketCodec(ViaClientSession.this, true));
+                    pipeline.addLast("manager", ViaClientSession.this);
 
                     addHAProxySupport(pipeline);
                 }
-            }).group(EVENT_LOOP_GROUP).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getConnectTimeout() * 1000);
+            });
 
             InetSocketAddress remoteAddress = resolveAddress();
             bootstrap.remoteAddress(remoteAddress);
@@ -230,14 +260,14 @@ public class ViaTcpClientSession extends TcpSession {
         Channel channel = getChannel();
         if (channel != null) {
             if (threshold >= 0) {
-                ChannelHandler handler = channel.pipeline().get("compression");
+                ChannelHandler handler = channel.pipeline().get(COMPRESSION_NAME);
                 if (handler == null) {
-                    channel.pipeline().addBefore("via-codec", "compression", new CompressionCodec(threshold));
+                    channel.pipeline().addBefore("via-codec", COMPRESSION_NAME, new CompressionCodec(threshold));
                 } else {
                     ((CompressionCodec) handler).setThreshold(threshold);
                 }
-            } else if (channel.pipeline().get("compression") != null) {
-                channel.pipeline().remove("compression");
+            } else if (channel.pipeline().get(COMPRESSION_NAME) != null) {
+                channel.pipeline().remove(COMPRESSION_NAME);
             }
         }
     }
@@ -433,14 +463,14 @@ public class ViaTcpClientSession extends TcpSession {
         logger.debug("Exception caught in Netty session.", cause);
     }
 
-    public void enableEncryption(SecretKey key) {
+    public void enableJavaEncryption(SecretKey key) {
         CryptoCodec codec = new CryptoCodec(key, key);
         ChannelPipeline pipeline = getChannel().pipeline();
 
         if (pipeline.get("vl-prenetty") != null) {
-            pipeline.addBefore("vl-prenetty", "encryption", codec);
+            pipeline.addBefore("vl-prenetty", ENCRYPTION_NAME, codec);
         } else {
-            pipeline.addBefore("sizer", "encryption", codec);
+            pipeline.addBefore(SIZER_NAME, ENCRYPTION_NAME, codec);
         }
     }
 }
