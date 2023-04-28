@@ -95,7 +95,8 @@ public class SWBaseListener extends SessionAdapter {
                 } else {
                     UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
                     boolean isLegacy = SWConstants.isLegacy(botConnection.options().protocolVersion());
-                    boolean shouldCallMojang = !isLegacy || Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
+                    ProtocolMetadataStorage metadataStorage = viaUserConnection.get(ProtocolMetadataStorage.class);
+                    boolean shouldCallMojang = !isLegacy || metadataStorage == null || metadataStorage.authenticate;
 
                     if (shouldCallMojang) {
                         SessionService sessionService = session.getFlag(MinecraftConstants.SESSION_SERVICE_KEY, new SessionService());
