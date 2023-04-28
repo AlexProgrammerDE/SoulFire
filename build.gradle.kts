@@ -64,7 +64,7 @@ dependencies {
     implementation("net.raphimc:ViaBedrock:0.0.1-SNAPSHOT") {
         exclude("io.netty", "netty-codec-http")
     }
-    implementation("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT") {
+    implementation("org.cloudburstmc.netty:netty-transport-raknet:4.1.51.Final") {
         isTransitive = false
     }
 
