@@ -53,13 +53,12 @@ import com.viaversion.viaversion.api.connection.UserConnection;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.SWConstants;
-import net.pistonmaster.serverwrecker.protocol.tcp.ViaClientSession;
+import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
-import java.util.Objects;
 
 @RequiredArgsConstructor
 public class SWBaseListener extends SessionAdapter {

@@ -49,7 +49,11 @@ public class BotsTicker implements InternalAddon, EventSubscriber<PreBotConnectE
             executor.scheduleWithFixedDelay(() -> {
                 tickTimer.advanceTime();
 
-                connection.tick(tickTimer.ticks, tickTimer.partialTicks);
+                try {
+                    connection.tick(tickTimer.ticks, tickTimer.partialTicks);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
             }, 0, 50, TimeUnit.MILLISECONDS); // 20 TPS
         }
 

@@ -21,19 +21,23 @@ package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import com.github.steveice10.opennbt.tag.builtin.*;
 import lombok.Getter;
+import net.pistonmaster.serverwrecker.protocol.bot.SWBlockConstants;
+import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.MCUniform;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.UniformOrInt;
 import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
+import net.pistonmaster.serverwrecker.util.BoundingBox;
+import net.pistonmaster.serverwrecker.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class LevelState {
+    private final SessionDataManager sessionDataManager;
     private final Map<ChunkKey, ChunkData> chunks = new ConcurrentHashMap<>();
     private final String dimensionName;
     private final int dimensionId;
@@ -56,7 +60,8 @@ public class LevelState {
     private final byte hasRaids;
     private final byte respawnAnchorWorks;
 
-    public LevelState(String dimensionName, int dimensionId, CompoundTag levelRegistry) {
+    public LevelState(SessionDataManager sessionDataManager, String dimensionName, int dimensionId, CompoundTag levelRegistry) {
+        this.sessionDataManager = sessionDataManager;
         this.dimensionName = dimensionName;
         this.dimensionId = dimensionId;
         Object lightLevel = levelRegistry.get("monster_spawn_light_level");
@@ -124,7 +129,7 @@ public class LevelState {
         return index + this.getMinSection();
     }
 
-    public void setBlock(Vector3i block, int state) {
+    public void setBlockId(Vector3i block, int state) {
         ChunkKey chunkKey = new ChunkKey(block);
         ChunkData chunkData = chunks.get(chunkKey);
 
@@ -134,7 +139,7 @@ public class LevelState {
         chunkData.setBlock(block, state);
     }
 
-    public int getBlock(Vector3i block) {
+    public int getBlockIdAt(Vector3i block) {
         ChunkKey chunkKey = new ChunkKey(block);
         ChunkData chunkData = chunks.get(chunkKey);
 
@@ -147,5 +152,43 @@ public class LevelState {
     public boolean isChunkLoaded(Vector3i block) {
         ChunkKey chunkKey = new ChunkKey(block);
         return chunks.containsKey(chunkKey);
+    }
+
+    public int getBlockIdAt(int blockPosX, int blockPosY, int blockPosZ) {
+        return getBlockIdAt(Vector3i.from(blockPosX, blockPosY, blockPosZ));
+    }
+
+    public String getBlockNameAt(Vector3i block) {
+        return sessionDataManager.getServerWrecker().getGlobalBlockPalette().getName(getBlockIdAt(block));
+    }
+
+    public String getBlockNameAt(int blockPosX, int blockPosY, int blockPosZ) {
+        return getBlockNameAt(Vector3i.from(blockPosX, blockPosY, blockPosZ));
+    }
+
+    public List<BoundingBox> getCollisionBoxes(BoundingBox aabb) {
+        List<BoundingBox> boundingBoxList = new ArrayList<>();
+
+        int minX = MathHelper.floor_double(aabb.minX);
+        int maxX = MathHelper.floor_double(aabb.maxX + 1.0);
+        int minY = MathHelper.floor_double(aabb.minY);
+        int maxY = MathHelper.floor_double(aabb.maxY + 1.0);
+        int minZ = MathHelper.floor_double(aabb.minZ);
+        int maxZ = MathHelper.floor_double(aabb.maxZ + 1.0);
+
+        for (int x = minX; x < maxX; x++) {
+            for (int y = minY; y < maxY; y++) {
+                for (int z = minZ; z < maxZ; z++) {
+                    if (this.isSolidBlockAt(x, y, z)) {
+                        boundingBoxList.add(new BoundingBox(x, y, z, x + 1, y + 1, z + 1));
+                    }
+                }
+            }
+        }
+        return boundingBoxList;
+    }
+
+    private boolean isSolidBlockAt(int x, int y, int z) {
+        return !getBlockNameAt(x, y, z).equals(SWBlockConstants.AIR); // TODO: Implement block info
     }
 }

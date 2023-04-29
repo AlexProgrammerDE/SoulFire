@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.viaversion.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
 import net.pistonmaster.serverwrecker.protocol.SWProtocolConstants;
-import net.pistonmaster.serverwrecker.protocol.tcp.ViaClientSession;
+import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.viaversion.StorableSession;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
 

@@ -26,7 +26,7 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
-import net.pistonmaster.serverwrecker.protocol.tcp.ViaClientSession;
+import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import org.slf4j.Logger;
 
 import java.time.Instant;
@@ -61,6 +61,8 @@ public record BotConnection(BotConnectionFactory factory, ServerWrecker serverWr
     }
 
     public void tick(long ticks, float partialTicks) {
-        session.tick(ticks, partialTicks);
+        for (int i = 0; i < ticks; i++) {
+            sessionDataManager().tick();
+        }
     }
 }

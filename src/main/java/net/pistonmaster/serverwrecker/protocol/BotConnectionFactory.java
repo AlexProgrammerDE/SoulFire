@@ -32,7 +32,7 @@ import net.pistonmaster.serverwrecker.common.NullHelper;
 import net.pistonmaster.serverwrecker.common.ProxyBotData;
 import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
-import net.pistonmaster.serverwrecker.protocol.tcp.ViaClientSession;
+import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;

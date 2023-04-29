@@ -35,4 +35,17 @@ public class BorderState {
     private int newAbsoluteMaxSize;
     private int warningBlocks;
     private int warningTime;
+
+    public void tick() {
+        if (lerpTime > 0) {
+            double d = (double) (System.currentTimeMillis() - lerpTime) / 1000.0D;
+
+            if (d < 0.0D || d > 1.0D) {
+                lerpTime = 0;
+                oldSize = newSize;
+            } else {
+                oldSize = oldSize + (newSize - oldSize) * d;
+            }
+        }
+    }
 }

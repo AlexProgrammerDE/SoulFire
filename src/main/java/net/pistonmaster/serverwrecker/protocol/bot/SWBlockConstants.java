@@ -17,11 +17,9 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.common;
+package net.pistonmaster.serverwrecker.protocol.bot;
 
-public record EntityMotion(
-        double motionX,
-        double motionY,
-        double motionZ
-) {
+public class SWBlockConstants {
+    public static final String WATER = "minecraft:water";
+    public static final String AIR = "minecraft:air";
 }

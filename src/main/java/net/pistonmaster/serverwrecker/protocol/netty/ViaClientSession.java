@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol.tcp;
+package net.pistonmaster.serverwrecker.protocol.netty;
 
 import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
 import com.github.steveice10.packetlib.BuiltinFlags;
@@ -192,7 +192,9 @@ public class ViaClientSession extends TcpSession {
                     PacketProtocol protocol = getPacketProtocol();
                     protocol.newClientSession(ViaClientSession.this);
 
-                    channel.config().setOption(ChannelOption.TCP_FASTOPEN_CONNECT, true);
+                    if (!isBedrock) {
+                        channel.config().setOption(ChannelOption.TCP_FASTOPEN_CONNECT, true);
+                    }
 
                     ChannelPipeline pipeline = channel.pipeline();
 
@@ -476,9 +478,5 @@ public class ViaClientSession extends TcpSession {
         } else {
             pipeline.addBefore(SIZER_NAME, ENCRYPTION_NAME, codec);
         }
-    }
-
-    public void tick(long ticks, float partialTicks) {
-
     }
 }

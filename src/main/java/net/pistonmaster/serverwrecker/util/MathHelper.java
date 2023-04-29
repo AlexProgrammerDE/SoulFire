@@ -17,13 +17,17 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.common;
+package net.pistonmaster.serverwrecker.util;
 
-public record EntityLocation(
-        double x,
-        double y,
-        double z,
-        float yaw,
-        float pitch
-) {
+/**
+ * Credit to https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/util/MathHelper.java
+ */
+public class MathHelper {
+    /**
+     * Returns the greatest integer less than or equal to the double argument
+     */
+    public static int floor_double(double value) {
+        int i = (int) value;
+        return value < (double) i ? i - 1 : i;
+    }
 }

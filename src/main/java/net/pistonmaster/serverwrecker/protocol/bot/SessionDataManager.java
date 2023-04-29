@@ -58,8 +58,6 @@ import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.common.EntityLocation;
-import net.pistonmaster.serverwrecker.common.EntityMotion;
 import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
@@ -69,7 +67,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.BorderState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkData;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.WeatherState;
-import net.pistonmaster.serverwrecker.protocol.tcp.ViaClientSession;
+import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.util.BusHandler;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
@@ -93,8 +91,7 @@ public final class SessionDataManager {
     private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
     private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
     private BorderState borderState;
-    private EntityLocation location;
-    private EntityMotion motion;
+    private EntityMovementManager entityMovementManager;
     private float health = -1;
     private int food = -1;
     private float saturation = -1;
@@ -153,8 +150,8 @@ public final class SessionDataManager {
     @BusHandler
     public void onPosition(ClientboundPlayerPositionPacket packet) {
         try {
-            location = new EntityLocation(packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch());
-            log.info("Position updated: {}", location);
+            entityMovementManager = new EntityMovementManager(this, packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch());
+            log.info("Position updated: {}", entityMovementManager);
         } catch (Exception e) {
             log.error("Error while logging position", e);
         }
@@ -197,7 +194,7 @@ public final class SessionDataManager {
                 String name = dimension.<StringTag>get("name").getValue();
                 int id = dimension.<IntTag>get("id").getValue();
 
-                levels.put(name, new LevelState(name, id, dimension.get("element")));
+                levels.put(name, new LevelState(this, name, id, dimension.get("element")));
             }
             CompoundTag biomeRegistry = loginData.registry().get("minecraft:worldgen/biome");
             for (Tag type : biomeRegistry.<ListTag>get("value").getValue()) {
@@ -393,7 +390,7 @@ public final class SessionDataManager {
             int newId = entry.getBlock();
 
             System.out.println("Updating block at " + vector3i + " to " + newId);
-            level.setBlock(vector3i, newId);
+            level.setBlockId(vector3i, newId);
         }
     }
 
@@ -405,7 +402,7 @@ public final class SessionDataManager {
         Vector3i vector3i = entry.getPosition();
         int newId = entry.getBlock();
 
-        level.setBlock(vector3i, newId);
+        level.setBlockId(vector3i, newId);
     }
 
     @BusHandler
@@ -484,7 +481,7 @@ public final class SessionDataManager {
     public void onEntityMotion(ClientboundSetEntityMotionPacket packet) {
         try {
             if (loginData.entityId() == packet.getEntityId()) {
-                motion = new EntityMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
+                entityMovementManager.setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
                 //log.info("Player moved with motion: {} {} {}", motionX, motionY, motionZ);
             } else {
                 //log.debug("Entity {} moved with motion: {} {} {}", entityId, motionX, motionY, motionZ);
@@ -558,7 +555,23 @@ public final class SessionDataManager {
         return new ChunkSection(blockCount, chunkPalette, biomePalette);
     }
 
-    private LevelState getCurrentLevel() {
+    public LevelState getCurrentLevel() {
+        if (currentDimension == null) {
+            return null;
+        }
+
         return levels.get(currentDimension.dimensionType());
+    }
+
+    public void tick() {
+        if (borderState != null) {
+            borderState.tick();
+        }
+
+        LevelState level = getCurrentLevel();
+        if (level != null && entityMovementManager != null
+                && level.isChunkLoaded(entityMovementManager.getBlockPos())) {
+            entityMovementManager.tick();
+        }
     }
 }

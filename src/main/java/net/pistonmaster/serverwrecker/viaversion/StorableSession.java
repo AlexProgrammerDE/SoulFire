@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.viaversion;
 
 import com.viaversion.viaversion.api.connection.StorableObject;
-import net.pistonmaster.serverwrecker.protocol.tcp.ViaClientSession;
+import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 
 public record StorableSession(ViaClientSession session) implements StorableObject {
     @Override
