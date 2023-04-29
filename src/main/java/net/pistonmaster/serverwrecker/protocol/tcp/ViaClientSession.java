@@ -183,8 +183,7 @@ public class ViaClientSession extends TcpSession {
                         .option(RakChannelOption.RAK_GUID, ThreadLocalRandom.current().nextLong());
             } else {
                 bootstrap
-                        .option(ChannelOption.TCP_NODELAY, true)
-                        .option(ChannelOption.TCP_FASTOPEN_CONNECT, true);
+                        .option(ChannelOption.TCP_NODELAY, true);
             }
 
             bootstrap.handler(new ChannelInitializer<>() {
@@ -192,6 +191,8 @@ public class ViaClientSession extends TcpSession {
                 public void initChannel(Channel channel) {
                     PacketProtocol protocol = getPacketProtocol();
                     protocol.newClientSession(ViaClientSession.this);
+
+                    channel.config().setOption(ChannelOption.TCP_FASTOPEN_CONNECT, true);
 
                     ChannelPipeline pipeline = channel.pipeline();
 
@@ -475,5 +476,9 @@ public class ViaClientSession extends TcpSession {
         } else {
             pipeline.addBefore(SIZER_NAME, ENCRYPTION_NAME, codec);
         }
+    }
+
+    public void tick(long ticks, float partialTicks) {
+
     }
 }

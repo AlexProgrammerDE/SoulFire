@@ -59,4 +59,8 @@ public record BotConnection(BotConnectionFactory factory, ServerWrecker serverWr
         meta.getUnregisterCleanups().add(instance);
         return instance;
     }
+
+    public void tick(long ticks, float partialTicks) {
+        session.tick(ticks, partialTicks);
+    }
 }
