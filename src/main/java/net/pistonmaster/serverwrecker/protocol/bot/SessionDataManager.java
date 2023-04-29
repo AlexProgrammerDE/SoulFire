@@ -30,6 +30,7 @@ import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
 import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.GlobalPos;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
+import com.github.steveice10.mc.protocol.data.game.entity.player.PositionElement;
 import com.github.steveice10.mc.protocol.data.game.level.block.BlockChangeEntry;
 import com.github.steveice10.mc.protocol.data.game.level.notify.RainStrengthValue;
 import com.github.steveice10.mc.protocol.data.game.level.notify.RespawnScreenValue;
@@ -44,6 +45,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.*;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundResourcePackPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import com.github.steveice10.opennbt.tag.builtin.*;
@@ -149,12 +151,37 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onPosition(ClientboundPlayerPositionPacket packet) {
-        try {
-            entityMovementManager = new EntityMovementManager(this, packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch());
-            log.info("Position updated: {}", entityMovementManager);
-        } catch (Exception e) {
-            log.error("Error while logging position", e);
+        double currentX = entityMovementManager != null ? entityMovementManager.getX() : 0;
+        double currentY = entityMovementManager != null ? entityMovementManager.getY() : 0;
+        double currentZ = entityMovementManager != null ? entityMovementManager.getZ() : 0;
+        float currentYaw = entityMovementManager != null ? entityMovementManager.getYaw() : 0;
+        float currentPitch = entityMovementManager != null ? entityMovementManager.getPitch() : 0;
+
+        boolean xRelative = packet.getRelative().contains(PositionElement.X);
+        boolean yRelative = packet.getRelative().contains(PositionElement.Y);
+        boolean zRelative = packet.getRelative().contains(PositionElement.Z);
+        boolean yawRelative = packet.getRelative().contains(PositionElement.YAW);
+        boolean pitchRelative = packet.getRelative().contains(PositionElement.PITCH);
+
+        double x = xRelative ? currentX + packet.getX() : packet.getX();
+        double y = yRelative ? currentY + packet.getY() : packet.getY();
+        double z = zRelative ? currentZ + packet.getZ() : packet.getZ();
+        float yaw = yawRelative ? currentYaw + packet.getYaw() : packet.getYaw();
+        float pitch = pitchRelative ? currentPitch + packet.getPitch() : packet.getPitch();
+
+        if (entityMovementManager == null) {
+            entityMovementManager = new EntityMovementManager(this, x, y, z, yaw, pitch);
+        } else {
+            entityMovementManager.setX(x);
+            entityMovementManager.setY(y);
+            entityMovementManager.setZ(z);
+            entityMovementManager.setYaw(yaw);
+            entityMovementManager.setPitch(pitch);
         }
+
+        session.send(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
+
+        log.info("Position updated: {}", entityMovementManager);
     }
 
     @BusHandler
@@ -170,11 +197,6 @@ public final class SessionDataManager {
         } catch (Exception e) {
             log.error("Error while logging health", e);
         }
-    }
-
-    @BusHandler
-    public void onDeath(ClientboundPlayerCombatKillPacket packet) {
-        this.isDead = true;
     }
 
     @BusHandler
@@ -243,6 +265,11 @@ public final class SessionDataManager {
         } catch (Exception e) {
             log.error("Error while logging join", e);
         }
+    }
+
+    @BusHandler
+    public void onDeath(ClientboundPlayerCombatKillPacket packet) {
+        this.isDead = true;
     }
 
     @BusHandler

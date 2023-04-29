@@ -25,6 +25,8 @@ import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.codec.PacketCodecHelper;
 import com.github.steveice10.packetlib.crypt.PacketEncryption;
 import com.github.steveice10.packetlib.event.session.PacketSendingEvent;
+import com.github.steveice10.packetlib.event.session.SessionEvent;
+import com.github.steveice10.packetlib.event.session.SessionListener;
 import com.github.steveice10.packetlib.helper.TransportHelper;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
@@ -83,6 +85,8 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ViaClientSession extends TcpSession {
@@ -103,6 +107,7 @@ public class ViaClientSession extends TcpSession {
     private final SWOptions options;
     @Setter
     private Runnable postDisconnectHook;
+    private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
 
     public ViaClientSession(String host, int port, PacketProtocol protocol, ProxyInfo proxy, SWOptions options) {
         this(host, port, "0.0.0.0", 0, protocol, proxy, options);
@@ -427,6 +432,23 @@ public class ViaClientSession extends TcpSession {
     }
 
     @Override
+    public void callPacketReceived(Packet packet) {
+        if (packet.isPriority()) {
+            super.callPacketReceived(packet);
+            return;
+        }
+
+        packetTickQueue.add(packet);
+    }
+
+    public void tick() {
+        Packet packet;
+        while ((packet = packetTickQueue.poll()) != null) {
+            super.callPacketReceived(packet);
+        }
+    }
+
+    @Override
     public void send(Packet packet) {
         Channel channel = getChannel();
         if (channel == null) {
@@ -436,16 +458,18 @@ public class ViaClientSession extends TcpSession {
         PacketSendingEvent sendingEvent = new PacketSendingEvent(this, packet);
         this.callEvent(sendingEvent);
 
-        if (!sendingEvent.isCancelled()) {
-            final Packet toSend = sendingEvent.getPacket();
-            channel.writeAndFlush(toSend).addListener((ChannelFutureListener) future -> {
-                if (future.isSuccess()) {
-                    callPacketSent(toSend);
-                } else {
-                    packetExceptionCaught(null, future.cause(), packet);
-                }
-            });
+        if (sendingEvent.isCancelled()) {
+            return;
         }
+
+        final Packet toSend = sendingEvent.getPacket();
+        channel.writeAndFlush(toSend).addListener((ChannelFutureListener) future -> {
+            if (future.isSuccess()) {
+                callPacketSent(toSend);
+            } else {
+                packetExceptionCaught(null, future.cause(), packet);
+            }
+        });
     }
 
     @Override

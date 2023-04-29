@@ -62,6 +62,7 @@ public record BotConnection(BotConnectionFactory factory, ServerWrecker serverWr
 
     public void tick(long ticks, float partialTicks) {
         for (int i = 0; i < ticks; i++) {
+            session.tick();
             sessionDataManager().tick();
         }
     }

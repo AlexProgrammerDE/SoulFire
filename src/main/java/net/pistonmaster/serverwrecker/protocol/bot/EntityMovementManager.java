@@ -171,23 +171,23 @@ public final class EntityMovementManager {
 
         // Send position packets if changed
         if (positionChanged && rotationChanged) {
-            this.dataManager.getSession().send(new ServerboundMovePlayerPosRotPacket(this.onGround, this.x, this.y, this.z, this.yaw, this.pitch));
+            dataManager.getSession().send(new ServerboundMovePlayerPosRotPacket(this.onGround, this.x, this.y, this.z, this.yaw, this.pitch));
         } else if (positionChanged) {
-            this.dataManager.getSession().send(new ServerboundMovePlayerPosPacket(this.onGround, this.x, this.y, this.z));
+            dataManager.getSession().send(new ServerboundMovePlayerPosPacket(this.onGround, this.x, this.y, this.z));
         } else if (rotationChanged) {
-            this.dataManager.getSession().send(new ServerboundMovePlayerRotPacket(this.onGround, this.yaw, this.pitch));
+            dataManager.getSession().send(new ServerboundMovePlayerRotPacket(this.onGround, this.yaw, this.pitch));
         } else if (onGroundChanged) {
-            this.dataManager.getSession().send(new ServerboundMovePlayerStatusOnlyPacket(this.onGround));
+            dataManager.getSession().send(new ServerboundMovePlayerStatusOnlyPacket(this.onGround));
         }
     }
 
     public boolean isInWater() {
-        return dataManager.getCurrentLevel()
+        return getLevelSafe()
                 .getBlockNameAt(this.getBlockPosX(), this.getBlockPosY(), this.getBlockPosZ()).equals(SWBlockConstants.WATER);
     }
 
     public boolean isHeadInWater() {
-        return dataManager.getCurrentLevel()
+        return getLevelSafe()
                 .getBlockNameAt(this.getBlockPosX(), (int) (this.y + this.getEyeHeight() + 0.12), this.getBlockPosZ()).equals(SWBlockConstants.WATER);
     }
 
@@ -305,7 +305,7 @@ public final class EntityMovementManager {
     }
 
     public boolean moveCollide(double targetX, double targetY, double targetZ) {
-        LevelState level = dataManager.getCurrentLevel();
+        LevelState level = getLevelSafe();
         // Target position
         double originalTargetX = targetX;
         double originalTargetY = targetY;
@@ -412,5 +412,12 @@ public final class EntityMovementManager {
 
     public Vector3i getBlockPos() {
         return Vector3i.from(getBlockPosX(), getBlockPosY(), getBlockPosZ());
+    }
+
+    private LevelState getLevelSafe() {
+        // SessionDataManager ensures that the current level is never null
+        LevelState level = dataManager.getCurrentLevel();
+        assert level != null;
+        return level;
     }
 }

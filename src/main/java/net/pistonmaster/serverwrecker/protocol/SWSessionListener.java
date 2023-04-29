@@ -46,7 +46,7 @@ public class SWSessionListener extends SessionAdapter {
             return;
         }
 
-        botConnection.logger().debug("Received packet: " + packet.getClass().getSimpleName());
+        // botConnection.logger().debug("Received packet: " + packet.toString());
 
         BusHelper.handlePacket(event1.getPacket(), bus);
     }
@@ -57,6 +57,12 @@ public class SWSessionListener extends SessionAdapter {
         ServerWreckerAPI.postEvent(event1);
         event.setPacket(event1.getPacket());
         event.setCancelled(event1.cancelled());
+
+        if (event1.cancelled()) {
+            return;
+        }
+
+        botConnection.logger().debug("Sending packet: " + event.getPacket().toString());
     }
 
     @Override
