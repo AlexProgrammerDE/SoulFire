@@ -6,7 +6,8 @@
     {
       "matchPackageNames": [
         "com.github.GeyserMC:MCProtocolLib",
-        "com.github.GeyserMC:mcauthlib"
+        "com.github.GeyserMC:mcauthlib",
+        "org.cloudburstmc.netty:netty-transport-raknet"
       ],
       "enabled": false
     },
