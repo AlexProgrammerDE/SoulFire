@@ -73,16 +73,21 @@ public final class EntityMovementManager {
         this.yaw = yaw;
         this.pitch = pitch;
 
-        setPos(x, y, z);
+        setPosition(x, y, z);
     }
 
-    public void setPos(double x, double y, double z) {
+    public void setPosition(double x, double y, double z) {
         this.x = x;
         this.y = y;
         this.z = z;
         float w = 0.3F;
         float h = 0.9F;
         this.boundingBox = new BoundingBox(x - w, y, z - w, x + w, y + h, z + w);
+    }
+
+    public void setRotation(float yaw, float pitch) {
+        this.yaw = yaw;
+        this.pitch = pitch;
     }
 
     public void setMotion(double x, double y, double z) {
@@ -129,7 +134,7 @@ public final class EntityMovementManager {
 
         // Jump
         if (this.jumping) {
-            if (this.isInWater()) {
+            if (this.isInFluid()) {
                 this.motionY += 0.03999999910593033D;
             } else if (this.onGround && this.jumpTicks == 0) {
                 this.jump();
@@ -145,7 +150,7 @@ public final class EntityMovementManager {
         if (this.flying) {
             this.travelFlying(this.moveForward, 0, this.moveStrafing);
         } else {
-            if (this.isInWater()) {
+            if (this.isInFluid()) {
                 // Is inside of water
                 this.travelInWater(this.moveForward, 0, this.moveStrafing);
             } else {
@@ -169,6 +174,12 @@ public final class EntityMovementManager {
         boolean rotationChanged = startPitch != this.pitch || startYaw != this.yaw;
         boolean onGroundChanged = startOnGround != this.onGround;
 
+        if (positionChanged || rotationChanged || onGroundChanged) {
+            System.out.println("Start   x: " + startX + " y: " + startY + " z: " + startZ + " pitch: " + startPitch + " yaw: " + startYaw + " onGround: " + startOnGround);
+
+            System.out.println("Current x: " + this.x + " y: " + this.y + " z: " + this.z + " pitch: " + this.pitch + " yaw: " + this.yaw + " onGround: " + this.onGround);
+        }
+
         // Send position packets if changed
         if (positionChanged && rotationChanged) {
             dataManager.getSession().send(new ServerboundMovePlayerPosRotPacket(this.onGround, this.x, this.y, this.z, this.yaw, this.pitch));
@@ -181,14 +192,10 @@ public final class EntityMovementManager {
         }
     }
 
-    public boolean isInWater() {
+    public boolean isInFluid() {
+        Vector3i blockPos = this.getBlockPos();
         return getLevelSafe()
-                .getBlockNameAt(this.getBlockPosX(), this.getBlockPosY(), this.getBlockPosZ()).equals(SWBlockConstants.WATER);
-    }
-
-    public boolean isHeadInWater() {
-        return getLevelSafe()
-                .getBlockNameAt(this.getBlockPosX(), (int) (this.y + this.getEyeHeight() + 0.12), this.getBlockPosZ()).equals(SWBlockConstants.WATER);
+                .getBlockNameAt(blockPos).equals(SWBlockConstants.WATER); // TODO: Add other fluids like lava
     }
 
     public void jump() {
@@ -258,7 +265,7 @@ public final class EntityMovementManager {
         float slipperiness = this.getBlockSlipperiness() * 0.91F;
 
         // Move
-        this.collision = this.moveCollide(-this.motionX, this.motionY, -this.motionZ);
+        this.collision = this.moveCollide(this.motionX, this.motionY, this.motionZ);
 
         // Gravity
         if (!this.flying) {

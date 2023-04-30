@@ -17,17 +17,26 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol;
+package net.pistonmaster.serverwrecker.data;
 
 import lombok.Getter;
-import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import lombok.AllArgsConstructor;
 
 @Getter
-public class BotConnectionMeta {
-    private final List<UnregisterCleanup> unregisterCleanups = new ArrayList<>();
+@AllArgsConstructor
+public final class DropData {
+    private final ItemType dropId;
+    private int dropMeta = -1;
+    private int minCount = -1;
+    private int maxCount = -1;
+
+    public DropData(ItemType dropId) {
+        this.dropId = dropId;
+    }
+
+    public DropData(ItemType dropId, int minCount, int maxCount) {
+        this.dropId = dropId;
+        this.minCount = minCount;
+        this.maxCount = maxCount;
+    }
 }

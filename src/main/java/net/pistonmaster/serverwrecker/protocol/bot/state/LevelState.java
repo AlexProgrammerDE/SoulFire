@@ -21,7 +21,8 @@ package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import com.github.steveice10.opennbt.tag.builtin.*;
 import lombok.Getter;
-import net.pistonmaster.serverwrecker.protocol.bot.SWBlockConstants;
+import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.data.BoundingBoxType;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.MCUniform;
@@ -139,7 +140,7 @@ public class LevelState {
         chunkData.setBlock(block, state);
     }
 
-    public int getBlockIdAt(Vector3i block) {
+    public int getBlockStateIdAt(Vector3i block) {
         ChunkKey chunkKey = new ChunkKey(block);
         ChunkData chunkData = chunks.get(chunkKey);
 
@@ -154,16 +155,8 @@ public class LevelState {
         return chunks.containsKey(chunkKey);
     }
 
-    public int getBlockIdAt(int blockPosX, int blockPosY, int blockPosZ) {
-        return getBlockIdAt(Vector3i.from(blockPosX, blockPosY, blockPosZ));
-    }
-
     public String getBlockNameAt(Vector3i block) {
-        return sessionDataManager.getServerWrecker().getGlobalBlockPalette().getName(getBlockIdAt(block));
-    }
-
-    public String getBlockNameAt(int blockPosX, int blockPosY, int blockPosZ) {
-        return getBlockNameAt(Vector3i.from(blockPosX, blockPosY, blockPosZ));
+        return sessionDataManager.getServerWrecker().getGlobalBlockPalette().getBlockNameForStateId(getBlockStateIdAt(block));
     }
 
     public List<BoundingBox> getCollisionBoxes(BoundingBox aabb) {
@@ -179,7 +172,7 @@ public class LevelState {
         for (int x = minX; x < maxX; x++) {
             for (int y = minY; y < maxY; y++) {
                 for (int z = minZ; z < maxZ; z++) {
-                    if (this.isSolidBlockAt(x, y, z)) {
+                    if (this.isSolidBlockAt(Vector3i.from(x, y, z))) {
                         boundingBoxList.add(new BoundingBox(x, y, z, x + 1, y + 1, z + 1));
                     }
                 }
@@ -188,7 +181,13 @@ public class LevelState {
         return boundingBoxList;
     }
 
-    private boolean isSolidBlockAt(int x, int y, int z) {
-        return !getBlockNameAt(x, y, z).equals(SWBlockConstants.AIR); // TODO: Implement block info
+    private boolean isSolidBlockAt(Vector3i block) {
+        String blockName = getBlockNameAt(block);
+        BlockType blockType = BlockType.getByMcName(blockName);
+        if (blockType == null) {
+            sessionDataManager.getLog().error("Unknown block: {}", blockName);
+            return false;
+        }
+        return blockType.getBoundingBox() == BoundingBoxType.BLOCK;
     }
 }

@@ -61,8 +61,8 @@ public record BotConnection(BotConnectionFactory factory, ServerWrecker serverWr
     }
 
     public void tick(long ticks, float partialTicks) {
+        session.tick(); // Ensure all packets are handled before ticking
         for (int i = 0; i < ticks; i++) {
-            session.tick();
             sessionDataManager().tick();
         }
     }

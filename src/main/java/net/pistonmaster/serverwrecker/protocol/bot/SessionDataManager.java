@@ -172,11 +172,8 @@ public final class SessionDataManager {
         if (entityMovementManager == null) {
             entityMovementManager = new EntityMovementManager(this, x, y, z, yaw, pitch);
         } else {
-            entityMovementManager.setX(x);
-            entityMovementManager.setY(y);
-            entityMovementManager.setZ(z);
-            entityMovementManager.setYaw(yaw);
-            entityMovementManager.setPitch(pitch);
+            entityMovementManager.setPosition(x, y, z);
+            entityMovementManager.setRotation(yaw, pitch);
         }
 
         session.send(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
@@ -357,7 +354,7 @@ public final class SessionDataManager {
                 gameMode = (GameMode) packet.getValue();
             }
             case ENTER_CREDITS -> {
-                log.info("Entered credits {} (Repawning now)", packet.getValue());
+                log.info("Entered credits {} (Respawning now)", packet.getValue());
                 session.send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)); // Respawns the player
             }
             case DEMO_MESSAGE -> log.debug("Demo event: {}", packet.getValue());
@@ -508,8 +505,11 @@ public final class SessionDataManager {
     public void onEntityMotion(ClientboundSetEntityMotionPacket packet) {
         try {
             if (loginData.entityId() == packet.getEntityId()) {
-                entityMovementManager.setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
-                //log.info("Player moved with motion: {} {} {}", motionX, motionY, motionZ);
+                double motionX = packet.getMotionX();
+                double motionY = packet.getMotionY();
+                double motionZ = packet.getMotionZ();
+                entityMovementManager.setMotion(motionX, motionY, motionZ);
+                log.info("Bot forced to motion: {} {} {}", motionX, motionY, motionZ);
             } else {
                 //log.debug("Entity {} moved with motion: {} {} {}", entityId, motionX, motionY, motionZ);
             }

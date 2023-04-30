@@ -47,11 +47,7 @@ public class GlobalBlockPalette {
         blockNameToStateId.put(name, id);
     }
 
-    public int getId(String name) {
-        return blockNameToStateId.getOrDefault(name, 0);
-    }
-
-    public String getName(int id) {
+    public String getBlockNameForStateId(int id) {
         return stateIdToBlockName[id];
     }
 }

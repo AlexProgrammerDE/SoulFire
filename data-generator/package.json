@@ -1,0 +1,20 @@
+{
+  "name": "data-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsx index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "minecraft-data": "^3.33.0",
+    "tsx": "^3.12.7",
+    "typescript": "^5.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.3"
+  }
+}
