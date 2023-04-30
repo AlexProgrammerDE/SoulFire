@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.addons;
 
 import net.kyori.event.EventSubscriber;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.serverwrecker.common.SWOptions;
@@ -28,7 +27,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AutoRegister implements InternalAddon, EventSubscriber<ChatMessageReceiveEvent> {
     @Override
-    public void init(ServerWrecker serverWrecker) {
+    public void onLoad() {
         ServerWreckerAPI.registerListener(ChatMessageReceiveEvent.class, this);
     }
 

@@ -38,7 +38,7 @@ import lombok.Setter;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.pistonmaster.serverwrecker.addons.*;
+import net.pistonmaster.serverwrecker.api.Addon;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.state.AttackEndEvent;
 import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
@@ -47,9 +47,9 @@ import net.pistonmaster.serverwrecker.common.*;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.mojangdata.TranslationMapper;
+import net.pistonmaster.serverwrecker.protocol.AuthData;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
-import net.pistonmaster.serverwrecker.protocol.OfflineAuthenticationService;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
@@ -78,10 +78,6 @@ public class ServerWrecker {
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
-    private final Set<InternalAddon> addons = Set.of(
-            new BotsTicker(), new ClientBrand(), new ClientSettings(),
-            new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
-            new ChatMessageLogger(), new ServerListBypass());
     private final List<BotConnection> botConnections = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
@@ -91,13 +87,13 @@ public class ServerWrecker {
     private final Map<String, String> mojangTranslations = new HashMap<>();
     private final GlobalBlockPalette globalBlockPalette;
     private final PlainTextComponentSerializer messageSerializer;
+    private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
+    private final SWTerminalConsole terminalConsole;
     @Setter
     private AttackState attackState = AttackState.STOPPED;
     @Setter
     private List<String> accounts;
     private boolean shutdown = false;
-    private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
-    private final SWTerminalConsole terminalConsole;
 
     public ServerWrecker(Path dataFolder) {
         // Register into injector
@@ -195,8 +191,8 @@ public class ServerWrecker {
             settingsPanel.registerVersions();
         }
 
-        for (InternalAddon addon : addons) {
-            addon.init(this);
+        for (Addon addon : ServerWreckerAPI.getAddons()) {
+            addon.onEnable(this);
         }
 
         initPlugins(dataFolder.resolve("plugins"));
@@ -233,11 +229,11 @@ public class ServerWrecker {
         Iterator<BotProxy> proxyIterator = proxyCache.listIterator();
         Map<BotProxy, AtomicInteger> proxyUseMap = new HashMap<>();
         List<BotConnectionFactory> factories = new ArrayList<>();
-        for (int i = 1; i <= options.amount(); i++) {
-            Pair<String, String> userPassword;
+        for (int i = 0; i <= options.amount(); i++) {
+            AuthData authData;
 
             if (accounts == null) {
-                userPassword = new Pair<>(String.format(options.botNameFormat(), i), "");
+                authData = new AuthData(String.format(options.botNameFormat(), i));
             } else {
                 if (accounts.size() <= i) {
                     logger.warn("Bot amount is set higher than accounts are available. Limiting bot amount to {}", accounts.size());
@@ -247,25 +243,32 @@ public class ServerWrecker {
                 String[] lines = accounts.get(i).split(":");
 
                 if (lines.length == 1) {
-                    userPassword = new Pair<>(lines[0], "");
+                    authData = new AuthData(lines[0]);
                 } else if (lines.length == 2) {
-                    userPassword = new Pair<>(lines[0], lines[1]);
+                    String email = lines[0];
+                    String password = lines[1];
+
+                    Optional<AuthData> optional = authenticate(options, email, password, Proxy.NO_PROXY);
+                    if (optional.isEmpty()) {
+                        logger.warn("The account {} failed to authenticate! (skipping it) Check above logs for further information.", email);
+                        continue;
+                    }
+
+                    authData = optional.get();
                 } else {
-                    userPassword = new Pair<>(String.format(options.botNameFormat(), i), "");
+                    throw new IllegalArgumentException("Invalid account format: " + accounts.get(i));
                 }
             }
 
-            Optional<MinecraftProtocol> optional = authenticate(options, userPassword.left(), userPassword.right(), Proxy.NO_PROXY);
-            if (optional.isEmpty()) {
-                logger.warn("The account " + userPassword.left() + " failed to authenticate! (skipping it) Check above logs for further information.");
-                continue;
-            }
-            MinecraftProtocol protocol = optional.get();
+            System.out.println("Authenticated " + authData);
+
+            // AuthData will be used internally instead of the MCProtocol data
+            MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile(authData.profileId(), authData.username()), authData.authToken());
 
             // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
             protocol.setUseDefaultListeners(false);
 
-            Logger logger = LoggerFactory.getLogger(protocol.getProfile().getName());
+            Logger logger = LoggerFactory.getLogger(authData.username());
             ProxyBotData proxyBotData = null;
             if (!proxyCache.isEmpty()) {
                 proxyIterator = fromStartIfNoNext(proxyIterator, proxyCache);
@@ -294,7 +297,7 @@ public class ServerWrecker {
                 proxyBotData = ProxyBotData.of(proxy.username(), proxy.password(), proxy.address(), options.proxyType());
             }
 
-            factories.add(new BotConnectionFactory(this, options, logger, protocol, options.authService(), proxyBotData));
+            factories.add(new BotConnectionFactory(this, options, logger, protocol, options.authService(), authData, proxyBotData));
         }
 
         if (proxyCache.isEmpty()) {
@@ -337,13 +340,13 @@ public class ServerWrecker {
         }
     }
 
-    public Optional<MinecraftProtocol> authenticate(SWOptions options, String username, String password, Proxy authProxy) {
-        if (password.isEmpty()) {
-            return Optional.of(new MinecraftProtocol(username));
+    public Optional<AuthData> authenticate(SWOptions options, String username, String password, Proxy authProxy) {
+        if (password.isBlank() || options.authService() == AuthService.OFFLINE) {
+            return Optional.of(new AuthData(username));
         } else {
             try {
                 AuthenticationService authService = switch (options.authService()) {
-                    case OFFLINE -> new OfflineAuthenticationService();
+                    case OFFLINE -> throw new IllegalStateException("Offline authentication is impossible!");
                     case MICROSOFT -> new MsaAuthenticationService(serviceServerConfig.get("clientId"));
                 };
 
@@ -354,9 +357,11 @@ public class ServerWrecker {
                 authService.login();
 
                 GameProfile profile = authService.getSelectedProfile();
+                String profileName = profile.getName();
+                UUID profileId = profile.getId();
                 String accessToken = authService.getAccessToken();
 
-                return Optional.of(new MinecraftProtocol(profile, accessToken));
+                return Optional.of(new AuthData(profileName, profileId, accessToken));
             } catch (RequestException e) {
                 logger.warn("Failed to authenticate {}! ({})", username, e.getMessage(), e);
                 return Optional.empty();

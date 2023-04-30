@@ -41,6 +41,10 @@ public class MainFrame extends JFrame {
         injector.register(JFrame.class, this);
     }
 
+    public static void setLookAndFeel() {
+        FlatDarculaLaf.setup();
+    }
+
     @PostConstruct
     public void postConstruct() {
         setResizable(true);
@@ -56,9 +60,5 @@ public class MainFrame extends JFrame {
         serverWrecker.getLogger().info("Opening GUI!");
 
         setVisible(true);
-    }
-
-    public static void setLookAndFeel() {
-        FlatDarculaLaf.setup();
     }
 }

@@ -48,7 +48,7 @@ public class CommandManager {
             List<String> online = new ArrayList<>();
             serverWrecker.getBotConnections().forEach(client -> {
                 if (client.isOnline()) {
-                    online.add(client.protocol().getProfile().getName());
+                    online.add(client.meta().getAuthData().username());
                 }
             });
             c.getSource().sendMessage(online.size() + " bots online: " + String.join(", ", online));

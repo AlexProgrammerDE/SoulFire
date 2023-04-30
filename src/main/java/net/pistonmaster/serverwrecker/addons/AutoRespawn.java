@@ -31,7 +31,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AutoRespawn implements InternalAddon, EventSubscriber<SWPacketReceiveEvent> {
     @Override
-    public void init(ServerWrecker serverWrecker) {
+    public void onLoad() {
         ServerWreckerAPI.registerListener(SWPacketReceiveEvent.class, this);
     }
 

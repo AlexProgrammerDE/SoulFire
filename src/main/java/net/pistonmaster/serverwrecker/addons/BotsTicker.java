@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.addons;
 
 import net.kyori.event.EventSubscriber;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
@@ -34,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BotsTicker implements InternalAddon, EventSubscriber<PreBotConnectEvent> {
     @Override
-    public void init(ServerWrecker serverWrecker) {
+    public void onLoad() {
         ServerWreckerAPI.registerListener(PreBotConnectEvent.class, this);
     }
 
@@ -44,7 +43,8 @@ public class BotsTicker implements InternalAddon, EventSubscriber<PreBotConnectE
                 Executors.newScheduledThreadPool(1), new TickTimer(20)));
     }
 
-    private record BotTicker(BotConnection connection, ScheduledExecutorService executor, TickTimer tickTimer) implements UnregisterCleanup {
+    private record BotTicker(BotConnection connection, ScheduledExecutorService executor,
+                             TickTimer tickTimer) implements UnregisterCleanup {
         public BotTicker {
             executor.scheduleWithFixedDelay(() -> {
                 tickTimer.advanceTime();

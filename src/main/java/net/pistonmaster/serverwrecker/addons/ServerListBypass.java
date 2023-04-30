@@ -19,11 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
-import net.pistonmaster.serverwrecker.ServerWrecker;
-
 public class ServerListBypass implements InternalAddon {
     @Override
-    public void init(ServerWrecker serverWrecker) {
+    public void onLoad() {
         // TODO
     }
 }

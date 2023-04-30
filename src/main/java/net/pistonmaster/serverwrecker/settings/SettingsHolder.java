@@ -17,27 +17,20 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol;
+package net.pistonmaster.serverwrecker.settings;
 
-import com.github.steveice10.mc.auth.data.GameProfile;
-import com.github.steveice10.mc.auth.service.AuthenticationService;
+import lombok.Getter;
 
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
-public class OfflineAuthenticationService extends AuthenticationService {
-    public OfflineAuthenticationService() {
-        super(URI.create(""));
-    }
+@Getter
+public abstract class SettingsHolder {
+    private final List<SWProperty<?>> properties = new ArrayList<>();
 
-    @Override
-    public void login() {
-        // No login procedure needed
-        setAccessToken("");
-        selectedProfile = new GameProfile(
-                UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8)),
-                username
-        );
+    protected <T> SWProperty<T> newProperty(String configId, String friendlyName, T defaultValue, Class<T> type, String description, String... cliNames) {
+        SWProperty<T> property = new SWProperty<>(configId, friendlyName, defaultValue, type, description, cliNames, defaultValue);
+        properties.add(property);
+        return property;
     }
 }

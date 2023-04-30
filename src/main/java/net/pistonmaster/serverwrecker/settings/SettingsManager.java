@@ -17,9 +17,17 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.settings;
 
-import net.pistonmaster.serverwrecker.api.Addon;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 
-public interface InternalAddon extends Addon {
+public class SettingsManager {
+    private Multimap<SWProperty<?>, Runnable> modificationListeners = MultimapBuilder.hashKeys().arrayListValues().build();
+
+    public void addModificationListener(SWProperty<?> property, Runnable listener) {
+        modificationListeners.put(property, listener);
+    }
+
+
 }

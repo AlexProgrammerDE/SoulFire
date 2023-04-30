@@ -38,11 +38,14 @@ public class AccountPanel extends NavigationItem {
     public static final JComboBox<ProxyType> proxyTypeCombo = new JComboBox<>();
     public static final JSpinner accPerProxy = new JSpinner();
     public static final JComboBox<AuthService> serviceBox = new JComboBox<>();
+    private final ServerWrecker serverWrecker;
 
     @Inject
     public AccountPanel(ServerWrecker serverWrecker, JFrame parent) {
+        this.serverWrecker = serverWrecker;
+
         JPanel accounts = new JPanel();
-        accounts.setLayout(new GridBagLayout());
+        accounts.setLayout(new GridLayout(0, 2));
 
         JButton loadAccounts = new JButton("Load Accounts");
 
@@ -100,10 +103,16 @@ public class AccountPanel extends NavigationItem {
         service.getConfigKeys().forEach(key -> {
             JLabel label = new JLabel(key);
             JTextField field = new JTextField();
-            field.setText("");
-            field.setSize(20, 60);
+            field.setText(serverWrecker.getServiceServerConfig().getOrDefault(key, ""));
+            field.setSize(40, 60);
             serviceSettingsPanel.add(label);
             serviceSettingsPanel.add(field);
+
+            field.addActionListener(action ->
+                    serverWrecker.getServiceServerConfig().put(key, field.getText()));
+
+            field.addActionListener(action ->
+                    System.out.println(field.getText()));
         });
 
         return serviceSettingsPanel;

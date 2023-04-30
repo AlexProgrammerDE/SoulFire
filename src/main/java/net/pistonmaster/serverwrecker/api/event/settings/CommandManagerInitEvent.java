@@ -17,9 +17,15 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.api.event.settings;
 
-import net.pistonmaster.serverwrecker.api.Addon;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import picocli.CommandLine;
 
-public interface InternalAddon extends Addon {
+/**
+ * Add yourself to the command manager by adding an ArgSpec to the CommandLine
+ *
+ * @param commandLine The command line
+ */
+public record CommandManagerInitEvent(CommandLine commandLine) implements ServerWreckerEvent {
 }

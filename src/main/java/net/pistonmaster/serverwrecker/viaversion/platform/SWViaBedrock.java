@@ -21,8 +21,8 @@ package net.pistonmaster.serverwrecker.viaversion.platform;
 
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.viaversion.JLoggerToLogback;
-import org.slf4j.LoggerFactory;
 import net.raphimc.viabedrock.platform.ViaBedrockPlatform;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Path;

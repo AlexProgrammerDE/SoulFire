@@ -38,20 +38,19 @@ import org.slf4j.Logger;
 import java.util.concurrent.CompletableFuture;
 
 public record BotConnectionFactory(ServerWrecker serverWrecker, SWOptions options, Logger logger,
-                                   MinecraftProtocol protocol, AuthService authService, ProxyBotData proxyBotData) {
+                                   MinecraftProtocol protocol, AuthService authService, AuthData authData,
+                                   ProxyBotData proxyBotData) {
     public CompletableFuture<BotConnection> connect() {
         return CompletableFuture.supplyAsync(this::connectInternal);
     }
 
     public BotConnection connectInternal() {
         ViaClientSession session = new ViaClientSession(options.host(), options.port(), protocol,
-                NullHelper.nullOrConvert(proxyBotData,
+                NullHelper.nullOrApply(proxyBotData,
                         data -> new ProxyInfo(ProxyInfo.Type.valueOf(data.getType().name()), data.getAddress(), data.getUsername(), data.getPassword())),
                 options);
-        BotConnection botConnection = new BotConnection(this, serverWrecker, options, logger, protocol, session, new BotConnectionMeta());
-        session.setPostDisconnectHook(() -> {
-            botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup);
-        });
+        BotConnection botConnection = new BotConnection(this, serverWrecker, options, logger, protocol, session, new BotConnectionMeta(authData));
+        session.setPostDisconnectHook(() -> botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup));
 
         SessionDataManager sessionDataManager = new SessionDataManager(botConnection);
         session.setFlag(SWProtocolConstants.SESSION_DATA_MANAGER, sessionDataManager);

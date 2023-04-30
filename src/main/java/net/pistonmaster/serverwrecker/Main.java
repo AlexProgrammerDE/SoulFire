@@ -20,6 +20,9 @@
 package net.pistonmaster.serverwrecker;
 
 import io.netty.util.ResourceLeakDetector;
+import net.pistonmaster.serverwrecker.addons.*;
+import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.MainFrame;
 import org.fusesource.jansi.AnsiConsole;
 import picocli.CommandLine;
@@ -28,6 +31,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 
 public class Main {
     static {
@@ -56,13 +60,25 @@ public class Main {
         Path dataFolder = initConfigDir();
 
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
+            loadAddons();
             runHeadless(args, dataFolder);
         } else {
             MainFrame.setLookAndFeel();
+
+            loadAddons();
             ServerWrecker serverWrecker = new ServerWrecker(dataFolder);
 
             serverWrecker.getInjector().getSingleton(MainFrame.class);
         }
+    }
+
+    private static void loadAddons() {
+        Set<InternalAddon> addons = Set.of(
+                new BotsTicker(), new ClientBrand(), new ClientSettings(),
+                new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
+                new ChatMessageLogger(), new ServerListBypass());
+
+        addons.forEach(ServerWreckerAPI::registerAddon);
     }
 
     private static Path initConfigDir() {
@@ -80,6 +96,13 @@ public class Main {
     private static void runHeadless(String[] args, Path dataFolder) {
         CommandLine commandLine = new CommandLine(new CommandDefinition(dataFolder));
         commandLine.setCaseInsensitiveEnumValuesAllowed(true);
+        commandLine.setUsageHelpAutoWidth(true);
+        commandLine.setUsageHelpLongOptionsMaxWidth(30);
+        commandLine.setExecutionExceptionHandler((ex, cmdLine, parseResult) -> {
+            ex.printStackTrace();
+            return 1;
+        });
+        ServerWreckerAPI.postEvent(new CommandManagerInitEvent(commandLine));
         int exitCode = commandLine.execute(args);
         System.exit(exitCode);
     }

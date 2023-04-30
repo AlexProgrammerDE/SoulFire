@@ -140,7 +140,7 @@ public class BoundingBox {
 
         // Check for collision if the X axis of the current box is bigger
         if (x > 0.0F && otherBoundingBox.maxX <= this.minX) {
-            double max = this.minX - otherBoundingBox.maxX - this.epsilon;
+            double max = this.minX - otherBoundingBox.maxX - epsilon;
             if (max < x) {
                 x = max;
             }
@@ -148,7 +148,7 @@ public class BoundingBox {
 
         // Check for collision if the X axis of the current box is smaller
         if (x < 0.0F && otherBoundingBox.minX >= this.maxX) {
-            double max = this.maxX - otherBoundingBox.minX + this.epsilon;
+            double max = this.maxX - otherBoundingBox.minX + epsilon;
             if (max > x) {
                 x = max;
             }
@@ -177,7 +177,7 @@ public class BoundingBox {
 
         // Check for collision if the Y axis of the current box is bigger
         if (y > 0.0F && otherBoundingBox.maxY <= this.minY) {
-            double max = this.minY - otherBoundingBox.maxY - this.epsilon;
+            double max = this.minY - otherBoundingBox.maxY - epsilon;
             if (max < y) {
                 y = max;
             }
@@ -185,7 +185,7 @@ public class BoundingBox {
 
         // Check for collision if the Y axis of the current box is bigger
         if (y < 0.0F && otherBoundingBox.minY >= this.maxY) {
-            double max = this.maxY - otherBoundingBox.minY + this.epsilon;
+            double max = this.maxY - otherBoundingBox.minY + epsilon;
             if (max > y) {
                 y = max;
             }
@@ -214,7 +214,7 @@ public class BoundingBox {
 
         // Check for collision if the Z axis of the current box is bigger
         if (z > 0.0F && otherBoundingBox.maxZ <= this.minZ) {
-            double max = this.minZ - otherBoundingBox.maxZ - this.epsilon;
+            double max = this.minZ - otherBoundingBox.maxZ - epsilon;
             if (max < z) {
                 z = max;
             }
@@ -222,7 +222,7 @@ public class BoundingBox {
 
         // Check for collision if the Z axis of the current box is bigger
         if (z < 0.0F && otherBoundingBox.minZ >= this.maxZ) {
-            double max = this.maxZ - otherBoundingBox.minZ + this.epsilon;
+            double max = this.maxZ - otherBoundingBox.minZ + epsilon;
             if (max > z) {
                 z = max;
             }

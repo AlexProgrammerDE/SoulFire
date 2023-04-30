@@ -17,9 +17,15 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.api;
 
-import net.pistonmaster.serverwrecker.api.Addon;
+import net.pistonmaster.serverwrecker.ServerWrecker;
 
-public interface InternalAddon extends Addon {
+public interface Addon {
+    default void onLoad() {
+    }
+
+    default void onEnable(ServerWrecker serverWrecker) {
+    }
+
 }

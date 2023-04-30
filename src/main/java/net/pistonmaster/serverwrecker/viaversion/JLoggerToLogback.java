@@ -43,7 +43,6 @@ public class JLoggerToLogback extends Logger {
         } else {
             this.base.trace(msg);
         }
-
     }
 
     public void log(Level level, String msg, Object param1) {

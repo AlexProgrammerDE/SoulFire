@@ -20,13 +20,10 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import ch.jalu.injector.Injector;
-import lombok.Getter;
 
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class NavigationPanel extends JPanel {
     @Inject

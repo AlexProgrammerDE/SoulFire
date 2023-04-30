@@ -17,9 +17,22 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.protocol;
 
-import net.pistonmaster.serverwrecker.api.Addon;
+import java.util.UUID;
 
-public interface InternalAddon extends Addon {
+public record AuthData(String username, UUID profileId, String authToken) {
+    public AuthData {
+        if (username == null) {
+            throw new IllegalArgumentException("Username cannot be null!");
+        }
+    }
+
+    public AuthData(String username) {
+        this(username, null, null);
+    }
+
+    public boolean isPremium() {
+        return profileId != null && authToken != null;
+    }
 }

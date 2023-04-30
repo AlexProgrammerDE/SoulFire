@@ -19,14 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
-import com.github.steveice10.mc.protocol.data.game.entity.player.HandPreference;
-import com.github.steveice10.mc.protocol.data.game.setting.ChatVisibility;
-import com.github.steveice10.mc.protocol.data.game.setting.SkinPart;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientInformationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundCustomPayloadPacket;
 import lombok.Getter;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
@@ -36,15 +31,12 @@ import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import javax.swing.*;
 import java.awt.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 public class ClientBrand implements InternalAddon {
     private final ClientBrandPanel clientBrandPanel = new ClientBrandPanel();
 
     @Override
-    public void init(ServerWrecker serverWrecker) {
+    public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
     }
 

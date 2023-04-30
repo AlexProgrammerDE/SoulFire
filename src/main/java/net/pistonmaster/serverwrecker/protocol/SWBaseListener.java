@@ -19,11 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.protocol;
 
-import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.auth.exception.request.InvalidCredentialsException;
 import com.github.steveice10.mc.auth.exception.request.RequestException;
 import com.github.steveice10.mc.auth.exception.request.ServiceUnavailableException;
-import com.github.steveice10.mc.auth.service.SessionService;
 import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
@@ -74,9 +72,6 @@ public class SWBaseListener extends SessionAdapter {
         MinecraftProtocol protocol = (MinecraftProtocol) session.getPacketProtocol();
         if (protocol.getState() == ProtocolState.LOGIN) {
             if (packet instanceof ClientboundHelloPacket helloPacket) {
-                GameProfile profile = session.getFlag(MinecraftConstants.PROFILE_KEY);
-                String accessToken = session.getFlag(MinecraftConstants.ACCESS_TOKEN_KEY);
-
                 SecretKey key;
                 try {
                     KeyGenerator gen = KeyGenerator.getInstance("AES");
@@ -89,7 +84,8 @@ public class SWBaseListener extends SessionAdapter {
                 session.setFlag(SWProtocolConstants.ENCRYPTION_SECRET_KEY, key);
                 session.send(new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
 
-                if (profile == null || accessToken == null) {
+                AuthData authData = botConnection.meta().getAuthData();
+                if (authData == null) {
                     botConnection.logger().debug("Skipping encrypting due to missing profile or access token.");
                 } else {
                     UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
@@ -98,10 +94,10 @@ public class SWBaseListener extends SessionAdapter {
                     boolean shouldCallMojang = !isLegacy || metadataStorage == null || metadataStorage.authenticate;
 
                     if (shouldCallMojang) {
-                        SessionService sessionService = session.getFlag(MinecraftConstants.SESSION_SERVICE_KEY, new SessionService());
+                        SWSessionService sessionService = new SWSessionService();
                         String serverId = sessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
                         try {
-                            sessionService.joinServer(profile, accessToken, serverId);
+                            sessionService.joinServer(authData.profileId(), authData.authToken(), serverId);
                         } catch (ServiceUnavailableException e) {
                             session.disconnect("Login failed: Authentication service unavailable.", e);
                             return;
@@ -158,8 +154,8 @@ public class SWBaseListener extends SessionAdapter {
             protocol.setState(this.targetState);
 
             if (this.targetState == ProtocolState.LOGIN) {
-                GameProfile profile = session.getFlag(MinecraftConstants.PROFILE_KEY);
-                session.send(new ServerboundHelloPacket(profile.getName(), profile.getId()));
+                AuthData authData = botConnection.meta().getAuthData();
+                session.send(new ServerboundHelloPacket(authData.username(), authData.profileId()));
             } else {
                 session.send(new ServerboundStatusRequestPacket());
             }

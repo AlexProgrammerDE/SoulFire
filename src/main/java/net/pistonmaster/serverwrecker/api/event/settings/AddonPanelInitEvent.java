@@ -26,6 +26,7 @@ import java.util.List;
 
 /**
  * Add yourself to the addon panel by adding a {@link NavigationItem} to the list.
+ *
  * @param navigationItems The list of navigation items.
  */
 public record AddonPanelInitEvent(List<NavigationItem> navigationItems) implements ServerWreckerEvent {

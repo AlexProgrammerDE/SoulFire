@@ -22,7 +22,7 @@ package net.pistonmaster.serverwrecker.common;
 import java.util.function.Function;
 
 public class NullHelper {
-    public static <P, T> T nullOrConvert(P value, Function<P, T> convert) {
+    public static <P, T> T nullOrApply(P value, Function<P, T> convert) {
         return value == null ? null : convert.apply(value);
     }
 }

@@ -20,14 +20,15 @@
 package net.pistonmaster.serverwrecker.protocol;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Getter
+@RequiredArgsConstructor
 public class BotConnectionMeta {
     private final List<UnregisterCleanup> unregisterCleanups = new ArrayList<>();
+    private final AuthData authData;
 }

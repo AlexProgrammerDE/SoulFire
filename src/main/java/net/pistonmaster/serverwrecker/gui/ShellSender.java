@@ -19,18 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.gui;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.logging.CommandManager;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.event.ActionEvent;

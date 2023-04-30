@@ -17,9 +17,19 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.settings;
 
-import net.pistonmaster.serverwrecker.api.Addon;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-public interface InternalAddon extends Addon {
+@Data
+@AllArgsConstructor
+public class SWProperty<T> {
+    private final String configId;
+    private final String friendlyName;
+    private final T defaultValue;
+    private final Class<T> type;
+    private final String description;
+    private final String[] cliNames;
+    private T value;
 }

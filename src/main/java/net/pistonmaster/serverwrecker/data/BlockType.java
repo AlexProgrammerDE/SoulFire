@@ -22,7 +22,6 @@ package net.pistonmaster.serverwrecker.data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 

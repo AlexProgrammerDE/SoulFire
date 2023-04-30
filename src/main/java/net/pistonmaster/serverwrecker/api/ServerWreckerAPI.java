@@ -27,11 +27,15 @@ import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 public class ServerWreckerAPI {
     private static final EventBus<ServerWreckerEvent> eventBus = EventBus.create(ServerWreckerEvent.class);
     private static ServerWrecker serverWrecker;
+    private static final List<Addon> addons = new ArrayList<>();
 
     /**
      * Get the current ServerWrecker instance for access to internals.
@@ -97,5 +101,14 @@ public class ServerWreckerAPI {
 
             return false;
         });
+    }
+
+    public static void registerAddon(Addon addon) {
+        addons.add(addon);
+        addon.onLoad();
+    }
+
+    public static List<Addon> getAddons() {
+        return Collections.unmodifiableList(addons);
     }
 }

@@ -20,9 +20,6 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.state.AttackEndEvent;
-import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
 import org.apache.logging.log4j.Level;
 
@@ -46,16 +43,11 @@ public class DeveloperPanel extends NavigationItem {
 
         setLayout(new GridLayout(0, 2));
 
-        add(new JLabel("Debug: "));
+        add(new JLabel("Debug:"));
         add(debug);
 
-        add(new JLabel("Save Log: "));
+        add(new JLabel("Save Log:"));
         add(saveLog);
-
-        ServerWreckerAPI.registerListener(AttackStartEvent.class, event ->
-                debug.setEnabled(false));
-        ServerWreckerAPI.registerListener(AttackEndEvent.class, event ->
-                debug.setEnabled(true));
 
         debug.addActionListener(listener -> {
             if (debug.isSelected()) {

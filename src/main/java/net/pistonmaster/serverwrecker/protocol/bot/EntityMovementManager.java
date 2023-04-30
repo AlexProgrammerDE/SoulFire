@@ -40,7 +40,7 @@ import java.util.List;
 public final class EntityMovementManager {
     private static final float FLY_SPEED = 0.05F;
     private static final float STEP_HEIGHT = 0.5F;
-
+    private static double eyeHeight = 1.62D;
     @ToString.Exclude
     private final SessionDataManager dataManager;
     private double x;
@@ -48,28 +48,21 @@ public final class EntityMovementManager {
     private double z;
     private float yaw;
     private float pitch;
-
     private BoundingBox boundingBox;
-
     private double motionX;
     private double motionY;
     private double motionZ;
-
     private boolean onGround = false;
     private boolean collision = false;
-
     private float jumpMovementFactor = 0.02F;
     private float speedInAir = 0.02F;
-
     private float moveForward;
     private float moveStrafing;
-
     private boolean jumping;
     private boolean sprinting;
     private boolean sneaking;
     private boolean flying;
     private int jumpTicks;
-    private static double eyeHeight = 1.62D;
 
     public EntityMovementManager(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
         this.dataManager = dataManager;
@@ -114,15 +107,15 @@ public final class EntityMovementManager {
         boolean eyes = origin == RotationOrigin.EYES;
 
         double dx = block.getX() - this.x;
-        double dy = block.getY() - (eyes ? this.y + this.eyeHeight : this.y);
+        double dy = block.getY() - (eyes ? this.y + eyeHeight : this.y);
         double dz = block.getZ() - this.z;
 
         double distanceXZ = Math.sqrt(dx * dx + dz * dz);
         double yaw = Math.toDegrees(Math.atan2(-dx, dz));
         double pitch = Math.toDegrees(Math.atan2(dy, distanceXZ));
 
-        this.yaw = (float)yaw;
-        this.pitch = (float)pitch;
+        this.yaw = (float) yaw;
+        this.pitch = (float) pitch;
     }
 
     private float updateRotation(float angle, float targetAngle, float maxIncrease) {

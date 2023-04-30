@@ -25,8 +25,6 @@ import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.codec.PacketCodecHelper;
 import com.github.steveice10.packetlib.crypt.PacketEncryption;
 import com.github.steveice10.packetlib.event.session.PacketSendingEvent;
-import com.github.steveice10.packetlib.event.session.SessionEvent;
-import com.github.steveice10.packetlib.event.session.SessionListener;
 import com.github.steveice10.packetlib.helper.TransportHelper;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
@@ -85,7 +83,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -105,9 +103,9 @@ public class ViaClientSession extends TcpSession {
     private final PacketCodecHelper codecHelper;
     @Getter
     private final SWOptions options;
+    private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
     @Setter
     private Runnable postDisconnectHook;
-    private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
 
     public ViaClientSession(String host, int port, PacketProtocol protocol, ProxyInfo proxy, SWOptions options) {
         this(host, port, "0.0.0.0", 0, protocol, proxy, options);

@@ -31,37 +31,31 @@ public class TickTimer {
      * Amount of ticks per second
      */
     private final float ticksPerSecond;
-
-    /**
-     * Last time updated in nano seconds
-     */
-    private long lastTime = System.nanoTime();
-
     /**
      * Scale the tick speed
      */
     public float timeScale = 1.0F;
-
     /**
      * Framerate of the advanceTime update
      */
     public float fps = 0.0F;
-
     /**
      * Passed time since last game update
      */
     public float passedTime = 0.0F;
-
     /**
      * The amount of ticks for the current game update.
      * It's the passed time as an integer
      */
     public int ticks;
-
     /**
      * The overflow of the current tick, caused by casting the passed time to an integer
      */
     public float partialTicks;
+    /**
+     * Last time updated in nano seconds
+     */
+    private long lastTime = System.nanoTime();
 
     /**
      * Timer to control the tick speed independently of the framerate
