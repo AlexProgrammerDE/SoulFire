@@ -17,26 +17,16 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.data;
+package net.pistonmaster.serverwrecker.api.event.settings;
 
-import lombok.Getter;
-import lombok.AllArgsConstructor;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 
-@Getter
-@AllArgsConstructor
-public final class DropData {
-    private final ItemType dropId;
-    private int dropMeta = -1;
-    private int minCount = -1;
-    private int maxCount = -1;
+import java.util.List;
 
-    public DropData(ItemType dropId) {
-        this.dropId = dropId;
-    }
-
-    public DropData(ItemType dropId, int minCount, int maxCount) {
-        this.dropId = dropId;
-        this.minCount = minCount;
-        this.maxCount = maxCount;
-    }
+/**
+ * Add yourself to the addon panel by adding a {@link NavigationItem} to the list.
+ * @param navigationItems The list of navigation items.
+ */
+public record AddonPanelInitEvent(List<NavigationItem> navigationItems) implements ServerWreckerEvent {
 }

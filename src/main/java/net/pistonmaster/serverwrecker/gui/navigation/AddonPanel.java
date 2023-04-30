@@ -19,15 +19,38 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
+import lombok.Getter;
+import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
+
 import javax.inject.Inject;
+import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AddonPanel extends NavigationItem {
+    @Getter
+    private final List<NavigationItem> navigationItems = new ArrayList<>();
+
     @Inject
-    public AddonPanel() {
+    public AddonPanel(RightPanelContainer container) {
         super();
 
-        setLayout(new GridLayout(5, 6, 5, 5));
+        ServerWreckerAPI.postEvent(new AddonPanelInitEvent(navigationItems));
+
+        setLayout(new GridLayout(3, 3, 10, 10));
+
+        for (NavigationItem item : navigationItems) {
+            JButton button = new JButton(item.getNavigationName());
+            button.addActionListener(action -> {
+                ((CardLayout) container.getLayout()).show(container, item.getNavigationId());
+            });
+
+            button.setSize(new Dimension(50, 50));
+
+            add(button);
+        }
     }
 
     @Override
@@ -36,7 +59,7 @@ public class AddonPanel extends NavigationItem {
     }
 
     @Override
-    public String getRightPanelContainerConstant() {
+    public String getNavigationId() {
         return RightPanelContainer.ADDON_MENU;
     }
 }

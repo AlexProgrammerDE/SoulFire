@@ -148,21 +148,6 @@ public final class SessionDataManager {
 
     private void onChat(Component message) {
         ServerWreckerAPI.postEvent(new ChatMessageReceiveEvent(connection, message));
-
-        String messageString = toPlainText(message);
-        if (messageString.contains("lookat ")) {
-            int index = messageString.indexOf("lookat ");
-            String[] args = messageString.substring(index + 7).split(" ");
-
-            double x = Double.parseDouble(args[0]);
-            double y = Double.parseDouble(args[1]);
-            double z = Double.parseDouble(args[2]);
-
-            RotationOrigin origin = RotationOrigin.from(Integer.parseInt(args[3]));
-
-            entityMovementManager.lookAt(origin, Vector3i.from(x, y, z));
-            entityMovementManager.sendRot();
-        }
     }
 
     @BusHandler

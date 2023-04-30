@@ -43,6 +43,7 @@ public class Main {
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
             runHeadless(args, dataFolder);
         } else {
+            MainFrame.setLookAndFeel();
             new ServerWrecker(dataFolder).getInjector().getSingleton(MainFrame.class);
         }
     }

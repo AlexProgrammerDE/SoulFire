@@ -147,7 +147,7 @@ public class SettingsPanel extends NavigationItem {
     }
 
     @Override
-    public String getRightPanelContainerConstant() {
+    public String getNavigationId() {
         return RightPanelContainer.SETTINGS_MENU;
     }
 

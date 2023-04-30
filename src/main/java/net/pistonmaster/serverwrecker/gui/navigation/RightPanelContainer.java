@@ -44,7 +44,8 @@ public class RightPanelContainer extends JPanel {
 
     public void create() {
         panels.add(injector.getSingleton(SettingsPanel.class));
-        panels.add(injector.getSingleton(AddonPanel.class));
+        AddonPanel addonPanel = injector.getSingleton(AddonPanel.class);
+        panels.add(addonPanel);
         panels.add(injector.getSingleton(AccountPanel.class));
         panels.add(injector.getSingleton(DeveloperPanel.class));
 
@@ -56,8 +57,10 @@ public class RightPanelContainer extends JPanel {
         AuthPanel authPanel = new AuthPanel(this);
         add(authPanel, AUTH_MENU);
 
+        panels.addAll(addonPanel.getNavigationItems());
+
         for (NavigationItem item : panels) {
-            add(NavigationWrapper.createWrapper(this, item), item.getRightPanelContainerConstant());
+            add(NavigationWrapper.createWrapper(this, item), item.getNavigationId());
         }
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

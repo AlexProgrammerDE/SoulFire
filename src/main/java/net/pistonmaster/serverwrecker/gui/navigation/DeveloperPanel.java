@@ -111,7 +111,7 @@ public class DeveloperPanel extends NavigationItem {
     }
 
     @Override
-    public String getRightPanelContainerConstant() {
+    public String getNavigationId() {
         return RightPanelContainer.DEV_MENU;
     }
 }

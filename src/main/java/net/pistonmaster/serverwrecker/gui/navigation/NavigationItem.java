@@ -24,5 +24,5 @@ import javax.swing.*;
 public abstract class NavigationItem extends JPanel {
     public abstract String getNavigationName();
 
-    public abstract String getRightPanelContainerConstant();
+    public abstract String getNavigationId();
 }

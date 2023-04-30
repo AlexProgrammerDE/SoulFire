@@ -78,7 +78,7 @@ public class ServerWrecker {
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
     private final Set<InternalAddon> addons = Set.of(
-            new BotsTicker(),
+            new BotsTicker(), new ClientBrand(), new ClientSettings(),
             new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
             new ChatMessageLogger(), new ServerListBypass());
     private final List<BotConnection> botConnections = new ArrayList<>();

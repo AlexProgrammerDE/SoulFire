@@ -124,7 +124,7 @@ public class AccountPanel extends NavigationItem {
     }
 
     @Override
-    public String getRightPanelContainerConstant() {
+    public String getNavigationId() {
         return RightPanelContainer.ACCOUNT_MENU;
     }
 }

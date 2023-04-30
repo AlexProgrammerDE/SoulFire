@@ -44,7 +44,6 @@ public class MainFrame extends JFrame {
 
     @PostConstruct
     public void postConstruct() {
-        setLookAndFeel();
         setResizable(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -60,7 +59,7 @@ public class MainFrame extends JFrame {
         setVisible(true);
     }
 
-    private void setLookAndFeel() {
+    public static void setLookAndFeel() {
         FlatDarculaLaf.setup();
     }
 }

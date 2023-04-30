@@ -29,9 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NavigationPanel extends JPanel {
-    @Getter
-    private final List<NavigationItem> navigationItemList = new ArrayList<>();
-
     @Inject
     public NavigationPanel(RightPanelContainer container, Injector injector) {
         super();
@@ -41,7 +38,7 @@ public class NavigationPanel extends JPanel {
         for (NavigationItem item : container.getPanels()) {
             JButton button = new JButton(item.getNavigationName());
             button.addActionListener(action -> {
-                ((CardLayout) container.getLayout()).show(container, item.getRightPanelContainerConstant());
+                ((CardLayout) container.getLayout()).show(container, item.getNavigationId());
             });
 
             button.setSize(new Dimension(50, 50));
