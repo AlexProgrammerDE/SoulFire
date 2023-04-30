@@ -182,6 +182,11 @@ public final class SessionDataManager {
     }
 
     @BusHandler
+    public void onLookAt(ClientboundPlayerLookAtPacket packet) {
+        // TODO
+    }
+
+    @BusHandler
     public void onHealth(ClientboundSetHealthPacket packet) {
         try {
             this.health = packet.getHealth();

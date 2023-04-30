@@ -107,6 +107,17 @@ public final class EntityMovementManager {
         }
     }
 
+    public void lookAt(Vector3i block) {
+        double x = block.getX() + 0.5D - this.x;
+        double y = block.getY() + 0.5D - (this.y + this.getEyeHeight());
+        double z = block.getZ() + 0.5D - this.z;
+        double d1 = Math.sqrt(x * x + z * z);
+        float yaw = (float) (Math.atan2(z, x) * 180.0D / Math.PI) - 90.0F;
+        float pitch = (float) (-(Math.atan2(y, d1) * 180.0D / Math.PI));
+        this.yaw = yaw;
+        this.pitch = pitch;
+    }
+
     public void tick() {
         double startX = this.x;
         double startY = this.y;
