@@ -59,14 +59,22 @@ public class CommandManager {
             return 1;
         }));
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("say")
-                .then(RequiredArgumentBuilder.<ConsoleSubject, String>argument("message", StringArgumentType.greedyString()).build())
+                .then(RequiredArgumentBuilder.<ConsoleSubject, String>argument("message", StringArgumentType.greedyString())
+                        .executes(c -> {
+                            String message = StringArgumentType.getString(c, "message");
+                            serverWrecker.getBotConnections().forEach(client -> {
+                                if (client.isOnline()) {
+                                    client.sendMessage(message);
+                                }
+                            });
+                            return 1;
+                        })));
+        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("help")
                 .executes(c -> {
-                    String message = StringArgumentType.getString(c, "message");
-                    serverWrecker.getBotConnections().forEach(client -> {
-                        if (client.isOnline()) {
-                            client.sendMessage(message);
-                        }
-                    });
+                    c.getSource().sendMessage("Available commands:");
+                    for (String command : dispatcher.getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
+                        c.getSource().sendMessage(command);
+                    }
                     return 1;
                 }));
     }
