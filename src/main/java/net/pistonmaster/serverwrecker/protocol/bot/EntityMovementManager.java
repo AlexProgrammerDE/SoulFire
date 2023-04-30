@@ -194,8 +194,7 @@ public final class EntityMovementManager {
 
     public boolean isInFluid() {
         Vector3i blockPos = this.getBlockPos();
-        return getLevelSafe()
-                .getBlockNameAt(blockPos).equals(SWBlockConstants.WATER); // TODO: Add other fluids like lava
+        return getLevelSafe().getBlockTypeAt(blockPos).isFluid();
     }
 
     public void jump() {

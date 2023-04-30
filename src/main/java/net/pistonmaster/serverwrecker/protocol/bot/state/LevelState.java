@@ -159,6 +159,16 @@ public class LevelState {
         return sessionDataManager.getServerWrecker().getGlobalBlockPalette().getBlockNameForStateId(getBlockStateIdAt(block));
     }
 
+    public BlockType getBlockTypeAt(Vector3i block) {
+        String blockName = getBlockNameAt(block);
+        BlockType blockType = BlockType.getByMcName(blockName);
+        if (blockType == null) {
+            sessionDataManager.getLog().error("Unknown block: {}", blockName);
+            throw new IllegalArgumentException("Unknown block: " + blockName);
+        }
+        return blockType;
+    }
+
     public List<BoundingBox> getCollisionBoxes(BoundingBox aabb) {
         List<BoundingBox> boundingBoxList = new ArrayList<>();
 
@@ -182,12 +192,6 @@ public class LevelState {
     }
 
     private boolean isSolidBlockAt(Vector3i block) {
-        String blockName = getBlockNameAt(block);
-        BlockType blockType = BlockType.getByMcName(blockName);
-        if (blockType == null) {
-            sessionDataManager.getLog().error("Unknown block: {}", blockName);
-            return false;
-        }
-        return blockType.getBoundingBox() == BoundingBoxType.BLOCK;
+        return getBlockTypeAt(block).getBoundingBox() == BoundingBoxType.BLOCK;
     }
 }

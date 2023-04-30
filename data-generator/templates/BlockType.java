@@ -48,4 +48,8 @@ public final class BlockType {
 
         return null;
     }
+
+    public boolean isFluid() {
+        return this == WATER || this == LAVA;
+    }
 }
