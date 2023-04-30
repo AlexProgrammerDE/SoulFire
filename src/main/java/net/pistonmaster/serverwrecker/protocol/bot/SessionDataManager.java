@@ -28,6 +28,7 @@ import com.github.steveice10.mc.protocol.data.game.chunk.ChunkBiomeData;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
 import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
+import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.GlobalPos;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PositionElement;
@@ -147,6 +148,21 @@ public final class SessionDataManager {
 
     private void onChat(Component message) {
         ServerWreckerAPI.postEvent(new ChatMessageReceiveEvent(connection, message));
+
+        String messageString = toPlainText(message);
+        if (messageString.contains("lookat ")) {
+            int index = messageString.indexOf("lookat ");
+            String[] args = messageString.substring(index + 7).split(" ");
+
+            double x = Double.parseDouble(args[0]);
+            double y = Double.parseDouble(args[1]);
+            double z = Double.parseDouble(args[2]);
+
+            RotationOrigin origin = RotationOrigin.from(Integer.parseInt(args[3]));
+
+            entityMovementManager.lookAt(origin, Vector3i.from(x, y, z));
+            entityMovementManager.sendRot();
+        }
     }
 
     @BusHandler
@@ -183,7 +199,10 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onLookAt(ClientboundPlayerLookAtPacket packet) {
-        // TODO
+        entityMovementManager.lookAt(packet.getOrigin(),
+                Vector3i.from(packet.getX(), packet.getY(), packet.getZ()));
+
+        // TODO: Implement entity look at
     }
 
     @BusHandler

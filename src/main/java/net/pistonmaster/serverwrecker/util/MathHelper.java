@@ -19,15 +19,26 @@
  */
 package net.pistonmaster.serverwrecker.util;
 
-/**
- * Credit to https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/util/MathHelper.java
- */
 public class MathHelper {
     /**
      * Returns the greatest integer less than or equal to the double argument
      */
-    public static int floor_double(double value) {
+    public static int floorDouble(double value) {
         int i = (int) value;
         return value < (double) i ? i - 1 : i;
+    }
+
+    public static float wrapDegrees(float v) {
+        v %= 360.0F;
+
+        if (v >= 180.0F) {
+            v -= 360.0F;
+        }
+
+        if (v < -180.0F) {
+            v += 360.0F;
+        }
+
+        return v;
     }
 }

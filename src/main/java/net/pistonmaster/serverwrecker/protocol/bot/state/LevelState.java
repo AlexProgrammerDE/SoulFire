@@ -172,12 +172,12 @@ public class LevelState {
     public List<BoundingBox> getCollisionBoxes(BoundingBox aabb) {
         List<BoundingBox> boundingBoxList = new ArrayList<>();
 
-        int minX = MathHelper.floor_double(aabb.minX);
-        int maxX = MathHelper.floor_double(aabb.maxX + 1.0);
-        int minY = MathHelper.floor_double(aabb.minY);
-        int maxY = MathHelper.floor_double(aabb.maxY + 1.0);
-        int minZ = MathHelper.floor_double(aabb.minZ);
-        int maxZ = MathHelper.floor_double(aabb.maxZ + 1.0);
+        int minX = MathHelper.floorDouble(aabb.minX);
+        int maxX = MathHelper.floorDouble(aabb.maxX + 1.0);
+        int minY = MathHelper.floorDouble(aabb.minY);
+        int maxY = MathHelper.floorDouble(aabb.maxY + 1.0);
+        int minZ = MathHelper.floorDouble(aabb.minZ);
+        int maxZ = MathHelper.floorDouble(aabb.maxZ + 1.0);
 
         for (int x = minX; x < maxX; x++) {
             for (int y = minY; y < maxY; y++) {

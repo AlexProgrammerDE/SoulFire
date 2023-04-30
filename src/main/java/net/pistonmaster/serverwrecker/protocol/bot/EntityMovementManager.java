@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot;
 
+import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
@@ -27,6 +28,7 @@ import lombok.Data;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
+import net.pistonmaster.serverwrecker.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.List;
@@ -67,6 +69,7 @@ public final class EntityMovementManager {
     private boolean sneaking;
     private boolean flying;
     private int jumpTicks;
+    private double eyeHeight = 1.62D;
 
     public EntityMovementManager(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
         this.dataManager = dataManager;
@@ -107,15 +110,30 @@ public final class EntityMovementManager {
         }
     }
 
-    public void lookAt(Vector3i block) {
-        double x = block.getX() + 0.5D - this.x;
-        double y = block.getY() + 0.5D - (this.y + this.getEyeHeight());
-        double z = block.getZ() + 0.5D - this.z;
-        double d1 = Math.sqrt(x * x + z * z);
-        float yaw = (float) (Math.atan2(z, x) * 180.0D / Math.PI) - 90.0F;
-        float pitch = (float) (-(Math.atan2(y, d1) * 180.0D / Math.PI));
-        this.yaw = yaw;
-        this.pitch = pitch;
+    public void lookAt(RotationOrigin origin, Vector3i block) {
+        boolean eyes = origin == RotationOrigin.EYES;
+
+        double dx = block.getX() - this.x;
+        double dy = block.getY() - (eyes ? this.y + this.eyeHeight : this.y);
+        double dz = block.getZ() - this.z;
+
+        double distanceXZ = Math.sqrt(dx * dx + dz * dz);
+        double yaw = Math.toDegrees(Math.atan2(-dx, dz));
+        double pitch = Math.toDegrees(Math.atan2(dy, distanceXZ));
+
+        this.yaw = (float)yaw;
+        this.pitch = (float)pitch;
+    }
+
+    private float updateRotation(float angle, float targetAngle, float maxIncrease) {
+        float f = MathHelper.wrapDegrees(targetAngle - angle);
+        if (f > maxIncrease) {
+            f = maxIncrease;
+        }
+        if (f < -maxIncrease) {
+            f = -maxIncrease;
+        }
+        return angle + f;
     }
 
     public void tick() {
@@ -185,22 +203,32 @@ public final class EntityMovementManager {
         boolean rotationChanged = startPitch != this.pitch || startYaw != this.yaw;
         boolean onGroundChanged = startOnGround != this.onGround;
 
-        if (positionChanged || rotationChanged || onGroundChanged) {
-            System.out.println("Start   x: " + startX + " y: " + startY + " z: " + startZ + " pitch: " + startPitch + " yaw: " + startYaw + " onGround: " + startOnGround);
-
-            System.out.println("Current x: " + this.x + " y: " + this.y + " z: " + this.z + " pitch: " + this.pitch + " yaw: " + this.yaw + " onGround: " + this.onGround);
-        }
-
         // Send position packets if changed
         if (positionChanged && rotationChanged) {
-            dataManager.getSession().send(new ServerboundMovePlayerPosRotPacket(this.onGround, this.x, this.y, this.z, this.yaw, this.pitch));
+            sendRot();
         } else if (positionChanged) {
-            dataManager.getSession().send(new ServerboundMovePlayerPosPacket(this.onGround, this.x, this.y, this.z));
+            sendPos();
         } else if (rotationChanged) {
-            dataManager.getSession().send(new ServerboundMovePlayerRotPacket(this.onGround, this.yaw, this.pitch));
+            sendRot();
         } else if (onGroundChanged) {
-            dataManager.getSession().send(new ServerboundMovePlayerStatusOnlyPacket(this.onGround));
+            sendOnGround();
         }
+    }
+
+    public void sendPosRot() {
+        dataManager.getSession().send(new ServerboundMovePlayerPosRotPacket(this.onGround, this.x, this.y, this.z, this.yaw, this.pitch));
+    }
+
+    public void sendPos() {
+        dataManager.getSession().send(new ServerboundMovePlayerPosPacket(this.onGround, this.x, this.y, this.z));
+    }
+
+    public void sendRot() {
+        dataManager.getSession().send(new ServerboundMovePlayerRotPacket(this.onGround, this.yaw, this.pitch));
+    }
+
+    public void sendOnGround() {
+        dataManager.getSession().send(new ServerboundMovePlayerStatusOnlyPacket(this.onGround));
     }
 
     public boolean isInFluid() {
