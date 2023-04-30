@@ -26,6 +26,11 @@ dependencyResolutionManagement {
         }
         mavenCentral()
     }
+    versionCatalogs {
+        create("libs") {
+            file("gradle/libs.versions.toml")
+        }
+    }
 }
 
 include("build-data")

@@ -20,15 +20,14 @@
 package net.pistonmaster.serverwrecker.gui;
 
 import ch.jalu.injector.Injector;
-import ch.qos.logback.classic.Logger;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.libs.GhostText;
 import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
 import net.pistonmaster.serverwrecker.gui.navigation.RightPanelContainer;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -41,9 +40,7 @@ import java.awt.event.KeyEvent;
 public class MainPanel extends JPanel {
     @Getter
     private static final MessageLogPanel logPanel = new MessageLogPanel(3000, false);
-    private final ServerWrecker serverWrecker;
     private final ShellSender shellSender;
-    private final JFrame parent;
     private final Injector injector;
     private final RightPanelContainer rightPanelContainer;
 
@@ -61,8 +58,9 @@ public class MainPanel extends JPanel {
         JPanel leftPanel = new JPanel();
 
         LogAppender logAppender = new LogAppender(logPanel);
+        logAppender.start();
         injector.register(LogAppender.class, logAppender);
-        ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).addAppender(logAppender);
+        ((Logger) LogManager.getRootLogger()).addAppender(logAppender);
 
         JTextField commands = new JTextField();
 

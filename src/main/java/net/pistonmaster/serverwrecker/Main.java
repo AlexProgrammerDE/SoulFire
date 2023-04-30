@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker;
 
+import io.netty.util.ResourceLeakDetector;
 import net.pistonmaster.serverwrecker.gui.MainFrame;
 import org.fusesource.jansi.AnsiConsole;
 import picocli.CommandLine;
@@ -27,10 +28,24 @@ import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
 
 public class Main {
+    static {
+        System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+
+        // If Velocity's natives are being extracted to a different temporary directory, make sure the
+        // Netty natives are extracted there as well
+        if (System.getProperty("velocity.natives-tmpdir") != null) {
+            System.setProperty("io.netty.native.workdir", System.getProperty("velocity.natives-tmpdir"));
+        }
+
+        // Disable the resource leak detector by default as it reduces performance. Allow the user to
+        // override this if desired.
+        if (System.getProperty("io.netty.leakDetection.level") == null) {
+            ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
+        }
+    }
+
     public static void main(String[] args) {
         AnsiConsole.systemInstall();
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
@@ -44,7 +59,9 @@ public class Main {
             runHeadless(args, dataFolder);
         } else {
             MainFrame.setLookAndFeel();
-            new ServerWrecker(dataFolder).getInjector().getSingleton(MainFrame.class);
+            ServerWrecker serverWrecker = new ServerWrecker(dataFolder);
+
+            serverWrecker.getInjector().getSingleton(MainFrame.class);
         }
     }
 

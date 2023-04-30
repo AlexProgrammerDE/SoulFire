@@ -131,23 +131,51 @@ public final class SessionDataManager {
     }
 
     @BusHandler
-    public void onPlayerChat(ClientboundPlayerChatPacket packet) {
-        Component message = packet.getUnsignedContent();
-        if (message != null) {
-            onChat(message);
-            return;
+    public void onJoin(ClientboundLoginPacket packet) {
+        try {
+            loginData = new LoginPacketData(
+                    packet.getEntityId(),
+                    packet.isHardcore(),
+                    packet.getWorldNames(),
+                    packet.getRegistry(),
+                    packet.getMaxPlayers(),
+                    packet.isReducedDebugInfo()
+            );
+            CompoundTag dimensionRegistry = loginData.registry().get("minecraft:dimension_type");
+            for (Tag type : dimensionRegistry.<ListTag>get("value").getValue()) {
+                CompoundTag dimension = (CompoundTag) type;
+                String name = dimension.<StringTag>get("name").getValue();
+                int id = dimension.<IntTag>get("id").getValue();
+
+                levels.put(name, new LevelState(this, name, id, dimension.get("element")));
+            }
+            CompoundTag biomeRegistry = loginData.registry().get("minecraft:worldgen/biome");
+            for (Tag type : biomeRegistry.<ListTag>get("value").getValue()) {
+                CompoundTag biome = (CompoundTag) type;
+                BiomeData biomeData = new BiomeData(biome);
+
+                biomes.put(biomeData.id(), biomeData);
+            }
+            biomesEntryBitsSize = ChunkData.log2RoundUp(biomes.size());
+
+            doImmediateRespawn = !packet.isEnableRespawnScreen();
+            currentDimension = new DimensionData(
+                    packet.getDimension(),
+                    packet.getWorldName(),
+                    packet.getHashedSeed(),
+                    packet.isDebug(),
+                    packet.isFlat()
+            );
+            gameMode = packet.getGameMode();
+            previousGameMode = packet.getPreviousGamemode();
+            serverViewDistance = packet.getViewDistance();
+            serverSimulationDistance = packet.getSimulationDistance();
+            lastDeathPos = packet.getLastDeathPos();
+
+            log.info("Joined server");
+        } catch (Exception e) {
+            log.error("Error while logging join", e);
         }
-
-        onChat(Component.text(packet.getContent()));
-    }
-
-    @BusHandler
-    public void onServerChat(ClientboundSystemChatPacket packet) {
-        onChat(packet.getContent());
-    }
-
-    private void onChat(Component message) {
-        ServerWreckerAPI.postEvent(new ChatMessageReceiveEvent(connection, message));
     }
 
     @BusHandler
@@ -206,51 +234,23 @@ public final class SessionDataManager {
     }
 
     @BusHandler
-    public void onJoin(ClientboundLoginPacket packet) {
-        try {
-            loginData = new LoginPacketData(
-                    packet.getEntityId(),
-                    packet.isHardcore(),
-                    packet.getWorldNames(),
-                    packet.getRegistry(),
-                    packet.getMaxPlayers(),
-                    packet.isReducedDebugInfo()
-            );
-            CompoundTag dimensionRegistry = loginData.registry().get("minecraft:dimension_type");
-            for (Tag type : dimensionRegistry.<ListTag>get("value").getValue()) {
-                CompoundTag dimension = (CompoundTag) type;
-                String name = dimension.<StringTag>get("name").getValue();
-                int id = dimension.<IntTag>get("id").getValue();
-
-                levels.put(name, new LevelState(this, name, id, dimension.get("element")));
-            }
-            CompoundTag biomeRegistry = loginData.registry().get("minecraft:worldgen/biome");
-            for (Tag type : biomeRegistry.<ListTag>get("value").getValue()) {
-                CompoundTag biome = (CompoundTag) type;
-                BiomeData biomeData = new BiomeData(biome);
-
-                biomes.put(biomeData.id(), biomeData);
-            }
-            biomesEntryBitsSize = ChunkData.log2RoundUp(biomes.size());
-
-            doImmediateRespawn = !packet.isEnableRespawnScreen();
-            currentDimension = new DimensionData(
-                    packet.getDimension(),
-                    packet.getWorldName(),
-                    packet.getHashedSeed(),
-                    packet.isDebug(),
-                    packet.isFlat()
-            );
-            gameMode = packet.getGameMode();
-            previousGameMode = packet.getPreviousGamemode();
-            serverViewDistance = packet.getViewDistance();
-            serverSimulationDistance = packet.getSimulationDistance();
-            lastDeathPos = packet.getLastDeathPos();
-
-            log.info("Joined server");
-        } catch (Exception e) {
-            log.error("Error while logging join", e);
+    public void onPlayerChat(ClientboundPlayerChatPacket packet) {
+        Component message = packet.getUnsignedContent();
+        if (message != null) {
+            onChat(message);
+            return;
         }
+
+        onChat(Component.text(packet.getContent()));
+    }
+
+    @BusHandler
+    public void onServerChat(ClientboundSystemChatPacket packet) {
+        onChat(packet.getContent());
+    }
+
+    private void onChat(Component message) {
+        ServerWreckerAPI.postEvent(new ChatMessageReceiveEvent(connection, message));
     }
 
     @BusHandler

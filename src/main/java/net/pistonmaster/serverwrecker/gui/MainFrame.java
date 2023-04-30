@@ -29,7 +29,6 @@ import javax.swing.*;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
-    public static final String AUTH_MENU = "AuthMenu";
     public static final String MAIN_MENU = "MainMenu";
     private final ServerWrecker serverWrecker;
     private final Injector injector;

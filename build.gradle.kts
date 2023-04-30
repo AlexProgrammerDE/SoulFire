@@ -38,16 +38,21 @@ application {
 dependencies {
     implementation(projects.buildData)
 
-    implementation("ch.qos.logback:logback-classic:1.4.7")
+    implementation(libs.bundles.log4j)
+    implementation(libs.terminalconsoleappender)
+    implementation(libs.slf4j)
+    implementation(libs.disruptor)
 
-    implementation("info.picocli:picocli:4.7.3")
-    annotationProcessor("info.picocli:picocli-codegen:4.7.3")
+    implementation(libs.brigadier)
 
-    compileOnly("org.projectlombok:lombok:1.18.26")
-    annotationProcessor("org.projectlombok:lombok:1.18.26")
+    implementation(libs.picoli)
+    annotationProcessor(libs.picoli.codegen)
 
-    implementation("com.github.GeyserMC:MCProtocolLib:bcf453c")
-    implementation("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
+
+    implementation(libs.mcprotocollib)
+    implementation(libs.velocity.native)
 
     val vvVer = "4.7.0-23w17a-SNAPSHOT"
     val vbVer = "4.7.0-23w17a-SNAPSHOT"
@@ -68,14 +73,14 @@ dependencies {
         isTransitive = false
     }
 
-    implementation("com.mojang:brigadier:1.1.8")
-    implementation("com.formdev:flatlaf:3.1.1")
-    implementation("org.pf4j:pf4j:3.9.0") {
+    implementation(libs.brigadier)
+    implementation(libs.flatlaf)
+    implementation(libs.pf4j) {
         isTransitive = false
     }
-    implementation("org.fusesource.jansi:jansi:2.4.0")
-    implementation("com.google.guava:guava:31.1-jre")
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.jansi)
+    implementation(libs.guava)
+    implementation(libs.gson)
 
     implementation("com.thealtening.api:api:4.1.0")
 

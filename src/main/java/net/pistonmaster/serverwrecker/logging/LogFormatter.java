@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.logging;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
+import org.apache.logging.log4j.core.LogEvent;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -34,10 +34,10 @@ public class LogFormatter {
     private final DateFormat dateFormat = new SimpleDateFormat("h:mm a");
     private final Date date = new Date();
 
-    public String format(ILoggingEvent event) {
+    public String format(LogEvent event) {
         StringBuilder builder = new StringBuilder();
 
-        date.setTime(event.getTimeStamp());
+        date.setTime(event.getTimeMillis());
         builder.append(dateFormat.format(date)).append(' ');
         builder.append(event.getLevel()).append(' ');
         builder.append('[').append(event.getLoggerName()).append(']').append(' ');
@@ -45,8 +45,8 @@ public class LogFormatter {
         return builder.toString();
     }
 
-    public String formatMessage(ILoggingEvent record) {
-        String simpleFormattedMessage = record.getFormattedMessage();
+    public String formatMessage(LogEvent record) {
+        String simpleFormattedMessage = record.getMessage().getFormattedMessage();
 
         simpleFormattedMessage = STRIP_COLOR_PATTERN.matcher(simpleFormattedMessage).replaceAll("");
 

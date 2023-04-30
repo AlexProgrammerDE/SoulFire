@@ -19,31 +19,29 @@
  */
 package net.pistonmaster.serverwrecker.logging;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.Context;
-import ch.qos.logback.core.LogbackException;
-import ch.qos.logback.core.filter.Filter;
-import ch.qos.logback.core.spi.FilterReply;
-import ch.qos.logback.core.status.Status;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-@RequiredArgsConstructor
-public class LogAppender implements Appender<ILoggingEvent> {
+public class LogAppender extends AbstractAppender {
     private final MessageLogPanel logPanel;
     private final LogFormatter formatter = new LogFormatter();
     @Getter
     private final Queue<String> logLines = new ConcurrentLinkedQueue<>();
 
+    public LogAppender(MessageLogPanel logPanel) {
+        super("LogPanelAppender", null, null, false, Property.EMPTY_ARRAY);
+        this.logPanel = logPanel;
+    }
+
     @Override
-    public void doAppend(ILoggingEvent iLoggingEvent) throws LogbackException {
-        String formatted = formatter.format(iLoggingEvent);
+    public void append(LogEvent event) {
+        String formatted = formatter.format(event);
 
         if (formatted.isEmpty()) {
             return;
@@ -52,82 +50,5 @@ public class LogAppender implements Appender<ILoggingEvent> {
         logLines.add(formatted);
 
         logPanel.log(formatted + "\n");
-    }
-
-    @Override
-    public String getName() {
-        return "LogPanelAppender";
-    }
-
-    @Override
-    public void setName(String s) {
-    }
-
-    @Override
-    public Context getContext() {
-        return null;
-    }
-
-    @Override
-    public void setContext(Context context) {
-    }
-
-    @Override
-    public void addStatus(Status status) {
-    }
-
-    @Override
-    public void addInfo(String msg) {
-    }
-
-    @Override
-    public void addInfo(String msg, Throwable ex) {
-    }
-
-    @Override
-    public void addWarn(String msg) {
-    }
-
-    @Override
-    public void addWarn(String msg, Throwable ex) {
-    }
-
-    @Override
-    public void addError(String msg) {
-    }
-
-    @Override
-    public void addError(String msg, Throwable ex) {
-    }
-
-    @Override
-    public void addFilter(Filter<ILoggingEvent> newFilter) {
-    }
-
-    @Override
-    public void clearAllFilters() {
-    }
-
-    @Override
-    public List<Filter<ILoggingEvent>> getCopyOfAttachedFiltersList() {
-        return null;
-    }
-
-    @Override
-    public FilterReply getFilterChainDecision(ILoggingEvent event) {
-        return null;
-    }
-
-    @Override
-    public void start() {
-    }
-
-    @Override
-    public void stop() {
-    }
-
-    @Override
-    public boolean isStarted() {
-        return false;
     }
 }

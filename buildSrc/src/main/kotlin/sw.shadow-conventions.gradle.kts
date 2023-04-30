@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer;
+
 plugins {
     id("sw.java-conventions")
     id("com.github.johnrengelman.shadow")
@@ -15,6 +17,7 @@ tasks {
 
     shadowJar {
         mergeServiceFiles()
+        transform(Log4j2PluginsCacheFileTransformer::class.java)
     }
 
     build {

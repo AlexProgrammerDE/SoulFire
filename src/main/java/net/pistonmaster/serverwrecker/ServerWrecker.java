@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker;
 
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
-import ch.qos.logback.classic.Level;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.auth.exception.request.RequestException;
 import com.github.steveice10.mc.auth.service.AuthenticationService;
@@ -46,7 +45,7 @@ import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.*;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
-import net.pistonmaster.serverwrecker.logging.LogUtil;
+import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.mojangdata.TranslationMapper;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
@@ -54,8 +53,9 @@ import net.pistonmaster.serverwrecker.protocol.OfflineAuthenticationService;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
-import net.raphimc.viabedrock.api.BedrockProtocolVersion;
-import net.raphimc.viabedrock.protocol.BedrockProtocol;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
 import org.slf4j.Logger;
@@ -69,6 +69,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
@@ -94,6 +95,9 @@ public class ServerWrecker {
     private AttackState attackState = AttackState.STOPPED;
     @Setter
     private List<String> accounts;
+    private boolean shutdown = false;
+    private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
+    private final SWTerminalConsole terminalConsole;
 
     public ServerWrecker(Path dataFolder) {
         // Register into injector
@@ -105,6 +109,11 @@ public class ServerWrecker {
         setupLogging(Level.INFO);
 
         logger.info("Starting ServerWrecker v{}...", BuildData.VERSION);
+
+        terminalConsole = injector.getSingleton(SWTerminalConsole.class);
+        terminalConsole.setupStreams();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
 
         JsonObject translations;
         try (InputStream stream = ServerWrecker.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
@@ -193,6 +202,7 @@ public class ServerWrecker {
         initPlugins(dataFolder.resolve("plugins"));
 
         logger.info("Finished loading!");
+        threadPool.execute(terminalConsole::start);
     }
 
     private void initPlugins(Path pluginDir) {
@@ -355,10 +365,41 @@ public class ServerWrecker {
     }
 
     public void stop() {
+        if (attackState.isStopped()) {
+            return;
+        }
+
         this.attackState = AttackState.STOPPED;
         botConnections.forEach(BotConnection::disconnect);
         botConnections.clear();
         ServerWreckerAPI.postEvent(new AttackEndEvent());
+    }
+
+
+    /**
+     * Shuts down the proxy, kicking players with the specified reason.
+     *
+     * @param explicitExit whether the user explicitly shut down the proxy
+     */
+    public void shutdown(boolean explicitExit) {
+        if (!shutdownInProgress.compareAndSet(false, true)) {
+            return;
+        }
+
+        logger.info("Shutting down...");
+
+        // Shutdown the connection manager, this should be
+        // done first to refuse new connections
+        stop();
+
+        // Since we manually removed the shutdown hook, we need to handle the shutdown ourselves.
+        LogManager.shutdown();
+
+        shutdown = true;
+
+        if (explicitExit) {
+            System.exit(0);
+        }
     }
 
     private boolean isFull(Map<BotProxy, AtomicInteger> map, int limit) {
@@ -376,9 +417,9 @@ public class ServerWrecker {
     }
 
     public void setupLogging(Level level) {
-        LogUtil.setLevel(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME, level);
-        LogUtil.setLevel(logger, level);
-        LogUtil.setLevel("io.netty", level);
-        LogUtil.setLevel("org.pf4j", level);
+        Configurator.setRootLevel(level);
+        Configurator.setLevel(logger.getName(), level);
+        Configurator.setLevel("io.netty", level);
+        Configurator.setLevel("org.pf4j", level);
     }
 }

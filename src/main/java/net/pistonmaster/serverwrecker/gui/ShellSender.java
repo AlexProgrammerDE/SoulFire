@@ -28,6 +28,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.logging.CommandManager;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -38,47 +39,12 @@ import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ShellSender extends AbstractAction {
-    private final ServerWrecker serverWrecker;
-    @Getter
-    private final CommandDispatcher<ShellSender> dispatcher = new CommandDispatcher<>();
+    private final CommandManager commandManager;
     @Getter
     private final List<String> commandHistory = new ArrayList<>();
     @Getter
     @Setter
     private int pointer = -1;
-
-    @PostConstruct
-    public void postConstruct() {
-        dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("test").executes(c -> {
-            sendMessage("test");
-            return 1;
-        }));
-        dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("online").executes(c -> {
-            List<String> online = new ArrayList<>();
-            serverWrecker.getBotConnections().forEach(client -> {
-                if (client.isOnline()) {
-                    online.add(client.protocol().getProfile().getName());
-                }
-            });
-            sendMessage(online.size() + " bots online: " + String.join(", ", online));
-            return 1;
-        }));
-        dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("clear").executes(c -> {
-            MainPanel.getLogPanel().clear();
-            return 1;
-        }));
-        dispatcher.register(LiteralArgumentBuilder.<ShellSender>literal("say")
-                .then(RequiredArgumentBuilder.<ShellSender, String>argument("message", StringArgumentType.greedyString()).build())
-                .executes(c -> {
-                    String message = StringArgumentType.getString(c, "message");
-                    serverWrecker.getBotConnections().forEach(client -> {
-                        if (client.isOnline()) {
-                            client.sendMessage(message);
-                        }
-                    });
-                    return 1;
-                }));
-    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -92,14 +58,6 @@ public class ShellSender extends AbstractAction {
         ((JTextField) e.getSource()).setText(null);
 
         commandHistory.add(command);
-        try {
-            dispatcher.execute(command, this);
-        } catch (CommandSyntaxException commandSyntaxException) {
-            serverWrecker.getLogger().warn("Invalid command syntax");
-        }
-    }
-
-    public void sendMessage(String message) {
-        serverWrecker.getLogger().info(message);
+        commandManager.execute(command);
     }
 }
