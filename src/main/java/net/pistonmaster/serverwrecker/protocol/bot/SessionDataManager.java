@@ -75,10 +75,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -424,16 +420,29 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onChunkForget(ClientboundForgetLevelChunkPacket packet) {
-        getCurrentLevel().getChunks().remove(new ChunkKey(packet.getX(), packet.getZ()));
+        LevelState level = getCurrentLevel();
+
+        if (level == null) {
+            log.warn("Received section update while not in a level");
+            return;
+        }
+
+        level.getChunks().remove(new ChunkKey(packet.getX(), packet.getZ()));
     }
 
     @BusHandler
     public void onChunkData(ClientboundLevelChunkWithLightPacket packet) {
+        MinecraftCodecHelper helper = session.getCodecHelper();
+        LevelState level = getCurrentLevel();
+
+        if (level == null) {
+            log.warn("Received section update while not in a level");
+            return;
+        }
+
         ChunkKey key = new ChunkKey(packet.getX(), packet.getZ());
         byte[] data = packet.getChunkData();
         ByteBuf buf = Unpooled.wrappedBuffer(data);
-        LevelState level = getCurrentLevel();
-        MinecraftCodecHelper helper = session.getCodecHelper();
 
         ChunkData chunkData = level.getChunks().computeIfAbsent(key, k -> new ChunkData(level));
 
@@ -450,6 +459,12 @@ public final class SessionDataManager {
     public void onSectionBlockUpdate(ClientboundSectionBlocksUpdatePacket packet) {
         ChunkKey key = new ChunkKey(packet.getChunkX(), packet.getChunkZ());
         LevelState level = getCurrentLevel();
+
+        if (level == null) {
+            log.warn("Received section update while not in a level");
+            return;
+        }
+
         ChunkData chunkData = level.getChunks().get(key);
 
         if (chunkData == null) {
@@ -469,6 +484,12 @@ public final class SessionDataManager {
     @BusHandler
     public void onBlockUpdate(ClientboundBlockUpdatePacket packet) {
         LevelState level = getCurrentLevel();
+
+        if (level == null) {
+            log.warn("Received section update while not in a level");
+            return;
+        }
+
         BlockChangeEntry entry = packet.getEntry();
 
         Vector3i vector3i = entry.getPosition();
@@ -525,6 +546,12 @@ public final class SessionDataManager {
     @BusHandler
     public void onChunkData(ClientboundChunksBiomesPacket packet) {
         LevelState level = getCurrentLevel();
+
+        if (level == null) {
+            log.warn("Received section update while not in a level");
+            return;
+        }
+
         MinecraftCodecHelper codec = session.getCodecHelper();
 
         for (ChunkBiomeData biomeData : packet.getChunkBiomeData()) {

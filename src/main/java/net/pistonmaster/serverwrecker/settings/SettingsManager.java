@@ -23,7 +23,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 
 public class SettingsManager {
-    private Multimap<SWProperty<?>, Runnable> modificationListeners = MultimapBuilder.hashKeys().arrayListValues().build();
+    private final Multimap<SWProperty<?>, Runnable> modificationListeners = MultimapBuilder.hashKeys().arrayListValues().build();
 
     public void addModificationListener(SWProperty<?> property, Runnable listener) {
         modificationListeners.put(property, listener);

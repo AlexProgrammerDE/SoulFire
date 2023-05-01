@@ -34,8 +34,8 @@ import java.util.Objects;
 
 public class ServerWreckerAPI {
     private static final EventBus<ServerWreckerEvent> eventBus = EventBus.create(ServerWreckerEvent.class);
-    private static ServerWrecker serverWrecker;
     private static final List<Addon> addons = new ArrayList<>();
+    private static ServerWrecker serverWrecker;
 
     /**
      * Get the current ServerWrecker instance for access to internals.
