@@ -51,7 +51,10 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        AnsiConsole.systemInstall();
+        if (System.console() != null) {
+            AnsiConsole.systemInstall();
+        }
+
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             throwable.printStackTrace();
             System.exit(1);
