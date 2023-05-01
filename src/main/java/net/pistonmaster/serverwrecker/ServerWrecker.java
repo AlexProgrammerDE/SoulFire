@@ -393,9 +393,12 @@ public class ServerWrecker {
 
         logger.info("Shutting down...");
 
-        // Shutdown the connection manager, this should be
-        // done first to refuse new connections
+        // Shutdown the attack if there is any
         stop();
+
+        // Shutdown scheduled tasks
+        scheduler.shutdown();
+        threadPool.shutdown();
 
         // Since we manually removed the shutdown hook, we need to handle the shutdown ourselves.
         LogManager.shutdown();
