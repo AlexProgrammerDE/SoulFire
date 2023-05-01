@@ -23,6 +23,8 @@ import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
 import com.github.steveice10.mc.protocol.data.UnexpectedEncryptionException;
 import com.github.steveice10.mc.protocol.data.game.ClientCommand;
+import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
+import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
 import com.github.steveice10.mc.protocol.data.game.ResourcePackStatus;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkBiomeData;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
@@ -65,10 +67,7 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.model.*;
-import net.pistonmaster.serverwrecker.protocol.bot.state.BorderState;
-import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkData;
-import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
-import net.pistonmaster.serverwrecker.protocol.bot.state.WeatherState;
+import net.pistonmaster.serverwrecker.protocol.bot.state.*;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.util.BusHandler;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -76,7 +75,12 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -89,6 +93,7 @@ public final class SessionDataManager {
     private final ViaClientSession session;
     private final BotConnection connection;
     private final WeatherState weatherState = new WeatherState();
+    private final PlayerListState playerListState = new PlayerListState();
     private final Map<Integer, AtomicInteger> itemCoolDowns = new ConcurrentHashMap<>();
     private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
     private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
@@ -250,6 +255,41 @@ public final class SessionDataManager {
 
     private void onChat(Component message) {
         ServerWreckerAPI.postEvent(new ChatMessageReceiveEvent(connection, message));
+    }
+
+    @BusHandler
+    public void onPlayerListHeaderFooter(ClientboundTabListPacket packet) {
+        playerListState.setHeader(packet.getHeader());
+        playerListState.setFooter(packet.getFooter());
+    }
+
+    @BusHandler
+    public void onPlayerListUpdate(ClientboundPlayerInfoUpdatePacket packet) {
+        for (PlayerListEntry update : packet.getEntries()) {
+            PlayerListEntry entry = playerListState.getEntries().computeIfAbsent(update.getProfileId(), k -> update);
+            for (PlayerListEntryAction action : packet.getActions()) {
+                switch (action) {
+                    case ADD_PLAYER -> entry.setProfile(update.getProfile());
+                    case INITIALIZE_CHAT -> {
+                        entry.setSessionId(update.getSessionId());
+                        entry.setExpiresAt(update.getExpiresAt());
+                        entry.setKeySignature(update.getKeySignature());
+                        entry.setPublicKey(update.getPublicKey());
+                    }
+                    case UPDATE_GAME_MODE -> entry.setGameMode(update.getGameMode());
+                    case UPDATE_LISTED -> entry.setListed(update.isListed());
+                    case UPDATE_LATENCY -> entry.setLatency(update.getLatency());
+                    case UPDATE_DISPLAY_NAME -> entry.setDisplayName(update.getDisplayName());
+                }
+            }
+        }
+    }
+
+    @BusHandler
+    public void onPlayerListRemove(ClientboundPlayerInfoRemovePacket packet) {
+        for (UUID profileId : packet.getProfileIds()) {
+            playerListState.getEntries().remove(profileId);
+        }
     }
 
     @BusHandler

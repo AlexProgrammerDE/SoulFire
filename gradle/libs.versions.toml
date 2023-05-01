@@ -14,7 +14,7 @@ guava = "com.google.guava:guava:31.1-jre"
 gson = "com.google.code.gson:gson:2.10.1"
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
 log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
-log4j-slf4j-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
+log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
 log4j-iostreams = { module = "org.apache.logging.log4j:log4j-iostreams", version.ref = "log4j" }
 log4j-jul = { module = "org.apache.logging.log4j:log4j-jul", version.ref = "log4j" }
 slf4j = "org.slf4j:slf4j-api:2.0.7"
@@ -28,4 +28,4 @@ lombok = "org.projectlombok:lombok:1.18.26"
 disruptor = "com.lmax:disruptor:3.4.4"
 
 [bundles]
-log4j = ["log4j-api", "log4j-core", "log4j-slf4j-impl", "log4j-iostreams", "log4j-jul"]
+log4j = ["log4j-api", "log4j-core", "log4j-slf4j2-impl", "log4j-iostreams", "log4j-jul"]
