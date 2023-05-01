@@ -85,9 +85,6 @@ public class SWBaseListener extends SessionAdapter {
                 session.send(new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
 
                 AuthData authData = botConnection.meta().getAuthData();
-                if (authData == null) {
-                    botConnection.logger().debug("Skipping encrypting due to missing profile or access token.");
-                } else {
                     UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
                     boolean isLegacy = SWConstants.isLegacy(botConnection.options().protocolVersion());
                     ProtocolMetadataStorage metadataStorage = viaUserConnection.get(ProtocolMetadataStorage.class);
@@ -111,7 +108,7 @@ public class SWBaseListener extends SessionAdapter {
                     }
 
                     viaSession.enableJavaEncryption(key);
-                }
+
             } else if (packet instanceof ClientboundGameProfilePacket) {
                 protocol.setState(ProtocolState.GAME);
             } else if (packet instanceof ClientboundLoginDisconnectPacket) {

@@ -32,7 +32,7 @@ repositories {
 }
 
 application {
-    mainClass.set("net.pistonmaster.serverwrecker.Main")
+    mainClass.set("ServerWrecker")
 }
 
 dependencies {
@@ -104,7 +104,7 @@ if (!mcFolder.exists()) {
 tasks.named<Jar>("jar").get().apply {
     registerMCJar()
     manifest {
-        attributes["Main-Class"] = "net.pistonmaster.serverwrecker.Main"
+        attributes["Main-Class"] = "ServerWrecker"
     }
 }
 
@@ -141,7 +141,7 @@ val copyMinecraft = tasks.create("copyMinecraft") {
 tasks.named("processResources").get().dependsOn(copyMinecraft)
 
 launch4j {
-    mainClassName = "net.pistonmaster.serverwrecker.Main"
+    mainClassName = "ServerWrecker"
     icon = "${rootDir}/assets/robot.ico"
     headerType = "gui"
     productName = "ServerWrecker"

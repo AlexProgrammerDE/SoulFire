@@ -33,7 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
-public class Main {
+public class ServerWreckerBootstrap {
     static {
         System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
 

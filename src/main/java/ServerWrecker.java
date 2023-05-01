@@ -17,29 +17,14 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.common;
+import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-import java.util.List;
-
-@Getter
-@RequiredArgsConstructor
-public enum AuthService {
-    MICROSOFT("Microsoft", List.of("clientId")),
-    OFFLINE("Offline");
-    // THE_ALTENING("The Altening", URI.create("https://authserver.thealtening.com/"), URI.create("https://sessionserver.thealtening.com/"));
-
-    private final String displayName;
-    private final List<String> configKeys;
-
-    AuthService(String displayName) {
-        this(displayName, List.of());
-    }
-
-    @Override
-    public String toString() {
-        return displayName;
+/**
+ * This class is used to set the default AWT name to ServerWrecker.
+ * This helps with linux name issues.
+ */
+public class ServerWrecker {
+    public static void main(String[] args) {
+        ServerWreckerBootstrap.main(args);
     }
 }
