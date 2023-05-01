@@ -91,9 +91,9 @@ public class SWBaseListener extends SessionAdapter {
                     UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
                     boolean isLegacy = SWConstants.isLegacy(botConnection.options().protocolVersion());
                     ProtocolMetadataStorage metadataStorage = viaUserConnection.get(ProtocolMetadataStorage.class);
-                    boolean shouldCallMojang = !isLegacy || metadataStorage == null || metadataStorage.authenticate;
+                    boolean isLegacyAuthenticate = !isLegacy || metadataStorage == null || metadataStorage.authenticate;
 
-                    if (shouldCallMojang) {
+                    if (authData.isPremium() && isLegacyAuthenticate) {
                         SWSessionService sessionService = new SWSessionService();
                         String serverId = sessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
                         try {
