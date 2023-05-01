@@ -1,5 +1,6 @@
 {
   "version": "1.19.3",
   "generate-blocks": true,
-  "generate-items": true
+  "generate-items": true,
+  "generate-entities": true
 }

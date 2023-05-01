@@ -55,7 +55,6 @@ if (mcData == null) {
         fs.writeFileSync("output/BlockType.java", result)
     }
 
-
     if (config["generate-items"]) {
         let result = fs.readFileSync("templates/ItemType.java", "utf-8");
         let enumValues: string[] = []
@@ -67,6 +66,18 @@ if (mcData == null) {
 
         fs.writeFileSync("output/ItemType.java", result)
     }
+
+    if (config["generate-entities"]) {
+        let result = fs.readFileSync("templates/EntityType.java", "utf-8");
+        let enumValues: string[] = []
+        for (const item of mcData.entitiesArray) {
+            enumValues.push(`public static final EntityType ${item.name.toUpperCase()} = register(new EntityType(${item.id}, ${item.internalId}, "${item.name}", "${item.displayName}", "${item.type}", ${item.width}, ${item.height}, ${valueToNullStringFallback(-1, item.length)}, ${valueToNullStringFallback(-1, item.offset)}, "${item.category}"));`)
+        }
+
+        result = result.replace(enumReplace, enumValues.join("\n    "))
+
+        fs.writeFileSync("output/EntityType.java", result)
+    }
 }
 
 function stringArrayToJavaList(array?: string[]): string {
@@ -75,4 +86,12 @@ function stringArrayToJavaList(array?: string[]): string {
     }
 
     return `List.of(${array.map(data => `"${data}"`).join(", ")})`
+}
+
+function valueToNullStringFallback(fallback: any, array?: any): string {
+    if (array == null) {
+        return fallback
+    }
+
+    return `"${array}"`
 }

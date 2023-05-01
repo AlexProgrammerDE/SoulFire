@@ -1,25 +1,13 @@
 package net.pistonmaster.serverwrecker.data;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@RequiredArgsConstructor
-public final class ItemType {
+public record ItemType(int id, String name, String displayName, int stackSize, List<String> enchantCategories,
+        List<String> repairWith, int maxDurability) {
     public static final List<ItemType> VALUES = new ArrayList<>();
 
     // VALUES REPLACE
-
-    private final int id;
-    private final String name;
-    private final String displayName;
-    private final int stackSize;
-    private final List<String> enchantCategories;
-    private final List<String> repairWith;
-    private final int maxDurability;
 
     public static ItemType register(ItemType itemType) {
         VALUES.add(itemType);
@@ -28,7 +16,7 @@ public final class ItemType {
 
     public static ItemType getById(int id) {
         for (ItemType itemType : VALUES) {
-            if (itemType.getId() == id) {
+            if (itemType.id() == id) {
                 return itemType;
             }
         }

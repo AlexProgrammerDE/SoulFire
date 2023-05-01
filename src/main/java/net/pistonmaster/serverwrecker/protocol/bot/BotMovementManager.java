@@ -37,7 +37,7 @@ import java.util.List;
  * Huge credit to https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/player/Player.java
  */
 @Data
-public final class EntityMovementManager {
+public final class BotMovementManager {
     private static final float FLY_SPEED = 0.05F;
     private static final float STEP_HEIGHT = 0.5F;
     private static double eyeHeight = 1.62D;
@@ -64,7 +64,7 @@ public final class EntityMovementManager {
     private boolean flying;
     private int jumpTicks;
 
-    public EntityMovementManager(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
+    public BotMovementManager(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
         this.dataManager = dataManager;
         this.yaw = yaw;
         this.pitch = pitch;

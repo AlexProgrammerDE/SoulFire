@@ -94,7 +94,7 @@ public final class SessionDataManager {
     private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
     private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
     private BorderState borderState;
-    private EntityMovementManager entityMovementManager;
+    private BotMovementManager botMovementManager;
     private float health = -1;
     private int food = -1;
     private float saturation = -1;
@@ -180,11 +180,11 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onPosition(ClientboundPlayerPositionPacket packet) {
-        double currentX = entityMovementManager != null ? entityMovementManager.getX() : 0;
-        double currentY = entityMovementManager != null ? entityMovementManager.getY() : 0;
-        double currentZ = entityMovementManager != null ? entityMovementManager.getZ() : 0;
-        float currentYaw = entityMovementManager != null ? entityMovementManager.getYaw() : 0;
-        float currentPitch = entityMovementManager != null ? entityMovementManager.getPitch() : 0;
+        double currentX = botMovementManager != null ? botMovementManager.getX() : 0;
+        double currentY = botMovementManager != null ? botMovementManager.getY() : 0;
+        double currentZ = botMovementManager != null ? botMovementManager.getZ() : 0;
+        float currentYaw = botMovementManager != null ? botMovementManager.getYaw() : 0;
+        float currentPitch = botMovementManager != null ? botMovementManager.getPitch() : 0;
 
         boolean xRelative = packet.getRelative().contains(PositionElement.X);
         boolean yRelative = packet.getRelative().contains(PositionElement.Y);
@@ -198,21 +198,21 @@ public final class SessionDataManager {
         float yaw = yawRelative ? currentYaw + packet.getYaw() : packet.getYaw();
         float pitch = pitchRelative ? currentPitch + packet.getPitch() : packet.getPitch();
 
-        if (entityMovementManager == null) {
-            entityMovementManager = new EntityMovementManager(this, x, y, z, yaw, pitch);
+        if (botMovementManager == null) {
+            botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch);
         } else {
-            entityMovementManager.setPosition(x, y, z);
-            entityMovementManager.setRotation(yaw, pitch);
+            botMovementManager.setPosition(x, y, z);
+            botMovementManager.setRotation(yaw, pitch);
         }
 
         session.send(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
 
-        log.info("Position updated: {}", entityMovementManager);
+        log.info("Position updated: {}", botMovementManager);
     }
 
     @BusHandler
     public void onLookAt(ClientboundPlayerLookAtPacket packet) {
-        entityMovementManager.lookAt(packet.getOrigin(),
+        botMovementManager.lookAt(packet.getOrigin(),
                 Vector3i.from(packet.getX(), packet.getY(), packet.getZ()));
 
         // TODO: Implement entity look at
@@ -583,7 +583,7 @@ public final class SessionDataManager {
                 double motionX = packet.getMotionX();
                 double motionY = packet.getMotionY();
                 double motionZ = packet.getMotionZ();
-                entityMovementManager.setMotion(motionX, motionY, motionZ);
+                botMovementManager.setMotion(motionX, motionY, motionZ);
                 log.info("Bot forced to motion: {} {} {}", motionX, motionY, motionZ);
             } else {
                 //log.debug("Entity {} moved with motion: {} {} {}", entityId, motionX, motionY, motionZ);
@@ -671,9 +671,9 @@ public final class SessionDataManager {
         }
 
         LevelState level = getCurrentLevel();
-        if (level != null && entityMovementManager != null
-                && level.isChunkLoaded(entityMovementManager.getBlockPos())) {
-            entityMovementManager.tick();
+        if (level != null && botMovementManager != null
+                && level.isChunkLoaded(botMovementManager.getBlockPos())) {
+            botMovementManager.tick();
         }
     }
 }

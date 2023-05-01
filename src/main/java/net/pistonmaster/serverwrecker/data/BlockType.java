@@ -1,33 +1,11 @@
-/*
- * ServerWrecker
- *
- * Copyright (C) 2023 ServerWrecker
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- */
 package net.pistonmaster.serverwrecker.data;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@RequiredArgsConstructor
-public final class BlockType {
+public record BlockType(int id, String name, String displayName, double hardness, double resistance,
+        int stackSize, boolean diggable, String material, BoundingBoxType boundingBox) {
     public static final List<BlockType> VALUES = new ArrayList<>();
 
     public static final BlockType AIR = register(new BlockType(0, "air", "Air", 0, 0, 64, false, "default", BoundingBoxType.EMPTY));
@@ -1003,16 +981,6 @@ public final class BlockType {
     public static final BlockType FROGSPAWN = register(new BlockType(970, "frogspawn", "Frogspawn", 0, 0, 64, true, "default", BoundingBoxType.EMPTY));
     public static final BlockType REINFORCED_DEEPSLATE = register(new BlockType(971, "reinforced_deepslate", "Reinforced Deepslate", 55, 1200, 64, true, "default", BoundingBoxType.BLOCK));
 
-    private final int id;
-    private final String name;
-    private final String displayName;
-    private final double hardness;
-    private final double resistance;
-    private final int stackSize;
-    private final boolean diggable;
-    private final String material;
-    private final BoundingBoxType boundingBox;
-
     public static BlockType register(BlockType blockType) {
         VALUES.add(blockType);
         return blockType;
@@ -1020,7 +988,7 @@ public final class BlockType {
 
     public static BlockType getById(int id) {
         for (BlockType blockType : VALUES) {
-            if (blockType.getId() == id) {
+            if (blockType.id() == id) {
                 return blockType;
             }
         }
@@ -1030,7 +998,7 @@ public final class BlockType {
 
     public static BlockType getByMcName(String mcName) {
         for (BlockType blockType : VALUES) {
-            if (("minecraft:" + blockType.getName()).equals(mcName)) {
+            if (("minecraft:" + blockType.name()).equals(mcName)) {
                 return blockType;
             }
         }
