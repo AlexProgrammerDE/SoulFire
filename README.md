@@ -1,6 +1,17 @@
 # ServerWrecker
+<p align="center">
+<a href="https://ci.codemc.io/job/SkinsRestorer/job/SkinsRestorerX-DEV/"><img src="https://ci.codemc.io/job/SkinsRestorer/job/SkinsRestorerX-DEV/badge/icon" alt="Build Status"></a>
+<a href="https://github.com/AlexProgrammerDE/ServerWrecker/actions/workflows/build.yml"><img src="https://github.com/AlexProgrammerDE/ServerWrecker/actions/workflows/build.yml/badge.svg?branch=main" alt="Java CI"></a>
+<a href="https://github.com/AlexProgrammerDE/ServerWrecker/graphs/contributors"><img src="https://img.shields.io/github/contributors/AlexProgrammerDE/ServerWrecker.svg" alt="Contributors"></a>
+<a href="https://github.com/AlexProgrammerDE/ServerWrecker/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AlexProgrammerDE/ServerWrecker.svg" alt="License"></a>
+</p>
+<p align="center"><a href="https://pistonmaster.net/discord"><img src="https://discordapp.com/api/guilds/739784741124833301/embed.png" alt="Discord embed"></a></p>
 
-Advanced Minecraft Server-Stresser Tool
+<p align="center">
+<a href="https://ci.codemc.io/job/AlexProgrammerDE/job/ServerWrecker/lastSuccessfulBuild/artifact/build/libs/SkinsRestorer.jar"><img src="https://img.shields.io/badge/DOWNLOAD-DEV__BUILD-important?style=for-the-badge" alt="download2 badge"></a>
+</p>
+
+Advanced Minecraft Server-Stresser Tool. Launch bot attacks on your own servers to stress-test them and measure performance.
 
 ## Nightly builds
 
@@ -59,12 +70,6 @@ All versions newer than r1.7.0 support online-mode.
 3. Run `./gradlew build` in the serverwrecker directory
 4. Get the jar files from `build/libs`
 
-## Community
-
-Feel free to join our discord community server:
-
-[![Discord Banner](https://discord.com/api/guilds/739784741124833301/widget.png?style=banner2)](https://discord.gg/CDrcxzH)
-
 ## Images
 
 ![GUI](./assets/img.png)
@@ -74,3 +79,12 @@ Feel free to join our discord community server:
 To run ServerWrecker from the command line without a GUI, enter  
 `java -jar serverwrecker.jar <options>`.
 
+## Community
+
+Feel free to join our discord community server:
+
+[![Discord Banner](https://discord.com/api/guilds/739784741124833301/widget.png?style=banner2)](https://discord.gg/CDrcxzH)
+
+## Attribution
+
+This project is based on [LambdaAttack](https://github.com/games647/LambdaAttack), but over the years the code has been remade multiple times to be far more complex than the original project.
