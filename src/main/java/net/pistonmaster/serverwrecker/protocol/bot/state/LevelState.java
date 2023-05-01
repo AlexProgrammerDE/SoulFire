@@ -195,6 +195,6 @@ public class LevelState {
     }
 
     private boolean isSolidBlockAt(Vector3i block) {
-        return getBlockTypeAt(block).getBoundingBox() == BoundingBoxType.BLOCK;
+        return getBlockTypeAt(block).boundingBox() == BoundingBoxType.BLOCK;
     }
 }

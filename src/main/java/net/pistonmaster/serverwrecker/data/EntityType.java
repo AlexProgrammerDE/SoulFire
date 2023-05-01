@@ -1,3 +1,22 @@
+/*
+ * ServerWrecker
+ *
+ * Copyright (C) 2023 ServerWrecker
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
 package net.pistonmaster.serverwrecker.data;
 
 import java.util.Map;
@@ -127,17 +146,6 @@ public record EntityType(int id, int internalId, String name, String displayName
     public static final EntityType ZOMBIFIED_PIGLIN = register(new EntityType(116, 116, "zombified_piglin", "Zombified Piglin", "hostile", 0.6, 1.95, -1, -1, "Hostile mobs"));
     public static final EntityType PLAYER = register(new EntityType(117, 117, "player", "Player", "player", 0.6, 1.8, -1, -1, "UNKNOWN"));
     public static final EntityType FISHING_BOBBER = register(new EntityType(118, 118, "fishing_bobber", "Fishing Bobber", "projectile", 0.25, 0.25, -1, -1, "Projectiles"));
-
-    private final int id;
-    private final int internalId;
-    private final String name;
-    private final String displayName;
-    private final String type;
-    private final double width;
-    private final double height;
-    private final int length;
-    private final int offset;
-    private final String category;
 
     public static EntityType register(EntityType entityType) {
         VALUES.add(entityType);

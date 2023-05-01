@@ -10,17 +10,6 @@ public record EntityType(int id, int internalId, String name, String displayName
 
     // VALUES REPLACE
 
-    private final int id;
-    private final int internalId;
-    private final String name;
-    private final String displayName;
-    private final String type;
-    private final double width;
-    private final double height;
-    private final int length;
-    private final int offset;
-    private final String category;
-
     public static EntityType register(EntityType entityType) {
         VALUES.add(entityType);
         return entityType;
