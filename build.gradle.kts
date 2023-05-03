@@ -54,7 +54,7 @@ dependencies {
     implementation(libs.mcprotocollib)
     implementation(libs.velocity.native)
 
-    val vvVer = "4.7.0-23w17a-SNAPSHOT"
+    val vvVer = "4.7.0-23w18a-SNAPSHOT"
     val vbVer = "4.7.0-23w18a-SNAPSHOT"
     val vrVer = "5f7fdc5"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
