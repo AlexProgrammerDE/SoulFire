@@ -85,6 +85,10 @@ Feel free to join our discord community server:
 
 [![Discord Banner](https://discord.com/api/guilds/739784741124833301/widget.png?style=banner2)](https://discord.gg/CDrcxzH)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=AlexProgrammerDE/ServerWrecker&type=Date)](https://star-history.com/#AlexProgrammerDE/ServerWrecker&Date)
+
 ## Attribution
 
 This project is based on [LambdaAttack](https://github.com/games647/LambdaAttack), but over the years the code has been remade multiple times to be far more complex than the original project.
