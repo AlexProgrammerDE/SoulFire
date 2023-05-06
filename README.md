@@ -8,7 +8,7 @@
 <p align="center"><a href="https://pistonmaster.net/discord"><img src="https://discordapp.com/api/guilds/739784741124833301/embed.png" alt="Discord embed"></a></p>
 
 <p align="center">
-<a href="https://ci.codemc.io/job/AlexProgrammerDE/job/ServerWrecker/lastSuccessfulBuild/artifact/build/libs/SkinsRestorer.jar"><img src="https://img.shields.io/badge/DOWNLOAD-DEV__BUILD-important?style=for-the-badge" alt="download2 badge"></a>
+<a href="https://nightly.link/AlexProgrammerDE/ServerWrecker/workflows/build/main/ServerWrecker.zip"><img src="https://img.shields.io/badge/DOWNLOAD-DEV__BUILD-important?style=for-the-badge" alt="download2 badge"></a>
 </p>
 
 Advanced Minecraft Server-Stresser Tool. Launch bot attacks on your own servers to stress-test them and measure performance.
