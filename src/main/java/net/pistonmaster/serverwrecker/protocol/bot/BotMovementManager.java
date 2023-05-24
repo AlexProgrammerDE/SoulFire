@@ -34,13 +34,12 @@ import org.cloudburstmc.math.vector.Vector3i;
 import java.util.List;
 
 /**
- * Huge credit to https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/player/Player.java
+ * Huge credit to <a href="https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/player/Player.java">LabyStudio/java-minecraft</a>
  */
 @Data
 public final class BotMovementManager {
     private static final float FLY_SPEED = 0.05F;
     private static final float STEP_HEIGHT = 0.5F;
-    private static double eyeHeight = 1.62D;
     @ToString.Exclude
     private final SessionDataManager dataManager;
     private double x;
@@ -76,8 +75,17 @@ public final class BotMovementManager {
         this.x = x;
         this.y = y;
         this.z = z;
-        float w = 0.3F;
-        float h = 0.9F;
+        updateBoundingBox(); // New position, new bounding box
+    }
+
+    public void setSneaking(boolean sneaking) {
+        this.sneaking = sneaking;
+        updateBoundingBox(); // New height, new bounding box
+    }
+
+    public void updateBoundingBox() {
+        float w = getBoundingBoxWidth() / 2;
+        float h = getBoundingBoxHeight() / 2;
         this.boundingBox = new BoundingBox(x - w, y, z - w, x + w, y + h, z + w);
     }
 
@@ -107,7 +115,7 @@ public final class BotMovementManager {
         boolean eyes = origin == RotationOrigin.EYES;
 
         double dx = block.getX() - this.x;
-        double dy = block.getY() - (eyes ? this.y + eyeHeight : this.y);
+        double dy = block.getY() - (eyes ? this.y + getEyeHeight() : this.y);
         double dz = block.getZ() - this.z;
 
         double distanceXZ = Math.sqrt(dx * dx + dz * dz);
@@ -282,8 +290,8 @@ public final class BotMovementManager {
         float prevSlipperiness = this.getBlockSlipperiness() * 0.91F;
 
         float value = 0.16277136F / (prevSlipperiness * prevSlipperiness * prevSlipperiness);
-        float friction;
 
+        float friction;
         if (this.onGround) {
             friction = this.getAIMoveSpeed() * value;
         } else {
@@ -434,6 +442,14 @@ public final class BotMovementManager {
 
     public float getEyeHeight() {
         return this.sneaking ? 1.50F : 1.62F;
+    }
+
+    public float getBoundingBoxWidth() {
+        return 0.6F;
+    }
+
+    public float getBoundingBoxHeight() {
+        return this.sneaking ? 1.5F : 1.8F;
     }
 
     public int getBlockPosX() {
