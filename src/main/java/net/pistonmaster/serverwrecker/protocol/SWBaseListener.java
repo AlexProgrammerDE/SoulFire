@@ -85,30 +85,31 @@ public class SWBaseListener extends SessionAdapter {
                 session.send(new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
 
                 AuthData authData = botConnection.meta().getAuthData();
-                    UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
-                    boolean isLegacy = SWConstants.isLegacy(botConnection.options().protocolVersion());
-                    ProtocolMetadataStorage metadataStorage = viaUserConnection.get(ProtocolMetadataStorage.class);
-                    boolean isLegacyAuthenticate = !isLegacy || metadataStorage == null || metadataStorage.authenticate;
+                UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
+                boolean isLegacy = SWConstants.isLegacy(botConnection.options().protocolVersion());
+                ProtocolMetadataStorage metadataStorage = viaUserConnection.get(ProtocolMetadataStorage.class);
+                boolean isLegacyAuthenticate = !isLegacy || metadataStorage == null || metadataStorage.authenticate;
 
-                    if (authData.isPremium() && isLegacyAuthenticate) {
-                        SWSessionService sessionService = new SWSessionService();
-                        String serverId = sessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
-                        try {
-                            sessionService.joinServer(authData.profileId(), authData.authToken(), serverId);
-                        } catch (ServiceUnavailableException e) {
-                            session.disconnect("Login failed: Authentication service unavailable.", e);
-                            return;
-                        } catch (InvalidCredentialsException e) {
-                            session.disconnect("Login failed: Invalid login session.", e);
-                            return;
-                        } catch (RequestException e) {
-                            session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
-                            return;
-                        }
+                if (authData.isPremium() && isLegacyAuthenticate) {
+                    SWSessionService sessionService = new SWSessionService();
+                    String serverId = sessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
+                    try {
+                        sessionService.joinServer(authData.profileId(), authData.authToken(), serverId);
+                    } catch (ServiceUnavailableException e) {
+                        session.disconnect("Login failed: Authentication service unavailable.", e);
+                        return;
+                    } catch (InvalidCredentialsException e) {
+                        session.disconnect("Login failed: Invalid login session.", e);
+                        return;
+                    } catch (RequestException e) {
+                        session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
+                        return;
                     }
+                }
 
+                if (!isLegacy) { // Legacy encryption is handled in SWViaEncryptionProvider
                     viaSession.enableJavaEncryption(key);
-
+                }
             } else if (packet instanceof ClientboundGameProfilePacket) {
                 protocol.setState(ProtocolState.GAME);
             } else if (packet instanceof ClientboundLoginDisconnectPacket) {
