@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.pistonmaster.serverwrecker.SWConstants;
-import net.pistonmaster.serverwrecker.common.AuthService;
+import net.pistonmaster.serverwrecker.auth.AuthService;
 import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.common.SWOptions;
 

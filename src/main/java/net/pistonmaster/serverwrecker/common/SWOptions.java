@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.common;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import net.pistonmaster.serverwrecker.auth.AuthService;
 
 public record SWOptions(String host, int port,
                         int amount, int joinDelayMs, boolean waitEstablished, String botNameFormat,

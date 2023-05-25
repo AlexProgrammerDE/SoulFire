@@ -22,9 +22,6 @@ package net.pistonmaster.serverwrecker;
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import com.github.steveice10.mc.auth.data.GameProfile;
-import com.github.steveice10.mc.auth.exception.request.RequestException;
-import com.github.steveice10.mc.auth.service.AuthenticationService;
-import com.github.steveice10.mc.auth.service.MsaAuthenticationService;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -42,12 +39,17 @@ import net.pistonmaster.serverwrecker.api.Addon;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.state.AttackEndEvent;
 import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
+import net.pistonmaster.serverwrecker.auth.AuthService;
+import net.pistonmaster.serverwrecker.auth.JavaAccount;
+import net.pistonmaster.serverwrecker.auth.JavaAuthService;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
-import net.pistonmaster.serverwrecker.common.*;
+import net.pistonmaster.serverwrecker.common.AttackState;
+import net.pistonmaster.serverwrecker.common.BotProxy;
+import net.pistonmaster.serverwrecker.common.ProxyRequestData;
+import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.mojangdata.TranslationMapper;
-import net.pistonmaster.serverwrecker.protocol.AuthData;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
@@ -230,46 +232,7 @@ public class ServerWrecker {
         Map<BotProxy, AtomicInteger> proxyUseMap = new HashMap<>();
         List<BotConnectionFactory> factories = new ArrayList<>();
         for (int i = 0; i <= options.amount(); i++) {
-            AuthData authData;
-
-            if (accounts == null) {
-                authData = new AuthData(String.format(options.botNameFormat(), i));
-            } else {
-                if (accounts.size() <= i) {
-                    logger.warn("Bot amount is set higher than accounts are available. Limiting bot amount to {}", accounts.size());
-                    break;
-                }
-
-                String[] lines = accounts.get(i).split(":");
-
-                if (lines.length == 1) {
-                    authData = new AuthData(lines[0]);
-                } else if (lines.length == 2) {
-                    String email = lines[0];
-                    String password = lines[1];
-
-                    Optional<AuthData> optional = authenticate(options, email, password, Proxy.NO_PROXY);
-                    if (optional.isEmpty()) {
-                        logger.warn("The account {} failed to authenticate! (skipping it) Check above logs for further information.", email);
-                        continue;
-                    }
-
-                    authData = optional.get();
-                } else {
-                    throw new IllegalArgumentException("Invalid account format: " + accounts.get(i));
-                }
-            }
-
-            System.out.println("Authenticated " + authData);
-
-            // AuthData will be used internally instead of the MCProtocol data
-            MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile(authData.profileId(), authData.username()), authData.authToken());
-
-            // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
-            protocol.setUseDefaultListeners(false);
-
-            Logger logger = LoggerFactory.getLogger(authData.username());
-            ProxyBotData proxyBotData = null;
+            ProxyRequestData proxyRequestData = null;
             if (!proxyCache.isEmpty()) {
                 proxyIterator = fromStartIfNoNext(proxyIterator, proxyCache);
                 BotProxy proxy = proxyIterator.next();
@@ -294,10 +257,52 @@ public class ServerWrecker {
                     }
                 }
 
-                proxyBotData = ProxyBotData.of(proxy.username(), proxy.password(), proxy.address(), options.proxyType());
+                proxyRequestData = ProxyRequestData.of(proxy.username(), proxy.password(), proxy.address(), options.proxyType());
             }
 
-            factories.add(new BotConnectionFactory(this, options, logger, protocol, options.authService(), authData, proxyBotData));
+            JavaAccount javaAccount;
+            if (accounts == null) {
+                javaAccount = new JavaAccount(String.format(options.botNameFormat(), i));
+            } else {
+                if (accounts.size() <= i) {
+                    logger.warn("Bot amount is set higher than accounts are available. Limiting bot amount to {}", accounts.size());
+                    break;
+                }
+
+                String accountString = accounts.get(i);
+                String[] lines = accountString.split(":");
+
+                if (lines.length == 0 || lines.length > 2) {
+                    throw new IllegalArgumentException("Invalid account format: " + accountString);
+                }
+
+                if (lines.length == 1 || lines[1].isBlank()) {
+                    javaAccount = new JavaAccount(lines[0]);
+                } else {
+                    String email = lines[0];
+                    String password = lines[1];
+
+                    try {
+                        javaAccount = authenticate(options, email, password, proxyRequestData);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        logger.warn("The account {} failed to authenticate! (skipping it) Check logs for further information.", email);
+                        continue;
+                    }
+                }
+            }
+
+            System.out.println("Authenticated " + javaAccount);
+
+            Logger botLogger = LoggerFactory.getLogger(javaAccount.username());
+
+            // AuthData will be used internally instead of the MCProtocol data
+            MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile(javaAccount.profileId(), javaAccount.username()), javaAccount.authToken());
+
+            // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
+            protocol.setUseDefaultListeners(false);
+
+            factories.add(new BotConnectionFactory(this, options, botLogger, protocol, options.authService(), javaAccount, proxyRequestData));
         }
 
         if (proxyCache.isEmpty()) {
@@ -340,33 +345,12 @@ public class ServerWrecker {
         }
     }
 
-    public Optional<AuthData> authenticate(SWOptions options, String username, String password, Proxy authProxy) {
-        if (password.isBlank() || options.authService() == AuthService.OFFLINE) {
-            return Optional.of(new AuthData(username));
-        } else {
-            try {
-                AuthenticationService authService = switch (options.authService()) {
-                    case OFFLINE -> throw new IllegalStateException("Offline authentication is impossible!");
-                    case MICROSOFT -> new MsaAuthenticationService(serviceServerConfig.get("clientId"));
-                };
-
-                authService.setUsername(username);
-                authService.setPassword(password);
-                authService.setProxy(authProxy);
-
-                authService.login();
-
-                GameProfile profile = authService.getSelectedProfile();
-                String profileName = profile.getName();
-                UUID profileId = profile.getId();
-                String accessToken = authService.getAccessToken();
-
-                return Optional.of(new AuthData(profileName, profileId, accessToken));
-            } catch (RequestException e) {
-                logger.warn("Failed to authenticate {}! ({})", username, e.getMessage(), e);
-                return Optional.empty();
-            }
+    public JavaAccount authenticate(SWOptions options, String username, String password, ProxyRequestData proxyRequestData) throws IOException {
+        if (options.authService() == AuthService.MICROSOFT) {
+            return new JavaAuthService().login(username, password, proxyRequestData);
         }
+
+        throw new IllegalArgumentException("Invalid auth service: " + options.authService());
     }
 
     public void stop() {

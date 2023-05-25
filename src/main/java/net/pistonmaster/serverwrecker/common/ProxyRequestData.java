@@ -17,22 +17,22 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol;
+package net.pistonmaster.serverwrecker.common;
 
-import java.util.UUID;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-public record AuthData(String username, UUID profileId, String authToken) {
-    public AuthData {
-        if (username == null) {
-            throw new IllegalArgumentException("Username cannot be null!");
-        }
-    }
+import java.net.InetSocketAddress;
 
-    public AuthData(String username) {
-        this(username, null, null);
-    }
+@Getter
+@RequiredArgsConstructor(staticName = "of")
+public class ProxyRequestData {
+    private final String username;
+    private final String password;
+    private final InetSocketAddress address;
+    private final ProxyType type;
 
-    public boolean isPremium() {
-        return profileId != null && authToken != null;
+    public boolean hasCredentials() {
+        return username != null && password != null;
     }
 }

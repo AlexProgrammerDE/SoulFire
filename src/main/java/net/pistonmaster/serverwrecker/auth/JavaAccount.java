@@ -17,7 +17,22 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.common;
+package net.pistonmaster.serverwrecker.auth;
 
-public record Pair<L, R>(L left, R right) {
+import java.util.UUID;
+
+public record JavaAccount(String username, UUID profileId, String authToken) {
+    public JavaAccount {
+        if (username == null) {
+            throw new IllegalArgumentException("Username cannot be null!");
+        }
+    }
+
+    public JavaAccount(String username) {
+        this(username, null, null);
+    }
+
+    public boolean isPremium() {
+        return profileId != null && authToken != null;
+    }
 }
