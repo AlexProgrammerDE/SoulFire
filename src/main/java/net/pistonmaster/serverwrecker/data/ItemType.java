@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record ItemType(int id, String name, String displayName, int stackSize, List<String> enchantCategories,
-        List<String> repairWith, int maxDurability) {
+                       List<String> repairWith, int maxDurability) {
     public static final List<ItemType> VALUES = new ArrayList<>();
 
     public static final ItemType AIR = register(new ItemType(0, "air", "Air", 64, null, null, -1));

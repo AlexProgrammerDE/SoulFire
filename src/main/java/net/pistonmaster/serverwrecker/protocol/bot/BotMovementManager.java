@@ -26,6 +26,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
 import lombok.Data;
 import lombok.ToString;
+import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 import net.pistonmaster.serverwrecker.util.MathHelper;
@@ -318,7 +319,21 @@ public final class BotMovementManager {
     }
 
     private float getBlockSlipperiness() {
-        return this.onGround ? 0.6F : 1.0F;
+        if (!this.onGround) {
+            return 1.0F;
+        }
+
+        Vector3i blockPos = this.getBlockPos();
+        BlockType blockType = getLevelSafe().getBlockTypeAt(blockPos);
+        if (blockType == BlockType.SLIME_BLOCK) {
+            return 0.8F;
+        } else if (blockType == BlockType.ICE || blockType == BlockType.PACKED_ICE) {
+            return 0.98F;
+        } else if (blockType == BlockType.BLUE_ICE) {
+            return 0.989F;
+        } else {
+            return 0.6F; // Normal block
+        }
     }
 
     private float getAIMoveSpeed() {

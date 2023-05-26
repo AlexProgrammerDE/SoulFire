@@ -66,7 +66,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -272,7 +271,7 @@ public class ServerWrecker {
                 String accountString = accounts.get(i);
                 String[] lines = accountString.split(":");
 
-                if (lines.length == 0 || lines.length > 2) {
+                if (lines.length == 0 || lines.length > 2 || lines[0].isBlank()) {
                     throw new IllegalArgumentException("Invalid account format: " + accountString);
                 }
 
@@ -363,7 +362,6 @@ public class ServerWrecker {
         botConnections.clear();
         ServerWreckerAPI.postEvent(new AttackEndEvent());
     }
-
 
     /**
      * Shuts down the proxy, kicking players with the specified reason.

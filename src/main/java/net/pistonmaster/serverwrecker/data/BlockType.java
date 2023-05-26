@@ -19,12 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.data;
 
-import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 
 public record BlockType(int id, String name, String displayName, double hardness, double resistance,
-        int stackSize, boolean diggable, String material, BoundingBoxType boundingBox) {
+                        int stackSize, boolean diggable, String material, BoundingBoxType boundingBox) {
     public static final List<BlockType> VALUES = new ArrayList<>();
 
     public static final BlockType AIR = register(new BlockType(0, "air", "Air", 0, 0, 64, false, "default", BoundingBoxType.EMPTY));
