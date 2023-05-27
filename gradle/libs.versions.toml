@@ -23,7 +23,7 @@ picoli = "info.picocli:picocli:4.7.3"
 picoli-codegen = "info.picocli:picocli-codegen:4.7.3"
 flatlaf = "com.formdev:flatlaf:3.1.1"
 pf4j = "org.pf4j:pf4j:3.9.0"
-mcprotocollib = "com.github.GeyserMC:MCProtocolLib:bcf453c"
+mcprotocollib = "com.github.GeyserMC:MCProtocolLib:d2803b7"
 lombok = "org.projectlombok:lombok:1.18.28"
 disruptor = "com.lmax:disruptor:3.4.4"
 
