@@ -4,6 +4,7 @@ plugins {
     application
     id("sw.shadow-conventions")
     id("edu.sc.seis.launch4j") version "2.5.4"
+    id("org.openjfx.javafxplugin") version "0.0.13"
 }
 
 version = "1.0.0"
@@ -33,6 +34,11 @@ repositories {
 
 application {
     mainClass.set("ServerWrecker")
+}
+
+javafx {
+    version = "20"
+    modules = listOf("javafx.controls", "javafx.swing")
 }
 
 dependencies {
@@ -88,6 +94,8 @@ dependencies {
     implementation(libs.jansi)
     implementation(libs.guava)
     implementation(libs.gson)
+
+    implementation("li.flor:native-j-file-chooser:1.6.4")
 
     implementation("com.thealtening.api:api:4.1.0")
 

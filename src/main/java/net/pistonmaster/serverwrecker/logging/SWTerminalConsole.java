@@ -35,7 +35,7 @@ import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class SWTerminalConsole extends SimpleTerminalConsole {
-    private static final Logger logger = LogManager.getLogger(SWTerminalConsole.class);
+    private static final Logger logger = LogManager.getLogger("ServerWrecker");
     private final ServerWrecker serverWrecker;
     private final CommandManager commandManager;
 

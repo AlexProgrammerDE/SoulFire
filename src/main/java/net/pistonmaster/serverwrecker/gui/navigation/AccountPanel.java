@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
+import li.flor.nativejfilechooser.NativeJFileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.auth.AuthService;
 import net.pistonmaster.serverwrecker.common.ProxyType;
@@ -43,14 +44,13 @@ public class AccountPanel extends NavigationItem {
     @Inject
     public AccountPanel(ServerWrecker serverWrecker, JFrame parent) {
         this.serverWrecker = serverWrecker;
-
         JPanel accounts = new JPanel();
         accounts.setLayout(new GridLayout(0, 2));
 
         JButton loadAccounts = new JButton("Load Accounts");
 
-        JFileChooser accountChooser = new JFileChooser();
-        accountChooser.addChoosableFileFilter(new FileNameExtensionFilter("", "txt"));
+        JFileChooser accountChooser = new NativeJFileChooser();
+        accountChooser.addChoosableFileFilter(new FileNameExtensionFilter("Account list file", "txt"));
         loadAccounts.addActionListener(new LoadAccountsListener(serverWrecker, parent, accountChooser));
 
         JPanel serviceSettingsPanel = new JPanel();
@@ -78,9 +78,9 @@ public class AccountPanel extends NavigationItem {
 
         JPanel proxies = new JPanel();
         JButton loadProxies = new JButton("Load proxies");
-        JFileChooser proxiesChooser = new JFileChooser();
+        JFileChooser proxiesChooser = new NativeJFileChooser();
 
-        proxiesChooser.addChoosableFileFilter(new FileNameExtensionFilter("", "txt"));
+        proxiesChooser.addChoosableFileFilter(new FileNameExtensionFilter("Proxy list file", "txt"));
         loadProxies.addActionListener(new LoadProxiesListener(serverWrecker, parent, proxiesChooser));
 
         Arrays.stream(ProxyType.values()).forEach(proxyTypeCombo::addItem);

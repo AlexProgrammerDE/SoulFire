@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.gui;
 
 import ch.jalu.injector.Injector;
 import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.util.SystemInfo;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 
 import javax.annotation.PostConstruct;
@@ -43,6 +44,11 @@ public class MainFrame extends JFrame {
 
     public static void setLookAndFeel() {
         FlatDarculaLaf.setup();
+
+        if (SystemInfo.isLinux) {
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            JDialog.setDefaultLookAndFeelDecorated(true);
+        }
     }
 
     @PostConstruct

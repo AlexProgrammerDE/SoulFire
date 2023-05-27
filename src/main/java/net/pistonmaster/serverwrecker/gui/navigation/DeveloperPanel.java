@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
+import li.flor.nativejfilechooser.NativeJFileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
 import org.apache.logging.log4j.Level;
@@ -58,7 +59,7 @@ public class DeveloperPanel extends NavigationItem {
         });
 
         saveLog.addActionListener(listener -> {
-            JFileChooser fileChooser = new JFileChooser();
+            JFileChooser fileChooser = new NativeJFileChooser();
             fileChooser.setDialogTitle("Save Log");
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fileChooser.setAcceptAllFileFilterUsed(false);
