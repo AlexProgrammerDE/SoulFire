@@ -476,7 +476,7 @@ public final class SessionDataManager {
             Vector3i vector3i = entry.getPosition();
             int newId = entry.getBlock();
 
-            System.out.println("Updating block at " + vector3i + " to " + newId);
+            log.debug("Updating block at {} to {}", vector3i, newId);
             level.setBlockId(vector3i, newId);
         }
     }
@@ -496,6 +496,8 @@ public final class SessionDataManager {
         int newId = entry.getBlock();
 
         level.setBlockId(vector3i, newId);
+
+        log.debug("Updating block at {} to {}", vector3i, newId);
     }
 
     @BusHandler
