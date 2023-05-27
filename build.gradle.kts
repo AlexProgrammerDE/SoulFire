@@ -4,7 +4,7 @@ plugins {
     application
     id("sw.shadow-conventions")
     id("edu.sc.seis.launch4j") version "2.5.4"
-    id("org.openjfx.javafxplugin") version "0.0.13"
+    id("org.openjfx.javafxplugin") version "0.0.14"
 }
 
 version = "1.0.0"
