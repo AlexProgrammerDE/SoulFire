@@ -27,14 +27,14 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
-import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.auth.JavaAccount;
 import net.pistonmaster.serverwrecker.common.NullHelper;
-import net.pistonmaster.serverwrecker.common.SWOptions;
+import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.common.SWProxy;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
-import net.pistonmaster.serverwrecker.settings.SettingsHolder;
+import net.pistonmaster.serverwrecker.settings.DevSettings;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
@@ -47,21 +47,23 @@ public record BotConnectionFactory(ServerWrecker serverWrecker, SettingsHolder s
     }
 
     public BotConnection connectInternal() {
-        SWOptions options = settingsHolder.get(SWOptions.class);
-        ViaClientSession session = new ViaClientSession(options.host(), options.port(), protocol,
+        BotSettings botSettings = settingsHolder.get(BotSettings.class);
+        ViaClientSession session = new ViaClientSession(botSettings.host(), botSettings.port(), protocol,
                 NullHelper.nullOrApply(proxyData,
                         data -> new ProxyInfo(ProxyInfo.Type.valueOf(data.type().name()), data.address(), data.username(), data.password())),
-                options);
-        BotConnection botConnection = new BotConnection(this, serverWrecker, options, logger, protocol, session, new BotConnectionMeta(javaAccount));
+                settingsHolder);
+        BotConnection botConnection = new BotConnection(this, serverWrecker, settingsHolder, logger, protocol, session, new BotConnectionMeta(javaAccount));
         session.setPostDisconnectHook(() -> botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup));
 
         SessionDataManager sessionDataManager = new SessionDataManager(botConnection);
         session.setFlag(SWProtocolConstants.SESSION_DATA_MANAGER, sessionDataManager);
-        session.setFlag(BuiltinFlags.PRINT_DEBUG, options.debug());
 
-        session.setConnectTimeout(options.connectTimeout());
-        session.setReadTimeout(options.readTimeout());
-        session.setWriteTimeout(options.writeTimeout());
+        DevSettings devSettings = settingsHolder.get(DevSettings.class);
+        session.setFlag(BuiltinFlags.PRINT_DEBUG, devSettings.debug());
+
+        session.setConnectTimeout(botSettings.connectTimeout());
+        session.setReadTimeout(botSettings.readTimeout());
+        session.setWriteTimeout(botSettings.writeTimeout());
 
         session.addListener(new SWBaseListener(botConnection, ProtocolState.LOGIN));
         session.addListener(new SWSessionListener(sessionDataManager, botConnection));

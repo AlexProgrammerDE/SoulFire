@@ -22,8 +22,8 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.common.SWOptions;
-import net.pistonmaster.serverwrecker.settings.SettingsDuplex;
+import net.pistonmaster.serverwrecker.settings.BotSettings;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SettingsPanel extends NavigationItem implements SettingsDuplex<SWOptions> {
+public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotSettings> {
     private final JTextField hostInput;
     private final JTextField portInput;
     private final JSpinner joinDelayMs;
@@ -54,7 +54,7 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<SWOp
     @Inject
     public SettingsPanel(ServerWrecker serverWrecker) {
         super();
-        serverWrecker.getSettingsManager().registerDuplex(SWOptions.class, this);
+        serverWrecker.getSettingsManager().registerDuplex(BotSettings.class, this);
 
         setLayout(new GridLayout(0, 2));
 
@@ -153,7 +153,7 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<SWOp
     }
 
     @Override
-    public void onSettingsChange(SWOptions settings) {
+    public void onSettingsChange(BotSettings settings) {
         hostInput.setText(settings.host());
         portInput.setText(String.valueOf(settings.port()));
         amount.setValue(settings.amount());
@@ -162,7 +162,6 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<SWOp
         nameFormat.setText(settings.botNameFormat());
         versionBox.setSelectedItem(settings.protocolVersion());
         autoRegister.setSelected(settings.autoRegister());
-        DeveloperPanel.debug.setSelected(settings.debug());
         AccountPanel.proxyTypeCombo.setSelectedEnum(settings.proxyType());
         AccountPanel.botsPerProxy.setValue(settings.botsPerProxy());
         readTimeout.setValue(settings.readTimeout());
@@ -178,8 +177,8 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<SWOp
     }
 
     @Override
-    public SWOptions collectSettings() {
-        return new SWOptions(
+    public BotSettings collectSettings() {
+        return new BotSettings(
                 hostInput.getText(),
                 Integer.parseInt(portInput.getText()),
                 (int) amount.getValue(),
@@ -188,7 +187,6 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<SWOp
                 nameFormat.getText(),
                 (ProtocolVersion) versionBox.getSelectedItem(),
                 autoRegister.isSelected(),
-                DeveloperPanel.debug.isSelected(),
                 AccountPanel.proxyTypeCombo.getSelectedEnum(),
                 (Integer) AccountPanel.botsPerProxy.getValue(),
                 (int) readTimeout.getValue(),

@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.AttackState;
-import net.pistonmaster.serverwrecker.common.SWOptions;
 
 import javax.inject.Inject;
 import javax.swing.*;

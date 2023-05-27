@@ -19,11 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.settings;
 
-/**
- * Listen for settings changes.
- * Can be from the terminal or from loading a profile.
- * @param <T> The type of settings object.
- */
-public interface SettingsListener<T extends SettingsObject> {
-    void onSettingsChange(T settings);
+import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
+
+public record DevSettings(boolean debug) implements SettingsObject {
 }

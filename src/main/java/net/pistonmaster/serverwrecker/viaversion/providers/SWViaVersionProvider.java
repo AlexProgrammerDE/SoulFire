@@ -21,7 +21,8 @@ package net.pistonmaster.serverwrecker.viaversion.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
-import net.pistonmaster.serverwrecker.viaversion.StorableOptions;
+import net.pistonmaster.serverwrecker.settings.BotSettings;
+import net.pistonmaster.serverwrecker.viaversion.StorableSettingsHolder;
 
 import java.util.Objects;
 
@@ -29,9 +30,9 @@ public class SWViaVersionProvider implements VersionProvider {
 
     @Override
     public int getClosestServerProtocol(UserConnection connection) {
-        StorableOptions options = connection.get(StorableOptions.class);
-        Objects.requireNonNull(options, "StorableOptions is null");
+        StorableSettingsHolder settingsHolder = connection.get(StorableSettingsHolder.class);
+        Objects.requireNonNull(settingsHolder, "StorableOptions is null");
 
-        return options.options().protocolVersion().getVersion();
+        return settingsHolder.settingsHolder().get(BotSettings.class).protocolVersion().getVersion();
     }
 }

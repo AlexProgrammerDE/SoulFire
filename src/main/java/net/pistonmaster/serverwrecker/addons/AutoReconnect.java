@@ -22,7 +22,7 @@ package net.pistonmaster.serverwrecker.addons;
 import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
-import net.pistonmaster.serverwrecker.common.SWOptions;
+import net.pistonmaster.serverwrecker.settings.BotSettings;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.concurrent.TimeUnit;
@@ -35,8 +35,8 @@ public class AutoReconnect implements InternalAddon, EventSubscriber<BotDisconne
 
     @Override
     public void on(@NonNull BotDisconnectedEvent event) throws Throwable {
-        SWOptions options = event.connection().options();
-        if (!options.autoReconnect() || event.connection().serverWrecker().getAttackState().isInactive()) {
+        BotSettings botSettings = event.connection().settingsHolder().get(BotSettings.class);
+        if (!botSettings.autoReconnect() || event.connection().serverWrecker().getAttackState().isInactive()) {
             return;
         }
 

@@ -27,6 +27,7 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
+import net.pistonmaster.serverwrecker.settings.BotSettings;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AutoRespawn implements InternalAddon, EventSubscriber<SWPacketReceiveEvent> {
@@ -39,7 +40,7 @@ public class AutoRespawn implements InternalAddon, EventSubscriber<SWPacketRecei
     public void on(@NonNull SWPacketReceiveEvent event) {
         BotConnection connection = event.getConnection();
         ServerWrecker serverWrecker = connection.serverWrecker();
-        if (!connection.options().autoRespawn()) {
+        if (!connection.settingsHolder().get(BotSettings.class).autoRespawn()) {
             return;
         }
 

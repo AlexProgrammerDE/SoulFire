@@ -19,16 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.settings;
 
-import java.util.List;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
-public record SettingsHolder(List<? extends SettingsObject> settings) {
-    @SuppressWarnings("unchecked")
-    public <T extends SettingsObject> T get(Class<T> clazz) {
-        return (T) settings.stream().filter(clazz::isInstance)
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("No settings found for " + clazz.getSimpleName()));
-    }
-
-    public <T extends SettingsObject> boolean has(Class<T> clazz) {
-        return settings.stream().anyMatch(clazz::isInstance);
-    }
+public record AccountSettings() implements SettingsObject {
 }

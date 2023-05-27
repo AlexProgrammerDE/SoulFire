@@ -17,11 +17,11 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.settings;
+package net.pistonmaster.serverwrecker.settings.lib;
 
 /**
- * A duplex of {@link SettingsListener} and {@link SettingsProvider}.
- * @param <T> The type of settings object.
+ * Represents a settings object. A settings object has to be json serializable.
+ * @see SettingsManager#registerProvider(Class, SettingsProvider)
  */
-public interface SettingsDuplex<T extends SettingsObject> extends SettingsListener<T>, SettingsProvider<T> {
+public interface SettingsObject {
 }

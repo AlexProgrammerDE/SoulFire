@@ -17,11 +17,15 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.settings;
+package net.pistonmaster.serverwrecker.viaversion;
 
-/**
- * Represents a settings object. A settings object has to be json serializable.
- * @see SettingsManager#registerProvider(Class, SettingsProvider)
- */
-public interface SettingsObject {
+import com.viaversion.viaversion.api.connection.StorableObject;
+import net.pistonmaster.serverwrecker.settings.BotSettings;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
+
+public record StorableSettingsHolder(SettingsHolder settingsHolder) implements StorableObject {
+    @Override
+    public boolean clearOnServerSwitch() {
+        return false;
+    }
 }

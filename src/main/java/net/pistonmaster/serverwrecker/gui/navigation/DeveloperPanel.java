@@ -22,6 +22,8 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import li.flor.nativejfilechooser.NativeJFileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
+import net.pistonmaster.serverwrecker.settings.DevSettings;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.apache.logging.log4j.Level;
 
 import javax.inject.Inject;
@@ -34,13 +36,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class DeveloperPanel extends NavigationItem {
-    public static final JCheckBox debug = new JCheckBox();
-    public static final JButton saveLog = new JButton("Save Log");
+public class DeveloperPanel extends NavigationItem implements SettingsDuplex<DevSettings> {
+    private final JCheckBox debug = new JCheckBox();
 
     @Inject
     public DeveloperPanel(ServerWrecker serverWrecker, LogAppender logAppender) {
         super();
+        serverWrecker.getSettingsManager().registerDuplex(DevSettings.class, this);
 
         setLayout(new GridLayout(0, 2));
 
@@ -48,6 +50,7 @@ public class DeveloperPanel extends NavigationItem {
         add(debug);
 
         add(new JLabel("Save Log:"));
+        JButton saveLog = new JButton("Save Log");
         add(saveLog);
 
         debug.addActionListener(listener -> {
@@ -106,5 +109,15 @@ public class DeveloperPanel extends NavigationItem {
     @Override
     public String getNavigationId() {
         return RightPanelContainer.DEV_MENU;
+    }
+
+    @Override
+    public void onSettingsChange(DevSettings settings) {
+        debug.setSelected(settings.debug());
+    }
+
+    @Override
+    public DevSettings collectSettings() {
+        return new DevSettings(debug.isSelected());
     }
 }

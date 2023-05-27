@@ -17,17 +17,18 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.common;
+package net.pistonmaster.serverwrecker.settings;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.pistonmaster.serverwrecker.auth.AuthType;
-import net.pistonmaster.serverwrecker.settings.SettingsObject;
+import net.pistonmaster.serverwrecker.common.ProxyType;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
-public record SWOptions(String host, int port,
-                        int amount, int joinDelayMs, boolean waitEstablished, String botNameFormat,
-                        ProtocolVersion protocolVersion, boolean autoRegister,
-                        boolean debug, ProxyType proxyType, int botsPerProxy,
-                        int readTimeout, int writeTimeout, int connectTimeout,
-                        String registerCommand, String loginCommand, String captchaCommand,
-                        String passwordFormat, boolean autoReconnect, boolean autoRespawn, AuthType authType) implements SettingsObject {
+public record BotSettings(String host, int port,
+                          int amount, int joinDelayMs, boolean waitEstablished, String botNameFormat,
+                          ProtocolVersion protocolVersion, boolean autoRegister,
+                          ProxyType proxyType, int botsPerProxy,
+                          int readTimeout, int writeTimeout, int connectTimeout,
+                          String registerCommand, String loginCommand, String captchaCommand,
+                          String passwordFormat, boolean autoReconnect, boolean autoRespawn, AuthType authType) implements SettingsObject {
 }

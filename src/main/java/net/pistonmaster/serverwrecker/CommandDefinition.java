@@ -24,7 +24,8 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.ProxyType;
-import net.pistonmaster.serverwrecker.common.SWOptions;
+import net.pistonmaster.serverwrecker.settings.BotSettings;
+import net.pistonmaster.serverwrecker.settings.DevSettings;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -106,8 +107,8 @@ public class CommandDefinition implements Callable<Integer> {
     public Integer call() {
         ServerWrecker serverWrecker = new ServerWrecker(dataFolder);
 
-        serverWrecker.getSettingsManager().registerProvider(SWOptions.class,
-                () -> new SWOptions(
+        serverWrecker.getSettingsManager().registerProvider(BotSettings.class,
+                () -> new BotSettings(
                         host,
                         port,
                         amount,
@@ -116,7 +117,6 @@ public class CommandDefinition implements Callable<Integer> {
                         nameFormat,
                         ProtocolVersion.getClosest(version),
                         autoRegister,
-                        debug,
                         proxy,
                         accountsPerProxy,
                         readTimeout,
@@ -129,6 +129,11 @@ public class CommandDefinition implements Callable<Integer> {
                         autoReconnect,
                         autoRespawn,
                         authType
+                ));
+
+        serverWrecker.getSettingsManager().registerProvider(DevSettings.class,
+                () -> new DevSettings(
+                        debug
                 ));
 
         serverWrecker.start();

@@ -61,10 +61,11 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.SWConstants;
-import net.pistonmaster.serverwrecker.common.SWOptions;
+import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.protocol.SWProtocolConstants;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.viaversion.FrameCodec;
-import net.pistonmaster.serverwrecker.viaversion.StorableOptions;
+import net.pistonmaster.serverwrecker.viaversion.StorableSettingsHolder;
 import net.pistonmaster.serverwrecker.viaversion.StorableSession;
 import net.raphimc.viabedrock.netty.BatchLengthCodec;
 import net.raphimc.viabedrock.netty.PacketEncapsulationCodec;
@@ -102,22 +103,22 @@ public class ViaClientSession extends TcpSession {
     private final ProxyInfo proxy;
     private final PacketCodecHelper codecHelper;
     @Getter
-    private final SWOptions options;
+    private final SettingsHolder settingsHolder;
     private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
     @Setter
     private Runnable postDisconnectHook;
 
-    public ViaClientSession(String host, int port, PacketProtocol protocol, ProxyInfo proxy, SWOptions options) {
-        this(host, port, "0.0.0.0", 0, protocol, proxy, options);
+    public ViaClientSession(String host, int port, PacketProtocol protocol, ProxyInfo proxy, SettingsHolder settingsHolder) {
+        this(host, port, "0.0.0.0", 0, protocol, proxy, settingsHolder);
     }
 
-    public ViaClientSession(String host, int port, String bindAddress, int bindPort, PacketProtocol protocol, ProxyInfo proxy, SWOptions options) {
+    public ViaClientSession(String host, int port, String bindAddress, int bindPort, PacketProtocol protocol, ProxyInfo proxy, SettingsHolder settingsHolder) {
         super(host, port, protocol);
         this.bindAddress = bindAddress;
         this.bindPort = bindPort;
         this.proxy = proxy;
         this.codecHelper = protocol.createHelper();
-        this.options = options;
+        this.settingsHolder = settingsHolder;
     }
 
     private static void createTcpEventLoopGroup() {
@@ -162,7 +163,8 @@ public class ViaClientSession extends TcpSession {
         }
 
         try {
-            ProtocolVersion version = options.protocolVersion();
+            BotSettings botSettings = settingsHolder.get(BotSettings.class);
+            ProtocolVersion version = botSettings.protocolVersion();
             boolean isLegacy = SWConstants.isLegacy(version);
             boolean isBedrock = SWConstants.isBedrock(version);
             Bootstrap bootstrap = new Bootstrap();
@@ -208,7 +210,7 @@ public class ViaClientSession extends TcpSession {
 
                     // This does the extra magic
                     UserConnectionImpl userConnection = new UserConnectionImpl(channel, true);
-                    userConnection.put(new StorableOptions(options));
+                    userConnection.put(new StorableSettingsHolder(settingsHolder));
                     userConnection.put(new StorableSession(ViaClientSession.this));
 
                     setFlag(SWProtocolConstants.VIA_USER_CONNECTION, userConnection);

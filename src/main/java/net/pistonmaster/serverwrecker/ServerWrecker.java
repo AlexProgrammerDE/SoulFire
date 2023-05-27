@@ -43,15 +43,16 @@ import net.pistonmaster.serverwrecker.auth.*;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.common.SWProxy;
-import net.pistonmaster.serverwrecker.common.SWOptions;
+import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.mojangdata.TranslationMapper;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
-import net.pistonmaster.serverwrecker.settings.SettingsHolder;
-import net.pistonmaster.serverwrecker.settings.SettingsManager;
+import net.pistonmaster.serverwrecker.settings.DevSettings;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
 import org.apache.logging.log4j.Level;
@@ -92,7 +93,7 @@ public class ServerWrecker {
     private AttackState attackState = AttackState.STOPPED;
     private final AccountRegistry accountRegistry = new AccountRegistry(this);
     private final SettingsManager settingsManager = new SettingsManager(
-            SWOptions.class
+            BotSettings.class
     );
     private boolean shutdown = false;
 
@@ -222,17 +223,18 @@ public class ServerWrecker {
     @SuppressWarnings("UnstableApiUsage")
     public void start() {
         SettingsHolder settingsHolder = settingsManager.collectSettings();
-        SWOptions options = settingsHolder.get(SWOptions.class);
+        BotSettings botSettings = settingsHolder.get(BotSettings.class);
+        DevSettings devSettings = settingsHolder.get(DevSettings.class);
 
-        Via.getManager().debugHandler().setEnabled(options.debug());
-        setupLogging(options.debug() ? Level.DEBUG : Level.INFO);
+        Via.getManager().debugHandler().setEnabled(devSettings.debug());
+        setupLogging(devSettings.debug() ? Level.DEBUG : Level.INFO);
 
         this.attackState = AttackState.RUNNING;
 
-        logger.info("Preparing bot attack at {}", options.host());
+        logger.info("Preparing bot attack at {}", botSettings.host());
 
-        int botAmount = options.amount(); // How many bots to connect
-        int botsPerProxy = options.botsPerProxy(); // How many bots per proxy are allowed
+        int botAmount = botSettings.amount(); // How many bots to connect
+        int botsPerProxy = botSettings.botsPerProxy(); // How many bots per proxy are allowed
         List<SWProxy> proxiesCopy = new ArrayList<>(availableProxies); // Copy the proxies
         int availableProxiesCount = proxiesCopy.size(); // How many proxies are available
         int maxBots = botsPerProxy > 0 ? botsPerProxy * availableProxiesCount : botAmount; // How many bots can be used at max
@@ -267,30 +269,26 @@ public class ServerWrecker {
         for (int botId = 1; botId <= botAmount; botId++) {
             SWProxy proxyData = getProxy(botsPerProxy, proxyUseMap);
 
-            JavaAccount javaAccount = getAccount(options, accounts, botId);
+            JavaAccount javaAccount = getAccount(botSettings, accounts, botId);
             int index = accounts.indexOf(javaAccount);
             if (index != -1) {
                 accounts.remove(index); // Remove the account from the list, so it can't be used again
-            }
-
-            if (options.authType() != AuthType.OFFLINE) { // Offline isn't "special"
-                logger.info("Authenticated {}", javaAccount);
             }
 
             factories.add(createBotFactory(settingsHolder, javaAccount, proxyData));
         }
 
         if (availableProxiesCount == 0) {
-            logger.info("Starting attack at {} with {} bots", options.host(), botConnections.size());
+            logger.info("Starting attack at {} with {} bots", botSettings.host(), factories.size());
         } else {
-            logger.info("Starting attack at {} with {} bots and {} proxies", options.host(), botConnections.size(), availableProxiesCount);
+            logger.info("Starting attack at {} with {} bots and {} proxies", botSettings.host(), factories.size(), availableProxiesCount);
         }
 
         ServerWreckerAPI.postEvent(new AttackStartEvent());
 
         for (BotConnectionFactory botConnectionFactory : factories) {
             try {
-                TimeUnit.MILLISECONDS.sleep(options.joinDelayMs());
+                TimeUnit.MILLISECONDS.sleep(botSettings.joinDelayMs());
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
@@ -312,7 +310,7 @@ public class ServerWrecker {
 
             CompletableFuture<BotConnection> future = botConnectionFactory.connect();
 
-            if (options.waitEstablished()) {
+            if (botSettings.waitEstablished()) {
                 this.botConnections.add(future.join());
             } else {
                 future.thenAccept(this.botConnections::add);
@@ -320,9 +318,9 @@ public class ServerWrecker {
         }
     }
 
-    private JavaAccount getAccount(SWOptions options, List<JavaAccount> accounts, int botId) {
+    private JavaAccount getAccount(BotSettings botSettings, List<JavaAccount> accounts, int botId) {
         if (accounts.isEmpty()) {
-            return new JavaAccount(String.format(options.botNameFormat(), botId));
+            return new JavaAccount(String.format(botSettings.botNameFormat(), botId));
         } else {
             return accounts.get(0);
         }

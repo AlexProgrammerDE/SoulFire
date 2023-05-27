@@ -22,7 +22,7 @@ package net.pistonmaster.serverwrecker.addons;
 import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.common.SWOptions;
+import net.pistonmaster.serverwrecker.settings.BotSettings;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AutoRegister implements InternalAddon, EventSubscriber<ChatMessageReceiveEvent> {
@@ -33,25 +33,25 @@ public class AutoRegister implements InternalAddon, EventSubscriber<ChatMessageR
 
     @Override
     public void on(@NonNull ChatMessageReceiveEvent event) {
-        SWOptions options = event.connection().options();
+        BotSettings botSettings = event.connection().settingsHolder().get(BotSettings.class);
         String plainMessage = event.parseToText();
-        if (!options.autoRegister()) {
+        if (!botSettings.autoRegister()) {
             return;
         }
 
-        String password = options.passwordFormat();
+        String password = botSettings.passwordFormat();
 
         // TODO: Add more password options
         if (plainMessage.contains("/register")) {
-            event.connection().sendMessage(options.registerCommand().replace("%password%", password));
+            event.connection().sendMessage(botSettings.registerCommand().replace("%password%", password));
         } else if (plainMessage.contains("/login")) {
-            event.connection().sendMessage(options.loginCommand().replace("%password%", password));
+            event.connection().sendMessage(botSettings.loginCommand().replace("%password%", password));
         } else if (plainMessage.contains("/captcha")) {
             String[] split = plainMessage.split(" ");
 
             for (int i = 0; i < split.length; i++) {
                 if (split[i].equals("/captcha")) {
-                    event.connection().sendMessage(options.captchaCommand().replace("%captcha%", split[i + 1]));
+                    event.connection().sendMessage(botSettings.captchaCommand().replace("%captcha%", split[i + 1]));
                 }
             }
         }

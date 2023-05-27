@@ -62,13 +62,14 @@ import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.common.SWOptions;
+import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.model.*;
 import net.pistonmaster.serverwrecker.protocol.bot.state.*;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.util.BusHandler;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
@@ -83,7 +84,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Getter
 @ToString
 public final class SessionDataManager {
-    private final SWOptions options;
+    private final SettingsHolder settingsHolder;
     private final Logger log;
     private final ServerWrecker serverWrecker;
     private final ViaClientSession session;
@@ -117,7 +118,7 @@ public final class SessionDataManager {
     private boolean isDead = false;
 
     public SessionDataManager(BotConnection connection) {
-        this.options = connection.options();
+        this.settingsHolder = connection.settingsHolder();
         this.log = connection.logger();
         this.serverWrecker = connection.serverWrecker();
         this.session = connection.session();

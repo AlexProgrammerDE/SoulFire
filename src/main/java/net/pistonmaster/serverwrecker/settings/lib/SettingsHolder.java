@@ -17,14 +17,18 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.viaversion;
+package net.pistonmaster.serverwrecker.settings.lib;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
-import net.pistonmaster.serverwrecker.common.SWOptions;
+import java.util.List;
 
-public record StorableOptions(SWOptions options) implements StorableObject {
-    @Override
-    public boolean clearOnServerSwitch() {
-        return false;
+public record SettingsHolder(List<? extends SettingsObject> settings) {
+    @SuppressWarnings("unchecked")
+    public <T extends SettingsObject> T get(Class<T> clazz) {
+        return (T) settings.stream().filter(clazz::isInstance)
+                .findFirst().orElseThrow(() -> new IllegalArgumentException("No settings found for " + clazz.getSimpleName()));
+    }
+
+    public <T extends SettingsObject> boolean has(Class<T> clazz) {
+        return settings.stream().anyMatch(clazz::isInstance);
     }
 }
