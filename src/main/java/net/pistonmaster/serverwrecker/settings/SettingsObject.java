@@ -19,17 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.settings;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-@Data
-@AllArgsConstructor
-public class SWProperty<T> {
-    private final String configId;
-    private final String friendlyName;
-    private final T defaultValue;
-    private final Class<T> type;
-    private final String description;
-    private final String[] cliNames;
-    private T value;
+/**
+ * Represents a settings object. A settings object has to be json serializable.
+ * @see SettingsManager#registerProvider(Class, SettingsProvider)
+ */
+public interface SettingsObject {
 }

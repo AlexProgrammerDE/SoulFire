@@ -17,9 +17,11 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.common;
+package net.pistonmaster.serverwrecker.settings;
 
-import java.net.InetSocketAddress;
-
-public record BotProxy(InetSocketAddress address, String username, String password) {
+/**
+ * A duplex of {@link SettingsListener} and {@link SettingsProvider}.
+ * @param <T> The type of settings object.
+ */
+public interface SettingsDuplex<T extends SettingsObject> extends SettingsListener<T>, SettingsProvider<T> {
 }

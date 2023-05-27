@@ -25,10 +25,12 @@ import com.github.steveice10.mc.protocol.data.game.setting.SkinPart;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientInformationPacket;
 import lombok.Getter;
+import net.pistonmaster.serverwrecker.addons.InternalAddon;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
+import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 
 import javax.swing.*;
@@ -78,10 +80,10 @@ public class ClientSettings implements InternalAddon {
             event.getConnection().session().send(new ServerboundClientInformationPacket(
                     clientSettingsPanel.getClientLocale().getText(),
                     (int) clientSettingsPanel.getRenderDistance().getValue(),
-                    (ChatVisibility) Objects.requireNonNull(clientSettingsPanel.getChatVisibility().getSelectedItem()),
+                    Objects.requireNonNull(clientSettingsPanel.getChatVisibility().getSelectedEnum()),
                     clientSettingsPanel.getUseChatColors().isSelected(),
                     skinParts,
-                    (HandPreference) Objects.requireNonNull(clientSettingsPanel.getHandPreference().getSelectedItem()),
+                    Objects.requireNonNull(clientSettingsPanel.getHandPreference().getSelectedEnum()),
                     clientSettingsPanel.getTextFilteringEnabled().isSelected(),
                     clientSettingsPanel.getAllowsListing().isSelected()
             ));
@@ -98,7 +100,7 @@ public class ClientSettings implements InternalAddon {
         private final JCheckBox sendClientSettings;
         private final JTextField clientLocale;
         private final JSpinner renderDistance;
-        private final JComboBox<ChatVisibility> chatVisibility;
+        private final JEnumComboBox<ChatVisibility> chatVisibility;
         private final JCheckBox useChatColors;
         private final JCheckBox capeEnabled;
         private final JCheckBox jacketEnabled;
@@ -107,7 +109,7 @@ public class ClientSettings implements InternalAddon {
         private final JCheckBox leftPantsLegEnabled;
         private final JCheckBox rightPantsLegEnabled;
         private final JCheckBox hatEnabled;
-        private final JComboBox<HandPreference> handPreference;
+        private final JEnumComboBox<HandPreference> handPreference;
         private final JCheckBox textFilteringEnabled;
         private final JCheckBox allowsListing;
 
@@ -130,7 +132,7 @@ public class ClientSettings implements InternalAddon {
             add(renderDistance);
 
             add(new JLabel("Chat Visibility: "));
-            chatVisibility = new JComboBox<>(ChatVisibility.values());
+            chatVisibility = new JEnumComboBox<>(ChatVisibility.class, ChatVisibility.FULL);
             chatVisibility.setSelectedItem(ChatVisibility.FULL);
             add(chatVisibility);
 
@@ -175,8 +177,7 @@ public class ClientSettings implements InternalAddon {
             add(hatEnabled);
 
             add(new JLabel("Hand Preference: "));
-            handPreference = new JComboBox<>(HandPreference.values());
-            handPreference.setSelectedItem(HandPreference.RIGHT_HAND);
+            handPreference = new JEnumComboBox<>(HandPreference.class, HandPreference.RIGHT_HAND);
             add(handPreference);
 
             add(new JLabel("Text Filtering Enabled: "));

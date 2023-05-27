@@ -44,8 +44,6 @@ public class ControlPanel extends JPanel {
         add(stopButton);
 
         startButton.addActionListener(action -> {
-            SWOptions options = container.getPanel(SettingsPanel.class).generateOptions();
-
             serverWrecker.getThreadPool().submit(() -> {
                 try {
                     startButton.setEnabled(false);
@@ -55,8 +53,7 @@ public class ControlPanel extends JPanel {
 
                     stopButton.setEnabled(true);
 
-                    serverWrecker.getLogger().info("Preparing bot attack at {}", options.host());
-                    serverWrecker.start(options);
+                    serverWrecker.start();
                 } catch (Exception ex) {
                     serverWrecker.getLogger().info(ex.getMessage(), ex);
                 }

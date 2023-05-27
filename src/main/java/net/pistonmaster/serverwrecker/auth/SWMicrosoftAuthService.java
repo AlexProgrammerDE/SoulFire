@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.auth;
 
-import net.pistonmaster.serverwrecker.common.ProxyRequestData;
+import net.pistonmaster.serverwrecker.common.SWProxy;
 import net.raphimc.mcauth.MinecraftAuth;
 import net.raphimc.mcauth.step.java.StepMCProfile;
 import net.raphimc.mcauth.step.java.StepMCToken;
@@ -41,50 +41,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JavaAuthService implements MCAuthService {
-    private static CloseableHttpClient createHttpClient(ProxyRequestData proxyRequestData) {
+public class SWMicrosoftAuthService implements MCAuthService {
+    private static CloseableHttpClient createHttpClient(SWProxy proxyData) {
         List<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType()));
         headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en"));
         headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "MinecraftAuth/2.0.0"));
 
-        HttpClientBuilder httpBuilder = HttpClientBuilder.create()
-                .setDefaultHeaders(headers);
-
-        int timeout = 5;
-        RequestConfig.Builder requestBuilder = RequestConfig.custom()
-                .setConnectTimeout(timeout * 1000)
-                .setConnectionRequestTimeout(timeout * 1000)
-                .setSocketTimeout(timeout * 1000);
-
-        if (proxyRequestData != null) {
-            HttpHost proxy = new HttpHost(proxyRequestData.getAddress().getHostName(), proxyRequestData.getAddress().getPort());
-
-            if (proxyRequestData.hasCredentials()) {
-                UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(proxyRequestData.getUsername(), proxyRequestData.getPassword());
-
-                AuthScope authScope = new AuthScope(proxy);
-
-                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-                credentialsProvider.setCredentials(authScope, credentials);
-
-                httpBuilder.setDefaultCredentialsProvider(credentialsProvider);
-            }
-
-            requestBuilder.setProxy(proxy);
-        }
-
-        httpBuilder.setDefaultRequestConfig(requestBuilder.build());
-
-        return httpBuilder.build();
+        return HttpHelper.createHttpClient(headers, proxyData);
     }
 
-    public JavaAccount login(String email, String password, ProxyRequestData proxyRequestData) throws IOException {
-        try (CloseableHttpClient httpClient = createHttpClient(proxyRequestData)) {
+    public JavaAccount login(String email, String password, SWProxy proxyData) throws IOException {
+        try (CloseableHttpClient httpClient = createHttpClient(proxyData)) {
             StepMCProfile.MCProfile mcProfile = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient,
                     new StepCredentialsMsaCode.MsaCredentials(email, password));
             StepMCToken.MCToken mcToken = mcProfile.prevResult().prevResult();
-            return new JavaAccount(mcProfile.name(), mcProfile.id(), mcToken.access_token(), mcToken.expireTimeMs());
+            return new JavaAccount(AuthType.MICROSOFT, mcProfile.name(), mcProfile.id(), mcToken.access_token(), mcToken.expireTimeMs());
         } catch (Exception e) {
             throw new IOException(e);
         }

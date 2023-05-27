@@ -23,6 +23,7 @@ import com.github.steveice10.mc.auth.exception.request.RequestException;
 import com.github.steveice10.mc.auth.service.Service;
 import com.github.steveice10.mc.auth.util.HTTP;
 import lombok.AllArgsConstructor;
+import net.pistonmaster.serverwrecker.auth.AuthType;
 
 import javax.crypto.SecretKey;
 import java.math.BigInteger;
@@ -34,14 +35,21 @@ import java.security.PublicKey;
 import java.util.UUID;
 
 public class SWSessionService extends Service {
-    private static final URI DEFAULT_BASE_URI = URI.create("https://sessionserver.mojang.com/session/minecraft/");
+    private static final URI DEFAULT_MOJANG_BASE_URI = URI.create("https://sessionserver.mojang.com/session/minecraft/");
+    private static final URI DEFAULT_THE_ALTENING_BASE_URI = URI.create("https://sessionserver.thealtening.com/session/minecraft/");
     private static final String JOIN_ENDPOINT = "join";
+    private final AuthType authType;
 
     /**
      * Creates a new SessionService instance.
      */
-    public SWSessionService() {
-        super(DEFAULT_BASE_URI);
+    public SWSessionService(AuthType authType) {
+        super(switch (authType) {
+            case MICROSOFT -> DEFAULT_MOJANG_BASE_URI;
+            case THE_ALTENING -> DEFAULT_THE_ALTENING_BASE_URI;
+            default -> throw new IllegalStateException("Unexpected value: " + authType);
+        });
+        this.authType = authType;
     }
 
     /**

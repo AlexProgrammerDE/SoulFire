@@ -27,12 +27,12 @@ import java.lang.reflect.Method;
 public class BusHelper {
     public static void handlePacket(Packet packet, Object bus) {
         for (Method declaredMethod : bus.getClass().getDeclaredMethods()) {
-            if (declaredMethod.getParameterCount() != 1) {
+            if (!declaredMethod.isAnnotationPresent(BusHandler.class)) {
                 continue;
             }
 
-            if (!declaredMethod.isAnnotationPresent(BusHandler.class)) {
-                continue;
+            if (declaredMethod.getParameterCount() != 1) {
+                throw new IllegalStateException("BusHandler methods must have exactly one parameter!");
             }
 
             Class<?> parameter = declaredMethod.getParameterTypes()[0];

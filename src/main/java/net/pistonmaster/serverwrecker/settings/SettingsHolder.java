@@ -19,18 +19,16 @@
  */
 package net.pistonmaster.serverwrecker.settings;
 
-import lombok.Getter;
-
-import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-public abstract class SettingsHolder {
-    private final List<SWProperty<?>> properties = new ArrayList<>();
+public record SettingsHolder(List<? extends SettingsObject> settings) {
+    @SuppressWarnings("unchecked")
+    public <T extends SettingsObject> T get(Class<T> clazz) {
+        return (T) settings.stream().filter(clazz::isInstance)
+                .findFirst().orElseThrow(() -> new IllegalArgumentException("No settings found for " + clazz.getSimpleName()));
+    }
 
-    protected <T> SWProperty<T> newProperty(String configId, String friendlyName, T defaultValue, Class<T> type, String description, String... cliNames) {
-        SWProperty<T> property = new SWProperty<>(configId, friendlyName, defaultValue, type, description, cliNames, defaultValue);
-        properties.add(property);
-        return property;
+    public <T extends SettingsObject> boolean has(Class<T> clazz) {
+        return settings.stream().anyMatch(clazz::isInstance);
     }
 }

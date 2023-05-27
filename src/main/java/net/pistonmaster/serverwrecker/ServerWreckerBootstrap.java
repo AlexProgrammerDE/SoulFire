@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker;
 
 import io.netty.util.ResourceLeakDetector;
 import net.pistonmaster.serverwrecker.addons.*;
+import net.pistonmaster.serverwrecker.addons.ClientSettings;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.MainFrame;

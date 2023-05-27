@@ -21,9 +21,9 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.pistonmaster.serverwrecker.SWConstants;
-import net.pistonmaster.serverwrecker.auth.AuthService;
-import net.pistonmaster.serverwrecker.common.ProxyType;
+import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.SWOptions;
+import net.pistonmaster.serverwrecker.settings.SettingsDuplex;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -32,10 +32,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SettingsPanel extends NavigationItem {
+public class SettingsPanel extends NavigationItem implements SettingsDuplex<SWOptions> {
     private final JTextField hostInput;
     private final JTextField portInput;
-    private final JSpinner delay;
+    private final JSpinner joinDelayMs;
     private final JCheckBox disableWaitEstablished;
     private final JCheckBox autoRegister;
     private final JTextField registerCommand;
@@ -52,8 +52,9 @@ public class SettingsPanel extends NavigationItem {
     private final JCheckBox autoRespawn;
 
     @Inject
-    public SettingsPanel() {
+    public SettingsPanel(ServerWrecker serverWrecker) {
         super();
+        serverWrecker.getSettingsManager().registerDuplex(SWOptions.class, this);
 
         setLayout(new GridLayout(0, 2));
 
@@ -66,9 +67,9 @@ public class SettingsPanel extends NavigationItem {
         add(portInput);
 
         add(new JLabel("Join delay (ms): "));
-        delay = new JSpinner();
-        delay.setValue(1000);
-        add(delay);
+        joinDelayMs = new JSpinner();
+        joinDelayMs.setValue(1000);
+        add(joinDelayMs);
 
         add(new JLabel("Disable wait established: "));
         disableWaitEstablished = new JCheckBox();
@@ -151,19 +152,45 @@ public class SettingsPanel extends NavigationItem {
         return RightPanelContainer.SETTINGS_MENU;
     }
 
-    public SWOptions generateOptions() {
+    @Override
+    public void onSettingsChange(SWOptions settings) {
+        hostInput.setText(settings.host());
+        portInput.setText(String.valueOf(settings.port()));
+        amount.setValue(settings.amount());
+        joinDelayMs.setValue(settings.joinDelayMs());
+        disableWaitEstablished.setSelected(!settings.waitEstablished());
+        nameFormat.setText(settings.botNameFormat());
+        versionBox.setSelectedItem(settings.protocolVersion());
+        autoRegister.setSelected(settings.autoRegister());
+        DeveloperPanel.debug.setSelected(settings.debug());
+        AccountPanel.proxyTypeCombo.setSelectedEnum(settings.proxyType());
+        AccountPanel.botsPerProxy.setValue(settings.botsPerProxy());
+        readTimeout.setValue(settings.readTimeout());
+        writeTimeout.setValue(settings.writeTimeout());
+        connectTimeout.setValue(settings.connectTimeout());
+        registerCommand.setText(settings.registerCommand());
+        loginCommand.setText(settings.loginCommand());
+        captchaCommand.setText(settings.captchaCommand());
+        passwordFormat.setText(settings.passwordFormat());
+        autoReconnect.setSelected(settings.autoReconnect());
+        autoRespawn.setSelected(settings.autoRespawn());
+        AccountPanel.serviceBox.setSelectedEnum(settings.authType());
+    }
+
+    @Override
+    public SWOptions collectSettings() {
         return new SWOptions(
                 hostInput.getText(),
                 Integer.parseInt(portInput.getText()),
                 (int) amount.getValue(),
-                (int) delay.getValue(),
+                (int) joinDelayMs.getValue(),
                 !disableWaitEstablished.isSelected(),
                 nameFormat.getText(),
                 (ProtocolVersion) versionBox.getSelectedItem(),
                 autoRegister.isSelected(),
                 DeveloperPanel.debug.isSelected(),
-                (ProxyType) AccountPanel.proxyTypeCombo.getSelectedItem(),
-                (Integer) AccountPanel.accPerProxy.getValue(),
+                AccountPanel.proxyTypeCombo.getSelectedEnum(),
+                (Integer) AccountPanel.botsPerProxy.getValue(),
                 (int) readTimeout.getValue(),
                 (int) writeTimeout.getValue(),
                 (int) connectTimeout.getValue(),
@@ -173,6 +200,6 @@ public class SettingsPanel extends NavigationItem {
                 passwordFormat.getText(),
                 autoReconnect.isSelected(),
                 autoRespawn.isSelected(),
-                (AuthService) AccountPanel.serviceBox.getSelectedItem());
+                AccountPanel.serviceBox.getSelectedEnum());
     }
 }

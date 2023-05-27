@@ -19,9 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.common;
 
-public enum ProxyType {
-    HTTP,
-    HTTPS,
-    SOCKS4,
-    SOCKS5
+import java.net.InetSocketAddress;
+
+public record SWProxy(ProxyType type, InetSocketAddress address, String username, String password) {
+
+    public boolean hasCredentials() {
+        return username != null && password != null;
+    }
 }

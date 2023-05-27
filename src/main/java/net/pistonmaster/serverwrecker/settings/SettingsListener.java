@@ -17,11 +17,13 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.common;
+package net.pistonmaster.serverwrecker.settings;
 
-public enum ProxyType {
-    HTTP,
-    HTTPS,
-    SOCKS4,
-    SOCKS5
+/**
+ * Listen for settings changes.
+ * Can be from the terminal or from loading a profile.
+ * @param <T> The type of settings object.
+ */
+public interface SettingsListener<T extends SettingsObject> {
+    void onSettingsChange(T settings);
 }

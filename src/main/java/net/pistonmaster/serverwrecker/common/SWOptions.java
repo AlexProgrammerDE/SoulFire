@@ -20,13 +20,14 @@
 package net.pistonmaster.serverwrecker.common;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import net.pistonmaster.serverwrecker.auth.AuthService;
+import net.pistonmaster.serverwrecker.auth.AuthType;
+import net.pistonmaster.serverwrecker.settings.SettingsObject;
 
 public record SWOptions(String host, int port,
                         int amount, int joinDelayMs, boolean waitEstablished, String botNameFormat,
                         ProtocolVersion protocolVersion, boolean autoRegister,
-                        boolean debug, ProxyType proxyType, int accountsPerProxy,
+                        boolean debug, ProxyType proxyType, int botsPerProxy,
                         int readTimeout, int writeTimeout, int connectTimeout,
                         String registerCommand, String loginCommand, String captchaCommand,
-                        String passwordFormat, boolean autoReconnect, boolean autoRespawn, AuthService authService) {
+                        String passwordFormat, boolean autoReconnect, boolean autoRespawn, AuthType authType) implements SettingsObject {
 }

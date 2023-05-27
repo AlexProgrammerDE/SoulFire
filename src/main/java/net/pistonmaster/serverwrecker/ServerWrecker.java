@@ -23,13 +23,13 @@ import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
-import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -39,13 +39,10 @@ import net.pistonmaster.serverwrecker.api.Addon;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.state.AttackEndEvent;
 import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
-import net.pistonmaster.serverwrecker.auth.AuthService;
-import net.pistonmaster.serverwrecker.auth.JavaAccount;
-import net.pistonmaster.serverwrecker.auth.JavaAuthService;
+import net.pistonmaster.serverwrecker.auth.*;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.AttackState;
-import net.pistonmaster.serverwrecker.common.BotProxy;
-import net.pistonmaster.serverwrecker.common.ProxyRequestData;
+import net.pistonmaster.serverwrecker.common.SWProxy;
 import net.pistonmaster.serverwrecker.common.SWOptions;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
@@ -53,6 +50,8 @@ import net.pistonmaster.serverwrecker.mojangdata.TranslationMapper;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
+import net.pistonmaster.serverwrecker.settings.SettingsHolder;
+import net.pistonmaster.serverwrecker.settings.SettingsManager;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
 import org.apache.logging.log4j.Level;
@@ -71,7 +70,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 public class ServerWrecker {
@@ -82,7 +80,7 @@ public class ServerWrecker {
     private final List<BotConnection> botConnections = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
-    private final List<BotProxy> passWordProxies = new ArrayList<>();
+    private final List<SWProxy> availableProxies = new ArrayList<>();
     private final Map<String, String> serviceServerConfig = new HashMap<>();
     private final Gson gson = new Gson();
     private final Map<String, String> mojangTranslations = new HashMap<>();
@@ -92,8 +90,10 @@ public class ServerWrecker {
     private final SWTerminalConsole terminalConsole;
     @Setter
     private AttackState attackState = AttackState.STOPPED;
-    @Setter
-    private List<String> accounts;
+    private final AccountRegistry accountRegistry = new AccountRegistry(this);
+    private final SettingsManager settingsManager = new SettingsManager(
+            SWOptions.class
+    );
     private boolean shutdown = false;
 
     public ServerWrecker(Path dataFolder) {
@@ -220,94 +220,70 @@ public class ServerWrecker {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public void start(SWOptions options) {
+    public void start() {
+        SettingsHolder settingsHolder = settingsManager.collectSettings();
+        SWOptions options = settingsHolder.get(SWOptions.class);
+
         Via.getManager().debugHandler().setEnabled(options.debug());
         setupLogging(options.debug() ? Level.DEBUG : Level.INFO);
 
         this.attackState = AttackState.RUNNING;
 
-        List<BotProxy> proxyCache = passWordProxies.isEmpty() ? Collections.emptyList() : ImmutableList.copyOf(passWordProxies);
-        Iterator<BotProxy> proxyIterator = proxyCache.listIterator();
-        Map<BotProxy, AtomicInteger> proxyUseMap = new HashMap<>();
-        List<BotConnectionFactory> factories = new ArrayList<>();
-        for (int i = 0; i <= options.amount(); i++) {
-            ProxyRequestData proxyRequestData = null;
-            if (!proxyCache.isEmpty()) {
-                proxyIterator = fromStartIfNoNext(proxyIterator, proxyCache);
-                BotProxy proxy = proxyIterator.next();
+        logger.info("Preparing bot attack at {}", options.host());
 
-                if (options.accountsPerProxy() > 0) {
-                    proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
-                    while (proxyUseMap.get(proxy).get() >= options.accountsPerProxy()) {
-                        proxyIterator = fromStartIfNoNext(proxyIterator, proxyCache);
-                        proxy = proxyIterator.next();
-                        proxyUseMap.putIfAbsent(proxy, new AtomicInteger());
+        int botAmount = options.amount(); // How many bots to connect
+        int botsPerProxy = options.botsPerProxy(); // How many bots per proxy are allowed
+        List<SWProxy> proxiesCopy = new ArrayList<>(availableProxies); // Copy the proxies
+        int availableProxiesCount = proxiesCopy.size(); // How many proxies are available
+        int maxBots = botsPerProxy > 0 ? botsPerProxy * availableProxiesCount : botAmount; // How many bots can be used at max
 
-                        if (!proxyIterator.hasNext() && proxyUseMap.get(proxy).get() >= options.accountsPerProxy()) {
-                            break;
-                        }
-                    }
-
-                    proxyUseMap.get(proxy).incrementAndGet();
-
-                    if (proxyUseMap.size() == proxyCache.size() && isFull(proxyUseMap, options.accountsPerProxy())) {
-                        logger.warn("All proxies already in use! Limiting amount of bots to {}", i - 1);
-                        break;
-                    }
-                }
-
-                proxyRequestData = ProxyRequestData.of(proxy.username(), proxy.password(), proxy.address(), options.proxyType());
-            }
-
-            JavaAccount javaAccount;
-            if (accounts == null) {
-                javaAccount = new JavaAccount(String.format(options.botNameFormat(), i));
-            } else {
-                if (accounts.size() <= i) {
-                    logger.warn("Bot amount is set higher than accounts are available. Limiting bot amount to {}", accounts.size());
-                    break;
-                }
-
-                String accountString = accounts.get(i);
-                String[] lines = accountString.split(":");
-
-                if (lines.length == 0 || lines.length > 2 || lines[0].isBlank()) {
-                    throw new IllegalArgumentException("Invalid account format: " + accountString);
-                }
-
-                if (lines.length == 1 || lines[1].isBlank()) {
-                    javaAccount = new JavaAccount(lines[0]);
-                } else {
-                    String email = lines[0];
-                    String password = lines[1];
-
-                    try {
-                        javaAccount = authenticate(options, email, password, proxyRequestData);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        logger.warn("The account {} failed to authenticate! (skipping it) Check logs for further information.", email);
-                        continue;
-                    }
-                }
-            }
-
-            System.out.println("Authenticated " + javaAccount);
-
-            Logger botLogger = LoggerFactory.getLogger(javaAccount.username());
-
-            // AuthData will be used internally instead of the MCProtocol data
-            MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile(javaAccount.profileId(), javaAccount.username()), javaAccount.authToken());
-
-            // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
-            protocol.setUseDefaultListeners(false);
-
-            factories.add(new BotConnectionFactory(this, options, botLogger, protocol, options.authService(), javaAccount, proxyRequestData));
+        if (botAmount > maxBots) {
+            logger.warn("You have specified {} bots, but only {} are available.", botAmount, maxBots);
+            logger.warn("You need {} more proxies to run this amount of bots.", (botAmount - maxBots) / botsPerProxy);
+            logger.warn("Continuing with {} bots.", maxBots);
+            botAmount = maxBots;
         }
 
-        if (proxyCache.isEmpty()) {
+        List<JavaAccount> accounts = new ArrayList<>(accountRegistry.getAccounts());
+        int availableAccounts = accounts.size();
+
+        if (availableAccounts > 0 && botAmount > availableAccounts) {
+            logger.warn("You have specified {} bots, but only {} accounts are available.", botAmount, availableAccounts);
+            logger.warn("Continuing with {} bots.", availableAccounts);
+            botAmount = availableAccounts;
+        }
+
+        boolean shuffle = false; // TODO: make this configurable
+        if (shuffle) {
+            Collections.shuffle(accounts);
+        }
+
+        Map<SWProxy, Integer> proxyUseMap = new Object2IntOpenHashMap<>();
+        for (SWProxy proxy : proxiesCopy) {
+            proxyUseMap.put(proxy, 0);
+        }
+
+        List<BotConnectionFactory> factories = new ArrayList<>();
+        for (int botId = 1; botId <= botAmount; botId++) {
+            SWProxy proxyData = getProxy(botsPerProxy, proxyUseMap);
+
+            JavaAccount javaAccount = getAccount(options, accounts, botId);
+            int index = accounts.indexOf(javaAccount);
+            if (index != -1) {
+                accounts.remove(index); // Remove the account from the list, so it can't be used again
+            }
+
+            if (options.authType() != AuthType.OFFLINE) { // Offline isn't "special"
+                logger.info("Authenticated {}", javaAccount);
+            }
+
+            factories.add(createBotFactory(settingsHolder, javaAccount, proxyData));
+        }
+
+        if (availableProxiesCount == 0) {
             logger.info("Starting attack at {} with {} bots", options.host(), botConnections.size());
         } else {
-            logger.info("Starting attack at {} with {} bots and {} proxies", options.host(), botConnections.size(), proxyUseMap.size());
+            logger.info("Starting attack at {} with {} bots and {} proxies", options.host(), botConnections.size(), availableProxiesCount);
         }
 
         ServerWreckerAPI.postEvent(new AttackStartEvent());
@@ -344,12 +320,49 @@ public class ServerWrecker {
         }
     }
 
-    public JavaAccount authenticate(SWOptions options, String username, String password, ProxyRequestData proxyRequestData) throws IOException {
-        if (options.authService() == AuthService.MICROSOFT) {
-            return new JavaAuthService().login(username, password, proxyRequestData);
+    private JavaAccount getAccount(SWOptions options, List<JavaAccount> accounts, int botId) {
+        if (accounts.isEmpty()) {
+            return new JavaAccount(String.format(options.botNameFormat(), botId));
+        } else {
+            return accounts.get(0);
+        }
+    }
+
+    private SWProxy getProxy(int maxPerProxy, Map<SWProxy, Integer> proxyUseMap) {
+        if (proxyUseMap.isEmpty()) {
+            return null; // No proxies available
+        } else {
+            SWProxy selectedProxy = proxyUseMap.entrySet().stream()
+                    .filter(entry -> entry.getValue() < maxPerProxy)
+                    .min(Comparator.comparingInt(Map.Entry::getValue))
+                    .map(Map.Entry::getKey)
+                    .orElseThrow(() -> new IllegalStateException("No proxies available!")); // Should never happen
+
+            // Always present
+            proxyUseMap.computeIfPresent(selectedProxy, (proxy, useCount) -> useCount + 1);
+
+            return selectedProxy;
+        }
+    }
+
+    private BotConnectionFactory createBotFactory(SettingsHolder settingsHolder, JavaAccount javaAccount, SWProxy proxyData) {
+        // AuthData will be used internally instead of the MCProtocol data
+        MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile(javaAccount.profileId(), javaAccount.username()), javaAccount.authToken());
+
+        // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
+        protocol.setUseDefaultListeners(false);
+
+        return new BotConnectionFactory(this, settingsHolder, LoggerFactory.getLogger(javaAccount.username()), protocol, javaAccount, proxyData);
+    }
+
+    public JavaAccount authenticate(AuthType authType, String email, String password, SWProxy proxyData) throws IOException {
+        if (authType == AuthType.MICROSOFT) {
+            return new SWMicrosoftAuthService().login(email, password, proxyData);
+        } else if (authType == AuthType.THE_ALTENING) {
+            return new SWTheAlteningAuthService().login(email, password, proxyData);
         }
 
-        throw new IllegalArgumentException("Invalid auth service: " + options.authService());
+        throw new IllegalArgumentException("Invalid auth service: " + authType);
     }
 
     public void stop() {
@@ -391,21 +404,6 @@ public class ServerWrecker {
             System.exit(0);
         }
     }
-
-    private boolean isFull(Map<BotProxy, AtomicInteger> map, int limit) {
-        for (Map.Entry<BotProxy, AtomicInteger> entry : map.entrySet()) {
-            if (entry.getValue().get() <= limit) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private Iterator<BotProxy> fromStartIfNoNext(Iterator<BotProxy> iterator, List<BotProxy> proxyList) {
-        return iterator.hasNext() ? iterator : proxyList.listIterator();
-    }
-
     public void setupLogging(Level level) {
         Configurator.setRootLevel(level);
         Configurator.setLevel(logger.getName(), level);

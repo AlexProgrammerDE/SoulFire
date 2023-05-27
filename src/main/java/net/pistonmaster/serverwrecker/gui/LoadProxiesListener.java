@@ -21,7 +21,9 @@ package net.pistonmaster.serverwrecker.gui;
 
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.common.BotProxy;
+import net.pistonmaster.serverwrecker.common.ProxyType;
+import net.pistonmaster.serverwrecker.common.SWProxy;
+import net.pistonmaster.serverwrecker.gui.navigation.AccountPanel;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -51,7 +53,7 @@ public class LoadProxiesListener implements ActionListener {
 
         serverWrecker.getThreadPool().submit(() -> {
             try {
-                List<BotProxy> proxies = new ArrayList<>();
+                List<SWProxy> proxies = new ArrayList<>();
 
                 try (Stream<String> lines = Files.lines(proxyFile)) {
                     lines.distinct().forEach(line -> {
@@ -61,15 +63,15 @@ public class LoadProxiesListener implements ActionListener {
                         int port = Integer.parseInt(split[1]);
 
                         if (split.length > 3) {
-                            proxies.add(new BotProxy(new InetSocketAddress(host, port), split[2], split[3]));
+                            proxies.add(new SWProxy(AccountPanel.proxyTypeCombo.getSelectedEnum(), new InetSocketAddress(host, port), split[2], split[3]));
                         } else {
-                            proxies.add(new BotProxy(new InetSocketAddress(host, port), null, null));
+                            proxies.add(new SWProxy(AccountPanel.proxyTypeCombo.getSelectedEnum(), new InetSocketAddress(host, port), null, null));
                         }
                     });
                 }
 
-                serverWrecker.getPassWordProxies().clear();
-                serverWrecker.getPassWordProxies().addAll(proxies);
+                serverWrecker.getAvailableProxies().clear();
+                serverWrecker.getAvailableProxies().addAll(proxies);
 
                 serverWrecker.getLogger().info("Loaded {} proxies", proxies.size());
             } catch (Exception ex) {

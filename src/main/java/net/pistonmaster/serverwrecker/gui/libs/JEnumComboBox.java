@@ -17,22 +17,31 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.common;
+package net.pistonmaster.serverwrecker.gui.libs;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import javax.swing.*;
 
-import java.net.InetSocketAddress;
+public class JEnumComboBox<E extends Enum<?>> extends JComboBox<E> {
+    public JEnumComboBox(Class<E> enumClass) {
+        super(enumClass.getEnumConstants());
+    }
 
-@Getter
-@RequiredArgsConstructor(staticName = "of")
-public class ProxyRequestData {
-    private final String username;
-    private final String password;
-    private final InetSocketAddress address;
-    private final ProxyType type;
+    public JEnumComboBox(Class<E> enumClass, E selected) {
+        this(enumClass);
+        setSelectedItem(selected);
+    }
 
-    public boolean hasCredentials() {
-        return username != null && password != null;
+    @SuppressWarnings("unchecked")
+    public E getSelectedEnum() {
+        return (E) super.getSelectedItem();
+    }
+
+    @Deprecated
+    public Object getSelectedItem() {
+        return super.getSelectedItem();
+    }
+
+    public void setSelectedEnum(E enumValue) {
+        setSelectedItem(enumValue);
     }
 }

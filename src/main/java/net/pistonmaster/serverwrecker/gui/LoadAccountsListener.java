@@ -25,6 +25,7 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -45,16 +46,13 @@ public class LoadAccountsListener implements ActionListener {
         }
 
         Path accountFile = fileChooser.getSelectedFile().toPath();
-        serverWrecker.getLogger().info("Opening: {}.", accountFile.getFileName());
+        serverWrecker.getLogger().info("Opening: {}", accountFile.getFileName());
 
         serverWrecker.getThreadPool().submit(() -> {
-            try (Stream<String> stream = Files.lines(accountFile)) {
-                List<String> accounts = stream.distinct().collect(Collectors.toList());
-
-                serverWrecker.getLogger().info("Loaded {} accounts", accounts.size());
-                serverWrecker.setAccounts(accounts);
-            } catch (Exception ex) {
-                serverWrecker.getLogger().error(null, ex);
+            try {
+                serverWrecker.getAccountRegistry().loadFromFile(Files.readString(accountFile));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
     }

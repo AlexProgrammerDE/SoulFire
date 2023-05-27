@@ -17,11 +17,12 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.common;
+package net.pistonmaster.serverwrecker.settings;
 
-public enum ProxyType {
-    HTTP,
-    HTTPS,
-    SOCKS4,
-    SOCKS5
+/**
+ * Provides a setting to the {@link SettingsHolder}.
+ * @param <T> The type of settings object.
+ */
+public interface SettingsProvider<T extends SettingsObject> {
+    T collectSettings();
 }

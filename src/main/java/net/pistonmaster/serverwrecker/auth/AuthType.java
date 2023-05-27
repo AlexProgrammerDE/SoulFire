@@ -22,21 +22,14 @@ package net.pistonmaster.serverwrecker.auth;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @RequiredArgsConstructor
-public enum AuthService {
-    MICROSOFT("Microsoft", List.of("clientId")),
+public enum AuthType {
+    MICROSOFT("Microsoft"),
+    THE_ALTENING("The Altening"),
     OFFLINE("Offline");
-    // THE_ALTENING("The Altening", URI.create("https://authserver.thealtening.com/"), URI.create("https://sessionserver.thealtening.com/"));
 
     private final String displayName;
-    private final List<String> configKeys;
-
-    AuthService(String displayName) {
-        this(displayName, List.of());
-    }
 
     @Override
     public String toString() {

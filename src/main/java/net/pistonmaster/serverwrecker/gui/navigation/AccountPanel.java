@@ -21,24 +21,23 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import li.flor.nativejfilechooser.NativeJFileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.auth.AuthService;
+import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.gui.LoadAccountsListener;
 import net.pistonmaster.serverwrecker.gui.LoadProxiesListener;
+import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 
 import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class AccountPanel extends NavigationItem {
     // TODO: Redo config flow, this is bad
-    public static final JComboBox<ProxyType> proxyTypeCombo = new JComboBox<>();
-    public static final JSpinner accPerProxy = new JSpinner();
-    public static final JComboBox<AuthService> serviceBox = new JComboBox<>();
+    public static final JEnumComboBox<ProxyType> proxyTypeCombo = new JEnumComboBox<>(ProxyType.class, ProxyType.SOCKS5);
+    public static final JSpinner botsPerProxy = new JSpinner();
+    public static final JEnumComboBox<AuthType> serviceBox = new JEnumComboBox<>(AuthType.class, AuthType.OFFLINE);
     private final ServerWrecker serverWrecker;
 
     @Inject
@@ -50,26 +49,18 @@ public class AccountPanel extends NavigationItem {
         JButton loadAccounts = new JButton("Load Accounts");
 
         JFileChooser accountChooser = new NativeJFileChooser();
-        accountChooser.addChoosableFileFilter(new FileNameExtensionFilter("Account list file", "txt"));
+        accountChooser.addChoosableFileFilter(new FileNameExtensionFilter("Account list file", "txt", "json"));
         loadAccounts.addActionListener(new LoadAccountsListener(serverWrecker, parent, accountChooser));
 
         JPanel serviceSettingsPanel = new JPanel();
 
         serviceSettingsPanel.setLayout(new GridLayout(0, 1));
 
-        Arrays.stream(AuthService.values()).forEach(serviceBox::addItem);
-
-        serviceBox.setSelectedItem(AuthService.OFFLINE);
-
-        AtomicReference<JPanel> currentServiceSettings = new AtomicReference<>(getServiceSettings(AuthService.OFFLINE));
         serviceBox.addActionListener(action -> {
-            refreshSettings(serviceSettingsPanel, currentServiceSettings.get(), (AuthService) serviceBox.getSelectedItem());
-
-            serverWrecker.getLogger().info("Switched auth servers to {}", ((AuthService) Objects.requireNonNull(serviceBox.getSelectedItem())).getDisplayName());
+            serverWrecker.getLogger().info("Switched auth servers to {}", Objects.requireNonNull(serviceBox.getSelectedEnum()).getDisplayName());
         });
 
         serviceSettingsPanel.add(serviceBox);
-        serviceSettingsPanel.add(currentServiceSettings.get());
 
         accounts.add(loadAccounts);
         accounts.add(serviceSettingsPanel);
@@ -83,48 +74,14 @@ public class AccountPanel extends NavigationItem {
         proxiesChooser.addChoosableFileFilter(new FileNameExtensionFilter("Proxy list file", "txt"));
         loadProxies.addActionListener(new LoadProxiesListener(serverWrecker, parent, proxiesChooser));
 
-        Arrays.stream(ProxyType.values()).forEach(proxyTypeCombo::addItem);
-
-        proxyTypeCombo.setSelectedItem(ProxyType.SOCKS5);
-
         proxies.add(loadProxies);
         proxies.add(proxyTypeCombo);
 
         proxies.add(new JLabel("Accounts per proxy: "));
-        accPerProxy.setValue(-1);
-        proxies.add(accPerProxy);
+        botsPerProxy.setValue(-1);
+        proxies.add(botsPerProxy);
 
         add(proxies);
-    }
-
-    private JPanel getServiceSettings(AuthService service) {
-        JPanel serviceSettingsPanel = new JPanel();
-
-        service.getConfigKeys().forEach(key -> {
-            JLabel label = new JLabel(key);
-            JTextField field = new JTextField();
-            field.setText(serverWrecker.getServiceServerConfig().getOrDefault(key, ""));
-            field.setSize(40, 60);
-            serviceSettingsPanel.add(label);
-            serviceSettingsPanel.add(field);
-
-            field.addActionListener(action ->
-                    serverWrecker.getServiceServerConfig().put(key, field.getText()));
-
-            field.addActionListener(action ->
-                    System.out.println(field.getText()));
-        });
-
-        return serviceSettingsPanel;
-    }
-
-    private void refreshSettings(JPanel serviceSettingsPanel, JPanel currentPanel, AuthService authService) {
-        if (currentPanel != null) {
-            serviceSettingsPanel.remove(currentPanel);
-        }
-
-        serviceSettingsPanel.add(getServiceSettings(authService));
-        serviceSettingsPanel.revalidate();
     }
 
     @Override

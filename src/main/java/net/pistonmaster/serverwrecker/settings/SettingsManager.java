@@ -19,15 +19,63 @@
  */
 package net.pistonmaster.serverwrecker.settings;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
+import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SettingsManager {
-    private final Multimap<SWProperty<?>, Runnable> modificationListeners = MultimapBuilder.hashKeys().arrayListValues().build();
+    private final List<ListenerRegistration<?>> listeners = new ArrayList<>();
+    private final List<ProviderRegistration<?>> providers = new ArrayList<>();
+    private final Class<? extends SettingsObject>[] registeredSettings;
 
-    public void addModificationListener(SWProperty<?> property, Runnable listener) {
-        modificationListeners.put(property, listener);
+    @SafeVarargs
+    public SettingsManager(Class<? extends SettingsObject>... registeredSettings) {
+        this.registeredSettings = registeredSettings;
     }
 
+    public <T extends SettingsObject> void registerListener(Class<T> clazz, SettingsListener<T> listener) {
+        listeners.add(new ListenerRegistration<>(clazz, listener));
+    }
 
+    public <T extends SettingsObject> void registerProvider(Class<T> clazz, SettingsProvider<T> provider) {
+        providers.add(new ProviderRegistration<>(clazz, provider));
+    }
+
+    public <T extends SettingsObject> void registerDuplex(Class<T> clazz, SettingsDuplex<T> duplex) {
+        registerListener(clazz, duplex);
+        registerProvider(clazz, duplex);
+    }
+
+    public SettingsHolder collectSettings() {
+        SettingsHolder settingsHolder = new SettingsHolder(providers.stream()
+                .map(ProviderRegistration::provider)
+                .map(SettingsProvider::collectSettings)
+                .toList());
+
+        for (Class<? extends SettingsObject> clazz : registeredSettings) {
+            if (!settingsHolder.has(clazz)) {
+                throw new IllegalArgumentException("No settings found for " + clazz.getSimpleName());
+            }
+        }
+
+        return settingsHolder;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void onSettingsLoad(SettingsHolder settings) {
+        for (SettingsObject setting : settings.settings()) {
+            for (ListenerRegistration<?> listener : listeners) {
+                if (listener.clazz.isInstance(setting)) {
+                    ((SettingsListener<SettingsObject>) listener.listener).onSettingsChange(setting);
+                }
+            }
+        }
+    }
+
+    private record ListenerRegistration<T extends SettingsObject>(Class<T> clazz, SettingsListener<T> listener) {
+    }
+
+    private record ProviderRegistration<T extends SettingsObject>(Class<T> clazz, SettingsProvider<T> provider) {
+    }
 }

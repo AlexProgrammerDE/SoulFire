@@ -92,7 +92,7 @@ public class SWBaseListener extends SessionAdapter {
                 boolean isLegacyAuthenticate = !isLegacy || metadataStorage == null || metadataStorage.authenticate;
 
                 if (javaAccount.isPremium() && isLegacyAuthenticate) {
-                    SWSessionService sessionService = new SWSessionService();
+                    SWSessionService sessionService = new SWSessionService(botConnection.options().authType());
                     String serverId = sessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
                     try {
                         sessionService.joinServer(javaAccount.profileId(), javaAccount.authToken(), serverId);

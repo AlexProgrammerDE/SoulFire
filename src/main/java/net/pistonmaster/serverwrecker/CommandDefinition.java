@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.auth.AuthService;
+import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.common.SWOptions;
@@ -100,33 +100,38 @@ public class CommandDefinition implements Callable<Integer> {
     private boolean disableWaitEstablished;
 
     @Option(names = {"--auth-service"}, description = "the auth service to use")
-    private AuthService authService = AuthService.OFFLINE;
+    private AuthType authType = AuthType.OFFLINE;
 
     @Override
     public Integer call() {
-        new ServerWrecker(dataFolder).start(new SWOptions(
-                host,
-                port,
-                amount,
-                joinDelay,
-                !disableWaitEstablished,
-                nameFormat,
-                ProtocolVersion.getClosest(version),
-                autoRegister,
-                debug,
-                proxy,
-                accountsPerProxy,
-                readTimeout,
-                writeTimout,
-                connectTimeout,
-                registerCommand,
-                loginCommand,
-                captchaCommand,
-                passwordFormat,
-                autoReconnect,
-                autoRespawn,
-                authService
-        ));
+        ServerWrecker serverWrecker = new ServerWrecker(dataFolder);
+
+        serverWrecker.getSettingsManager().registerProvider(SWOptions.class,
+                () -> new SWOptions(
+                        host,
+                        port,
+                        amount,
+                        joinDelay,
+                        !disableWaitEstablished,
+                        nameFormat,
+                        ProtocolVersion.getClosest(version),
+                        autoRegister,
+                        debug,
+                        proxy,
+                        accountsPerProxy,
+                        readTimeout,
+                        writeTimout,
+                        connectTimeout,
+                        registerCommand,
+                        loginCommand,
+                        captchaCommand,
+                        passwordFormat,
+                        autoReconnect,
+                        autoRespawn,
+                        authType
+                ));
+
+        serverWrecker.start();
         return 0;
     }
 }

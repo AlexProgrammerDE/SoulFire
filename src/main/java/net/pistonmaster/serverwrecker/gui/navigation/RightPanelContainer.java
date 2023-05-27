@@ -22,7 +22,6 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import ch.jalu.injector.Injector;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.gui.AuthPanel;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -32,7 +31,6 @@ import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class RightPanelContainer extends JPanel {
-    public static final String AUTH_MENU = "AuthMenu";
     public static final String NAVIGATION_MENU = "NavigationMenu";
     public static final String SETTINGS_MENU = "SettingsMenu";
     public static final String ADDON_MENU = "AddonMenu";
@@ -53,9 +51,6 @@ public class RightPanelContainer extends JPanel {
 
         NavigationPanel navigationPanel = injector.getSingleton(NavigationPanel.class);
         add(navigationPanel, NAVIGATION_MENU);
-
-        AuthPanel authPanel = new AuthPanel(this);
-        add(authPanel, AUTH_MENU);
 
         panels.addAll(addonPanel.getNavigationItems());
 
