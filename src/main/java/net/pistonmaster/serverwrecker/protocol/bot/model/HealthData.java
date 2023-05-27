@@ -17,18 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol.bot.state;
+package net.pistonmaster.serverwrecker.protocol.bot.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-
-@Setter
-@Getter
-@NoArgsConstructor
-public final class WeatherState {
-    private boolean raining;
-    private float rainStrength;
-    private float thunderStrength;
+public record HealthData(float health, int food, float saturation) {
 }

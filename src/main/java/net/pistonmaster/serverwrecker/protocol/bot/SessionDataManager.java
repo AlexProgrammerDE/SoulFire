@@ -93,11 +93,10 @@ public final class SessionDataManager {
     private final Map<Integer, AtomicInteger> itemCoolDowns = new ConcurrentHashMap<>();
     private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
     private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
     private BorderState borderState;
     private BotMovementManager botMovementManager;
-    private float health = -1;
-    private int food = -1;
-    private float saturation = -1;
+    private HealthData healthData;
     private GameMode gameMode = null;
     private @Nullable GameMode previousGameMode = null;
     private GameProfile botProfile;
@@ -220,17 +219,13 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onHealth(ClientboundSetHealthPacket packet) {
-        try {
-            this.health = packet.getHealth();
-            this.food = packet.getFood();
-            this.saturation = packet.getSaturation();
+        this.healthData = new HealthData(packet.getHealth(), packet.getFood(), packet.getSaturation());
 
-            if (health < 1) {
-                this.isDead = true;
-            }
-        } catch (Exception e) {
-            log.error("Error while logging health", e);
+        if (healthData.health() < 1) {
+            this.isDead = true;
         }
+
+        log.info("Health updated: {}", healthData);
     }
 
     @BusHandler
@@ -341,6 +336,11 @@ public final class SessionDataManager {
     @BusHandler
     public void onExperience(ClientboundSetExperiencePacket packet) {
         experienceData = new ExperienceData(packet.getExperience(), packet.getLevel(), packet.getTotalExperience());
+    }
+
+    @BusHandler
+    public void onMapData(ClientboundMapItemDataPacket packet) {
+        mapDataStates.computeIfAbsent(packet.getMapId(), k -> new MapDataState()).update(packet);
     }
 
     @BusHandler
