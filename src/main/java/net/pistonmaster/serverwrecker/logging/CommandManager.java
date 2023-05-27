@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.logging;
 
+import com.google.gson.*;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -29,9 +30,14 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.MainPanel;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +47,8 @@ public class CommandManager {
     private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
     private final ServerWrecker serverWrecker;
     private final ConsoleSubject consoleSubject;
+    private final Gson normalGson = new GsonBuilder().setPrettyPrinting().create();
+    private final Gson settingsGson = new GsonBuilder().registerTypeHierarchyAdapter(Object.class, new ObjectAdapter()).create();
 
     @PostConstruct
     public void postConstruct() {
@@ -77,6 +85,44 @@ public class CommandManager {
                     }
                     return 1;
                 }));
+        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("export-settings")
+                .executes(c -> {
+                    Path path = Path.of("settings.json");
+
+                    try {
+                        List<JsonElement> settingsHolder = new ArrayList<>();
+                        for (SettingsObject settingsObject : serverWrecker.getSettingsManager().collectSettings().settings()) {
+                            settingsHolder.add(settingsGson.toJsonTree(settingsObject));
+                        }
+                        Files.writeString(path, normalGson.toJson(settingsHolder));
+                        serverWrecker.getLogger().info("Exported settings!");
+                    } catch (Exception e) {
+                        c.getSource().sendMessage("Failed to export settings!");
+                        serverWrecker.getLogger().warn("Failed to export settings!", e);
+                        return 0;
+                    }
+
+                    return 1;
+                }));
+        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("load-settings")
+                .executes(c -> {
+                    Path path = Path.of("settings.json");
+                    try {
+                        JsonArray settingsHolder = normalGson.fromJson(Files.readString(path), JsonArray.class);
+                        List<SettingsObject> settingsObjects = new ArrayList<>();
+                        for (JsonElement jsonElement : settingsHolder) {
+                            settingsObjects.add(settingsGson.fromJson(jsonElement, SettingsObject.class));
+                        }
+                        serverWrecker.getSettingsManager().onSettingsLoad(new SettingsHolder(settingsObjects));
+                        serverWrecker.getLogger().info("Loaded settings!");
+                    } catch (Exception e) {
+                        c.getSource().sendMessage("Failed to load settings!");
+                        serverWrecker.getLogger().warn("Failed to load settings!", e);
+                        return 0;
+                    }
+
+                    return 1;
+                }));
     }
 
     public void execute(String command) {
@@ -90,5 +136,31 @@ public class CommandManager {
     public List<String> getCompletionSuggestions(String command) {
         return dispatcher.getCompletionSuggestions(dispatcher.parse(command, consoleSubject)).join().getList()
                 .stream().map(Suggestion::getText).toList();
+    }
+
+
+
+    public static class ObjectAdapter implements JsonSerializer<Object>, JsonDeserializer<Object> {
+        @Override
+        public JsonElement serialize(Object src, Type typeOfSrc, JsonSerializationContext context) {
+            Gson gson = new Gson();
+            JsonElement serialized = gson.toJsonTree(src);
+            JsonObject jsonObject = serialized.getAsJsonObject();
+            jsonObject.addProperty("class", src.getClass().getName());
+            return jsonObject;
+        }
+
+        @Override
+        public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = json.getAsJsonObject();
+            String className = jsonObject.get("class").getAsString();
+            try {
+                Class<?> clazz = Class.forName(className);
+                Gson gson = new Gson();
+                return gson.fromJson(jsonObject, clazz);
+            } catch (ClassNotFoundException e) {
+                throw new JsonParseException(e);
+            }
+        }
     }
 }
