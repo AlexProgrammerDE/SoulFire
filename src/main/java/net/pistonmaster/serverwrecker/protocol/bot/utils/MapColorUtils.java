@@ -61,6 +61,7 @@ public class MapColorUtils {
     }
 
     private static Color generateShade(Color c, double shade) {
+        shade /= 255.0;
         return new Color((int) (c.getRed() * shade + 0.5), (int) (c.getGreen() * shade + 0.5), (int) (c.getBlue() * shade + 0.5), c.getAlpha());
     }
 

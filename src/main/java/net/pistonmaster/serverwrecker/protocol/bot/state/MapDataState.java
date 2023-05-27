@@ -46,18 +46,28 @@ public class MapDataState {
         this.icons = packet.getIcons();
 
         if (packet.getData() != null) {
-            this.mapData = packet.getData();
-            /*
-            Path path = Path.of("mapdata-" + packet.getMapId() + ".png");
-            BufferedImage image = MapColorUtils.generateFromData(this.mapData);
+            if (this.mapData == null) {
+                this.mapData = new MapData(128, 128, 0, 0, new byte[128 * 128]);
+            }
 
-            try {
-                ImageIO.write(image, "png", path.toFile());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }*/
+            this.mergeIntoMap(packet.getData());
         }
+    }
 
-        System.out.println("MapDataState: " + this);
+    private void mergeIntoMap(MapData source) {
+        int width = source.getColumns();
+        int height = source.getRows();
+
+        int xOffset = source.getX();
+        int yOffset = source.getY();
+        for (int i = 0; i < width; ++i) {
+            for (int j = 0; j < height; ++j) {
+                byte colorData = source.getData()[i + j * width];
+
+                int x = xOffset + i;
+                int y = yOffset + j;
+                this.mapData.getData()[x + y * 128] = colorData;
+            }
+        }
     }
 }
