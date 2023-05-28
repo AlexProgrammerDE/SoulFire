@@ -43,13 +43,7 @@ public class SWMenuBar extends JMenuBar {
             chooser.showOpenDialog(this);
 
             if (chooser.getSelectedFile() != null) {
-                // Add .json if not present
-                String path = chooser.getSelectedFile().getAbsolutePath();
-                if (!path.endsWith(".json")) {
-                    path += ".json";
-                }
-
-                serverWrecker.getSettingsManager().loadProfile(Path.of(path));
+                serverWrecker.getSettingsManager().loadProfile(chooser.getSelectedFile().toPath());
             }
         });
 
