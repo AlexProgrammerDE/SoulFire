@@ -71,7 +71,8 @@ public class ServerWreckerBootstrap {
             loadAddons();
             ServerWrecker serverWrecker = new ServerWrecker(dataFolder);
 
-            serverWrecker.getInjector().getSingleton(MainFrame.class);
+            EventQueue.invokeLater(() ->
+                    serverWrecker.getInjector().getSingleton(MainFrame.class));
         }
     }
 

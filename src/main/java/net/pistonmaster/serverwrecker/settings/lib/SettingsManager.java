@@ -135,12 +135,12 @@ public class SettingsManager {
                 Class<?> clazz = Class.forName(className);
                 return normalGson.fromJson(jsonObject, clazz);
             } catch (ClassNotFoundException e) {
-                throw new JsonParseException(e);
+                return null; // Some extension might not be loaded, so we just ignore it
             }
         }
     }
 
-    private class ProtocolVersionAdapter implements JsonSerializer<ProtocolVersion>, JsonDeserializer<ProtocolVersion> {
+    private static class ProtocolVersionAdapter implements JsonSerializer<ProtocolVersion>, JsonDeserializer<ProtocolVersion> {
         @Override
         public ProtocolVersion deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             return ProtocolVersion.getClosest(json.getAsString());
