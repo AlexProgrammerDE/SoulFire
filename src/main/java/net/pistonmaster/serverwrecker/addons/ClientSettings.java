@@ -25,22 +25,26 @@ import com.github.steveice10.mc.protocol.data.game.setting.SkinPart;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientInformationPacket;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientSettings implements InternalAddon {
-    private final ClientSettingsPanel clientSettingsPanel = new ClientSettingsPanel();
-
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
@@ -49,53 +53,58 @@ public class ClientSettings implements InternalAddon {
     @EventHandler
     public void onPacket(SWPacketReceiveEvent event) {
         if (event.getPacket() instanceof ClientboundPlayerAbilitiesPacket) { // Recommended packet to use
-            if (!clientSettingsPanel.getSendClientSettings().isSelected()) {
+            if (!event.getConnection().settingsHolder().has(ClientSettingsSettings.class)) {
+                return;
+            }
+
+            ClientSettingsSettings settings = event.getConnection().settingsHolder().get(ClientSettingsSettings.class);
+            if (!settings.sendClientSettings()) {
                 return;
             }
 
             List<SkinPart> skinParts = new ArrayList<>();
-            if (clientSettingsPanel.getCapeEnabled().isSelected()) {
+            if (settings.capeEnabled()) {
                 skinParts.add(SkinPart.CAPE);
             }
-            if (clientSettingsPanel.getJacketEnabled().isSelected()) {
+            if (settings.jacketEnabled()) {
                 skinParts.add(SkinPart.JACKET);
             }
-            if (clientSettingsPanel.getLeftSleeveEnabled().isSelected()) {
+            if (settings.leftSleeveEnabled()) {
                 skinParts.add(SkinPart.LEFT_SLEEVE);
             }
-            if (clientSettingsPanel.getRightSleeveEnabled().isSelected()) {
+            if (settings.rightSleeveEnabled()) {
                 skinParts.add(SkinPart.RIGHT_SLEEVE);
             }
-            if (clientSettingsPanel.getLeftPantsLegEnabled().isSelected()) {
+            if (settings.leftPantsLegEnabled()) {
                 skinParts.add(SkinPart.LEFT_PANTS_LEG);
             }
-            if (clientSettingsPanel.getRightPantsLegEnabled().isSelected()) {
+            if (settings.rightPantsLegEnabled()) {
                 skinParts.add(SkinPart.RIGHT_PANTS_LEG);
             }
-            if (clientSettingsPanel.getHatEnabled().isSelected()) {
+            if (settings.hatEnabled()) {
                 skinParts.add(SkinPart.HAT);
             }
 
             event.getConnection().session().send(new ServerboundClientInformationPacket(
-                    clientSettingsPanel.getClientLocale().getText(),
-                    (int) clientSettingsPanel.getRenderDistance().getValue(),
-                    Objects.requireNonNull(clientSettingsPanel.getChatVisibility().getSelectedEnum()),
-                    clientSettingsPanel.getUseChatColors().isSelected(),
+                    settings.clientLocale(),
+                    settings.renderDistance(),
+                    settings.chatVisibility(),
+                    settings.useChatColors(),
                     skinParts,
-                    Objects.requireNonNull(clientSettingsPanel.getHandPreference().getSelectedEnum()),
-                    clientSettingsPanel.getTextFilteringEnabled().isSelected(),
-                    clientSettingsPanel.getAllowsListing().isSelected()
+                    settings.handPreference(),
+                    settings.textFilteringEnabled(),
+                    settings.allowsListing()
             ));
         }
     }
 
     @EventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
-        event.navigationItems().add(clientSettingsPanel);
+        event.navigationItems().add(new ClientSettingsPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
     @Getter
-    private static class ClientSettingsPanel extends NavigationItem {
+    private static class ClientSettingsPanel extends NavigationItem implements SettingsDuplex<ClientSettingsSettings> {
         private final JCheckBox sendClientSettings;
         private final JTextField clientLocale;
         private final JSpinner renderDistance;
@@ -112,8 +121,9 @@ public class ClientSettings implements InternalAddon {
         private final JCheckBox textFilteringEnabled;
         private final JCheckBox allowsListing;
 
-        public ClientSettingsPanel() {
+        public ClientSettingsPanel(ServerWrecker serverWrecker) {
             super();
+            serverWrecker.getSettingsManager().registerDuplex(ClientSettingsSettings.class, this);
 
             setLayout(new GridLayout(0, 2));
 
@@ -199,5 +209,64 @@ public class ClientSettings implements InternalAddon {
         public String getNavigationId() {
             return "client-settings";
         }
+
+        @Override
+        public void onSettingsChange(ClientSettingsSettings settings) {
+            sendClientSettings.setSelected(settings.sendClientSettings());
+            clientLocale.setText(settings.clientLocale());
+            renderDistance.setValue(settings.renderDistance());
+            chatVisibility.setSelectedItem(settings.chatVisibility());
+            useChatColors.setSelected(settings.useChatColors());
+            capeEnabled.setSelected(settings.capeEnabled());
+            jacketEnabled.setSelected(settings.jacketEnabled());
+            leftSleeveEnabled.setSelected(settings.leftSleeveEnabled());
+            rightSleeveEnabled.setSelected(settings.rightSleeveEnabled());
+            leftPantsLegEnabled.setSelected(settings.leftPantsLegEnabled());
+            rightPantsLegEnabled.setSelected(settings.rightPantsLegEnabled());
+            hatEnabled.setSelected(settings.hatEnabled());
+            handPreference.setSelectedItem(settings.handPreference());
+            textFilteringEnabled.setSelected(settings.textFilteringEnabled());
+            allowsListing.setSelected(settings.allowsListing());
+        }
+
+        @Override
+        public ClientSettingsSettings collectSettings() {
+            return new ClientSettingsSettings(
+                    sendClientSettings.isSelected(),
+                    clientLocale.getText(),
+                    (int) renderDistance.getValue(),
+                    Objects.requireNonNull(chatVisibility.getSelectedEnum()),
+                    useChatColors.isSelected(),
+                    capeEnabled.isSelected(),
+                    jacketEnabled.isSelected(),
+                    leftSleeveEnabled.isSelected(),
+                    rightSleeveEnabled.isSelected(),
+                    leftPantsLegEnabled.isSelected(),
+                    rightPantsLegEnabled.isSelected(),
+                    hatEnabled.isSelected(),
+                    Objects.requireNonNull(handPreference.getSelectedEnum()),
+                    textFilteringEnabled.isSelected(),
+                    allowsListing.isSelected()
+            );
+        }
+    }
+
+    private static record ClientSettingsSettings(
+            boolean sendClientSettings,
+            String clientLocale,
+            int renderDistance,
+            ChatVisibility chatVisibility,
+            boolean useChatColors,
+            boolean capeEnabled,
+            boolean jacketEnabled,
+            boolean leftSleeveEnabled,
+            boolean rightSleeveEnabled,
+            boolean leftPantsLegEnabled,
+            boolean rightPantsLegEnabled,
+            boolean hatEnabled,
+            HandPreference handPreference,
+            boolean textFilteringEnabled,
+            boolean allowsListing
+    ) implements SettingsObject {
     }
 }
