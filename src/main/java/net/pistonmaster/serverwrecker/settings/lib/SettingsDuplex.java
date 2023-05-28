@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.settings.lib;
 
 /**
  * A duplex of {@link SettingsListener} and {@link SettingsProvider}.
+ *
  * @param <T> The type of settings object.
  */
 public interface SettingsDuplex<T extends SettingsObject> extends SettingsListener<T>, SettingsProvider<T> {

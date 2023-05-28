@@ -34,7 +34,7 @@ public class AddonPanel extends NavigationItem {
     private final List<NavigationItem> navigationItems = new ArrayList<>();
 
     @Inject
-    public AddonPanel(RightPanelContainer container) {
+    public AddonPanel(ButtonPanelContainer container) {
         super();
 
         ServerWreckerAPI.postEvent(new AddonPanelInitEvent(navigationItems));
@@ -60,6 +60,6 @@ public class AddonPanel extends NavigationItem {
 
     @Override
     public String getNavigationId() {
-        return RightPanelContainer.ADDON_MENU;
+        return ButtonPanelContainer.ADDON_MENU;
     }
 }

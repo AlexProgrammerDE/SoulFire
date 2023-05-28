@@ -78,7 +78,7 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
                 }
             });
 
-            int result = fileChooser.showSaveDialog(null);
+            int result = fileChooser.showSaveDialog(this);
 
             if (result != JFileChooser.APPROVE_OPTION) {
                 return;
@@ -108,7 +108,7 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
 
     @Override
     public String getNavigationId() {
-        return RightPanelContainer.DEV_MENU;
+        return ButtonPanelContainer.DEV_MENU;
     }
 
     @Override

@@ -24,7 +24,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundCh
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
-import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
@@ -34,7 +33,8 @@ import java.time.Instant;
 import java.util.BitSet;
 import java.util.Collections;
 
-public record BotConnection(BotConnectionFactory factory, ServerWrecker serverWrecker, SettingsHolder settingsHolder, Logger logger,
+public record BotConnection(BotConnectionFactory factory, ServerWrecker serverWrecker, SettingsHolder settingsHolder,
+                            Logger logger,
                             MinecraftProtocol protocol, ViaClientSession session, BotConnectionMeta meta) {
     public void sendMessage(String message) {
         if (message.startsWith("/")) {

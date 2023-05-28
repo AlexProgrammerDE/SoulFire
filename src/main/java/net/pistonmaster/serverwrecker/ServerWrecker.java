@@ -43,13 +43,13 @@ import net.pistonmaster.serverwrecker.auth.*;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.common.SWProxy;
-import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.mojangdata.TranslationMapper;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
+import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
@@ -89,12 +89,13 @@ public class ServerWrecker {
     private final PlainTextComponentSerializer messageSerializer;
     private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
     private final SWTerminalConsole terminalConsole;
-    @Setter
-    private AttackState attackState = AttackState.STOPPED;
     private final AccountRegistry accountRegistry = new AccountRegistry(this);
     private final SettingsManager settingsManager = new SettingsManager(
+            logger,
             BotSettings.class
     );
+    @Setter
+    private AttackState attackState = AttackState.STOPPED;
     private boolean shutdown = false;
 
     public ServerWrecker(Path dataFolder) {
@@ -402,6 +403,7 @@ public class ServerWrecker {
             System.exit(0);
         }
     }
+
     public void setupLogging(Level level) {
         Configurator.setRootLevel(level);
         Configurator.setLevel(logger.getName(), level);

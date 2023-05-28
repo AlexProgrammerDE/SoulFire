@@ -142,6 +142,10 @@ public class AccountRegistry {
         return new JavaAccount(authType, username, profileId, authToken, tokenExpireAt);
     }
 
+    public List<JavaAccount> getAccounts() {
+        return Collections.unmodifiableList(accounts);
+    }
+
     @AllArgsConstructor
     @NoArgsConstructor
     private static class AccountJsonType {
@@ -153,9 +157,5 @@ public class AccountRegistry {
 
         private String email;
         private String password;
-    }
-
-    public List<JavaAccount> getAccounts() {
-        return Collections.unmodifiableList(accounts);
     }
 }

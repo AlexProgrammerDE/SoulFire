@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Setter

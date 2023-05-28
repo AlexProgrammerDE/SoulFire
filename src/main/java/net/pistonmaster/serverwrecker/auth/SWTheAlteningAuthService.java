@@ -20,15 +20,12 @@
 package net.pistonmaster.serverwrecker.auth;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
-import com.github.steveice10.mc.auth.service.MojangAuthenticationService;
-import com.github.steveice10.mc.auth.util.HTTP;
 import com.google.gson.Gson;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.SWProxy;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -42,9 +39,9 @@ import java.util.List;
 import java.util.UUID;
 
 public class SWTheAlteningAuthService implements MCAuthService {
-    private final Gson gson = new Gson();
     @SuppressWarnings("HttpUrlsUsage") // The Altening doesn't support encrypted HTTPS
     private static final URI AUTHENTICATE_ENDPOINT = URI.create("http://authserver.thealtening.com/authenticate");
+    private final Gson gson = new Gson();
 
     private static CloseableHttpClient createHttpClient(SWProxy proxyData) {
         List<Header> headers = new ArrayList<>();
@@ -70,8 +67,8 @@ public class SWTheAlteningAuthService implements MCAuthService {
     }
 
     private static class Agent {
-        private String name;
-        private int version;
+        private final String name;
+        private final int version;
 
         protected Agent(String name, int version) {
             this.name = name;
@@ -85,11 +82,11 @@ public class SWTheAlteningAuthService implements MCAuthService {
     }
 
     private static class AuthenticationRequest {
-        private Agent agent;
-        private String username;
-        private String password;
-        private String clientToken;
-        private boolean requestUser;
+        private final Agent agent;
+        private final String username;
+        private final String password;
+        private final String clientToken;
+        private final boolean requestUser;
 
         protected AuthenticationRequest(String username, String password, String clientToken) {
             this.agent = new Agent("Minecraft", 1);

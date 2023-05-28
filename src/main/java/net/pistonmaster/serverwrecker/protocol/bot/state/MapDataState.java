@@ -25,11 +25,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.Clientb
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.pistonmaster.serverwrecker.protocol.bot.utils.MapColorUtils;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.nio.file.Path;
 
 @Setter
 @Getter

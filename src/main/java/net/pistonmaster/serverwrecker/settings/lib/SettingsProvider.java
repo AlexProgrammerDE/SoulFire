@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.settings.lib;
 
 /**
  * Provides a setting to the {@link SettingsHolder}.
+ *
  * @param <T> The type of settings object.
  */
 public interface SettingsProvider<T extends SettingsObject> {

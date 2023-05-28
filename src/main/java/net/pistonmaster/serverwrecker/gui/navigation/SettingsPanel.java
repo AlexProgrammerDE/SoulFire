@@ -149,7 +149,7 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
 
     @Override
     public String getNavigationId() {
-        return RightPanelContainer.SETTINGS_MENU;
+        return ButtonPanelContainer.SETTINGS_MENU;
     }
 
     @Override

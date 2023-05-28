@@ -36,12 +36,12 @@ public class JEnumComboBox<E extends Enum<?>> extends JComboBox<E> {
         return (E) super.getSelectedItem();
     }
 
+    public void setSelectedEnum(E enumValue) {
+        setSelectedItem(enumValue);
+    }
+
     @Deprecated
     public Object getSelectedItem() {
         return super.getSelectedItem();
-    }
-
-    public void setSelectedEnum(E enumValue) {
-        setSelectedItem(enumValue);
     }
 }

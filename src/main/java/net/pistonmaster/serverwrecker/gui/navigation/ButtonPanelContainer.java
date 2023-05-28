@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class RightPanelContainer extends JPanel {
+public class ButtonPanelContainer extends JPanel {
     public static final String NAVIGATION_MENU = "NavigationMenu";
     public static final String SETTINGS_MENU = "SettingsMenu";
     public static final String ADDON_MENU = "AddonMenu";
@@ -59,9 +59,5 @@ public class RightPanelContainer extends JPanel {
         }
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-    }
-
-    public <A> A getPanel(Class<A> aClass) {
-        return panels.stream().filter(aClass::isInstance).map(aClass::cast).findFirst().orElse(null);
     }
 }

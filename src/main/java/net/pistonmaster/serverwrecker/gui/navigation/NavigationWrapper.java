@@ -23,7 +23,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class NavigationWrapper {
-    public static JPanel createWrapper(RightPanelContainer container, NavigationItem item) {
+    public static JPanel createWrapper(ButtonPanelContainer container, NavigationItem item) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
 
@@ -33,7 +33,7 @@ public class NavigationWrapper {
         JButton back = new JButton("Back");
 
         back.addActionListener(action -> {
-            ((CardLayout) container.getLayout()).show(container, RightPanelContainer.NAVIGATION_MENU);
+            ((CardLayout) container.getLayout()).show(container, ButtonPanelContainer.NAVIGATION_MENU);
         });
 
         topBar.add(back, BorderLayout.PAGE_END);

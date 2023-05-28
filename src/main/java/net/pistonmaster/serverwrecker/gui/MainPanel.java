@@ -24,7 +24,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.gui.libs.GhostText;
 import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
-import net.pistonmaster.serverwrecker.gui.navigation.RightPanelContainer;
+import net.pistonmaster.serverwrecker.gui.navigation.ButtonPanelContainer;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
@@ -42,19 +42,28 @@ public class MainPanel extends JPanel {
     private static final MessageLogPanel logPanel = new MessageLogPanel(3000, false);
     private final ShellSender shellSender;
     private final Injector injector;
-    private final RightPanelContainer rightPanelContainer;
+    private final ButtonPanelContainer buttonPanelContainer;
 
     @PostConstruct
     public void postConstruct() {
-        JPanel leftPanel = setLogPane();
-        rightPanelContainer.create();
+        JPanel logPanel = createLogPanel();
+        buttonPanelContainer.create();
 
-        setLayout(new BorderLayout());
-        add(leftPanel, BorderLayout.CENTER);
-        add(rightPanelContainer, BorderLayout.EAST);
+        setLayout(new GridBagLayout());
+        GridBagConstraints menuConstraints = new GridBagConstraints();
+        menuConstraints.fill = GridBagConstraints.VERTICAL;
+        menuConstraints.weighty = 1;
+
+        GridBagConstraints logConstraints = new GridBagConstraints();
+        logConstraints.fill = GridBagConstraints.BOTH;
+        logConstraints.weightx = 1;
+        logConstraints.weighty = 1;
+
+        add(buttonPanelContainer, menuConstraints);
+        add(logPanel, logConstraints);
     }
 
-    private JPanel setLogPane() throws SecurityException {
+    private JPanel createLogPanel() throws SecurityException {
         JPanel leftPanel = new JPanel();
 
         LogAppender logAppender = new LogAppender(logPanel);

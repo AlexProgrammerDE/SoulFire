@@ -27,7 +27,7 @@ import java.awt.*;
 
 public class NavigationPanel extends JPanel {
     @Inject
-    public NavigationPanel(RightPanelContainer container, Injector injector) {
+    public NavigationPanel(ButtonPanelContainer container, Injector injector) {
         super();
 
         setLayout(new GridLayout(3, 3, 10, 10));

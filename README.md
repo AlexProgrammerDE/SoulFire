@@ -20,14 +20,18 @@ You can download the latest development version of ServerWrecker through [nightl
 ## Features
 
 * GUI & CLI
-* Configurable amount of bots and join delay
-* Configurable target
-* Configurable name format or name list
+* Configurable options for every attack like number of bots, join delay and more
+* Load and save profiles for quick access
+* Support for online and offline mode servers
 * Huge version support
-* Tested with Spigot, Paper, Purpur, Folia, Velocity/Bungeecord
-* Disconnects gracefully after the end
-* Multiple modules like AutoRespawn and AutoRegister for cracked servers
+* Multiple modules like AutoRespawn and also AutoRegister for cracked servers
 * Supports SOCKS4 and 5 proxies
+* Console command support
+
+## Requirements
+
+* Java 17
+* Minecraft server (Tested with Spigot, Paper, Purpur, Folia, Velocity/BungeeCord)
 
 ## Version support
 
@@ -58,26 +62,42 @@ Currently versions below r1.7.0 only support offline-mode,
 but a future version will support online-mode servers as well.
 All versions newer than r1.7.0 support online-mode.
 
-## Requirements
+## Built-in modules
 
-* Java 17
-* Minecraft server
+### AutoRespawn
 
-## Building
+Automatically respawns bots when they die.
 
-1. Download Gradle
-2. Download the latest version of ServerWrecker
-3. Run `./gradlew build` in the serverwrecker directory
-4. Get the jar files from `build/libs`
+### AutoRegister
 
-## Images
+Automatically runs /register and /login on cracked servers.
+Also supports /captcha for servers that have it.
 
-![GUI](./assets/img.png)
+### ClientSettings & ClientBrand
+
+Configurable client settings like chat visibility, chat colors, skin customization, and more.
+Client brand can also be changed to any string; by default, it's set to "vanilla".
+Useful for bypassing anti-bot plugins that check for client settings.
+
+## Demo
+
+ServerWrecker has a built-in GUI for easy usage.
+![GUI](./assets/demo.png)
 
 ## Command Line Usage
 
 To run ServerWrecker from the command line without a GUI, enter  
 `java -jar serverwrecker.jar <options>`.
+
+> **Note:** Some features are not available in CLI mode, we recommend using the GUI.
+
+## Build from source
+
+1. Install Java 17
+2. Download Gradle
+3. Download the latest version of ServerWrecker
+4. Run `./gradlew build` in the ServerWrecker directory
+5. Get the jar file from `build/libs`
 
 ## Community
 

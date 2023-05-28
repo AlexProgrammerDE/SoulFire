@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.viaversion;
 
 import com.viaversion.viaversion.api.connection.StorableObject;
-import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 
 public record StorableSettingsHolder(SettingsHolder settingsHolder) implements StorableObject {

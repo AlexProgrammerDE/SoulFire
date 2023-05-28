@@ -19,16 +19,30 @@
  */
 package net.pistonmaster.serverwrecker.settings.lib;
 
+import com.google.gson.*;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import org.slf4j.Logger;
+
+import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SettingsManager {
     private final List<ListenerRegistration<?>> listeners = new ArrayList<>();
     private final List<ProviderRegistration<?>> providers = new ArrayList<>();
+    private final Logger logger;
     private final Class<? extends SettingsObject>[] registeredSettings;
+    private final Gson normalGson = new GsonBuilder()
+            .setPrettyPrinting()
+            .registerTypeAdapter(ProtocolVersion.class, new ProtocolVersionAdapter())
+            .create();
+    private final Gson settingsGson = new GsonBuilder().registerTypeHierarchyAdapter(Object.class, new ObjectAdapter()).create();
 
     @SafeVarargs
-    public SettingsManager(Class<? extends SettingsObject>... registeredSettings) {
+    public SettingsManager(Logger logger, Class<? extends SettingsObject>... registeredSettings) {
+        this.logger = logger;
         this.registeredSettings = registeredSettings;
     }
 
@@ -71,9 +85,72 @@ public class SettingsManager {
         }
     }
 
+    public void loadProfile(Path path) {
+        try {
+            JsonArray settingsHolder = normalGson.fromJson(Files.readString(path), JsonArray.class);
+            List<SettingsObject> settingsObjects = new ArrayList<>();
+            for (JsonElement jsonElement : settingsHolder) {
+                settingsObjects.add(settingsGson.fromJson(jsonElement, SettingsObject.class));
+            }
+            onSettingsLoad(new SettingsHolder(settingsObjects));
+            logger.info("Loaded profile!");
+        } catch (Exception e) {
+            logger.warn("Failed to load profile!", e);
+        }
+    }
+
+    public void saveProfile(Path path) {
+        try {
+            List<JsonElement> settingsHolder = new ArrayList<>();
+            for (SettingsObject settingsObject : collectSettings().settings()) {
+                settingsHolder.add(settingsGson.toJsonTree(settingsObject));
+            }
+            Files.writeString(path, normalGson.toJson(settingsHolder));
+            logger.info("Saved profile!");
+        } catch (Exception e) {
+            logger.warn("Failed to save profile!", e);
+        }
+    }
+
     private record ListenerRegistration<T extends SettingsObject>(Class<T> clazz, SettingsListener<T> listener) {
     }
 
     private record ProviderRegistration<T extends SettingsObject>(Class<T> clazz, SettingsProvider<T> provider) {
     }
+
+    private class ObjectAdapter implements JsonSerializer<Object>, JsonDeserializer<Object> {
+        @Override
+        public JsonElement serialize(Object src, Type typeOfSrc, JsonSerializationContext context) {
+            JsonElement serialized = normalGson.toJsonTree(src);
+            JsonObject jsonObject = serialized.getAsJsonObject();
+            jsonObject.addProperty("class", src.getClass().getName());
+            return jsonObject;
+        }
+
+        @Override
+        public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = json.getAsJsonObject();
+            String className = jsonObject.get("class").getAsString();
+            try {
+                Class<?> clazz = Class.forName(className);
+                return normalGson.fromJson(jsonObject, clazz);
+            } catch (ClassNotFoundException e) {
+                throw new JsonParseException(e);
+            }
+        }
+    }
+
+    private class ProtocolVersionAdapter implements JsonSerializer<ProtocolVersion>, JsonDeserializer<ProtocolVersion> {
+        @Override
+        public ProtocolVersion deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            return ProtocolVersion.getClosest(json.getAsString());
+        }
+
+        @Override
+        public JsonElement serialize(ProtocolVersion src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(src.getName());
+        }
+    }
+
+
 }

@@ -28,7 +28,7 @@ import java.awt.*;
 
 public class ControlPanel extends JPanel {
     @Inject
-    public ControlPanel(RightPanelContainer container, ServerWrecker serverWrecker) {
+    public ControlPanel(ButtonPanelContainer container, ServerWrecker serverWrecker) {
         JButton startButton = new JButton("Start");
         JButton pauseButton = new JButton("Pause");
         JButton stopButton = new JButton("Stop");
