@@ -22,19 +22,20 @@ package net.pistonmaster.serverwrecker.addons;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundCustomPayloadPacket;
 import lombok.Getter;
+import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
 import javax.swing.*;
 import java.awt.*;
 import java.nio.charset.StandardCharsets;
 
 public class ClientBrand implements InternalAddon {
-    private final ClientBrandPanel clientBrandPanel = new ClientBrandPanel();
-
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
@@ -43,29 +44,36 @@ public class ClientBrand implements InternalAddon {
     @EventHandler
     public void onPacket(SWPacketReceiveEvent event) {
         if (event.getPacket() instanceof ClientboundPlayerAbilitiesPacket) { // Recommended packet to use
-            if (!clientBrandPanel.getSendClientBrand().isSelected()) {
+            if (!event.getConnection().settingsHolder().has(ClientBrandSettings.class)) {
+                return;
+            }
+
+            ClientBrandSettings clientBrandSettings = event.getConnection().settingsHolder().get(ClientBrandSettings.class);
+
+            if (!clientBrandSettings.sendClientBrand()) {
                 return;
             }
 
             event.getConnection().session().send(new ServerboundCustomPayloadPacket(
                     "minecraft:brand",
-                    clientBrandPanel.getClientBrand().getText().getBytes(StandardCharsets.UTF_8)
+                    clientBrandSettings.clientBrand().getBytes(StandardCharsets.UTF_8)
             ));
         }
     }
 
     @EventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
-        event.navigationItems().add(clientBrandPanel);
+        event.navigationItems().add(new ClientBrandPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
     @Getter
-    private static class ClientBrandPanel extends NavigationItem {
+    private static class ClientBrandPanel extends NavigationItem implements SettingsDuplex<ClientBrandSettings> {
         private final JCheckBox sendClientBrand;
         private final JTextField clientBrand;
 
-        public ClientBrandPanel() {
+        public ClientBrandPanel(ServerWrecker serverWrecker) {
             super();
+            serverWrecker.getSettingsManager().registerDuplex(ClientBrandSettings.class, this);
 
             setLayout(new GridLayout(0, 2));
 
@@ -88,5 +96,25 @@ public class ClientBrand implements InternalAddon {
         public String getNavigationId() {
             return "client-brand";
         }
+
+        @Override
+        public void onSettingsChange(ClientBrandSettings settings) {
+            sendClientBrand.setSelected(settings.sendClientBrand());
+            clientBrand.setText(settings.clientBrand());
+        }
+
+        @Override
+        public ClientBrandSettings collectSettings() {
+            return new ClientBrandSettings(
+                    sendClientBrand.isSelected(),
+                    clientBrand.getText()
+            );
+        }
+    }
+
+    private record ClientBrandSettings(
+            boolean sendClientBrand,
+            String clientBrand
+    ) implements SettingsObject {
     }
 }

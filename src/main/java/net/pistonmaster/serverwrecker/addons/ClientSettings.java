@@ -251,7 +251,7 @@ public class ClientSettings implements InternalAddon {
         }
     }
 
-    private static record ClientSettingsSettings(
+    private record ClientSettingsSettings(
             boolean sendClientSettings,
             String clientLocale,
             int renderDistance,
