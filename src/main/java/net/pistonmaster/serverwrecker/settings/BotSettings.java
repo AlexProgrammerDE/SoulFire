@@ -26,10 +26,8 @@ import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
 public record BotSettings(String host, int port,
                           int amount, int joinDelayMs, boolean waitEstablished, String botNameFormat,
-                          ProtocolVersion protocolVersion, boolean autoRegister,
+                          ProtocolVersion protocolVersion,
                           ProxyType proxyType, int botsPerProxy,
                           int readTimeout, int writeTimeout, int connectTimeout,
-                          String registerCommand, String loginCommand, String captchaCommand,
-                          String passwordFormat, boolean autoRespawn,
                           AuthType authType) implements SettingsObject {
 }

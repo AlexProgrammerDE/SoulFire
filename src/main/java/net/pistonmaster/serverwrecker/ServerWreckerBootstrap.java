@@ -78,7 +78,7 @@ public class ServerWreckerBootstrap {
 
     private static void loadAddons() {
         Set<InternalAddon> addons = Set.of(
-                new BotsTicker(), new ClientBrand(), new ClientSettings(),
+                new BotTicker(), new ClientBrand(), new ClientSettings(),
                 new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
                 new ChatMessageLogger(), new ServerListBypass());
 

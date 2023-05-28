@@ -19,41 +19,131 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
-import net.kyori.event.EventSubscriber;
+import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.settings.BotSettings;
+import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
+import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class AutoRegister implements InternalAddon, EventSubscriber<ChatMessageReceiveEvent> {
+import javax.swing.*;
+import java.awt.*;
+
+public class AutoRegister implements InternalAddon {
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListener(ChatMessageReceiveEvent.class, this);
+        ServerWreckerAPI.registerListeners(this);
     }
 
-    @Override
-    public void on(@NonNull ChatMessageReceiveEvent event) {
-        BotSettings botSettings = event.connection().settingsHolder().get(BotSettings.class);
-        String plainMessage = event.parseToText();
-        if (!botSettings.autoRegister()) {
+    @EventHandler
+    public void onChat(@NonNull ChatMessageReceiveEvent event) {
+        if (!event.connection().settingsHolder().has(AutoRegisterSettings.class)) {
             return;
         }
 
-        String password = botSettings.passwordFormat();
+        AutoRegisterSettings autoRegisterSettings = event.connection().settingsHolder().get(AutoRegisterSettings.class);
+        String plainMessage = event.parseToText();
+        if (!autoRegisterSettings.autoRegister()) {
+            return;
+        }
+
+        String password = autoRegisterSettings.passwordFormat();
 
         // TODO: Add more password options
         if (plainMessage.contains("/register")) {
-            event.connection().sendMessage(botSettings.registerCommand().replace("%password%", password));
+            event.connection().sendMessage(autoRegisterSettings.registerCommand().replace("%password%", password));
         } else if (plainMessage.contains("/login")) {
-            event.connection().sendMessage(botSettings.loginCommand().replace("%password%", password));
+            event.connection().sendMessage(autoRegisterSettings.loginCommand().replace("%password%", password));
         } else if (plainMessage.contains("/captcha")) {
             String[] split = plainMessage.split(" ");
 
             for (int i = 0; i < split.length; i++) {
                 if (split[i].equals("/captcha")) {
-                    event.connection().sendMessage(botSettings.captchaCommand().replace("%captcha%", split[i + 1]));
+                    event.connection().sendMessage(autoRegisterSettings.captchaCommand().replace("%captcha%", split[i + 1]));
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void onAddonPanel(AddonPanelInitEvent event) {
+        event.navigationItems().add(new AutoRegisterPanel(ServerWreckerAPI.getServerWrecker()));
+    }
+
+    private static class AutoRegisterPanel extends NavigationItem implements SettingsDuplex<AutoRegisterSettings> {
+        private final JCheckBox autoRegister;
+        private final JTextField registerCommand;
+        private final JTextField loginCommand;
+        private final JTextField captchaCommand;
+        private final JTextField passwordFormat;
+
+        public AutoRegisterPanel(ServerWrecker serverWrecker) {
+            super();
+            serverWrecker.getSettingsManager().registerDuplex(AutoRegisterSettings.class, this);
+
+            setLayout(new GridLayout(0, 2));
+
+            add(new JLabel("Auto Register: "));
+            autoRegister = new JCheckBox();
+            add(autoRegister);
+
+            add(new JLabel("Register Command: "));
+            registerCommand = new JTextField("/register %password% %password%");
+            add(registerCommand);
+
+            add(new JLabel("Login Command: "));
+            loginCommand = new JTextField("/login %password%");
+            add(loginCommand);
+
+            add(new JLabel("Captcha Command: "));
+            captchaCommand = new JTextField("/captcha %captcha%");
+            add(captchaCommand);
+
+            add(new JLabel("Password Format: "));
+            passwordFormat = new JTextField("ServerWrecker");
+            add(passwordFormat);
+        }
+
+        @Override
+        public String getNavigationName() {
+            return "Auto Register";
+        }
+
+        @Override
+        public String getNavigationId() {
+            return "auto-register";
+        }
+
+        @Override
+        public void onSettingsChange(AutoRegisterSettings settings) {
+            autoRegister.setSelected(settings.autoRegister());
+            registerCommand.setText(settings.registerCommand());
+            loginCommand.setText(settings.loginCommand());
+            captchaCommand.setText(settings.captchaCommand());
+            passwordFormat.setText(settings.passwordFormat());
+        }
+
+        @Override
+        public AutoRegisterSettings collectSettings() {
+            return new AutoRegisterSettings(
+                    autoRegister.isSelected(),
+                    registerCommand.getText(),
+                    loginCommand.getText(),
+                    captchaCommand.getText(),
+                    passwordFormat.getText()
+            );
+        }
+    }
+
+    private record AutoRegisterSettings(
+            boolean autoRegister,
+            String registerCommand,
+            String loginCommand,
+            String captchaCommand,
+            String passwordFormat
+    ) implements SettingsObject {
     }
 }

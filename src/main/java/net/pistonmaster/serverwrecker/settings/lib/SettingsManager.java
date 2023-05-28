@@ -118,6 +118,18 @@ public class SettingsManager {
     private record ProviderRegistration<T extends SettingsObject>(Class<T> clazz, SettingsProvider<T> provider) {
     }
 
+    private static class ProtocolVersionAdapter implements JsonSerializer<ProtocolVersion>, JsonDeserializer<ProtocolVersion> {
+        @Override
+        public ProtocolVersion deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            return ProtocolVersion.getClosest(json.getAsString());
+        }
+
+        @Override
+        public JsonElement serialize(ProtocolVersion src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(src.getName());
+        }
+    }
+
     private class ObjectAdapter implements JsonSerializer<Object>, JsonDeserializer<Object> {
         @Override
         public JsonElement serialize(Object src, Type typeOfSrc, JsonSerializationContext context) {
@@ -137,18 +149,6 @@ public class SettingsManager {
             } catch (ClassNotFoundException e) {
                 return null; // Some extension might not be loaded, so we just ignore it
             }
-        }
-    }
-
-    private static class ProtocolVersionAdapter implements JsonSerializer<ProtocolVersion>, JsonDeserializer<ProtocolVersion> {
-        @Override
-        public ProtocolVersion deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            return ProtocolVersion.getClosest(json.getAsString());
-        }
-
-        @Override
-        public JsonElement serialize(ProtocolVersion src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(src.getName());
         }
     }
 

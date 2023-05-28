@@ -37,18 +37,12 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
     private final JTextField portInput;
     private final JSpinner joinDelayMs;
     private final JCheckBox disableWaitEstablished;
-    private final JCheckBox autoRegister;
-    private final JTextField registerCommand;
-    private final JTextField loginCommand;
-    private final JTextField captchaCommand;
-    private final JTextField passwordFormat;
     private final JSpinner amount;
     private final JTextField nameFormat;
     private final JComboBox<ProtocolVersion> versionBox;
     private final JSpinner readTimeout;
     private final JSpinner writeTimeout;
     private final JSpinner connectTimeout;
-    private final JCheckBox autoRespawn;
 
     @Inject
     public SettingsPanel(ServerWrecker serverWrecker) {
@@ -73,26 +67,6 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         add(new JLabel("Disable wait established: "));
         disableWaitEstablished = new JCheckBox();
         add(disableWaitEstablished);
-
-        add(new JLabel("Auto Register: "));
-        autoRegister = new JCheckBox();
-        add(autoRegister);
-
-        add(new JLabel("Register Command: "));
-        registerCommand = new JTextField("/register %password% %password%");
-        add(registerCommand);
-
-        add(new JLabel("Login Command: "));
-        loginCommand = new JTextField("/login %password%");
-        add(loginCommand);
-
-        add(new JLabel("Captcha Command: "));
-        captchaCommand = new JTextField("/captcha %captcha%");
-        add(captchaCommand);
-
-        add(new JLabel("Password Format: "));
-        passwordFormat = new JTextField("ServerWrecker");
-        add(passwordFormat);
 
         add(new JLabel("Amount: "));
         amount = new JSpinner();
@@ -122,11 +96,6 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         connectTimeout = new JSpinner();
         connectTimeout.setValue(30);
         add(connectTimeout);
-
-        add(new JLabel("Auto Respawn: "));
-        autoRespawn = new JCheckBox();
-        autoRespawn.setSelected(true);
-        add(autoRespawn);
     }
 
     public void registerVersions() {
@@ -155,17 +124,11 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         disableWaitEstablished.setSelected(!settings.waitEstablished());
         nameFormat.setText(settings.botNameFormat());
         versionBox.setSelectedItem(settings.protocolVersion());
-        autoRegister.setSelected(settings.autoRegister());
         AccountPanel.proxyTypeCombo.setSelectedEnum(settings.proxyType());
         AccountPanel.botsPerProxy.setValue(settings.botsPerProxy());
         readTimeout.setValue(settings.readTimeout());
         writeTimeout.setValue(settings.writeTimeout());
         connectTimeout.setValue(settings.connectTimeout());
-        registerCommand.setText(settings.registerCommand());
-        loginCommand.setText(settings.loginCommand());
-        captchaCommand.setText(settings.captchaCommand());
-        passwordFormat.setText(settings.passwordFormat());
-        autoRespawn.setSelected(settings.autoRespawn());
         AccountPanel.serviceBox.setSelectedEnum(settings.authType());
     }
 
@@ -179,17 +142,11 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
                 !disableWaitEstablished.isSelected(),
                 nameFormat.getText(),
                 (ProtocolVersion) versionBox.getSelectedItem(),
-                autoRegister.isSelected(),
                 AccountPanel.proxyTypeCombo.getSelectedEnum(),
                 (Integer) AccountPanel.botsPerProxy.getValue(),
                 (int) readTimeout.getValue(),
                 (int) writeTimeout.getValue(),
                 (int) connectTimeout.getValue(),
-                registerCommand.getText(),
-                loginCommand.getText(),
-                captchaCommand.getText(),
-                passwordFormat.getText(),
-                autoRespawn.isSelected(),
                 AccountPanel.serviceBox.getSelectedEnum());
     }
 }

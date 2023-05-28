@@ -31,7 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class BotsTicker implements InternalAddon, EventSubscriber<PreBotConnectEvent> {
+public class BotTicker implements InternalAddon, EventSubscriber<PreBotConnectEvent> {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListener(PreBotConnectEvent.class, this);
@@ -39,13 +39,13 @@ public class BotsTicker implements InternalAddon, EventSubscriber<PreBotConnectE
 
     @Override
     public void on(@NonNull PreBotConnectEvent event) throws Throwable {
-        event.connection().cleanup(new BotTicker(event.connection(),
+        event.connection().cleanup(new BotTickerTask(event.connection(),
                 Executors.newScheduledThreadPool(1), new TickTimer(20)));
     }
 
-    private record BotTicker(BotConnection connection, ScheduledExecutorService executor,
-                             TickTimer tickTimer) implements UnregisterCleanup {
-        public BotTicker {
+    private record BotTickerTask(BotConnection connection, ScheduledExecutorService executor,
+                                 TickTimer tickTimer) implements UnregisterCleanup {
+        public BotTickerTask {
             executor.scheduleWithFixedDelay(() -> {
                 tickTimer.advanceTime();
 

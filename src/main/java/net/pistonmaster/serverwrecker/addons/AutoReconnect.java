@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
-import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
@@ -42,7 +41,7 @@ public class AutoReconnect implements InternalAddon {
     }
 
     @EventHandler
-    public void onDisconnect(@NonNull BotDisconnectedEvent event) throws Throwable {
+    public void onDisconnect(@NonNull BotDisconnectedEvent event) {
         if (!event.connection().settingsHolder().has(AutoReconnectSettings.class)) {
             return;
         }

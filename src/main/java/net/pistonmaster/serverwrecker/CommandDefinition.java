@@ -76,24 +76,6 @@ public class CommandDefinition implements Callable<Integer> {
     @Option(names = {"--connect-timeout"}, description = "bot connect timeout")
     private int connectTimeout = 30;
 
-    @Option(names = {"--auto-register"}, description = "make bots run the /register and /login command after joining")
-    private boolean autoRegister;
-
-    @Option(names = {"--register-command"}, description = "command to be executed to register")
-    private String registerCommand = "/register %password% %password%";
-
-    @Option(names = {"--login-command"}, description = "command to be executed to log in")
-    private String loginCommand = "/login %password%";
-
-    @Option(names = {"--captcha-command"}, description = "command to be executed to confirm a captcha")
-    private String captchaCommand = "/captcha %captcha%";
-
-    @Option(names = {"--password-format"}, description = "the password for registering")
-    private String passwordFormat = "ServerWrecker";
-
-    @Option(names = {"--auto-respawn"}, description = "respawn bots after death")
-    private boolean autoRespawn = true;
-
     @Option(names = {"--disable-wait-established"}, description = "make the program halt and wait till a bot was successfully connected before connecting the next bot")
     private boolean disableWaitEstablished;
 
@@ -113,17 +95,11 @@ public class CommandDefinition implements Callable<Integer> {
                         !disableWaitEstablished,
                         nameFormat,
                         ProtocolVersion.getClosest(version),
-                        autoRegister,
                         proxy,
                         accountsPerProxy,
                         readTimeout,
                         writeTimout,
                         connectTimeout,
-                        registerCommand,
-                        loginCommand,
-                        captchaCommand,
-                        passwordFormat,
-                        autoRespawn,
                         authType
                 ));
 
