@@ -48,7 +48,6 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
     private final JSpinner readTimeout;
     private final JSpinner writeTimeout;
     private final JSpinner connectTimeout;
-    private final JCheckBox autoReconnect;
     private final JCheckBox autoRespawn;
 
     @Inject
@@ -124,11 +123,6 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         connectTimeout.setValue(30);
         add(connectTimeout);
 
-        add(new JLabel("Auto Reconnect: "));
-        autoReconnect = new JCheckBox();
-        autoReconnect.setSelected(true);
-        add(autoReconnect);
-
         add(new JLabel("Auto Respawn: "));
         autoRespawn = new JCheckBox();
         autoRespawn.setSelected(true);
@@ -171,7 +165,6 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         loginCommand.setText(settings.loginCommand());
         captchaCommand.setText(settings.captchaCommand());
         passwordFormat.setText(settings.passwordFormat());
-        autoReconnect.setSelected(settings.autoReconnect());
         autoRespawn.setSelected(settings.autoRespawn());
         AccountPanel.serviceBox.setSelectedEnum(settings.authType());
     }
@@ -196,7 +189,6 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
                 loginCommand.getText(),
                 captchaCommand.getText(),
                 passwordFormat.getText(),
-                autoReconnect.isSelected(),
                 autoRespawn.isSelected(),
                 AccountPanel.serviceBox.getSelectedEnum());
     }

@@ -20,23 +20,35 @@
 package net.pistonmaster.serverwrecker.addons;
 
 import net.kyori.event.EventSubscriber;
+import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
-import net.pistonmaster.serverwrecker.settings.BotSettings;
+import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
+import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-public class AutoReconnect implements InternalAddon, EventSubscriber<BotDisconnectedEvent> {
+public class AutoReconnect implements InternalAddon {
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListener(BotDisconnectedEvent.class, this);
+        ServerWreckerAPI.registerListeners(this);
     }
 
-    @Override
-    public void on(@NonNull BotDisconnectedEvent event) throws Throwable {
-        BotSettings botSettings = event.connection().settingsHolder().get(BotSettings.class);
-        if (!botSettings.autoReconnect() || event.connection().serverWrecker().getAttackState().isInactive()) {
+    @EventHandler
+    public void onDisconnect(@NonNull BotDisconnectedEvent event) throws Throwable {
+        if (!event.connection().settingsHolder().has(AutoReconnectSettings.class)) {
+            return;
+        }
+
+        AutoReconnectSettings autoReconnectSettings = event.connection().settingsHolder().get(AutoReconnectSettings.class);
+        if (!autoReconnectSettings.autoReconnect() || event.connection().serverWrecker().getAttackState().isInactive()) {
             return;
         }
 
@@ -44,6 +56,82 @@ public class AutoReconnect implements InternalAddon, EventSubscriber<BotDisconne
             event.connection().factory().connect()
                     .thenAccept(newConnection -> event.connection().serverWrecker().getBotConnections()
                             .replaceAll(connection1 -> connection1 == event.connection() ? newConnection : connection1));
-        }, 1, TimeUnit.SECONDS);
+        }, ThreadLocalRandom.current()
+                .nextInt(autoReconnectSettings.minDelay(), autoReconnectSettings.maxDelay()), TimeUnit.SECONDS);
+    }
+
+    @EventHandler
+    public void onAddonPanel(AddonPanelInitEvent event) {
+        event.navigationItems().add(new AutoReconnectPanel(ServerWreckerAPI.getServerWrecker()));
+    }
+
+    private static class AutoReconnectPanel extends NavigationItem implements SettingsDuplex<AutoReconnectSettings> {
+        private final JCheckBox autoReconnect;
+        private final JSpinner minDelay;
+        private final JSpinner maxDelay;
+
+        public AutoReconnectPanel(ServerWrecker serverWrecker) {
+            super();
+            serverWrecker.getSettingsManager().registerDuplex(AutoReconnectSettings.class, this);
+
+            setLayout(new GridLayout(0, 2));
+
+            add(new JLabel("Do Auto Reconnect?"));
+            autoReconnect = new JCheckBox();
+            autoReconnect.setSelected(true);
+            add(autoReconnect);
+
+            add(new JLabel("Min Delay (Seconds)"));
+            minDelay = new JSpinner(new SpinnerNumberModel(1, 1, 1000, 1));
+            add(minDelay);
+
+            add(new JLabel("Max Delay (Seconds)"));
+            maxDelay = new JSpinner(new SpinnerNumberModel(5, 1, 1000, 1));
+            add(maxDelay);
+
+            minDelay.addChangeListener(e -> {
+                if ((int) minDelay.getValue() > (int) maxDelay.getValue()) {
+                    maxDelay.setValue(minDelay.getValue());
+                }
+            });
+            maxDelay.addChangeListener(e -> {
+                if ((int) minDelay.getValue() > (int) maxDelay.getValue()) {
+                    minDelay.setValue(maxDelay.getValue());
+                }
+            });
+        }
+
+        @Override
+        public String getNavigationName() {
+            return "Auto Reconnect";
+        }
+
+        @Override
+        public String getNavigationId() {
+            return "auto-reconnect";
+        }
+
+        @Override
+        public void onSettingsChange(AutoReconnectSettings settings) {
+            autoReconnect.setSelected(settings.autoReconnect());
+            minDelay.setValue(settings.minDelay());
+            maxDelay.setValue(settings.maxDelay());
+        }
+
+        @Override
+        public AutoReconnectSettings collectSettings() {
+            return new AutoReconnectSettings(
+                    autoReconnect.isSelected(),
+                    (int) minDelay.getValue(),
+                    (int) maxDelay.getValue()
+            );
+        }
+    }
+
+    private record AutoReconnectSettings(
+            boolean autoReconnect,
+            int minDelay,
+            int maxDelay
+    ) implements SettingsObject {
     }
 }

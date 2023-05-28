@@ -91,9 +91,6 @@ public class CommandDefinition implements Callable<Integer> {
     @Option(names = {"--password-format"}, description = "the password for registering")
     private String passwordFormat = "ServerWrecker";
 
-    @Option(names = {"--auto-reconnect"}, description = "reconnect bots after being disconnected")
-    private boolean autoReconnect = true;
-
     @Option(names = {"--auto-respawn"}, description = "respawn bots after death")
     private boolean autoRespawn = true;
 
@@ -126,7 +123,6 @@ public class CommandDefinition implements Callable<Integer> {
                         loginCommand,
                         captchaCommand,
                         passwordFormat,
-                        autoReconnect,
                         autoRespawn,
                         authType
                 ));

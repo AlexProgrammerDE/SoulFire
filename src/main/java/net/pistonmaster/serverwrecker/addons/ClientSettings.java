@@ -103,7 +103,6 @@ public class ClientSettings implements InternalAddon {
         event.navigationItems().add(new ClientSettingsPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @Getter
     private static class ClientSettingsPanel extends NavigationItem implements SettingsDuplex<ClientSettingsSettings> {
         private final JCheckBox sendClientSettings;
         private final JTextField clientLocale;

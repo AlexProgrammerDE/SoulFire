@@ -30,6 +30,6 @@ public record BotSettings(String host, int port,
                           ProxyType proxyType, int botsPerProxy,
                           int readTimeout, int writeTimeout, int connectTimeout,
                           String registerCommand, String loginCommand, String captchaCommand,
-                          String passwordFormat, boolean autoReconnect, boolean autoRespawn,
+                          String passwordFormat, boolean autoRespawn,
                           AuthType authType) implements SettingsObject {
 }

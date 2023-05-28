@@ -66,7 +66,6 @@ public class ClientBrand implements InternalAddon {
         event.navigationItems().add(new ClientBrandPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @Getter
     private static class ClientBrandPanel extends NavigationItem implements SettingsDuplex<ClientBrandSettings> {
         private final JCheckBox sendClientBrand;
         private final JTextField clientBrand;
