@@ -41,7 +41,7 @@ public class AutoReconnect implements InternalAddon {
     }
 
     @EventHandler
-    public void onDisconnect(@NonNull BotDisconnectedEvent event) {
+    public void onDisconnect(BotDisconnectedEvent event) {
         if (!event.connection().settingsHolder().has(AutoReconnectSettings.class)) {
             return;
         }

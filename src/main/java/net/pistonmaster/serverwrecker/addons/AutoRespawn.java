@@ -38,14 +38,14 @@ import java.awt.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-public class AutoRespawn implements InternalAddon, EventSubscriber<SWPacketReceiveEvent> {
+public class AutoRespawn implements InternalAddon {
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListener(SWPacketReceiveEvent.class, this);
+        ServerWreckerAPI.registerListeners(this);
     }
 
-    @Override
-    public void on(@NonNull SWPacketReceiveEvent event) {
+    @EventHandler
+    public void onPacket(SWPacketReceiveEvent event) {
         if (event.getPacket() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
             if (!event.getConnection().settingsHolder().has(AutoRespawnSettings.class)) {
                 return;
@@ -110,12 +110,12 @@ public class AutoRespawn implements InternalAddon, EventSubscriber<SWPacketRecei
 
         @Override
         public String getNavigationName() {
-            return "Auto Reconnect";
+            return "Auto Respawn";
         }
 
         @Override
         public String getNavigationId() {
-            return "auto-reconnect";
+            return "auto-respawn";
         }
 
         @Override

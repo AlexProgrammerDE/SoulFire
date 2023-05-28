@@ -39,7 +39,7 @@ public class AutoRegister implements InternalAddon {
     }
 
     @EventHandler
-    public void onChat(@NonNull ChatMessageReceiveEvent event) {
+    public void onChat(ChatMessageReceiveEvent event) {
         if (!event.connection().settingsHolder().has(AutoRegisterSettings.class)) {
             return;
         }
