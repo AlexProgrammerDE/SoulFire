@@ -156,13 +156,13 @@ val copyMinecraft = tasks.create("copyMinecraft") {
 tasks.named("processResources").get().dependsOn(copyMinecraft)
 
 launch4j {
-    mainClassName = "ServerWrecker"
-    icon = "${rootDir}/assets/robot.ico"
-    headerType = "gui"
-    productName = "ServerWrecker"
-    internalName = "ServerWrecker"
-    companyName = "AlexProgrammerDE"
-    copyright = "© 2023 AlexProgrammerDE"
-    copyConfigurable = emptyArray<Any>()
-    jarTask = project.tasks.shadowJar.get()
+    mainClassName.set("ServerWrecker")
+    icon.set("${rootDir}/assets/robot.ico")
+    headerType.set("gui")
+    productName.set("ServerWrecker")
+    internalName.set("ServerWrecker")
+    companyName.set("AlexProgrammerDE")
+    copyright.set("© 2023 AlexProgrammerDE")
+    copyConfigurable.set(emptyArray<Any>())
+    jarTask.set(project.tasks.shadowJar.get())
 }
