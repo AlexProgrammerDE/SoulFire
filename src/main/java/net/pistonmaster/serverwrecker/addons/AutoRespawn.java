@@ -23,6 +23,7 @@ import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
@@ -75,13 +76,7 @@ public class AutoRespawn implements InternalAddon {
 
     @EventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
-        AutoRespawnCommand autoRespawnCommand = new AutoRespawnCommand();
-        CommandLine.Model.CommandSpec commandSpec = CommandLine.Model.CommandSpec.forAnnotatedObject(autoRespawnCommand);
-        for (CommandLine.Model.OptionSpec optionSpec : commandSpec.options()) {
-            event.commandLine().getCommandSpec().addOption(optionSpec);
-        }
-
-        ServerWreckerAPI.getServerWrecker().getSettingsManager().registerProvider(AutoRespawnSettings.class, autoRespawnCommand);
+        AddonCLIHelper.registerCommands(event.commandLine(), AutoRespawnSettings.class, new AutoRespawnCommand());
     }
 
     private static class AutoRespawnPanel extends NavigationItem implements SettingsDuplex<AutoRespawnSettings> {

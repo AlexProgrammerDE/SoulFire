@@ -22,13 +22,17 @@ package net.pistonmaster.serverwrecker.addons;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundCustomPayloadPacket;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
+import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
@@ -63,6 +67,11 @@ public class ClientBrand implements InternalAddon {
     @EventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new ClientBrandPanel(ServerWreckerAPI.getServerWrecker()));
+    }
+
+    @EventHandler
+    public void onCommandLine(CommandManagerInitEvent event) {
+        AddonCLIHelper.registerCommands(event.commandLine(), ClientBrandSettings.class, new ClientBrandCommand());
     }
 
     private static class ClientBrandPanel extends NavigationItem implements SettingsDuplex<ClientBrandSettings> {
@@ -106,6 +115,21 @@ public class ClientBrand implements InternalAddon {
             return new ClientBrandSettings(
                     sendClientBrand.isSelected(),
                     clientBrand.getText()
+            );
+        }
+    }
+
+    private static class ClientBrandCommand implements SettingsProvider<ClientBrandSettings> {
+        @CommandLine.Option(names = {"--send-client-brand"} , description = "Send client brand")
+        private boolean sendClientBrand = true;
+        @CommandLine.Option(names = {"--client-brand"} , description = "Client brand")
+        private String clientBrand = "vanilla";
+
+        @Override
+        public ClientBrandSettings collectSettings() {
+            return new ClientBrandSettings(
+                    sendClientBrand,
+                    clientBrand
             );
         }
     }

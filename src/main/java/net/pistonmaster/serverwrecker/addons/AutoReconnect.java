@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.addons;
 
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
@@ -68,13 +69,7 @@ public class AutoReconnect implements InternalAddon {
 
     @EventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
-        AutoReconnectCommand autoReconnectCommand = new AutoReconnectCommand();
-        CommandLine.Model.CommandSpec commandSpec = CommandLine.Model.CommandSpec.forAnnotatedObject(autoReconnectCommand);
-        for (CommandLine.Model.OptionSpec optionSpec : commandSpec.options()) {
-            event.commandLine().getCommandSpec().addOption(optionSpec);
-        }
-
-        ServerWreckerAPI.getServerWrecker().getSettingsManager().registerProvider(AutoReconnectSettings.class, autoReconnectCommand);
+        AddonCLIHelper.registerCommands(event.commandLine(), AutoReconnectSettings.class, new AutoReconnectCommand());
     }
 
     private static class AutoReconnectPanel extends NavigationItem implements SettingsDuplex<AutoReconnectSettings> {

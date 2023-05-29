@@ -201,6 +201,9 @@ public class ServerWrecker {
         initPlugins(dataFolder.resolve("plugins"));
 
         logger.info("Finished loading!");
+    }
+
+    public void initConsole() {
         threadPool.execute(terminalConsole::start);
     }
 
@@ -309,13 +312,7 @@ public class ServerWrecker {
 
             botConnectionFactory.logger().info("Connecting...");
 
-            CompletableFuture<BotConnection> future = botConnectionFactory.connect();
-
-            if (botSettings.waitEstablished()) {
-                this.botConnections.add(future.join());
-            } else {
-                future.thenAccept(this.botConnections::add);
-            }
+            this.botConnections.add(botConnectionFactory.connect().join());
         }
     }
 

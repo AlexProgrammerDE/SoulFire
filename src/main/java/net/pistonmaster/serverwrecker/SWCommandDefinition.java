@@ -36,53 +36,56 @@ import java.util.concurrent.Callable;
 @Command(name = "serverwrecker", mixinStandardHelpOptions = true,
         version = "ServerWrecker v" + BuildData.VERSION, showDefaultValues = true,
         description = "Stress test a minecraft server using bots", sortOptions = false)
-public class CommandDefinition implements Callable<Integer> {
+public class SWCommandDefinition implements Callable<Integer> {
     private final ServerWrecker serverWrecker;
 
-    @Option(names = {"--host", "--target"}, description = "target url to connect to")
+    @Option(names = {"--host", "--target"}, description = "Target url to connect to")
     private String host = "127.0.0.1";
 
-    @Option(names = {"--port"}, description = "target port to connect to")
+    @Option(names = {"--port"}, description = "Target port to connect to")
     private int port = 25565;
 
-    @Option(names = {"-a", "--amount"}, description = "amount of bots to connect to the server")
+    @Option(names = {"-a", "--amount"}, description = "Amount of bots to connect to the server")
     private int amount = 20;
 
-    @Option(names = {"--join-delay"}, description = "the delay between bot spawns, in milliseconds")
+    @Option(names = {"--join-delay"}, description = "The delay between bot spawns, in milliseconds")
     private int joinDelay = 1000;
 
-    @Option(names = {"--name-format"}, description = "format for bot names. allows integer placeholder '%%d'")
+    @Option(names = {"--name-format"}, description = "Format for bot names. allows integer placeholder '%%d'")
     private String nameFormat = "Bot-%d";
 
     @Option(names = {"-mc", "--mc-version"}, description = "Minecraft version of the server to connect to")
     private String version = SWConstants.LATEST_SHOWN_VERSION.getName();
 
-    @Option(names = {"--debug"}, description = "log additional information useful for debugging the software")
+    @Option(names = {"--debug"}, description = "Log additional information useful for debugging the software")
     private boolean debug;
 
-    @Option(names = {"--proxy-type"}, description = "type of proxies used")
+    @Option(names = {"--proxy-type"}, description = "Type of proxies used")
     private ProxyType proxy = ProxyType.SOCKS5;
 
-    @Option(names = {"--accounts-per-proxy"}, description = "amount of accounts that can be on a single proxy")
+    @Option(names = {"--accounts-per-proxy"}, description = "Amount of accounts that can be on a single proxy")
     private int accountsPerProxy = -1;
 
-    @Option(names = {"--read-timeout"}, description = "bot read timeout")
+    @Option(names = {"--read-timeout"}, description = "Bot read timeout")
     private int readTimeout = 30;
 
-    @Option(names = {"--write-timeout"}, description = "bot write timeout")
+    @Option(names = {"--write-timeout"}, description = "Bot write timeout")
     private int writeTimout = 0;
 
-    @Option(names = {"--connect-timeout"}, description = "bot connect timeout")
+    @Option(names = {"--connect-timeout"}, description = "Bot connect timeout")
     private int connectTimeout = 30;
 
-    @Option(names = {"--disable-wait-established"}, description = "make the program halt and wait till a bot was successfully connected before connecting the next bot")
+    @Option(names = {"--disable-wait-established"}, description = "Make the program halt and wait till a bot was successfully connected before connecting the next bot")
     private boolean disableWaitEstablished;
 
-    @Option(names = {"--auth-service"}, description = "the auth service to use")
+    @Option(names = {"--auth-service"}, description = "The auth service to use")
     private AuthType authType = AuthType.OFFLINE;
 
     @Override
     public Integer call() {
+        // Delayed to here, so help and version do not get cut off
+        serverWrecker.initConsole();
+
         serverWrecker.getSettingsManager().registerProvider(BotSettings.class,
                 () -> new BotSettings(
                         host,

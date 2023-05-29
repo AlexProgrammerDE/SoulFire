@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.addons;
 
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
@@ -77,13 +78,7 @@ public class AutoRegister implements InternalAddon {
 
     @EventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
-        AutoRegisterCommand autoRegisterCommand = new AutoRegisterCommand();
-        CommandLine.Model.CommandSpec commandSpec = CommandLine.Model.CommandSpec.forAnnotatedObject(autoRegisterCommand);
-        for (CommandLine.Model.OptionSpec optionSpec : commandSpec.options()) {
-            event.commandLine().getCommandSpec().addOption(optionSpec);
-        }
-
-        ServerWreckerAPI.getServerWrecker().getSettingsManager().registerProvider(AutoRegisterSettings.class, autoRegisterCommand);
+        AddonCLIHelper.registerCommands(event.commandLine(), AutoRegisterSettings.class, new AutoRegisterCommand());
     }
 
     private static class AutoRegisterPanel extends NavigationItem implements SettingsDuplex<AutoRegisterSettings> {

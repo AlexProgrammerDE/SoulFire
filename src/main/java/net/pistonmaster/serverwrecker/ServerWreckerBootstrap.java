@@ -70,6 +70,7 @@ public class ServerWreckerBootstrap {
 
             loadInternalAddons();
             ServerWrecker serverWrecker = new ServerWrecker(dataFolder);
+            serverWrecker.initConsole();
 
             EventQueue.invokeLater(() ->
                     serverWrecker.getInjector().getSingleton(MainFrame.class));
@@ -99,7 +100,7 @@ public class ServerWreckerBootstrap {
 
     private static void runHeadless(String[] args, Path dataFolder) {
         ServerWrecker serverWrecker = new ServerWrecker(dataFolder);
-        CommandLine commandLine = new CommandLine(new CommandDefinition(serverWrecker));
+        CommandLine commandLine = new CommandLine(new SWCommandDefinition(serverWrecker));
         commandLine.setCaseInsensitiveEnumValuesAllowed(true);
         commandLine.setUsageHelpAutoWidth(true);
         commandLine.setUsageHelpLongOptionsMaxWidth(30);
