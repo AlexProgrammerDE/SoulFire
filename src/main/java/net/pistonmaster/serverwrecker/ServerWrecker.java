@@ -99,13 +99,20 @@ public class ServerWrecker {
     private final AccountRegistry accountRegistry = new AccountRegistry(this);
     private final SettingsManager settingsManager = new SettingsManager(
             logger,
-            BotSettings.class
+            BotSettings.class,
+            DevSettings.class
     );
+    private final Path dataFolder = Path.of(System.getProperty("user.home"), ".serverwrecker");
+    private final Path profilesFolder;
+    private final Path pluginsFolder;
     @Setter
     private AttackState attackState = AttackState.STOPPED;
     private boolean shutdown = false;
 
-    public ServerWrecker(Path dataFolder) {
+    public ServerWrecker() {
+        this.profilesFolder = dataFolder.resolve("profiles");
+        this.pluginsFolder = dataFolder.resolve("plugins");
+
         // Register into injector
         injector.register(ServerWrecker.class, this);
 
@@ -120,6 +127,14 @@ public class ServerWrecker {
         terminalConsole.setupStreams();
 
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+
+        try {
+            Files.createDirectories(dataFolder);
+            Files.createDirectories(profilesFolder);
+            Files.createDirectories(pluginsFolder);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         JsonObject translations;
         try (InputStream stream = ServerWrecker.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
@@ -205,7 +220,7 @@ public class ServerWrecker {
             addon.onEnable(this);
         }
 
-        initPlugins(dataFolder.resolve("plugins"));
+        initPlugins(pluginsFolder);
 
         logger.info("Finished loading!");
     }

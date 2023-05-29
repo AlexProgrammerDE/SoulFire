@@ -19,8 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.gui;
 
-import li.flor.nativejfilechooser.NativeJFileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.gui.libs.NativeJFileChooser;
 import net.pistonmaster.serverwrecker.gui.popups.AboutPopup;
 
 import javax.inject.Inject;
@@ -34,7 +34,7 @@ public class SWMenuBar extends JMenuBar {
         JMenu fileMenu = new JMenu("File");
         JMenuItem loadProfile = new JMenuItem("Load Profile");
         loadProfile.addActionListener(e -> {
-            JFileChooser chooser = new NativeJFileChooser();
+            JFileChooser chooser = new NativeJFileChooser(serverWrecker.getProfilesFolder());
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setDialogTitle("Load Profile");
             chooser.setApproveButtonText("Load");
@@ -50,7 +50,7 @@ public class SWMenuBar extends JMenuBar {
         fileMenu.add(loadProfile);
         JMenuItem saveProfile = new JMenuItem("Save Profile");
         saveProfile.addActionListener(e -> {
-            JFileChooser chooser = new NativeJFileChooser();
+            JFileChooser chooser = new NativeJFileChooser(serverWrecker.getProfilesFolder());
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setDialogTitle("Save Profile");
             chooser.setApproveButtonText("Save");

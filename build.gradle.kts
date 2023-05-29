@@ -95,8 +95,6 @@ dependencies {
     implementation(libs.guava)
     implementation(libs.gson)
 
-    implementation("li.flor:native-j-file-chooser:1.6.4")
-
     implementation("com.thealtening.api:api:4.1.0")
 
     implementation("net.kyori:adventure-text-serializer-plain:4.13.1")

@@ -19,8 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
-import li.flor.nativejfilechooser.NativeJFileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.gui.libs.NativeJFileChooser;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
@@ -62,7 +62,7 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
         });
 
         saveLog.addActionListener(listener -> {
-            JFileChooser fileChooser = new NativeJFileChooser();
+            JFileChooser fileChooser = new NativeJFileChooser(serverWrecker.getDataFolder());
             fileChooser.setDialogTitle("Save Log");
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fileChooser.setAcceptAllFileFilterUsed(false);

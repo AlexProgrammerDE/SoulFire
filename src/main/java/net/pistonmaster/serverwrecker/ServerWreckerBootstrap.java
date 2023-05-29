@@ -61,16 +61,14 @@ public class ServerWreckerBootstrap {
             System.exit(1);
         });
 
-        Path dataFolder = initConfigDir();
-
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
             loadInternalAddons();
-            runHeadless(args, dataFolder);
+            runHeadless(args);
         } else {
             MainFrame.setLookAndFeel();
 
             loadInternalAddons();
-            ServerWrecker serverWrecker = new ServerWrecker(dataFolder);
+            ServerWrecker serverWrecker = new ServerWrecker();
             serverWrecker.initConsole();
 
             SwingUtilities.invokeLater(() ->
@@ -87,20 +85,8 @@ public class ServerWreckerBootstrap {
         addons.forEach(ServerWreckerAPI::registerAddon);
     }
 
-    private static Path initConfigDir() {
-        Path dataDirectory = Path.of(System.getProperty("user.home"), ".serverwrecker");
-
-        try {
-            Files.createDirectories(dataDirectory);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return dataDirectory;
-    }
-
-    private static void runHeadless(String[] args, Path dataFolder) {
-        ServerWrecker serverWrecker = new ServerWrecker(dataFolder);
+    private static void runHeadless(String[] args) {
+        ServerWrecker serverWrecker = new ServerWrecker();
         CommandLine commandLine = new CommandLine(new SWCommandDefinition(serverWrecker));
         commandLine.setCaseInsensitiveEnumValuesAllowed(true);
         commandLine.setUsageHelpAutoWidth(true);
