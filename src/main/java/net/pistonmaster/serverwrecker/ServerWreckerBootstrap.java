@@ -24,6 +24,7 @@ import net.pistonmaster.serverwrecker.addons.*;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.MainFrame;
+import org.apache.logging.log4j.LogManager;
 import org.fusesource.jansi.AnsiConsole;
 import picocli.CommandLine;
 
@@ -110,6 +111,10 @@ public class ServerWreckerBootstrap {
         });
         ServerWreckerAPI.postEvent(new CommandManagerInitEvent(commandLine));
         int exitCode = commandLine.execute(args);
+
+        // Shutdown ServerWrecker first
+        serverWrecker.shutdown(false);
+
         System.exit(exitCode);
     }
 }

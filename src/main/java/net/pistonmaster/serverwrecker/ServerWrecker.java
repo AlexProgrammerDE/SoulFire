@@ -392,7 +392,7 @@ public class ServerWrecker {
         threadPool.shutdown();
 
         // Since we manually removed the shutdown hook, we need to handle the shutdown ourselves.
-        LogManager.shutdown();
+        LogManager.shutdown(true, true);
 
         shutdown = true;
 
