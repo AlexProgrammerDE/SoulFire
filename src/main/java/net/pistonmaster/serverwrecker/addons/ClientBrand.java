@@ -28,6 +28,7 @@ import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
@@ -85,12 +86,11 @@ public class ClientBrand implements InternalAddon {
             setLayout(new GridLayout(0, 2));
 
             add(new JLabel("Send Client Brand: "));
-            sendClientBrand = new JCheckBox();
-            sendClientBrand.setSelected(true);
+            sendClientBrand = new PresetJCheckBox(ClientBrandSettings.DEFAULT_SEND_CLIENT_BRAND);
             add(sendClientBrand);
 
             add(new JLabel("Client Brand: "));
-            clientBrand = new JTextField("vanilla");
+            clientBrand = new JTextField(ClientBrandSettings.DEFAULT_CLIENT_BRAND);
             add(clientBrand);
         }
 
@@ -121,9 +121,9 @@ public class ClientBrand implements InternalAddon {
 
     private static class ClientBrandCommand implements SettingsProvider<ClientBrandSettings> {
         @CommandLine.Option(names = {"--send-client-brand"} , description = "Send client brand")
-        private boolean sendClientBrand = true;
+        private boolean sendClientBrand = ClientBrandSettings.DEFAULT_SEND_CLIENT_BRAND;
         @CommandLine.Option(names = {"--client-brand"} , description = "Client brand")
-        private String clientBrand = "vanilla";
+        private String clientBrand = ClientBrandSettings.DEFAULT_CLIENT_BRAND;
 
         @Override
         public ClientBrandSettings collectSettings() {
@@ -138,5 +138,7 @@ public class ClientBrand implements InternalAddon {
             boolean sendClientBrand,
             String clientBrand
     ) implements SettingsObject {
+        public static final boolean DEFAULT_SEND_CLIENT_BRAND = true;
+        public static final String DEFAULT_CLIENT_BRAND = "vanilla";
     }
 }

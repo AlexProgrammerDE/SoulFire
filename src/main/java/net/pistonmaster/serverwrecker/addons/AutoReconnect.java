@@ -26,6 +26,8 @@ import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
+import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
@@ -84,28 +86,18 @@ public class AutoReconnect implements InternalAddon {
             setLayout(new GridLayout(0, 2));
 
             add(new JLabel("Do Auto Reconnect?"));
-            autoReconnect = new JCheckBox();
-            autoReconnect.setSelected(true);
+            autoReconnect = new PresetJCheckBox(AutoReconnectSettings.DEFAULT_AUTO_RECONNECT);
             add(autoReconnect);
 
             add(new JLabel("Min Delay (Seconds)"));
-            minDelay = new JSpinner(new SpinnerNumberModel(1, 1, 1000, 1));
+            minDelay = new JSpinner(new SpinnerNumberModel(AutoReconnectSettings.DEFAULT_MIN_DELAY, 1, 1000, 1));
             add(minDelay);
 
             add(new JLabel("Max Delay (Seconds)"));
-            maxDelay = new JSpinner(new SpinnerNumberModel(5, 1, 1000, 1));
+            maxDelay = new JSpinner(new SpinnerNumberModel(AutoReconnectSettings.DEFAULT_MAX_DELAY, 1, 1000, 1));
             add(maxDelay);
 
-            minDelay.addChangeListener(e -> {
-                if ((int) minDelay.getValue() > (int) maxDelay.getValue()) {
-                    maxDelay.setValue(minDelay.getValue());
-                }
-            });
-            maxDelay.addChangeListener(e -> {
-                if ((int) minDelay.getValue() > (int) maxDelay.getValue()) {
-                    minDelay.setValue(maxDelay.getValue());
-                }
-            });
+            JMinMaxHelper.applyLink(minDelay, maxDelay);
         }
 
         @Override
@@ -136,12 +128,12 @@ public class AutoReconnect implements InternalAddon {
     }
 
     private static class AutoReconnectCommand implements SettingsProvider<AutoReconnectSettings> {
-        @CommandLine.Option(names = {"--auto-reconnect"}, description = "reconnect bots after being disconnected")
-        private boolean autoReconnect = true;
-        @CommandLine.Option(names = {"--reconnect-min-delay"}, description = "minimum delay between reconnects")
-        private int minDelay = 1;
-        @CommandLine.Option(names = {"--reconnect-max-delay"}, description = "maximum delay between reconnects")
-        private int maxDelay = 5;
+        @CommandLine.Option(names = {"--auto-reconnect"}, description = "Reconnect bots after being disconnected")
+        private boolean autoReconnect = AutoReconnectSettings.DEFAULT_AUTO_RECONNECT;
+        @CommandLine.Option(names = {"--reconnect-min-delay"}, description = "Minimum delay between reconnects")
+        private int minDelay = AutoReconnectSettings.DEFAULT_MIN_DELAY;
+        @CommandLine.Option(names = {"--reconnect-max-delay"}, description = "Maximum delay between reconnects")
+        private int maxDelay = AutoReconnectSettings.DEFAULT_MAX_DELAY;
 
         @Override
         public AutoReconnectSettings collectSettings() {
@@ -158,5 +150,8 @@ public class AutoReconnect implements InternalAddon {
             int minDelay,
             int maxDelay
     ) implements SettingsObject {
+        public static final boolean DEFAULT_AUTO_RECONNECT = true;
+        public static final int DEFAULT_MIN_DELAY = 1;
+        public static final int DEFAULT_MAX_DELAY = 5;
     }
 }

@@ -26,6 +26,7 @@ import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
@@ -95,23 +96,23 @@ public class AutoRegister implements InternalAddon {
             setLayout(new GridLayout(0, 2));
 
             add(new JLabel("Auto Register: "));
-            autoRegister = new JCheckBox();
+            autoRegister = new PresetJCheckBox(AutoRegisterSettings.DEFAULT_AUTO_REGISTER);
             add(autoRegister);
 
             add(new JLabel("Register Command: "));
-            registerCommand = new JTextField("/register %password% %password%");
+            registerCommand = new JTextField(AutoRegisterSettings.DEFAULT_REGISTER_COMMAND);
             add(registerCommand);
 
             add(new JLabel("Login Command: "));
-            loginCommand = new JTextField("/login %password%");
+            loginCommand = new JTextField(AutoRegisterSettings.DEFAULT_LOGIN_COMMAND);
             add(loginCommand);
 
             add(new JLabel("Captcha Command: "));
-            captchaCommand = new JTextField("/captcha %captcha%");
+            captchaCommand = new JTextField(AutoRegisterSettings.DEFAULT_CAPTCHA_COMMAND);
             add(captchaCommand);
 
             add(new JLabel("Password Format: "));
-            passwordFormat = new JTextField("ServerWrecker");
+            passwordFormat = new JTextField(AutoRegisterSettings.DEFAULT_PASSWORD_FORMAT);
             add(passwordFormat);
         }
 
@@ -147,16 +148,16 @@ public class AutoRegister implements InternalAddon {
     }
 
     private static class AutoRegisterCommand implements SettingsProvider<AutoRegisterSettings> {
-        @CommandLine.Option(names = {"--auto-register"}, description = "make bots run the /register and /login command after joining")
-        private boolean autoRegister;
-        @CommandLine.Option(names = {"--register-command"}, description = "command to be executed to register")
-        private String registerCommand = "/register %password% %password%";
-        @CommandLine.Option(names = {"--login-command"}, description = "command to be executed to log in")
-        private String loginCommand = "/login %password%";
-        @CommandLine.Option(names = {"--captcha-command"}, description = "command to be executed to confirm a captcha")
-        private String captchaCommand = "/captcha %captcha%";
-        @CommandLine.Option(names = {"--password-format"}, description = "the password for registering")
-        private String passwordFormat = "ServerWrecker";
+        @CommandLine.Option(names = {"--auto-register"}, description = "Make bots run the /register and /login command after joining")
+        private boolean autoRegister = AutoRegisterSettings.DEFAULT_AUTO_REGISTER;
+        @CommandLine.Option(names = {"--register-command"}, description = "Command to be executed to register")
+        private String registerCommand = AutoRegisterSettings.DEFAULT_REGISTER_COMMAND;
+        @CommandLine.Option(names = {"--login-command"}, description = "Command to be executed to log in")
+        private String loginCommand = AutoRegisterSettings.DEFAULT_LOGIN_COMMAND;
+        @CommandLine.Option(names = {"--captcha-command"}, description = "Command to be executed to confirm a captcha")
+        private String captchaCommand = AutoRegisterSettings.DEFAULT_CAPTCHA_COMMAND;
+        @CommandLine.Option(names = {"--password-format"}, description = "The password for registering")
+        private String passwordFormat = AutoRegisterSettings.DEFAULT_PASSWORD_FORMAT;
 
         @Override
         public AutoRegisterSettings collectSettings() {
@@ -177,5 +178,10 @@ public class AutoRegister implements InternalAddon {
             String captchaCommand,
             String passwordFormat
     ) implements SettingsObject {
+        public static final boolean DEFAULT_AUTO_REGISTER = false;
+        public static final String DEFAULT_REGISTER_COMMAND = "/register %password% %password%";
+        public static final String DEFAULT_LOGIN_COMMAND = "/login %password%";
+        public static final String DEFAULT_CAPTCHA_COMMAND = "/captcha %captcha%";
+        public static final String DEFAULT_PASSWORD_FORMAT = "ServerWrecker";
     }
 }

@@ -33,6 +33,7 @@ import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
+import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
@@ -135,75 +136,64 @@ public class ClientSettings implements InternalAddon {
             setLayout(new GridLayout(0, 2));
 
             add(new JLabel("Send Client Settings: "));
-            sendClientSettings = new JCheckBox();
-            sendClientSettings.setSelected(true);
+            sendClientSettings = new PresetJCheckBox(ClientSettingsSettings.DEFAULT_SEND_CLIENT_SETTINGS);
             add(sendClientSettings);
 
             add(new JLabel("Client Locale: "));
-            clientLocale = new JTextField("en_US");
+            clientLocale = new JTextField(ClientSettingsSettings.DEFAULT_CLIENT_LOCALE);
             add(clientLocale);
 
             add(new JLabel("Render Distance: "));
-            renderDistance = new JSpinner(new SpinnerNumberModel(8, 2, 32, 1));
+            renderDistance = new JSpinner(
+                    new SpinnerNumberModel(ClientSettingsSettings.DEFAULT_RENDER_DISTANCE, 2, 32, 1));
             add(renderDistance);
 
             add(new JLabel("Chat Visibility: "));
-            chatVisibility = new JEnumComboBox<>(ChatVisibility.class, ChatVisibility.FULL);
-            chatVisibility.setSelectedItem(ChatVisibility.FULL);
+            chatVisibility = new JEnumComboBox<>(ChatVisibility.class, ClientSettingsSettings.DEFAULT_CHAT_VISIBILITY);
             add(chatVisibility);
 
             add(new JLabel("Use Chat Colors: "));
-            useChatColors = new JCheckBox();
-            useChatColors.setSelected(true);
+            useChatColors = new PresetJCheckBox(ClientSettingsSettings.DEFAULT_USE_CHAT_COLORS);
             add(useChatColors);
 
             add(new JLabel("Cape Enabled: "));
-            capeEnabled = new JCheckBox();
-            capeEnabled.setSelected(true);
+            capeEnabled = new PresetJCheckBox(ClientSettingsSettings.DEFAULT_CAPE_ENABLED);
             add(capeEnabled);
 
             add(new JLabel("Jacket Enabled: "));
-            jacketEnabled = new JCheckBox();
-            jacketEnabled.setSelected(true);
+            jacketEnabled = new PresetJCheckBox(ClientSettingsSettings.DEFAULT_JACKET_ENABLED);
             add(jacketEnabled);
 
             add(new JLabel("Left Sleeve Enabled: "));
-            leftSleeveEnabled = new JCheckBox();
-            leftSleeveEnabled.setSelected(true);
+            leftSleeveEnabled = new PresetJCheckBox(ClientSettingsSettings.DEFAULT_LEFT_SLEEVE_ENABLED);
             add(leftSleeveEnabled);
 
             add(new JLabel("Right Sleeve Enabled: "));
-            rightSleeveEnabled = new JCheckBox();
-            rightSleeveEnabled.setSelected(true);
+            rightSleeveEnabled = new PresetJCheckBox(ClientSettingsSettings.DEFAULT_RIGHT_SLEEVE_ENABLED);
             add(rightSleeveEnabled);
 
             add(new JLabel("Left Pants Leg Enabled: "));
-            leftPantsLegEnabled = new JCheckBox();
-            leftPantsLegEnabled.setSelected(true);
+            leftPantsLegEnabled = new PresetJCheckBox(ClientSettingsSettings.DEFAULT_LEFT_PANTS_LEG_ENABLED);
             add(leftPantsLegEnabled);
 
             add(new JLabel("Right Pants Leg Enabled: "));
-            rightPantsLegEnabled = new JCheckBox();
-            rightPantsLegEnabled.setSelected(true);
+            rightPantsLegEnabled = new PresetJCheckBox( ClientSettingsSettings.DEFAULT_RIGHT_PANTS_LEG_ENABLED);
             add(rightPantsLegEnabled);
 
             add(new JLabel("Hat Enabled: "));
-            hatEnabled = new JCheckBox();
-            hatEnabled.setSelected(true);
+            hatEnabled = new PresetJCheckBox(ClientSettingsSettings.DEFAULT_HAT_ENABLED);
             add(hatEnabled);
 
             add(new JLabel("Hand Preference: "));
-            handPreference = new JEnumComboBox<>(HandPreference.class, HandPreference.RIGHT_HAND);
+            handPreference = new JEnumComboBox<>(HandPreference.class, ClientSettingsSettings.DEFAULT_HAND_PREFERENCE);
             add(handPreference);
 
             add(new JLabel("Text Filtering Enabled: "));
-            textFilteringEnabled = new JCheckBox();
-            textFilteringEnabled.setSelected(false);
+            textFilteringEnabled = new PresetJCheckBox(ClientSettingsSettings.DEFAULT_TEXT_FILTERING_ENABLED);
             add(textFilteringEnabled);
 
             add(new JLabel("Allows Listing: "));
-            allowsListing = new JCheckBox();
-            allowsListing.setSelected(true);
+            allowsListing = new PresetJCheckBox(ClientSettingsSettings.DEFAULT_ALLOWS_LISTING);
             add(allowsListing);
         }
 
@@ -260,35 +250,35 @@ public class ClientSettings implements InternalAddon {
 
     private static class ClientSettingsCommand implements SettingsProvider<ClientSettingsSettings> {
         @CommandLine.Option(names = {"--send-client-settings"} , description = "Send client settings")
-        private boolean sendClientBrand = true;
+        private boolean sendClientBrand = ClientSettingsSettings.DEFAULT_SEND_CLIENT_SETTINGS;
         @CommandLine.Option(names = {"--client-locale"} , description = "Client locale")
-        private String clientBrand = "en_US";
+        private String clientBrand = ClientSettingsSettings.DEFAULT_CLIENT_LOCALE;
         @CommandLine.Option(names = {"--render-distance"} , description = "Render distance")
-        private int renderDistance = 8;
+        private int renderDistance = ClientSettingsSettings.DEFAULT_RENDER_DISTANCE;
         @CommandLine.Option(names = {"--chat-visibility"} , description = "Chat visibility")
-        private ChatVisibility chatVisibility = ChatVisibility.FULL;
+        private ChatVisibility chatVisibility = ClientSettingsSettings.DEFAULT_CHAT_VISIBILITY;
         @CommandLine.Option(names = {"--use-chat-colors"} , description = "Use chat colors")
-        private boolean useChatColors = true;
+        private boolean useChatColors = ClientSettingsSettings.DEFAULT_USE_CHAT_COLORS;
         @CommandLine.Option(names = {"--cape-enabled"} , description = "Cape enabled")
-        private boolean capeEnabled = true;
+        private boolean capeEnabled = ClientSettingsSettings.DEFAULT_CAPE_ENABLED;
         @CommandLine.Option(names = {"--jacket-enabled"} , description = "Jacket enabled")
-        private boolean jacketEnabled = true;
+        private boolean jacketEnabled = ClientSettingsSettings.DEFAULT_JACKET_ENABLED;
         @CommandLine.Option(names = {"--left-sleeve-enabled"} , description = "Left sleeve enabled")
-        private boolean leftSleeveEnabled = true;
+        private boolean leftSleeveEnabled = ClientSettingsSettings.DEFAULT_LEFT_SLEEVE_ENABLED;
         @CommandLine.Option(names = {"--right-sleeve-enabled"} , description = "Right sleeve enabled")
-        private boolean rightSleeveEnabled = true;
+        private boolean rightSleeveEnabled = ClientSettingsSettings.DEFAULT_RIGHT_SLEEVE_ENABLED;
         @CommandLine.Option(names = {"--left-pants-leg-enabled"} , description = "Left pants leg enabled")
-        private boolean leftPantsLegEnabled = true;
+        private boolean leftPantsLegEnabled = ClientSettingsSettings.DEFAULT_LEFT_PANTS_LEG_ENABLED;
         @CommandLine.Option(names = {"--right-pants-leg-enabled"} , description = "Right pants leg enabled")
-        private boolean rightPantsLegEnabled = true;
+        private boolean rightPantsLegEnabled = ClientSettingsSettings.DEFAULT_RIGHT_PANTS_LEG_ENABLED;
         @CommandLine.Option(names = {"--hat-enabled"} , description = "Hat enabled")
-        private boolean hatEnabled = true;
+        private boolean hatEnabled = ClientSettingsSettings.DEFAULT_HAT_ENABLED;
         @CommandLine.Option(names = {"--hand-preference"} , description = "Hand preference")
-        private HandPreference handPreference = HandPreference.RIGHT_HAND;
+        private HandPreference handPreference = ClientSettingsSettings.DEFAULT_HAND_PREFERENCE;
         @CommandLine.Option(names = {"--text-filtering-enabled"} , description = "Text filtering enabled")
-        private boolean textFilteringEnabled = false;
+        private boolean textFilteringEnabled = ClientSettingsSettings.DEFAULT_TEXT_FILTERING_ENABLED;
         @CommandLine.Option(names = {"--allows-listing"} , description = "Allows listing")
-        private boolean allowsListing = true;
+        private boolean allowsListing = ClientSettingsSettings.DEFAULT_ALLOWS_LISTING;
 
         @Override
         public ClientSettingsSettings collectSettings() {
@@ -329,5 +319,20 @@ public class ClientSettings implements InternalAddon {
             boolean textFilteringEnabled,
             boolean allowsListing
     ) implements SettingsObject {
+        public static final boolean DEFAULT_SEND_CLIENT_SETTINGS = true;
+        public static final String DEFAULT_CLIENT_LOCALE = "en_US";
+        public static final int DEFAULT_RENDER_DISTANCE = 8;
+        public static final ChatVisibility DEFAULT_CHAT_VISIBILITY = ChatVisibility.FULL;
+        public static final boolean DEFAULT_USE_CHAT_COLORS = true;
+        public static final boolean DEFAULT_CAPE_ENABLED = true;
+        public static final boolean DEFAULT_JACKET_ENABLED = true;
+        public static final boolean DEFAULT_LEFT_SLEEVE_ENABLED = true;
+        public static final boolean DEFAULT_RIGHT_SLEEVE_ENABLED = true;
+        public static final boolean DEFAULT_LEFT_PANTS_LEG_ENABLED = true;
+        public static final boolean DEFAULT_RIGHT_PANTS_LEG_ENABLED = true;
+        public static final boolean DEFAULT_HAT_ENABLED = true;
+        public static final HandPreference DEFAULT_HAND_PREFERENCE = HandPreference.RIGHT_HAND;
+        public static final boolean DEFAULT_TEXT_FILTERING_ENABLED = false;
+        public static final boolean DEFAULT_ALLOWS_LISTING = true;
     }
 }

@@ -29,6 +29,8 @@ import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
+import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
@@ -91,28 +93,18 @@ public class AutoRespawn implements InternalAddon {
             setLayout(new GridLayout(0, 2));
 
             add(new JLabel("Do Auto Respawn?"));
-            autoRespawn = new JCheckBox();
-            autoRespawn.setSelected(true);
+            autoRespawn = new PresetJCheckBox(AutoRespawnSettings.DEFAULT_AUTO_RESPAWN);
             add(autoRespawn);
 
             add(new JLabel("Min Delay (Seconds)"));
-            minDelay = new JSpinner(new SpinnerNumberModel(1, 1, 1000, 1));
+            minDelay = new JSpinner(new SpinnerNumberModel(AutoRespawnSettings.DEFAULT_MIN_DELAY, 1, 1000, 1));
             add(minDelay);
 
             add(new JLabel("Max Delay (Seconds)"));
-            maxDelay = new JSpinner(new SpinnerNumberModel(3, 1, 1000, 1));
+            maxDelay = new JSpinner(new SpinnerNumberModel(AutoRespawnSettings.DEFAULT_MAX_DELAY, 1, 1000, 1));
             add(maxDelay);
 
-            minDelay.addChangeListener(e -> {
-                if ((int) minDelay.getValue() > (int) maxDelay.getValue()) {
-                    maxDelay.setValue(minDelay.getValue());
-                }
-            });
-            maxDelay.addChangeListener(e -> {
-                if ((int) minDelay.getValue() > (int) maxDelay.getValue()) {
-                    minDelay.setValue(maxDelay.getValue());
-                }
-            });
+            JMinMaxHelper.applyLink(minDelay, maxDelay);
         }
 
         @Override
@@ -143,12 +135,12 @@ public class AutoRespawn implements InternalAddon {
     }
 
     private static class AutoRespawnCommand implements SettingsProvider<AutoRespawnSettings> {
-        @CommandLine.Option(names = {"--auto-respawn"}, description = "respawn bots after death")
-        private boolean autoRespawn = true;
-        @CommandLine.Option(names = {"--respawn-min-delay"}, description = "minimum delay between respawns")
-        private int minDelay = 1;
-        @CommandLine.Option(names = {"--respawn-max-delay"}, description = "maximum delay between respawns")
-        private int maxDelay = 3;
+        @CommandLine.Option(names = {"--auto-respawn"}, description = "Respawn bots after death")
+        private boolean autoRespawn = AutoRespawnSettings.DEFAULT_AUTO_RESPAWN;
+        @CommandLine.Option(names = {"--respawn-min-delay"}, description = "Minimum delay between respawns")
+        private int minDelay = AutoRespawnSettings.DEFAULT_MIN_DELAY;
+        @CommandLine.Option(names = {"--respawn-max-delay"}, description = "Maximum delay between respawns")
+        private int maxDelay = AutoRespawnSettings.DEFAULT_MAX_DELAY;
 
         @Override
         public AutoRespawnSettings collectSettings() {
@@ -165,5 +157,8 @@ public class AutoRespawn implements InternalAddon {
             int minDelay,
             int maxDelay
     ) implements SettingsObject {
+        public static final boolean DEFAULT_AUTO_RESPAWN = true;
+        public static final int DEFAULT_MIN_DELAY = 1;
+        public static final int DEFAULT_MAX_DELAY = 3;
     }
 }
