@@ -22,16 +22,17 @@ package net.pistonmaster.serverwrecker.addons;
 import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
-import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
+import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
@@ -70,6 +71,17 @@ public class AutoRespawn implements InternalAddon {
     @EventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new AutoRespawnPanel(ServerWreckerAPI.getServerWrecker()));
+    }
+
+    @EventHandler
+    public void onCommandLine(CommandManagerInitEvent event) {
+        AutoRespawnCommand autoRespawnCommand = new AutoRespawnCommand();
+        CommandLine.Model.CommandSpec commandSpec = CommandLine.Model.CommandSpec.forAnnotatedObject(autoRespawnCommand);
+        for (CommandLine.Model.OptionSpec optionSpec : commandSpec.options()) {
+            event.commandLine().getCommandSpec().addOption(optionSpec);
+        }
+
+        ServerWreckerAPI.getServerWrecker().getSettingsManager().registerProvider(AutoRespawnSettings.class, autoRespawnCommand);
     }
 
     private static class AutoRespawnPanel extends NavigationItem implements SettingsDuplex<AutoRespawnSettings> {
@@ -131,6 +143,24 @@ public class AutoRespawn implements InternalAddon {
                     autoRespawn.isSelected(),
                     (int) minDelay.getValue(),
                     (int) maxDelay.getValue()
+            );
+        }
+    }
+
+    private static class AutoRespawnCommand implements SettingsProvider<AutoRespawnSettings> {
+        @CommandLine.Option(names = {"--auto-respawn"}, description = "respawn bots after death")
+        private boolean autoRespawn = true;
+        @CommandLine.Option(names = {"--respawn-min-delay"}, description = "minimum delay between respawns")
+        private int minDelay = 1;
+        @CommandLine.Option(names = {"--respawn-max-delay"}, description = "maximum delay between respawns")
+        private int maxDelay = 3;
+
+        @Override
+        public AutoRespawnSettings collectSettings() {
+            return new AutoRespawnSettings(
+                    autoRespawn,
+                    minDelay,
+                    maxDelay
             );
         }
     }

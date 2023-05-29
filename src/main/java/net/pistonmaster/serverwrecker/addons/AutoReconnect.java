@@ -29,7 +29,7 @@ import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
-import picocli.CommandLine.*;
+import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
@@ -69,8 +69,8 @@ public class AutoReconnect implements InternalAddon {
     @EventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
         AutoReconnectCommand autoReconnectCommand = new AutoReconnectCommand();
-        Model.CommandSpec commandSpec = Model.CommandSpec.forAnnotatedObject(autoReconnectCommand);
-        for (Model.OptionSpec optionSpec : commandSpec.options()) {
+        CommandLine.Model.CommandSpec commandSpec = CommandLine.Model.CommandSpec.forAnnotatedObject(autoReconnectCommand);
+        for (CommandLine.Model.OptionSpec optionSpec : commandSpec.options()) {
             event.commandLine().getCommandSpec().addOption(optionSpec);
         }
 
@@ -141,11 +141,11 @@ public class AutoReconnect implements InternalAddon {
     }
 
     private static class AutoReconnectCommand implements SettingsProvider<AutoReconnectSettings> {
-        @Option(names = {"--auto-reconnect"}, description = "reconnect bots after being disconnected")
+        @CommandLine.Option(names = {"--auto-reconnect"}, description = "reconnect bots after being disconnected")
         private boolean autoReconnect = true;
-        @Option(names = {"--reconnect-min-delay"}, description = "minimum delay between reconnects")
+        @CommandLine.Option(names = {"--reconnect-min-delay"}, description = "minimum delay between reconnects")
         private int minDelay = 1;
-        @Option(names = {"--reconnect-max-delay"}, description = "maximum delay between reconnects")
+        @CommandLine.Option(names = {"--reconnect-max-delay"}, description = "maximum delay between reconnects")
         private int maxDelay = 5;
 
         @Override

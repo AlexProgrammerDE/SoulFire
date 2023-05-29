@@ -24,10 +24,12 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
+import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
@@ -71,6 +73,17 @@ public class AutoRegister implements InternalAddon {
     @EventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new AutoRegisterPanel(ServerWreckerAPI.getServerWrecker()));
+    }
+
+    @EventHandler
+    public void onCommandLine(CommandManagerInitEvent event) {
+        AutoRegisterCommand autoRegisterCommand = new AutoRegisterCommand();
+        CommandLine.Model.CommandSpec commandSpec = CommandLine.Model.CommandSpec.forAnnotatedObject(autoRegisterCommand);
+        for (CommandLine.Model.OptionSpec optionSpec : commandSpec.options()) {
+            event.commandLine().getCommandSpec().addOption(optionSpec);
+        }
+
+        ServerWreckerAPI.getServerWrecker().getSettingsManager().registerProvider(AutoRegisterSettings.class, autoRegisterCommand);
     }
 
     private static class AutoRegisterPanel extends NavigationItem implements SettingsDuplex<AutoRegisterSettings> {
@@ -134,6 +147,30 @@ public class AutoRegister implements InternalAddon {
                     loginCommand.getText(),
                     captchaCommand.getText(),
                     passwordFormat.getText()
+            );
+        }
+    }
+
+    private static class AutoRegisterCommand implements SettingsProvider<AutoRegisterSettings> {
+        @CommandLine.Option(names = {"--auto-register"}, description = "make bots run the /register and /login command after joining")
+        private boolean autoRegister;
+        @CommandLine.Option(names = {"--register-command"}, description = "command to be executed to register")
+        private String registerCommand = "/register %password% %password%";
+        @CommandLine.Option(names = {"--login-command"}, description = "command to be executed to log in")
+        private String loginCommand = "/login %password%";
+        @CommandLine.Option(names = {"--captcha-command"}, description = "command to be executed to confirm a captcha")
+        private String captchaCommand = "/captcha %captcha%";
+        @CommandLine.Option(names = {"--password-format"}, description = "the password for registering")
+        private String passwordFormat = "ServerWrecker";
+
+        @Override
+        public AutoRegisterSettings collectSettings() {
+            return new AutoRegisterSettings(
+                    autoRegister,
+                    registerCommand,
+                    loginCommand,
+                    captchaCommand,
+                    passwordFormat
             );
         }
     }
