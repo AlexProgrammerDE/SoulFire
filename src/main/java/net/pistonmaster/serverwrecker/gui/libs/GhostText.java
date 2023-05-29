@@ -19,6 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.gui.libs;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -32,6 +35,8 @@ public class GhostText implements FocusListener, DocumentListener, PropertyChang
     private final JTextField textfield;
     private final String ghostText;
     private boolean isEmpty;
+    @Setter
+    @Getter
     private Color ghostColor;
     private Color foregroundColor;
 
@@ -61,14 +66,6 @@ public class GhostText implements FocusListener, DocumentListener, PropertyChang
     private void unregisterListeners() {
         textfield.getDocument().removeDocumentListener(this);
         textfield.removePropertyChangeListener("foreground", this);
-    }
-
-    public Color getGhostColor() {
-        return ghostColor;
-    }
-
-    public void setGhostColor(Color ghostColor) {
-        this.ghostColor = ghostColor;
     }
 
     private void updateState() {

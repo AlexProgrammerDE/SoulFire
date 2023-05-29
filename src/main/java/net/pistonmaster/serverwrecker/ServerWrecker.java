@@ -29,6 +29,7 @@ import com.google.gson.JsonObject;
 import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
+import io.netty.channel.EventLoopGroup;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,6 +50,8 @@ import net.pistonmaster.serverwrecker.mojangdata.TranslationMapper;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
+import net.pistonmaster.serverwrecker.protocol.netty.ResolveUtil;
+import net.pistonmaster.serverwrecker.protocol.netty.SWNettyHelper;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
@@ -66,10 +69,14 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
@@ -269,6 +276,9 @@ public class ServerWrecker {
             proxyUseMap.put(proxy, 0);
         }
 
+        EventLoopGroup resolveGroup = SWNettyHelper.createEventLoopGroup();
+        InetSocketAddress targetAddress = ResolveUtil.resolveAddress(settingsHolder, resolveGroup, null);
+
         List<BotConnectionFactory> factories = new ArrayList<>();
         for (int botId = 1; botId <= botAmount; botId++) {
             SWProxy proxyData = getProxy(botsPerProxy, proxyUseMap);
@@ -279,7 +289,7 @@ public class ServerWrecker {
                 accounts.remove(index); // Remove the account from the list, so it can't be used again
             }
 
-            factories.add(createBotFactory(settingsHolder, javaAccount, proxyData));
+            factories.add(createBotFactory(targetAddress, settingsHolder, javaAccount, proxyData));
         }
 
         if (availableProxiesCount == 0) {
@@ -341,14 +351,22 @@ public class ServerWrecker {
         }
     }
 
-    private BotConnectionFactory createBotFactory(SettingsHolder settingsHolder, JavaAccount javaAccount, SWProxy proxyData) {
+    private BotConnectionFactory createBotFactory(InetSocketAddress targetAddress, SettingsHolder settingsHolder, JavaAccount javaAccount, SWProxy proxyData) {
         // AuthData will be used internally instead of the MCProtocol data
         MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile(javaAccount.profileId(), javaAccount.username()), javaAccount.authToken());
 
         // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
         protocol.setUseDefaultListeners(false);
 
-        return new BotConnectionFactory(this, settingsHolder, LoggerFactory.getLogger(javaAccount.username()), protocol, javaAccount, proxyData);
+        return new BotConnectionFactory(
+                this,
+                targetAddress,
+                settingsHolder,
+                LoggerFactory.getLogger(javaAccount.username()),
+                protocol,
+                javaAccount,
+                proxyData
+        );
     }
 
     public JavaAccount authenticate(AuthType authType, String email, String password, SWProxy proxyData) throws IOException {

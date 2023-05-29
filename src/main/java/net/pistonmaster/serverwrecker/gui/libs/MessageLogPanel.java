@@ -24,7 +24,7 @@ import javax.swing.text.*;
 import java.awt.*;
 
 /**
- * Modified version of: https://github.com/SKCraft/Launcher/blob/master/launcher/src/main/java/com/skcraft/launcher/swing/MessageLog.java
+ * Modified version of: <a href="https://github.com/SKCraft/Launcher/blob/master/launcher/src/main/java/com/skcraft/launcher/swing/MessageLog.java">SKCraft/Launcher Log Panel</a>
  */
 public class MessageLogPanel extends JPanel {
     protected final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();

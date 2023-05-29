@@ -27,7 +27,7 @@ import javax.swing.text.Document;
 import javax.swing.text.Element;
 
 /**
- * From http://tips4java.wordpress.com/2008/10/15/limit-lines-in-document/
+ * From <a href="http://tips4java.wordpress.com/2008/10/15/limit-lines-in-document/">tips4java</a>
  *
  * @author Rob Camick
  */
@@ -116,7 +116,7 @@ public class LimitLinesDocumentListener implements DocumentListener {
         try {
             document.remove(0, end);
         } catch (BadLocationException ble) {
-            System.out.println(ble);
+            ble.printStackTrace();
         }
     }
 
@@ -131,7 +131,7 @@ public class LimitLinesDocumentListener implements DocumentListener {
         try {
             document.remove(start - 1, end - start);
         } catch (BadLocationException ble) {
-            System.out.println(ble);
+            ble.printStackTrace();
         }
     }
 }

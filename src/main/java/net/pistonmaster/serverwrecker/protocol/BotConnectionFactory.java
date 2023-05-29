@@ -37,9 +37,11 @@ import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import org.slf4j.Logger;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
-public record BotConnectionFactory(ServerWrecker serverWrecker, SettingsHolder settingsHolder, Logger logger,
+public record BotConnectionFactory(ServerWrecker serverWrecker, InetSocketAddress targetAddress,
+                                   SettingsHolder settingsHolder, Logger logger,
                                    MinecraftProtocol protocol, JavaAccount javaAccount,
                                    SWProxy proxyData) {
     public CompletableFuture<BotConnection> connect() {
@@ -48,7 +50,7 @@ public record BotConnectionFactory(ServerWrecker serverWrecker, SettingsHolder s
 
     public BotConnection connectInternal() {
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
-        ViaClientSession session = new ViaClientSession(botSettings.host(), botSettings.port(), protocol,
+        ViaClientSession session = new ViaClientSession(targetAddress, protocol,
                 NullHelper.nullOrApply(proxyData,
                         data -> new ProxyInfo(ProxyInfo.Type.valueOf(data.type().name()), data.address(), data.username(), data.password())),
                 settingsHolder);

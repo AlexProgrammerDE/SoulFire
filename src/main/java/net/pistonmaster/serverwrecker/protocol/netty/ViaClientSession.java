@@ -25,7 +25,6 @@ import com.github.steveice10.packetlib.ProxyInfo;
 import com.github.steveice10.packetlib.codec.PacketCodecHelper;
 import com.github.steveice10.packetlib.crypt.PacketEncryption;
 import com.github.steveice10.packetlib.event.session.PacketSendingEvent;
-import com.github.steveice10.packetlib.helper.TransportHelper;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpPacketCodec;
@@ -35,29 +34,11 @@ import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.exception.CancelCodecException;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
-import io.netty.channel.epoll.EpollDatagramChannel;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollSocketChannel;
-import io.netty.channel.kqueue.KQueueDatagramChannel;
-import io.netty.channel.kqueue.KQueueEventLoopGroup;
-import io.netty.channel.kqueue.KQueueSocketChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.DatagramChannel;
-import io.netty.channel.socket.nio.NioDatagramChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.dns.*;
 import io.netty.handler.codec.haproxy.*;
 import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.proxy.Socks5ProxyHandler;
-import io.netty.incubator.channel.uring.IOUringDatagramChannel;
-import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
-import io.netty.incubator.channel.uring.IOUringSocketChannel;
-import io.netty.resolver.dns.DnsNameResolver;
-import io.netty.resolver.dns.DnsNameResolverBuilder;
-import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.SWConstants;
@@ -81,9 +62,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.crypto.SecretKey;
 import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
@@ -92,28 +71,27 @@ public class ViaClientSession extends TcpSession {
     public static final String SIZER_NAME = "sizer";
     public static final String COMPRESSION_NAME = "compression";
     public static final String ENCRYPTION_NAME = "encryption";
-    private static final String IP_REGEX = "\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b";
-    private static Class<? extends Channel> CHANNEL_CLASS;
-    private static Class<? extends DatagramChannel> DATAGRAM_CHANNEL_CLASS;
-    private static EventLoopGroup EVENT_LOOP_GROUP;
 
+    // Changed from static to non-static to allow high concurrency and performance
+    private final EventLoopGroup eventLoopGroup = SWNettyHelper.createEventLoopGroup();
     private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final InetSocketAddress targetAddress;
     private final String bindAddress;
     private final int bindPort;
     private final ProxyInfo proxy;
     private final PacketCodecHelper codecHelper;
-    @Getter
     private final SettingsHolder settingsHolder;
     private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
     @Setter
     private Runnable postDisconnectHook;
 
-    public ViaClientSession(String host, int port, PacketProtocol protocol, ProxyInfo proxy, SettingsHolder settingsHolder) {
-        this(host, port, "0.0.0.0", 0, protocol, proxy, settingsHolder);
+    public ViaClientSession(InetSocketAddress targetAddress, PacketProtocol protocol, ProxyInfo proxy, SettingsHolder settingsHolder) {
+        this(targetAddress, "0.0.0.0", 0, protocol, proxy, settingsHolder);
     }
 
-    public ViaClientSession(String host, int port, String bindAddress, int bindPort, PacketProtocol protocol, ProxyInfo proxy, SettingsHolder settingsHolder) {
-        super(host, port, protocol);
+    private ViaClientSession(InetSocketAddress targetAddress, String bindAddress, int bindPort, PacketProtocol protocol, ProxyInfo proxy, SettingsHolder settingsHolder) {
+        super(null, -1, protocol);
+        this.targetAddress = targetAddress;
         this.bindAddress = bindAddress;
         this.bindPort = bindPort;
         this.proxy = proxy;
@@ -121,45 +99,10 @@ public class ViaClientSession extends TcpSession {
         this.settingsHolder = settingsHolder;
     }
 
-    private static void createTcpEventLoopGroup() {
-        if (CHANNEL_CLASS != null) {
-            return;
-        }
-
-        switch (TransportHelper.determineTransportMethod()) {
-            case IO_URING -> {
-                EVENT_LOOP_GROUP = new IOUringEventLoopGroup();
-                CHANNEL_CLASS = IOUringSocketChannel.class;
-                DATAGRAM_CHANNEL_CLASS = IOUringDatagramChannel.class;
-            }
-            case EPOLL -> {
-                EVENT_LOOP_GROUP = new EpollEventLoopGroup();
-                CHANNEL_CLASS = EpollSocketChannel.class;
-                DATAGRAM_CHANNEL_CLASS = EpollDatagramChannel.class;
-            }
-            case KQUEUE -> {
-                EVENT_LOOP_GROUP = new KQueueEventLoopGroup();
-                CHANNEL_CLASS = KQueueSocketChannel.class;
-                DATAGRAM_CHANNEL_CLASS = KQueueDatagramChannel.class;
-            }
-            case NIO -> {
-                EVENT_LOOP_GROUP = new NioEventLoopGroup();
-                CHANNEL_CLASS = NioSocketChannel.class;
-                DATAGRAM_CHANNEL_CLASS = NioDatagramChannel.class;
-            }
-        }
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> EVENT_LOOP_GROUP.shutdownGracefully()));
-    }
-
     @Override
     public void connect(boolean wait) {
         if (this.disconnected) {
             throw new IllegalStateException("Session has already been disconnected.");
-        }
-
-        if (CHANNEL_CLASS == null) {
-            createTcpEventLoopGroup();
         }
 
         try {
@@ -169,11 +112,11 @@ public class ViaClientSession extends TcpSession {
             boolean isBedrock = SWConstants.isBedrock(version);
             Bootstrap bootstrap = new Bootstrap();
 
-            bootstrap.group(EVENT_LOOP_GROUP);
+            bootstrap.group(eventLoopGroup);
             if (isBedrock) {
-                bootstrap.channelFactory(RakChannelFactory.client(DATAGRAM_CHANNEL_CLASS));
+                bootstrap.channelFactory(RakChannelFactory.client(SWNettyHelper.DATAGRAM_CHANNEL_CLASS));
             } else {
-                bootstrap.channel(CHANNEL_CLASS);
+                bootstrap.channel(SWNettyHelper.CHANNEL_CLASS);
             }
 
             bootstrap
@@ -243,8 +186,7 @@ public class ViaClientSession extends TcpSession {
                 }
             });
 
-            InetSocketAddress remoteAddress = resolveAddress();
-            bootstrap.remoteAddress(remoteAddress);
+            bootstrap.remoteAddress(targetAddress);
             bootstrap.localAddress(bindAddress, bindPort);
 
             ChannelFuture future = bootstrap.connect();
@@ -296,77 +238,6 @@ public class ViaClientSession extends TcpSession {
     @Override
     public MinecraftCodecHelper getCodecHelper() {
         return (MinecraftCodecHelper) this.codecHelper;
-    }
-
-    private InetSocketAddress resolveAddress() {
-        boolean debug = getFlag(BuiltinFlags.PRINT_DEBUG, false);
-
-        String name = this.getPacketProtocol().getSRVRecordPrefix() + "._tcp." + this.getHost();
-        if (debug) {
-            System.out.println("[PacketLib] Attempting SRV lookup for \"" + name + "\".");
-        }
-
-        if (getFlag(BuiltinFlags.ATTEMPT_SRV_RESOLVE, true) && (!this.host.matches(IP_REGEX) && !this.host.equalsIgnoreCase("localhost"))) {
-            AddressedEnvelope<DnsResponse, InetSocketAddress> envelope = null;
-            try (DnsNameResolver resolver = new DnsNameResolverBuilder(EVENT_LOOP_GROUP.next())
-                    .channelType(DATAGRAM_CHANNEL_CLASS)
-                    .build()) {
-                envelope = resolver.query(new DefaultDnsQuestion(name, DnsRecordType.SRV)).get();
-
-                DnsResponse response = envelope.content();
-                if (response.count(DnsSection.ANSWER) > 0) {
-                    DefaultDnsRawRecord record = response.recordAt(DnsSection.ANSWER, 0);
-                    if (record.type() == DnsRecordType.SRV) {
-                        ByteBuf buf = record.content();
-                        buf.skipBytes(4); // Skip priority and weight.
-
-                        int port = buf.readUnsignedShort();
-                        String host = DefaultDnsRecordDecoder.decodeName(buf);
-                        if (host.endsWith(".")) {
-                            host = host.substring(0, host.length() - 1);
-                        }
-
-                        if (debug) {
-                            System.out.println("[PacketLib] Found SRV record containing \"" + host + ":" + port + "\".");
-                        }
-
-                        this.host = host;
-                        this.port = port;
-                    } else if (debug) {
-                        System.out.println("[PacketLib] Received non-SRV record in response.");
-                    }
-                } else if (debug) {
-                    System.out.println("[PacketLib] No SRV record found.");
-                }
-            } catch (Exception e) {
-                if (debug) {
-                    System.out.println("[PacketLib] Failed to resolve SRV record.");
-                    e.printStackTrace();
-                }
-            } finally {
-                if (envelope != null) {
-                    envelope.release();
-                }
-
-            }
-        } else if (debug) {
-            System.out.println("[PacketLib] Not resolving SRV record for " + this.host);
-        }
-
-        // Resolve host here
-        try {
-            InetAddress resolved = InetAddress.getByName(getHost());
-            if (debug) {
-                System.out.printf("[PacketLib] Resolved %s -> %s%n", getHost(), resolved.getHostAddress());
-            }
-            return new InetSocketAddress(resolved, getPort());
-        } catch (UnknownHostException e) {
-            if (debug) {
-                System.out.println("[PacketLib] Failed to resolve host, letting Netty do it instead.");
-                e.printStackTrace();
-            }
-            return InetSocketAddress.createUnresolved(getHost(), getPort());
-        }
     }
 
     private void addProxy(ChannelPipeline pipeline) {

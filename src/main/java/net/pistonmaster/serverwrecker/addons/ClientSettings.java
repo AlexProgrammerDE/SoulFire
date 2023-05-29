@@ -177,7 +177,7 @@ public class ClientSettings implements InternalAddon {
             add(leftPantsLegEnabled);
 
             add(new JLabel("Right Pants Leg Enabled: "));
-            rightPantsLegEnabled = new PresetJCheckBox( ClientSettingsSettings.DEFAULT_RIGHT_PANTS_LEG_ENABLED);
+            rightPantsLegEnabled = new PresetJCheckBox(ClientSettingsSettings.DEFAULT_RIGHT_PANTS_LEG_ENABLED);
             add(rightPantsLegEnabled);
 
             add(new JLabel("Hat Enabled: "));
@@ -249,35 +249,35 @@ public class ClientSettings implements InternalAddon {
     }
 
     private static class ClientSettingsCommand implements SettingsProvider<ClientSettingsSettings> {
-        @CommandLine.Option(names = {"--send-client-settings"} , description = "Send client settings")
+        @CommandLine.Option(names = {"--send-client-settings"}, description = "Send client settings")
         private boolean sendClientBrand = ClientSettingsSettings.DEFAULT_SEND_CLIENT_SETTINGS;
-        @CommandLine.Option(names = {"--client-locale"} , description = "Client locale")
+        @CommandLine.Option(names = {"--client-locale"}, description = "Client locale")
         private String clientBrand = ClientSettingsSettings.DEFAULT_CLIENT_LOCALE;
-        @CommandLine.Option(names = {"--render-distance"} , description = "Render distance")
+        @CommandLine.Option(names = {"--render-distance"}, description = "Render distance")
         private int renderDistance = ClientSettingsSettings.DEFAULT_RENDER_DISTANCE;
-        @CommandLine.Option(names = {"--chat-visibility"} , description = "Chat visibility")
+        @CommandLine.Option(names = {"--chat-visibility"}, description = "Chat visibility")
         private ChatVisibility chatVisibility = ClientSettingsSettings.DEFAULT_CHAT_VISIBILITY;
-        @CommandLine.Option(names = {"--use-chat-colors"} , description = "Use chat colors")
+        @CommandLine.Option(names = {"--use-chat-colors"}, description = "Use chat colors")
         private boolean useChatColors = ClientSettingsSettings.DEFAULT_USE_CHAT_COLORS;
-        @CommandLine.Option(names = {"--cape-enabled"} , description = "Cape enabled")
+        @CommandLine.Option(names = {"--cape-enabled"}, description = "Cape enabled")
         private boolean capeEnabled = ClientSettingsSettings.DEFAULT_CAPE_ENABLED;
-        @CommandLine.Option(names = {"--jacket-enabled"} , description = "Jacket enabled")
+        @CommandLine.Option(names = {"--jacket-enabled"}, description = "Jacket enabled")
         private boolean jacketEnabled = ClientSettingsSettings.DEFAULT_JACKET_ENABLED;
-        @CommandLine.Option(names = {"--left-sleeve-enabled"} , description = "Left sleeve enabled")
+        @CommandLine.Option(names = {"--left-sleeve-enabled"}, description = "Left sleeve enabled")
         private boolean leftSleeveEnabled = ClientSettingsSettings.DEFAULT_LEFT_SLEEVE_ENABLED;
-        @CommandLine.Option(names = {"--right-sleeve-enabled"} , description = "Right sleeve enabled")
+        @CommandLine.Option(names = {"--right-sleeve-enabled"}, description = "Right sleeve enabled")
         private boolean rightSleeveEnabled = ClientSettingsSettings.DEFAULT_RIGHT_SLEEVE_ENABLED;
-        @CommandLine.Option(names = {"--left-pants-leg-enabled"} , description = "Left pants leg enabled")
+        @CommandLine.Option(names = {"--left-pants-leg-enabled"}, description = "Left pants leg enabled")
         private boolean leftPantsLegEnabled = ClientSettingsSettings.DEFAULT_LEFT_PANTS_LEG_ENABLED;
-        @CommandLine.Option(names = {"--right-pants-leg-enabled"} , description = "Right pants leg enabled")
+        @CommandLine.Option(names = {"--right-pants-leg-enabled"}, description = "Right pants leg enabled")
         private boolean rightPantsLegEnabled = ClientSettingsSettings.DEFAULT_RIGHT_PANTS_LEG_ENABLED;
-        @CommandLine.Option(names = {"--hat-enabled"} , description = "Hat enabled")
+        @CommandLine.Option(names = {"--hat-enabled"}, description = "Hat enabled")
         private boolean hatEnabled = ClientSettingsSettings.DEFAULT_HAT_ENABLED;
-        @CommandLine.Option(names = {"--hand-preference"} , description = "Hand preference")
+        @CommandLine.Option(names = {"--hand-preference"}, description = "Hand preference")
         private HandPreference handPreference = ClientSettingsSettings.DEFAULT_HAND_PREFERENCE;
-        @CommandLine.Option(names = {"--text-filtering-enabled"} , description = "Text filtering enabled")
+        @CommandLine.Option(names = {"--text-filtering-enabled"}, description = "Text filtering enabled")
         private boolean textFilteringEnabled = ClientSettingsSettings.DEFAULT_TEXT_FILTERING_ENABLED;
-        @CommandLine.Option(names = {"--allows-listing"} , description = "Allows listing")
+        @CommandLine.Option(names = {"--allows-listing"}, description = "Allows listing")
         private boolean allowsListing = ClientSettingsSettings.DEFAULT_ALLOWS_LISTING;
 
         @Override

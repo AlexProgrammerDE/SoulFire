@@ -24,6 +24,7 @@ import javax.swing.*;
 public class JMinMaxHelper {
     /**
      * Force min to be less than max and max to be more than min by changing the other value.
+     *
      * @param min The min spinner
      * @param max The max spinner
      */

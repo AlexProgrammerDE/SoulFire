@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
@@ -35,6 +36,7 @@ import java.util.List;
 public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotSettings> {
     private final JTextField hostInput;
     private final JTextField portInput;
+    private final JCheckBox trySrv;
     private final JSpinner joinDelayMs;
     private final JCheckBox disableWaitEstablished;
     private final JSpinner amount;
@@ -59,13 +61,17 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         portInput = new JTextField("25565");
         add(portInput);
 
+        add(new JLabel("Try SRV record resolving: "));
+        trySrv = new PresetJCheckBox(true);
+        add(trySrv);
+
         add(new JLabel("Join delay (ms): "));
         joinDelayMs = new JSpinner();
         joinDelayMs.setValue(1000);
         add(joinDelayMs);
 
         add(new JLabel("Disable wait established: "));
-        disableWaitEstablished = new JCheckBox();
+        disableWaitEstablished = new PresetJCheckBox(false);
         add(disableWaitEstablished);
 
         add(new JLabel("Amount: "));
@@ -137,6 +143,7 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         return new BotSettings(
                 hostInput.getText(),
                 Integer.parseInt(portInput.getText()),
+                trySrv.isSelected(),
                 (int) amount.getValue(),
                 (int) joinDelayMs.getValue(),
                 !disableWaitEstablished.isSelected(),

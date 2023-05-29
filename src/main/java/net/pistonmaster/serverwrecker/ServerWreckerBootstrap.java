@@ -24,10 +24,10 @@ import net.pistonmaster.serverwrecker.addons.*;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.MainFrame;
-import org.apache.logging.log4j.LogManager;
 import org.fusesource.jansi.AnsiConsole;
 import picocli.CommandLine;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -73,7 +73,7 @@ public class ServerWreckerBootstrap {
             ServerWrecker serverWrecker = new ServerWrecker(dataFolder);
             serverWrecker.initConsole();
 
-            EventQueue.invokeLater(() ->
+            SwingUtilities.invokeLater(() ->
                     serverWrecker.getInjector().getSingleton(MainFrame.class));
         }
     }

@@ -24,7 +24,7 @@ import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
-public record BotSettings(String host, int port,
+public record BotSettings(String host, int port, boolean trySrv,
                           int amount, int joinDelayMs, boolean waitEstablished, String botNameFormat,
                           ProtocolVersion protocolVersion,
                           ProxyType proxyType, int botsPerProxy,

@@ -167,11 +167,14 @@ public class SWBaseListener extends SessionAdapter {
     @Override
     public void connected(ConnectedEvent event) {
         MinecraftProtocol protocol = (MinecraftProtocol) event.getSession().getPacketProtocol();
+        BotSettings botSettings = botConnection.settingsHolder().get(BotSettings.class);
+        String host = botSettings.host();
+        int port = botSettings.port();
 
         event.getSession().send(new ClientIntentionPacket(
                 protocol.getCodec().getProtocolVersion(),
-                event.getSession().getHost(),
-                event.getSession().getPort(),
+                host,
+                port,
                 switch (this.targetState) {
                     case LOGIN -> HandshakeIntent.LOGIN;
                     case STATUS -> HandshakeIntent.STATUS;

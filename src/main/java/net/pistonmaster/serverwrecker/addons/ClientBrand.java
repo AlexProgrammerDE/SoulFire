@@ -120,9 +120,9 @@ public class ClientBrand implements InternalAddon {
     }
 
     private static class ClientBrandCommand implements SettingsProvider<ClientBrandSettings> {
-        @CommandLine.Option(names = {"--send-client-brand"} , description = "Send client brand")
+        @CommandLine.Option(names = {"--send-client-brand"}, description = "Send client brand")
         private boolean sendClientBrand = ClientBrandSettings.DEFAULT_SEND_CLIENT_BRAND;
-        @CommandLine.Option(names = {"--client-brand"} , description = "Client brand")
+        @CommandLine.Option(names = {"--client-brand"}, description = "Client brand")
         private String clientBrand = ClientBrandSettings.DEFAULT_CLIENT_BRAND;
 
         @Override

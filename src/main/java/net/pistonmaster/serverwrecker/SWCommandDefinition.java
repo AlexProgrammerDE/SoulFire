@@ -45,6 +45,9 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Option(names = {"--port"}, description = "Target port to connect to")
     private int port = 25565;
 
+    @Option(names = {"--try-srv"}, description = "Try to connect to the target using SRV records")
+    private boolean trySrv;
+
     @Option(names = {"-a", "--amount"}, description = "Amount of bots to connect to the server")
     private int amount = 20;
 
@@ -90,6 +93,7 @@ public class SWCommandDefinition implements Callable<Integer> {
                 () -> new BotSettings(
                         host,
                         port,
+                        trySrv,
                         amount,
                         joinDelay,
                         !disableWaitEstablished,

@@ -38,6 +38,18 @@ public class ComponentResizer extends MouseAdapter {
     private final static Dimension MINIMUM_SIZE = new Dimension(10, 10);
     private final static Dimension MAXIMUM_SIZE = new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
     private static final Map<Integer, Integer> cursors = new HashMap<Integer, Integer>();
+
+    static {
+        cursors.put(1, Cursor.N_RESIZE_CURSOR);
+        cursors.put(2, Cursor.W_RESIZE_CURSOR);
+        cursors.put(4, Cursor.S_RESIZE_CURSOR);
+        cursors.put(8, Cursor.E_RESIZE_CURSOR);
+        cursors.put(3, Cursor.NW_RESIZE_CURSOR);
+        cursors.put(9, Cursor.NE_RESIZE_CURSOR);
+        cursors.put(6, Cursor.SW_RESIZE_CURSOR);
+        cursors.put(12, Cursor.SE_RESIZE_CURSOR);
+    }
+
     private Insets dragInsets;
     private Dimension snapSize;
     private int direction;
@@ -48,17 +60,6 @@ public class ComponentResizer extends MouseAdapter {
     private boolean autoscrolls;
     private Dimension minimumSize = MINIMUM_SIZE;
     private Dimension maximumSize = MAXIMUM_SIZE;
-
-    {
-        cursors.put(1, Cursor.N_RESIZE_CURSOR);
-        cursors.put(2, Cursor.W_RESIZE_CURSOR);
-        cursors.put(4, Cursor.S_RESIZE_CURSOR);
-        cursors.put(8, Cursor.E_RESIZE_CURSOR);
-        cursors.put(3, Cursor.NW_RESIZE_CURSOR);
-        cursors.put(9, Cursor.NE_RESIZE_CURSOR);
-        cursors.put(6, Cursor.SW_RESIZE_CURSOR);
-        cursors.put(12, Cursor.SE_RESIZE_CURSOR);
-    }
 
     /**
      * Convenience contructor. All borders are resizable in increments of
