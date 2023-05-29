@@ -26,14 +26,18 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientInformationPacket;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
+import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import picocli.CommandLine;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -100,6 +104,11 @@ public class ClientSettings implements InternalAddon {
     @EventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new ClientSettingsPanel(ServerWreckerAPI.getServerWrecker()));
+    }
+
+    @EventHandler
+    public void onCommandLine(CommandManagerInitEvent event) {
+        AddonCLIHelper.registerCommands(event.commandLine(), ClientSettingsSettings.class, new ClientSettingsCommand());
     }
 
     private static class ClientSettingsPanel extends NavigationItem implements SettingsDuplex<ClientSettingsSettings> {
@@ -245,6 +254,60 @@ public class ClientSettings implements InternalAddon {
                     Objects.requireNonNull(handPreference.getSelectedEnum()),
                     textFilteringEnabled.isSelected(),
                     allowsListing.isSelected()
+            );
+        }
+    }
+
+    private static class ClientSettingsCommand implements SettingsProvider<ClientSettingsSettings> {
+        @CommandLine.Option(names = {"--send-client-settings"} , description = "Send client settings")
+        private boolean sendClientBrand = true;
+        @CommandLine.Option(names = {"--client-locale"} , description = "Client locale")
+        private String clientBrand = "en_US";
+        @CommandLine.Option(names = {"--render-distance"} , description = "Render distance")
+        private int renderDistance = 8;
+        @CommandLine.Option(names = {"--chat-visibility"} , description = "Chat visibility")
+        private ChatVisibility chatVisibility = ChatVisibility.FULL;
+        @CommandLine.Option(names = {"--use-chat-colors"} , description = "Use chat colors")
+        private boolean useChatColors = true;
+        @CommandLine.Option(names = {"--cape-enabled"} , description = "Cape enabled")
+        private boolean capeEnabled = true;
+        @CommandLine.Option(names = {"--jacket-enabled"} , description = "Jacket enabled")
+        private boolean jacketEnabled = true;
+        @CommandLine.Option(names = {"--left-sleeve-enabled"} , description = "Left sleeve enabled")
+        private boolean leftSleeveEnabled = true;
+        @CommandLine.Option(names = {"--right-sleeve-enabled"} , description = "Right sleeve enabled")
+        private boolean rightSleeveEnabled = true;
+        @CommandLine.Option(names = {"--left-pants-leg-enabled"} , description = "Left pants leg enabled")
+        private boolean leftPantsLegEnabled = true;
+        @CommandLine.Option(names = {"--right-pants-leg-enabled"} , description = "Right pants leg enabled")
+        private boolean rightPantsLegEnabled = true;
+        @CommandLine.Option(names = {"--hat-enabled"} , description = "Hat enabled")
+        private boolean hatEnabled = true;
+        @CommandLine.Option(names = {"--hand-preference"} , description = "Hand preference")
+        private HandPreference handPreference = HandPreference.RIGHT_HAND;
+        @CommandLine.Option(names = {"--text-filtering-enabled"} , description = "Text filtering enabled")
+        private boolean textFilteringEnabled = false;
+        @CommandLine.Option(names = {"--allows-listing"} , description = "Allows listing")
+        private boolean allowsListing = true;
+
+        @Override
+        public ClientSettingsSettings collectSettings() {
+            return new ClientSettingsSettings(
+                    sendClientBrand,
+                    clientBrand,
+                    renderDistance,
+                    chatVisibility,
+                    useChatColors,
+                    capeEnabled,
+                    jacketEnabled,
+                    leftSleeveEnabled,
+                    rightSleeveEnabled,
+                    leftPantsLegEnabled,
+                    rightPantsLegEnabled,
+                    hatEnabled,
+                    handPreference,
+                    textFilteringEnabled,
+                    allowsListing
             );
         }
     }
