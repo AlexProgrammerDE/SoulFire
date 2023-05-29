@@ -24,10 +24,12 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
 import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
+import net.pistonmaster.serverwrecker.api.event.settings.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import picocli.CommandLine.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -62,6 +64,17 @@ public class AutoReconnect implements InternalAddon {
     @EventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new AutoReconnectPanel(ServerWreckerAPI.getServerWrecker()));
+    }
+
+    @EventHandler
+    public void onCommandLine(CommandManagerInitEvent event) {
+        AutoReconnectCommand autoReconnectCommand = new AutoReconnectCommand();
+        Model.CommandSpec commandSpec = Model.CommandSpec.forAnnotatedObject(autoReconnectCommand);
+        for (Model.OptionSpec optionSpec : commandSpec.options()) {
+            event.commandLine().getCommandSpec().addOption(optionSpec);
+        }
+
+        ServerWreckerAPI.getServerWrecker().getSettingsManager().registerProvider(AutoReconnectSettings.class, autoReconnectCommand);
     }
 
     private static class AutoReconnectPanel extends NavigationItem implements SettingsDuplex<AutoReconnectSettings> {
@@ -123,6 +136,24 @@ public class AutoReconnect implements InternalAddon {
                     autoReconnect.isSelected(),
                     (int) minDelay.getValue(),
                     (int) maxDelay.getValue()
+            );
+        }
+    }
+
+    private static class AutoReconnectCommand implements SettingsProvider<AutoReconnectSettings> {
+        @Option(names = {"--auto-reconnect"}, description = "reconnect bots after being disconnected")
+        private boolean autoReconnect = true;
+        @Option(names = {"--reconnect-min-delay"}, description = "minimum delay between reconnects")
+        private int minDelay = 1;
+        @Option(names = {"--reconnect-max-delay"}, description = "maximum delay between reconnects")
+        private int maxDelay = 5;
+
+        @Override
+        public AutoReconnectSettings collectSettings() {
+            return new AutoReconnectSettings(
+                    autoReconnect,
+                    minDelay,
+                    maxDelay
             );
         }
     }

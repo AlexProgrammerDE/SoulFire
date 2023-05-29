@@ -38,7 +38,7 @@ import java.util.concurrent.Callable;
         version = "ServerWrecker v" + BuildData.VERSION, showDefaultValues = true,
         description = "Stress test a minecraft server using bots", sortOptions = false)
 public class CommandDefinition implements Callable<Integer> {
-    private final Path dataFolder;
+    private final ServerWrecker serverWrecker;
 
     @Option(names = {"--host", "--target"}, description = "target url to connect to")
     private String host = "127.0.0.1";
@@ -84,8 +84,6 @@ public class CommandDefinition implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        ServerWrecker serverWrecker = new ServerWrecker(dataFolder);
-
         serverWrecker.getSettingsManager().registerProvider(BotSettings.class,
                 () -> new BotSettings(
                         host,

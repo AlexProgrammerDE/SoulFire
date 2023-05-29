@@ -86,7 +86,13 @@ public class ServerWreckerAPI {
             method.setAccessible(true);
 
             registerListener((Class<? extends ServerWreckerEvent>) method.getParameterTypes()[0],
-                    event -> method.invoke(listener, event));
+                    event -> {
+                        try {
+                            method.invoke(listener, event);
+                        } catch (Throwable t) {
+                            t.printStackTrace();
+                        }
+                    });
         }
     }
 

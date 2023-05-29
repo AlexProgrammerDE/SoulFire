@@ -63,12 +63,12 @@ public class ServerWreckerBootstrap {
         Path dataFolder = initConfigDir();
 
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
-            loadAddons();
+            loadInternalAddons();
             runHeadless(args, dataFolder);
         } else {
             MainFrame.setLookAndFeel();
 
-            loadAddons();
+            loadInternalAddons();
             ServerWrecker serverWrecker = new ServerWrecker(dataFolder);
 
             EventQueue.invokeLater(() ->
@@ -76,7 +76,7 @@ public class ServerWreckerBootstrap {
         }
     }
 
-    private static void loadAddons() {
+    private static void loadInternalAddons() {
         Set<InternalAddon> addons = Set.of(
                 new BotTicker(), new ClientBrand(), new ClientSettings(),
                 new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
@@ -98,7 +98,8 @@ public class ServerWreckerBootstrap {
     }
 
     private static void runHeadless(String[] args, Path dataFolder) {
-        CommandLine commandLine = new CommandLine(new CommandDefinition(dataFolder));
+        ServerWrecker serverWrecker = new ServerWrecker(dataFolder);
+        CommandLine commandLine = new CommandLine(new CommandDefinition(serverWrecker));
         commandLine.setCaseInsensitiveEnumValuesAllowed(true);
         commandLine.setUsageHelpAutoWidth(true);
         commandLine.setUsageHelpLongOptionsMaxWidth(30);
