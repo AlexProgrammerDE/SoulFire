@@ -208,7 +208,7 @@ public final class BotMovementManager {
 
         // Send position packets if changed
         if (positionChanged && rotationChanged) {
-            sendRot();
+            sendPosRot();
         } else if (positionChanged) {
             sendPos();
         } else if (rotationChanged) {

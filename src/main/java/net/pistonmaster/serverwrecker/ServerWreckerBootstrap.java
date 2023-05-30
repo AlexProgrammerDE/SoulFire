@@ -29,9 +29,6 @@ import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Set;
 
 public class ServerWreckerBootstrap {
@@ -80,7 +77,7 @@ public class ServerWreckerBootstrap {
         Set<InternalAddon> addons = Set.of(
                 new BotTicker(), new ClientBrand(), new ClientSettings(),
                 new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
-                new ChatMessageLogger(), new ServerListBypass());
+                new ChatMessageLogger(), new AutoJump(), new ServerListBypass());
 
         addons.forEach(ServerWreckerAPI::registerAddon);
     }
