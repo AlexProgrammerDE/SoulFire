@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.viaversion.platform;
 
 import com.viaversion.viabackwards.api.ViaBackwardsPlatform;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.viaversion.JLoggerToLogback;
+import net.pistonmaster.serverwrecker.viaversion.JLoggerToSLF4J;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 @RequiredArgsConstructor
 public class SWViaBackwards implements ViaBackwardsPlatform {
-    private final JLoggerToLogback logger = new JLoggerToLogback(LoggerFactory.getLogger("ViaBackwards"));
+    private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaBackwards"));
     private final Path dataFolder;
 
     @Override

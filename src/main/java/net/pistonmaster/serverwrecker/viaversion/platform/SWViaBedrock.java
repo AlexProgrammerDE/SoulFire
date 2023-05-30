@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.viaversion.platform;
 
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.viaversion.JLoggerToLogback;
+import net.pistonmaster.serverwrecker.viaversion.JLoggerToSLF4J;
 import net.raphimc.viabedrock.platform.ViaBedrockPlatform;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 @RequiredArgsConstructor
 public class SWViaBedrock implements ViaBedrockPlatform {
-    private final JLoggerToLogback logger = new JLoggerToLogback(LoggerFactory.getLogger("ViaBedrock"));
+    private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaBedrock"));
     private final Path dataFolder;
 
     @Override

@@ -37,7 +37,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.viaversion.FutureTaskId;
-import net.pistonmaster.serverwrecker.viaversion.JLoggerToLogback;
+import net.pistonmaster.serverwrecker.viaversion.JLoggerToSLF4J;
 import net.pistonmaster.serverwrecker.viaversion.SWViaInjector;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +53,7 @@ import java.util.logging.Logger;
 @RequiredArgsConstructor
 public class SWViaPlatform implements ViaPlatform<UUID> {
     private final Path dataFolder;
-    private final JLoggerToLogback logger = new JLoggerToLogback(LoggerFactory.getLogger("ViaVersion"));
+    private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaVersion"));
     private final ViaAPI<UUID> api = new ViaAPIBase<>() {
     };
     @Getter

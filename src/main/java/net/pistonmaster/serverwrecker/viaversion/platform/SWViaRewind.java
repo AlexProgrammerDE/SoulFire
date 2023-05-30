@@ -22,7 +22,7 @@ package net.pistonmaster.serverwrecker.viaversion.platform;
 import de.gerrygames.viarewind.api.ViaRewindConfigImpl;
 import de.gerrygames.viarewind.api.ViaRewindPlatform;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.viaversion.JLoggerToLogback;
+import net.pistonmaster.serverwrecker.viaversion.JLoggerToSLF4J;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 @RequiredArgsConstructor
 public class SWViaRewind implements ViaRewindPlatform {
-    private final JLoggerToLogback logger = new JLoggerToLogback(LoggerFactory.getLogger("ViaRewind"));
+    private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaRewind"));
     private final Path dataFolder;
 
     @Override

@@ -170,7 +170,7 @@ public class AutoJump implements InternalAddon {
             int minDelay,
             int maxDelay
     ) implements SettingsObject {
-        public static final boolean DEFAULT_AUTO_JUMP = true;
+        public static final boolean DEFAULT_AUTO_JUMP = false;
         public static final int DEFAULT_MIN_DELAY = 2;
         public static final int DEFAULT_MAX_DELAY = 5;
     }

@@ -61,6 +61,8 @@ import lombok.ToString;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
+import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
@@ -668,6 +670,8 @@ public final class SessionDataManager {
     }
 
     public void tick() {
+        ServerWreckerAPI.postEvent(new BotPreTickEvent(connection));
+
         if (borderState != null) {
             borderState.tick();
         }
@@ -677,5 +681,7 @@ public final class SessionDataManager {
                 && level.isChunkLoaded(botMovementManager.getBlockPos())) {
             botMovementManager.tick();
         }
+
+        ServerWreckerAPI.postEvent(new BotPostTickEvent(connection));
     }
 }

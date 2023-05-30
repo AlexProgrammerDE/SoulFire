@@ -23,10 +23,10 @@ import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class JLoggerToLogback extends Logger {
+public class JLoggerToSLF4J extends Logger {
     private final org.slf4j.Logger base;
 
-    public JLoggerToLogback(org.slf4j.Logger logger) {
+    public JLoggerToSLF4J(org.slf4j.Logger logger) {
         super("logger", null);
         this.base = logger;
     }
