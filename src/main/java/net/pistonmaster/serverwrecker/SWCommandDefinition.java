@@ -24,8 +24,10 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.ProxyType;
+import net.pistonmaster.serverwrecker.settings.AccountSettings;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
+import net.pistonmaster.serverwrecker.settings.ProxySettings;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -99,17 +101,25 @@ public class SWCommandDefinition implements Callable<Integer> {
                         !disableWaitEstablished,
                         nameFormat,
                         ProtocolVersion.getClosest(version),
-                        proxy,
-                        accountsPerProxy,
                         readTimeout,
                         writeTimout,
-                        connectTimeout,
-                        authType
+                        connectTimeout
                 ));
 
         serverWrecker.getSettingsManager().registerProvider(DevSettings.class,
                 () -> new DevSettings(
                         debug
+                ));
+
+        serverWrecker.getSettingsManager().registerProvider(AccountSettings.class,
+                () -> new AccountSettings(
+                        authType
+                ));
+
+        serverWrecker.getSettingsManager().registerProvider(ProxySettings.class,
+                () -> new ProxySettings(
+                        proxy,
+                        accountsPerProxy
                 ));
 
         serverWrecker.start();

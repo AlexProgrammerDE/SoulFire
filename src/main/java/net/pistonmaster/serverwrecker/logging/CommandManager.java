@@ -28,6 +28,9 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.ConsoleSubject;
+import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.DispatcherInitEvent;
 import net.pistonmaster.serverwrecker.gui.MainPanel;
 
 import javax.annotation.PostConstruct;
@@ -77,6 +80,8 @@ public class CommandManager {
                     }
                     return 1;
                 }));
+
+        ServerWreckerAPI.postEvent(new DispatcherInitEvent(dispatcher));
     }
 
     public void execute(String command) {

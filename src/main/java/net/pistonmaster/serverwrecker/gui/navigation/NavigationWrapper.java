@@ -48,6 +48,4 @@ public class NavigationWrapper {
 
         return panel;
     }
-
-
 }

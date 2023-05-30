@@ -17,17 +17,15 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event.settings;
+package net.pistonmaster.serverwrecker.api.event.lifecycle;
 
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-
-import java.util.List;
+import picocli.CommandLine;
 
 /**
- * Add yourself to the addon panel by adding a {@link NavigationItem} to the list.
+ * Add yourself to the command manager by adding an ArgSpec to the CommandLine
  *
- * @param navigationItems The list of navigation items.
+ * @param commandLine The command line
  */
-public record AddonPanelInitEvent(List<NavigationItem> navigationItems) implements ServerWreckerEvent {
+public record CommandManagerInitEvent(CommandLine commandLine) implements ServerWreckerEvent {
 }

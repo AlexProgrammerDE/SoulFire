@@ -130,12 +130,9 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         disableWaitEstablished.setSelected(!settings.waitEstablished());
         nameFormat.setText(settings.botNameFormat());
         versionBox.setSelectedItem(settings.protocolVersion());
-        AccountPanel.proxyTypeCombo.setSelectedEnum(settings.proxyType());
-        AccountPanel.botsPerProxy.setValue(settings.botsPerProxy());
         readTimeout.setValue(settings.readTimeout());
         writeTimeout.setValue(settings.writeTimeout());
         connectTimeout.setValue(settings.connectTimeout());
-        AccountPanel.serviceBox.setSelectedEnum(settings.authType());
     }
 
     @Override
@@ -149,11 +146,8 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
                 !disableWaitEstablished.isSelected(),
                 nameFormat.getText(),
                 (ProtocolVersion) versionBox.getSelectedItem(),
-                AccountPanel.proxyTypeCombo.getSelectedEnum(),
-                (Integer) AccountPanel.botsPerProxy.getValue(),
                 (int) readTimeout.getValue(),
                 (int) writeTimeout.getValue(),
-                (int) connectTimeout.getValue(),
-                AccountPanel.serviceBox.getSelectedEnum());
+                (int) connectTimeout.getValue());
     }
 }

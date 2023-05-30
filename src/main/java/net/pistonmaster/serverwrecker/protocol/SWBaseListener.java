@@ -53,6 +53,7 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.auth.JavaAccount;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
+import net.pistonmaster.serverwrecker.settings.AccountSettings;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 
@@ -87,6 +88,7 @@ public class SWBaseListener extends SessionAdapter {
                 session.send(new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
 
                 BotSettings botSettings = botConnection.settingsHolder().get(BotSettings.class);
+                AccountSettings accountSettings = botConnection.settingsHolder().get(AccountSettings.class);
                 JavaAccount javaAccount = botConnection.meta().getJavaAccount();
                 UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
                 boolean isLegacy = SWConstants.isLegacy(botSettings.protocolVersion());
@@ -94,7 +96,7 @@ public class SWBaseListener extends SessionAdapter {
                 boolean isLegacyAuthenticate = !isLegacy || metadataStorage == null || metadataStorage.authenticate;
 
                 if (javaAccount.isPremium() && isLegacyAuthenticate) {
-                    SWSessionService sessionService = new SWSessionService(botSettings.authType());
+                    SWSessionService sessionService = new SWSessionService(accountSettings.authType());
                     String serverId = sessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
                     try {
                         sessionService.joinServer(javaAccount.profileId(), javaAccount.authToken(), serverId);

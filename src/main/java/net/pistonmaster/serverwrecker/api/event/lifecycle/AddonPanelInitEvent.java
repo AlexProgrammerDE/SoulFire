@@ -17,15 +17,17 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event.bot;
+package net.pistonmaster.serverwrecker.api.event.lifecycle;
 
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
+import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
+
+import java.util.List;
 
 /**
- * Called when the bot has ticked. This event is called inside the tick loop.
+ * Add yourself to the addon panel by adding a {@link NavigationItem} to the list.
  *
- * @param connection The bot connection
+ * @param navigationItems The list of navigation items.
  */
-public record BotPostTickEvent(BotConnection connection) implements ServerWreckerEvent {
+public record AddonPanelInitEvent(List<NavigationItem> navigationItems) implements ServerWreckerEvent {
 }

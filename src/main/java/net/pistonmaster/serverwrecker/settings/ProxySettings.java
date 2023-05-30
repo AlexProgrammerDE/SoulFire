@@ -17,15 +17,10 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event.settings;
+package net.pistonmaster.serverwrecker.settings;
 
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
-import picocli.CommandLine;
+import net.pistonmaster.serverwrecker.common.ProxyType;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
-/**
- * Add yourself to the command manager by adding an ArgSpec to the CommandLine
- *
- * @param commandLine The command line
- */
-public record CommandManagerInitEvent(CommandLine commandLine) implements ServerWreckerEvent {
+public record ProxySettings(ProxyType proxyType, int botsPerProxy) implements SettingsObject {
 }

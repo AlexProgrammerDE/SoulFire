@@ -52,8 +52,10 @@ import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.serverwrecker.protocol.netty.ResolveUtil;
 import net.pistonmaster.serverwrecker.protocol.netty.SWNettyHelper;
+import net.pistonmaster.serverwrecker.settings.AccountSettings;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
+import net.pistonmaster.serverwrecker.settings.ProxySettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
@@ -100,7 +102,9 @@ public class ServerWrecker {
     private final SettingsManager settingsManager = new SettingsManager(
             logger,
             BotSettings.class,
-            DevSettings.class
+            DevSettings.class,
+            AccountSettings.class,
+            ProxySettings.class
     );
     private final Path dataFolder = Path.of(System.getProperty("user.home"), ".serverwrecker");
     private final Path profilesFolder;
@@ -251,6 +255,7 @@ public class ServerWrecker {
         SettingsHolder settingsHolder = settingsManager.collectSettings();
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
         DevSettings devSettings = settingsHolder.get(DevSettings.class);
+        ProxySettings proxySettings = settingsHolder.get(ProxySettings.class);
 
         Via.getManager().debugHandler().setEnabled(devSettings.debug());
         setupLogging(devSettings.debug() ? Level.DEBUG : Level.INFO);
@@ -260,7 +265,7 @@ public class ServerWrecker {
         logger.info("Preparing bot attack at {}", botSettings.host());
 
         int botAmount = botSettings.amount(); // How many bots to connect
-        int botsPerProxy = botSettings.botsPerProxy(); // How many bots per proxy are allowed
+        int botsPerProxy = proxySettings.botsPerProxy(); // How many bots per proxy are allowed
         List<SWProxy> proxiesCopy = new ArrayList<>(availableProxies); // Copy the proxies
         int availableProxiesCount = proxiesCopy.size(); // How many proxies are available
         int maxBots = botsPerProxy > 0 ? botsPerProxy * availableProxiesCount : botAmount; // How many bots can be used at max

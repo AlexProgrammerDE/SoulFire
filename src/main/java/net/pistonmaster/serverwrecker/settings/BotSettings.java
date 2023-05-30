@@ -20,14 +20,10 @@
 package net.pistonmaster.serverwrecker.settings;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import net.pistonmaster.serverwrecker.auth.AuthType;
-import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
 public record BotSettings(String host, int port, boolean trySrv,
                           int amount, int joinDelayMs, boolean waitEstablished, String botNameFormat,
                           ProtocolVersion protocolVersion,
-                          ProxyType proxyType, int botsPerProxy,
-                          int readTimeout, int writeTimeout, int connectTimeout,
-                          AuthType authType) implements SettingsObject {
+                          int readTimeout, int writeTimeout, int connectTimeout) implements SettingsObject {
 }

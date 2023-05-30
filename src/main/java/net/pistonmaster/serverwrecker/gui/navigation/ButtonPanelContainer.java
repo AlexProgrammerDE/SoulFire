@@ -31,11 +31,9 @@ import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ButtonPanelContainer extends JPanel {
-    public static final String NAVIGATION_MENU = "NavigationMenu";
-    public static final String SETTINGS_MENU = "SettingsMenu";
-    public static final String ADDON_MENU = "AddonMenu";
-    public static final String ACCOUNT_MENU = "AccountMenu";
-    public static final String DEV_MENU = "DeveloperMenu";
+    public static final String NAVIGATION_MENU = "navigation-menu";
+    public static final String SETTINGS_MENU = "settings-menu";
+    public static final String DEV_MENU = "dev-menu";
     @Getter
     private final List<NavigationItem> panels = new ArrayList<>();
     private final Injector injector;
@@ -45,6 +43,7 @@ public class ButtonPanelContainer extends JPanel {
         AddonPanel addonPanel = injector.getSingleton(AddonPanel.class);
         panels.add(addonPanel);
         panels.add(injector.getSingleton(AccountPanel.class));
+        panels.add(injector.getSingleton(ProxyPanel.class));
         panels.add(injector.getSingleton(DeveloperPanel.class));
 
         setLayout(new CardLayout());

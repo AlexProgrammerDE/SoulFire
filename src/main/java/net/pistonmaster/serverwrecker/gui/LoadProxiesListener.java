@@ -21,8 +21,8 @@ package net.pistonmaster.serverwrecker.gui;
 
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.common.SWProxy;
-import net.pistonmaster.serverwrecker.gui.navigation.AccountPanel;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -61,10 +61,11 @@ public class LoadProxiesListener implements ActionListener {
                         String host = split[0];
                         int port = Integer.parseInt(split[1]);
 
+                        // TODO: Reimplement proxy management
                         if (split.length > 3) {
-                            proxies.add(new SWProxy(AccountPanel.proxyTypeCombo.getSelectedEnum(), new InetSocketAddress(host, port), split[2], split[3]));
+                            proxies.add(new SWProxy(ProxyType.SOCKS5, new InetSocketAddress(host, port), split[2], split[3]));
                         } else {
-                            proxies.add(new SWProxy(AccountPanel.proxyTypeCombo.getSelectedEnum(), new InetSocketAddress(host, port), null, null));
+                            proxies.add(new SWProxy(ProxyType.SOCKS5, new InetSocketAddress(host, port), null, null));
                         }
                     });
                 }

@@ -141,11 +141,6 @@ public class NativeJFileChooser extends JFileChooser {
     }
 
     @Override
-    public File getSelectedFile() {
-        return currentFile;
-    }
-
-    @Override
     public void setSelectedFiles(File[] selectedFiles) {
         if (selectedFiles == null || selectedFiles.length == 0) {
             currentFiles = null;
@@ -153,6 +148,11 @@ public class NativeJFileChooser extends JFileChooser {
             setSelectedFile(selectedFiles[0]);
             currentFiles = new ArrayList<>(Arrays.asList(selectedFiles));
         }
+    }
+
+    @Override
+    public File getSelectedFile() {
+        return currentFile;
     }
 
     @Override
@@ -191,16 +191,16 @@ public class NativeJFileChooser extends JFileChooser {
     }
 
     @Override
+    public String getDialogTitle() {
+        return fileChooser.getTitle();
+    }
+
+    @Override
     public void setDialogTitle(String dialogTitle) {
         fileChooser.setTitle(dialogTitle);
         if (directoryChooser != null) {
             directoryChooser.setTitle(dialogTitle);
         }
-    }
-
-    @Override
-    public String getDialogTitle() {
-        return fileChooser.getTitle();
     }
 
     @Override

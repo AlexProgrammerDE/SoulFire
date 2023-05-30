@@ -108,7 +108,7 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
 
     @Override
     public String getNavigationId() {
-        return ButtonPanelContainer.DEV_MENU;
+        return "dev-menu";
     }
 
     @Override

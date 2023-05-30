@@ -21,11 +21,11 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.auth.AuthType;
-import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.gui.LoadAccountsListener;
-import net.pistonmaster.serverwrecker.gui.LoadProxiesListener;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.NativeJFileChooser;
+import net.pistonmaster.serverwrecker.settings.AccountSettings;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -34,18 +34,12 @@ import java.awt.*;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class AccountPanel extends NavigationItem {
-    // TODO: Redo config flow, this is bad
-    public static final JEnumComboBox<ProxyType> proxyTypeCombo = new JEnumComboBox<>(ProxyType.class, ProxyType.SOCKS5);
-    public static final JSpinner botsPerProxy = new JSpinner();
-    public static final JEnumComboBox<AuthType> serviceBox = new JEnumComboBox<>(AuthType.class, AuthType.OFFLINE);
-    private final ServerWrecker serverWrecker;
+public class AccountPanel extends NavigationItem implements SettingsDuplex<AccountSettings> {
+    private final JEnumComboBox<AuthType> serviceBox = new JEnumComboBox<>(AuthType.class, AuthType.OFFLINE);
 
     @Inject
     public AccountPanel(ServerWrecker serverWrecker, JFrame parent) {
-        this.serverWrecker = serverWrecker;
-        JPanel accounts = new JPanel();
-        accounts.setLayout(new GridLayout(0, 2));
+        setLayout(new GridLayout(0, 2));
 
         JButton loadAccounts = new JButton("Load Accounts");
 
@@ -63,26 +57,8 @@ public class AccountPanel extends NavigationItem {
 
         serviceSettingsPanel.add(serviceBox);
 
-        accounts.add(loadAccounts);
-        accounts.add(serviceSettingsPanel);
-
-        add(accounts);
-
-        JPanel proxies = new JPanel();
-        JButton loadProxies = new JButton("Load proxies");
-        JFileChooser proxiesChooser = new NativeJFileChooser(Path.of(System.getProperty("user.dir")));
-
-        proxiesChooser.addChoosableFileFilter(new FileNameExtensionFilter("Proxy list file", "txt"));
-        loadProxies.addActionListener(new LoadProxiesListener(serverWrecker, parent, proxiesChooser));
-
-        proxies.add(loadProxies);
-        proxies.add(proxyTypeCombo);
-
-        proxies.add(new JLabel("Accounts per proxy: "));
-        botsPerProxy.setValue(-1);
-        proxies.add(botsPerProxy);
-
-        add(proxies);
+        add(loadAccounts);
+        add(serviceSettingsPanel);
     }
 
     @Override
@@ -92,6 +68,16 @@ public class AccountPanel extends NavigationItem {
 
     @Override
     public String getNavigationId() {
-        return ButtonPanelContainer.ACCOUNT_MENU;
+        return "account-menu";
+    }
+
+    @Override
+    public void onSettingsChange(AccountSettings settings) {
+        serviceBox.setSelectedEnum(settings.authType());
+    }
+
+    @Override
+    public AccountSettings collectSettings() {
+        return new AccountSettings(serviceBox.getSelectedEnum());
     }
 }

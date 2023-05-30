@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.settings.AddonPanelInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -60,6 +60,6 @@ public class AddonPanel extends NavigationItem {
 
     @Override
     public String getNavigationId() {
-        return ButtonPanelContainer.ADDON_MENU;
+        return "addon-menu";
     }
 }

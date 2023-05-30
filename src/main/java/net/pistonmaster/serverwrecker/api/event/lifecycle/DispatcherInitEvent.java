@@ -17,15 +17,17 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event.bot;
+package net.pistonmaster.serverwrecker.api.event.lifecycle;
 
+import com.mojang.brigadier.CommandDispatcher;
+import net.pistonmaster.serverwrecker.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
 /**
- * Called when the bot has ticked. This event is called inside the tick loop.
+ * Add yourself to the command dispatcher to add custom commands.
+ * At this stage, all built-in commands are already registered.
  *
- * @param connection The bot connection
+ * @param commandDispatcher The command dispatcher.
  */
-public record BotPostTickEvent(BotConnection connection) implements ServerWreckerEvent {
+public record DispatcherInitEvent(CommandDispatcher<ConsoleSubject> commandDispatcher) implements ServerWreckerEvent {
 }

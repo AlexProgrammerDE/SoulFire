@@ -19,7 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.settings;
 
+import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
-public record AccountSettings() implements SettingsObject {
+public record AccountSettings(AuthType authType) implements SettingsObject {
 }
