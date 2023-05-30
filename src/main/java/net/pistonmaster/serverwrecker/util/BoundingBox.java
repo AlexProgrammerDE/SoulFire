@@ -19,14 +19,17 @@
  */
 package net.pistonmaster.serverwrecker.util;
 
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 /**
- * Taken from: https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/util/BoundingBox.java
+ * Taken from: <a href="https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/util/BoundingBox.java">LabyStudio/java-minecraft</a>
  */
 @ToString
-public class BoundingBox {
-
+@EqualsAndHashCode
+@AllArgsConstructor
+public class BoundingBox implements Cloneable {
     private static final double epsilon = 0.0F;
 
     public double minX;
@@ -35,34 +38,6 @@ public class BoundingBox {
     public double maxX;
     public double maxY;
     public double maxZ;
-
-    /**
-     * Bounding box
-     *
-     * @param minX Minimum x side
-     * @param minY Minimum y side
-     * @param minZ Minimum z side
-     * @param maxX Maximum x side
-     * @param maxY Maximum y side
-     * @param maxZ Maximum z side
-     */
-    public BoundingBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
-        this.minX = minX;
-        this.minY = minY;
-        this.minZ = minZ;
-        this.maxX = maxX;
-        this.maxY = maxY;
-        this.maxZ = maxZ;
-    }
-
-    /**
-     * Copy the current bounding box object
-     *
-     * @return Clone of the bounding box
-     */
-    public BoundingBox clone() {
-        return new BoundingBox(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
-    }
 
     /**
      * Expand the bounding box. Positive and negative numbers controls which side of the box should grow.
@@ -109,10 +84,10 @@ public class BoundingBox {
      * Expand the bounding box on both sides.
      * The center is always fixed when using grow.
      *
-     * @param x
-     * @param y
-     * @param z
-     * @return
+     * @param x Amount to expand the minX and maxX
+     * @param y Amount to expand the minY and maxY
+     * @param z Amount to expand the minZ and maxZ
+     * @return The expanded bounding box
      */
     public BoundingBox grow(double x, double y, double z) {
         return new BoundingBox(this.minX - x, this.minY - y,
@@ -278,5 +253,14 @@ public class BoundingBox {
      */
     public BoundingBox offset(double x, double y, double z) {
         return new BoundingBox(this.minX + x, this.minY + y, this.minZ + z, this.maxX + x, this.maxY + y, this.maxZ + z);
+    }
+
+    @Override
+    public BoundingBox clone() {
+        try {
+            return (BoundingBox) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

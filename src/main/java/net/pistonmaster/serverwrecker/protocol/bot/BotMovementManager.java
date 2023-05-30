@@ -30,6 +30,7 @@ import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 import net.pistonmaster.serverwrecker.util.MathHelper;
+import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.List;
@@ -323,7 +324,7 @@ public final class BotMovementManager {
             return 1.0F;
         }
 
-        Vector3i blockPos = this.getBlockPos();
+        Vector3i blockPos = this.getPlayerPos().add(Vector3d.from(0, -0.5, 0)).toInt();
         BlockType blockType = getLevelSafe().getBlockTypeAt(blockPos);
         if (blockType == BlockType.SLIME_BLOCK) {
             return 0.8F;
@@ -481,6 +482,10 @@ public final class BotMovementManager {
 
     public Vector3i getBlockPos() {
         return Vector3i.from(getBlockPosX(), getBlockPosY(), getBlockPosZ());
+    }
+
+    public Vector3d getPlayerPos() {
+        return Vector3d.from(this.x, this.y, this.z);
     }
 
     private LevelState getLevelSafe() {
