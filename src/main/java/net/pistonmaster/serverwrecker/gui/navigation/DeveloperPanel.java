@@ -41,7 +41,6 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
 
     @Inject
     public DeveloperPanel(ServerWrecker serverWrecker, LogAppender logAppender) {
-        super();
         serverWrecker.getSettingsManager().registerDuplex(DevSettings.class, this);
 
         setLayout(new GridLayout(0, 2));

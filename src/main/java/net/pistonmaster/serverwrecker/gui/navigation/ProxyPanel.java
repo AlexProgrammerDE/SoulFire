@@ -39,6 +39,8 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
 
     @Inject
     public ProxyPanel(ServerWrecker serverWrecker, JFrame parent) {
+        serverWrecker.getSettingsManager().registerDuplex(ProxySettings.class, this);
+
         setLayout(new GridLayout(0, 2));
 
         JButton loadProxies = new JButton("Load proxies");

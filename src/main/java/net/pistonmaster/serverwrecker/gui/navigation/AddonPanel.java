@@ -35,8 +35,6 @@ public class AddonPanel extends NavigationItem {
 
     @Inject
     public AddonPanel(ButtonPanelContainer container) {
-        super();
-
         ServerWreckerAPI.postEvent(new AddonPanelInitEvent(navigationItems));
 
         setLayout(new GridLayout(3, 3, 10, 10));

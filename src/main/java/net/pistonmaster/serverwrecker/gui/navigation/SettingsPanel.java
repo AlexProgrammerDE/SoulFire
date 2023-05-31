@@ -48,7 +48,6 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
 
     @Inject
     public SettingsPanel(ServerWrecker serverWrecker) {
-        super();
         serverWrecker.getSettingsManager().registerDuplex(BotSettings.class, this);
 
         setLayout(new GridLayout(0, 2));

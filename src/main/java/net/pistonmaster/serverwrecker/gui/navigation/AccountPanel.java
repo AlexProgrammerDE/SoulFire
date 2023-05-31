@@ -39,6 +39,8 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
     @Inject
     public AccountPanel(ServerWrecker serverWrecker, JFrame parent) {
+        serverWrecker.getSettingsManager().registerDuplex(AccountSettings.class, this);
+
         setLayout(new GridLayout(0, 2));
 
         JButton loadAccounts = new JButton("Load Accounts");
