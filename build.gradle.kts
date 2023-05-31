@@ -10,12 +10,20 @@ plugins {
 version = "1.0.0"
 
 repositories {
-    maven("https://repo.opencollab.dev/maven-releases")
-    maven("https://repo.opencollab.dev/maven-snapshots")
-    maven("https://repo.papermc.io/repository/maven-public/")
-    maven("https://repo.viaversion.com/")
-    maven("https://maven.lenni0451.net/releases/") {
-        name = "Lenni0451 Releases"
+    maven("https://repo.opencollab.dev/maven-releases") {
+        name = "OpenCollab Releases"
+    }
+    maven("https://repo.opencollab.dev/maven-snapshots") {
+        name = "OpenCollab Snapshots"
+    }
+    maven("https://repo.papermc.io/repository/maven-public/") {
+        name = "PaperMC Repository"
+    }
+    maven("https://repo.viaversion.com/") {
+        name = "ViaVersion Repository"
+    }
+    maven("https://maven.lenni0451.net/releases") {
+        name = "Lenni0451"
     }
     maven("https://maven.lenni0451.net/snapshots") {
         name = "Lenni0451 Snapshots"
@@ -64,21 +72,26 @@ dependencies {
     implementation(libs.velocity.native)
 
     // For advanced account authentication
-    implementation("net.raphimc:MinecraftAuth:2.1.3")
+    implementation("net.raphimc:MinecraftAuth:2.1.3") {
+        exclude("com.google.code.gson", "gson")
+        exclude("org.slf4j", "slf4j-api")
+    }
 
     // For supporting multiple Minecraft versions
-    val vvVer = "4.7.0-23w18a-SNAPSHOT"
-    val vbVer = "4.7.0-23w18a-SNAPSHOT"
-    val vrVer = "5f7fdc5"
+    val vvVer = "4.7.0-1.20-rc1-SNAPSHOT"
+    val vbVer = "4.7.0-1.20-pre5-SNAPSHOT"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
-    implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
-    implementation("net.raphimc:ViaAprilFools:2.0.6")
-    implementation("net.raphimc:ViaLegacy:2.2.16")
-    implementation("net.raphimc:ViaProtocolHack:2.2.4") {
+    implementation("com.viaversion:viarewind-core:2.0.4-SNAPSHOT")
+
+    implementation("net.raphimc:ViaLegacy:2.2.17-SNAPSHOT")
+    implementation("net.raphimc:ViaAprilFools:2.0.7-SNAPSHOT")
+    implementation("net.raphimc:ViaLoader:2.2.5-SNAPSHOT") {
         exclude("org.slf4j", "slf4j-api")
         exclude("org.yaml", "snakeyaml")
     }
+
+    // For Bedrock support
     implementation("net.raphimc:ViaBedrock:0.0.1-SNAPSHOT") {
         exclude("io.netty", "netty-codec-http")
     }
