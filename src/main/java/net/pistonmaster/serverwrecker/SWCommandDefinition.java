@@ -65,9 +65,6 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Option(names = {"--debug"}, description = "Log additional information useful for debugging the software")
     private boolean debug;
 
-    @Option(names = {"--proxy-type"}, description = "Type of proxies used")
-    private ProxyType proxy = ProxyType.SOCKS5;
-
     @Option(names = {"--accounts-per-proxy"}, description = "Amount of accounts that can be on a single proxy")
     private int accountsPerProxy = -1;
 
@@ -82,9 +79,6 @@ public class SWCommandDefinition implements Callable<Integer> {
 
     @Option(names = {"--disable-wait-established"}, description = "Make the program halt and wait till a bot was successfully connected before connecting the next bot")
     private boolean disableWaitEstablished;
-
-    @Option(names = {"--auth-service"}, description = "The auth service to use")
-    private AuthType authType = AuthType.OFFLINE;
 
     @Override
     public Integer call() {
@@ -112,13 +106,10 @@ public class SWCommandDefinition implements Callable<Integer> {
                 ));
 
         serverWrecker.getSettingsManager().registerProvider(AccountSettings.class,
-                () -> new AccountSettings(
-                        authType
-                ));
+                AccountSettings::new);
 
         serverWrecker.getSettingsManager().registerProvider(ProxySettings.class,
                 () -> new ProxySettings(
-                        proxy,
                         accountsPerProxy
                 ));
 

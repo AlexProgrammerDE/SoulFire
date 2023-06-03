@@ -88,7 +88,6 @@ public class SWBaseListener extends SessionAdapter {
                 session.send(new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
 
                 BotSettings botSettings = botConnection.settingsHolder().get(BotSettings.class);
-                AccountSettings accountSettings = botConnection.settingsHolder().get(AccountSettings.class);
                 JavaAccount javaAccount = botConnection.meta().getJavaAccount();
                 UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
                 boolean isLegacy = SWConstants.isLegacy(botSettings.protocolVersion());
@@ -96,7 +95,7 @@ public class SWBaseListener extends SessionAdapter {
                 boolean isLegacyAuthenticate = !isLegacy || metadataStorage == null || metadataStorage.authenticate;
 
                 if (javaAccount.isPremium() && isLegacyAuthenticate) {
-                    SWSessionService sessionService = new SWSessionService(accountSettings.authType());
+                    SWSessionService sessionService = new SWSessionService(javaAccount.authType());
                     String serverId = sessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
                     try {
                         sessionService.joinServer(javaAccount.profileId(), javaAccount.authToken(), serverId);

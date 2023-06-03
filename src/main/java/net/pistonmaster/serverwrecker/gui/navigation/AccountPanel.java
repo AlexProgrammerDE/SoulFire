@@ -19,9 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
+
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.auth.AuthType;
-import net.pistonmaster.serverwrecker.gui.LoadAccountsListener;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.NativeJFileChooser;
 import net.pistonmaster.serverwrecker.settings.AccountSettings;
@@ -31,6 +31,10 @@ import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
@@ -75,11 +79,32 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
     @Override
     public void onSettingsChange(AccountSettings settings) {
-        serviceBox.setSelectedEnum(settings.authType());
     }
 
     @Override
     public AccountSettings collectSettings() {
-        return new AccountSettings(serviceBox.getSelectedEnum());
+        return new AccountSettings();
     }
+
+    private record LoadAccountsListener(ServerWrecker serverWrecker, JFrame frame, JFileChooser fileChooser) implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            int returnVal = fileChooser.showOpenDialog(frame);
+            if (returnVal != JFileChooser.APPROVE_OPTION) {
+                return;
+            }
+
+            Path accountFile = fileChooser.getSelectedFile().toPath();
+            serverWrecker.getLogger().info("Opening: {}", accountFile.getFileName());
+
+            serverWrecker.getThreadPool().submit(() -> {
+                try {
+                    serverWrecker.getAccountRegistry().loadFromFile(Files.readString(accountFile));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
 }

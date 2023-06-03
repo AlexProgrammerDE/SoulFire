@@ -19,8 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.settings;
 
-import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
-public record ProxySettings(ProxyType proxyType, int botsPerProxy) implements SettingsObject {
+public record ProxySettings(int botsPerProxy) implements SettingsObject {
 }
