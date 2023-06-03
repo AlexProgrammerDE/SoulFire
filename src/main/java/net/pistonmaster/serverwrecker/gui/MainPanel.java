@@ -22,7 +22,6 @@ package net.pistonmaster.serverwrecker.gui;
 import ch.jalu.injector.Injector;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.gui.libs.GhostText;
 import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
 import net.pistonmaster.serverwrecker.gui.navigation.ButtonPanelContainer;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
@@ -120,7 +119,7 @@ public class MainPanel extends JPanel {
             }
         });
 
-        new GhostText(commands, "Type ServerWrecker commands here...");
+        commands.putClientProperty("JTextField.placeholderText", "Type ServerWrecker commands here...");
 
         leftPanel.setLayout(new BorderLayout());
         leftPanel.add(logPanel, BorderLayout.CENTER);
