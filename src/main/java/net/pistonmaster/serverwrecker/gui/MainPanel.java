@@ -49,23 +49,26 @@ public class MainPanel extends JPanel {
         buttonPanelContainer.create();
 
         setLayout(new GridBagLayout());
-        GridBagConstraints menuConstraints = new GridBagConstraints();
-        menuConstraints.fill = GridBagConstraints.VERTICAL;
-        menuConstraints.weighty = 1;
 
-        GridBagConstraints logConstraints = new GridBagConstraints();
-        logConstraints.fill = GridBagConstraints.BOTH;
-        logConstraints.weightx = 1;
-        logConstraints.weighty = 1;
+        GridBagConstraints splitConstraints = new GridBagConstraints();
+        splitConstraints.fill = GridBagConstraints.BOTH;
+        splitConstraints.weightx = 1;
+        splitConstraints.weighty = 1;
 
-        add(buttonPanelContainer, menuConstraints);
-        add(logPanel, logConstraints);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, buttonPanelContainer, logPanel);
+
+        splitPane.setOneTouchExpandable(true);
+        splitPane.setDividerLocation(150);
+
+        add(splitPane, splitConstraints);
+
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 0));
     }
 
     private JPanel createLogPanel() throws SecurityException {
-        JPanel leftPanel = new JPanel();
+        JPanel logPanel = new JPanel();
 
-        LogAppender logAppender = new LogAppender(logPanel);
+        LogAppender logAppender = new LogAppender(MainPanel.logPanel);
         logAppender.start();
         injector.register(LogAppender.class, logAppender);
         ((Logger) LogManager.getRootLogger()).addAppender(logAppender);
@@ -121,10 +124,10 @@ public class MainPanel extends JPanel {
 
         commands.putClientProperty("JTextField.placeholderText", "Type ServerWrecker commands here...");
 
-        leftPanel.setLayout(new BorderLayout());
-        leftPanel.add(logPanel, BorderLayout.CENTER);
-        leftPanel.add(commands, BorderLayout.SOUTH);
+        logPanel.setLayout(new BorderLayout());
+        logPanel.add(MainPanel.logPanel, BorderLayout.CENTER);
+        logPanel.add(commands, BorderLayout.SOUTH);
 
-        return leftPanel;
+        return logPanel;
     }
 }

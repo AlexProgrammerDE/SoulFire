@@ -56,7 +56,5 @@ public class ButtonPanelContainer extends JPanel {
         for (NavigationItem item : panels) {
             add(NavigationWrapper.createWrapper(this, item), item.getNavigationId());
         }
-
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
     }
 }
