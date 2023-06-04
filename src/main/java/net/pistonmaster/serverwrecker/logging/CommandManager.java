@@ -58,7 +58,10 @@ public class CommandManager {
             return 1;
         }));
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("clear").executes(c -> {
-            MainPanel.getLogPanel().clear();
+            MainPanel mainPanel = serverWrecker.getInjector().getIfAvailable(MainPanel.class);
+            if (mainPanel != null) {
+                mainPanel.getMessageLogPanel().clear();
+            }
             return 1;
         }));
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("say")

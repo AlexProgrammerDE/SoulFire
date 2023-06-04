@@ -38,7 +38,7 @@ import java.awt.event.KeyEvent;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MainPanel extends JPanel {
     @Getter
-    private static final MessageLogPanel logPanel = new MessageLogPanel(3000, false);
+    private final MessageLogPanel messageLogPanel = new MessageLogPanel(3000, false);
     private final ShellSender shellSender;
     private final Injector injector;
     private final ButtonPanelContainer buttonPanelContainer;
@@ -55,20 +55,22 @@ public class MainPanel extends JPanel {
         splitConstraints.weightx = 1;
         splitConstraints.weighty = 1;
 
+        buttonPanelContainer.setMinimumSize(new Dimension(600, 0));
+        logPanel.setMinimumSize(new Dimension(600, 0));
+
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, buttonPanelContainer, logPanel);
 
         splitPane.setOneTouchExpandable(true);
-        splitPane.setDividerLocation(150);
+        splitPane.setDividerLocation(50);
+        splitPane.setContinuousLayout(true);
 
         add(splitPane, splitConstraints);
-
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 0));
     }
 
     private JPanel createLogPanel() throws SecurityException {
         JPanel logPanel = new JPanel();
 
-        LogAppender logAppender = new LogAppender(MainPanel.logPanel);
+        LogAppender logAppender = new LogAppender(messageLogPanel);
         logAppender.start();
         injector.register(LogAppender.class, logAppender);
         ((Logger) LogManager.getRootLogger()).addAppender(logAppender);
@@ -125,7 +127,7 @@ public class MainPanel extends JPanel {
         commands.putClientProperty("JTextField.placeholderText", "Type ServerWrecker commands here...");
 
         logPanel.setLayout(new BorderLayout());
-        logPanel.add(MainPanel.logPanel, BorderLayout.CENTER);
+        logPanel.add(messageLogPanel, BorderLayout.CENTER);
         logPanel.add(commands, BorderLayout.SOUTH);
 
         return logPanel;

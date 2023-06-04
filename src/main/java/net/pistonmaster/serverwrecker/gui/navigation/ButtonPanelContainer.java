@@ -33,7 +33,6 @@ import java.util.List;
 public class ButtonPanelContainer extends JPanel {
     public static final String NAVIGATION_MENU = "navigation-menu";
     public static final String SETTINGS_MENU = "settings-menu";
-    public static final String DEV_MENU = "dev-menu";
     @Getter
     private final List<NavigationItem> panels = new ArrayList<>();
     private final Injector injector;
@@ -56,5 +55,7 @@ public class ButtonPanelContainer extends JPanel {
         for (NavigationItem item : panels) {
             add(NavigationWrapper.createWrapper(this, item), item.getNavigationId());
         }
+
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
     }
 }

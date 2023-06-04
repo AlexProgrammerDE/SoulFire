@@ -27,6 +27,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import org.apache.commons.validator.routines.EmailValidator;
 
 import java.io.IOException;
 import java.util.*;
@@ -65,6 +66,7 @@ public class AccountRegistry {
         }
 
         this.accounts.addAll(newAccounts);
+        serverWrecker.getLogger().info("Loaded {} accounts!", newAccounts.size());
     }
 
     private boolean isJson(String file) {
@@ -101,6 +103,8 @@ public class AccountRegistry {
         }
 
         String email = split[0].trim();
+        expectEmail(email);
+
         String password = split[1].trim();
 
         try {
@@ -111,7 +115,13 @@ public class AccountRegistry {
     }
 
     private boolean isEmail(String account) {
-        return account.contains("@");
+        return EmailValidator.getInstance().isValid(account);
+    }
+
+    private void expectEmail(String account) {
+        if (!isEmail(account)) {
+            throw new IllegalArgumentException("Invalid email!");
+        }
     }
 
     private JavaAccount fromJsonType(AccountJsonType type) {
@@ -129,11 +139,13 @@ public class AccountRegistry {
         long tokenExpireAt = authType == AuthType.OFFLINE ? -1 : type.tokenExpireAt;
 
         String email = type.email == null ? null : type.email.trim();
+        expectEmail(email);
+
         String password = type.password == null ? null : type.password.trim();
 
         if (email != null && password != null && authType != AuthType.OFFLINE && authToken == null) {
             try {
-                return serverWrecker.authenticate(authType, email, password, null); // TODO: Implement proxy and auth type
+                return serverWrecker.authenticate(authType, email, password, null); // TODO: Implement proxy
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

@@ -107,6 +107,7 @@ dependencies {
     implementation(libs.jansi)
     implementation(libs.guava)
     implementation(libs.gson)
+    implementation("commons-validator:commons-validator:1.7")
 
     implementation("com.thealtening.api:api:4.1.0")
 
