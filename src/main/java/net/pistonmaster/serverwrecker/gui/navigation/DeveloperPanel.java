@@ -19,8 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
+import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.gui.libs.NativeJFileChooser;
+import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
@@ -28,10 +29,8 @@ import org.apache.logging.log4j.Level;
 
 import javax.inject.Inject;
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -61,29 +60,14 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
         });
 
         saveLog.addActionListener(listener -> {
-            JFileChooser fileChooser = new NativeJFileChooser(ServerWrecker.DATA_FOLDER);
-            fileChooser.setDialogTitle("Save Log");
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            fileChooser.setAcceptAllFileFilterUsed(false);
-            fileChooser.setFileFilter(new FileFilter() {
-                @Override
-                public boolean accept(File file) {
-                    return file.getName().endsWith(".log");
-                }
-
-                @Override
-                public String getDescription() {
-                    return "Log Files";
-                }
-            });
-
-            int result = fileChooser.showSaveDialog(this);
-
-            if (result != JFileChooser.APPROVE_OPTION) {
+            FileChooser chooser = new FileChooser();
+            chooser.setInitialDirectory(ServerWrecker.DATA_FOLDER.toFile());
+            chooser.setTitle("Save Log");
+            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Log Files", "log"));
+            Path selectedFile = JFXFileHelper.showSaveDialog(chooser);
+            if (selectedFile == null) {
                 return;
             }
-
-            Path selectedFile = fileChooser.getSelectedFile().toPath();
 
             try (BufferedWriter writer = Files.newBufferedWriter(selectedFile)) {
                 logAppender.getLogLines().forEach(entry -> {

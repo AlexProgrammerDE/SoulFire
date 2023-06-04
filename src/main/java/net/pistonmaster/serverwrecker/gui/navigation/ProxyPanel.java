@@ -19,17 +19,17 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
+import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.common.SWProxy;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
-import net.pistonmaster.serverwrecker.gui.libs.NativeJFileChooser;
+import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.settings.ProxySettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,10 +50,13 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         setLayout(new GridLayout(0, 2));
 
         JButton loadProxies = new JButton("Load proxies");
-        JFileChooser proxiesChooser = new NativeJFileChooser(Path.of(System.getProperty("user.dir")));
 
-        proxiesChooser.addChoosableFileFilter(new FileNameExtensionFilter("Proxy list file", "txt"));
-        loadProxies.addActionListener(new LoadProxiesListener(serverWrecker, parent, proxiesChooser));
+        FileChooser chooser = new FileChooser();
+        chooser.setInitialDirectory(Path.of(System.getProperty("user.dir")).toFile());
+        chooser.setTitle("Load proxies");
+        chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Proxy list file", "txt"));
+
+        loadProxies.addActionListener(new LoadProxiesListener(serverWrecker, parent, chooser));
 
         add(loadProxies);
         JEnumComboBox<ProxyType> proxyTypeCombo = new JEnumComboBox<>(ProxyType.class, ProxyType.SOCKS5);
@@ -87,15 +90,14 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
     }
 
     private record LoadProxiesListener(ServerWrecker serverWrecker, JFrame frame,
-                                       JFileChooser fileChooser) implements ActionListener {
+                                       FileChooser chooser) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            int returnVal = fileChooser.showOpenDialog(frame);
-            if (returnVal != JFileChooser.APPROVE_OPTION) {
+            Path proxyFile = JFXFileHelper.showOpenDialog(chooser);
+            if (proxyFile == null) {
                 return;
             }
 
-            Path proxyFile = fileChooser.getSelectedFile().toPath();
             serverWrecker.getLogger().info("Opening: {}.", proxyFile.getFileName());
 
             serverWrecker.getThreadPool().submit(() -> {

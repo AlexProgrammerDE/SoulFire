@@ -24,14 +24,14 @@ import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.gui.libs.NativeJFileChooser;
+import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.popups.AboutPopup;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
 
 import javax.inject.Inject;
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -57,17 +57,15 @@ public class SWMenuBar extends JMenuBar {
         JMenu fileMenu = new JMenu("File");
         JMenuItem loadProfile = new JMenuItem("Load Profile");
         loadProfile.addActionListener(e -> {
-            JFileChooser chooser = new NativeJFileChooser(serverWrecker.getProfilesFolder());
-            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            chooser.setDialogTitle("Load Profile");
-            chooser.setApproveButtonText("Load");
-            chooser.addChoosableFileFilter(new FileNameExtensionFilter("ServerWrecker profile", "json"));
-            chooser.setMultiSelectionEnabled(false);
-            chooser.showOpenDialog(this);
+            FileChooser chooser = new FileChooser();
+            chooser.setInitialDirectory(serverWrecker.getProfilesFolder().toFile());
+            chooser.setTitle("Load Profile");
+            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("ServerWrecker profile", "json"));
+            Path selectedFile = JFXFileHelper.showOpenDialog(chooser);
 
-            if (chooser.getSelectedFile() != null) {
+            if (selectedFile != null) {
                 try {
-                    serverWrecker.getSettingsManager().loadProfile(chooser.getSelectedFile().toPath());
+                    serverWrecker.getSettingsManager().loadProfile(selectedFile);
                     serverWrecker.getLogger().info("Loaded profile!");
                 } catch (IOException ex) {
                     serverWrecker.getLogger().warn("Failed to load profile!", ex);
@@ -78,17 +76,15 @@ public class SWMenuBar extends JMenuBar {
         fileMenu.add(loadProfile);
         JMenuItem saveProfile = new JMenuItem("Save Profile");
         saveProfile.addActionListener(e -> {
-            JFileChooser chooser = new NativeJFileChooser(serverWrecker.getProfilesFolder());
-            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            chooser.setDialogTitle("Save Profile");
-            chooser.setApproveButtonText("Save");
-            chooser.addChoosableFileFilter(new FileNameExtensionFilter("ServerWrecker profile", "json"));
-            chooser.setMultiSelectionEnabled(false);
-            chooser.showSaveDialog(this);
+            FileChooser chooser = new FileChooser();
+            chooser.setInitialDirectory(serverWrecker.getProfilesFolder().toFile());
+            chooser.setTitle("Save Profile");
+            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("ServerWrecker profile", "json"));
+            Path selectedFile = JFXFileHelper.showSaveDialog(chooser);
 
-            if (chooser.getSelectedFile() != null) {
+            if (selectedFile != null) {
                 // Add .json if not present
-                String path = chooser.getSelectedFile().getAbsolutePath();
+                String path = selectedFile.toString();
                 if (!path.endsWith(".json")) {
                     path += ".json";
                 }

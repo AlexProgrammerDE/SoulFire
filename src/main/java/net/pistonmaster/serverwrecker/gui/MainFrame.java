@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.gui;
 
 import ch.jalu.injector.Injector;
+import javafx.embed.swing.JFXPanel;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 
 import javax.annotation.PostConstruct;
@@ -42,6 +43,8 @@ public class MainFrame extends JFrame {
 
     @PostConstruct
     public void postConstruct() {
+        new JFXPanel(); // Initializes the JavaFX Platform
+
         setResizable(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 

@@ -20,16 +20,16 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 
+import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
-import net.pistonmaster.serverwrecker.gui.libs.NativeJFileChooser;
+import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.settings.AccountSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -49,9 +49,12 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
         JButton loadAccounts = new JButton("Load Accounts");
 
-        JFileChooser accountChooser = new NativeJFileChooser(Path.of(System.getProperty("user.dir")));
-        accountChooser.addChoosableFileFilter(new FileNameExtensionFilter("Account list file", "txt", "json"));
-        loadAccounts.addActionListener(new LoadAccountsListener(serverWrecker, parent, accountChooser));
+        FileChooser chooser = new FileChooser();
+        chooser.setInitialDirectory(Path.of(System.getProperty("user.dir")).toFile());
+        chooser.setTitle("Load accounts");
+        chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Account list file", "txt", "json"));
+
+        loadAccounts.addActionListener(new LoadAccountsListener(serverWrecker, parent, chooser));
 
         JPanel serviceSettingsPanel = new JPanel();
 
@@ -87,15 +90,14 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
     }
 
     private record LoadAccountsListener(ServerWrecker serverWrecker, JFrame frame,
-                                        JFileChooser fileChooser) implements ActionListener {
+                                        FileChooser chooser) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            int returnVal = fileChooser.showOpenDialog(frame);
-            if (returnVal != JFileChooser.APPROVE_OPTION) {
+            Path accountFile = JFXFileHelper.showOpenDialog(chooser);
+            if (accountFile == null) {
                 return;
             }
 
-            Path accountFile = fileChooser.getSelectedFile().toPath();
             serverWrecker.getLogger().info("Opening: {}", accountFile.getFileName());
 
             serverWrecker.getThreadPool().submit(() -> {
