@@ -42,7 +42,6 @@ public class LogAppender extends AbstractAppender {
     @Override
     public void append(LogEvent event) {
         String formatted = formatter.format(event);
-
         if (formatted.isEmpty()) {
             return;
         }

@@ -34,7 +34,7 @@ public class AddonPanel extends NavigationItem {
     private final List<NavigationItem> navigationItems = new ArrayList<>();
 
     @Inject
-    public AddonPanel(ButtonPanelContainer container) {
+    public AddonPanel(CardsContainer container) {
         ServerWreckerAPI.postEvent(new AddonPanelInitEvent(navigationItems));
 
         setLayout(new GridLayout(3, 3, 10, 10));

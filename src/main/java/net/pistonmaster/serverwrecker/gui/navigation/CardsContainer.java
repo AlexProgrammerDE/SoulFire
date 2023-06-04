@@ -30,9 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ButtonPanelContainer extends JPanel {
+public class CardsContainer extends JPanel {
     public static final String NAVIGATION_MENU = "navigation-menu";
-    public static final String SETTINGS_MENU = "settings-menu";
     @Getter
     private final List<NavigationItem> panels = new ArrayList<>();
     private final Injector injector;
@@ -50,10 +49,12 @@ public class ButtonPanelContainer extends JPanel {
         NavigationPanel navigationPanel = injector.getSingleton(NavigationPanel.class);
         add(navigationPanel, NAVIGATION_MENU);
 
-        panels.addAll(addonPanel.getNavigationItems());
-
         for (NavigationItem item : panels) {
-            add(NavigationWrapper.createWrapper(this, item), item.getNavigationId());
+            add(NavigationWrapper.createWrapper(this, NAVIGATION_MENU, item), item.getNavigationId());
+        }
+
+        for (NavigationItem item : addonPanel.getNavigationItems()) {
+            add(NavigationWrapper.createWrapper(this, addonPanel.getNavigationId(), item), item.getNavigationId());
         }
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

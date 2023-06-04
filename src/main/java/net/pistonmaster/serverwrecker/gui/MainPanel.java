@@ -23,7 +23,7 @@ import ch.jalu.injector.Injector;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
-import net.pistonmaster.serverwrecker.gui.navigation.ButtonPanelContainer;
+import net.pistonmaster.serverwrecker.gui.navigation.CardsContainer;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
@@ -41,12 +41,12 @@ public class MainPanel extends JPanel {
     private final MessageLogPanel messageLogPanel = new MessageLogPanel(3000, false);
     private final ShellSender shellSender;
     private final Injector injector;
-    private final ButtonPanelContainer buttonPanelContainer;
+    private final CardsContainer cardsContainer;
 
     @PostConstruct
     public void postConstruct() {
         JPanel logPanel = createLogPanel();
-        buttonPanelContainer.create();
+        cardsContainer.create();
 
         setLayout(new GridBagLayout());
 
@@ -55,10 +55,10 @@ public class MainPanel extends JPanel {
         splitConstraints.weightx = 1;
         splitConstraints.weighty = 1;
 
-        buttonPanelContainer.setMinimumSize(new Dimension(600, 0));
+        cardsContainer.setMinimumSize(new Dimension(600, 0));
         logPanel.setMinimumSize(new Dimension(600, 0));
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, buttonPanelContainer, logPanel);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, cardsContainer, logPanel);
 
         splitPane.setOneTouchExpandable(true);
         splitPane.setDividerLocation(0.5d);
