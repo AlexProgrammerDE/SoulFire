@@ -61,7 +61,7 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
         });
 
         saveLog.addActionListener(listener -> {
-            JFileChooser fileChooser = new NativeJFileChooser(serverWrecker.getDataFolder());
+            JFileChooser fileChooser = new NativeJFileChooser(ServerWrecker.DATA_FOLDER);
             fileChooser.setDialogTitle("Save Log");
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fileChooser.setAcceptAllFileFilterUsed(false);

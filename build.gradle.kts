@@ -99,8 +99,11 @@ dependencies {
         isTransitive = false
     }
 
-    implementation(libs.brigadier)
     implementation(libs.flatlaf)
+    implementation(libs.flatlaf.intellij.themes)
+    implementation(libs.flatlaf.extras)
+
+    implementation(libs.brigadier)
     implementation(libs.pf4j) {
         isTransitive = false
     }

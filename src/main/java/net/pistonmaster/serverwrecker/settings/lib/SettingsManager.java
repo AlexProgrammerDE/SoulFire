@@ -21,8 +21,8 @@ package net.pistonmaster.serverwrecker.settings.lib;
 
 import com.google.gson.*;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,7 +32,6 @@ import java.util.List;
 public class SettingsManager {
     private final List<ListenerRegistration<?>> listeners = new ArrayList<>();
     private final List<ProviderRegistration<?>> providers = new ArrayList<>();
-    private final Logger logger;
     private final Class<? extends SettingsObject>[] registeredSettings;
     private final Gson normalGson = new GsonBuilder()
             .setPrettyPrinting()
@@ -41,8 +40,7 @@ public class SettingsManager {
     private final Gson settingsGson = new GsonBuilder().registerTypeHierarchyAdapter(Object.class, new ObjectAdapter()).create();
 
     @SafeVarargs
-    public SettingsManager(Logger logger, Class<? extends SettingsObject>... registeredSettings) {
-        this.logger = logger;
+    public SettingsManager(Class<? extends SettingsObject>... registeredSettings) {
         this.registeredSettings = registeredSettings;
     }
 
@@ -85,7 +83,7 @@ public class SettingsManager {
         }
     }
 
-    public void loadProfile(Path path) {
+    public void loadProfile(Path path) throws IOException {
         try {
             JsonArray settingsHolder = normalGson.fromJson(Files.readString(path), JsonArray.class);
             List<SettingsObject> settingsObjects = new ArrayList<>();
@@ -93,22 +91,20 @@ public class SettingsManager {
                 settingsObjects.add(settingsGson.fromJson(jsonElement, SettingsObject.class));
             }
             onSettingsLoad(new SettingsHolder(settingsObjects));
-            logger.info("Loaded profile!");
         } catch (Exception e) {
-            logger.warn("Failed to load profile!", e);
+            throw new IOException(e);
         }
     }
 
-    public void saveProfile(Path path) {
+    public void saveProfile(Path path) throws IOException {
         try {
             List<JsonElement> settingsHolder = new ArrayList<>();
             for (SettingsObject settingsObject : collectSettings().settings()) {
                 settingsHolder.add(settingsGson.toJsonTree(settingsObject));
             }
             Files.writeString(path, normalGson.toJson(settingsHolder));
-            logger.info("Saved profile!");
         } catch (Exception e) {
-            logger.warn("Failed to save profile!", e);
+            throw new IOException(e);
         }
     }
 

@@ -21,9 +21,7 @@ package net.pistonmaster.serverwrecker;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
-import net.pistonmaster.serverwrecker.common.ProxyType;
 import net.pistonmaster.serverwrecker.settings.AccountSettings;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;

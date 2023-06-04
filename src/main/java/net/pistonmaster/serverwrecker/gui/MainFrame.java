@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.gui;
 
 import ch.jalu.injector.Injector;
-import com.formdev.flatlaf.FlatDarculaLaf;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 
 import javax.annotation.PostConstruct;
@@ -39,10 +38,6 @@ public class MainFrame extends JFrame {
         this.serverWrecker = serverWrecker;
         this.injector = injector;
         injector.register(JFrame.class, this);
-    }
-
-    public static void setLookAndFeel() {
-        FlatDarculaLaf.setup();
     }
 
     @PostConstruct

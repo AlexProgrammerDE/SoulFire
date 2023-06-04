@@ -86,7 +86,8 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         return new AccountSettings();
     }
 
-    private record LoadAccountsListener(ServerWrecker serverWrecker, JFrame frame, JFileChooser fileChooser) implements ActionListener {
+    private record LoadAccountsListener(ServerWrecker serverWrecker, JFrame frame,
+                                        JFileChooser fileChooser) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             int returnVal = fileChooser.showOpenDialog(frame);

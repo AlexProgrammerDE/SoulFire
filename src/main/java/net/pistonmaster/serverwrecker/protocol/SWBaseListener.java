@@ -53,7 +53,6 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.auth.JavaAccount;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
-import net.pistonmaster.serverwrecker.settings.AccountSettings;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 

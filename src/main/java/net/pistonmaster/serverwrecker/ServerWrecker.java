@@ -83,6 +83,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 public class ServerWrecker {
+    public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
     private final Logger logger = LoggerFactory.getLogger("ServerWrecker");
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
@@ -100,13 +101,11 @@ public class ServerWrecker {
     private final SWTerminalConsole terminalConsole;
     private final AccountRegistry accountRegistry = new AccountRegistry(this);
     private final SettingsManager settingsManager = new SettingsManager(
-            logger,
             BotSettings.class,
             DevSettings.class,
             AccountSettings.class,
             ProxySettings.class
     );
-    private final Path dataFolder = Path.of(System.getProperty("user.home"), ".serverwrecker");
     private final Path profilesFolder;
     private final Path pluginsFolder;
     @Setter
@@ -114,8 +113,8 @@ public class ServerWrecker {
     private boolean shutdown = false;
 
     public ServerWrecker() {
-        this.profilesFolder = dataFolder.resolve("profiles");
-        this.pluginsFolder = dataFolder.resolve("plugins");
+        this.profilesFolder = DATA_FOLDER.resolve("profiles");
+        this.pluginsFolder = DATA_FOLDER.resolve("plugins");
 
         // Register into injector
         injector.register(ServerWrecker.class, this);
@@ -133,7 +132,7 @@ public class ServerWrecker {
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
 
         try {
-            Files.createDirectories(dataFolder);
+            Files.createDirectories(DATA_FOLDER);
             Files.createDirectories(profilesFolder);
             Files.createDirectories(pluginsFolder);
         } catch (IOException e) {
@@ -184,7 +183,7 @@ public class ServerWrecker {
         logger.info("Loaded {} block states", stateMap.size());
 
         // Init via
-        Path viaPath = dataFolder.resolve("ViaVersion");
+        Path viaPath = DATA_FOLDER.resolve("ViaVersion");
         SWViaPlatform platform = new SWViaPlatform(viaPath);
 
         Via.init(ViaManagerImpl.builder()
@@ -201,11 +200,11 @@ public class ServerWrecker {
         ((ProtocolManagerImpl) Via.getManager().getProtocolManager()).refreshVersions();
 
         Via.getManager().addEnableListener(() -> {
-            new SWViaRewind(dataFolder.resolve("ViaRewind")).init();
-            new SWViaBackwards(dataFolder.resolve("ViaBackwards")).init();
-            new SWViaAprilFools(dataFolder.resolve("ViaAprilFools")).init();
-            new SWViaLegacy(dataFolder.resolve("ViaLegacy")).init();
-            new SWViaBedrock(dataFolder.resolve("ViaBedrock")).init();
+            new SWViaRewind(DATA_FOLDER.resolve("ViaRewind")).init();
+            new SWViaBackwards(DATA_FOLDER.resolve("ViaBackwards")).init();
+            new SWViaAprilFools(DATA_FOLDER.resolve("ViaAprilFools")).init();
+            new SWViaLegacy(DATA_FOLDER.resolve("ViaLegacy")).init();
+            new SWViaBedrock(DATA_FOLDER.resolve("ViaBedrock")).init();
         });
 
         ViaManagerImpl manager = (ViaManagerImpl) Via.getManager();

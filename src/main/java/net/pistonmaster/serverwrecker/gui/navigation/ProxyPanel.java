@@ -86,7 +86,8 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         );
     }
 
-    private record LoadProxiesListener(ServerWrecker serverWrecker, JFrame frame, JFileChooser fileChooser) implements ActionListener {
+    private record LoadProxiesListener(ServerWrecker serverWrecker, JFrame frame,
+                                       JFileChooser fileChooser) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             int returnVal = fileChooser.showOpenDialog(frame);

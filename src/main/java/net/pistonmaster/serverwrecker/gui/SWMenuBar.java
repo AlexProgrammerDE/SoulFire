@@ -19,18 +19,41 @@
  */
 package net.pistonmaster.serverwrecker.gui;
 
+import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.libs.NativeJFileChooser;
 import net.pistonmaster.serverwrecker.gui.popups.AboutPopup;
+import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
 
 import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.basic.BasicLookAndFeel;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SWMenuBar extends JMenuBar {
+    private static final List<Class<? extends BasicLookAndFeel>> THEMES;
+
+    static {
+        List<Class<? extends BasicLookAndFeel>> tempThemes = new ArrayList<>(List.of(
+                FlatDarculaLaf.class,
+                FlatIntelliJLaf.class,
+                FlatMacDarkLaf.class,
+                FlatMacLightLaf.class,
+                FlatOneDarkIJTheme.class
+        ));
+        THEMES = List.copyOf(tempThemes);
+    }
+
     @Inject
-    public SWMenuBar(ServerWrecker serverWrecker) {
+    public SWMenuBar(ServerWrecker serverWrecker, JFrame frame) {
         JMenu fileMenu = new JMenu("File");
         JMenuItem loadProfile = new JMenuItem("Load Profile");
         loadProfile.addActionListener(e -> {
@@ -43,7 +66,12 @@ public class SWMenuBar extends JMenuBar {
             chooser.showOpenDialog(this);
 
             if (chooser.getSelectedFile() != null) {
-                serverWrecker.getSettingsManager().loadProfile(chooser.getSelectedFile().toPath());
+                try {
+                    serverWrecker.getSettingsManager().loadProfile(chooser.getSelectedFile().toPath());
+                    serverWrecker.getLogger().info("Loaded profile!");
+                } catch (IOException ex) {
+                    serverWrecker.getLogger().warn("Failed to load profile!", ex);
+                }
             }
         });
 
@@ -65,9 +93,15 @@ public class SWMenuBar extends JMenuBar {
                     path += ".json";
                 }
 
-                serverWrecker.getSettingsManager().saveProfile(Path.of(path));
+                try {
+                    serverWrecker.getSettingsManager().saveProfile(Path.of(path));
+                    serverWrecker.getLogger().info("Saved profile!");
+                } catch (IOException ex) {
+                    serverWrecker.getLogger().warn("Failed to save profile!", ex);
+                }
             }
         });
+
         fileMenu.add(saveProfile);
 
         fileMenu.addSeparator();
@@ -76,6 +110,22 @@ public class SWMenuBar extends JMenuBar {
         exit.addActionListener(e -> serverWrecker.shutdown(true));
         fileMenu.add(exit);
         add(fileMenu);
+
+        JMenu window = new JMenu("Window");
+        JMenu themeSelector = new JMenu("Theme");
+        for (Class<? extends BasicLookAndFeel> theme : THEMES) {
+            JMenuItem themeItem = new JMenuItem(theme.getSimpleName());
+            themeItem.addActionListener(e -> {
+                ThemeUtil.THEME_PROVIDER.setThemeClass(theme);
+                SwingUtilities.invokeLater(() -> {
+                    ThemeUtil.setLookAndFeel();
+                    SwingUtilities.updateComponentTreeUI(frame);
+                });
+            });
+            themeSelector.add(themeItem);
+        }
+        window.add(themeSelector);
+        add(window);
 
         JMenu helpMenu = new JMenu("Help");
         JMenuItem about = new JMenuItem("About");

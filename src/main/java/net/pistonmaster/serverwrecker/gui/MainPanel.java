@@ -61,7 +61,7 @@ public class MainPanel extends JPanel {
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, buttonPanelContainer, logPanel);
 
         splitPane.setOneTouchExpandable(true);
-        splitPane.setDividerLocation(50);
+        splitPane.setDividerLocation(0.5d);
         splitPane.setContinuousLayout(true);
 
         add(splitPane, splitConstraints);
@@ -129,6 +129,8 @@ public class MainPanel extends JPanel {
         logPanel.setLayout(new BorderLayout());
         logPanel.add(messageLogPanel, BorderLayout.CENTER);
         logPanel.add(commands, BorderLayout.SOUTH);
+
+        logPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
         return logPanel;
     }
