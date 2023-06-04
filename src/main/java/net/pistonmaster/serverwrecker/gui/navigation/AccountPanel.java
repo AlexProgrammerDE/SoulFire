@@ -22,10 +22,10 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
-import net.pistonmaster.serverwrecker.settings.AccountSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;
@@ -34,7 +34,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
@@ -102,7 +101,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
             serverWrecker.getThreadPool().submit(() -> {
                 try {
-                    serverWrecker.getAccountRegistry().loadFromFile(Files.readString(accountFile));
+                    serverWrecker.getAccountRegistry().loadFromFile(accountFile);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

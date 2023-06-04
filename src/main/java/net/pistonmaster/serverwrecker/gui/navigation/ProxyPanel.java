@@ -22,10 +22,9 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.ProxyType;
-import net.pistonmaster.serverwrecker.common.SWProxy;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
-import net.pistonmaster.serverwrecker.settings.ProxySettings;
+import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;
@@ -33,12 +32,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.InetSocketAddress;
-import java.nio.file.Files;
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 
 public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySettings> {
     private final JSpinner botsPerProxy = new JSpinner();
@@ -102,30 +97,9 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
 
             serverWrecker.getThreadPool().submit(() -> {
                 try {
-                    List<SWProxy> proxies = new ArrayList<>();
-
-                    try (Stream<String> lines = Files.lines(proxyFile)) {
-                        lines.distinct().forEach(line -> {
-                            String[] split = line.split(":");
-
-                            String host = split[0];
-                            int port = Integer.parseInt(split[1]);
-
-                            // TODO: Reimplement proxy management
-                            if (split.length > 3) {
-                                proxies.add(new SWProxy(ProxyType.SOCKS5, new InetSocketAddress(host, port), split[2], split[3]));
-                            } else {
-                                proxies.add(new SWProxy(ProxyType.SOCKS5, new InetSocketAddress(host, port), null, null));
-                            }
-                        });
-                    }
-
-                    serverWrecker.getAvailableProxies().clear();
-                    serverWrecker.getAvailableProxies().addAll(proxies);
-
-                    serverWrecker.getLogger().info("Loaded {} proxies", proxies.size());
-                } catch (Exception ex) {
-                    serverWrecker.getLogger().error(null, ex);
+                    serverWrecker.getProxyRegistry().loadFromFile(proxyFile);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             });
         }

@@ -31,18 +31,22 @@ public class JLoggerToSLF4J extends Logger {
         this.base = logger;
     }
 
+    @Override
     public void log(Level level, String msg) {
         this.base.atLevel(toSLF4JLevel(level)).log(msg);
     }
 
+    @Override
     public void log(Level level, String msg, Object param1) {
         this.base.atLevel(toSLF4JLevel(level)).log(msg, param1);
     }
 
+    @Override
     public void log(Level level, String msg, Object... params) {
         log(level, MessageFormat.format(msg, params));
     }
 
+    @Override
     public void log(Level level, String msg, Throwable params) {
         this.base.atLevel(toSLF4JLevel(level)).log(msg, params);
     }

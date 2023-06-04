@@ -27,23 +27,26 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 @RequiredArgsConstructor
-public class AccountRegistry {
+public class AccountRegistry implements SettingsDuplex<AccountList> {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final List<JavaAccount> accounts = new ArrayList<>();
     private final ServerWrecker serverWrecker;
 
-    public void loadFromFile(String file) {
-        List<JavaAccount> newAccounts = new ArrayList<>();
+    public void loadFromFile(Path file) throws IOException {
+        loadFromString(Files.readString(file));
+    }
 
-        if (accounts.isEmpty()) {
-            throw new IllegalArgumentException("No accounts found!");
-        }
+    public void loadFromString(String file) {
+        List<JavaAccount> newAccounts = new ArrayList<>();
 
         if (isJson(file)) {
             if (isArray(file)) {
@@ -156,6 +159,17 @@ public class AccountRegistry {
 
     public List<JavaAccount> getAccounts() {
         return Collections.unmodifiableList(accounts);
+    }
+
+    @Override
+    public void onSettingsChange(AccountList settings) {
+        accounts.clear();
+        accounts.addAll(settings.accounts());
+    }
+
+    @Override
+    public AccountList collectSettings() {
+        return new AccountList(List.copyOf(accounts));
     }
 
     @AllArgsConstructor

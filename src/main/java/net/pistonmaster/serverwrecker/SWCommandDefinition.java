@@ -21,14 +21,16 @@ package net.pistonmaster.serverwrecker;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
-import net.pistonmaster.serverwrecker.settings.AccountSettings;
+import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
-import net.pistonmaster.serverwrecker.settings.ProxySettings;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 @RequiredArgsConstructor
@@ -77,6 +79,15 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Option(names = {"--disable-wait-established"}, description = "Make the program halt and wait till a bot was successfully connected before connecting the next bot")
     private boolean disableWaitEstablished;
 
+    @Option(names = {"--account-file"}, description = "File to load accounts from")
+    private Path accountFile;
+
+    @Option(names = {"--proxy-file"}, description = "File to load proxies from")
+    private Path proxyFile;
+
+    @Option(names = {"--profile-file"}, description = "File to load a profile from")
+    private Path profileFile;
+
     @Override
     public Integer call() {
         // Delayed to here, so help and version do not get cut off
@@ -102,13 +113,33 @@ public class SWCommandDefinition implements Callable<Integer> {
                         debug
                 ));
 
-        serverWrecker.getSettingsManager().registerProvider(AccountSettings.class,
-                AccountSettings::new);
+        serverWrecker.getSettingsManager().registerProvider(AccountSettings.class, AccountSettings::new);
 
         serverWrecker.getSettingsManager().registerProvider(ProxySettings.class,
                 () -> new ProxySettings(
                         accountsPerProxy
                 ));
+
+        try {
+            serverWrecker.getAccountRegistry().loadFromFile(accountFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 1;
+        }
+
+        try {
+            serverWrecker.getProxyRegistry().loadFromFile(proxyFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 1;
+        }
+
+        try {
+            serverWrecker.getSettingsManager().loadProfile(profileFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 1;
+        }
 
         serverWrecker.start();
         return 0;

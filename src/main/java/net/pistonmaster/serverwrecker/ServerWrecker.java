@@ -52,10 +52,11 @@ import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.serverwrecker.protocol.netty.ResolveUtil;
 import net.pistonmaster.serverwrecker.protocol.netty.SWNettyHelper;
-import net.pistonmaster.serverwrecker.settings.AccountSettings;
+import net.pistonmaster.serverwrecker.proxy.ProxyList;
+import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
+import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
-import net.pistonmaster.serverwrecker.settings.ProxySettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
@@ -91,7 +92,6 @@ public class ServerWrecker {
     private final List<BotConnection> botConnections = new ArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
-    private final List<SWProxy> availableProxies = new ArrayList<>();
     private final Map<String, String> serviceServerConfig = new HashMap<>();
     private final Gson gson = new Gson();
     private final Map<String, String> mojangTranslations = new HashMap<>();
@@ -100,11 +100,14 @@ public class ServerWrecker {
     private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
     private final SWTerminalConsole terminalConsole;
     private final AccountRegistry accountRegistry = new AccountRegistry(this);
+    private final ProxyRegistry proxyRegistry = new ProxyRegistry(this);
     private final SettingsManager settingsManager = new SettingsManager(
             BotSettings.class,
             DevSettings.class,
             AccountSettings.class,
-            ProxySettings.class
+            AccountList.class,
+            ProxySettings.class,
+            ProxyList.class
     );
     private final Path profilesFolder;
     private final Path pluginsFolder;
@@ -123,6 +126,9 @@ public class ServerWrecker {
         ServerWreckerAPI.setServerWrecker(this);
 
         setupLogging(Level.INFO);
+
+        settingsManager.registerDuplex(AccountList.class, accountRegistry);
+        settingsManager.registerDuplex(ProxyList.class, proxyRegistry);
 
         logger.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
@@ -265,8 +271,8 @@ public class ServerWrecker {
 
         int botAmount = botSettings.amount(); // How many bots to connect
         int botsPerProxy = proxySettings.botsPerProxy(); // How many bots per proxy are allowed
-        List<SWProxy> proxiesCopy = new ArrayList<>(availableProxies); // Copy the proxies
-        int availableProxiesCount = proxiesCopy.size(); // How many proxies are available
+        List<SWProxy> proxies = settingsHolder.get(ProxyList.class).proxies();
+        int availableProxiesCount = proxies.size(); // How many proxies are available?
         int maxBots = botsPerProxy > 0 ? botsPerProxy * availableProxiesCount : botAmount; // How many bots can be used at max
 
         if (botAmount > maxBots) {
@@ -276,7 +282,8 @@ public class ServerWrecker {
             botAmount = maxBots;
         }
 
-        List<JavaAccount> accounts = new ArrayList<>(accountRegistry.getAccounts());
+        AccountList accountList = settingsHolder.get(AccountList.class);
+        List<JavaAccount> accounts = accountList.accounts();
         int availableAccounts = accounts.size();
 
         if (availableAccounts > 0 && botAmount > availableAccounts) {
@@ -291,7 +298,7 @@ public class ServerWrecker {
         }
 
         Map<SWProxy, Integer> proxyUseMap = new Object2IntOpenHashMap<>();
-        for (SWProxy proxy : proxiesCopy) {
+        for (SWProxy proxy : proxies) {
             proxyUseMap.put(proxy, 0);
         }
 

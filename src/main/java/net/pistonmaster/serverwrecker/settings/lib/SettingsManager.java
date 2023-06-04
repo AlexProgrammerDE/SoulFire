@@ -90,6 +90,7 @@ public class SettingsManager {
             for (JsonElement jsonElement : settingsHolder) {
                 settingsObjects.add(settingsGson.fromJson(jsonElement, SettingsObject.class));
             }
+
             onSettingsLoad(new SettingsHolder(settingsObjects));
         } catch (Exception e) {
             throw new IOException(e);
