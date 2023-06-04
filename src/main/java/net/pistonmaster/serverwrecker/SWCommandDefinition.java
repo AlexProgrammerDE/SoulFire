@@ -56,7 +56,7 @@ public class SWCommandDefinition implements Callable<Integer> {
     private int joinDelay = 1000;
 
     @Option(names = {"--name-format"}, description = "Format for bot names. allows integer placeholder '%%d'")
-    private String nameFormat = "Bot-%d";
+    private String nameFormat = "Bot%d";
 
     @Option(names = {"-mc", "--mc-version"}, description = "Minecraft version of the server to connect to")
     private String version = SWConstants.LATEST_SHOWN_VERSION.getName();
@@ -120,25 +120,31 @@ public class SWCommandDefinition implements Callable<Integer> {
                         accountsPerProxy
                 ));
 
-        try {
-            serverWrecker.getAccountRegistry().loadFromFile(accountFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return 1;
+        if (accountFile != null) {
+            try {
+                serverWrecker.getAccountRegistry().loadFromFile(accountFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return 1;
+            }
         }
 
-        try {
-            serverWrecker.getProxyRegistry().loadFromFile(proxyFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return 1;
+        if (proxyFile != null) {
+            try {
+                serverWrecker.getProxyRegistry().loadFromFile(proxyFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return 1;
+            }
         }
 
-        try {
-            serverWrecker.getSettingsManager().loadProfile(profileFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return 1;
+        if (profileFile != null) {
+            try {
+                serverWrecker.getSettingsManager().loadProfile(profileFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return 1;
+            }
         }
 
         serverWrecker.start();
