@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.data;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public record BlockType(int id, String name, String displayName, double hardness, double resistance,
                         int stackSize, boolean diggable, String material, BoundingBoxType boundingBox) {
     public static final List<BlockType> VALUES = new ArrayList<>();

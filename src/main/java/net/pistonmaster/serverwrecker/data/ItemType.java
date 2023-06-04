@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.data;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public record ItemType(int id, String name, String displayName, int stackSize, List<String> enchantCategories,
                        List<String> repairWith, int maxDurability) {
     public static final List<ItemType> VALUES = new ArrayList<>();

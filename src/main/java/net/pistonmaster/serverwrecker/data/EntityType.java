@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.data;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public record EntityType(int id, int internalId, String name, String displayName, String type,
                          double width, double height, int length, int offset, String category) {
     public static final List<EntityType> VALUES = new ArrayList<>();

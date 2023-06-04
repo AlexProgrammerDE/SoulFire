@@ -32,48 +32,32 @@ public class JLoggerToSLF4J extends Logger {
     }
 
     public void log(Level level, String msg) {
-        if (level == Level.FINE) {
-            this.base.debug(msg);
-        } else if (level == Level.WARNING) {
-            this.base.warn(msg);
-        } else if (level == Level.SEVERE) {
-            this.base.error(msg);
-        } else if (level == Level.INFO) {
-            this.base.info(msg);
-        } else {
-            this.base.trace(msg);
-        }
+        this.base.atLevel(toSLF4JLevel(level)).log(msg);
     }
 
     public void log(Level level, String msg, Object param1) {
-        if (level == Level.FINE) {
-            this.base.debug(msg, param1);
-        } else if (level == Level.WARNING) {
-            this.base.warn(msg, param1);
-        } else if (level == Level.SEVERE) {
-            this.base.error(msg, param1);
-        } else if (level == Level.INFO) {
-            this.base.info(msg, param1);
-        } else {
-            this.base.trace(msg, param1);
-        }
+        this.base.atLevel(toSLF4JLevel(level)).log(msg, param1);
     }
 
-    public void log(Level level, String msg, Object[] params) {
+    public void log(Level level, String msg, Object... params) {
         log(level, MessageFormat.format(msg, params));
     }
 
     public void log(Level level, String msg, Throwable params) {
+        this.base.atLevel(toSLF4JLevel(level)).log(msg, params);
+    }
+
+    private org.slf4j.event.Level toSLF4JLevel(Level level) {
         if (level == Level.FINE) {
-            this.base.debug(msg, params);
+            return org.slf4j.event.Level.DEBUG;
         } else if (level == Level.WARNING) {
-            this.base.warn(msg, params);
+            return org.slf4j.event.Level.WARN;
         } else if (level == Level.SEVERE) {
-            this.base.error(msg, params);
+            return org.slf4j.event.Level.ERROR;
         } else if (level == Level.INFO) {
-            this.base.info(msg, params);
+            return org.slf4j.event.Level.INFO;
         } else {
-            this.base.trace(msg, params);
+            return org.slf4j.event.Level.TRACE;
         }
     }
 }

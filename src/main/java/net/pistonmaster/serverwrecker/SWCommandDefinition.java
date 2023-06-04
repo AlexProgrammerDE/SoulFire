@@ -31,7 +31,6 @@ import picocli.CommandLine.Option;
 
 import java.util.concurrent.Callable;
 
-@SuppressWarnings("FieldMayBeFinal")
 @RequiredArgsConstructor
 @Command(name = "serverwrecker", mixinStandardHelpOptions = true,
         version = "ServerWrecker v" + BuildData.VERSION, showDefaultValues = true,

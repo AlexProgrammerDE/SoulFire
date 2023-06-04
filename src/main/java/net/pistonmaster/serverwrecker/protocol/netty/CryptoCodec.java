@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.protocol.netty;
 
-
 import com.velocitypowered.natives.encryption.VelocityCipher;
 import com.velocitypowered.natives.util.MoreByteBufUtils;
 import com.velocitypowered.natives.util.Natives;
@@ -50,7 +49,7 @@ public class CryptoCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) {
         ByteBuf compatible = MoreByteBufUtils.ensureCompatible(ctx.alloc(), encoder, msg);
         try {
             encoder.process(compatible);
@@ -61,7 +60,7 @@ public class CryptoCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) {
         if (!ctx.channel().isActive()) return;
         ByteBuf compatible = MoreByteBufUtils.ensureCompatible(ctx.alloc(), decoder, msg);
         try {

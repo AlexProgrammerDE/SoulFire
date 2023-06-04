@@ -66,14 +66,7 @@ public class SWTheAlteningAuthService implements MCAuthService {
         }
     }
 
-    private static class Agent {
-        private final String name;
-        private final int version;
-
-        protected Agent(String name, int version) {
-            this.name = name;
-            this.version = version;
-        }
+    private record Agent(String name, int version) {
     }
 
     private static class User {
