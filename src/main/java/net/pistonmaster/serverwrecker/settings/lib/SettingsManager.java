@@ -103,6 +103,7 @@ public class SettingsManager {
             for (SettingsObject settingsObject : collectSettings().settings()) {
                 settingsHolder.add(settingsGson.toJsonTree(settingsObject));
             }
+
             Files.writeString(path, normalGson.toJson(settingsHolder));
         } catch (Exception e) {
             throw new IOException(e);

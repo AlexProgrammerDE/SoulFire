@@ -114,6 +114,7 @@ public final class SessionDataManager {
     private @Nullable ExperienceData experienceData;
     private @Nullable PlayerInventoryContainer playerInventoryContainer;
     private @Nullable Container openContainer;
+    private int heldItemSlot = -1;
     private int biomesEntryBitsSize = -1;
     private @Nullable ChunkKey centerChunk;
     private boolean isDead = false;
@@ -378,6 +379,11 @@ public final class SessionDataManager {
     @BusHandler
     public void onCloseInventory(ClientboundContainerClosePacket packet) {
         openContainer = null;
+    }
+
+    @BusHandler
+    public void onSetSlot(ClientboundSetCarriedItemPacket packet) {
+        heldItemSlot = packet.getSlot();
     }
 
     @BusHandler

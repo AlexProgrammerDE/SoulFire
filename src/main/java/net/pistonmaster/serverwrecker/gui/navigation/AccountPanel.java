@@ -38,8 +38,6 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 public class AccountPanel extends NavigationItem implements SettingsDuplex<AccountSettings> {
-    private final JEnumComboBox<AuthType> serviceBox = new JEnumComboBox<>(AuthType.class, AuthType.OFFLINE);
-
     @Inject
     public AccountPanel(ServerWrecker serverWrecker, JFrame parent) {
         serverWrecker.getSettingsManager().registerDuplex(AccountSettings.class, this);
@@ -55,18 +53,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
         loadAccounts.addActionListener(new LoadAccountsListener(serverWrecker, parent, chooser));
 
-        JPanel serviceSettingsPanel = new JPanel();
-
-        serviceSettingsPanel.setLayout(new GridLayout(0, 1));
-
-        serviceBox.addActionListener(action -> {
-            serverWrecker.getLogger().info("Switched auth servers to {}", Objects.requireNonNull(serviceBox.getSelectedEnum()).getDisplayName());
-        });
-
-        serviceSettingsPanel.add(serviceBox);
-
         add(loadAccounts);
-        add(serviceSettingsPanel);
     }
 
     @Override
@@ -108,5 +95,4 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
             });
         }
     }
-
 }
