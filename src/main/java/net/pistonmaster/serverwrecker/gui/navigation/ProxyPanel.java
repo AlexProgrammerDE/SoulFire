@@ -54,8 +54,6 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         loadProxies.addActionListener(new LoadProxiesListener(serverWrecker, parent, chooser));
 
         add(loadProxies);
-        JEnumComboBox<ProxyType> proxyTypeCombo = new JEnumComboBox<>(ProxyType.class, ProxyType.SOCKS5);
-        add(proxyTypeCombo);
 
         add(new JLabel("Accounts per proxy: "));
         botsPerProxy.setValue(-1);
