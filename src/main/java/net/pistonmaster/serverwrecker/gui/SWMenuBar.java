@@ -60,7 +60,7 @@ public class SWMenuBar extends JMenuBar {
             FileChooser chooser = new FileChooser();
             chooser.setInitialDirectory(serverWrecker.getProfilesFolder().toFile());
             chooser.setTitle("Load Profile");
-            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("ServerWrecker profile", "json"));
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ServerWrecker profile", "json"));
             Path selectedFile = JFXFileHelper.showOpenDialog(chooser);
 
             if (selectedFile != null) {
@@ -79,7 +79,7 @@ public class SWMenuBar extends JMenuBar {
             FileChooser chooser = new FileChooser();
             chooser.setInitialDirectory(serverWrecker.getProfilesFolder().toFile());
             chooser.setTitle("Save Profile");
-            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("ServerWrecker profile", "json"));
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ServerWrecker profile", "json"));
             Path selectedFile = JFXFileHelper.showSaveDialog(chooser);
 
             if (selectedFile != null) {

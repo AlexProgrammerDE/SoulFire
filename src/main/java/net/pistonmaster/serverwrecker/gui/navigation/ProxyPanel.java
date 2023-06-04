@@ -49,7 +49,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         FileChooser chooser = new FileChooser();
         chooser.setInitialDirectory(Path.of(System.getProperty("user.dir")).toFile());
         chooser.setTitle("Load proxies");
-        chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Proxy list file", "txt"));
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Proxy list file", "txt"));
 
         loadProxies.addActionListener(new LoadProxiesListener(serverWrecker, parent, chooser));
 

@@ -63,7 +63,7 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
             FileChooser chooser = new FileChooser();
             chooser.setInitialDirectory(ServerWrecker.DATA_FOLDER.toFile());
             chooser.setTitle("Save Log");
-            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Log Files", "log"));
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log Files", "log"));
             Path selectedFile = JFXFileHelper.showSaveDialog(chooser);
             if (selectedFile == null) {
                 return;

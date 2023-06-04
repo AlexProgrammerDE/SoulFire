@@ -51,7 +51,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         FileChooser chooser = new FileChooser();
         chooser.setInitialDirectory(Path.of(System.getProperty("user.dir")).toFile());
         chooser.setTitle("Load accounts");
-        chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Account list file", "txt", "json"));
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Account list file", "txt", "json"));
 
         loadAccounts.addActionListener(new LoadAccountsListener(serverWrecker, parent, chooser));
 
