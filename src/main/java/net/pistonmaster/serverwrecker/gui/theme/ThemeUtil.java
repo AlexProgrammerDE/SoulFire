@@ -67,6 +67,8 @@ public class ThemeUtil {
         }
 
         try {
+            Files.createDirectories(ServerWrecker.DATA_FOLDER);
+
             THEME_MANAGER.saveProfile(THEME_PATH);
         } catch (IOException e) {
             e.printStackTrace();
