@@ -20,12 +20,15 @@
 package net.pistonmaster.serverwrecker.protocol.bot.container;
 
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
+import com.viaversion.viaversion.libs.fastutil.ints.Int2IntMap;
+import com.viaversion.viaversion.libs.fastutil.ints.Int2IntOpenHashMap;
 import lombok.Getter;
 
 @Getter
 public class Container {
     private final ItemStack[] slots;
     private final int id;
+    private final Int2IntMap properties = new Int2IntOpenHashMap();
 
     public Container(int slots, int id) {
         this.slots = new ItemStack[slots];
@@ -48,5 +51,13 @@ public class Container {
         }
 
         return items;
+    }
+
+    public void setProperty(int property, int value) {
+        properties.put(property, value);
+    }
+
+    public int getProperty(int property) {
+        return properties.getOrDefault(property, 0);
     }
 }

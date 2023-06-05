@@ -40,9 +40,7 @@ import com.github.steveice10.mc.protocol.data.game.level.notify.ThunderStrengthV
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityMotionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.*;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerClosePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetSlotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.*;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
@@ -67,6 +65,7 @@ import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
+import net.pistonmaster.serverwrecker.protocol.bot.container.WindowContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.model.*;
 import net.pistonmaster.serverwrecker.protocol.bot.state.*;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
@@ -96,6 +95,7 @@ public final class SessionDataManager {
     private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
     private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<Container> containerData = new Int2ObjectOpenHashMap<>();
     private BorderState borderState;
     private BotMovementManager botMovementManager;
     private HealthData healthData;
@@ -112,8 +112,7 @@ public final class SessionDataManager {
     private @Nullable AbilitiesData abilitiesData;
     private @Nullable DefaultSpawnData defaultSpawnData;
     private @Nullable ExperienceData experienceData;
-    private @Nullable PlayerInventoryContainer playerInventoryContainer;
-    private @Nullable Container openContainer;
+    private int openContainerId = -1;
     private int heldItemSlot = -1;
     private int biomesEntryBitsSize = -1;
     private @Nullable ChunkKey centerChunk;
@@ -173,6 +172,8 @@ public final class SessionDataManager {
             serverViewDistance = packet.getViewDistance();
             serverSimulationDistance = packet.getSimulationDistance();
             lastDeathPos = packet.getLastDeathPos();
+
+            containerData.put(0, new PlayerInventoryContainer());
 
             log.info("Joined server");
         } catch (Exception e) {
@@ -347,43 +348,64 @@ public final class SessionDataManager {
     }
 
     @BusHandler
-    public void onSetInventoryContent(ClientboundContainerSetContentPacket packet) {
-        if (packet.getContainerId() == 0) {
-            PlayerInventoryContainer inventoryContainer = this.playerInventoryContainer;
-            if (inventoryContainer == null) {
-                inventoryContainer = new PlayerInventoryContainer();
-            }
+    public void onSetContainerContent(ClientboundContainerSetContentPacket packet) {
+        Container container = containerData.get(packet.getContainerId());
 
-            for (int i = 0; i < packet.getItems().length; i++) {
-                inventoryContainer.setSlot(i, packet.getItems()[i]);
-            }
+        if (container == null) {
+            log.warn("Received container content update for unknown container {}", packet.getContainerId());
+            return;
+        }
 
-            this.playerInventoryContainer = inventoryContainer;
-        } else log.debug("Received inventory content for unknown container: {}", packet.getContainerId());
+        for (int i = 0; i < packet.getItems().length; i++) {
+            container.setSlot(i, packet.getItems()[i]);
+        }
     }
 
     @BusHandler
-    public void onSetInventorySlot(ClientboundContainerSetSlotPacket packet) {
-        if (packet.getContainerId() == 0) {
-            PlayerInventoryContainer inventoryContainer = this.playerInventoryContainer;
-            if (inventoryContainer == null) {
-                inventoryContainer = new PlayerInventoryContainer();
-            }
+    public void onSetContainerSlot(ClientboundContainerSetSlotPacket packet) {
+        Container container = containerData.get(packet.getContainerId());
 
-            inventoryContainer.setSlot(packet.getSlot(), packet.getItem());
+        if (container == null) {
+            log.warn("Received container slot update for unknown container {}", packet.getContainerId());
+            return;
+        }
 
-            this.playerInventoryContainer = inventoryContainer;
-        } else log.debug("Received inventory slot for unknown container: {}", packet.getContainerId());
+        container.setSlot(packet.getSlot(), packet.getItem());
     }
 
     @BusHandler
-    public void onCloseInventory(ClientboundContainerClosePacket packet) {
-        openContainer = null;
+    public void onSetContainerData(ClientboundContainerSetDataPacket packet) {
+        Container container = containerData.get(packet.getContainerId());
+
+        if (container == null) {
+            log.warn("Received container data update for unknown container {}", packet.getContainerId());
+            return;
+        }
+
+        container.setProperty(packet.getRawProperty(), packet.getValue());
     }
 
     @BusHandler
     public void onSetSlot(ClientboundSetCarriedItemPacket packet) {
         heldItemSlot = packet.getSlot();
+    }
+
+    @BusHandler
+    public void onOpenScreen(ClientboundOpenScreenPacket packet) {
+        containerData.put(packet.getContainerId(), new WindowContainer(packet.getType(), packet.getTitle(), packet.getContainerId()));
+    }
+
+    @BusHandler
+    public void onOpenBookScreen(ClientboundOpenBookPacket packet) {
+    }
+
+    @BusHandler
+    public void onOpenHorseScreen(ClientboundHorseScreenOpenPacket packet) {
+    }
+
+    @BusHandler
+    public void onCloseContainer(ClientboundContainerClosePacket packet) {
+        openContainerId = -1;
     }
 
     @BusHandler
