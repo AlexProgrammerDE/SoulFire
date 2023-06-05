@@ -21,8 +21,6 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.common.ProxyType;
-import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
@@ -52,7 +50,6 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Proxy list file", "txt"));
 
         loadProxies.addActionListener(new LoadProxiesListener(serverWrecker, parent, chooser));
-
         add(loadProxies);
 
         add(new JLabel("Accounts per proxy: "));

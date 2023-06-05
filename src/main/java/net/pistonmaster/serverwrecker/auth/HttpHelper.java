@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.auth;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.pistonmaster.serverwrecker.common.SWProxy;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;

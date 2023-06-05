@@ -54,7 +54,7 @@ public class AutoJump implements InternalAddon {
     }
 
     @EventHandler
-    public void onPreConnect(PreBotConnectEvent event) throws Throwable {
+    public void onPreConnect(PreBotConnectEvent event) {
         event.connection().cleanup(new BotJumpThread(event.connection(),
                 Executors.newScheduledThreadPool(1), new LinkedHashSet<>()));
     }
@@ -76,12 +76,12 @@ public class AutoJump implements InternalAddon {
                 AutoJumpSettings settings = connection.settingsHolder().get(AutoJumpSettings.class);
 
                 ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
-                    connection.logger().info("[AutoJump] Jumping!");
                     SessionDataManager sessionDataManager = connection.sessionDataManager();
                     LevelState level = sessionDataManager.getCurrentLevel();
                     BotMovementManager movementManager = sessionDataManager.getBotMovementManager();
                     if (level != null && movementManager != null
                             && level.isChunkLoaded(movementManager.getBlockPos())) {
+                        connection.logger().info("[AutoJump] Jumping!");
                         movementManager.jump();
                     }
                 }, settings.minDelay(), settings.maxDelay());

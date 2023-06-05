@@ -25,7 +25,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.handler.codec.dns.*;
 import io.netty.resolver.dns.DnsNameResolver;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
-import net.pistonmaster.serverwrecker.common.SWProxy;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;

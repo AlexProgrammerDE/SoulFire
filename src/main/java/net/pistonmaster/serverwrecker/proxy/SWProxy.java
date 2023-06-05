@@ -19,9 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.proxy;
 
-import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
+import java.net.InetSocketAddress;
 
-import java.util.List;
+public record SWProxy(ProxyType type, InetSocketAddress address, String username, String password) {
 
-public record ProxyList(List<SWProxy> proxies) implements SettingsObject {
+    public boolean hasCredentials() {
+        return username != null && password != null;
+    }
 }

@@ -23,6 +23,7 @@ import io.netty.util.ResourceLeakDetector;
 import net.pistonmaster.serverwrecker.addons.*;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.gui.MainFrame;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
 import org.fusesource.jansi.AnsiConsole;
@@ -66,7 +67,7 @@ public class ServerWreckerBootstrap {
             ThemeUtil.setLookAndFeel();
 
             loadInternalAddons();
-            ServerWrecker serverWrecker = new ServerWrecker();
+            ServerWrecker serverWrecker = new ServerWrecker(OperationMode.GUI);
             serverWrecker.initConsole();
 
             SwingUtilities.invokeLater(() ->
@@ -84,7 +85,7 @@ public class ServerWreckerBootstrap {
     }
 
     private static void runHeadless(String[] args) {
-        ServerWrecker serverWrecker = new ServerWrecker();
+        ServerWrecker serverWrecker = new ServerWrecker(OperationMode.CLI);
         CommandLine commandLine = new CommandLine(new SWCommandDefinition(serverWrecker));
         commandLine.setCaseInsensitiveEnumValuesAllowed(true);
         commandLine.setUsageHelpAutoWidth(true);
@@ -93,6 +94,8 @@ public class ServerWreckerBootstrap {
             ex.printStackTrace();
             return 1;
         });
+
+
         ServerWreckerAPI.postEvent(new CommandManagerInitEvent(commandLine));
         int exitCode = commandLine.execute(args);
 

@@ -43,7 +43,7 @@ import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
 import net.pistonmaster.serverwrecker.auth.*;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.AttackState;
-import net.pistonmaster.serverwrecker.common.SWProxy;
+import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.mojangdata.TranslationMapper;
@@ -55,6 +55,7 @@ import net.pistonmaster.serverwrecker.protocol.netty.SWNettyHelper;
 import net.pistonmaster.serverwrecker.proxy.ProxyList;
 import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
@@ -109,13 +110,15 @@ public class ServerWrecker {
             ProxySettings.class,
             ProxyList.class
     );
+    private final OperationMode operationMode;
     private final Path profilesFolder;
     private final Path pluginsFolder;
     @Setter
     private AttackState attackState = AttackState.STOPPED;
     private boolean shutdown = false;
 
-    public ServerWrecker() {
+    public ServerWrecker(OperationMode operationMode) {
+        this.operationMode = operationMode;
         this.profilesFolder = DATA_FOLDER.resolve("profiles");
         this.pluginsFolder = DATA_FOLDER.resolve("plugins");
 
@@ -133,7 +136,6 @@ public class ServerWrecker {
         logger.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
         terminalConsole = injector.getSingleton(SWTerminalConsole.class);
-        terminalConsole.setupStreams();
 
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
 
@@ -235,6 +237,7 @@ public class ServerWrecker {
     }
 
     public void initConsole() {
+        terminalConsole.setupStreams();
         threadPool.execute(terminalConsole::start);
     }
 
@@ -426,7 +429,9 @@ public class ServerWrecker {
             return;
         }
 
-        logger.info("Shutting down...");
+        if (explicitExit) {
+            logger.info("Shutting down...");
+        }
 
         // Shutdown the attack if there is any
         stop();

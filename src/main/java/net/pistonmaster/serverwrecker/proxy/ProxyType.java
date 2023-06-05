@@ -17,13 +17,11 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.common;
+package net.pistonmaster.serverwrecker.proxy;
 
-import java.net.InetSocketAddress;
-
-public record SWProxy(ProxyType type, InetSocketAddress address, String username, String password) {
-
-    public boolean hasCredentials() {
-        return username != null && password != null;
-    }
+public enum ProxyType {
+    HTTP,
+    HTTPS,
+    SOCKS4,
+    SOCKS5
 }

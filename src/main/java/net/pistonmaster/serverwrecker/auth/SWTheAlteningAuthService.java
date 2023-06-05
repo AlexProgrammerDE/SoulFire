@@ -22,7 +22,7 @@ package net.pistonmaster.serverwrecker.auth;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.google.gson.Gson;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
-import net.pistonmaster.serverwrecker.common.SWProxy;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpPost;

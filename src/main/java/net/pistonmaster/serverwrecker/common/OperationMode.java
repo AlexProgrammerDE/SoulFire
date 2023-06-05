@@ -19,9 +19,10 @@
  */
 package net.pistonmaster.serverwrecker.common;
 
-public enum ProxyType {
-    HTTP,
-    HTTPS,
-    SOCKS4,
-    SOCKS5
+/**
+ * Represents the operation mode of the application.
+ */
+public enum OperationMode {
+    CLI,
+    GUI
 }

@@ -21,8 +21,6 @@ package net.pistonmaster.serverwrecker.proxy;
 
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.common.ProxyType;
-import net.pistonmaster.serverwrecker.common.SWProxy;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import java.io.IOException;

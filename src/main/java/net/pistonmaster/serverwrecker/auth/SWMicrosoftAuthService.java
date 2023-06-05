@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.auth;
 
-import net.pistonmaster.serverwrecker.common.SWProxy;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.raphimc.mcauth.MinecraftAuth;
 import net.raphimc.mcauth.step.java.StepMCProfile;
 import net.raphimc.mcauth.step.java.StepMCToken;
