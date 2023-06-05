@@ -78,7 +78,7 @@ dependencies {
     }
 
     // For supporting multiple Minecraft versions
-    val vvVer = "4.7.0-1.20-rc1-SNAPSHOT"
+    val vvVer = "4.7.0-1.20-pre7-SNAPSHOT"
     val vbVer = "4.7.0-1.20-pre5-SNAPSHOT"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
