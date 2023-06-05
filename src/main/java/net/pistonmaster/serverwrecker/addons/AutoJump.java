@@ -150,9 +150,9 @@ public class AutoJump implements InternalAddon {
     private static class AutoJumpCommand implements SettingsProvider<AutoJumpSettings> {
         @CommandLine.Option(names = {"--auto-jump"}, description = "Do auto jump?")
         private boolean autoJump = AutoJumpSettings.DEFAULT_AUTO_JUMP;
-        @CommandLine.Option(names = {"--reconnect-min-delay"}, description = "Minimum delay between jumps")
+        @CommandLine.Option(names = {"--jump-min-delay"}, description = "Minimum delay between jumps")
         private int minDelay = AutoJumpSettings.DEFAULT_MIN_DELAY;
-        @CommandLine.Option(names = {"--reconnect-max-delay"}, description = "Maximum delay between jumps")
+        @CommandLine.Option(names = {"--jump-max-delay"}, description = "Maximum delay between jumps")
         private int maxDelay = AutoJumpSettings.DEFAULT_MAX_DELAY;
 
         @Override
