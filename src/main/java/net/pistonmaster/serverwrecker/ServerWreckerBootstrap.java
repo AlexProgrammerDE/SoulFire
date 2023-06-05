@@ -64,6 +64,7 @@ public class ServerWreckerBootstrap {
             loadInternalAddons();
             runHeadless(args);
         } else {
+            ThemeUtil.initFlatLaf();
             ThemeUtil.setLookAndFeel();
 
             loadInternalAddons();
@@ -94,7 +95,6 @@ public class ServerWreckerBootstrap {
             ex.printStackTrace();
             return 1;
         });
-
 
         ServerWreckerAPI.postEvent(new CommandManagerInitEvent(commandLine));
         int exitCode = commandLine.execute(args);

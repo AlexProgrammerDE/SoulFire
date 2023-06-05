@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.gui;
 
 import ch.jalu.injector.Injector;
+import com.formdev.flatlaf.util.SystemInfo;
 import javafx.embed.swing.JFXPanel;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 
@@ -44,6 +45,11 @@ public class MainFrame extends JFrame {
     @PostConstruct
     public void postConstruct() {
         new JFXPanel(); // Initializes the JavaFX Platform
+
+        if (SystemInfo.isMacOS) {
+            // Hide window title because we want to avoid dark-mode name issues
+            getRootPane().putClientProperty("apple.awt.windowTitleVisible", false);
+        }
 
         setResizable(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

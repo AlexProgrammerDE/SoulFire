@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.gui.theme;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.util.SystemInfo;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 
@@ -67,11 +68,26 @@ public class ThemeUtil {
         }
 
         try {
-            Files.createDirectories(ServerWrecker.DATA_FOLDER);
-
             THEME_MANAGER.saveProfile(THEME_PATH);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void initFlatLaf() {
+        if (SystemInfo.isMacOS) {
+            // Use top screen menu bar on macOS
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
+
+            // Set name in top menu bar
+            System.setProperty("apple.awt.application.name", "ServerWrecker");
+
+            // Color the frame
+            System.setProperty("apple.awt.application.appearance", "system");
+        } else if (SystemInfo.isLinux) {
+            // Make window decorations like on windows
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            JDialog.setDefaultLookAndFeelDecorated(true);
         }
     }
 }

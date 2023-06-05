@@ -17,19 +17,24 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.settings.lib;
+package net.pistonmaster.serverwrecker.api.event.gui;
 
-import java.util.List;
+import lombok.*;
+import net.kyori.event.Cancellable;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
 
-public record SettingsHolder(List<? extends SettingsObject> settings) {
-    public <T extends SettingsObject> T get(Class<T> clazz) {
-        return settings.stream()
-                .filter(clazz::isInstance)
-                .map(clazz::cast)
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("No settings found for " + clazz.getSimpleName()));
+@ToString
+@EqualsAndHashCode
+public class WindowCloseEvent implements ServerWreckerEvent, Cancellable {
+    private boolean cancelled;
+
+    @Override
+    public boolean cancelled() {
+        return cancelled;
     }
 
-    public <T extends SettingsObject> boolean has(Class<T> clazz) {
-        return settings.stream().anyMatch(clazz::isInstance);
+    @Override
+    public void cancelled(boolean cancelled) {
+        this.cancelled = cancelled;
     }
 }

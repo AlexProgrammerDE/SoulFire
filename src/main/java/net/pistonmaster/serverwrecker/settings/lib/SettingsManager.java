@@ -72,14 +72,18 @@ public class SettingsManager {
         return settingsHolder;
     }
 
-    @SuppressWarnings("unchecked")
     public void onSettingsLoad(SettingsHolder settings) {
         for (SettingsObject setting : settings.settings()) {
             for (ListenerRegistration<?> listener : listeners) {
-                if (listener.clazz.isInstance(setting)) {
-                    ((SettingsListener<SettingsObject>) listener.listener).onSettingsChange(setting);
-                }
+                loadSetting(setting, listener);
             }
+        }
+    }
+
+    private <T extends SettingsObject> void loadSetting(SettingsObject setting, ListenerRegistration<T> registration) {
+        if (registration.clazz.isInstance(setting)) {
+            T castedSetting = registration.clazz.cast(setting);
+            registration.listener.onSettingsChange(castedSetting);
         }
     }
 
@@ -98,6 +102,8 @@ public class SettingsManager {
     }
 
     public void saveProfile(Path path) throws IOException {
+        Files.createDirectories(path.getParent());
+
         try {
             List<JsonElement> settingsHolder = new ArrayList<>();
             for (SettingsObject settingsObject : collectSettings().settings()) {

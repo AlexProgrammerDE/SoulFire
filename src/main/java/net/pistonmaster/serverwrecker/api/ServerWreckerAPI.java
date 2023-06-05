@@ -85,7 +85,7 @@ public class ServerWreckerAPI {
 
             method.setAccessible(true);
 
-            registerListener((Class<? extends ServerWreckerEvent>) method.getParameterTypes()[0],
+            registerListener(method.getParameterTypes()[0].asSubclass(ServerWreckerEvent.class),
                     event -> {
                         try {
                             method.invoke(listener, event);

@@ -26,6 +26,8 @@ import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.gui.WindowCloseEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.popups.AboutPopup;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
@@ -33,6 +35,7 @@ import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
 import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicLookAndFeel;
+import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -107,7 +110,7 @@ public class SWMenuBar extends JMenuBar {
         fileMenu.add(exit);
         add(fileMenu);
 
-        JMenu window = new JMenu("Window");
+        JMenu window = new JMenu("Options");
         JMenu themeSelector = new JMenu("Theme");
         for (Class<? extends BasicLookAndFeel> theme : THEMES) {
             JMenuItem themeItem = new JMenuItem(theme.getSimpleName());
@@ -126,10 +129,31 @@ public class SWMenuBar extends JMenuBar {
         JMenu helpMenu = new JMenu("Help");
         JMenuItem about = new JMenuItem("About");
         about.addActionListener(e -> {
-            JPopupMenu popupMenu = new AboutPopup();
-            popupMenu.show(this, 0, 0);
         });
         helpMenu.add(about);
         add(helpMenu);
+
+        Desktop desktop = Desktop.getDesktop();
+        if (desktop.isSupported(Desktop.Action.APP_ABOUT)) {
+            desktop.setAboutHandler(e -> showAboutDialog());
+        }
+
+        if (desktop.isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
+            desktop.setQuitHandler((e, response) -> {
+                WindowCloseEvent event = new WindowCloseEvent();
+                ServerWreckerAPI.postEvent(event);
+                boolean canQuit = !event.cancelled();
+                if (canQuit) {
+                    response.performQuit();
+                } else {
+                    response.cancelQuit();
+                }
+            });
+        }
+    }
+
+    private void showAboutDialog() {
+        JPopupMenu popupMenu = new AboutPopup();
+        popupMenu.show(this, 0, 0);
     }
 }
