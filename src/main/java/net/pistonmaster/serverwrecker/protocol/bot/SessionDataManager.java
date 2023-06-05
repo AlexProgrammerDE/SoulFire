@@ -393,6 +393,7 @@ public final class SessionDataManager {
     @BusHandler
     public void onOpenScreen(ClientboundOpenScreenPacket packet) {
         containerData.put(packet.getContainerId(), new WindowContainer(packet.getType(), packet.getTitle(), packet.getContainerId()));
+        openContainerId = packet.getContainerId();
     }
 
     @BusHandler
