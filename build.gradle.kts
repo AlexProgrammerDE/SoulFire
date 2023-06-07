@@ -115,7 +115,7 @@ dependencies {
     implementation("com.thealtening.api:api:4.1.0")
 
     implementation("net.kyori:adventure-text-serializer-plain:4.13.1")
-    implementation("net.kyori:adventure-text-serializer-gson:4.13.1")
+    implementation("net.kyori:adventure-text-serializer-gson:4.14.0")
 
     implementation("net.kyori:event-api:5.0.0-SNAPSHOT")
     implementation("ch.jalu:injector:1.0")
