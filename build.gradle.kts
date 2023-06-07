@@ -84,7 +84,7 @@ dependencies {
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.viaversion:viarewind-core:2.0.4-SNAPSHOT")
 
-    implementation("net.raphimc:ViaLegacy:2.2.17-SNAPSHOT")
+    implementation("net.raphimc:ViaLegacy:2.2.17")
     implementation("net.raphimc:ViaAprilFools:2.0.7")
     implementation("net.raphimc:ViaLoader:2.2.5-SNAPSHOT") {
         exclude("org.slf4j", "slf4j-api")
