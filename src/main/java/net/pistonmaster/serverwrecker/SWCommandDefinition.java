@@ -45,6 +45,7 @@ public class SWCommandDefinition implements Callable<Integer> {
 
     @Option(names = {"--port"}, description = "Target port to connect to")
     private int port = BotSettings.DEFAULT_PORT;
+
     @Option(names = {"-a", "--amount"}, description = "Amount of bots to connect to the server")
     private int amount = BotSettings.DEFAULT_AMOUNT;
 
@@ -65,9 +66,6 @@ public class SWCommandDefinition implements Callable<Integer> {
 
     @Option(names = {"--try-srv"}, description = "Try to connect to the target using SRV records")
     private boolean trySrv = BotSettings.DEFAULT_TRY_SRV;
-
-    @Option(names = {"--wait-established"}, description = "Make the program halt and wait till a bot was successfully connected before connecting the next bot")
-    private boolean waitEstablished = BotSettings.DEFAULT_WAIT_ESTABLISHED;
 
     @Option(names = {"--debug"}, description = "Log additional information useful for debugging the software")
     private boolean debug = DevSettings.DEFAULT_DEBUG;
@@ -105,8 +103,7 @@ public class SWCommandDefinition implements Callable<Integer> {
                         readTimeout,
                         writeTimout,
                         connectTimeout,
-                        trySrv,
-                        waitEstablished
+                        trySrv
                 ));
 
         serverWrecker.getSettingsManager().registerProvider(DevSettings.class,

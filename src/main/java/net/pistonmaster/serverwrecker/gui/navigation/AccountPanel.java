@@ -25,7 +25,6 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
-import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;

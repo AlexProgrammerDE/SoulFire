@@ -38,7 +38,6 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
     private final JTextField portInput;
     private final JCheckBox trySrv;
     private final JSpinner joinDelayMs;
-    private final JCheckBox waitEstablished;
     private final JSpinner amount;
     private final JComboBox<ProtocolVersion> versionBox;
     private final JSpinner readTimeout;
@@ -67,10 +66,6 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         joinDelayMs = new JSpinner();
         joinDelayMs.setValue(BotSettings.DEFAULT_JOIN_DELAY_MS);
         add(joinDelayMs);
-
-        add(new JLabel("Wait established: "));
-        waitEstablished = new PresetJCheckBox(BotSettings.DEFAULT_WAIT_ESTABLISHED);
-        add(waitEstablished);
 
         add(new JLabel("Amount: "));
         amount = new JSpinner();
@@ -127,7 +122,6 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         writeTimeout.setValue(settings.writeTimeout());
         connectTimeout.setValue(settings.connectTimeout());
         trySrv.setSelected(settings.trySrv());
-        waitEstablished.setSelected(settings.waitEstablished());
     }
 
     @Override
@@ -141,8 +135,7 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
                 (int) readTimeout.getValue(),
                 (int) writeTimeout.getValue(),
                 (int) connectTimeout.getValue(),
-                trySrv.isSelected(),
-                waitEstablished.isSelected()
+                trySrv.isSelected()
         );
     }
 }
