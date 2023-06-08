@@ -78,10 +78,8 @@ dependencies {
     }
 
     // For supporting multiple Minecraft versions
-    val vvVer = "4.7.0-1.20-pre7-SNAPSHOT"
-    val vbVer = "4.7.0-1.20-pre5-SNAPSHOT"
-    implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
-    implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
+    implementation("com.viaversion:viaversion:4.7.0") { isTransitive = false }
+    implementation("com.viaversion:viabackwards:4.7.0") { isTransitive = false }
     implementation("com.viaversion:viarewind-core:2.0.4-SNAPSHOT")
 
     implementation("net.raphimc:ViaLegacy:2.2.17")
