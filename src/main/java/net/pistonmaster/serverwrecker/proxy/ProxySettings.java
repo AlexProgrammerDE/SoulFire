@@ -22,4 +22,5 @@ package net.pistonmaster.serverwrecker.proxy;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
 public record ProxySettings(int botsPerProxy) implements SettingsObject {
+    public static final int DEFAULT_BOTS_PER_PROXY = -1;
 }

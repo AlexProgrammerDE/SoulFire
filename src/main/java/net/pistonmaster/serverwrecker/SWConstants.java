@@ -29,7 +29,6 @@ import java.util.List;
 
 public class SWConstants {
     public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.v1_20;
-    public static final ProtocolVersion LATEST_SHOWN_VERSION = ProtocolVersion.v1_20;
 
     public static List<ProtocolVersion> getVersionsSorted() {
         List<ProtocolVersion> normalVersions = new ArrayList<>();
@@ -40,7 +39,7 @@ public class SWConstants {
             }
 
             int versionId = version.getVersion();
-            if (versionId > LATEST_SHOWN_VERSION.getVersion()) {
+            if (versionId > CURRENT_PROTOCOL_VERSION.getVersion()) {
                 continue; // Exclude in-development versions
             }
 

@@ -47,13 +47,13 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         FileChooser chooser = new FileChooser();
         chooser.setInitialDirectory(Path.of(System.getProperty("user.dir")).toFile());
         chooser.setTitle("Load proxies");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Proxy list file", "txt"));
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Proxy list file", "*.txt"));
 
         loadProxies.addActionListener(new LoadProxiesListener(serverWrecker, parent, chooser));
         add(loadProxies);
 
         add(new JLabel("Accounts per proxy: "));
-        botsPerProxy.setValue(-1);
+        botsPerProxy.setValue(ProxySettings.DEFAULT_BOTS_PER_PROXY);
         add(botsPerProxy);
     }
 

@@ -263,6 +263,7 @@ public class ServerWrecker {
         SettingsHolder settingsHolder = settingsManager.collectSettings();
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
         DevSettings devSettings = settingsHolder.get(DevSettings.class);
+        AccountSettings accountSettings = settingsHolder.get(AccountSettings.class);
         ProxySettings proxySettings = settingsHolder.get(ProxySettings.class);
 
         Via.getManager().debugHandler().setEnabled(devSettings.debug());
@@ -286,7 +287,7 @@ public class ServerWrecker {
         }
 
         AccountList accountList = settingsHolder.get(AccountList.class);
-        List<JavaAccount> accounts = accountList.accounts();
+        List<JavaAccount> accounts = new ArrayList<>(accountList.accounts());
         int availableAccounts = accounts.size();
 
         if (availableAccounts > 0 && botAmount > availableAccounts) {
@@ -295,8 +296,7 @@ public class ServerWrecker {
             botAmount = availableAccounts;
         }
 
-        boolean shuffle = false; // TODO: make this configurable
-        if (shuffle) {
+        if (accountSettings.shuffleAccounts()) {
             Collections.shuffle(accounts);
         }
 
@@ -312,7 +312,7 @@ public class ServerWrecker {
         for (int botId = 1; botId <= botAmount; botId++) {
             SWProxy proxyData = getProxy(botsPerProxy, proxyUseMap);
 
-            JavaAccount javaAccount = getAccount(botSettings, accounts, botId);
+            JavaAccount javaAccount = getAccount(accountSettings, accounts, botId);
             int index = accounts.indexOf(javaAccount);
             if (index != -1) {
                 accounts.remove(index); // Remove the account from the list, so it can't be used again
@@ -355,9 +355,9 @@ public class ServerWrecker {
         }
     }
 
-    private JavaAccount getAccount(BotSettings botSettings, List<JavaAccount> accounts, int botId) {
+    private JavaAccount getAccount(AccountSettings accountSettings, List<JavaAccount> accounts, int botId) {
         if (accounts.isEmpty()) {
-            return new JavaAccount(String.format(botSettings.botNameFormat(), botId));
+            return new JavaAccount(String.format(accountSettings.nameFormat(), botId));
         } else {
             return accounts.get(0);
         }

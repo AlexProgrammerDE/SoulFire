@@ -20,10 +20,22 @@
 package net.pistonmaster.serverwrecker.settings;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
-public record BotSettings(String host, int port, boolean trySrv,
-                          int amount, int joinDelayMs, boolean waitEstablished, String botNameFormat,
+public record BotSettings(String host, int port,
+                          int amount, int joinDelayMs,
                           ProtocolVersion protocolVersion,
-                          int readTimeout, int writeTimeout, int connectTimeout) implements SettingsObject {
+                          int readTimeout, int writeTimeout, int connectTimeout,
+                          boolean trySrv, boolean waitEstablished) implements SettingsObject {
+    public static final String DEFAULT_HOST = "127.0.0.1";
+    public static final int DEFAULT_PORT = 25565;
+    public static final int DEFAULT_AMOUNT = 1;
+    public static final int DEFAULT_JOIN_DELAY_MS = 1000;
+    public static final ProtocolVersion DEFAULT_PROTOCOL_VERSION = SWConstants.CURRENT_PROTOCOL_VERSION;
+    public static final int DEFAULT_READ_TIMEOUT = 30;
+    public static final int DEFAULT_WRITE_TIMEOUT = 0;
+    public static final int DEFAULT_CONNECT_TIMEOUT = 30;
+    public static final boolean DEFAULT_TRY_SRV = true;
+    public static final boolean DEFAULT_WAIT_ESTABLISHED = true;
 }

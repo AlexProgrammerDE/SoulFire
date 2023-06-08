@@ -41,43 +41,45 @@ public class SWCommandDefinition implements Callable<Integer> {
     private final ServerWrecker serverWrecker;
 
     @Option(names = {"--host", "--target"}, description = "Target url to connect to")
-    private String host = "127.0.0.1";
+    private String host = BotSettings.DEFAULT_HOST;
 
     @Option(names = {"--port"}, description = "Target port to connect to")
-    private int port = 25565;
-
-    @Option(names = {"--try-srv"}, description = "Try to connect to the target using SRV records")
-    private boolean trySrv;
-
+    private int port = BotSettings.DEFAULT_PORT;
     @Option(names = {"-a", "--amount"}, description = "Amount of bots to connect to the server")
-    private int amount = 20;
+    private int amount = BotSettings.DEFAULT_AMOUNT;
 
     @Option(names = {"--join-delay"}, description = "The delay between bot spawns, in milliseconds")
-    private int joinDelay = 1000;
-
-    @Option(names = {"--name-format"}, description = "Format for bot names. allows integer placeholder '%%d'")
-    private String nameFormat = "Bot%d";
+    private int joinDelay = BotSettings.DEFAULT_JOIN_DELAY_MS;
 
     @Option(names = {"-mc", "--mc-version"}, description = "Minecraft version of the server to connect to")
-    private String version = SWConstants.LATEST_SHOWN_VERSION.getName();
-
-    @Option(names = {"--debug"}, description = "Log additional information useful for debugging the software")
-    private boolean debug;
-
-    @Option(names = {"--accounts-per-proxy"}, description = "Amount of accounts that can be on a single proxy")
-    private int accountsPerProxy = -1;
+    private String version = BotSettings.DEFAULT_PROTOCOL_VERSION.getName();
 
     @Option(names = {"--read-timeout"}, description = "Bot read timeout")
-    private int readTimeout = 30;
+    private int readTimeout = BotSettings.DEFAULT_READ_TIMEOUT;
 
     @Option(names = {"--write-timeout"}, description = "Bot write timeout")
-    private int writeTimout = 0;
+    private int writeTimout = BotSettings.DEFAULT_WRITE_TIMEOUT;
 
     @Option(names = {"--connect-timeout"}, description = "Bot connect timeout")
-    private int connectTimeout = 30;
+    private int connectTimeout = BotSettings.DEFAULT_CONNECT_TIMEOUT;
 
-    @Option(names = {"--disable-wait-established"}, description = "Make the program halt and wait till a bot was successfully connected before connecting the next bot")
-    private boolean disableWaitEstablished;
+    @Option(names = {"--try-srv"}, description = "Try to connect to the target using SRV records")
+    private boolean trySrv = BotSettings.DEFAULT_TRY_SRV;
+
+    @Option(names = {"--wait-established"}, description = "Make the program halt and wait till a bot was successfully connected before connecting the next bot")
+    private boolean waitEstablished = BotSettings.DEFAULT_WAIT_ESTABLISHED;
+
+    @Option(names = {"--debug"}, description = "Log additional information useful for debugging the software")
+    private boolean debug = DevSettings.DEFAULT_DEBUG;
+
+    @Option(names = {"--bots-per-proxy"}, description = "Amount of bots that can be on a single proxy")
+    private int botsPerProxy = ProxySettings.DEFAULT_BOTS_PER_PROXY;
+
+    @Option(names = {"--name-format"}, description = "Format for bot names. allows integer placeholder '%%d'")
+    private String nameFormat = AccountSettings.DEFAULT_NAME_FORMAT;
+
+    @Option(names = {"--shuffle-accounts"}, description = "Shuffle accounts before connecting")
+    private boolean shuffleAccounts = AccountSettings.DEFAULT_SHUFFLE_ACCOUNTS;
 
     @Option(names = {"--account-file"}, description = "File to load accounts from")
     private Path accountFile;
@@ -97,15 +99,14 @@ public class SWCommandDefinition implements Callable<Integer> {
                 () -> new BotSettings(
                         host,
                         port,
-                        trySrv,
                         amount,
                         joinDelay,
-                        !disableWaitEstablished,
-                        nameFormat,
                         ProtocolVersion.getClosest(version),
                         readTimeout,
                         writeTimout,
-                        connectTimeout
+                        connectTimeout,
+                        trySrv,
+                        waitEstablished
                 ));
 
         serverWrecker.getSettingsManager().registerProvider(DevSettings.class,
@@ -113,11 +114,15 @@ public class SWCommandDefinition implements Callable<Integer> {
                         debug
                 ));
 
-        serverWrecker.getSettingsManager().registerProvider(AccountSettings.class, AccountSettings::new);
+        serverWrecker.getSettingsManager().registerProvider(AccountSettings.class,
+                () -> new AccountSettings(
+                        nameFormat,
+                        shuffleAccounts
+                ));
 
         serverWrecker.getSettingsManager().registerProvider(ProxySettings.class,
                 () -> new ProxySettings(
-                        accountsPerProxy
+                        botsPerProxy
                 ));
 
         if (accountFile != null) {

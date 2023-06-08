@@ -24,6 +24,8 @@ import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
+import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
+import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;
@@ -35,6 +37,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public class AccountPanel extends NavigationItem implements SettingsDuplex<AccountSettings> {
+    private final JTextField nameFormat;
+    private final JCheckBox shuffleAccounts = new PresetJCheckBox(AccountSettings.DEFAULT_SHUFFLE_ACCOUNTS);
+
     @Inject
     public AccountPanel(ServerWrecker serverWrecker, JFrame parent) {
         serverWrecker.getSettingsManager().registerDuplex(AccountSettings.class, this);
@@ -46,11 +51,18 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         FileChooser chooser = new FileChooser();
         chooser.setInitialDirectory(Path.of(System.getProperty("user.dir")).toFile());
         chooser.setTitle("Load accounts");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Account list file", "txt", "json"));
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Account list file", "*.txt", "*.json"));
 
         loadAccounts.addActionListener(new LoadAccountsListener(serverWrecker, parent, chooser));
 
         add(loadAccounts);
+
+        add(new JLabel("Shuffle accounts: "));
+        add(shuffleAccounts);
+
+        add(new JLabel("Name Format: "));
+        nameFormat = new JTextField(AccountSettings.DEFAULT_NAME_FORMAT);
+        add(nameFormat);
     }
 
     @Override
@@ -65,11 +77,16 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
     @Override
     public void onSettingsChange(AccountSettings settings) {
+        nameFormat.setText(settings.nameFormat());
+        shuffleAccounts.setSelected(settings.shuffleAccounts());
     }
 
     @Override
     public AccountSettings collectSettings() {
-        return new AccountSettings();
+        return new AccountSettings(
+                nameFormat.getText(),
+                shuffleAccounts.isSelected()
+        );
     }
 
     private record LoadAccountsListener(ServerWrecker serverWrecker, JFrame frame,

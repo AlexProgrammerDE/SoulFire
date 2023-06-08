@@ -22,4 +22,5 @@ package net.pistonmaster.serverwrecker.settings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
 public record DevSettings(boolean debug) implements SettingsObject {
+    public static final boolean DEFAULT_DEBUG = false;
 }

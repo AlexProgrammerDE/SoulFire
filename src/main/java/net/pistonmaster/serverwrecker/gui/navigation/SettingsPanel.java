@@ -38,9 +38,8 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
     private final JTextField portInput;
     private final JCheckBox trySrv;
     private final JSpinner joinDelayMs;
-    private final JCheckBox disableWaitEstablished;
+    private final JCheckBox waitEstablished;
     private final JSpinner amount;
-    private final JTextField nameFormat;
     private final JComboBox<ProtocolVersion> versionBox;
     private final JSpinner readTimeout;
     private final JSpinner writeTimeout;
@@ -53,34 +52,30 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         setLayout(new GridLayout(0, 2));
 
         add(new JLabel("Host: "));
-        hostInput = new JTextField("127.0.0.1");
+        hostInput = new JTextField(BotSettings.DEFAULT_HOST);
         add(hostInput);
 
         add(new JLabel("Port: "));
-        portInput = new JTextField("25565");
+        portInput = new JTextField(String.valueOf(BotSettings.DEFAULT_PORT));
         add(portInput);
 
         add(new JLabel("Try SRV record resolving: "));
-        trySrv = new PresetJCheckBox(true);
+        trySrv = new PresetJCheckBox(BotSettings.DEFAULT_TRY_SRV);
         add(trySrv);
 
         add(new JLabel("Join delay (ms): "));
         joinDelayMs = new JSpinner();
-        joinDelayMs.setValue(1000);
+        joinDelayMs.setValue(BotSettings.DEFAULT_JOIN_DELAY_MS);
         add(joinDelayMs);
 
-        add(new JLabel("Disable wait established: "));
-        disableWaitEstablished = new PresetJCheckBox(false);
-        add(disableWaitEstablished);
+        add(new JLabel("Wait established: "));
+        waitEstablished = new PresetJCheckBox(BotSettings.DEFAULT_WAIT_ESTABLISHED);
+        add(waitEstablished);
 
         add(new JLabel("Amount: "));
         amount = new JSpinner();
-        amount.setValue(20);
+        amount.setValue(BotSettings.DEFAULT_AMOUNT);
         add(amount);
-
-        add(new JLabel("Name Format: "));
-        nameFormat = new JTextField("Bot%d");
-        add(nameFormat);
 
         add(new JLabel("Version: "));
         versionBox = new JComboBox<>();
@@ -89,17 +84,17 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
 
         add(new JLabel("Read Timeout: "));
         readTimeout = new JSpinner();
-        readTimeout.setValue(30);
+        readTimeout.setValue(BotSettings.DEFAULT_READ_TIMEOUT);
         add(readTimeout);
 
         add(new JLabel("Write Timeout: "));
         writeTimeout = new JSpinner();
-        writeTimeout.setValue(0);
+        writeTimeout.setValue(BotSettings.DEFAULT_WRITE_TIMEOUT);
         add(writeTimeout);
 
         add(new JLabel("Connect Timeout: "));
         connectTimeout = new JSpinner();
-        connectTimeout.setValue(30);
+        connectTimeout.setValue(BotSettings.DEFAULT_CONNECT_TIMEOUT);
         add(connectTimeout);
     }
 
@@ -108,6 +103,7 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         List<ProtocolVersion> versions = new ArrayList<>(SWConstants.getVersionsSorted());
         Collections.reverse(versions);
         versions.forEach(versionBox::addItem);
+        versionBox.setSelectedItem(BotSettings.DEFAULT_PROTOCOL_VERSION);
     }
 
     @Override
@@ -126,12 +122,12 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         portInput.setText(String.valueOf(settings.port()));
         amount.setValue(settings.amount());
         joinDelayMs.setValue(settings.joinDelayMs());
-        disableWaitEstablished.setSelected(!settings.waitEstablished());
-        nameFormat.setText(settings.botNameFormat());
         versionBox.setSelectedItem(settings.protocolVersion());
         readTimeout.setValue(settings.readTimeout());
         writeTimeout.setValue(settings.writeTimeout());
         connectTimeout.setValue(settings.connectTimeout());
+        trySrv.setSelected(settings.trySrv());
+        waitEstablished.setSelected(settings.waitEstablished());
     }
 
     @Override
@@ -139,14 +135,14 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         return new BotSettings(
                 hostInput.getText(),
                 Integer.parseInt(portInput.getText()),
-                trySrv.isSelected(),
                 (int) amount.getValue(),
                 (int) joinDelayMs.getValue(),
-                !disableWaitEstablished.isSelected(),
-                nameFormat.getText(),
                 (ProtocolVersion) versionBox.getSelectedItem(),
                 (int) readTimeout.getValue(),
                 (int) writeTimeout.getValue(),
-                (int) connectTimeout.getValue());
+                (int) connectTimeout.getValue(),
+                trySrv.isSelected(),
+                waitEstablished.isSelected()
+        );
     }
 }
