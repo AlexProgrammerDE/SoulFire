@@ -64,6 +64,8 @@ public class MainPanel extends JPanel {
         splitPane.setDividerLocation(0.5d);
         splitPane.setContinuousLayout(true);
 
+        splitPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+
         add(splitPane, splitConstraints);
     }
 

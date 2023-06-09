@@ -88,6 +88,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Getter
 public class ServerWrecker {
     public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
+
+    static {
+        MinecraftCodec.CODEC.getCodec(ProtocolState.STATUS)
+                .registerClientbound(new PacketDefinition<>(0x00,
+                        SWClientboundStatusResponsePacket.class,
+                        new MinecraftPacketSerializer<>(SWClientboundStatusResponsePacket::new)));
+    }
+
     private final Logger logger = LoggerFactory.getLogger("ServerWrecker");
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
@@ -118,13 +126,6 @@ public class ServerWrecker {
     @Setter
     private AttackState attackState = AttackState.STOPPED;
     private boolean shutdown = false;
-
-    static {
-        MinecraftCodec.CODEC.getCodec(ProtocolState.STATUS)
-                .registerClientbound(new PacketDefinition<>(0x00,
-                        SWClientboundStatusResponsePacket.class,
-                        new MinecraftPacketSerializer<>(SWClientboundStatusResponsePacket::new)));
-    }
 
     public ServerWrecker(OperationMode operationMode) {
         this.operationMode = operationMode;

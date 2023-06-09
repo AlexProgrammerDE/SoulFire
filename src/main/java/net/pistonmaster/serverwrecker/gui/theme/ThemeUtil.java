@@ -20,6 +20,8 @@
 package net.pistonmaster.serverwrecker.gui.theme;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.util.SystemInfo;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
@@ -62,7 +64,13 @@ public class ThemeUtil {
             BasicLookAndFeel theme = Class.forName(themeSettings.themeClass())
                     .asSubclass(BasicLookAndFeel.class).getDeclaredConstructor().newInstance();
 
+            FlatAnimatedLafChange.showSnapshot();
+
             UIManager.setLookAndFeel(theme);
+
+            FlatLaf.updateUI();
+
+            FlatAnimatedLafChange.hideSnapshotWithAnimation();
         } catch (UnsupportedLookAndFeelException | ReflectiveOperationException e) {
             e.printStackTrace();
         }

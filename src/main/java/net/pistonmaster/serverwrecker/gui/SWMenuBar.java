@@ -116,10 +116,7 @@ public class SWMenuBar extends JMenuBar {
             JMenuItem themeItem = new JMenuItem(theme.getSimpleName());
             themeItem.addActionListener(e -> {
                 ThemeUtil.THEME_PROVIDER.setThemeClass(theme);
-                SwingUtilities.invokeLater(() -> {
-                    ThemeUtil.setLookAndFeel();
-                    SwingUtilities.updateComponentTreeUI(frame);
-                });
+                SwingUtilities.invokeLater(ThemeUtil::setLookAndFeel);
             });
             themeSelector.add(themeItem);
         }
@@ -129,6 +126,7 @@ public class SWMenuBar extends JMenuBar {
         JMenu helpMenu = new JMenu("Help");
         JMenuItem about = new JMenuItem("About");
         about.addActionListener(e -> {
+            showAboutDialog();
         });
         helpMenu.add(about);
         add(helpMenu);

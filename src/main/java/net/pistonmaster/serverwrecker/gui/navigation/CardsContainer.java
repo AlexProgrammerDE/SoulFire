@@ -57,6 +57,6 @@ public class CardsContainer extends JPanel {
             add(NavigationWrapper.createWrapper(this, addonPanel.getNavigationId(), item), item.getNavigationId());
         }
 
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));
     }
 }

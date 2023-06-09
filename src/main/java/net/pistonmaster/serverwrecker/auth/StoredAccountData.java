@@ -19,5 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.auth;
 
-public record StoredAccountData(AuthType authType, String username, String email, String password, String authToken, long tokenExpireAt) {
+public record StoredAccountData(AuthType authType, String username, String email, String password, String authToken,
+                                long tokenExpireAt) {
 }

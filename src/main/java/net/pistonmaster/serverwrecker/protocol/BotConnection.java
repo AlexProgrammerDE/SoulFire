@@ -34,7 +34,8 @@ import java.util.BitSet;
 import java.util.Collections;
 
 public record BotConnection(BotConnectionFactory factory, ServerWrecker serverWrecker, SettingsHolder settingsHolder,
-                            Logger logger, MinecraftProtocol protocol, ViaClientSession session, BotConnectionMeta meta) {
+                            Logger logger, MinecraftProtocol protocol, ViaClientSession session,
+                            BotConnectionMeta meta) {
     public void sendMessage(String message) {
         if (message.startsWith("/")) {
             session.send(new ServerboundChatCommandPacket(message.substring(1), Instant.now().toEpochMilli(), 0, Collections.emptyList(), 0, new BitSet()));
