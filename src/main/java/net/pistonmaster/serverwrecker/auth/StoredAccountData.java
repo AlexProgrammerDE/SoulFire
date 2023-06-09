@@ -17,21 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol;
+package net.pistonmaster.serverwrecker.auth;
 
-import com.github.steveice10.mc.protocol.data.ProtocolState;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
-import net.pistonmaster.serverwrecker.auth.JavaAccount;
-
-import java.util.ArrayList;
-import java.util.List;
-
-@Getter
-@RequiredArgsConstructor
-public class BotConnectionMeta {
-    private final List<UnregisterCleanup> unregisterCleanups = new ArrayList<>();
-    private final JavaAccount javaAccount;
-    private final ProtocolState targetState;
+public record StoredAccountData(AuthType authType, String username, String email, String password, String authToken, long tokenExpireAt) {
 }

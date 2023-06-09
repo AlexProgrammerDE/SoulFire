@@ -17,12 +17,19 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.common;
+package net.pistonmaster.serverwrecker.util;
 
-import java.util.function.Function;
+import java.util.concurrent.TimeUnit;
 
-public class NullHelper {
-    public static <P, T> T nullOrApply(P value, Function<P, T> convert) {
-        return value == null ? null : convert.apply(value);
+/**
+ * Simple class to make waiting easier and less verbose.
+ */
+public class TimeUtil {
+    public static void waitTime(long time, TimeUnit unit) {
+        try {
+            unit.sleep(time);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

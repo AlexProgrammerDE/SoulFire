@@ -43,13 +43,14 @@ public record BotConnectionFactory(ServerWrecker serverWrecker, InetSocketAddres
                                    MinecraftProtocol protocol, JavaAccount javaAccount,
                                    SWProxy proxyData) {
     public CompletableFuture<BotConnection> connect() {
-        return CompletableFuture.supplyAsync(this::connectInternal);
+        return CompletableFuture.supplyAsync(() -> connectInternal(ProtocolState.LOGIN));
     }
 
-    public BotConnection connectInternal() {
+    public BotConnection connectInternal(ProtocolState targetState) {
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
         ViaClientSession session = new ViaClientSession(targetAddress, protocol, proxyData, settingsHolder);
-        BotConnection botConnection = new BotConnection(this, serverWrecker, settingsHolder, logger, protocol, session, new BotConnectionMeta(javaAccount));
+        BotConnection botConnection = new BotConnection(this, serverWrecker, settingsHolder, logger, protocol, session,
+                new BotConnectionMeta(javaAccount, targetState));
         session.setPostDisconnectHook(() -> botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup));
 
         SessionDataManager sessionDataManager = new SessionDataManager(botConnection);
@@ -62,7 +63,7 @@ public record BotConnectionFactory(ServerWrecker serverWrecker, InetSocketAddres
         session.setReadTimeout(botSettings.readTimeout());
         session.setWriteTimeout(botSettings.writeTimeout());
 
-        session.addListener(new SWBaseListener(botConnection, ProtocolState.LOGIN));
+        session.addListener(new SWBaseListener(botConnection, targetState));
         session.addListener(new SWSessionListener(sessionDataManager, botConnection));
 
         ServerWreckerAPI.postEvent(new PreBotConnectEvent(botConnection));

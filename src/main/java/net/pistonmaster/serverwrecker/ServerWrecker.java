@@ -23,6 +23,10 @@ import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
+import com.github.steveice10.mc.protocol.codec.MinecraftCodec;
+import com.github.steveice10.mc.protocol.codec.MinecraftPacketSerializer;
+import com.github.steveice10.mc.protocol.data.ProtocolState;
+import com.github.steveice10.packetlib.codec.PacketDefinition;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -44,14 +48,15 @@ import net.pistonmaster.serverwrecker.auth.*;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.common.OperationMode;
+import net.pistonmaster.serverwrecker.data.TranslationMapper;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
-import net.pistonmaster.serverwrecker.data.TranslationMapper;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.serverwrecker.protocol.netty.ResolveUtil;
 import net.pistonmaster.serverwrecker.protocol.netty.SWNettyHelper;
+import net.pistonmaster.serverwrecker.protocol.packet.SWClientboundStatusResponsePacket;
 import net.pistonmaster.serverwrecker.proxy.ProxyList;
 import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
@@ -77,10 +82,7 @@ import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
@@ -116,6 +118,13 @@ public class ServerWrecker {
     @Setter
     private AttackState attackState = AttackState.STOPPED;
     private boolean shutdown = false;
+
+    static {
+        MinecraftCodec.CODEC.getCodec(ProtocolState.STATUS)
+                .registerClientbound(new PacketDefinition<>(0x00,
+                        SWClientboundStatusResponsePacket.class,
+                        new MinecraftPacketSerializer<>(SWClientboundStatusResponsePacket::new)));
+    }
 
     public ServerWrecker(OperationMode operationMode) {
         this.operationMode = operationMode;
@@ -306,9 +315,9 @@ public class ServerWrecker {
         }
 
         EventLoopGroup resolveGroup = SWNettyHelper.createEventLoopGroup();
-        InetSocketAddress targetAddress = ResolveUtil.resolveAddress(settingsHolder, resolveGroup, null);
+        InetSocketAddress targetAddress = ResolveUtil.resolveAddress(settingsHolder, resolveGroup);
 
-        List<BotConnectionFactory> factories = new ArrayList<>();
+        Queue<BotConnectionFactory> factories = new ArrayBlockingQueue<>(botAmount);
         for (int botId = 1; botId <= botAmount; botId++) {
             SWProxy proxyData = getProxy(botsPerProxy, proxyUseMap);
 
@@ -329,29 +338,38 @@ public class ServerWrecker {
 
         ServerWreckerAPI.postEvent(new AttackStartEvent());
 
-        for (BotConnectionFactory botConnectionFactory : factories) {
+        while (!factories.isEmpty()) {
             try {
                 TimeUnit.MILLISECONDS.sleep(botSettings.joinDelayMs());
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
 
-            while (attackState.isPaused()) {
+            if (attackState.isStopped()) {
+                break;
+            }
+
+            if (attackState.isPaused()) {
                 try {
                     TimeUnit.MILLISECONDS.sleep(100);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
+                continue;
             }
 
-            // Stop the bot in case the user aborted the attack
-            if (attackState.isStopped()) {
+            BotConnectionFactory factory = factories.poll();
+            if (factory == null) {
                 break;
             }
 
-            botConnectionFactory.logger().info("Connecting...");
-
-            this.botConnections.add(botConnectionFactory.connect().join());
+            threadPool.execute(() -> {
+                try {
+                    factory.connect().join();
+                } catch (Exception e) {
+                    logger.error("Error while connecting", e);
+                }
+            });
         }
     }
 
