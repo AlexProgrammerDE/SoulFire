@@ -28,9 +28,6 @@ repositories {
     maven("https://maven.lenni0451.net/snapshots") {
         name = "Lenni0451 Snapshots"
     }
-    maven("https://libraries.minecraft.net/") {
-        name = "Minecraft Repository"
-    }
     maven("https://oss.sonatype.org/content/repositories/snapshots/") {
         name = "Sonatype Repository"
     }
