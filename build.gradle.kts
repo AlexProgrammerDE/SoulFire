@@ -40,8 +40,14 @@ repositories {
     mavenCentral()
 }
 
+val moduleOpens = setOf(
+    "java.desktop/sun.awt.X11"
+)
+
 application {
-    mainClass.set("ServerWrecker")
+    applicationName = "ServerWrecker"
+    mainClass.set("net.pistonmaster.serverwrecker.ServerWreckerBootstrap")
+    applicationDefaultJvmArgs += moduleOpens.map { "--add-opens=$it=ALL-UNNAMED" }
 }
 
 javafx {
@@ -132,7 +138,8 @@ if (!mcFolder.exists()) {
 tasks.named<Jar>("jar").get().apply {
     registerMCJar()
     manifest {
-        attributes["Main-Class"] = "ServerWrecker"
+        attributes["Main-Class"] = "net.pistonmaster.serverwrecker.ServerWreckerBootstrap"
+        attributes["Add-Opens"] = moduleOpens.joinToString(" ")
     }
 }
 

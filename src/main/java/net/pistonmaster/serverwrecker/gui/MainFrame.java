@@ -28,6 +28,8 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 
 public class MainFrame extends JFrame {
     public static final String MAIN_MENU = "MainMenu";
@@ -40,6 +42,7 @@ public class MainFrame extends JFrame {
         this.serverWrecker = serverWrecker;
         this.injector = injector;
         injector.register(JFrame.class, this);
+        setAppTitle();
     }
 
     @PostConstruct
@@ -66,5 +69,18 @@ public class MainFrame extends JFrame {
         serverWrecker.getLogger().info("Opening GUI!");
 
         setVisible(true);
+    }
+
+    public void setAppTitle() {
+        try {
+            Toolkit xToolkit = Toolkit.getDefaultToolkit();
+            VarHandle CLASS_NAME_VARIABLE = MethodHandles
+                    .privateLookupIn(xToolkit.getClass(), MethodHandles.lookup())
+                    .findStaticVarHandle(xToolkit.getClass(), "awtAppClassName", String.class);
+
+            CLASS_NAME_VARIABLE.set("ServerWrecker");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
