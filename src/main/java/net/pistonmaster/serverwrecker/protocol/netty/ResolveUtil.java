@@ -29,12 +29,15 @@ import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 public class ResolveUtil {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResolveUtil.class);
     private static final String IP_REGEX = "\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b";
 
     public static InetSocketAddress resolveAddress(SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup, SWProxy proxy) { // TODO: Add proxy support
@@ -42,15 +45,10 @@ public class ResolveUtil {
         String host = settings.host();
         int port = settings.port();
 
-        DevSettings devSettings = settingsHolder.get(DevSettings.class);
-        boolean debug = devSettings.debug();
-
         String name = "_minecraft._tcp." + settings.host();
-        if (debug) {
-            System.out.println("[PacketLib] Attempting SRV lookup for \"" + name + "\".");
-        }
+        LOGGER.debug("[PacketLib] Attempting SRV lookup for \"{}\".", name);
 
-        if (settings.trySrv() && (!host.matches(IP_REGEX) && !host.equalsIgnoreCase("localhost"))) {
+        if (settings.trySrv() && !host.matches(IP_REGEX) && !host.equalsIgnoreCase("localhost")) {
             AddressedEnvelope<DnsResponse, InetSocketAddress> envelope = null;
             try (DnsNameResolver resolver = new DnsNameResolverBuilder(eventLoopGroup.next())
                     .channelType(SWNettyHelper.DATAGRAM_CHANNEL_CLASS)
@@ -70,43 +68,31 @@ public class ResolveUtil {
                             host = host.substring(0, host.length() - 1);
                         }
 
-                        if (devSettings.debug()) {
-                            System.out.println("[PacketLib] Found SRV record containing \"" + host + ":" + port + "\".");
-                        }
-
-                    } else if (debug) {
-                        System.out.println("[PacketLib] Received non-SRV record in response.");
+                        LOGGER.debug("[PacketLib] Found SRV record containing \"{}:{}}\".", host, port);
+                    } else {
+                        LOGGER.debug("[PacketLib] Received non-SRV record in response.");
                     }
-                } else if (debug) {
-                    System.out.println("[PacketLib] No SRV record found.");
+                } else {
+                    LOGGER.debug("[PacketLib] No SRV record found.");
                 }
             } catch (Exception e) {
-                if (debug) {
-                    System.out.println("[PacketLib] Failed to resolve SRV record.");
-                    e.printStackTrace();
-                }
+                LOGGER.debug("[PacketLib] Failed to resolve SRV record.", e);
             } finally {
                 if (envelope != null) {
                     envelope.release();
                 }
-
             }
-        } else if (debug) {
-            System.out.println("[PacketLib] Not resolving SRV record for " + host);
+        } else {
+            LOGGER.debug("[PacketLib] Not resolving SRV record for {}", host);
         }
 
         // Resolve host here
         try {
             InetAddress resolved = InetAddress.getByName(host);
-            if (debug) {
-                System.out.printf("[PacketLib] Resolved %s -> %s%n", host, resolved.getHostAddress());
-            }
+            LOGGER.debug("[PacketLib] Resolved {} -> {}", host, resolved.getHostAddress());
             return new InetSocketAddress(resolved, port);
         } catch (UnknownHostException e) {
-            if (debug) {
-                System.out.println("[PacketLib] Failed to resolve host, letting Netty do it instead.");
-                e.printStackTrace();
-            }
+            LOGGER.debug("[PacketLib] Failed to resolve host, letting Netty do it instead.", e);
             return InetSocketAddress.createUnresolved(host, port);
         }
     }

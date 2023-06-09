@@ -19,9 +19,20 @@
  */
 package net.pistonmaster.serverwrecker.proxy;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
 public enum ProxyType {
-    HTTP,
-    HTTPS,
-    SOCKS4,
-    SOCKS5
+    // TODO: Verify these values
+    HTTP(false, true, true, false),
+    HTTPS(false, false, false, true),
+    SOCKS4(false, true, true, true),
+    SOCKS5(true, true, true, true);
+
+    private final boolean udp;
+    private final boolean mcTcp;
+    private final boolean webHttp;
+    private final boolean webHttps;
 }

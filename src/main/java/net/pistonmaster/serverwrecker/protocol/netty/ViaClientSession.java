@@ -43,6 +43,7 @@ import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.protocol.SWProtocolConstants;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.viaversion.FrameCodec;
@@ -78,18 +79,18 @@ public class ViaClientSession extends TcpSession {
     private final InetSocketAddress targetAddress;
     private final String bindAddress;
     private final int bindPort;
-    private final ProxyInfo proxy;
+    private final SWProxy proxy;
     private final PacketCodecHelper codecHelper;
     private final SettingsHolder settingsHolder;
     private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
     @Setter
     private Runnable postDisconnectHook;
 
-    public ViaClientSession(InetSocketAddress targetAddress, PacketProtocol protocol, ProxyInfo proxy, SettingsHolder settingsHolder) {
+    public ViaClientSession(InetSocketAddress targetAddress, PacketProtocol protocol, SWProxy proxy, SettingsHolder settingsHolder) {
         this(targetAddress, "0.0.0.0", 0, protocol, proxy, settingsHolder);
     }
 
-    private ViaClientSession(InetSocketAddress targetAddress, String bindAddress, int bindPort, PacketProtocol protocol, ProxyInfo proxy, SettingsHolder settingsHolder) {
+    private ViaClientSession(InetSocketAddress targetAddress, String bindAddress, int bindPort, PacketProtocol protocol, SWProxy proxy, SettingsHolder settingsHolder) {
         super(null, -1, protocol);
         this.targetAddress = targetAddress;
         this.bindAddress = bindAddress;
@@ -149,7 +150,9 @@ public class ViaClientSession extends TcpSession {
                     refreshReadTimeoutHandler(channel);
                     refreshWriteTimeoutHandler(channel);
 
-                    addProxy(pipeline);
+                    if (proxy != null) {
+                        SWNettyHelper.addProxy(pipeline, proxy);
+                    }
 
                     // This does the extra magic
                     UserConnectionImpl userConnection = new UserConnectionImpl(channel, true);
@@ -238,35 +241,6 @@ public class ViaClientSession extends TcpSession {
     @Override
     public MinecraftCodecHelper getCodecHelper() {
         return (MinecraftCodecHelper) this.codecHelper;
-    }
-
-    private void addProxy(ChannelPipeline pipeline) {
-        if (proxy != null) {
-            switch (proxy.getType()) {
-                case HTTP -> {
-                    if (proxy.isAuthenticated()) {
-                        pipeline.addFirst("proxy", new HttpProxyHandler(proxy.getAddress(), proxy.getUsername(), proxy.getPassword()));
-                    } else {
-                        pipeline.addFirst("proxy", new HttpProxyHandler(proxy.getAddress()));
-                    }
-                }
-                case SOCKS4 -> {
-                    if (proxy.isAuthenticated()) {
-                        pipeline.addFirst("proxy", new Socks4ProxyHandler(proxy.getAddress(), proxy.getUsername()));
-                    } else {
-                        pipeline.addFirst("proxy", new Socks4ProxyHandler(proxy.getAddress()));
-                    }
-                }
-                case SOCKS5 -> {
-                    if (proxy.isAuthenticated()) {
-                        pipeline.addFirst("proxy", new Socks5ProxyHandler(proxy.getAddress(), proxy.getUsername(), proxy.getPassword()));
-                    } else {
-                        pipeline.addFirst("proxy", new Socks5ProxyHandler(proxy.getAddress()));
-                    }
-                }
-                default -> throw new UnsupportedOperationException("Unsupported proxy type: " + proxy.getType());
-            }
-        }
     }
 
     private void addHAProxySupport(ChannelPipeline pipeline) {

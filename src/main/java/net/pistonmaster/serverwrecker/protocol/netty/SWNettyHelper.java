@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.protocol.netty;
 
 import com.github.steveice10.packetlib.helper.TransportHelper;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollDatagramChannel;
 import io.netty.channel.epoll.EpollEventLoopGroup;
@@ -32,9 +33,13 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.proxy.HttpProxyHandler;
+import io.netty.handler.proxy.Socks4ProxyHandler;
+import io.netty.handler.proxy.Socks5ProxyHandler;
 import io.netty.incubator.channel.uring.IOUringDatagramChannel;
 import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import io.netty.incubator.channel.uring.IOUringSocketChannel;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
 
 public class SWNettyHelper {
     public static final Class<? extends Channel> CHANNEL_CLASS;
@@ -74,5 +79,32 @@ public class SWNettyHelper {
         Runtime.getRuntime().addShutdownHook(new Thread(group::shutdownGracefully));
 
         return group;
+    }
+
+    public static void addProxy(ChannelPipeline pipeline, SWProxy proxy) {
+        switch (proxy.type()) {
+            case HTTP -> {
+                if (proxy.hasCredentials()) {
+                    pipeline.addFirst("proxy", new HttpProxyHandler(proxy.address(), proxy.username(), proxy.password()));
+                } else {
+                    pipeline.addFirst("proxy", new HttpProxyHandler(proxy.address()));
+                }
+            }
+            case SOCKS4 -> {
+                if (proxy.hasCredentials()) {
+                    pipeline.addFirst("proxy", new Socks4ProxyHandler(proxy.address(), proxy.username()));
+                } else {
+                    pipeline.addFirst("proxy", new Socks4ProxyHandler(proxy.address()));
+                }
+            }
+            case SOCKS5 -> {
+                if (proxy.hasCredentials()) {
+                    pipeline.addFirst("proxy", new Socks5ProxyHandler(proxy.address(), proxy.username(), proxy.password()));
+                } else {
+                    pipeline.addFirst("proxy", new Socks5ProxyHandler(proxy.address()));
+                }
+            }
+            default -> throw new UnsupportedOperationException("Unsupported proxy type: " + proxy.type());
+        }
     }
 }
