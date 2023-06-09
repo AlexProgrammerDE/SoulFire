@@ -102,7 +102,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
             serverWrecker.getThreadPool().submit(() -> {
                 try {
                     serverWrecker.getAccountRegistry().loadFromFile(accountFile);
-                } catch (IOException e) {
+                } catch (Throwable e) {
                     e.printStackTrace();
                 }
             });

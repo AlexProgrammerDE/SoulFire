@@ -41,6 +41,8 @@ import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 
+import java.net.InetSocketAddress;
+
 public class SWNettyHelper {
     public static final Class<? extends Channel> CHANNEL_CLASS;
     public static final Class<? extends DatagramChannel> DATAGRAM_CHANNEL_CLASS;
@@ -82,27 +84,20 @@ public class SWNettyHelper {
     }
 
     public static void addProxy(ChannelPipeline pipeline, SWProxy proxy) {
+        InetSocketAddress address = proxy.getInetSocketAddress();
         switch (proxy.type()) {
             case HTTP -> {
                 if (proxy.hasCredentials()) {
-                    pipeline.addFirst("proxy", new HttpProxyHandler(proxy.address(), proxy.username(), proxy.password()));
+                    pipeline.addFirst("proxy", new HttpProxyHandler(address, proxy.username(), proxy.password()));
                 } else {
-                    pipeline.addFirst("proxy", new HttpProxyHandler(proxy.address()));
+                    pipeline.addFirst("proxy", new HttpProxyHandler(address));
                 }
             }
             case SOCKS4 -> {
-                if (proxy.hasCredentials()) {
-                    pipeline.addFirst("proxy", new Socks4ProxyHandler(proxy.address(), proxy.username()));
-                } else {
-                    pipeline.addFirst("proxy", new Socks4ProxyHandler(proxy.address()));
-                }
+                pipeline.addFirst("proxy", new Socks4ProxyHandler(address, proxy.username()));
             }
             case SOCKS5 -> {
-                if (proxy.hasCredentials()) {
-                    pipeline.addFirst("proxy", new Socks5ProxyHandler(proxy.address(), proxy.username(), proxy.password()));
-                } else {
-                    pipeline.addFirst("proxy", new Socks5ProxyHandler(proxy.address()));
-                }
+                pipeline.addFirst("proxy", new Socks5ProxyHandler(address, proxy.username(), proxy.password()));
             }
             default -> throw new UnsupportedOperationException("Unsupported proxy type: " + proxy.type());
         }

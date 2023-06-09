@@ -24,7 +24,6 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -35,13 +34,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProxyRegistry implements SettingsDuplex<ProxyList> {
     private final List<SWProxy> proxies = new ArrayList<>();
+    private final List<Runnable> loadHooks = new ArrayList<>();
     private final ServerWrecker serverWrecker;
 
-    public void loadFromFile(Path file) throws IOException {
-        loadFromString(Files.readString(file));
+    public void loadFromFile(Path file, ProxyType proxyType) throws IOException {
+        loadFromString(Files.readString(file), proxyType);
     }
 
-    public void loadFromString(String file) {
+    public void loadFromString(String file, ProxyType proxyType) {
         List<SWProxy> newProxies = new ArrayList<>();
 
         String[] proxyLines = file.split("\n");
@@ -49,31 +49,41 @@ public class ProxyRegistry implements SettingsDuplex<ProxyList> {
         Arrays.stream(proxyLines)
                 .filter(line -> !line.isBlank())
                 .distinct()
-                .map(this::fromString)
+                .map(line -> fromString(line, proxyType))
                 .forEach(newProxies::add);
 
         this.proxies.addAll(newProxies);
         serverWrecker.getLogger().info("Loaded {} proxies!", newProxies.size());
+
+        loadHooks.forEach(Runnable::run);
     }
 
-    private SWProxy fromString(String proxy) {
+    private SWProxy fromString(String proxy, ProxyType proxyType) {
         proxy = proxy.trim();
 
         String[] split = proxy.split(":");
 
         String host = split[0];
         int port = Integer.parseInt(split[1]);
+        String username = getIndexOrNull(split, 2);
+        String password = getIndexOrNull(split, 3);
 
-        // TODO: Make this more dynamic
-        if (split.length > 3) {
-            return new SWProxy(ProxyType.SOCKS5, new InetSocketAddress(host, port), split[2], split[3]);
+        return new SWProxy(proxyType, host, port, username, password, true);
+    }
+
+    private <T> T getIndexOrNull(T[] array, int index) {
+        if (index < array.length) {
+            return array[index];
         } else {
-            return new SWProxy(ProxyType.SOCKS5, new InetSocketAddress(host, port), null, null);
+            return null;
         }
     }
 
     public List<SWProxy> getProxies() {
-        return Collections.unmodifiableList(proxies);
+        return proxies
+                .stream()
+                .filter(SWProxy::enabled)
+                .toList();
     }
 
     @Override
@@ -85,5 +95,14 @@ public class ProxyRegistry implements SettingsDuplex<ProxyList> {
     @Override
     public ProxyList collectSettings() {
         return new ProxyList(List.copyOf(proxies));
+    }
+
+    public void addLoadHook(Runnable runnable) {
+        loadHooks.add(runnable);
+    }
+
+    public void setProxies(List<SWProxy> proxies) {
+        this.proxies.clear();
+        this.proxies.addAll(proxies);
     }
 }

@@ -382,12 +382,12 @@ public class ServerWrecker {
         }
     }
 
-    private SWProxy getProxy(int maxPerProxy, Map<SWProxy, Integer> proxyUseMap) {
+    private SWProxy getProxy(int accountsPerProxy, Map<SWProxy, Integer> proxyUseMap) {
         if (proxyUseMap.isEmpty()) {
             return null; // No proxies available
         } else {
             SWProxy selectedProxy = proxyUseMap.entrySet().stream()
-                    .filter(entry -> entry.getValue() < maxPerProxy)
+                    .filter(entry -> accountsPerProxy == -1 || entry.getValue() < accountsPerProxy)
                     .min(Comparator.comparingInt(Map.Entry::getValue))
                     .map(Map.Entry::getKey)
                     .orElseThrow(() -> new IllegalStateException("No proxies available!")); // Should never happen

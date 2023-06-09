@@ -47,7 +47,7 @@ public class HttpHelper {
                 .setSocketTimeout(timeout * 1000);
 
         if (proxyData != null) {
-            HttpHost proxy = new HttpHost(proxyData.address().getHostName(), proxyData.address().getPort());
+            HttpHost proxy = new HttpHost(proxyData.host(), proxyData.port());
 
             if (proxyData.hasCredentials()) {
                 UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(proxyData.username(), proxyData.password());

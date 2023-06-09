@@ -21,9 +21,13 @@ package net.pistonmaster.serverwrecker.proxy;
 
 import java.net.InetSocketAddress;
 
-public record SWProxy(ProxyType type, InetSocketAddress address, String username, String password) {
+public record SWProxy(ProxyType type, String host, int port, String username, String password, boolean enabled) {
 
     public boolean hasCredentials() {
         return username != null && password != null;
+    }
+
+    public InetSocketAddress getInetSocketAddress() {
+        return new InetSocketAddress(host, port);
     }
 }

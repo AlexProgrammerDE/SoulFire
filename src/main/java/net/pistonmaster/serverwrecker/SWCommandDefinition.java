@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
+import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import picocli.CommandLine.Command;
@@ -85,6 +86,9 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Option(names = {"--proxy-file"}, description = "File to load proxies from")
     private Path proxyFile;
 
+    @Option(names = {"--proxy-type"}, description = "Type of proxies in the proxy file")
+    private ProxyType proxyType;
+
     @Option(names = {"--profile-file"}, description = "File to load a profile from")
     private Path profileFile;
 
@@ -131,9 +135,9 @@ public class SWCommandDefinition implements Callable<Integer> {
             }
         }
 
-        if (proxyFile != null) {
+        if (proxyFile != null && proxyType != null) {
             try {
-                serverWrecker.getProxyRegistry().loadFromFile(proxyFile);
+                serverWrecker.getProxyRegistry().loadFromFile(proxyFile, proxyType);
             } catch (IOException e) {
                 e.printStackTrace();
                 return 1;
