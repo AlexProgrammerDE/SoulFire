@@ -285,7 +285,7 @@ public class ServerWrecker {
 
         int botAmount = botSettings.amount(); // How many bots to connect
         int botsPerProxy = proxySettings.botsPerProxy(); // How many bots per proxy are allowed
-        List<SWProxy> proxies = settingsHolder.get(ProxyList.class).proxies();
+        List<SWProxy> proxies = proxyRegistry.getProxies();
         int availableProxiesCount = proxies.size(); // How many proxies are available?
         int maxBots = botsPerProxy > 0 ? botsPerProxy * availableProxiesCount : botAmount; // How many bots can be used at max
 
@@ -296,8 +296,7 @@ public class ServerWrecker {
             botAmount = maxBots;
         }
 
-        AccountList accountList = settingsHolder.get(AccountList.class);
-        List<JavaAccount> accounts = new ArrayList<>(accountList.accounts());
+        List<JavaAccount> accounts = new ArrayList<>(accountRegistry.getAccounts());
         int availableAccounts = accounts.size();
 
         if (availableAccounts > 0 && botAmount > availableAccounts) {
