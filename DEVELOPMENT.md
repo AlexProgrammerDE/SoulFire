@@ -28,7 +28,7 @@ java -DbundlerMainClass=net.minecraft.data.Main -jar server.jar --all
 
 Then go into the generated folder `generated/reports`. Then execute:
 ```bash
-state_ids=$(jq -r '.[].states[].id' blocks.json)
+state_ids=$(jq -r '.[].states[].id' assets/minecraft/blocks.json)
 
 # Sort the IDs in descending order and get the highest one
 highest_id=$(echo "${state_ids}" | sort -rn | head -n 1)

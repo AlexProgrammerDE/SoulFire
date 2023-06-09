@@ -27,7 +27,6 @@ import io.netty.resolver.dns.DnsNameResolver;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
-import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,58 +34,75 @@ import org.slf4j.LoggerFactory;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 public class ResolveUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResolveUtil.class);
-    private static final String IP_REGEX = "\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b";
+    private static final Pattern IP_REGEX = Pattern.compile("\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b");
 
     public static InetSocketAddress resolveAddress(SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup, SWProxy proxy) { // TODO: Add proxy support
         BotSettings settings = settingsHolder.get(BotSettings.class);
         String host = settings.host();
         int port = settings.port();
 
-        String name = "_minecraft._tcp." + settings.host();
-        LOGGER.debug("[PacketLib] Attempting SRV lookup for \"{}\".", name);
-
-        if (settings.trySrv() && !host.matches(IP_REGEX) && !host.equalsIgnoreCase("localhost")) {
-            AddressedEnvelope<DnsResponse, InetSocketAddress> envelope = null;
-            try (DnsNameResolver resolver = new DnsNameResolverBuilder(eventLoopGroup.next())
-                    .channelType(SWNettyHelper.DATAGRAM_CHANNEL_CLASS)
-                    .build()) {
-                envelope = resolver.query(new DefaultDnsQuestion(name, DnsRecordType.SRV)).get();
-
-                DnsResponse response = envelope.content();
-                if (response.count(DnsSection.ANSWER) > 0) {
-                    DefaultDnsRawRecord record = response.recordAt(DnsSection.ANSWER, 0);
-                    if (record.type() == DnsRecordType.SRV) {
-                        ByteBuf buf = record.content();
-                        buf.skipBytes(4); // Skip priority and weight.
-
-                        port = buf.readUnsignedShort();
-                        host = DefaultDnsRecordDecoder.decodeName(buf);
-                        if (host.endsWith(".")) {
-                            host = host.substring(0, host.length() - 1);
-                        }
-
-                        LOGGER.debug("[PacketLib] Found SRV record containing \"{}:{}}\".", host, port);
-                    } else {
-                        LOGGER.debug("[PacketLib] Received non-SRV record in response.");
-                    }
-                } else {
-                    LOGGER.debug("[PacketLib] No SRV record found.");
-                }
-            } catch (Exception e) {
-                LOGGER.debug("[PacketLib] Failed to resolve SRV record.", e);
-            } finally {
-                if (envelope != null) {
-                    envelope.release();
-                }
+        if (settings.trySrv()) {
+            Optional<InetSocketAddress> resolved = resolveSrv(host, port, eventLoopGroup);
+            if (resolved.isPresent()) {
+                return resolved.get();
             }
         } else {
             LOGGER.debug("[PacketLib] Not resolving SRV record for {}", host);
         }
 
-        // Resolve host here
+        return resolveByHost(host, port);
+    }
+
+    private static Optional<InetSocketAddress> resolveSrv(String host, int port, EventLoopGroup eventLoopGroup) {
+        if (IP_REGEX.matcher(host).matches() || host.equalsIgnoreCase("localhost")) {
+            LOGGER.debug("[PacketLib] Not a valid domain: {}", host);
+            return Optional.empty();
+        }
+
+        String name = "_minecraft._tcp." + host;
+        LOGGER.debug("[PacketLib] Attempting SRV lookup for \"{}\".", name);
+
+        try (DnsNameResolver resolver = new DnsNameResolverBuilder(eventLoopGroup.next())
+                .channelType(SWNettyHelper.DATAGRAM_CHANNEL_CLASS)
+                .build()) {
+            AddressedEnvelope<DnsResponse, InetSocketAddress> envelope = resolver.query(new DefaultDnsQuestion(name, DnsRecordType.SRV)).get();
+
+            DnsResponse response = envelope.content();
+            if (response.count(DnsSection.ANSWER) == 0) {
+                LOGGER.debug("[PacketLib] No SRV record found.");
+                return Optional.empty();
+            }
+
+            DefaultDnsRawRecord record = response.recordAt(DnsSection.ANSWER, 0);
+            if (record.type() != DnsRecordType.SRV) {
+                LOGGER.debug("[PacketLib] Received non-SRV record in response.");
+                return Optional.empty();
+            }
+
+            ByteBuf buf = record.content();
+            buf.skipBytes(4); // Skip priority and weight.
+
+            port = buf.readUnsignedShort();
+            host = DefaultDnsRecordDecoder.decodeName(buf);
+            if (host.endsWith(".")) {
+                host = host.substring(0, host.length() - 1);
+            }
+
+            LOGGER.debug("[PacketLib] Found SRV record containing \"{}:{}}\".", host, port);
+
+            return Optional.of(new InetSocketAddress(host, port));
+        } catch (Exception e) {
+            LOGGER.debug("[PacketLib] Failed to resolve SRV record.", e);
+            return Optional.empty();
+        }
+    }
+
+    private static InetSocketAddress resolveByHost(String host, int port) {
         try {
             InetAddress resolved = InetAddress.getByName(host);
             LOGGER.debug("[PacketLib] Resolved {} -> {}", host, resolved.getHostAddress());

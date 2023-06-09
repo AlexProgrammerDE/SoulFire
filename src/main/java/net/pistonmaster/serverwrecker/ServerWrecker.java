@@ -46,7 +46,7 @@ import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
-import net.pistonmaster.serverwrecker.mojangdata.TranslationMapper;
+import net.pistonmaster.serverwrecker.data.TranslationMapper;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;

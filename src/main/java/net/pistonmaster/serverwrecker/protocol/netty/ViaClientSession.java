@@ -87,14 +87,10 @@ public class ViaClientSession extends TcpSession {
     private Runnable postDisconnectHook;
 
     public ViaClientSession(InetSocketAddress targetAddress, PacketProtocol protocol, SWProxy proxy, SettingsHolder settingsHolder) {
-        this(targetAddress, "0.0.0.0", 0, protocol, proxy, settingsHolder);
-    }
-
-    private ViaClientSession(InetSocketAddress targetAddress, String bindAddress, int bindPort, PacketProtocol protocol, SWProxy proxy, SettingsHolder settingsHolder) {
         super(null, -1, protocol);
         this.targetAddress = targetAddress;
-        this.bindAddress = bindAddress;
-        this.bindPort = bindPort;
+        this.bindAddress = "0.0.0.0";
+        this.bindPort = 0;
         this.proxy = proxy;
         this.codecHelper = protocol.createHelper();
         this.settingsHolder = settingsHolder;
