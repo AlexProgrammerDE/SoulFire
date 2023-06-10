@@ -174,8 +174,6 @@ public final class SessionDataManager {
             lastDeathPos = packet.getLastDeathPos();
 
             containerData.put(0, new PlayerInventoryContainer());
-
-            log.info("Joined server");
         } catch (Exception e) {
             log.error("Error while logging join", e);
         }
@@ -203,6 +201,7 @@ public final class SessionDataManager {
 
         if (botMovementManager == null) {
             botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch);
+            log.info("Joined server at position: X{} Y{} Z{}", Math.round(x), Math.round(y), Math.round(z));
         } else {
             botMovementManager.setPosition(x, y, z);
             botMovementManager.setRotation(yaw, pitch);
@@ -210,7 +209,7 @@ public final class SessionDataManager {
 
         session.send(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
 
-        log.info("Position updated: {}", botMovementManager);
+        log.debug("Position updated: {}", botMovementManager);
     }
 
     @BusHandler
@@ -229,7 +228,7 @@ public final class SessionDataManager {
             this.isDead = true;
         }
 
-        log.info("Health updated: {}", healthData);
+        log.debug("Health updated: {}", healthData);
     }
 
     @BusHandler
@@ -617,7 +616,7 @@ public final class SessionDataManager {
                 double motionY = packet.getMotionY();
                 double motionZ = packet.getMotionZ();
                 botMovementManager.setMotion(motionX, motionY, motionZ);
-                log.info("Bot forced to motion: {} {} {}", motionX, motionY, motionZ);
+                log.debug("Bot forced to motion: {} {} {}", motionX, motionY, motionZ);
             } else {
                 //log.debug("Entity {} moved with motion: {} {} {}", entityId, motionX, motionY, motionZ);
             }
