@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
@@ -37,7 +38,8 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
     private final JTextField hostInput;
     private final JTextField portInput;
     private final JCheckBox trySrv;
-    private final JSpinner joinDelayMs;
+    private final JSpinner minJoinDelayMs;
+    private final JSpinner maxJoinDelayMs;
     private final JSpinner amount;
     private final JComboBox<ProtocolVersion> versionBox;
     private final JSpinner readTimeout;
@@ -62,10 +64,17 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         trySrv = new PresetJCheckBox(BotSettings.DEFAULT_TRY_SRV);
         add(trySrv);
 
-        add(new JLabel("Join delay (ms): "));
-        joinDelayMs = new JSpinner();
-        joinDelayMs.setValue(BotSettings.DEFAULT_JOIN_DELAY_MS);
-        add(joinDelayMs);
+        add(new JLabel("Min join delay (ms): "));
+        minJoinDelayMs = new JSpinner();
+        minJoinDelayMs.setValue(BotSettings.DEFAULT_MIN_JOIN_DELAY_MS);
+        add(minJoinDelayMs);
+
+        add(new JLabel("Max join delay (ms): "));
+        maxJoinDelayMs = new JSpinner();
+        maxJoinDelayMs.setValue(BotSettings.DEFAULT_MAX_JOIN_DELAY_MS);
+        add(maxJoinDelayMs);
+
+        JMinMaxHelper.applyLink(minJoinDelayMs, maxJoinDelayMs);
 
         add(new JLabel("Amount: "));
         amount = new JSpinner();
@@ -116,7 +125,8 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         hostInput.setText(settings.host());
         portInput.setText(String.valueOf(settings.port()));
         amount.setValue(settings.amount());
-        joinDelayMs.setValue(settings.joinDelayMs());
+        minJoinDelayMs.setValue(settings.minJoinDelayMs());
+        maxJoinDelayMs.setValue(settings.maxJoinDelayMs());
         versionBox.setSelectedItem(settings.protocolVersion());
         readTimeout.setValue(settings.readTimeout());
         writeTimeout.setValue(settings.writeTimeout());
@@ -130,7 +140,8 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
                 hostInput.getText(),
                 Integer.parseInt(portInput.getText()),
                 (int) amount.getValue(),
-                (int) joinDelayMs.getValue(),
+                (int) minJoinDelayMs.getValue(),
+                (int) maxJoinDelayMs.getValue(),
                 (ProtocolVersion) versionBox.getSelectedItem(),
                 (int) readTimeout.getValue(),
                 (int) writeTimeout.getValue(),

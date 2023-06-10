@@ -338,9 +338,10 @@ public class ServerWrecker {
 
         ServerWreckerAPI.postEvent(new AttackStartEvent());
 
+        Random random = ThreadLocalRandom.current();
         while (!factories.isEmpty()) {
             try {
-                TimeUnit.MILLISECONDS.sleep(botSettings.joinDelayMs());
+                TimeUnit.MILLISECONDS.sleep(random.nextInt(botSettings.minJoinDelayMs(), botSettings.maxJoinDelayMs()));
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }

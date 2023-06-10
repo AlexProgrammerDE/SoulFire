@@ -24,14 +24,15 @@ import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
 public record BotSettings(String host, int port,
-                          int amount, int joinDelayMs,
+                          int amount, int minJoinDelayMs, int maxJoinDelayMs,
                           ProtocolVersion protocolVersion,
                           int readTimeout, int writeTimeout, int connectTimeout,
                           boolean trySrv) implements SettingsObject {
     public static final String DEFAULT_HOST = "127.0.0.1";
     public static final int DEFAULT_PORT = 25565;
     public static final int DEFAULT_AMOUNT = 1;
-    public static final int DEFAULT_JOIN_DELAY_MS = 1000;
+    public static final int DEFAULT_MIN_JOIN_DELAY_MS = 1000;
+    public static final int DEFAULT_MAX_JOIN_DELAY_MS = 3000;
     public static final ProtocolVersion DEFAULT_PROTOCOL_VERSION = SWConstants.CURRENT_PROTOCOL_VERSION;
     public static final int DEFAULT_READ_TIMEOUT = 30;
     public static final int DEFAULT_WRITE_TIMEOUT = 0;
