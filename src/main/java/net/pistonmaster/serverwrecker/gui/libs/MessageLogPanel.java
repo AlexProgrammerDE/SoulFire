@@ -19,6 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.gui.libs;
 
+import lombok.Setter;
+
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
@@ -27,15 +29,14 @@ import java.awt.*;
  * Modified version of: <a href="https://github.com/SKCraft/Launcher/blob/master/launcher/src/main/java/com/skcraft/launcher/swing/MessageLog.java">SKCraft/Launcher Log Panel</a>
  */
 public class MessageLogPanel extends JPanel {
-    protected final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();
+    private final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();
     private final int numLines;
-    private final boolean colorEnabled;
-    protected JTextComponent textComponent;
-    protected Document document;
+    private JTextArea textComponent;
+    private Document document;
+    private final NoopDocumentFilter noopDocumentFilter = new NoopDocumentFilter();
 
-    public MessageLogPanel(int numLines, boolean colorEnabled) {
+    public MessageLogPanel(int numLines) {
         this.numLines = numLines;
-        this.colorEnabled = colorEnabled;
 
         setLayout(new BorderLayout());
 
@@ -43,33 +44,23 @@ public class MessageLogPanel extends JPanel {
     }
 
     private void initComponents() {
-        if (colorEnabled) {
-            this.textComponent = new JTextPane() {
-                @Override
-                public boolean getScrollableTracksViewportWidth() {
-                    return true;
-                }
-            };
-        } else {
-            JTextArea text = new JTextArea();
-            this.textComponent = text;
-            text.setLineWrap(true);
-            text.setWrapStyleWord(true);
-        }
+        this.textComponent = new JTextArea();
+
+        textComponent.setLineWrap(true);
+        textComponent.setWrapStyleWord(true);
 
         textComponent.setFont(new JLabel().getFont());
-        textComponent.setEditable(false);
+        textComponent.setEditable(true);
         DefaultCaret caret = (DefaultCaret) textComponent.getCaret();
         caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         document = textComponent.getDocument();
         document.addDocumentListener(new LimitLinesDocumentListener(numLines, true));
+        ((AbstractDocument) document).setDocumentFilter(noopDocumentFilter);
 
         JScrollPane scrollText = new JScrollPane();
-        scrollText.setBorder(null);
-        scrollText.setVerticalScrollBarPolicy(
-                ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollText.setHorizontalScrollBarPolicy(
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollText.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        scrollText.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollText.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         scrollText.setViewportView(textComponent);
 
@@ -79,7 +70,11 @@ public class MessageLogPanel extends JPanel {
     }
 
     public void clear() {
-        textComponent.setText("");
+        SwingUtilities.invokeLater(() -> {
+            noopDocumentFilter.setFilter(false);
+            textComponent.setText("");
+            noopDocumentFilter.setFilter(true);
+        });
     }
 
     /**
@@ -88,16 +83,46 @@ public class MessageLogPanel extends JPanel {
      * @param line line
      */
     public void log(final String line) {
-        final Document d = document;
-        final JTextComponent t = textComponent;
-
         SwingUtilities.invokeLater(() -> {
             try {
-                int offset = d.getLength();
-                d.insertString(offset, line, defaultAttributes);
-                t.setCaretPosition(0);
+                noopDocumentFilter.setFilter(false);
+                int offset = document.getLength();
+                document.insertString(offset, line, defaultAttributes);
+                noopDocumentFilter.setFilter(true);
             } catch (BadLocationException ignored) {
             }
         });
+    }
+
+    @Setter
+    private static class NoopDocumentFilter extends DocumentFilter {
+        private boolean filter = true;
+
+        @Override
+        public void remove(DocumentFilter.FilterBypass fb, int offset, int length) throws BadLocationException {
+            if (filter) {
+                return;
+            }
+
+            super.remove(fb, offset, length);
+        }
+
+        @Override
+        public void insertString(DocumentFilter.FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+            if (filter) {
+                return;
+            }
+
+            super.insertString(fb, offset, string, attr);
+        }
+
+        @Override
+        public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+            if (filter) {
+                return;
+            }
+
+            super.replace(fb, offset, length, text, attrs);
+        }
     }
 }

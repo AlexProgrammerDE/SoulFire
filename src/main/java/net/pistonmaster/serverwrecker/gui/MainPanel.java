@@ -38,7 +38,7 @@ import java.awt.event.KeyEvent;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MainPanel extends JPanel {
     @Getter
-    private final MessageLogPanel messageLogPanel = new MessageLogPanel(3000, false);
+    private final MessageLogPanel messageLogPanel = new MessageLogPanel(3000);
     private final ShellSender shellSender;
     private final Injector injector;
     private final CardsContainer cardsContainer;

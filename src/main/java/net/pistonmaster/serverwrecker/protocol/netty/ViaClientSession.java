@@ -109,6 +109,10 @@ public class ViaClientSession extends TcpSession {
 
             bootstrap.group(eventLoopGroup);
             if (isBedrock) {
+                if (proxy != null && !proxy.type().isUdp()) {
+                    throw new IllegalStateException("Proxy must support UDP! (Only SOCKS5 is supported)");
+                }
+
                 bootstrap.channelFactory(RakChannelFactory.client(SWNettyHelper.DATAGRAM_CHANNEL_CLASS));
             } else {
                 bootstrap.channel(SWNettyHelper.CHANNEL_CLASS);
