@@ -39,10 +39,14 @@ import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class AutoRespawn implements InternalAddon {
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
@@ -64,7 +68,7 @@ public class AutoRespawn implements InternalAddon {
             event.getConnection().logger().info("[AutoRespawn] Died with killer: {} and message: '{}'",
                     combatKillPacket.getPlayerId(), message);
 
-            event.getConnection().serverWrecker().getScheduler().schedule(() ->
+            scheduler.schedule(() ->
                             event.getConnection().session().send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
                     ThreadLocalRandom.current().nextInt(autoRespawnSettings.minDelay(), autoRespawnSettings.maxDelay()), TimeUnit.SECONDS);
         }

@@ -36,10 +36,14 @@ import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class AutoReconnect implements InternalAddon {
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
@@ -56,7 +60,7 @@ public class AutoReconnect implements InternalAddon {
             return;
         }
 
-        event.connection().session().getEventLoopGroup().schedule(() -> {
+        scheduler.schedule(() -> {
             event.connection().factory().connect()
                     .thenAccept(newConnection -> event.connection().serverWrecker().getBotConnections()
                             .replaceAll(connection1 -> connection1 == event.connection() ? newConnection : connection1));

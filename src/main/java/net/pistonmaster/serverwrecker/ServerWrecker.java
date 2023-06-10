@@ -109,7 +109,6 @@ public class ServerWrecker {
             .create();
     private final List<BotConnection> botConnections = new CopyOnWriteArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
     private final Map<String, String> serviceServerConfig = new HashMap<>();
     private final Gson gson = new Gson();
     private final Map<String, String> mojangTranslations = new HashMap<>();
@@ -391,6 +390,9 @@ public class ServerWrecker {
 
         ServerWreckerAPI.postEvent(new AttackStartEvent());
 
+        // Used for concurrent bot connecting
+        ExecutorService connectService = Executors.newFixedThreadPool(3);
+
         Random random = ThreadLocalRandom.current();
         while (!factories.isEmpty()) {
             try {
@@ -417,7 +419,7 @@ public class ServerWrecker {
                 break;
             }
 
-            attackEventLoopGroup.execute(() -> {
+            connectService.execute(() -> {
                 try {
                     botConnections.add(factory.connect().join());
                 } catch (Throwable e) {
@@ -487,7 +489,6 @@ public class ServerWrecker {
         stop();
 
         // Shutdown scheduled tasks
-        scheduler.shutdown();
         threadPool.shutdown();
 
         // Since we manually removed the shutdown hook, we need to handle the shutdown ourselves.
