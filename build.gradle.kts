@@ -47,6 +47,22 @@ application {
     applicationDefaultJvmArgs += moduleOpens.map { "--add-opens=$it=ALL-UNNAMED" }
 }
 
+tasks.distTar {
+    enabled = false
+}
+
+tasks.distZip {
+    enabled = false
+}
+
+tasks.shadowDistTar {
+    archiveBaseName.set("ServerWrecker")
+}
+
+tasks.shadowDistZip {
+    archiveBaseName.set("ServerWrecker")
+}
+
 javafx {
     version = "20"
     modules = listOf("javafx.controls", "javafx.swing")

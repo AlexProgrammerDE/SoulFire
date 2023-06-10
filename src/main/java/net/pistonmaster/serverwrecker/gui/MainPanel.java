@@ -132,7 +132,7 @@ public class MainPanel extends JPanel {
         logPanel.add(messageLogPanel, BorderLayout.CENTER);
         logPanel.add(commands, BorderLayout.SOUTH);
 
-        logPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+        logPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 0));
 
         return logPanel;
     }
