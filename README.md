@@ -9,7 +9,7 @@
 <p align="center"><a href="https://pistonmaster.net/discord"><img src="https://discordapp.com/api/guilds/739784741124833301/embed.png" alt="Discord embed"></a></p>
 
 <p align="center">
-<a href="https://github.com/AlexProgrammerDE/ServerWrecker/releases/latest/download/SkinsRestorer.jar"><img src="https://img.shields.io/badge/DOWNLOAD-LATEST-success?style=for-the-badge" alt="download badge"></a>
+<a href="https://github.com/AlexProgrammerDE/ServerWrecker/releases/latest/download/serverwrecker-1.0.0-all.jar"><img src="https://img.shields.io/badge/DOWNLOAD-LATEST-success?style=for-the-badge" alt="download badge"></a>
 <a href="https://nightly.link/AlexProgrammerDE/ServerWrecker/workflows/build/main/ServerWrecker.zip"><img src="https://img.shields.io/badge/DOWNLOAD-DEV__BUILD-important?style=for-the-badge" alt="download2 badge"></a>
 </p>
 
@@ -92,6 +92,8 @@ Useful for bypassing anti-bot plugins that check for client settings.
 
 ServerWrecker supports Microsoft, The Altening and Offline accounts.
 
+If no account is selected, ServerWrecker will generate offline accounts based on the configured name format.
+
 Select the account type in the GUI or CLI and use one of these formats with one account per line:
 
 #### Microsoft
@@ -105,9 +107,9 @@ email3:password3
 #### The Altening
 
 ```text
-<token>@alt.com
-<token2>@alt.com
-<token3>@alt.com
+token@alt.com
+token2@alt.com
+token3@alt.com
 ```
 
 #### Offline

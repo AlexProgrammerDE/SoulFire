@@ -47,20 +47,22 @@ application {
     applicationDefaultJvmArgs += moduleOpens.map { "--add-opens=$it=ALL-UNNAMED" }
 }
 
-tasks.distTar {
-    enabled = false
-}
-
-tasks.distZip {
-    enabled = false
-}
-
-tasks.shadowDistTar {
-    archiveBaseName.set("ServerWrecker")
-}
-
-tasks.shadowDistZip {
-    archiveBaseName.set("ServerWrecker")
+tasks {
+    distTar {
+        enabled = false
+    }
+    distZip {
+        enabled = false
+    }
+    shadowDistTar {
+        archiveBaseName.set("ServerWrecker")
+    }
+    shadowDistZip {
+        archiveBaseName.set("ServerWrecker")
+    }
+    withType<ShadowJar> {
+        archiveBaseName.set("ServerWrecker")
+    }
 }
 
 javafx {
