@@ -296,7 +296,7 @@ public class ServerWrecker {
             botAmount = maxBots;
         }
 
-        List<JavaAccount> accounts = new ArrayList<>(accountRegistry.getAccounts());
+        List<JavaAccount> accounts = new ArrayList<>(accountRegistry.getUsableAccounts());
         int availableAccounts = accounts.size();
 
         if (availableAccounts > 0 && botAmount > availableAccounts) {

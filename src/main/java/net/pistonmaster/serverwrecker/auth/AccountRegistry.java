@@ -192,6 +192,12 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
         return Collections.unmodifiableList(accounts);
     }
 
+    public List<JavaAccount> getUsableAccounts() {
+        return accounts.stream()
+                .filter(JavaAccount::enabled)
+                .toList();
+    }
+
     @Override
     public void onSettingsChange(AccountList settings) {
         accounts.clear();
