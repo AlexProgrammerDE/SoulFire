@@ -22,18 +22,28 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
+import net.pistonmaster.serverwrecker.auth.JavaAccount;
+import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
+import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
+import net.pistonmaster.serverwrecker.proxy.ProxyType;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class AccountPanel extends NavigationItem implements SettingsDuplex<AccountSettings> {
     private final JTextField nameFormat;
@@ -70,6 +80,81 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         accountOptionsPanel.add(accountSettingsPanel);
 
         add(accountOptionsPanel);
+
+        JPanel accountListPanel = new JPanel();
+        accountListPanel.setLayout(new GridLayout(1, 1));
+
+        String[] columnNames = {"Username", "UUID", "Auth Token", "Token Expiry", "Type", "Enabled"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+            final Class<?>[] columnTypes = new Class<?>[] {
+                    String.class, UUID.class, String.class, Long.class, AuthType.class, Boolean.class
+            };
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                return columnTypes[columnIndex];
+            }
+        };
+
+        JTable accountList = new JTable(model);
+
+        serverWrecker.getAccountRegistry().addLoadHook(() -> {
+            model.getDataVector().removeAllElements();
+
+            AccountRegistry registry = serverWrecker.getAccountRegistry();
+            List<JavaAccount> accounts = registry.getAccounts();
+            int registrySize = accounts.size();
+            Object[][] dataVector = new Object[registrySize][];
+            for (int i = 0; i < registrySize; i++) {
+                JavaAccount account = accounts.get(i);
+
+                dataVector[i] = new Object[]{
+                        account.username(),
+                        account.profileId(),
+                        account.authToken(),
+                        account.tokenExpireAt(),
+                        account.authType(),
+                        account.enabled()
+                };
+            }
+
+            model.setDataVector(dataVector, columnNames);
+
+            accountList.getColumnModel().getColumn(4)
+                    .setCellEditor(new DefaultCellEditor(new JEnumComboBox<>(AuthType.class)));
+
+            model.fireTableDataChanged();
+        });
+
+        accountList.addPropertyChangeListener(evt -> {
+            if ("tableCellEditor".equals(evt.getPropertyName()) && !accountList.isEditing()) {
+                List<JavaAccount> accounts = new ArrayList<>();
+
+                for (int i = 0; i < accountList.getRowCount(); i++) {
+                    Object[] row = new Object[accountList.getColumnCount()];
+                    for (int j = 0; j < accountList.getColumnCount(); j++) {
+                        row[j] = accountList.getValueAt(i, j);
+                    }
+
+                    String username = (String) row[0];
+                    UUID profileId = (UUID) row[1];
+                    String authToken = (String) row[2];
+                    long tokenExpireAt = (long) row[3];
+                    AuthType authType = (AuthType) row[4];
+                    boolean enabled = (boolean) row[5];
+
+                    accounts.add(new JavaAccount(authType, username, profileId, authToken, tokenExpireAt, enabled));
+                }
+
+                serverWrecker.getAccountRegistry().setAccounts(accounts);
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(accountList);
+
+        accountListPanel.add(scrollPane);
+
+        add(accountListPanel);
     }
 
     private JButton createAccountLoadButton(ServerWrecker serverWrecker, JFrame parent, AuthType type) {

@@ -27,7 +27,6 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -40,6 +39,7 @@ import java.util.*;
 public class AccountRegistry implements SettingsDuplex<AccountList> {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final List<JavaAccount> accounts = new ArrayList<>();
+    private final List<Runnable> loadHooks = new ArrayList<>();
     private final ServerWrecker serverWrecker;
 
     public void loadFromFile(Path file, AuthType authType) throws IOException {
@@ -49,7 +49,7 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
     public void loadFromString(String file, AuthType authType) {
         List<JavaAccount> newAccounts = new ArrayList<>();
 
-        if (isJson(file)) {
+        if (isSupportedJson(file)) {
             if (isArray(file)) {
                 newAccounts.addAll(Arrays.stream(GSON.fromJson(file, AccountJsonType[].class))
                         .map(account -> fromJsonType(account, authType))
@@ -71,12 +71,13 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
 
         this.accounts.addAll(newAccounts);
         serverWrecker.getLogger().info("Loaded {} accounts!", newAccounts.size());
+        loadHooks.forEach(Runnable::run);
     }
 
-    private boolean isJson(String file) {
+    private boolean isSupportedJson(String file) {
         try {
-            GSON.fromJson(file, JsonElement.class);
-            return true;
+            JsonElement element = GSON.fromJson(file, JsonElement.class);
+            return element.isJsonArray() || element.isJsonObject();
         } catch (JsonSyntaxException ex) {
             return false;
         }
@@ -165,7 +166,7 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
         String password = type.password == null ? null : type.password.trim();
 
         if (authToken != null) {
-            return new JavaAccount(authType, username, profileId, authToken, tokenExpireAt);
+            return new JavaAccount(authType, username, profileId, authToken, tokenExpireAt, true);
         }
 
         switch (authType) {
@@ -202,14 +203,13 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
         return new AccountList(List.copyOf(accounts));
     }
 
-    public JavaAccount authenticate(AuthType authType, String email, String password, SWProxy proxyData) throws IOException {
-        if (authType == AuthType.MICROSOFT) {
-            return new SWMicrosoftAuthService().login(email, password, proxyData);
-        } else if (authType == AuthType.THE_ALTENING) {
-            return new SWTheAlteningAuthService().login(email, proxyData);
-        }
+    public void addLoadHook(Runnable hook) {
+        loadHooks.add(hook);
+    }
 
-        throw new IllegalArgumentException("Invalid auth service: " + authType);
+    public void setAccounts(List<JavaAccount> accounts) {
+        this.accounts.clear();
+        this.accounts.addAll(accounts);
     }
 
     @AllArgsConstructor

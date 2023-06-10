@@ -49,7 +49,7 @@ public class SWMicrosoftAuthService implements MCAuthService {
             StepMCProfile.MCProfile mcProfile = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient,
                     new StepCredentialsMsaCode.MsaCredentials(email, password));
             StepMCToken.MCToken mcToken = mcProfile.prevResult().prevResult();
-            return new JavaAccount(AuthType.MICROSOFT, mcProfile.name(), mcProfile.id(), mcToken.access_token(), mcToken.expireTimeMs());
+            return new JavaAccount(AuthType.MICROSOFT, mcProfile.name(), mcProfile.id(), mcToken.access_token(), mcToken.expireTimeMs(), true);
         } catch (Exception e) {
             throw new IOException(e);
         }

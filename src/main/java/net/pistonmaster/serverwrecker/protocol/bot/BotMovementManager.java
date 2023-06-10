@@ -236,7 +236,12 @@ public final class BotMovementManager {
 
     public boolean isInFluid() {
         Vector3i blockPos = this.getBlockPos();
-        return getLevelSafe().getBlockTypeAt(blockPos).isFluid();
+        LevelState level = getLevelSafe();
+        if (level.isOutOfWorld(blockPos)) {
+            return false;
+        }
+
+        return level.getBlockTypeAt(blockPos).isFluid();
     }
 
     public void jump() {
@@ -325,7 +330,12 @@ public final class BotMovementManager {
         }
 
         Vector3i blockPos = this.getPlayerPos().add(Vector3d.from(0, -0.5, 0)).toInt();
-        BlockType blockType = getLevelSafe().getBlockTypeAt(blockPos);
+        LevelState level = getLevelSafe();
+        if (level.isOutOfWorld(blockPos)) {
+            return 1.0F;
+        }
+
+        BlockType blockType = level.getBlockTypeAt(blockPos);
         if (blockType == BlockType.SLIME_BLOCK) {
             return 0.8F;
         } else if (blockType == BlockType.ICE || blockType == BlockType.PACKED_ICE) {

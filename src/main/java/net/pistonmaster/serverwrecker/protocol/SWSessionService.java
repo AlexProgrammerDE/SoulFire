@@ -36,7 +36,8 @@ import java.util.UUID;
 
 public class SWSessionService extends Service {
     private static final URI DEFAULT_MOJANG_BASE_URI = URI.create("https://sessionserver.mojang.com/session/minecraft/");
-    private static final URI DEFAULT_THE_ALTENING_BASE_URI = URI.create("https://sessionserver.thealtening.com/session/minecraft/");
+    @SuppressWarnings("HttpUrlsUsage")
+    private static final URI DEFAULT_THE_ALTENING_BASE_URI = URI.create("http://sessionserver.thealtening.com/session/minecraft/");
     private static final String JOIN_ENDPOINT = "join";
     private final AuthType authType;
 
@@ -82,7 +83,11 @@ public class SWSessionService extends Service {
      * @throws RequestException If an error occurs while making the request.
      */
     public void joinServer(UUID profileId, String authenticationToken, String serverId) throws RequestException {
-        SWSessionService.JoinServerRequest request = new SWSessionService.JoinServerRequest(authenticationToken, profileId, serverId);
+        SWSessionService.JoinServerRequest request = new SWSessionService.JoinServerRequest(
+                authenticationToken,
+                profileId.toString().replace("-", ""), // Remove dashes from UUID
+                serverId
+        );
         HTTP.makeRequest(this.getProxy(), this.getEndpointUri(JOIN_ENDPOINT), request, null);
     }
 
@@ -90,7 +95,7 @@ public class SWSessionService extends Service {
     @AllArgsConstructor
     private static class JoinServerRequest {
         private String accessToken;
-        private UUID selectedProfile;
+        private String selectedProfile;
         private String serverId;
     }
 }

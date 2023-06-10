@@ -172,6 +172,10 @@ public class LevelState {
         return blockType;
     }
 
+    public boolean isOutOfWorld(Vector3i block) {
+        return block.getY() < this.getMinBuildHeight() || block.getY() >= this.getMaxBuildHeight();
+    }
+
     public List<BoundingBox> getCollisionBoxes(BoundingBox aabb) {
         List<BoundingBox> boundingBoxList = new ArrayList<>();
 
@@ -195,6 +199,10 @@ public class LevelState {
     }
 
     private boolean isSolidBlockAt(Vector3i block) {
+        if (isOutOfWorld(block)) {
+            return false;
+        }
+
         return getBlockTypeAt(block).boundingBox() == BoundingBoxType.BLOCK;
     }
 }

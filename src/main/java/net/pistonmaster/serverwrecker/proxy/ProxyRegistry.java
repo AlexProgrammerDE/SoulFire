@@ -79,11 +79,15 @@ public class ProxyRegistry implements SettingsDuplex<ProxyList> {
         }
     }
 
-    public List<SWProxy> getProxies() {
+    public List<SWProxy> getUsableProxies() {
         return proxies
                 .stream()
                 .filter(SWProxy::enabled)
                 .toList();
+    }
+
+    public List<SWProxy> getProxies() {
+        return Collections.unmodifiableList(proxies);
     }
 
     @Override

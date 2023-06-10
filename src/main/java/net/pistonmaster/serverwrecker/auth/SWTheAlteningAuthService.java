@@ -20,9 +20,13 @@
 package net.pistonmaster.serverwrecker.auth;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
+import com.github.steveice10.mc.auth.service.MojangAuthenticationService;
 import com.google.gson.Gson;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
+import net.pistonmaster.serverwrecker.util.UUIDHelper;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpPost;
@@ -61,7 +65,14 @@ public class SWTheAlteningAuthService implements MCAuthService {
             AuthenticateRefreshResponse response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
                     AuthenticateRefreshResponse.class);
 
-            return new JavaAccount(AuthType.THE_ALTENING, response.selectedProfile.getName(), response.selectedProfile.getId(), response.accessToken, -1);
+            return new JavaAccount(
+                    AuthType.THE_ALTENING,
+                    response.getSelectedProfile().getName(),
+                    UUIDHelper.convertToDashed(response.getSelectedProfile().getId()),
+                    response.getAccessToken(),
+                    -1,
+                    true
+            );
         } catch (Exception e) {
             throw new IOException(e);
         }
@@ -70,32 +81,24 @@ public class SWTheAlteningAuthService implements MCAuthService {
     private record Agent(String name, int version) {
     }
 
-    private static class User {
-        public String id;
-        public List<GameProfile.Property> properties;
-    }
-
+    @RequiredArgsConstructor
     private static class AuthenticationRequest {
-        private final Agent agent;
+        private final Agent agent = new Agent("Minecraft", 1);
         private final String username;
         private final String password;
         private final String clientToken;
-        private final boolean requestUser;
-
-        protected AuthenticationRequest(String username, String password, String clientToken) {
-            this.agent = new Agent("Minecraft", 1);
-            this.username = username;
-            this.password = password;
-            this.clientToken = clientToken;
-            this.requestUser = true;
-        }
+        private final boolean requestUser = true;
     }
 
+    @Getter
     private static class AuthenticateRefreshResponse {
-        public String accessToken;
-        public String clientToken;
-        public GameProfile selectedProfile;
-        public GameProfile[] availableProfiles;
-        public User user;
+        private String accessToken;
+        private ResponseGameProfile selectedProfile;
+    }
+
+    @Getter
+    private static class ResponseGameProfile {
+        private String id;
+        private String name;
     }
 }

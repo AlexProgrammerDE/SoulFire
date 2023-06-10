@@ -68,7 +68,7 @@ public class ChatMessageLogger implements InternalAddon, EventSubscriber<PreBotC
 
         @Override
         public void on(@NonNull ChatMessageReceiveEvent event) {
-            messageQueue.add(event.parseToText());
+            messageQueue.add(event.parseToText().replace("\n", ""));
         }
 
         @Override
