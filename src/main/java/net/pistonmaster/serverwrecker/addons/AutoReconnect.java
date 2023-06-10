@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
+import io.netty.channel.EventLoopGroup;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
@@ -61,6 +62,11 @@ public class AutoReconnect implements InternalAddon {
         }
 
         scheduler.schedule(() -> {
+            EventLoopGroup eventLoopGroup = event.connection().session().getEventLoopGroup();
+            if (eventLoopGroup.isShuttingDown() || eventLoopGroup.isShutdown() || eventLoopGroup.isTerminated()) {
+                return;
+            }
+
             event.connection().factory().connect()
                     .thenAccept(newConnection -> event.connection().serverWrecker().getBotConnections()
                             .replaceAll(connection1 -> connection1 == event.connection() ? newConnection : connection1));
