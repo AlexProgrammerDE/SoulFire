@@ -35,6 +35,7 @@ import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.handler.codec.haproxy.*;
+import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.SWConstants;
@@ -69,8 +70,6 @@ public class ViaClientSession extends TcpSession {
     public static final String COMPRESSION_NAME = "compression";
     public static final String ENCRYPTION_NAME = "encryption";
 
-    // Changed from static to non-static to allow high concurrency and performance
-    private final EventLoopGroup eventLoopGroup = SWNettyHelper.createEventLoopGroup();
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final InetSocketAddress targetAddress;
     private final String bindAddress;
@@ -78,11 +77,13 @@ public class ViaClientSession extends TcpSession {
     private final SWProxy proxy;
     private final PacketCodecHelper codecHelper;
     private final SettingsHolder settingsHolder;
+    @Getter
+    private final EventLoopGroup eventLoopGroup;
     private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
     @Setter
     private Runnable postDisconnectHook;
 
-    public ViaClientSession(InetSocketAddress targetAddress, PacketProtocol protocol, SWProxy proxy, SettingsHolder settingsHolder) {
+    public ViaClientSession(InetSocketAddress targetAddress, PacketProtocol protocol, SWProxy proxy, SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup) {
         super(null, -1, protocol);
         this.targetAddress = targetAddress;
         this.bindAddress = "0.0.0.0";
@@ -90,6 +91,7 @@ public class ViaClientSession extends TcpSession {
         this.proxy = proxy;
         this.codecHelper = protocol.createHelper();
         this.settingsHolder = settingsHolder;
+        this.eventLoopGroup = eventLoopGroup;
     }
 
     @Override

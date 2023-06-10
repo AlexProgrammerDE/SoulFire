@@ -42,6 +42,7 @@ import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ThreadFactory;
 
 public class SWNettyHelper {
     public static final Class<? extends Channel> CHANNEL_CLASS;
@@ -70,12 +71,13 @@ public class SWNettyHelper {
         }
     }
 
-    public static EventLoopGroup createEventLoopGroup() {
+    public static EventLoopGroup createEventLoopGroup(int threads, String name) {
+        ThreadFactory threadFactory = (ThreadFactory) r -> new Thread(r, "ServerWrecker-" + name);
         EventLoopGroup group = switch (TransportHelper.determineTransportMethod()) {
-            case IO_URING -> new IOUringEventLoopGroup();
-            case EPOLL -> new EpollEventLoopGroup();
-            case KQUEUE -> new KQueueEventLoopGroup();
-            case NIO -> new NioEventLoopGroup();
+            case IO_URING -> new IOUringEventLoopGroup(threads, threadFactory);
+            case EPOLL -> new EpollEventLoopGroup(threads, threadFactory);
+            case KQUEUE -> new KQueueEventLoopGroup(threads, threadFactory);
+            case NIO -> new NioEventLoopGroup(threads, threadFactory);
         };
 
         Runtime.getRuntime().addShutdownHook(new Thread(group::shutdownGracefully));

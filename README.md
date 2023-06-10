@@ -1,5 +1,6 @@
 # ServerWrecker
 
+<!--suppress HtmlDeprecatedAttribute -->
 <p align="center">
 <a href="https://ci.codemc.io/job/SkinsRestorer/job/SkinsRestorerX-DEV/"><img src="https://ci.codemc.io/job/SkinsRestorer/job/SkinsRestorerX-DEV/badge/icon" alt="Build Status"></a>
 <a href="https://github.com/AlexProgrammerDE/ServerWrecker/actions/workflows/build.yml"><img src="https://github.com/AlexProgrammerDE/ServerWrecker/actions/workflows/build.yml/badge.svg?branch=main" alt="Java CI"></a>

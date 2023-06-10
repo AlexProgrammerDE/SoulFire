@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.protocol;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.github.steveice10.packetlib.BuiltinFlags;
+import io.netty.channel.EventLoopGroup;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
@@ -41,14 +42,14 @@ import java.util.concurrent.CompletableFuture;
 public record BotConnectionFactory(ServerWrecker serverWrecker, InetSocketAddress targetAddress,
                                    SettingsHolder settingsHolder, Logger logger,
                                    MinecraftProtocol protocol, JavaAccount javaAccount,
-                                   SWProxy proxyData) {
+                                   SWProxy proxyData, EventLoopGroup eventLoopGroup) {
     public CompletableFuture<BotConnection> connect() {
         return CompletableFuture.supplyAsync(() -> connectInternal(ProtocolState.LOGIN));
     }
 
     public BotConnection connectInternal(ProtocolState targetState) {
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
-        ViaClientSession session = new ViaClientSession(targetAddress, protocol, proxyData, settingsHolder);
+        ViaClientSession session = new ViaClientSession(targetAddress, protocol, proxyData, settingsHolder, eventLoopGroup);
         BotConnection botConnection = new BotConnection(this, serverWrecker, settingsHolder, logger, protocol, session,
                 new BotConnectionMeta(javaAccount, targetState));
         session.setPostDisconnectHook(() -> botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup));

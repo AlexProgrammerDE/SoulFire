@@ -42,6 +42,7 @@ import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.pistonmaster.serverwrecker.api.Addon;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.api.event.state.AttackEndEvent;
 import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
 import net.pistonmaster.serverwrecker.auth.AccountList;
@@ -106,7 +107,7 @@ public class ServerWrecker {
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
-    private final List<BotConnection> botConnections = new ArrayList<>();
+    private final List<BotConnection> botConnections = new CopyOnWriteArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
     private final Map<String, String> serviceServerConfig = new HashMap<>();
@@ -355,20 +356,31 @@ public class ServerWrecker {
             proxyUseMap.put(proxy, 0);
         }
 
-        EventLoopGroup resolveGroup = SWNettyHelper.createEventLoopGroup();
-        InetSocketAddress targetAddress = ResolveUtil.resolveAddress(settingsHolder, resolveGroup);
+        // Prepare an event loop group with enough threads for the attack
+        EventLoopGroup attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(botAmount, "Attack");
+        InetSocketAddress targetAddress = ResolveUtil.resolveAddress(settingsHolder, attackEventLoopGroup);
 
         Queue<BotConnectionFactory> factories = new ArrayBlockingQueue<>(botAmount);
         for (int botId = 1; botId <= botAmount; botId++) {
             SWProxy proxyData = getProxy(botsPerProxy, proxyUseMap);
-
             JavaAccount javaAccount = getAccount(accountSettings, accounts, botId);
-            int index = accounts.indexOf(javaAccount);
-            if (index != -1) {
-                accounts.remove(index); // Remove the account from the list, so it can't be used again
-            }
 
-            factories.add(createBotFactory(targetAddress, settingsHolder, javaAccount, proxyData));
+            // AuthData will be used internally instead of the MCProtocol data
+            MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile(javaAccount.profileId(), javaAccount.username()), javaAccount.authToken());
+
+            // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
+            protocol.setUseDefaultListeners(false);
+
+            factories.add(new BotConnectionFactory(
+                    this,
+                    targetAddress,
+                    settingsHolder,
+                    LoggerFactory.getLogger(javaAccount.username()),
+                    protocol,
+                    javaAccount,
+                    proxyData,
+                    attackEventLoopGroup
+            ));
         }
 
         if (availableProxiesCount == 0) {
@@ -405,10 +417,10 @@ public class ServerWrecker {
                 break;
             }
 
-            threadPool.execute(() -> {
+            attackEventLoopGroup.execute(() -> {
                 try {
-                    factory.connect().join();
-                } catch (Exception e) {
+                    botConnections.add(factory.connect().join());
+                } catch (Throwable e) {
                     logger.error("Error while connecting", e);
                 }
             });
@@ -418,9 +430,9 @@ public class ServerWrecker {
     private JavaAccount getAccount(AccountSettings accountSettings, List<JavaAccount> accounts, int botId) {
         if (accounts.isEmpty()) {
             return new JavaAccount(String.format(accountSettings.nameFormat(), botId));
-        } else {
-            return accounts.get(0);
         }
+
+        return accounts.remove(0);
     }
 
     private SWProxy getProxy(int accountsPerProxy, Map<SWProxy, Integer> proxyUseMap) {
@@ -440,31 +452,19 @@ public class ServerWrecker {
         }
     }
 
-    private BotConnectionFactory createBotFactory(InetSocketAddress targetAddress, SettingsHolder settingsHolder, JavaAccount javaAccount, SWProxy proxyData) {
-        // AuthData will be used internally instead of the MCProtocol data
-        MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile(javaAccount.profileId(), javaAccount.username()), javaAccount.authToken());
-
-        // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
-        protocol.setUseDefaultListeners(false);
-
-        return new BotConnectionFactory(
-                this,
-                targetAddress,
-                settingsHolder,
-                LoggerFactory.getLogger(javaAccount.username()),
-                protocol,
-                javaAccount,
-                proxyData
-        );
-    }
-
     public void stop() {
         if (attackState.isStopped()) {
             return;
         }
 
         this.attackState = AttackState.STOPPED;
-        botConnections.forEach(BotConnection::disconnect);
+        for (BotConnection botConnection : botConnections) {
+            botConnection.disconnect();
+        }
+        for (BotConnection botConnection : botConnections) {
+            botConnection.session().getEventLoopGroup().shutdownGracefully();
+            botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup);
+        }
         botConnections.clear();
         ServerWreckerAPI.postEvent(new AttackEndEvent());
     }

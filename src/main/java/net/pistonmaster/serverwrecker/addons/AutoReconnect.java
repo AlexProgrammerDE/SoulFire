@@ -56,7 +56,7 @@ public class AutoReconnect implements InternalAddon {
             return;
         }
 
-        event.connection().serverWrecker().getScheduler().schedule(() -> {
+        event.connection().session().getEventLoopGroup().schedule(() -> {
             event.connection().factory().connect()
                     .thenAccept(newConnection -> event.connection().serverWrecker().getBotConnections()
                             .replaceAll(connection1 -> connection1 == event.connection() ? newConnection : connection1));
