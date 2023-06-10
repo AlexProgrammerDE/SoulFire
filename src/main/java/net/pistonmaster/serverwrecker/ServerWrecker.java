@@ -44,7 +44,10 @@ import net.pistonmaster.serverwrecker.api.Addon;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.state.AttackEndEvent;
 import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
-import net.pistonmaster.serverwrecker.auth.*;
+import net.pistonmaster.serverwrecker.auth.AccountList;
+import net.pistonmaster.serverwrecker.auth.AccountRegistry;
+import net.pistonmaster.serverwrecker.auth.AccountSettings;
+import net.pistonmaster.serverwrecker.auth.JavaAccount;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.common.OperationMode;
@@ -65,6 +68,7 @@ import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
+import net.pistonmaster.serverwrecker.util.VersionComparator;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
 import org.apache.logging.log4j.Level;
@@ -78,7 +82,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -123,6 +129,7 @@ public class ServerWrecker {
     private final OperationMode operationMode;
     private final Path profilesFolder;
     private final Path pluginsFolder;
+    private final boolean outdated;
     @Setter
     private AttackState attackState = AttackState.STOPPED;
     private boolean shutdown = false;
@@ -243,7 +250,41 @@ public class ServerWrecker {
 
         initPlugins(pluginsFolder);
 
+        logger.info("Checking for updates...");
+        outdated = checkForUpdates();
+
         logger.info("Finished loading!");
+    }
+
+    private boolean checkForUpdates() {
+        try {
+            URL url = new URL("https://api.github.com/repos/AlexProgrammerDE/ServerWrecker/releases/latest");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("User-Agent", "ServerWrecker");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            if (connection.getResponseCode() != 200) {
+                logger.warn("Failed to check for updates: {}", connection.getResponseCode());
+                return false;
+            }
+
+            JsonObject response;
+            try (InputStream stream = connection.getInputStream()) {
+                response = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
+            }
+
+            String latestVersion = response.get("tag_name").getAsString();
+            if (VersionComparator.isNewer(BuildData.VERSION, latestVersion)) {
+                logger.warn("ServerWrecker is outdated! Current version: {}, latest version: {}", BuildData.VERSION, latestVersion);
+                return true;
+            }
+        } catch (IOException e) {
+            logger.warn("Failed to check for updates", e);
+        }
+
+        return false;
     }
 
     public void initConsole() {
