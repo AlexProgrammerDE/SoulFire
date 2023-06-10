@@ -391,7 +391,7 @@ public class ServerWrecker {
         ServerWreckerAPI.postEvent(new AttackStartEvent());
 
         // Used for concurrent bot connecting
-        ExecutorService connectService = Executors.newFixedThreadPool(3);
+        ExecutorService connectService = Executors.newFixedThreadPool(1);
 
         Random random = ThreadLocalRandom.current();
         while (!factories.isEmpty()) {

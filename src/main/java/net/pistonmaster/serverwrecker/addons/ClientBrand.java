@@ -19,8 +19,15 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundCustomPayloadPacket;
+import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
+import com.viaversion.viaversion.api.type.Type;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
@@ -37,6 +44,7 @@ import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class ClientBrand implements InternalAddon {
@@ -47,7 +55,7 @@ public class ClientBrand implements InternalAddon {
 
     @EventHandler
     public void onPacket(SWPacketReceiveEvent event) {
-        if (event.getPacket() instanceof ClientboundPlayerAbilitiesPacket) { // Recommended packet to use
+        if (event.getPacket() instanceof ClientboundLoginPacket) { // Recommended packet to use
             if (!event.getConnection().settingsHolder().has(ClientBrandSettings.class)) {
                 return;
             }
@@ -58,9 +66,13 @@ public class ClientBrand implements InternalAddon {
                 return;
             }
 
+            ByteBuf buf = Unpooled.buffer();
+            event.getConnection().session().getCodecHelper()
+                    .writeString(buf, clientBrandSettings.clientBrand());
+
             event.getConnection().session().send(new ServerboundCustomPayloadPacket(
                     "minecraft:brand",
-                    clientBrandSettings.clientBrand().getBytes(StandardCharsets.UTF_8)
+                    ByteBufUtil.getBytes(buf)
             ));
         }
     }

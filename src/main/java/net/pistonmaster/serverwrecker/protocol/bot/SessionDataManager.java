@@ -201,7 +201,7 @@ public final class SessionDataManager {
 
         if (botMovementManager == null) {
             botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch);
-            log.info("Joined server at position: X{} Y{} Z{}", Math.round(x), Math.round(y), Math.round(z));
+            log.info("Joined server at position: X {} Y {} Z {}", Math.round(x), Math.round(y), Math.round(z));
         } else {
             botMovementManager.setPosition(x, y, z);
             botMovementManager.setRotation(yaw, pitch);
