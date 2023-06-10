@@ -23,6 +23,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
+import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
@@ -32,7 +33,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.nio.file.Path;
 
 public class AccountPanel extends NavigationItem implements SettingsDuplex<AccountSettings> {
@@ -43,25 +43,47 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
     public AccountPanel(ServerWrecker serverWrecker, JFrame parent) {
         serverWrecker.getSettingsManager().registerDuplex(AccountSettings.class, this);
 
-        setLayout(new GridLayout(0, 2));
+        setLayout(new GridLayout(2, 1, 10, 10));
 
-        JButton loadAccounts = new JButton("Load Accounts");
+        JPanel accountOptionsPanel = new JPanel();
+        accountOptionsPanel.setLayout(new GridLayout(2, 1, 10, 10));
+
+        JPanel addAccountPanel = new JPanel();
+        addAccountPanel.setLayout(new GridLayout(1, 3, 10, 10));
+
+        addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.OFFLINE));
+        addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.MICROSOFT));
+        addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.THE_ALTENING));
+
+        accountOptionsPanel.add(addAccountPanel);
+
+        JPanel accountSettingsPanel = new JPanel();
+        accountSettingsPanel.setLayout(new GridLayout(0, 2));
+
+        accountSettingsPanel.add(new JLabel("Shuffle accounts: "));
+        accountSettingsPanel.add(shuffleAccounts);
+
+        accountSettingsPanel.add(new JLabel("Name Format: "));
+        nameFormat = new JTextField(AccountSettings.DEFAULT_NAME_FORMAT);
+        accountSettingsPanel.add(nameFormat);
+
+        accountOptionsPanel.add(accountSettingsPanel);
+
+        add(accountOptionsPanel);
+    }
+
+    private JButton createAccountLoadButton(ServerWrecker serverWrecker, JFrame parent, AuthType type) {
+        String loadText = String.format("Load %s accounts", type);
+        String typeText = String.format("%s list file", type);
+        JButton button = new JButton(loadText);
 
         FileChooser chooser = new FileChooser();
         chooser.setInitialDirectory(Path.of(System.getProperty("user.dir")).toFile());
-        chooser.setTitle("Load accounts");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Account list file", "*.txt", "*.json"));
+        chooser.setTitle(loadText);
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(typeText, "*.txt"));
 
-        loadAccounts.addActionListener(new LoadAccountsListener(serverWrecker, parent, chooser));
-
-        add(loadAccounts);
-
-        add(new JLabel("Shuffle accounts: "));
-        add(shuffleAccounts);
-
-        add(new JLabel("Name Format: "));
-        nameFormat = new JTextField(AccountSettings.DEFAULT_NAME_FORMAT);
-        add(nameFormat);
+        button.addActionListener(new LoadAccountsListener(serverWrecker, parent, chooser, type));
+        return button;
     }
 
     @Override
@@ -89,7 +111,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
     }
 
     private record LoadAccountsListener(ServerWrecker serverWrecker, JFrame frame,
-                                        FileChooser chooser) implements ActionListener {
+                                        FileChooser chooser, AuthType authType) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             Path accountFile = JFXFileHelper.showOpenDialog(chooser);
@@ -101,7 +123,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
             serverWrecker.getThreadPool().submit(() -> {
                 try {
-                    serverWrecker.getAccountRegistry().loadFromFile(accountFile);
+                    serverWrecker.getAccountRegistry().loadFromFile(accountFile, authType);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }

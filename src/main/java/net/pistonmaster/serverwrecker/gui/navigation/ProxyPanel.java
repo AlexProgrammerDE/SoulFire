@@ -55,10 +55,9 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         proxyOptionsPanel.setLayout(new GridLayout(2, 1, 10, 10));
 
         JPanel addProxyPanel = new JPanel();
-        addProxyPanel.setLayout(new GridLayout(1, 4, 10, 10));
+        addProxyPanel.setLayout(new GridLayout(1, 3, 10, 10));
 
         addProxyPanel.add(createProxyLoadButton(serverWrecker, parent, ProxyType.HTTP));
-        addProxyPanel.add(createProxyLoadButton(serverWrecker, parent, ProxyType.HTTPS));
         addProxyPanel.add(createProxyLoadButton(serverWrecker, parent, ProxyType.SOCKS4));
         addProxyPanel.add(createProxyLoadButton(serverWrecker, parent, ProxyType.SOCKS5));
 

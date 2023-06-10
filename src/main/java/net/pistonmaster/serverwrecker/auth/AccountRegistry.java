@@ -27,6 +27,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -41,20 +42,20 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
     private final List<JavaAccount> accounts = new ArrayList<>();
     private final ServerWrecker serverWrecker;
 
-    public void loadFromFile(Path file) throws IOException {
-        loadFromString(Files.readString(file));
+    public void loadFromFile(Path file, AuthType authType) throws IOException {
+        loadFromString(Files.readString(file), authType);
     }
 
-    public void loadFromString(String file) {
+    public void loadFromString(String file, AuthType authType) {
         List<JavaAccount> newAccounts = new ArrayList<>();
 
         if (isJson(file)) {
             if (isArray(file)) {
                 newAccounts.addAll(Arrays.stream(GSON.fromJson(file, AccountJsonType[].class))
-                        .map(this::fromJsonType)
+                        .map(account -> fromJsonType(account, authType))
                         .toList());
             } else if (isObject(file)) {
-                newAccounts.add(fromJsonType(GSON.fromJson(file, AccountJsonType.class)));
+                newAccounts.add(fromJsonType(GSON.fromJson(file, AccountJsonType.class), authType));
             } else {
                 throw new IllegalArgumentException("Invalid JSON!");
             }
@@ -64,7 +65,7 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
             Arrays.stream(accountLines)
                     .filter(line -> !line.isBlank())
                     .distinct()
-                    .map(this::fromString)
+                    .map(account -> fromString(account, authType))
                     .forEach(newAccounts::add);
         }
 
@@ -89,31 +90,54 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
         return GSON.fromJson(file, JsonElement.class).isJsonObject();
     }
 
-    private JavaAccount fromString(String account) {
+    private JavaAccount fromString(String account, AuthType authType) {
         account = account.trim();
 
         if (account.isBlank()) {
             throw new IllegalArgumentException("Account cannot be empty!");
         }
 
-        if (!account.contains(":")) {
-            return new JavaAccount(account);
-        }
-
         String[] split = account.split(":");
-        if (split.length < 2) {
-            throw new IllegalArgumentException("Invalid account!");
-        }
 
-        String email = split[0].trim();
-        expectEmail(email);
+        switch (authType) {
+            case OFFLINE -> {
+                if (account.contains(":")) {
+                    throw new IllegalArgumentException("Invalid account!");
+                }
 
-        String password = split[1].trim();
+                return new JavaAccount(account);
+            }
+            case MICROSOFT -> {
+                if (split.length < 2) {
+                    throw new IllegalArgumentException("Invalid account!");
+                }
 
-        try {
-            return serverWrecker.authenticate(AuthType.MICROSOFT, email, password, null); // TODO: Implement proxy and auth type
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+                String email = split[0].trim();
+                expectEmail(email);
+
+                String password = split[1].trim();
+
+                try {
+                    return new SWMicrosoftAuthService().login(email, password, null);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            case THE_ALTENING -> {
+                if (split.length < 1) {
+                    throw new IllegalArgumentException("Invalid account!");
+                }
+
+                String altToken = split[0].trim();
+                expectEmail(altToken);
+
+                try {
+                    return new SWTheAlteningAuthService().login(altToken, null);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            default -> throw new IllegalArgumentException("Invalid auth type!");
         }
     }
 
@@ -127,16 +151,10 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
         }
     }
 
-    private JavaAccount fromJsonType(AccountJsonType type) {
+    private JavaAccount fromJsonType(AccountJsonType type, AuthType authType) {
         Objects.requireNonNull(type, "Account type cannot be null");
         String username = Objects.requireNonNull(type.username, "Username not found").trim();
         UUID profileId = type.profileId == null ? null : UUID.fromString(type.profileId.trim());
-        AuthType authType;
-        if (type.authType == null) {
-            authType = profileId == null ? AuthType.OFFLINE : AuthType.MICROSOFT;
-        } else {
-            authType = AuthType.valueOf(type.authType.trim().toUpperCase(Locale.ENGLISH));
-        }
 
         String authToken = type.authToken == null ? null : type.authToken.trim();
         long tokenExpireAt = authType == AuthType.OFFLINE ? -1 : type.tokenExpireAt;
@@ -146,15 +164,27 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
 
         String password = type.password == null ? null : type.password.trim();
 
-        if (email != null && password != null && authType != AuthType.OFFLINE && authToken == null) {
-            try {
-                return serverWrecker.authenticate(authType, email, password, null); // TODO: Implement proxy
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        if (authToken != null) {
+            return new JavaAccount(authType, username, profileId, authToken, tokenExpireAt);
         }
 
-        return new JavaAccount(authType, username, profileId, authToken, tokenExpireAt);
+        switch (authType) {
+            case MICROSOFT -> {
+                try {
+                    return new SWMicrosoftAuthService().login(email, password, null);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            case THE_ALTENING -> {
+                try {
+                    return new SWTheAlteningAuthService().login(email, null);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            default -> throw new IllegalArgumentException("Could not create a auth token!");
+        }
     }
 
     public List<JavaAccount> getAccounts() {
@@ -172,12 +202,21 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
         return new AccountList(List.copyOf(accounts));
     }
 
+    public JavaAccount authenticate(AuthType authType, String email, String password, SWProxy proxyData) throws IOException {
+        if (authType == AuthType.MICROSOFT) {
+            return new SWMicrosoftAuthService().login(email, password, proxyData);
+        } else if (authType == AuthType.THE_ALTENING) {
+            return new SWTheAlteningAuthService().login(email, proxyData);
+        }
+
+        throw new IllegalArgumentException("Invalid auth service: " + authType);
+    }
+
     @AllArgsConstructor
     @NoArgsConstructor
     private static class AccountJsonType {
         private String username;
         private String profileId;
-        private String authType;
         private String authToken;
         private long tokenExpireAt;
 

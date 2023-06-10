@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
+import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
@@ -83,6 +84,9 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Option(names = {"--account-file"}, description = "File to load accounts from")
     private Path accountFile;
 
+    @Option(names = {"--account-type"}, description = "Type of accounts in the account file")
+    private AuthType authType;
+
     @Option(names = {"--proxy-file"}, description = "File to load proxies from")
     private Path proxyFile;
 
@@ -126,9 +130,9 @@ public class SWCommandDefinition implements Callable<Integer> {
                         botsPerProxy
                 ));
 
-        if (accountFile != null) {
+        if (accountFile != null && authType != null) {
             try {
-                serverWrecker.getAccountRegistry().loadFromFile(accountFile);
+                serverWrecker.getAccountRegistry().loadFromFile(accountFile, authType);
             } catch (IOException e) {
                 e.printStackTrace();
                 return 1;

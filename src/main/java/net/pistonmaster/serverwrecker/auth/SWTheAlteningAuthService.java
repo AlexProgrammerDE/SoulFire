@@ -41,6 +41,7 @@ import java.util.UUID;
 public class SWTheAlteningAuthService implements MCAuthService {
     @SuppressWarnings("HttpUrlsUsage") // The Altening doesn't support encrypted HTTPS
     private static final URI AUTHENTICATE_ENDPOINT = URI.create("http://authserver.thealtening.com/authenticate");
+    private static final String PASSWORD = "ServerWreckerIsCool"; // Password doesn't matter for The Altening
     private final Gson gson = new Gson();
 
     private static CloseableHttpClient createHttpClient(SWProxy proxyData) {
@@ -52,9 +53,9 @@ public class SWTheAlteningAuthService implements MCAuthService {
         return HttpHelper.createHttpClient(headers, proxyData);
     }
 
-    public JavaAccount login(String email, String password, SWProxy proxyData) throws IOException {
+    public JavaAccount login(String altToken, SWProxy proxyData) throws IOException {
         try (CloseableHttpClient httpClient = createHttpClient(proxyData)) {
-            AuthenticationRequest request = new AuthenticationRequest(email, password, UUID.randomUUID().toString());
+            AuthenticationRequest request = new AuthenticationRequest(altToken, PASSWORD, UUID.randomUUID().toString());
             HttpPost httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
             httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
             AuthenticateRefreshResponse response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),

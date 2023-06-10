@@ -416,16 +416,6 @@ public class ServerWrecker {
         );
     }
 
-    public JavaAccount authenticate(AuthType authType, String email, String password, SWProxy proxyData) throws IOException {
-        if (authType == AuthType.MICROSOFT) {
-            return new SWMicrosoftAuthService().login(email, password, proxyData);
-        } else if (authType == AuthType.THE_ALTENING) {
-            return new SWTheAlteningAuthService().login(email, password, proxyData);
-        }
-
-        throw new IllegalArgumentException("Invalid auth service: " + authType);
-    }
-
     public void stop() {
         if (attackState.isStopped()) {
             return;
