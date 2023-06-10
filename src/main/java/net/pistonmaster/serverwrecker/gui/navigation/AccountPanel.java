@@ -29,9 +29,6 @@ import net.pistonmaster.serverwrecker.auth.JavaAccount;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
-import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
-import net.pistonmaster.serverwrecker.proxy.ProxyType;
-import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;
@@ -86,7 +83,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
         String[] columnNames = {"Username", "UUID", "Auth Token", "Token Expiry", "Type", "Enabled"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
-            final Class<?>[] columnTypes = new Class<?>[] {
+            final Class<?>[] columnTypes = new Class<?>[]{
                     String.class, UUID.class, String.class, Long.class, AuthType.class, Boolean.class
             };
 

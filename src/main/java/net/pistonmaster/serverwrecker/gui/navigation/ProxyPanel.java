@@ -35,12 +35,9 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySettings> {
     private final JSpinner botsPerProxy = new JSpinner();
@@ -79,7 +76,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
 
         String[] columnNames = {"IP", "Port", "Username", "Password", "Type", "Enabled"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
-            final Class<?>[] columnTypes = new Class<?>[] {
+            final Class<?>[] columnTypes = new Class<?>[]{
                     Object.class, Integer.class, Object.class, Object.class, ProxyType.class, Boolean.class
             };
 

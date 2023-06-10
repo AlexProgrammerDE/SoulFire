@@ -19,8 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.auth;
 
-import com.github.steveice10.mc.auth.data.GameProfile;
-import com.github.steveice10.mc.auth.service.MojangAuthenticationService;
 import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

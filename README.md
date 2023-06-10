@@ -1,4 +1,5 @@
 # ServerWrecker
+
 <p align="center">
 <a href="https://ci.codemc.io/job/SkinsRestorer/job/SkinsRestorerX-DEV/"><img src="https://ci.codemc.io/job/SkinsRestorer/job/SkinsRestorerX-DEV/badge/icon" alt="Build Status"></a>
 <a href="https://github.com/AlexProgrammerDE/ServerWrecker/actions/workflows/build.yml"><img src="https://github.com/AlexProgrammerDE/ServerWrecker/actions/workflows/build.yml/badge.svg?branch=main" alt="Java CI"></a>
@@ -8,25 +9,29 @@
 <p align="center"><a href="https://pistonmaster.net/discord"><img src="https://discordapp.com/api/guilds/739784741124833301/embed.png" alt="Discord embed"></a></p>
 
 <p align="center">
+<a href="https://github.com/AlexProgrammerDE/ServerWrecker/releases/latest/download/SkinsRestorer.jar"><img src="https://img.shields.io/badge/DOWNLOAD-LATEST-success?style=for-the-badge" alt="download badge"></a>
 <a href="https://nightly.link/AlexProgrammerDE/ServerWrecker/workflows/build/main/ServerWrecker.zip"><img src="https://img.shields.io/badge/DOWNLOAD-DEV__BUILD-important?style=for-the-badge" alt="download2 badge"></a>
 </p>
 
-Advanced Minecraft Server-Stresser Tool. Launch bot attacks on your own servers to stress-test them and measure performance.
-
-## Nightly builds
-
-You can download the latest development version of ServerWrecker through [nightly.link](https://nightly.link/AlexProgrammerDE/ServerWrecker/workflows/build/main/ServerWrecker.zip).
+Advanced Minecraft Server-Stresser Tool. Launch bot attacks on your own servers to stress-test them and measure
+performance.
 
 ## Features
 
-* GUI & CLI
+* GUI (Multiple themes) & CLI
 * Configurable options for every attack like number of bots, join delay and more
 * Load and save profiles for quick access
 * Support for online and offline mode servers
 * Huge version support
+* Use Microsoft, The Altening or Offline accounts
+* Use HTTP/SOCKS4/SOCKS5 proxies
 * Multiple modules like AutoRespawn and also AutoRegister for cracked servers
-* Supports SOCKS4 and 5 proxies
 * Console command support
+
+## Nightly builds
+
+You can download the latest development version of ServerWrecker
+through [nightly.link](https://nightly.link/AlexProgrammerDE/ServerWrecker/workflows/build/main/ServerWrecker.zip).
 
 ## Requirements
 
@@ -36,6 +41,7 @@ You can download the latest development version of ServerWrecker through [nightl
 ## Version support
 
 ServerWrecker currently supports these versions:
+
 - Release (1.0.0 - 1.20 (latest))
 - Beta (b1.0 - b1.8.1)
 - Alpha (a1.0.15 - a1.2.6)
@@ -51,7 +57,8 @@ Thanks to a built-in implementation of [ViaVersion](https://github.com/ViaVersio
 [ViaLegacy](https://github.com/RaphiMC/ViaLegacy) and [ViaBedrock](https://github.com/RaphiMC/ViaBedrock),
 a ServerWrecker bot can connect to all these versions even without the server having ViaVersion installed.
 The packet translation happens "client/bot side".
-This feature takes inspiration from services like [ViAaaS](https://github.com/ViaVersion/VIAaaS) and [ViaProxy](https://github.com/RaphiMC/ViaProxy),
+This feature takes inspiration from services like [ViAaaS](https://github.com/ViaVersion/VIAaaS)
+and [ViaProxy](https://github.com/RaphiMC/ViaProxy),
 which include client-side translation externally.
 ServerWrecker includes a similar implementation as these two proxies
 and is comparable functionality wise to [ViaFabric](https://github.com/ViaVersion/ViaFabric).
@@ -78,6 +85,65 @@ Also supports /captcha for servers that have it.
 Configurable client settings like chat visibility, chat colors, skin customization, and more.
 Client brand can also be changed to any string; by default, it's set to "vanilla".
 Useful for bypassing anti-bot plugins that check for client settings.
+
+## Import accounts & proxies
+
+### Accounts
+
+ServerWrecker supports Microsoft, The Altening and Offline accounts.
+
+Select the account type in the GUI or CLI and use one of these formats with one account per line:
+
+#### Microsoft
+
+```text
+email:password
+email2:password2
+email3:password3
+```
+
+#### The Altening
+
+```text
+<token>@alt.com
+<token2>@alt.com
+<token3>@alt.com
+```
+
+#### Offline
+
+```text
+Username
+Username2
+Username3
+```
+
+### Proxies
+
+ServerWrecker supports HTTP, SOCKS4 and SOCKS5 proxies.
+
+Select the proxy type in the GUI or CLI and use one of these formats with one proxy per line:
+
+#### HTTP
+
+```text
+ip:port <- no authentication
+ip:port:username:password <- authentication
+```
+
+#### SOCKS4
+
+```text
+ip:port <- no authentication
+ip:port:username <- authentication (socks4 doesn't support passwords)
+```
+
+#### SOCKS5
+
+```text
+ip:port <- no authentication
+ip:port:username:password <- authentication
+```
 
 ## Demo
 
@@ -111,4 +177,5 @@ Feel free to join our discord community server:
 
 ## Attribution
 
-This project is based on [LambdaAttack](https://github.com/games647/LambdaAttack), but over the years the code has been remade multiple times to be far more complex than the original project.
+This project is based on [LambdaAttack](https://github.com/games647/LambdaAttack), but over the years the code has been
+remade multiple times to be far more complex than the original project.

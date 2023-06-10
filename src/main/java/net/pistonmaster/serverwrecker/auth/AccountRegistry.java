@@ -192,6 +192,11 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
         return Collections.unmodifiableList(accounts);
     }
 
+    public void setAccounts(List<JavaAccount> accounts) {
+        this.accounts.clear();
+        this.accounts.addAll(accounts);
+    }
+
     public List<JavaAccount> getUsableAccounts() {
         return accounts.stream()
                 .filter(JavaAccount::enabled)
@@ -211,11 +216,6 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
 
     public void addLoadHook(Runnable hook) {
         loadHooks.add(hook);
-    }
-
-    public void setAccounts(List<JavaAccount> accounts) {
-        this.accounts.clear();
-        this.accounts.addAll(accounts);
     }
 
     @AllArgsConstructor

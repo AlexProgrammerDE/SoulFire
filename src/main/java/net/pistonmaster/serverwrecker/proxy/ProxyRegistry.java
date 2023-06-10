@@ -90,6 +90,11 @@ public class ProxyRegistry implements SettingsDuplex<ProxyList> {
         return Collections.unmodifiableList(proxies);
     }
 
+    public void setProxies(List<SWProxy> proxies) {
+        this.proxies.clear();
+        this.proxies.addAll(proxies);
+    }
+
     @Override
     public void onSettingsChange(ProxyList settings) {
         proxies.clear();
@@ -103,10 +108,5 @@ public class ProxyRegistry implements SettingsDuplex<ProxyList> {
 
     public void addLoadHook(Runnable runnable) {
         loadHooks.add(runnable);
-    }
-
-    public void setProxies(List<SWProxy> proxies) {
-        this.proxies.clear();
-        this.proxies.addAll(proxies);
     }
 }

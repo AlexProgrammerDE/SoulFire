@@ -21,7 +21,8 @@ package net.pistonmaster.serverwrecker.auth;
 
 import java.util.UUID;
 
-public record JavaAccount(AuthType authType, String username, UUID profileId, String authToken, long tokenExpireAt, boolean enabled) {
+public record JavaAccount(AuthType authType, String username, UUID profileId, String authToken, long tokenExpireAt,
+                          boolean enabled) {
     public JavaAccount {
         if (username == null) {
             throw new IllegalArgumentException("Username cannot be null!");
