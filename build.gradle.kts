@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     application
     id("sw.shadow-conventions")
-    id("edu.sc.seis.launch4j") version "3.0.1"
+    id("edu.sc.seis.launch4j") version "3.0.3"
     id("org.openjfx.javafxplugin") version "0.0.14"
 }
 
