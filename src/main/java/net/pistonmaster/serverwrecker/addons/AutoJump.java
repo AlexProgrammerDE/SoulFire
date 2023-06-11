@@ -80,7 +80,8 @@ public class AutoJump implements InternalAddon {
                     LevelState level = sessionDataManager.getCurrentLevel();
                     BotMovementManager movementManager = sessionDataManager.getBotMovementManager();
                     if (level != null && movementManager != null
-                            && level.isChunkLoaded(movementManager.getBlockPos())) {
+                            && level.isChunkLoaded(movementManager.getBlockPos())
+                            && movementManager.isOnGround()) {
                         connection.logger().info("[AutoJump] Jumping!");
                         movementManager.jump();
                     }
