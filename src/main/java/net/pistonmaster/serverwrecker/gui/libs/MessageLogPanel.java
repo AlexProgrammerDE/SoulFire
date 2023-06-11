@@ -57,6 +57,10 @@ public class MessageLogPanel extends JPanel {
         document.addDocumentListener(new LimitLinesDocumentListener(numLines, true));
         ((AbstractDocument) document).setDocumentFilter(noopDocumentFilter);
 
+        updatePopup();
+
+        textComponent.addCaretListener(e -> updatePopup());
+
         JScrollPane scrollText = new JScrollPane();
         scrollText.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
         scrollText.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -67,6 +71,39 @@ public class MessageLogPanel extends JPanel {
         new SmartScroller(scrollText);
 
         add(scrollText, BorderLayout.CENTER);
+    }
+
+    private void updatePopup() {
+        JPopupMenu popupMenu = new JPopupMenu();
+        if (textComponent.getSelectedText() != null) {
+            JMenuItem copyItem = new JMenuItem("Copy");
+            copyItem.addActionListener(e -> textComponent.copy());
+            popupMenu.add(copyItem);
+
+            JMenuItem cutItem = new JMenuItem("Upload to pastes.dev");
+            cutItem.addActionListener(e -> {
+                try {
+                    String url = "https://pastes.dev/" + PastesDevService.upload(textComponent.getSelectedText());
+                    JOptionPane.showMessageDialog(this,
+                            SwingTextUtils.createPane("Uploaded to: <a href='" + url + "'>" + url + "</a>"),
+                            "Success", JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "Failed to upload!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+            popupMenu.add(cutItem);
+        }
+
+        // Add divider
+        if (popupMenu.getComponentCount() > 0) {
+            popupMenu.addSeparator();
+        }
+
+        JMenuItem clearItem = new JMenuItem("Clear");
+        clearItem.addActionListener(e -> clear());
+        popupMenu.add(clearItem);
+        textComponent.setComponentPopupMenu(popupMenu);
     }
 
     public void clear() {
