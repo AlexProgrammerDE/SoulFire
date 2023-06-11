@@ -69,6 +69,7 @@ import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
+import net.pistonmaster.serverwrecker.util.TimeUtil;
 import net.pistonmaster.serverwrecker.util.VersionComparator;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
@@ -391,41 +392,41 @@ public class ServerWrecker {
         ServerWreckerAPI.postEvent(new AttackStartEvent());
 
         // Used for concurrent bot connecting
-        ExecutorService connectService = Executors.newFixedThreadPool(1);
+        ExecutorService connectService = Executors.newFixedThreadPool(botSettings.concurrentConnects());
 
+        boolean isFirst = true;
         Random random = ThreadLocalRandom.current();
         while (!factories.isEmpty()) {
-            try {
-                TimeUnit.MILLISECONDS.sleep(random.nextInt(botSettings.minJoinDelayMs(), botSettings.maxJoinDelayMs()));
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }
-
-            if (attackState.isStopped()) {
-                break;
-            }
-
-            if (attackState.isPaused()) {
-                try {
-                    TimeUnit.MILLISECONDS.sleep(100);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                continue;
-            }
-
             BotConnectionFactory factory = factories.poll();
             if (factory == null) {
                 break;
             }
 
+            if (!isFirst) {
+                try {
+                    TimeUnit.MILLISECONDS.sleep(random.nextInt(botSettings.minJoinDelayMs(), botSettings.maxJoinDelayMs()));
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+
+            logger.debug("Scheduling bot {}", factory.javaAccount().username());
             connectService.execute(() -> {
+                if (attackState.isStopped()) {
+                    return;
+                }
+
+                TimeUtil.waitCondition(attackState::isPaused);
+
+                logger.debug("Connecting bot {}", factory.javaAccount().username());
                 try {
                     botConnections.add(factory.connect().join());
                 } catch (Throwable e) {
                     logger.error("Error while connecting", e);
                 }
             });
+
+            isFirst = false;
         }
     }
 
