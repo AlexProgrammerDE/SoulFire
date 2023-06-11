@@ -199,5 +199,5 @@ launch4j {
     companyName.set("AlexProgrammerDE")
     copyright.set("© 2023 AlexProgrammerDE")
     copyConfigurable.set(emptyArray<Any>())
-    jarTask.set(project.tasks.shadowJar.get())
+    jarFiles.set(project.tasks.shadowJar.get().outputs.files)
 }
