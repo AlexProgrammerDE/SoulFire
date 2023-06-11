@@ -27,7 +27,7 @@ public record BotSettings(String host, int port,
                           int amount, int minJoinDelayMs, int maxJoinDelayMs,
                           ProtocolVersion protocolVersion,
                           int readTimeout, int writeTimeout, int connectTimeout,
-                          boolean trySrv) implements SettingsObject {
+                          boolean trySrv, int concurrentConnects) implements SettingsObject {
     public static final String DEFAULT_HOST = "127.0.0.1";
     public static final int DEFAULT_PORT = 25565;
     public static final int DEFAULT_AMOUNT = 1;
@@ -38,4 +38,5 @@ public record BotSettings(String host, int port,
     public static final int DEFAULT_WRITE_TIMEOUT = 0;
     public static final int DEFAULT_CONNECT_TIMEOUT = 30;
     public static final boolean DEFAULT_TRY_SRV = true;
+    public static final int DEFAULT_CONCURRENT_CONNECTS = 1;
 }

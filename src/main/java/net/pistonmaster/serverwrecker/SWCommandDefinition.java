@@ -72,6 +72,9 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Option(names = {"--try-srv"}, description = "Try to connect to the target using SRV records")
     private boolean trySrv = BotSettings.DEFAULT_TRY_SRV;
 
+    @Option(names = {"--concurrent-connects"}, description = "Amount of bots that can try to connect at the same time")
+    private int concurrentConnects = BotSettings.DEFAULT_CONCURRENT_CONNECTS;
+
     @Option(names = {"--debug"}, description = "Log additional information useful for debugging the software")
     private boolean debug = DevSettings.DEFAULT_DEBUG;
 
@@ -115,7 +118,8 @@ public class SWCommandDefinition implements Callable<Integer> {
                         readTimeout,
                         writeTimout,
                         connectTimeout,
-                        trySrv
+                        trySrv,
+                        concurrentConnects
                 ));
 
         serverWrecker.getSettingsManager().registerProvider(DevSettings.class,

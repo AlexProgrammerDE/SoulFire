@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.util;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 
 /**
  * Simple class to make waiting easier and less verbose.
@@ -30,6 +31,16 @@ public class TimeUtil {
             unit.sleep(time);
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void waitCondition(BooleanSupplier condition) {
+        while (condition.getAsBoolean()) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }

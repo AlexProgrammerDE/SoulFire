@@ -45,6 +45,7 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
     private final JSpinner readTimeout;
     private final JSpinner writeTimeout;
     private final JSpinner connectTimeout;
+    private final JSpinner concurrentConnects;
 
     @Inject
     public SettingsPanel(ServerWrecker serverWrecker) {
@@ -59,10 +60,6 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         add(new JLabel("Port: "));
         portInput = new JTextField(String.valueOf(BotSettings.DEFAULT_PORT));
         add(portInput);
-
-        add(new JLabel("Try SRV record resolving: "));
-        trySrv = new PresetJCheckBox(BotSettings.DEFAULT_TRY_SRV);
-        add(trySrv);
 
         add(new JLabel("Min join delay (ms): "));
         minJoinDelayMs = new JSpinner();
@@ -100,6 +97,15 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         connectTimeout = new JSpinner();
         connectTimeout.setValue(BotSettings.DEFAULT_CONNECT_TIMEOUT);
         add(connectTimeout);
+
+        add(new JLabel("Try SRV record resolving: "));
+        trySrv = new PresetJCheckBox(BotSettings.DEFAULT_TRY_SRV);
+        add(trySrv);
+
+        add(new JLabel("Concurrent Connects: "));
+        concurrentConnects = new JSpinner();
+        concurrentConnects.setValue(BotSettings.DEFAULT_CONCURRENT_CONNECTS);
+        add(concurrentConnects);
     }
 
     public void registerVersions() {
@@ -132,6 +138,7 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         writeTimeout.setValue(settings.writeTimeout());
         connectTimeout.setValue(settings.connectTimeout());
         trySrv.setSelected(settings.trySrv());
+        concurrentConnects.setValue(settings.concurrentConnects());
     }
 
     @Override
@@ -146,7 +153,8 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
                 (int) readTimeout.getValue(),
                 (int) writeTimeout.getValue(),
                 (int) connectTimeout.getValue(),
-                trySrv.isSelected()
+                trySrv.isSelected(),
+                (int) concurrentConnects.getValue()
         );
     }
 }
