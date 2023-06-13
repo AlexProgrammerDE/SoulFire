@@ -74,6 +74,10 @@ public class MainFrame extends JFrame {
     public void setAppTitle() {
         try {
             Toolkit xToolkit = Toolkit.getDefaultToolkit();
+            if (!xToolkit.getClass().getName().equals("sun.awt.X11.XToolkit")) {
+                return;
+            }
+
             VarHandle CLASS_NAME_VARIABLE = MethodHandles
                     .privateLookupIn(xToolkit.getClass(), MethodHandles.lookup())
                     .findStaticVarHandle(xToolkit.getClass(), "awtAppClassName", String.class);
