@@ -49,7 +49,7 @@ public record BotConnectionFactory(ServerWrecker serverWrecker, InetSocketAddres
 
     public BotConnection connectInternal(ProtocolState targetState) {
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
-        ViaClientSession session = new ViaClientSession(targetAddress, protocol, proxyData, settingsHolder, eventLoopGroup);
+        ViaClientSession session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup);
         BotConnection botConnection = new BotConnection(this, serverWrecker, settingsHolder, logger, protocol, session,
                 new BotConnectionMeta(javaAccount, targetState));
         session.setPostDisconnectHook(() -> botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup));

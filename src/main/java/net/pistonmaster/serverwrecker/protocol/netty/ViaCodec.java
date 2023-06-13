@@ -30,6 +30,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToMessageCodec;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.viaversion.StorableSession;
 
 import java.util.List;
 
@@ -44,6 +45,7 @@ public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
             out.add(msg.retain());
             return;
         }
+
         var transformedBuf = ctx.alloc().buffer().writeBytes(msg);
         try {
             info.transformServerbound(transformedBuf, CancelEncoderException::generate);
@@ -61,6 +63,7 @@ public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
             out.add(msg.retain());
             return;
         }
+
         var transformedBuf = ctx.alloc().buffer().writeBytes(msg);
         try {
             info.transformClientbound(transformedBuf, CancelDecoderException::generate);
@@ -87,7 +90,8 @@ public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
         if ((PipelineUtil.containsCause(cause, InformativeException.class)
                 && info.getProtocolInfo().getState() != State.HANDSHAKE)
                 || Via.getManager().debugHandler().enabled()) {
-            cause.printStackTrace();
+            info.get(StorableSession.class).session().getLogger()
+                    .error("A ViaVersion error has occurred: ", cause);
         }
     }
 }

@@ -70,7 +70,8 @@ public class ViaClientSession extends TcpSession {
     public static final String COMPRESSION_NAME = "compression";
     public static final String ENCRYPTION_NAME = "encryption";
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    @Getter
+    private final Logger logger;
     private final InetSocketAddress targetAddress;
     private final String bindAddress;
     private final int bindPort;
@@ -83,8 +84,11 @@ public class ViaClientSession extends TcpSession {
     @Setter
     private Runnable postDisconnectHook;
 
-    public ViaClientSession(InetSocketAddress targetAddress, PacketProtocol protocol, SWProxy proxy, SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup) {
+    public ViaClientSession(InetSocketAddress targetAddress, Logger logger,
+                            PacketProtocol protocol, SWProxy proxy,
+                            SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup) {
         super(null, -1, protocol);
+        this.logger = logger;
         this.targetAddress = targetAddress;
         this.bindAddress = "0.0.0.0";
         this.bindPort = 0;
