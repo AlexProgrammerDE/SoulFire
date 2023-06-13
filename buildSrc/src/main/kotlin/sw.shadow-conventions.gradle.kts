@@ -16,6 +16,7 @@ tasks {
     }
 
     shadowJar {
+        archiveClassifier.set("")
         mergeServiceFiles()
         transform(Log4j2PluginsCacheFileTransformer::class.java)
     }
