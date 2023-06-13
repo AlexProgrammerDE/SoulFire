@@ -4,7 +4,6 @@ plugins {
     application
     id("sw.shadow-conventions")
     id("edu.sc.seis.launch4j") version "3.0.3"
-    id("org.openjfx.javafxplugin") version "0.0.14"
 }
 
 version = "1.0.1-SNAPSHOT"
@@ -63,11 +62,6 @@ tasks {
     withType<ShadowJar> {
         archiveBaseName.set("ServerWrecker")
     }
-}
-
-javafx {
-    version = "20"
-    modules = listOf("javafx.controls", "javafx.swing")
 }
 
 dependencies {
@@ -139,6 +133,16 @@ dependencies {
     implementation("net.kyori:event-api:5.0.0-SNAPSHOT")
     implementation("ch.jalu:injector:1.0")
     implementation("org.yaml:snakeyaml:2.0")
+
+    val javaFXVersion = "20"
+    val javaFXModules = listOf("base", "graphics", "controls", "swing")
+    val javaFXPlatforms = listOf("linux", "linux-aarch64", "mac", "mac-aarch64", "win")
+
+    javaFXModules.forEach { module ->
+        javaFXPlatforms.forEach { platform ->
+            implementation("org.openjfx:javafx-$module:$javaFXVersion:$platform")
+        }
+    }
 }
 
 tasks.compileJava.get().apply {
