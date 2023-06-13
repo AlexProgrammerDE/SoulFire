@@ -69,18 +69,22 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
                 return;
             }
 
-            try (BufferedWriter writer = Files.newBufferedWriter(selectedFile)) {
-                logAppender.getLogLines().forEach(entry -> {
-                    try {
-                        writer.write(entry);
-                        writer.newLine();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            serverWrecker.getThreadPool().submit(() -> {
+                try (BufferedWriter writer = Files.newBufferedWriter(selectedFile)) {
+                    logAppender.getLogLines().forEach(entry -> {
+                        try {
+                            writer.write(entry);
+                            writer.newLine();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                serverWrecker.getLogger().info("Saved log to: {}", selectedFile);
+            });
         });
     }
 

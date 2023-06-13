@@ -191,7 +191,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
                 return;
             }
 
-            serverWrecker.getLogger().info("Opening: {}.", proxyFile.getFileName());
+            serverWrecker.getLogger().info("Opening: {}", proxyFile.getFileName());
 
             serverWrecker.getThreadPool().submit(() -> {
                 try {
