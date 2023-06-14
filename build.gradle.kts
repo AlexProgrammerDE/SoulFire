@@ -6,7 +6,7 @@ plugins {
     id("edu.sc.seis.launch4j") version "3.0.3"
 }
 
-version = "1.0.1"
+version = "1.1.0-SNAPSHOT"
 
 repositories {
     maven("https://repo.opencollab.dev/maven-releases") {
@@ -60,6 +60,9 @@ tasks {
         archiveBaseName.set("ServerWrecker")
     }
     withType<ShadowJar> {
+        archiveBaseName.set("ServerWrecker")
+    }
+    jar {
         archiveBaseName.set("ServerWrecker")
     }
 }
