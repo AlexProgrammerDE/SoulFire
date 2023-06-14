@@ -26,6 +26,7 @@ import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEven
 import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.gui.MainFrame;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
+import org.apache.logging.log4j.LogManager;
 import org.fusesource.jansi.AnsiConsole;
 import picocli.CommandLine;
 
@@ -71,8 +72,14 @@ public class ServerWreckerBootstrap {
             ServerWrecker serverWrecker = new ServerWrecker(OperationMode.GUI);
             serverWrecker.initConsole();
 
-            SwingUtilities.invokeLater(() ->
-                    serverWrecker.getInjector().getSingleton(MainFrame.class));
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    serverWrecker.getInjector().getSingleton(MainFrame.class);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                    LogManager.shutdown(true, true);
+                }
+            });
         }
     }
 

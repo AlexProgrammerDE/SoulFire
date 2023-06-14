@@ -312,6 +312,10 @@ public class ServerWrecker {
 
     @SuppressWarnings("UnstableApiUsage")
     public void start() {
+        if (!attackState.isStopped()) {
+            throw new IllegalStateException("Attack is already running");
+        }
+
         SettingsHolder settingsHolder = settingsManager.collectSettings();
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
         DevSettings devSettings = settingsHolder.get(DevSettings.class);

@@ -33,10 +33,11 @@ import lombok.With;
 @With
 @AllArgsConstructor
 public class SWClientboundStatusResponsePacket implements MinecraftPacket {
+    private static final Gson GSON = new Gson();
     private final @NonNull JsonObject info;
 
     public SWClientboundStatusResponsePacket(ByteBuf in, MinecraftCodecHelper helper) {
-        this.info = new Gson().fromJson(helper.readString(in), JsonObject.class);
+        this.info = GSON.fromJson(helper.readString(in), JsonObject.class);
     }
 
     @Override

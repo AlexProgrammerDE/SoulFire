@@ -91,7 +91,7 @@ public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
                 && info.getProtocolInfo().getState() != State.HANDSHAKE)
                 || Via.getManager().debugHandler().enabled()) {
             info.get(StorableSession.class).session().getLogger()
-                    .error("A ViaVersion error has occurred: ", cause);
+                    .error("A ViaVersion error has occurred:", cause);
         }
     }
 }
