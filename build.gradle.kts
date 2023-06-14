@@ -115,7 +115,7 @@ dependencies {
     implementation(libs.flatlaf)
     implementation(libs.flatlaf.intellij.themes)
     implementation(libs.flatlaf.extras)
-    implementation("org.knowm.xchart:xchart:3.8.3")
+    implementation("org.knowm.xchart:xchart:3.8.4")
 
     implementation(libs.brigadier)
     implementation(libs.pf4j) {
