@@ -38,8 +38,6 @@ public class NavigationPanel extends JPanel {
                 ((CardLayout) container.getLayout()).show(container, item.getNavigationId());
             });
 
-            button.setSize(new Dimension(50, 50));
-
             add(button);
         }
 

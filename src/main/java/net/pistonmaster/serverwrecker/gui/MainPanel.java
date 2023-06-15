@@ -48,12 +48,7 @@ public class MainPanel extends JPanel {
         JPanel logPanel = createLogPanel();
         cardsContainer.create();
 
-        setLayout(new GridBagLayout());
-
-        GridBagConstraints splitConstraints = new GridBagConstraints();
-        splitConstraints.fill = GridBagConstraints.BOTH;
-        splitConstraints.weightx = 1;
-        splitConstraints.weighty = 1;
+        setLayout(new GridLayout(1, 1));
 
         cardsContainer.setMinimumSize(new Dimension(600, 0));
         logPanel.setMinimumSize(new Dimension(600, 0));
@@ -61,12 +56,12 @@ public class MainPanel extends JPanel {
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, cardsContainer, logPanel);
 
         splitPane.setOneTouchExpandable(true);
-        splitPane.setDividerLocation(0.5d);
+        splitPane.setResizeWeight(0.5d);
         splitPane.setContinuousLayout(true);
 
         splitPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
-        add(splitPane, splitConstraints);
+        add(splitPane);
     }
 
     private JPanel createLogPanel() throws SecurityException {

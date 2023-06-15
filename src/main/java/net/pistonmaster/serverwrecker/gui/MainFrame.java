@@ -57,10 +57,10 @@ public class MainFrame extends JFrame {
         setResizable(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
+        setJMenuBar(injector.getSingleton(SWMenuBar.class));
+
         setLayout(new CardLayout());
         add(injector.getSingleton(MainPanel.class), MAIN_MENU);
-
-        setJMenuBar(injector.getSingleton(SWMenuBar.class));
 
         pack();
 
