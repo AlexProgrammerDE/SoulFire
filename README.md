@@ -17,10 +17,10 @@
 Advanced Minecraft Server-Stresser Tool. Launch bot attacks on your own servers to stress-test them and measure
 performance.
 
-## Features
+## 🚀 Features
 
 * GUI (Multiple themes) & CLI
-* Configurable options for every attack like number of bots, join delay and more
+* Configurable options for every attack like the number of bots, join delay and more
 * Load and save profiles for quick access
 * Support for online and offline mode servers
 * Huge version support
@@ -29,17 +29,17 @@ performance.
 * Multiple modules like AutoRespawn and also AutoRegister for cracked servers
 * Console command support
 
-## Nightly builds
+## ✨ Nightly builds
 
 You can download the latest development version of ServerWrecker
 through [nightly.link](https://nightly.link/AlexProgrammerDE/ServerWrecker/workflows/build/main/ServerWrecker.zip).
 
-## Requirements
+## 🔭 Requirements
 
 * Java 17
 * Minecraft server (Tested with Spigot/Paper/Purpur/Folia, Velocity/BungeeCord)
 
-## Version support
+## 🍿 Version support
 
 ServerWrecker currently supports these versions:
 
@@ -50,7 +50,7 @@ ServerWrecker currently supports these versions:
 - Minecraft Bedrock Edition (1.19.70)
 
 This includes every single subversion, not just a few specific versions.
-The latest Release and latest Bedrock Edition info may be out of sync with the latest development version.
+The latest Java Release and Bedrock Edition info may be out of sync with the latest development version.
 
 ### How does this work?
 
@@ -62,15 +62,15 @@ This feature takes inspiration from services like [ViAaaS](https://github.com/Vi
 and [ViaProxy](https://github.com/RaphiMC/ViaProxy),
 which include client-side translation externally.
 ServerWrecker includes a similar implementation as these two proxies
-and is comparable functionality wise to [ViaFabric](https://github.com/ViaVersion/ViaFabric).
+and is comparable functionality-wise to [ViaFabric](https://github.com/ViaVersion/ViaFabric).
 
 ### What's the catch?
 
-Currently versions below r1.7.0 only support offline-mode,
-but a future version will support online-mode servers as well.
-All versions newer than r1.7.0 support online-mode.
+Currently, versions below r1.7.0 only support offline mode,
+but a future version will also support online mode servers.
+All versions newer than r1.7.0 support online mode.
 
-## Built-in modules
+## 📻 Built-in modules
 
 ### AutoRespawn
 
@@ -78,16 +78,16 @@ Automatically respawns bots when they die.
 
 ### AutoRegister
 
-Automatically runs /register and /login on cracked servers.
-Also supports /captcha for servers that have it.
+Automatically runs `/register` and `/login` on cracked servers.
+Also supports `/captcha` for servers that have it.
 
 ### ClientSettings & ClientBrand
 
-Configurable client settings like chat visibility, chat colors, skin customization, and more.
+Configurable client settings like chat visibility, chat colours, skin customization, and more.
 Client brand can also be changed to any string; by default, it's set to "vanilla".
 Useful for bypassing anti-bot plugins that check for client settings.
 
-## Import accounts & proxies
+## 🗃 Import accounts & proxies
 
 ### Accounts
 
@@ -148,19 +148,19 @@ ip:port <- no authentication
 ip:port:username:password <- authentication
 ```
 
-## Demo
+## 🧵 Demo
 
 ServerWrecker has a built-in GUI for easy usage.
 ![GUI](./assets/demo.png)
 
-## Command Line Usage
+## 💻 Command Line Usage
 
 To run ServerWrecker from the command line without a GUI, enter  
 `java -jar serverwrecker.jar <options>`.
 
 > **Note:** Some features are not available in CLI mode, we recommend using the GUI.
 
-## Build from source
+## 🔧 Build from source
 
 1. Install Java 17
 2. Download Gradle
@@ -168,17 +168,17 @@ To run ServerWrecker from the command line without a GUI, enter
 4. Run `./gradlew build` in the ServerWrecker directory
 5. Get the jar file from `build/libs`
 
-## Community
+## 🌈 Community
 
 Feel free to join our discord community server:
 
 [![Discord Banner](https://discord.com/api/guilds/739784741124833301/widget.png?style=banner2)](https://discord.gg/CDrcxzH)
 
-## Star History
+## ⭐ Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=AlexProgrammerDE/ServerWrecker&type=Date)](https://star-history.com/#AlexProgrammerDE/ServerWrecker&Date)
 
-## Attribution
+## 📜 Attribution
 
 This project is based on [LambdaAttack](https://github.com/games647/LambdaAttack), but over the years the code has been
 remade multiple times to be far more complex than the original project.
