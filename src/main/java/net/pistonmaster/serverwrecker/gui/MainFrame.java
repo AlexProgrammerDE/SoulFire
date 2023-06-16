@@ -64,7 +64,7 @@ public class MainFrame extends JFrame {
 
         pack();
 
-        setMinimumSize(new Dimension(getWidth() + 500, getHeight()));
+        setMinimumSize(new Dimension(600, 400));
 
         serverWrecker.getLogger().info("Opening GUI!");
 

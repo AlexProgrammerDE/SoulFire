@@ -53,6 +53,11 @@ public class MainPanel extends JPanel {
         cardsContainer.setMinimumSize(new Dimension(600, 0));
         logPanel.setMinimumSize(new Dimension(600, 0));
 
+        cardsContainer.setPreferredSize(new Dimension(600,
+                cardsContainer.getPreferredSize().height));
+        logPanel.setPreferredSize(new Dimension(600,
+                logPanel.getPreferredSize().height));
+
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, cardsContainer, logPanel);
 
         splitPane.setOneTouchExpandable(true);
