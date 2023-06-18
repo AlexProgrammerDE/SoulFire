@@ -68,12 +68,21 @@ and is comparable functionality-wise to [ViaFabric](https://github.com/ViaVersio
 
 ### AutoRespawn
 
-Automatically respawns bots when they die.
+Automatically respawns bots with a random delay when they die.
+Bots do not cause a lot of lags when they are dead, so this module is useful for ensuring
+that the bots are always alive and performing their actions.
 
 ### AutoRegister
 
 Automatically runs `/register` and `/login` on cracked servers.
 Also supports `/captcha` for servers that have it.
+
+### AutoJump
+
+Automatically jumps with a random delay.
+Useful for slowing the server down.
+It will also make the bots send a lot of movement packets,
+which is useful for testing the server's performance.
 
 ### ClientSettings & ClientBrand
 
