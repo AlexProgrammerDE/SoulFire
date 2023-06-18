@@ -24,7 +24,6 @@ import com.github.steveice10.mc.auth.exception.request.RequestException;
 import com.github.steveice10.mc.auth.exception.request.ServiceUnavailableException;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.auth.JavaAccount;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
@@ -33,12 +32,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@RequiredArgsConstructor
 public class BotConnectionMeta {
     private final List<UnregisterCleanup> unregisterCleanups = new ArrayList<>();
     private final JavaAccount javaAccount;
     private final ProtocolState targetState;
     private final SWSessionService sessionService;
+
+    public BotConnectionMeta(JavaAccount javaAccount, ProtocolState targetState) {
+        this.javaAccount = javaAccount;
+        this.targetState = targetState;
+        this.sessionService = javaAccount.isPremium() ? new SWSessionService(javaAccount.authType()) : null;
+    }
 
     public void joinServerId(String serverId, ViaClientSession session) {
         try {

@@ -62,6 +62,11 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
+import net.pistonmaster.serverwrecker.pathfinding.RouteFinder;
+import net.pistonmaster.serverwrecker.pathfinding.minecraft.BlockPosition;
+import net.pistonmaster.serverwrecker.pathfinding.minecraft.MinecraftAction;
+import net.pistonmaster.serverwrecker.pathfinding.minecraft.MinecraftGraph;
+import net.pistonmaster.serverwrecker.pathfinding.minecraft.MovementScorer;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
@@ -76,7 +81,9 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -240,6 +247,16 @@ public final class SessionDataManager {
         }
 
         onChat(Component.text(packet.getContent()));
+
+        /*
+        System.out.println(getCurrentLevel().getBlockTypeAt(botMovementManager.getBlockPos()));
+        RouteFinder<MinecraftAction> routeFinder = new RouteFinder<>(new MinecraftGraph(this), new MovementScorer(), new MovementScorer());
+        BlockPosition start = new BlockPosition(botMovementManager.getPlayerPos());
+        BlockPosition target = new BlockPosition(botMovementManager.getPlayerPos().add(2, 0, 2));
+        System.out.println("Start: " + start);
+        System.out.println("Target: " + target);
+        List<MinecraftAction> actions = routeFinder.findRoute(start, target);
+        System.out.println(actions);*/
     }
 
     @BusHandler

@@ -21,18 +21,9 @@ package net.pistonmaster.serverwrecker.pathfinding.minecraft;
 
 import org.cloudburstmc.math.vector.Vector3d;
 
-public record PlayerMovement(Vector3d from, BasicMovementAction action) implements MinecraftAction {
+public record BlockPosition(Vector3d startPosition) implements MinecraftAction {
     @Override
     public Vector3d getTargetPos() {
-        return switch (action) {
-            case NORTH -> from.add(0, 0, -1);
-            case SOUTH -> from.add(0, 0, 1);
-            case EAST -> from.add(1, 0, 0);
-            case WEST -> from.add(-1, 0, 0);
-            case NORTH_EAST -> from.add(1, 0, -1);
-            case NORTH_WEST -> from.add(-1, 0, -1);
-            case SOUTH_EAST -> from.add(1, 0, 1);
-            case SOUTH_WEST -> from.add(-1, 0, 1);
-        };
+        return startPosition;
     }
 }
