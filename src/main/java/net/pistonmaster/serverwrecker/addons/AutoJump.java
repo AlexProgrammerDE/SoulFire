@@ -55,6 +55,15 @@ public class AutoJump implements InternalAddon {
 
     @EventHandler
     public void onPreConnect(PreBotConnectEvent event) {
+        if (!event.connection().settingsHolder().has(AutoJumpSettings.class)) {
+            return;
+        }
+
+        AutoJumpSettings settings = event.connection().settingsHolder().get(AutoJumpSettings.class);
+        if (!settings.autoJump()) {
+            return;
+        }
+
         event.connection().cleanup(new BotJumpThread(event.connection(),
                 Executors.newScheduledThreadPool(1), new LinkedHashSet<>()));
     }
@@ -72,21 +81,19 @@ public class AutoJump implements InternalAddon {
     private record BotJumpThread(BotConnection connection, ScheduledExecutorService executor,
                                  Set<String> messageQueue) implements UnregisterCleanup {
         public BotJumpThread {
-            if (connection.settingsHolder().has(AutoJumpSettings.class)) {
-                AutoJumpSettings settings = connection.settingsHolder().get(AutoJumpSettings.class);
+            AutoJumpSettings settings = connection.settingsHolder().get(AutoJumpSettings.class);
 
-                ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
-                    SessionDataManager sessionDataManager = connection.sessionDataManager();
-                    LevelState level = sessionDataManager.getCurrentLevel();
-                    BotMovementManager movementManager = sessionDataManager.getBotMovementManager();
-                    if (level != null && movementManager != null
-                            && level.isChunkLoaded(movementManager.getBlockPos())
-                            && movementManager.isOnGround()) {
-                        connection.logger().info("[AutoJump] Jumping!");
-                        movementManager.jump();
-                    }
-                }, settings.minDelay(), settings.maxDelay());
-            }
+            ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
+                SessionDataManager sessionDataManager = connection.sessionDataManager();
+                LevelState level = sessionDataManager.getCurrentLevel();
+                BotMovementManager movementManager = sessionDataManager.getBotMovementManager();
+                if (level != null && movementManager != null
+                        && level.isChunkLoaded(movementManager.getBlockPos())
+                        && movementManager.isOnGround()) {
+                    connection.logger().info("[AutoJump] Jumping!");
+                    movementManager.jump();
+                }
+            }, settings.minDelay(), settings.maxDelay());
         }
 
         @Override
