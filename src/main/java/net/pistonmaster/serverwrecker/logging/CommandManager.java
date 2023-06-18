@@ -25,6 +25,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
+import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
@@ -32,6 +33,9 @@ import net.pistonmaster.serverwrecker.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.DispatcherInitEvent;
 import net.pistonmaster.serverwrecker.gui.MainPanel;
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -47,6 +51,7 @@ public class CommandManager {
 
     @PostConstruct
     public void postConstruct() {
+        Logger logger = serverWrecker.getLogger();
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("online").executes(c -> {
             List<String> online = new ArrayList<>();
             serverWrecker.getBotConnections().forEach(client -> {
@@ -75,6 +80,47 @@ public class CommandManager {
                             });
                             return 1;
                         })));
+        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("stats").executes(c -> {
+            if (serverWrecker.getBotConnections().isEmpty()) {
+                logger.info("No bots connected!");
+                return 1;
+            }
+
+            logger.info("Total bots: {}", serverWrecker.getBotConnections().size());
+            long readTraffic = 0;
+            long writeTraffic = 0;
+            for (BotConnection bot : serverWrecker.getBotConnections()) {
+                GlobalTrafficShapingHandler trafficShapingHandler = bot.getTrafficHandler();
+
+                if (trafficShapingHandler == null) {
+                    continue;
+                }
+
+                readTraffic += trafficShapingHandler.trafficCounter().cumulativeReadBytes();
+                writeTraffic += trafficShapingHandler.trafficCounter().cumulativeWrittenBytes();
+            }
+
+            logger.info("Total read traffic: {}", FileUtils.byteCountToDisplaySize(readTraffic));
+            logger.info("Total write traffic: {}", FileUtils.byteCountToDisplaySize(writeTraffic));
+
+            long currentReadTraffic = 0;
+            long currentWriteTraffic = 0;
+            for (BotConnection bot : serverWrecker.getBotConnections()) {
+                GlobalTrafficShapingHandler trafficShapingHandler = bot.getTrafficHandler();
+
+                if (trafficShapingHandler == null) {
+                    continue;
+                }
+
+                currentReadTraffic += trafficShapingHandler.trafficCounter().lastReadThroughput();
+                currentWriteTraffic += trafficShapingHandler.trafficCounter().lastWriteThroughput();
+            }
+
+            logger.info("Current read traffic: {}/s", FileUtils.byteCountToDisplaySize(currentReadTraffic));
+            logger.info("Current write traffic: {}/s", FileUtils.byteCountToDisplaySize(currentWriteTraffic));
+
+            return 1;
+        }));
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("help")
                 .executes(c -> {
                     c.getSource().sendMessage("Available commands:");

@@ -23,4 +23,5 @@ public class SWProtocolConstants {
     public static final String ENCRYPTION_SECRET_KEY = "encryption-secret-key";
     public static final String SESSION_DATA_MANAGER = "session-data-manager";
     public static final String VIA_USER_CONNECTION = "via-user-connection";
+    public static final String TRAFFIC_HANDLER = "netty-traffic-handler";
 }

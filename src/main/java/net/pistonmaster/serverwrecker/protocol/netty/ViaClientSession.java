@@ -35,6 +35,7 @@ import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.handler.codec.haproxy.*;
+import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
@@ -159,6 +160,11 @@ public class ViaClientSession extends TcpSession {
                     if (proxy != null) {
                         SWNettyHelper.addProxy(pipeline, proxy);
                     }
+
+                    // This monitors the traffic
+                    GlobalTrafficShapingHandler trafficHandler = new GlobalTrafficShapingHandler(eventLoopGroup.next(), 0, 0, 1000);
+                    pipeline.addLast("traffic", trafficHandler);
+                    setFlag(SWProtocolConstants.TRAFFIC_HANDLER, trafficHandler);
 
                     // This does the extra magic
                     UserConnectionImpl userConnection = new UserConnectionImpl(channel, true);

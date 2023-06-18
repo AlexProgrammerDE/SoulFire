@@ -128,6 +128,7 @@ dependencies {
     implementation(libs.guava)
     implementation(libs.gson)
     implementation("commons-validator:commons-validator:1.7")
+    implementation("commons-io:commons-io:2.13.0")
 
     implementation("com.thealtening.api:api:4.1.0")
 

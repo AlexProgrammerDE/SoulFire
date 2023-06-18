@@ -361,7 +361,10 @@ public class ServerWrecker {
         }
 
         // Prepare an event loop group with enough threads for the attack
-        EventLoopGroup attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(botAmount, "Attack");
+        int threads = botAmount;
+        threads *= 2; // We need a monitor thread for each bot
+
+        EventLoopGroup attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(threads, "Attack-Thread");
         InetSocketAddress targetAddress = ResolveUtil.resolveAddress(settingsHolder, attackEventLoopGroup);
 
         Queue<BotConnectionFactory> factories = new ArrayBlockingQueue<>(botAmount);
