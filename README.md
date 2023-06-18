@@ -64,12 +64,6 @@ which include client-side translation externally.
 ServerWrecker includes a similar implementation as these two proxies
 and is comparable functionality-wise to [ViaFabric](https://github.com/ViaVersion/ViaFabric).
 
-### What's the catch?
-
-Currently, versions below r1.7.0 only support offline mode,
-but a future version will also support online mode servers.
-All versions newer than r1.7.0 support online mode.
-
 ## 📻 Built-in modules
 
 ### AutoRespawn

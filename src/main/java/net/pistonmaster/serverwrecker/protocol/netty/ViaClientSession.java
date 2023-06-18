@@ -314,6 +314,7 @@ public class ViaClientSession extends TcpSession {
         this.callEvent(sendingEvent);
 
         if (sendingEvent.isCancelled()) {
+            logger.debug("Packet {} was cancelled.", packet.getClass().getSimpleName());
             return;
         }
 
