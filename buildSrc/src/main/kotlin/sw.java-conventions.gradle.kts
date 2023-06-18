@@ -14,6 +14,7 @@ tasks.withType<JavaCompile>() {
     options.encoding = "UTF-8"
 }
 
+/*
 val exportDependenciesTask by tasks.registering {
     group = "export"
     description = "Export project dependencies to a JSON file"
@@ -68,3 +69,4 @@ fun List<Map<String, Any?>>.toJsonString(): String {
     val gson = GsonBuilder().setPrettyPrinting().create()
     return gson.toJson(this)
 }
+*/

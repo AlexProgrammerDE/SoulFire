@@ -27,6 +27,7 @@ import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.MovementTr
 import com.viaversion.viaversion.velocity.providers.VelocityMovementTransmitter;
 import net.pistonmaster.serverwrecker.viaversion.providers.*;
 import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
+import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.providers.OldAuthProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.providers.GameProfileFetcher;
 
@@ -40,6 +41,7 @@ public class SWViaLoader implements ViaPlatformLoader {
         // For ViaLegacy
         Via.getManager().getProviders().use(GameProfileFetcher.class, new SWViaGameProfileFetcher());
         Via.getManager().getProviders().use(EncryptionProvider.class, new SWViaEncryptionProvider());
+        Via.getManager().getProviders().use(OldAuthProvider.class, new SWViaOldAuthProvider());
 
         // For ViaBedrock
         Via.getManager().getProviders().use(NettyPipelineProvider.class, new SWViaNettyPipelineProvider());

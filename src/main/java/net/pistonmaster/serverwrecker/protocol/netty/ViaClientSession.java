@@ -39,6 +39,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.SWConstants;
+import net.pistonmaster.serverwrecker.protocol.BotConnectionMeta;
 import net.pistonmaster.serverwrecker.protocol.SWProtocolConstants;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
@@ -80,13 +81,16 @@ public class ViaClientSession extends TcpSession {
     private final SettingsHolder settingsHolder;
     @Getter
     private final EventLoopGroup eventLoopGroup;
+    @Getter
+    private final BotConnectionMeta meta;
     private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
     @Setter
     private Runnable postDisconnectHook;
 
     public ViaClientSession(InetSocketAddress targetAddress, Logger logger,
                             PacketProtocol protocol, SWProxy proxy,
-                            SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup) {
+                            SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup,
+                            BotConnectionMeta meta) {
         super(null, -1, protocol);
         this.logger = logger;
         this.targetAddress = targetAddress;
@@ -96,6 +100,7 @@ public class ViaClientSession extends TcpSession {
         this.codecHelper = protocol.createHelper();
         this.settingsHolder = settingsHolder;
         this.eventLoopGroup = eventLoopGroup;
+        this.meta = meta;
     }
 
     @Override

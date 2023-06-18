@@ -19,11 +19,15 @@
  */
 package net.pistonmaster.serverwrecker.protocol;
 
+import com.github.steveice10.mc.auth.exception.request.InvalidCredentialsException;
+import com.github.steveice10.mc.auth.exception.request.RequestException;
+import com.github.steveice10.mc.auth.exception.request.ServiceUnavailableException;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.auth.JavaAccount;
+import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,4 +38,17 @@ public class BotConnectionMeta {
     private final List<UnregisterCleanup> unregisterCleanups = new ArrayList<>();
     private final JavaAccount javaAccount;
     private final ProtocolState targetState;
+    private final SWSessionService sessionService;
+
+    public void joinServerId(String serverId, ViaClientSession session) {
+        try {
+            sessionService.joinServer(javaAccount.profileId(), javaAccount.authToken(), serverId);
+        } catch (ServiceUnavailableException e) {
+            session.disconnect("Login failed: Authentication service unavailable.", e);
+        } catch (InvalidCredentialsException e) {
+            session.disconnect("Login failed: Invalid login session.", e);
+        } catch (RequestException e) {
+            session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
+        }
+    }
 }

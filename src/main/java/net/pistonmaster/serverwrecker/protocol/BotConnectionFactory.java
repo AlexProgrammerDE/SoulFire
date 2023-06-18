@@ -49,9 +49,9 @@ public record BotConnectionFactory(ServerWrecker serverWrecker, InetSocketAddres
 
     public BotConnection connectInternal(ProtocolState targetState) {
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
-        ViaClientSession session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup);
-        BotConnection botConnection = new BotConnection(this, serverWrecker, settingsHolder, logger, protocol, session,
-                new BotConnectionMeta(javaAccount, targetState));
+        BotConnectionMeta meta = new BotConnectionMeta(javaAccount, targetState, new SWSessionService(javaAccount.authType()));
+        ViaClientSession session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
+        BotConnection botConnection = new BotConnection(this, serverWrecker, settingsHolder, logger, protocol, session, meta);
         session.setPostDisconnectHook(() -> botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup));
 
         SessionDataManager sessionDataManager = new SessionDataManager(botConnection);

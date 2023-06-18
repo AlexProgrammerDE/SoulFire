@@ -61,7 +61,10 @@ public class CryptoCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) {
-        if (!ctx.channel().isActive()) return;
+        if (!ctx.channel().isActive()) {
+            return;
+        }
+
         ByteBuf compatible = MoreByteBufUtils.ensureCompatible(ctx.alloc(), decoder, msg);
         try {
             decoder.process(compatible);

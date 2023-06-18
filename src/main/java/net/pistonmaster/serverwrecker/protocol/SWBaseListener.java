@@ -68,7 +68,7 @@ public class SWBaseListener extends SessionAdapter {
     @Override
     public void packetReceived(Session session, Packet packet) {
         if (!(session instanceof ViaClientSession viaSession)) {
-            return;
+            throw new IllegalStateException("Session is not a ViaSession!");
         }
 
         MinecraftProtocol protocol = (MinecraftProtocol) session.getPacketProtocol();
@@ -96,18 +96,7 @@ public class SWBaseListener extends SessionAdapter {
                 if (javaAccount.isPremium() && isLegacyAuthenticate) {
                     SWSessionService sessionService = new SWSessionService(javaAccount.authType());
                     String serverId = sessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
-                    try {
-                        sessionService.joinServer(javaAccount.profileId(), javaAccount.authToken(), serverId);
-                    } catch (ServiceUnavailableException e) {
-                        session.disconnect("Login failed: Authentication service unavailable.", e);
-                        return;
-                    } catch (InvalidCredentialsException e) {
-                        session.disconnect("Login failed: Invalid login session.", e);
-                        return;
-                    } catch (RequestException e) {
-                        session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
-                        return;
-                    }
+                    botConnection.meta().joinServerId(serverId, viaSession);
                 }
 
                 if (!isLegacy) { // Legacy encryption is handled in SWViaEncryptionProvider
