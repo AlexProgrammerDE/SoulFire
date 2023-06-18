@@ -19,9 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.protocol;
 
-import com.github.steveice10.mc.auth.exception.request.InvalidCredentialsException;
-import com.github.steveice10.mc.auth.exception.request.RequestException;
-import com.github.steveice10.mc.auth.exception.request.ServiceUnavailableException;
 import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
@@ -59,6 +56,7 @@ import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.Pr
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 public class SWBaseListener extends SessionAdapter {
@@ -83,24 +81,31 @@ public class SWBaseListener extends SessionAdapter {
                     throw new IllegalStateException("Failed to generate shared key.", e);
                 }
 
-                session.setFlag(SWProtocolConstants.ENCRYPTION_SECRET_KEY, key);
-                session.send(new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
-
                 BotSettings botSettings = botConnection.settingsHolder().get(BotSettings.class);
                 JavaAccount javaAccount = botConnection.meta().getJavaAccount();
                 UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
-                boolean isLegacy = SWConstants.isLegacy(botSettings.protocolVersion());
-                ProtocolMetadataStorage metadataStorage = viaUserConnection.get(ProtocolMetadataStorage.class);
-                boolean isLegacyAuthenticate = !isLegacy || metadataStorage == null || metadataStorage.authenticate;
 
-                if (javaAccount.isPremium() && isLegacyAuthenticate) {
-                    SWSessionService sessionService = new SWSessionService(javaAccount.authType());
-                    String serverId = sessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
+                boolean isLegacy = SWConstants.isLegacy(botSettings.protocolVersion());
+                boolean auth = javaAccount.isPremium();
+                if (auth && isLegacy)  {
+                    auth = Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
+                }
+
+                botConnection.logger().debug("Doing auth: {}", auth);
+
+                if (auth) {
+                    String serverId = botConnection.meta().getSessionService()
+                            .getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
                     botConnection.meta().joinServerId(serverId, viaSession);
                 }
 
+                session.send(new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
+
                 if (!isLegacy) { // Legacy encryption is handled in SWViaEncryptionProvider
                     viaSession.enableJavaEncryption(key);
+                } else {
+                    botConnection.logger().debug("Storing legacy secret key.");
+                    session.setFlag(SWProtocolConstants.ENCRYPTION_SECRET_KEY, key);
                 }
             } else if (packet instanceof ClientboundGameProfilePacket) {
                 protocol.setState(ProtocolState.GAME);

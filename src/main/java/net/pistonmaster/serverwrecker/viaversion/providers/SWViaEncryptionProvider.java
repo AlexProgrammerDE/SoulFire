@@ -34,6 +34,7 @@ public class SWViaEncryptionProvider extends EncryptionProvider {
         ViaClientSession session = Objects.requireNonNull(user.get(StorableSession.class)).session();
         SecretKey key = session.getFlag(SWProtocolConstants.ENCRYPTION_SECRET_KEY);
         Objects.requireNonNull(key, "Key is null!");
+        session.setFlag(SWProtocolConstants.ENCRYPTION_SECRET_KEY, null);
 
         session.enableJavaEncryption(key);
     }

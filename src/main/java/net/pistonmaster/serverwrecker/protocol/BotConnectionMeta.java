@@ -47,6 +47,7 @@ public class BotConnectionMeta {
     public void joinServerId(String serverId, ViaClientSession session) {
         try {
             sessionService.joinServer(javaAccount.profileId(), javaAccount.authToken(), serverId);
+            session.getLogger().info("Successfully sent mojang join request!");
         } catch (ServiceUnavailableException e) {
             session.disconnect("Login failed: Authentication service unavailable.", e);
         } catch (InvalidCredentialsException e) {

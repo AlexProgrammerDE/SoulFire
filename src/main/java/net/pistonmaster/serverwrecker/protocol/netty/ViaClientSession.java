@@ -57,7 +57,6 @@ import net.raphimc.vialoader.netty.viabedrock.RakMessageEncapsulationCodec;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.crypto.SecretKey;
 import java.net.Inet4Address;
@@ -220,18 +219,22 @@ public class ViaClientSession extends TcpSession {
     }
 
     public void setCompressionThreshold(int threshold) {
+        logger.debug("Enabling compression with threshold {}", threshold);
+
         Channel channel = getChannel();
-        if (channel != null) {
-            if (threshold >= 0) {
-                ChannelHandler handler = channel.pipeline().get(COMPRESSION_NAME);
-                if (handler == null) {
-                    channel.pipeline().addBefore("via-codec", COMPRESSION_NAME, new CompressionCodec(threshold));
-                } else {
-                    ((CompressionCodec) handler).setThreshold(threshold);
-                }
-            } else if (channel.pipeline().get(COMPRESSION_NAME) != null) {
-                channel.pipeline().remove(COMPRESSION_NAME);
+        if (channel == null) {
+            throw new IllegalStateException("Channel is not initialized.");
+        }
+
+        if (threshold >= 0) {
+            ChannelHandler handler = channel.pipeline().get(COMPRESSION_NAME);
+            if (handler == null) {
+                channel.pipeline().addBefore("via-codec", COMPRESSION_NAME, new CompressionCodec(threshold));
+            } else {
+                ((CompressionCodec) handler).setThreshold(threshold);
             }
+        } else if (channel.pipeline().get(COMPRESSION_NAME) != null) {
+            channel.pipeline().remove(COMPRESSION_NAME);
         }
     }
 
@@ -350,8 +353,10 @@ public class ViaClientSession extends TcpSession {
         ChannelPipeline pipeline = getChannel().pipeline();
 
         if (pipeline.get("vl-prenetty") != null) {
+            logger.debug("Enabling legacy decryption");
             pipeline.addBefore("vl-prenetty", ENCRYPTION_NAME, codec);
         } else {
+            logger.debug("Enabling decryption");
             pipeline.addBefore(SIZER_NAME, ENCRYPTION_NAME, codec);
         }
     }
