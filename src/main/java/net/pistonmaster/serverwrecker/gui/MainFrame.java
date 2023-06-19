@@ -64,7 +64,12 @@ public class MainFrame extends JFrame {
 
         pack();
 
-        setMinimumSize(new Dimension(600, 400));
+        // Calculate 16:9 width from height
+        int height = getHeight();
+        int width = height * 16 / 9;
+
+        setSize(width, height);
+        setMinimumSize(new Dimension(width, height));
 
         serverWrecker.getLogger().info("Opening GUI!");
 
