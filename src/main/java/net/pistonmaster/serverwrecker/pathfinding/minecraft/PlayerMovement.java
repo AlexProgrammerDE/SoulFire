@@ -19,20 +19,64 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.minecraft;
 
+import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public record PlayerMovement(Vector3d from, BasicMovementAction action) implements MinecraftAction {
     @Override
     public Vector3d getTargetPos() {
+        // Make from be either dividable by 0.5 or 1
+        // This way we can have clean positions
+        Vector3d normalizedFrom = VectorHelper.halfBlockNormalize(this.from);
+
         return switch (action) {
-            case NORTH -> from.add(0, 0, -1);
-            case SOUTH -> from.add(0, 0, 1);
-            case EAST -> from.add(1, 0, 0);
-            case WEST -> from.add(-1, 0, 0);
-            case NORTH_EAST -> from.add(1, 0, -1);
-            case NORTH_WEST -> from.add(-1, 0, -1);
-            case SOUTH_EAST -> from.add(1, 0, 1);
-            case SOUTH_WEST -> from.add(-1, 0, 1);
+            case NORTH -> normalizedFrom.add(0, 0, -0.5);
+            case SOUTH -> normalizedFrom.add(0, 0, 0.5);
+            case EAST -> normalizedFrom.add(0.5, 0, 0);
+            case WEST -> normalizedFrom.add(-0.5, 0, 0);
+            case NORTH_EAST -> normalizedFrom.add(0.5, 0, -0.5);
+            case NORTH_WEST -> normalizedFrom.add(-0.5, 0, -0.5);
+            case SOUTH_EAST -> normalizedFrom.add(0.5, 0, 0.5);
+            case SOUTH_WEST -> normalizedFrom.add(-0.5, 0, 0.5);
         };
+    }
+
+    public Set<Vector3i> requiredFreeBlocks() {
+        Set<Vector3i> requiredFreeBlocks = new HashSet<>();
+        Vector3i targetPos = getTargetPos().toInt();
+
+        // Add the block that is required to be free for straight movement
+        requiredFreeBlocks.add(targetPos);
+
+        // Add the blocks that are required to be free for diagonal movement
+        switch (action) {
+            case NORTH_EAST -> {
+                requiredFreeBlocks.add(targetPos.add(0, 0, -1));
+                requiredFreeBlocks.add(targetPos.add(1, 0, 0));
+            }
+            case NORTH_WEST -> {
+                requiredFreeBlocks.add(targetPos.add(0, 0, -1));
+                requiredFreeBlocks.add(targetPos.add(-1, 0, 0));
+            }
+            case SOUTH_EAST -> {
+                requiredFreeBlocks.add(targetPos.add(0, 0, 1));
+                requiredFreeBlocks.add(targetPos.add(1, 0, 0));
+            }
+            case SOUTH_WEST -> {
+                requiredFreeBlocks.add(targetPos.add(0, 0, 1));
+                requiredFreeBlocks.add(targetPos.add(-1, 0, 0));
+            }
+        }
+
+        // Add the blocks that are required to be free for the head of the player
+        for (Vector3i requiredFreeBlock : Set.copyOf(requiredFreeBlocks)) {
+            requiredFreeBlocks.add(requiredFreeBlock.add(0, 1, 0));
+        }
+
+        return requiredFreeBlocks;
     }
 }

@@ -64,6 +64,7 @@ public final class BotMovementManager {
     private boolean sneaking;
     private boolean flying;
     private int jumpTicks;
+    private Vector3d movementTarget;
 
     public BotMovementManager(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
         this.dataManager = dataManager;
@@ -113,7 +114,7 @@ public final class BotMovementManager {
         }
     }
 
-    public void lookAt(RotationOrigin origin, Vector3i block) {
+    public void lookAt(RotationOrigin origin, Vector3d block) {
         boolean eyes = origin == RotationOrigin.EYES;
 
         double dx = block.getX() - this.x;
@@ -199,6 +200,15 @@ public final class BotMovementManager {
             if (this.moveForward <= 0 || this.collision || this.sneaking) {
                 this.sprinting = false;
             }
+        }
+
+        if (movementTarget != null) {
+            lookAt(RotationOrigin.FEET, movementTarget);
+
+            double speed = 0.2;
+            this.motionX = -Math.sin(Math.toRadians(this.yaw)) * Math.cos(Math.toRadians(this.pitch)) * speed;
+            this.motionY = -Math.sin(Math.toRadians(this.pitch)) * speed;
+            this.motionZ = Math.cos(Math.toRadians(this.yaw)) * Math.cos(Math.toRadians(this.pitch)) * speed;
         }
 
         // Detect whether positions changed

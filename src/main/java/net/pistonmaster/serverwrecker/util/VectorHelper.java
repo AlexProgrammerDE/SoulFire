@@ -17,18 +17,12 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.minecraft;
+package net.pistonmaster.serverwrecker.util;
 
-import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 
-public record BlockPosition(Vector3d position) implements MinecraftAction {
-    public BlockPosition {
-        position = VectorHelper.halfBlockNormalize(position);
-    }
-
-    @Override
-    public Vector3d getTargetPos() {
-        return position;
+public class VectorHelper {
+    public static Vector3d halfBlockNormalize(Vector3d vector) {
+        return vector.mul(2).round().div(2);
     }
 }

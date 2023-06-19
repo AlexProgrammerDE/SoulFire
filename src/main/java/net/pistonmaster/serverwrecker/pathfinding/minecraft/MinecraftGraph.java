@@ -43,15 +43,18 @@ public record MinecraftGraph(SessionDataManager sessionDataManager) implements G
         }
 
         Set<MinecraftAction> targetSet = new HashSet<>();
-        for (BasicMovementAction action : BasicMovementAction.values()) {
+        actions: for (BasicMovementAction action : BasicMovementAction.values()) {
             PlayerMovement playerMovement = new PlayerMovement(from, action);
-            Vector3i targetPos = playerMovement.getTargetPos().toInt();
 
-            BlockType feetBlockType = levelState.getBlockTypeAt(targetPos);
-            BlockType headBlockType = levelState.getBlockTypeAt(targetPos.add(0, 1, 0));
-            if (!BlockTypeHelper.isSolid(feetBlockType) && !BlockTypeHelper.isSolid(headBlockType)) {
-                targetSet.add(new BlockPosition(playerMovement.getTargetPos()));
+            for (Vector3i requiredFreeBlock : playerMovement.requiredFreeBlocks()) {
+                BlockType blockType = levelState.getBlockTypeAt(requiredFreeBlock);
+                if (BlockTypeHelper.isSolid(blockType)) {
+                    log.debug("Block {} is solid, so we can't move there!", requiredFreeBlock);
+                    continue actions;
+                }
             }
+
+            targetSet.add(new BlockPosition(playerMovement.getTargetPos()));
         }
 
         return targetSet;

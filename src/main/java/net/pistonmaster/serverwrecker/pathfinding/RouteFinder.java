@@ -40,7 +40,7 @@ public record RouteFinder<T extends GraphNode>(Graph<T> graph, Scorer<T> nextNod
         openSet.add(start);
 
         while (!openSet.isEmpty()) {
-            log.debug("Open Set contains: " + openSet.stream().map(RouteNode::getCurrent).collect(Collectors.toSet()));
+            log.trace("Open Set contains: " + openSet.stream().map(RouteNode::getCurrent).collect(Collectors.toSet()));
             RouteNode<T> next = openSet.poll();
             log.debug("Looking at node: " + next);
             if (next.getCurrent().equals(to)) {

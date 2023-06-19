@@ -76,6 +76,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.*;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.util.BusHandler;
+import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -222,7 +223,7 @@ public final class SessionDataManager {
     @BusHandler
     public void onLookAt(ClientboundPlayerLookAtPacket packet) {
         botMovementManager.lookAt(packet.getOrigin(),
-                Vector3i.from(packet.getX(), packet.getY(), packet.getZ()));
+                Vector3d.from(packet.getX(), packet.getY(), packet.getZ()));
 
         // TODO: Implement entity look at
     }
@@ -256,7 +257,8 @@ public final class SessionDataManager {
         System.out.println("Start: " + start);
         System.out.println("Target: " + target);
         List<MinecraftAction> actions = routeFinder.findRoute(start, target);
-        System.out.println(actions);*/
+        System.out.println(actions);
+        */
     }
 
     @BusHandler
