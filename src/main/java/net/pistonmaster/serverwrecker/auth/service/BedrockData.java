@@ -17,23 +17,9 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.auth;
+package net.pistonmaster.serverwrecker.auth.service;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import java.util.UUID;
 
-@Getter
-@RequiredArgsConstructor
-public enum AuthType {
-    MICROSOFT_JAVA("Microsoft Java"),
-    MICROSOFT_BEDROCK("Microsoft Bedrock"),
-    THE_ALTENING("The Altening"),
-    OFFLINE("Offline");
-
-    private final String displayName;
-
-    @Override
-    public String toString() {
-        return displayName;
-    }
+public record BedrockData(UUID deviceId, String playFabId) implements AccountData {
 }

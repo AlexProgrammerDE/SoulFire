@@ -23,5 +23,5 @@ import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
 import java.util.List;
 
-public record AccountList(List<JavaAccount> accounts) implements SettingsObject {
+public record AccountList(List<MinecraftAccount> accounts) implements SettingsObject {
 }

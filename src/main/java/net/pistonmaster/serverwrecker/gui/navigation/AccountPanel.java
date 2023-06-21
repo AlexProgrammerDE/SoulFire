@@ -25,7 +25,7 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
-import net.pistonmaster.serverwrecker.auth.JavaAccount;
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
@@ -59,7 +59,8 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         addAccountPanel.setLayout(new GridLayout(1, 3, 10, 10));
 
         addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.OFFLINE));
-        addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.MICROSOFT));
+        addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.MICROSOFT_JAVA));
+        addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.MICROSOFT_BEDROCK));
         addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.THE_ALTENING));
 
         accountOptionsPanel.add(addAccountPanel);
@@ -81,10 +82,10 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         JPanel accountListPanel = new JPanel();
         accountListPanel.setLayout(new GridLayout(1, 1));
 
-        String[] columnNames = {"Username", "UUID", "Auth Token", "Token Expiry", "Type", "Enabled"};
+        String[] columnNames = {"Username", "Type", "Enabled"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
             final Class<?>[] columnTypes = new Class<?>[]{
-                    String.class, UUID.class, String.class, Long.class, AuthType.class, Boolean.class
+                    String.class, AuthType.class, Boolean.class
             };
 
             @Override
@@ -99,17 +100,14 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
             model.getDataVector().removeAllElements();
 
             AccountRegistry registry = serverWrecker.getAccountRegistry();
-            List<JavaAccount> accounts = registry.getAccounts();
+            List<MinecraftAccount> accounts = registry.getAccounts();
             int registrySize = accounts.size();
             Object[][] dataVector = new Object[registrySize][];
             for (int i = 0; i < registrySize; i++) {
-                JavaAccount account = accounts.get(i);
+                MinecraftAccount account = accounts.get(i);
 
                 dataVector[i] = new Object[]{
                         account.username(),
-                        account.profileId(),
-                        account.authToken(),
-                        account.tokenExpireAt(),
                         account.authType(),
                         account.enabled()
                 };
@@ -125,7 +123,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
         accountList.addPropertyChangeListener(evt -> {
             if ("tableCellEditor".equals(evt.getPropertyName()) && !accountList.isEditing()) {
-                List<JavaAccount> accounts = new ArrayList<>();
+                List<MinecraftAccount> accounts = new ArrayList<>();
 
                 for (int i = 0; i < accountList.getRowCount(); i++) {
                     Object[] row = new Object[accountList.getColumnCount()];
@@ -134,13 +132,12 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
                     }
 
                     String username = (String) row[0];
-                    UUID profileId = (UUID) row[1];
-                    String authToken = (String) row[2];
-                    long tokenExpireAt = (long) row[3];
-                    AuthType authType = (AuthType) row[4];
-                    boolean enabled = (boolean) row[5];
+                    AuthType authType = (AuthType) row[1];
+                    boolean enabled = (boolean) row[2];
 
-                    accounts.add(new JavaAccount(authType, username, profileId, authToken, tokenExpireAt, enabled));
+                    MinecraftAccount account = serverWrecker.getAccountRegistry().getAccount(username, authType);
+
+                    accounts.add(new MinecraftAccount(authType, username, account.accountData(), enabled));
                 }
 
                 serverWrecker.getAccountRegistry().setAccounts(accounts);

@@ -19,30 +19,26 @@
  */
 package net.pistonmaster.serverwrecker.auth;
 
-import java.util.UUID;
+import net.pistonmaster.serverwrecker.auth.service.AccountData;
+import net.pistonmaster.serverwrecker.auth.service.JavaData;
 
-public record JavaAccount(AuthType authType, String username, UUID profileId, String authToken, long tokenExpireAt,
-                          boolean enabled) {
-    public JavaAccount {
+public record MinecraftAccount(AuthType authType, String username, AccountData accountData, boolean enabled) {
+    public MinecraftAccount {
         if (username == null) {
             throw new IllegalArgumentException("Username cannot be null!");
         }
     }
 
-    public JavaAccount(String username) {
-        this(AuthType.OFFLINE, username, null, null, -1, true);
-    }
-
-    public boolean isPremium() {
-        return profileId != null && authToken != null;
-    }
-
-    public boolean isTokenExpired() {
-        return tokenExpireAt != -1 && System.currentTimeMillis() > tokenExpireAt;
+    public MinecraftAccount(String username) {
+        this(AuthType.OFFLINE, username, null, true);
     }
 
     @Override
     public String toString() {
-        return String.format("JavaAccount(username=%s, profileId=%s, authToken=REDACTED)", username, profileId);
+        return String.format("JavaAccount(username=%s)", username);
+    }
+
+    public boolean isPremiumJava() {
+        return accountData instanceof JavaData;
     }
 }

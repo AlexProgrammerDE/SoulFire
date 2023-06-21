@@ -25,7 +25,8 @@ import com.github.steveice10.mc.auth.exception.request.ServiceUnavailableExcepti
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
-import net.pistonmaster.serverwrecker.auth.JavaAccount;
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.auth.service.JavaData;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 
 import java.util.ArrayList;
@@ -34,19 +35,20 @@ import java.util.List;
 @Getter
 public class BotConnectionMeta {
     private final List<UnregisterCleanup> unregisterCleanups = new ArrayList<>();
-    private final JavaAccount javaAccount;
+    private final MinecraftAccount minecraftAccount;
     private final ProtocolState targetState;
     private final SWSessionService sessionService;
 
-    public BotConnectionMeta(JavaAccount javaAccount, ProtocolState targetState) {
-        this.javaAccount = javaAccount;
+    public BotConnectionMeta(MinecraftAccount minecraftAccount, ProtocolState targetState) {
+        this.minecraftAccount = minecraftAccount;
         this.targetState = targetState;
-        this.sessionService = javaAccount.isPremium() ? new SWSessionService(javaAccount.authType()) : null;
+        this.sessionService = minecraftAccount.isPremiumJava() ? new SWSessionService(minecraftAccount.authType()) : null;
     }
 
     public void joinServerId(String serverId, ViaClientSession session) {
         try {
-            sessionService.joinServer(javaAccount.profileId(), javaAccount.authToken(), serverId);
+            JavaData javaData = (JavaData) minecraftAccount.accountData();
+            sessionService.joinServer(javaData.profileId(), javaData.authToken(), serverId);
             session.getLogger().info("Successfully sent mojang join request!");
         } catch (ServiceUnavailableException e) {
             session.disconnect("Login failed: Authentication service unavailable.", e);

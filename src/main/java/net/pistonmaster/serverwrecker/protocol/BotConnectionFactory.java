@@ -27,7 +27,7 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
-import net.pistonmaster.serverwrecker.auth.JavaAccount;
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
@@ -41,7 +41,7 @@ import java.util.concurrent.CompletableFuture;
 
 public record BotConnectionFactory(ServerWrecker serverWrecker, InetSocketAddress targetAddress,
                                    SettingsHolder settingsHolder, Logger logger,
-                                   MinecraftProtocol protocol, JavaAccount javaAccount,
+                                   MinecraftProtocol protocol, MinecraftAccount minecraftAccount,
                                    SWProxy proxyData, EventLoopGroup eventLoopGroup) {
     public CompletableFuture<BotConnection> connect() {
         return CompletableFuture.supplyAsync(() -> connectInternal(ProtocolState.LOGIN));
@@ -49,7 +49,7 @@ public record BotConnectionFactory(ServerWrecker serverWrecker, InetSocketAddres
 
     public BotConnection connectInternal(ProtocolState targetState) {
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
-        BotConnectionMeta meta = new BotConnectionMeta(javaAccount, targetState);
+        BotConnectionMeta meta = new BotConnectionMeta(minecraftAccount, targetState);
         ViaClientSession session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
         BotConnection botConnection = new BotConnection(this, serverWrecker, settingsHolder, logger, protocol, session, meta);
         session.setPostDisconnectHook(() -> botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup));

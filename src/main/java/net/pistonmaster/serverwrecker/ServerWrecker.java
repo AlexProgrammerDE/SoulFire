@@ -48,7 +48,7 @@ import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
 import net.pistonmaster.serverwrecker.auth.AccountList;
 import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
-import net.pistonmaster.serverwrecker.auth.JavaAccount;
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.common.OperationMode;
@@ -342,7 +342,7 @@ public class ServerWrecker {
             botAmount = maxBots;
         }
 
-        List<JavaAccount> accounts = new ArrayList<>(accountRegistry.getUsableAccounts());
+        List<MinecraftAccount> accounts = new ArrayList<>(accountRegistry.getUsableAccounts());
         int availableAccounts = accounts.size();
 
         if (availableAccounts > 0 && botAmount > availableAccounts) {
@@ -370,10 +370,10 @@ public class ServerWrecker {
         Queue<BotConnectionFactory> factories = new ArrayBlockingQueue<>(botAmount);
         for (int botId = 1; botId <= botAmount; botId++) {
             SWProxy proxyData = getProxy(botsPerProxy, proxyUseMap);
-            JavaAccount javaAccount = getAccount(accountSettings, accounts, botId);
+            MinecraftAccount minecraftAccount = getAccount(accountSettings, accounts, botId);
 
             // AuthData will be used internally instead of the MCProtocol data
-            MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile(javaAccount.profileId(), javaAccount.username()), javaAccount.authToken());
+            MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile("", ""), "");
 
             // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
             protocol.setUseDefaultListeners(false);
@@ -382,9 +382,9 @@ public class ServerWrecker {
                     this,
                     targetAddress,
                     settingsHolder,
-                    LoggerFactory.getLogger(javaAccount.username()),
+                    LoggerFactory.getLogger(minecraftAccount.username()),
                     protocol,
-                    javaAccount,
+                    minecraftAccount,
                     proxyData,
                     attackEventLoopGroup
             ));
@@ -417,7 +417,7 @@ public class ServerWrecker {
                 }
             }
 
-            logger.debug("Scheduling bot {}", factory.javaAccount().username());
+            logger.debug("Scheduling bot {}", factory.minecraftAccount().username());
             connectService.execute(() -> {
                 if (attackState.isStopped()) {
                     return;
@@ -425,7 +425,7 @@ public class ServerWrecker {
 
                 TimeUtil.waitCondition(attackState::isPaused);
 
-                logger.debug("Connecting bot {}", factory.javaAccount().username());
+                logger.debug("Connecting bot {}", factory.minecraftAccount().username());
                 try {
                     botConnections.add(factory.connect().join());
                 } catch (Throwable e) {
@@ -437,9 +437,9 @@ public class ServerWrecker {
         }
     }
 
-    private JavaAccount getAccount(AccountSettings accountSettings, List<JavaAccount> accounts, int botId) {
+    private MinecraftAccount getAccount(AccountSettings accountSettings, List<MinecraftAccount> accounts, int botId) {
         if (accounts.isEmpty()) {
-            return new JavaAccount(String.format(accountSettings.nameFormat(), botId));
+            return new MinecraftAccount(String.format(accountSettings.nameFormat(), botId));
         }
 
         return accounts.remove(0);

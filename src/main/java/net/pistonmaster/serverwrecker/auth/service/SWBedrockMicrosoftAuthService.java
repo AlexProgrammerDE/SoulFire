@@ -17,13 +17,19 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.auth;
+package net.pistonmaster.serverwrecker.auth.service;
 
+import net.pistonmaster.serverwrecker.auth.AuthType;
+import net.pistonmaster.serverwrecker.auth.HttpHelper;
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.raphimc.mcauth.MinecraftAuth;
-import net.raphimc.mcauth.step.java.StepMCProfile;
-import net.raphimc.mcauth.step.java.StepMCToken;
+import net.raphimc.mcauth.step.bedrock.StepMCChain;
+import net.raphimc.mcauth.step.bedrock.StepPlayFabToken;
 import net.raphimc.mcauth.step.msa.StepCredentialsMsaCode;
+import net.raphimc.mcauth.step.xbl.StepXblXstsToken;
+import net.raphimc.mcauth.util.MicrosoftConstants;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.ContentType;
@@ -33,23 +39,26 @@ import org.apache.http.message.BasicHeader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-public class SWMicrosoftAuthService implements MCAuthService {
+public class SWBedrockMicrosoftAuthService implements MCAuthService {
     private static CloseableHttpClient createHttpClient(SWProxy proxyData) {
-        List<Header> headers = new ArrayList<>();
-        headers.add(new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType()));
-        headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en"));
-        headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "MinecraftAuth/2.0.0"));
+        List<Header> headers = MicrosoftConstants.getDefaultHeaders();
+        headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "ServerWrecker/" + BuildData.VERSION));
 
         return HttpHelper.createHttpClient(headers, proxyData);
     }
 
-    public JavaAccount login(String email, String password, SWProxy proxyData) throws IOException {
+    public MinecraftAccount login(String email, String password, SWProxy proxyData) throws IOException {
         try (CloseableHttpClient httpClient = createHttpClient(proxyData)) {
-            StepMCProfile.MCProfile mcProfile = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient,
+            StepMCChain.MCChain mcChain = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(httpClient,
                     new StepCredentialsMsaCode.MsaCredentials(email, password));
-            StepMCToken.MCToken mcToken = mcProfile.prevResult().prevResult();
-            return new JavaAccount(AuthType.MICROSOFT, mcProfile.name(), mcProfile.id(), mcToken.access_token(), mcToken.expireTimeMs(), true);
+
+            StepXblXstsToken.XblXsts<?> xblXsts = mcChain.prevResult();
+            UUID deviceId = xblXsts.initialXblSession().prevResult2().id();
+            StepPlayFabToken.PlayFabToken playFabTokenStep = MinecraftAuth.BEDROCK_PLAY_FAB_TOKEN.applyStep(httpClient, xblXsts);
+            String playFabId = playFabTokenStep.playFabId();
+            return new MinecraftAccount(AuthType.MICROSOFT_BEDROCK, mcChain.displayName(), new BedrockData(deviceId, playFabId), true);
         } catch (Exception e) {
             throw new IOException(e);
         }

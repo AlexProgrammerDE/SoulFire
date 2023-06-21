@@ -27,6 +27,10 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.auth.service.JavaData;
+import net.pistonmaster.serverwrecker.auth.service.SWBedrockMicrosoftAuthService;
+import net.pistonmaster.serverwrecker.auth.service.SWJavaMicrosoftAuthService;
+import net.pistonmaster.serverwrecker.auth.service.SWTheAlteningAuthService;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -38,7 +42,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class AccountRegistry implements SettingsDuplex<AccountList> {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private final List<JavaAccount> accounts = new ArrayList<>();
+    private final List<MinecraftAccount> accounts = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
     private final ServerWrecker serverWrecker;
 
@@ -47,7 +51,7 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
     }
 
     public void loadFromString(String file, AuthType authType) {
-        List<JavaAccount> newAccounts = new ArrayList<>();
+        List<MinecraftAccount> newAccounts = new ArrayList<>();
 
         if (isSupportedJson(file)) {
             if (isArray(file)) {
@@ -91,7 +95,7 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
         return GSON.fromJson(file, JsonElement.class).isJsonObject();
     }
 
-    private JavaAccount fromString(String account, AuthType authType) {
+    private MinecraftAccount fromString(String account, AuthType authType) {
         account = account.trim();
 
         if (account.isBlank()) {
@@ -106,9 +110,9 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
                     throw new IllegalArgumentException("Invalid account!");
                 }
 
-                return new JavaAccount(account);
+                return new MinecraftAccount(account);
             }
-            case MICROSOFT -> {
+            case MICROSOFT_JAVA, MICROSOFT_BEDROCK -> {
                 if (split.length < 2) {
                     throw new IllegalArgumentException("Invalid account!");
                 }
@@ -119,7 +123,11 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
                 String password = split[1].trim();
 
                 try {
-                    return new SWMicrosoftAuthService().login(email, password, null);
+                    if (authType == AuthType.MICROSOFT_JAVA) {
+                        return new SWJavaMicrosoftAuthService().login(email, password, null);
+                    } else {
+                        return new SWBedrockMicrosoftAuthService().login(email, password, null);
+                    }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -152,7 +160,7 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
         }
     }
 
-    private JavaAccount fromJsonType(AccountJsonType type, AuthType authType) {
+    private MinecraftAccount fromJsonType(AccountJsonType type, AuthType authType) {
         Objects.requireNonNull(type, "Account type cannot be null");
         String username = Objects.requireNonNull(type.username, "Username not found").trim();
         UUID profileId = type.profileId == null ? null : UUID.fromString(type.profileId.trim());
@@ -166,13 +174,13 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
         String password = type.password == null ? null : type.password.trim();
 
         if (authToken != null) {
-            return new JavaAccount(authType, username, profileId, authToken, tokenExpireAt, true);
+            return new MinecraftAccount(authType, username, new JavaData(profileId, authToken, tokenExpireAt), true);
         }
 
         switch (authType) {
-            case MICROSOFT -> {
+            case MICROSOFT_JAVA -> {
                 try {
-                    return new SWMicrosoftAuthService().login(email, password, null);
+                    return new SWJavaMicrosoftAuthService().login(email, password, null);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -188,18 +196,18 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
         }
     }
 
-    public List<JavaAccount> getAccounts() {
+    public List<MinecraftAccount> getAccounts() {
         return Collections.unmodifiableList(accounts);
     }
 
-    public void setAccounts(List<JavaAccount> accounts) {
+    public void setAccounts(List<MinecraftAccount> accounts) {
         this.accounts.clear();
         this.accounts.addAll(accounts);
     }
 
-    public List<JavaAccount> getUsableAccounts() {
+    public List<MinecraftAccount> getUsableAccounts() {
         return accounts.stream()
-                .filter(JavaAccount::enabled)
+                .filter(MinecraftAccount::enabled)
                 .toList();
     }
 
@@ -216,6 +224,14 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
 
     public void addLoadHook(Runnable hook) {
         loadHooks.add(hook);
+    }
+
+    public MinecraftAccount getAccount(String username, AuthType authType) {
+        return accounts.stream()
+                .filter(account -> account.authType() == authType)
+                .filter(account -> account.username().equals(username))
+                .findFirst()
+                .orElse(null);
     }
 
     @AllArgsConstructor

@@ -17,11 +17,14 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.auth;
+package net.pistonmaster.serverwrecker.auth.service;
 
 import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.auth.AuthType;
+import net.pistonmaster.serverwrecker.auth.HttpHelper;
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.util.UUIDHelper;
@@ -55,7 +58,7 @@ public class SWTheAlteningAuthService implements MCAuthService {
         return HttpHelper.createHttpClient(headers, proxyData);
     }
 
-    public JavaAccount login(String altToken, SWProxy proxyData) throws IOException {
+    public MinecraftAccount login(String altToken, SWProxy proxyData) throws IOException {
         try (CloseableHttpClient httpClient = createHttpClient(proxyData)) {
             AuthenticationRequest request = new AuthenticationRequest(altToken, PASSWORD, UUID.randomUUID().toString());
             HttpPost httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
@@ -63,12 +66,14 @@ public class SWTheAlteningAuthService implements MCAuthService {
             AuthenticateRefreshResponse response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
                     AuthenticateRefreshResponse.class);
 
-            return new JavaAccount(
+            return new MinecraftAccount(
                     AuthType.THE_ALTENING,
                     response.getSelectedProfile().getName(),
-                    UUIDHelper.convertToDashed(response.getSelectedProfile().getId()),
-                    response.getAccessToken(),
-                    -1,
+                    new JavaData(
+                            UUIDHelper.convertToDashed(response.getSelectedProfile().getId()),
+                            response.getAccessToken(),
+                            -1
+                    ),
                     true
             );
         } catch (Exception e) {

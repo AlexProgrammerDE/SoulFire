@@ -48,7 +48,8 @@ import com.viaversion.viaversion.api.connection.UserConnection;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.SWConstants;
-import net.pistonmaster.serverwrecker.auth.JavaAccount;
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.auth.service.JavaData;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
@@ -57,6 +58,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class SWBaseListener extends SessionAdapter {
@@ -82,11 +84,11 @@ public class SWBaseListener extends SessionAdapter {
                 }
 
                 BotSettings botSettings = botConnection.settingsHolder().get(BotSettings.class);
-                JavaAccount javaAccount = botConnection.meta().getJavaAccount();
+                MinecraftAccount minecraftAccount = botConnection.meta().getMinecraftAccount();
                 UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
 
                 boolean isLegacy = SWConstants.isLegacy(botSettings.protocolVersion());
-                boolean auth = javaAccount.isPremium();
+                boolean auth = minecraftAccount.isPremiumJava();
                 if (auth && isLegacy)  {
                     auth = Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
                 }
@@ -150,8 +152,16 @@ public class SWBaseListener extends SessionAdapter {
             protocol.setState(this.targetState);
 
             if (this.targetState == ProtocolState.LOGIN) {
-                JavaAccount javaAccount = botConnection.meta().getJavaAccount();
-                session.send(new ServerboundHelloPacket(javaAccount.username(), javaAccount.profileId()));
+                MinecraftAccount minecraftAccount = botConnection.meta().getMinecraftAccount();
+
+                UUID uuid;
+                if (minecraftAccount.accountData() instanceof JavaData javaData) {
+                    uuid = javaData.profileId();
+                } else {
+                    uuid = UUID.randomUUID(); // We are using a bedrock account, the uuid doesn't matter.
+                }
+
+                session.send(new ServerboundHelloPacket(minecraftAccount.username(), uuid));
             } else {
                 session.send(new ServerboundStatusRequestPacket());
             }

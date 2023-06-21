@@ -46,7 +46,7 @@ public class SWSessionService extends Service {
      */
     public SWSessionService(AuthType authType) {
         super(switch (authType) {
-            case MICROSOFT -> DEFAULT_MOJANG_BASE_URI;
+            case MICROSOFT_JAVA -> DEFAULT_MOJANG_BASE_URI;
             case THE_ALTENING -> DEFAULT_THE_ALTENING_BASE_URI;
             default -> throw new IllegalStateException("Unexpected value: " + authType);
         });

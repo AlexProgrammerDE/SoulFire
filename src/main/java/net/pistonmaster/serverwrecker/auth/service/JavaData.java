@@ -17,7 +17,16 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.auth;
+package net.pistonmaster.serverwrecker.auth.service;
 
-public interface MCAuthService {
+import java.util.UUID;
+
+public record JavaData(UUID profileId, String authToken, long tokenExpireAt) implements AccountData {
+    public boolean isPremium() {
+        return profileId != null && authToken != null;
+    }
+
+    public boolean isTokenExpired() {
+        return tokenExpireAt != -1 && System.currentTimeMillis() > tokenExpireAt;
+    }
 }
