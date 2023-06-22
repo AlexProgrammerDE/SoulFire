@@ -29,6 +29,7 @@ import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,6 +81,7 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
 
         add(new JLabel("Version: "));
         versionBox = new JComboBox<>();
+        versionBox.setRenderer(new ProtocolVersionRenderer());
         registerVersions();
         add(versionBox);
 
@@ -156,5 +158,23 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
                 trySrv.isSelected(),
                 (int) concurrentConnects.getValue()
         );
+    }
+
+    private static class ProtocolVersionRenderer extends BasicComboBoxRenderer {
+        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+            if (value instanceof ProtocolVersion version) {
+                if (SWConstants.isBedrock(version)) {
+                    setText(String.format("%s (%s)", version.getName(), version.getVersion() - 1_000_000));
+                } else if (SWConstants.isLegacy(version)) {
+                    setText(String.format("%s (%s)", version.getName(), Math.abs(version.getVersion()) >> 2));
+                } else {
+                    setText(version.toString());
+                }
+            }
+
+            return this;
+        }
     }
 }
