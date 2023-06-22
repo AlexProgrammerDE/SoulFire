@@ -38,17 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SWJavaMicrosoftAuthService implements MCAuthService {
-    private static CloseableHttpClient createHttpClient(SWProxy proxyData) {
-        List<Header> headers = new ArrayList<>();
-        headers.add(new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType()));
-        headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en"));
-        headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "MinecraftAuth/2.0.0"));
-
-        return HttpHelper.createHttpClient(headers, proxyData);
-    }
-
     public MinecraftAccount login(String email, String password, SWProxy proxyData) throws IOException {
-        try (CloseableHttpClient httpClient = createHttpClient(proxyData)) {
+        try (CloseableHttpClient httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
             StepMCProfile.MCProfile mcProfile = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient,
                     new StepCredentialsMsaCode.MsaCredentials(email, password));
             StepMCToken.MCToken mcToken = mcProfile.prevResult().prevResult();

@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.auth;
 
 import net.pistonmaster.serverwrecker.auth.service.AccountData;
+import net.pistonmaster.serverwrecker.auth.service.BedrockData;
 import net.pistonmaster.serverwrecker.auth.service.JavaData;
 
 public record MinecraftAccount(AuthType authType, String username, AccountData accountData, boolean enabled) {
@@ -39,6 +40,10 @@ public record MinecraftAccount(AuthType authType, String username, AccountData a
     }
 
     public boolean isPremiumJava() {
-        return accountData instanceof JavaData;
+        return accountData != null && accountData instanceof JavaData;
+    }
+
+    public boolean isPremiumBedrock() {
+        return accountData != null && accountData instanceof BedrockData;
     }
 }

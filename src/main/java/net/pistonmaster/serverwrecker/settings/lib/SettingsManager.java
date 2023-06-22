@@ -21,23 +21,41 @@ package net.pistonmaster.serverwrecker.settings.lib;
 
 import com.google.gson.*;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.auth.service.AccountData;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 public class SettingsManager {
     private final List<ListenerRegistration<?>> listeners = new ArrayList<>();
     private final List<ProviderRegistration<?>> providers = new ArrayList<>();
     private final Class<? extends SettingsObject>[] registeredSettings;
-    private final Gson normalGson = new GsonBuilder()
-            .setPrettyPrinting()
+    // Used to read & write the settings file
+    private final Gson dumpGson = new GsonBuilder().setPrettyPrinting().create();
+    private final Gson baseGson = new GsonBuilder()
             .registerTypeAdapter(ProtocolVersion.class, new ProtocolVersionAdapter())
+            .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
+            .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
             .create();
-    private final Gson settingsGson = new GsonBuilder().registerTypeHierarchyAdapter(Object.class, new ObjectAdapter()).create();
+    private final Gson normalGson = baseGson.newBuilder()
+            .registerTypeHierarchyAdapter(AccountData.class, new ClassObjectAdapter(baseGson))
+            .create();
+    private final Gson settingsTypeGson = new GsonBuilder()
+            .registerTypeHierarchyAdapter(Object.class, new ClassObjectAdapter(normalGson))
+            .create();
 
     @SafeVarargs
     public SettingsManager(Class<? extends SettingsObject>... registeredSettings) {
@@ -89,10 +107,10 @@ public class SettingsManager {
 
     public void loadProfile(Path path) throws IOException {
         try {
-            JsonArray settingsHolder = normalGson.fromJson(Files.readString(path), JsonArray.class);
+            JsonArray settingsHolder = dumpGson.fromJson(Files.readString(path), JsonArray.class);
             List<SettingsObject> settingsObjects = new ArrayList<>();
             for (JsonElement jsonElement : settingsHolder) {
-                settingsObjects.add(settingsGson.fromJson(jsonElement, SettingsObject.class));
+                settingsObjects.add(settingsTypeGson.fromJson(jsonElement, SettingsObject.class));
             }
 
             onSettingsLoad(new SettingsHolder(settingsObjects));
@@ -107,10 +125,10 @@ public class SettingsManager {
         try {
             List<JsonElement> settingsHolder = new ArrayList<>();
             for (SettingsObject settingsObject : collectSettings().settings()) {
-                settingsHolder.add(settingsGson.toJsonTree(settingsObject));
+                settingsHolder.add(settingsTypeGson.toJsonTree(settingsObject));
             }
 
-            Files.writeString(path, normalGson.toJson(settingsHolder));
+            Files.writeString(path, dumpGson.toJson(settingsHolder));
         } catch (Exception e) {
             throw new IOException(e);
         }
@@ -134,10 +152,10 @@ public class SettingsManager {
         }
     }
 
-    private class ObjectAdapter implements JsonSerializer<Object>, JsonDeserializer<Object> {
+    private record ClassObjectAdapter(Gson gson) implements JsonSerializer<Object>, JsonDeserializer<Object> {
         @Override
         public JsonElement serialize(Object src, Type typeOfSrc, JsonSerializationContext context) {
-            JsonElement serialized = normalGson.toJsonTree(src);
+            JsonElement serialized = gson.toJsonTree(src);
             JsonObject jsonObject = serialized.getAsJsonObject();
             jsonObject.addProperty("class", src.getClass().getName());
             return jsonObject;
@@ -149,12 +167,50 @@ public class SettingsManager {
             String className = jsonObject.get("class").getAsString();
             try {
                 Class<?> clazz = Class.forName(className);
-                return normalGson.fromJson(jsonObject, clazz);
+                return gson.fromJson(jsonObject, clazz);
             } catch (ClassNotFoundException e) {
                 return null; // Some extension might not be loaded, so we just ignore it
             }
         }
     }
 
+    private static class ECPublicKeyAdapter implements JsonSerializer<ECPublicKey>, JsonDeserializer<ECPublicKey> {
+        @Override
+        public ECPublicKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            String base64 = json.getAsString();
+            byte[] bytes = Base64.getDecoder().decode(base64);
 
+            try {
+                KeyFactory keyFactory = KeyFactory.getInstance("EC");
+                return (ECPublicKey) keyFactory.generatePublic(new X509EncodedKeySpec(bytes));
+            } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+                throw new JsonParseException(e);
+            }
+        }
+
+        @Override
+        public JsonElement serialize(ECPublicKey src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(Base64.getEncoder().encodeToString(src.getEncoded()));
+        }
+    }
+
+    private static class ECPrivateKeyAdapter implements JsonSerializer<ECPrivateKey>, JsonDeserializer<ECPrivateKey> {
+        @Override
+        public ECPrivateKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            String base64 = json.getAsString();
+            byte[] bytes = Base64.getDecoder().decode(base64);
+
+            try {
+                KeyFactory keyFactory = KeyFactory.getInstance("EC");
+                return (ECPrivateKey) keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
+            } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+                throw new JsonParseException(e);
+            }
+        }
+
+        @Override
+        public JsonElement serialize(ECPrivateKey src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(Base64.getEncoder().encodeToString(src.getEncoded()));
+        }
+    }
 }

@@ -115,7 +115,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
             model.setDataVector(dataVector, columnNames);
 
-            accountList.getColumnModel().getColumn(4)
+            accountList.getColumnModel().getColumn(1)
                     .setCellEditor(new DefaultCellEditor(new JEnumComboBox<>(AuthType.class)));
 
             model.fireTableDataChanged();

@@ -40,6 +40,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.SWConstants;
+import net.pistonmaster.serverwrecker.auth.service.BedrockData;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionMeta;
 import net.pistonmaster.serverwrecker.protocol.SWProtocolConstants;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
@@ -51,6 +52,7 @@ import net.pistonmaster.serverwrecker.viaversion.StorableSettingsHolder;
 import net.raphimc.viabedrock.netty.BatchLengthCodec;
 import net.raphimc.viabedrock.netty.PacketEncapsulationCodec;
 import net.raphimc.viabedrock.protocol.BedrockBaseProtocol;
+import net.raphimc.viabedrock.protocol.storage.AuthChainData;
 import net.raphimc.vialegacy.netty.PreNettyLengthCodec;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.baseprotocols.PreNettyBaseProtocol;
 import net.raphimc.vialoader.netty.viabedrock.DisconnectHandler;
@@ -170,6 +172,19 @@ public class ViaClientSession extends TcpSession {
                     UserConnectionImpl userConnection = new UserConnectionImpl(channel, true);
                     userConnection.put(new StorableSettingsHolder(settingsHolder));
                     userConnection.put(new StorableSession(ViaClientSession.this));
+
+                    if (isBedrock && meta.getMinecraftAccount().isPremiumBedrock()) {
+                        BedrockData bedrockData = (BedrockData) meta.getMinecraftAccount().accountData();
+                        userConnection.put(new AuthChainData(
+                                userConnection,
+                                bedrockData.mojangJwt(),
+                                bedrockData.identityJwt(),
+                                bedrockData.publicKey(),
+                                bedrockData.privateKey(),
+                                bedrockData.deviceId(),
+                                bedrockData.playFabId()
+                        ));
+                    }
 
                     setFlag(SWProtocolConstants.VIA_USER_CONNECTION, userConnection);
 

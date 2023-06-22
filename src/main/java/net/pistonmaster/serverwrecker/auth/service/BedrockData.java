@@ -19,7 +19,10 @@
  */
 package net.pistonmaster.serverwrecker.auth.service;
 
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.util.UUID;
 
-public record BedrockData(UUID deviceId, String playFabId) implements AccountData {
+public record BedrockData(String mojangJwt, String identityJwt, ECPublicKey publicKey, ECPrivateKey privateKey,
+                          UUID deviceId, String playFabId) implements AccountData {
 }
