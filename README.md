@@ -43,7 +43,7 @@ through [nightly.link](https://nightly.link/AlexProgrammerDE/ServerWrecker/workf
 
 ServerWrecker currently supports these versions:
 
-- Release (1.0.0 - 1.20 (latest))
+- Release (1.0.0 - 1.20.1 (latest))
 - Beta (b1.0 - b1.8.1)
 - Alpha (a1.0.15 - a1.2.6)
 - Classic (c0.0.15 - c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
