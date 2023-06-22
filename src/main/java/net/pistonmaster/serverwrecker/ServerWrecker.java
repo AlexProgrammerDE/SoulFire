@@ -365,7 +365,9 @@ public class ServerWrecker {
         threads *= 2; // We need a monitor thread for each bot
 
         EventLoopGroup attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(threads, "Attack-Thread");
-        InetSocketAddress targetAddress = ResolveUtil.resolveAddress(settingsHolder, attackEventLoopGroup);
+
+        boolean isBedrock = SWConstants.isBedrock(botSettings.protocolVersion());
+        InetSocketAddress targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder, attackEventLoopGroup);
 
         Queue<BotConnectionFactory> factories = new ArrayBlockingQueue<>(botAmount);
         for (int botId = 1; botId <= botAmount; botId++) {
@@ -373,7 +375,7 @@ public class ServerWrecker {
             MinecraftAccount minecraftAccount = getAccount(accountSettings, accounts, botId);
 
             // AuthData will be used internally instead of the MCProtocol data
-            MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile("", ""), "");
+            MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile((UUID) null, "DoNotUseGameProfile"), "");
 
             // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
             protocol.setUseDefaultListeners(false);
