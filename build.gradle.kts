@@ -108,7 +108,7 @@ dependencies {
     }
 
     // For Bedrock support
-    implementation("net.raphimc:ViaBedrock:0.0.1-SNAPSHOT") {
+    implementation("net.raphimc:ViaBedrock:0.0.2-SNAPSHOT") {
         exclude("io.netty", "netty-codec-http")
     }
     implementation("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT") {

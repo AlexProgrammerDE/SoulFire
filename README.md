@@ -47,7 +47,7 @@ ServerWrecker currently supports these versions:
 - Beta (b1.0 - b1.8.1)
 - Alpha (a1.0.15 - a1.2.6)
 - Classic (c0.0.15 - c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
-- Minecraft Bedrock Edition (1.19.70)
+- Minecraft Bedrock Edition (1.20.0)
 
 This includes every single subversion, not just a few specific versions.
 The latest Java Release and Bedrock Edition info may be out of sync with the latest development version.
