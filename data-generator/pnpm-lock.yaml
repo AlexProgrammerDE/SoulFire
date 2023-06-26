@@ -1,9 +1,13 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   minecraft-data:
-    specifier: ^3.35.0
-    version: 3.35.0
+    specifier: ^3.37.0
+    version: 3.37.0
   tsx:
     specifier: ^3.12.7
     version: 3.12.7
@@ -287,8 +291,8 @@ packages:
     resolution: {integrity: sha512-MjhiaIWCJ1sAU4pIQ5i5OfOuHHxVo1oYeNsWTON7jxYkod8pHocXeh+SSbmu5OZZZK73B6cbJ2XADzXehLyovQ==}
     dev: false
 
-  /minecraft-data@3.35.0:
-    resolution: {integrity: sha512-qIWjfk93v2qMG/W1tUI9BOIE1KayCDFddJrzUEmcT+35upnAEl1XAJnlLuyqD7TEDIkUC2rcvtaOOtzZpYWZAw==}
+  /minecraft-data@3.37.0:
+    resolution: {integrity: sha512-hcKncWDaI4OiGcvZ8ufrLwq548Z1vl1TqMEpxOuPGj0ro4mb7X+rMWtHcP4grWAJz6IKK2TXKSz0YcRX+IBJZw==}
     dev: false
 
   /source-map-support@0.5.21:
