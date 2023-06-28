@@ -28,34 +28,72 @@ import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
-public record MinecraftGraph(SessionDataManager sessionDataManager) implements Graph<MinecraftAction> {
+public record MinecraftGraph(SessionDataManager sessionDataManager) implements Graph {
     @Override
-    public Set<MinecraftAction> getConnections(MinecraftAction node) {
-        Vector3d from = node.getTargetPos();
+    public Map<BlockPosition, MinecraftAction> getConnections(BlockPosition node) {
+        Vector3d from = node.position();
 
         LevelState levelState = sessionDataManager.getCurrentLevel();
         if (levelState == null) {
-            return Set.of();
+            return Map.of();
         }
 
-        Set<MinecraftAction> targetSet = new HashSet<>();
-        actions: for (BasicMovementAction action : BasicMovementAction.values()) {
+        Map<Vector3i, Boolean> solidBlockMap = new HashMap<>();
+        Map<BlockPosition, MinecraftAction> targetSet = new HashMap<>();
+        actions: for (BasicMovementEnum action : BasicMovementEnum.values()) {
+            log.debug("Checking action {}", action);
             PlayerMovement playerMovement = new PlayerMovement(from, action);
 
             for (Vector3i requiredFreeBlock : playerMovement.requiredFreeBlocks()) {
+                Boolean solid = solidBlockMap.get(requiredFreeBlock);
+                if (solid != null) {
+                    if (solid) {
+                        log.debug("We cached the block {} is solid, so we can't move there!", requiredFreeBlock);
+                        continue actions;
+                    } else {
+                        continue;
+                    }
+                }
+
                 BlockType blockType = levelState.getBlockTypeAt(requiredFreeBlock);
                 if (BlockTypeHelper.isSolid(blockType)) {
-                    log.debug("Block {} is solid, so we can't move there!", requiredFreeBlock);
+                    log.debug("Block {} is solid (type {}), so we can't move there!", requiredFreeBlock, blockType.name());
+                    solidBlockMap.put(requiredFreeBlock, true);
                     continue actions;
+                } else {
+                    solidBlockMap.put(requiredFreeBlock, false);
                 }
             }
 
-            targetSet.add(new BlockPosition(playerMovement.getTargetPos()));
+            for (Vector3i requiredSolidBlock : playerMovement.requiredSolidBlocks()) {
+                Boolean solid = solidBlockMap.get(requiredSolidBlock);
+                if (solid != null) {
+                    if (!solid) {
+                        log.debug("We cached the block {} is not solid, so we can't move on it!", requiredSolidBlock);
+                        continue actions;
+                    } else {
+                        continue;
+                    }
+                }
+
+                BlockType blockType = levelState.getBlockTypeAt(requiredSolidBlock);
+                if (!BlockTypeHelper.isSolid(blockType)) {
+                    log.debug("Block {} is not solid, so we can't move on it!", requiredSolidBlock);
+                    solidBlockMap.put(requiredSolidBlock, false);
+                    continue actions;
+                } else {
+                    solidBlockMap.put(requiredSolidBlock, true);
+                }
+            }
+
+            targetSet.put(new BlockPosition(playerMovement.getTargetPos()), playerMovement);
         }
+
+        log.debug("Found {} possible actions for {}", targetSet.values(), node);
 
         return targetSet;
     }

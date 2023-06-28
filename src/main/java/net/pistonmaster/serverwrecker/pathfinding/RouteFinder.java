@@ -25,51 +25,53 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.serverwrecker.pathfinding.minecraft.BlockPosition;
 
 @Slf4j
-public record RouteFinder<T extends GraphNode>(Graph<T> graph, Scorer<T> nextNodeScorer, Scorer<T> targetScorer) {
-    public List<T> findRoute(T from, T to) {
-        Map<T, RouteNode<T>> allNodes = new HashMap<>();
-        Queue<RouteNode<T>> openSet = new PriorityQueue<>();
+public record RouteFinder(Graph graph, Scorer nextNodeScorer, Scorer targetScorer) {
+    public List<BlockPosition> findRoute(BlockPosition from, BlockPosition to) {
+        Map<BlockPosition, MinecraftRouteNode> routeIndex = new HashMap<>();
+        Queue<MinecraftRouteNode> openSet = new PriorityQueue<>();
 
-        RouteNode<T> start = new RouteNode<>(from, null, 0d, targetScorer.computeCost(from, to));
-        allNodes.put(from, start);
+        MinecraftRouteNode start = new MinecraftRouteNode(from, null, 0d, targetScorer.computeCost(from, to));
+        routeIndex.put(from, start);
         openSet.add(start);
 
-        while (!openSet.isEmpty()) {
-            log.trace("Open Set contains: " + openSet.stream().map(RouteNode::getCurrent).collect(Collectors.toSet()));
-            RouteNode<T> next = openSet.poll();
-            log.debug("Looking at node: " + next);
-            if (next.getCurrent().equals(to)) {
+        MinecraftRouteNode current;
+        while ((current = openSet.poll()) != null) {
+            log.debug("Looking at node: " + current);
+            if (current.getPosition().equals(to)) {
                 log.debug("Found our destination!");
 
-                List<T> route = new ArrayList<>();
-                RouteNode<T> current = next;
+                List<BlockPosition> route = new ArrayList<>();
+                MinecraftRouteNode previousElement = current;
                 do {
-                    route.add(0, current.getCurrent());
-                    current = allNodes.get(current.getPrevious());
-                } while (current != null);
+                    route.add(0, previousElement.getPosition());
+                    previousElement = previousElement.getPrevious();
+                } while (previousElement != null);
 
                 log.debug("Route: " + route);
                 return route;
             }
 
-            graph.getConnections(next.getCurrent()).forEach(connection -> {
-                RouteNode<T> nextNode = allNodes.getOrDefault(connection, new RouteNode<>(connection));
-                allNodes.put(connection, nextNode);
+            for (var entry : graph.getConnections(current.getPosition()).entrySet()) {
+                BlockPosition blockPosition = entry.getKey();
+                MinecraftRouteNode nextNode = routeIndex.computeIfAbsent(blockPosition, k -> new MinecraftRouteNode(blockPosition));
 
-                double newScore = next.getRouteScore() + nextNodeScorer.computeCost(next.getCurrent(), connection);
-                if (newScore < nextNode.getRouteScore()) {
-                    nextNode.setPrevious(next.getCurrent());
-                    nextNode.setRouteScore(newScore);
-                    nextNode.setEstimatedScore(newScore + targetScorer.computeCost(connection, to));
+                // Calculate new distance from start to this node,
+                // Get distance from the current element
+                // and add the distance from the current element to the next element
+                double newSourceCost = current.getSourceCost() + nextNodeScorer.computeCost(current.getPosition(), blockPosition);
+                if (newSourceCost < nextNode.getSourceCost()) {
+                    nextNode.setPrevious(current);
+                    nextNode.setSourceCost(newSourceCost);
+                    nextNode.setTotalRouteScore(newSourceCost + targetScorer.computeCost(blockPosition, to));
                     openSet.add(nextNode);
                     log.debug("Found a better route to node: " + nextNode);
                 }
-            });
+            }
         }
 
         throw new IllegalStateException("No route found");

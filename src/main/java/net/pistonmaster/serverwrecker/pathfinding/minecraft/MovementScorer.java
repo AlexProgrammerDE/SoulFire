@@ -20,14 +20,10 @@
 package net.pistonmaster.serverwrecker.pathfinding.minecraft;
 
 import net.pistonmaster.serverwrecker.pathfinding.Scorer;
-import org.cloudburstmc.math.vector.Vector3d;
 
-public class MovementScorer implements Scorer<MinecraftAction> {
+public class MovementScorer implements Scorer {
     @Override
-    public double computeCost(MinecraftAction from, MinecraftAction to) {
-        Vector3d fromPos = from.getTargetPos();
-        Vector3d toPos = to.getTargetPos();
-
-        return fromPos.distance(toPos);
+    public double computeCost(BlockPosition from, BlockPosition to) {
+        return from.position().distance(to.position());
     }
 }

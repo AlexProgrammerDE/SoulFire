@@ -19,6 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding;
 
-public interface Scorer<T extends GraphNode> {
-    double computeCost(T from, T to);
+import net.pistonmaster.serverwrecker.pathfinding.minecraft.BlockPosition;
+
+public interface Scorer {
+    double computeCost(BlockPosition from, BlockPosition to);
 }

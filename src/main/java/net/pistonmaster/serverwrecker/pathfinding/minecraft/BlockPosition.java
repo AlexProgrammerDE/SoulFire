@@ -22,13 +22,8 @@ package net.pistonmaster.serverwrecker.pathfinding.minecraft;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 
-public record BlockPosition(Vector3d position) implements MinecraftAction {
+public record BlockPosition(Vector3d position) {
     public BlockPosition {
-        position = VectorHelper.halfBlockNormalize(position);
-    }
-
-    @Override
-    public Vector3d getTargetPos() {
-        return position;
+        position = VectorHelper.middleOfBlockNormalize(position);
     }
 }

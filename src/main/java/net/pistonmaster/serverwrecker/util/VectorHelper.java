@@ -22,7 +22,7 @@ package net.pistonmaster.serverwrecker.util;
 import org.cloudburstmc.math.vector.Vector3d;
 
 public class VectorHelper {
-    public static Vector3d halfBlockNormalize(Vector3d vector) {
-        return vector.mul(2).round().div(2);
+    public static Vector3d middleOfBlockNormalize(Vector3d vector) {
+        return vector.floor().add(0.5, 0.5, 0.5);
     }
 }

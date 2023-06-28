@@ -19,12 +19,34 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import net.pistonmaster.serverwrecker.pathfinding.minecraft.BlockPosition;
-import net.pistonmaster.serverwrecker.pathfinding.minecraft.MinecraftAction;
 
-import java.util.Map;
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
+class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
+    private final BlockPosition position;
+    private MinecraftRouteNode previous;
+    /**
+     * The cost of the route from the start node to this node.
+     */
+    private double sourceCost;
+    /**
+     * The estimated cost of the route from this node to the target.
+     */
+    private double totalRouteScore;
 
+    MinecraftRouteNode(BlockPosition position) {
+        this(position, null, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+    }
 
-public interface Graph {
-    Map<BlockPosition, MinecraftAction> getConnections(BlockPosition node);
+    @Override
+    public int compareTo(MinecraftRouteNode other) {
+        return Double.compare(this.totalRouteScore, other.totalRouteScore);
+    }
 }

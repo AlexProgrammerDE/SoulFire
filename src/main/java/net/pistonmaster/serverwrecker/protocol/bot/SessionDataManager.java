@@ -251,14 +251,19 @@ public final class SessionDataManager {
 
         /*
         System.out.println(getCurrentLevel().getBlockTypeAt(botMovementManager.getBlockPos()));
-        RouteFinder<MinecraftAction> routeFinder = new RouteFinder<>(new MinecraftGraph(this), new MovementScorer(), new MovementScorer());
+        RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new MovementScorer(), new MovementScorer());
         BlockPosition start = new BlockPosition(botMovementManager.getPlayerPos());
-        BlockPosition target = new BlockPosition(botMovementManager.getPlayerPos().add(2, 0, 2));
+        BlockPosition target = new BlockPosition(botMovementManager.getPlayerPos().add(4, 0, 2));
         System.out.println("Start: " + start);
         System.out.println("Target: " + target);
-        List<MinecraftAction> actions = routeFinder.findRoute(start, target);
+        List<BlockPosition> actions = routeFinder.findRoute(start, target);
         System.out.println(actions);
-        */
+        BlockPosition last = start;
+        for (BlockPosition action : actions) {
+            System.out.println("Move: " + action.position().sub(last.position()));
+            last = action;
+        }
+         */
     }
 
     @BusHandler

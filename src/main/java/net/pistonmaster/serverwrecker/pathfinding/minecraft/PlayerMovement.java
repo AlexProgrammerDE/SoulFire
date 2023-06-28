@@ -26,28 +26,28 @@ import org.cloudburstmc.math.vector.Vector3i;
 import java.util.HashSet;
 import java.util.Set;
 
-public record PlayerMovement(Vector3d from, BasicMovementAction action) implements MinecraftAction {
+public record PlayerMovement(Vector3d from, BasicMovementEnum action) implements MinecraftAction {
     @Override
     public Vector3d getTargetPos() {
-        // Make from be either dividable by 0.5 or 1
-        // This way we can have clean positions
-        Vector3d normalizedFrom = VectorHelper.halfBlockNormalize(this.from);
+        // Make sure we are in the middle of the block
+        Vector3d normalizedFrom = VectorHelper.middleOfBlockNormalize(this.from);
 
         return switch (action) {
-            case NORTH -> normalizedFrom.add(0, 0, -0.5);
-            case SOUTH -> normalizedFrom.add(0, 0, 0.5);
-            case EAST -> normalizedFrom.add(0.5, 0, 0);
-            case WEST -> normalizedFrom.add(-0.5, 0, 0);
-            case NORTH_EAST -> normalizedFrom.add(0.5, 0, -0.5);
-            case NORTH_WEST -> normalizedFrom.add(-0.5, 0, -0.5);
-            case SOUTH_EAST -> normalizedFrom.add(0.5, 0, 0.5);
-            case SOUTH_WEST -> normalizedFrom.add(-0.5, 0, 0.5);
+            case NORTH -> normalizedFrom.add(0, 0, -1);
+            case SOUTH -> normalizedFrom.add(0, 0, 1);
+            case EAST -> normalizedFrom.add(1, 0, 0);
+            case WEST -> normalizedFrom.add(-1, 0, 0);
+            case NORTH_EAST -> normalizedFrom.add(1, 0, -1);
+            case NORTH_WEST -> normalizedFrom.add(-1, 0, -1);
+            case SOUTH_EAST -> normalizedFrom.add(1, 0, 1);
+            case SOUTH_WEST -> normalizedFrom.add(-1, 0, 1);
         };
     }
 
     public Set<Vector3i> requiredFreeBlocks() {
         Set<Vector3i> requiredFreeBlocks = new HashSet<>();
         Vector3i targetPos = getTargetPos().toInt();
+        Vector3i fromPos = from.toInt();
 
         // Add the block that is required to be free for straight movement
         requiredFreeBlocks.add(targetPos);
@@ -55,20 +55,20 @@ public record PlayerMovement(Vector3d from, BasicMovementAction action) implemen
         // Add the blocks that are required to be free for diagonal movement
         switch (action) {
             case NORTH_EAST -> {
-                requiredFreeBlocks.add(targetPos.add(0, 0, -1));
-                requiredFreeBlocks.add(targetPos.add(1, 0, 0));
+                requiredFreeBlocks.add(fromPos.add(0, 0, -1));
+                requiredFreeBlocks.add(fromPos.add(1, 0, 0));
             }
             case NORTH_WEST -> {
-                requiredFreeBlocks.add(targetPos.add(0, 0, -1));
-                requiredFreeBlocks.add(targetPos.add(-1, 0, 0));
+                requiredFreeBlocks.add(fromPos.add(0, 0, -1));
+                requiredFreeBlocks.add(fromPos.add(-1, 0, 0));
             }
             case SOUTH_EAST -> {
-                requiredFreeBlocks.add(targetPos.add(0, 0, 1));
-                requiredFreeBlocks.add(targetPos.add(1, 0, 0));
+                requiredFreeBlocks.add(fromPos.add(0, 0, 1));
+                requiredFreeBlocks.add(fromPos.add(1, 0, 0));
             }
             case SOUTH_WEST -> {
-                requiredFreeBlocks.add(targetPos.add(0, 0, 1));
-                requiredFreeBlocks.add(targetPos.add(-1, 0, 0));
+                requiredFreeBlocks.add(fromPos.add(0, 0, 1));
+                requiredFreeBlocks.add(fromPos.add(-1, 0, 0));
             }
         }
 
@@ -78,5 +78,36 @@ public record PlayerMovement(Vector3d from, BasicMovementAction action) implemen
         }
 
         return requiredFreeBlocks;
+    }
+
+    public Set<Vector3i> requiredSolidBlocks() {
+        Set<Vector3i> requiredSolidBlocks = new HashSet<>();
+        Vector3i targetPos = getTargetPos().toInt();
+        Vector3i fromPos = from.toInt();
+
+        // Add the block that is required to be solid for straight movement
+        requiredSolidBlocks.add(targetPos.add(0, -1, 0));
+
+        // Add the blocks that are required to be solid for diagonal movement
+        switch (action) {
+            case NORTH_EAST -> {
+                requiredSolidBlocks.add(fromPos.add(0, -1, -1));
+                requiredSolidBlocks.add(fromPos.add(1, -1, 0));
+            }
+            case NORTH_WEST -> {
+                requiredSolidBlocks.add(fromPos.add(0, -1, -1));
+                requiredSolidBlocks.add(fromPos.add(-1, -1, 0));
+            }
+            case SOUTH_EAST -> {
+                requiredSolidBlocks.add(fromPos.add(0, -1, 1));
+                requiredSolidBlocks.add(fromPos.add(1, -1, 0));
+            }
+            case SOUTH_WEST -> {
+                requiredSolidBlocks.add(fromPos.add(0, -1, 1));
+                requiredSolidBlocks.add(fromPos.add(-1, -1, 0));
+            }
+        }
+
+        return requiredSolidBlocks;
     }
 }
