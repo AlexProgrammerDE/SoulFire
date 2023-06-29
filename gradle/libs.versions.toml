@@ -10,7 +10,7 @@ jline = "org.jline:jline-terminal-jansi:3.23.0"
 junit = "org.junit.jupiter:junit-jupiter:5.9.3"
 jansi = "org.fusesource.jansi:jansi:2.4.0"
 mockito = "org.mockito:mockito-core:5.4.0"
-guava = "com.google.guava:guava:32.0.1-jre"
+guava = "com.google.guava:guava:32.1.0-jre"
 gson = "com.google.code.gson:gson:2.10.1"
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
 log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
