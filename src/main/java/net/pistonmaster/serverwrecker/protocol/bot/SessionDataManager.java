@@ -105,6 +105,7 @@ public final class SessionDataManager {
     private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<Container> containerData = new Int2ObjectOpenHashMap<>();
     private final EntityTrackerState entityTrackerState = new EntityTrackerState();
+    private final EntityMetadataState selfMetaData = new EntityMetadataState();
     private BorderState borderState;
     private BotMovementManager botMovementManager;
     private HealthData healthData;
@@ -693,12 +694,12 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onEntityData(ClientboundSetEntityDataPacket packet) {
-        if (packet.getEntityId() == loginData.entityId()) {
-            log.info("Received entity data packet for bot, notify the developers!");
-            return;
-        }
+        EntityMetadataState state = packet.getEntityId() == loginData.entityId() ?
+                selfMetaData : entityTrackerState.getEntity(packet.getEntityId()).getMetadata();
 
-        // TODO: Implement entity data
+        for (var entry : packet.getMetadata()) {
+            state.setMetadata(entry);
+        }
     }
 
     @BusHandler
@@ -710,8 +711,9 @@ public final class SessionDataManager {
             botMovementManager.setMotion(motionX, motionY, motionZ);
             log.debug("Bot forced to motion: {} {} {}", motionX, motionY, motionZ);
         } else {
-            entityTrackerState.getEntity(packet.getEntityId())
-                    .setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
+            EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+
+            state.setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
         }
     }
 
