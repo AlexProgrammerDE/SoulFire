@@ -107,6 +107,7 @@ public final class SessionDataManager {
     private final EntityTrackerState entityTrackerState = new EntityTrackerState();
     private final EntityMetadataState selfMetadata = new EntityMetadataState();
     private final EntityAttributesState selfAttributeState = new EntityAttributesState();
+    private @Nullable ServerPlayData serverPlayData;
     private BorderState borderState;
     private BotMovementManager botMovementManager;
     private HealthData healthData;
@@ -251,6 +252,15 @@ public final class SessionDataManager {
         }
 
         this.isDead = true;
+    }
+
+    @BusHandler
+    public void onServerPlayData(ClientboundServerDataPacket packet) {
+        serverPlayData = new ServerPlayData(
+                packet.getMotd(),
+                packet.getIconBytes(),
+                packet.isEnforcesSecureChat()
+        );
     }
 
     //
