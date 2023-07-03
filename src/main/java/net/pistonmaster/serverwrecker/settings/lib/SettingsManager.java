@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.settings.lib;
 
 import com.google.gson.*;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.auth.service.AccountData;
 
 import java.io.IOException;

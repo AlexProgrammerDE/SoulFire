@@ -78,6 +78,9 @@ public class MapColorUtils {
         return image;
     }
 
+    /**
+     * Keep in sync with: <a href="https://minecraft.fandom.com/wiki/Map_item_format?veaction=edit&section=8">Minecraft Fandom Page</a>
+     */
     private enum MapColor {
         NONE(0, 0, 0),
         GRASS(127, 178, 56),

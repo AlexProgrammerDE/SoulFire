@@ -21,14 +21,9 @@ package net.pistonmaster.serverwrecker.gui.popups;
 
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
-import org.intellij.lang.annotations.Language;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.HyperlinkEvent;
-import java.awt.*;
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 public class AboutPopup extends JPopupMenu {
     public AboutPopup() {

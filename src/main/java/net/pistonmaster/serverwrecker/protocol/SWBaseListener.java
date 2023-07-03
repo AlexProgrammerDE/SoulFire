@@ -89,7 +89,7 @@ public class SWBaseListener extends SessionAdapter {
 
                 boolean isLegacy = SWConstants.isLegacy(botSettings.protocolVersion());
                 boolean auth = minecraftAccount.isPremiumJava();
-                if (auth && isLegacy)  {
+                if (auth && isLegacy) {
                     auth = Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
                 }
 

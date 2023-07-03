@@ -105,7 +105,8 @@ public final class SessionDataManager {
     private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<Container> containerData = new Int2ObjectOpenHashMap<>();
     private final EntityTrackerState entityTrackerState = new EntityTrackerState();
-    private final EntityMetadataState selfMetaData = new EntityMetadataState();
+    private final EntityMetadataState selfMetadata = new EntityMetadataState();
+    private final EntityAttributesState selfAttributeState = new EntityAttributesState();
     private BorderState borderState;
     private BotMovementManager botMovementManager;
     private HealthData healthData;
@@ -244,6 +245,11 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onDeath(ClientboundPlayerCombatKillPacket packet) {
+        if (packet.getPlayerId() != loginData.entityId()) {
+            log.warn("Received death packet for another player");
+            return;
+        }
+
         this.isDead = true;
     }
 
@@ -375,11 +381,6 @@ public final class SessionDataManager {
         experienceData = new ExperienceData(packet.getExperience(), packet.getLevel(), packet.getTotalExperience());
     }
 
-    @BusHandler
-    public void onMapData(ClientboundMapItemDataPacket packet) {
-        mapDataStates.computeIfAbsent(packet.getMapId(), k -> new MapDataState()).update(packet);
-    }
-
     //
     // Inventory packets
     //
@@ -447,6 +448,11 @@ public final class SessionDataManager {
     }
 
     @BusHandler
+    public void onMapData(ClientboundMapItemDataPacket packet) {
+        mapDataStates.computeIfAbsent(packet.getMapId(), k -> new MapDataState()).update(packet);
+    }
+
+    @BusHandler
     public void onExperience(ClientboundCooldownPacket packet) {
         if (packet.getCooldownTicks() == 0) {
             itemCoolDowns.remove(packet.getItemId());
@@ -482,9 +488,13 @@ public final class SessionDataManager {
     }
 
     @BusHandler
-    public void onGameEvent(ClientboundSetChunkCacheCenterPacket packet) {
+    public void onSetCenterChunk(ClientboundSetChunkCacheCenterPacket packet) {
         centerChunk = new ChunkKey(packet.getChunkX(), packet.getChunkZ());
     }
+
+    //
+    // Chunk packets
+    //
 
     @BusHandler
     public void onChunkForget(ClientboundForgetLevelChunkPacket packet) {
@@ -522,6 +532,43 @@ public final class SessionDataManager {
             e.printStackTrace();
         }
     }
+
+    @BusHandler
+    public void onChunkData(ClientboundChunksBiomesPacket packet) {
+        LevelState level = getCurrentLevel();
+
+        if (level == null) {
+            log.warn("Received section update while not in a level");
+            return;
+        }
+
+        MinecraftCodecHelper codec = session.getCodecHelper();
+
+        for (ChunkBiomeData biomeData : packet.getChunkBiomeData()) {
+            ChunkKey key = new ChunkKey(biomeData.getX(), biomeData.getZ());
+            ChunkData chunkData = level.getChunks().get(key);
+
+            if (chunkData == null) {
+                log.warn("Received biome update for unknown chunk: {}", key);
+                return;
+            }
+
+            ByteBuf buf = Unpooled.wrappedBuffer(biomeData.getBuffer());
+            try {
+                for (int i = 0; chunkData.getSections().length > i; i++) {
+                    ChunkSection section = chunkData.getSections()[i];
+                    DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, biomesEntryBitsSize);
+                    chunkData.getSections()[i] = new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //
+    // Block packets
+    //
 
     @BusHandler
     public void onSectionBlockUpdate(ClientboundSectionBlocksUpdatePacket packet) {
@@ -566,44 +613,6 @@ public final class SessionDataManager {
         level.setBlockId(vector3i, newId);
 
         log.debug("Updating block at {} to {}", vector3i, newId);
-    }
-
-    @BusHandler
-    public void onChunkData(ClientboundChunksBiomesPacket packet) {
-        LevelState level = getCurrentLevel();
-
-        if (level == null) {
-            log.warn("Received section update while not in a level");
-            return;
-        }
-
-        MinecraftCodecHelper codec = session.getCodecHelper();
-
-        for (ChunkBiomeData biomeData : packet.getChunkBiomeData()) {
-            ChunkKey key = new ChunkKey(biomeData.getX(), biomeData.getZ());
-            ChunkData chunkData = level.getChunks().get(key);
-
-            if (chunkData == null) {
-                log.warn("Received biome update for unknown chunk: {}", key);
-                return;
-            }
-
-            ByteBuf buf = Unpooled.wrappedBuffer(biomeData.getBuffer());
-            try {
-                for (int i = 0; chunkData.getSections().length > i; i++) {
-                    ChunkSection section = chunkData.getSections()[i];
-                    DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, biomesEntryBitsSize);
-                    chunkData.getSections()[i] = new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @BusHandler
-    public void onBlockDestruction(ClientboundBlockDestructionPacket packet) {
-        // Indicates the ten states of a block-breaking animation
     }
 
     @BusHandler
@@ -693,12 +702,22 @@ public final class SessionDataManager {
     }
 
     @BusHandler
-    public void onEntityData(ClientboundSetEntityDataPacket packet) {
+    public void onEntityMetadata(ClientboundSetEntityDataPacket packet) {
         EntityMetadataState state = packet.getEntityId() == loginData.entityId() ?
-                selfMetaData : entityTrackerState.getEntity(packet.getEntityId()).getMetadata();
+                selfMetadata : entityTrackerState.getEntity(packet.getEntityId()).getMetadataState();
 
         for (var entry : packet.getMetadata()) {
             state.setMetadata(entry);
+        }
+    }
+
+    @BusHandler
+    public void onEntityAttributes(ClientboundUpdateAttributesPacket packet) {
+        EntityAttributesState state = packet.getEntityId() == loginData.entityId() ?
+                selfAttributeState : entityTrackerState.getEntity(packet.getEntityId()).getAttributesState();
+
+        for (var entry : packet.getAttributes()) {
+            state.setAttribute(entry);
         }
     }
 

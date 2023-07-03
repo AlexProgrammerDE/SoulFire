@@ -20,11 +20,13 @@
 package net.pistonmaster.serverwrecker.protocol.bot.state.entity;
 
 import lombok.Data;
+import net.pistonmaster.serverwrecker.protocol.bot.state.EntityAttributesState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.EntityMetadataState;
 
 @Data
 public class EntityLikeState {
-    private final EntityMetadataState metadata = new EntityMetadataState();
+    private final EntityMetadataState metadataState = new EntityMetadataState();
+    private final EntityAttributesState attributesState = new EntityAttributesState();
     private double x;
     private double y;
     private double z;

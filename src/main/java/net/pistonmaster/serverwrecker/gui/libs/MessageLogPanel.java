@@ -31,9 +31,9 @@ import java.awt.*;
 public class MessageLogPanel extends JPanel {
     private final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();
     private final int numLines;
+    private final NoopDocumentFilter noopDocumentFilter = new NoopDocumentFilter();
     private JTextArea textComponent;
     private Document document;
-    private final NoopDocumentFilter noopDocumentFilter = new NoopDocumentFilter();
 
     public MessageLogPanel(int numLines) {
         this.numLines = numLines;

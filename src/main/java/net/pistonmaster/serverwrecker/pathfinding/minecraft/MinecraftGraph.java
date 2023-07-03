@@ -44,7 +44,8 @@ public record MinecraftGraph(SessionDataManager sessionDataManager) implements G
 
         Map<Vector3i, Boolean> solidBlockMap = new HashMap<>();
         Map<BlockPosition, MinecraftAction> targetSet = new HashMap<>();
-        actions: for (BasicMovementEnum action : BasicMovementEnum.values()) {
+        actions:
+        for (BasicMovementEnum action : BasicMovementEnum.values()) {
             log.debug("Checking action {}", action);
             PlayerMovement playerMovement = new PlayerMovement(from, action);
 

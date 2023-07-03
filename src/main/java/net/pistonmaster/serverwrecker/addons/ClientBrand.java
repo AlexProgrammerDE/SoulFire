@@ -20,12 +20,8 @@
 package net.pistonmaster.serverwrecker.addons;
 
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundCustomPayloadPacket;
-import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
-import com.viaversion.viaversion.api.type.Type;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import net.pistonmaster.serverwrecker.ServerWrecker;
@@ -44,8 +40,6 @@ import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 public class ClientBrand implements InternalAddon {
     @Override

@@ -27,15 +27,9 @@ import net.raphimc.mcauth.MinecraftAuth;
 import net.raphimc.mcauth.step.java.StepMCProfile;
 import net.raphimc.mcauth.step.java.StepMCToken;
 import net.raphimc.mcauth.step.msa.StepCredentialsMsaCode;
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
-import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicHeader;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SWJavaMicrosoftAuthService implements MCAuthService {
     public MinecraftAccount login(String email, String password, SWProxy proxyData) throws IOException {

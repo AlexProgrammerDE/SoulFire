@@ -40,7 +40,6 @@ import java.awt.event.ActionListener;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class AccountPanel extends NavigationItem implements SettingsDuplex<AccountSettings> {
     private final JTextField nameFormat;

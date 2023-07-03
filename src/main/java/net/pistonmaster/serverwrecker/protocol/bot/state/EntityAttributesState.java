@@ -19,25 +19,18 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
+import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
+import com.viaversion.viaversion.libs.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Data;
-import net.pistonmaster.serverwrecker.protocol.bot.state.entity.EntityLikeState;
 
 import java.util.Map;
 
 @Data
-public class EntityTrackerState {
-    private final Map<Integer, EntityLikeState> entities = new Int2ObjectOpenHashMap<>();
+public class EntityAttributesState {
+    private final Map<AttributeType, Attribute> attributeStore = new Object2ObjectOpenHashMap<>();
 
-    public void addEntity(int entityId, EntityLikeState entity) {
-        entities.put(entityId, entity);
-    }
-
-    public void removeEntity(int entityId) {
-        entities.remove(entityId);
-    }
-
-    public EntityLikeState getEntity(int entityId) {
-        return entities.get(entityId);
+    public void setAttribute(Attribute attribute) {
+        this.attributeStore.put(attribute.getType(), attribute);
     }
 }
