@@ -19,10 +19,21 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.state.entity;
 
+import com.github.steveice10.mc.protocol.data.game.entity.object.ObjectData;
+import com.github.steveice10.mc.protocol.data.game.entity.type.EntityType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class EntityState extends EntityLikeState {
+    private final int entityId;
+    private final UUID uuid;
+    private final EntityType type;
+    private final ObjectData data;
+    private float yaw;
+    private float headYaw;
+    private float pitch;
 }

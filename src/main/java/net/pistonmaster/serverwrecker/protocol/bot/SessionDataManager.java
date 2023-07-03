@@ -38,8 +38,11 @@ import com.github.steveice10.mc.protocol.data.game.level.notify.RainStrengthValu
 import com.github.steveice10.mc.protocol.data.game.level.notify.RespawnScreenValue;
 import com.github.steveice10.mc.protocol.data.game.level.notify.ThunderStrengthValue;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.*;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityMotionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.*;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddPlayerPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.*;
@@ -62,17 +65,16 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.pathfinding.RouteFinder;
-import net.pistonmaster.serverwrecker.pathfinding.minecraft.BlockPosition;
-import net.pistonmaster.serverwrecker.pathfinding.minecraft.MinecraftAction;
-import net.pistonmaster.serverwrecker.pathfinding.minecraft.MinecraftGraph;
-import net.pistonmaster.serverwrecker.pathfinding.minecraft.MovementScorer;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.container.WindowContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.model.*;
 import net.pistonmaster.serverwrecker.protocol.bot.state.*;
+import net.pistonmaster.serverwrecker.protocol.bot.state.entity.EntityLikeState;
+import net.pistonmaster.serverwrecker.protocol.bot.state.entity.EntityState;
+import net.pistonmaster.serverwrecker.protocol.bot.state.entity.ExperienceOrbState;
+import net.pistonmaster.serverwrecker.protocol.bot.state.entity.PlayerState;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.util.BusHandler;
@@ -82,9 +84,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -104,6 +104,7 @@ public final class SessionDataManager {
     private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<Container> containerData = new Int2ObjectOpenHashMap<>();
+    private final EntityTrackerState entityTrackerState = new EntityTrackerState();
     private BorderState borderState;
     private BotMovementManager botMovementManager;
     private HealthData healthData;
@@ -141,50 +142,46 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onJoin(ClientboundLoginPacket packet) {
-        try {
-            loginData = new LoginPacketData(
-                    packet.getEntityId(),
-                    packet.isHardcore(),
-                    packet.getWorldNames(),
-                    packet.getRegistry(),
-                    packet.getMaxPlayers(),
-                    packet.isReducedDebugInfo()
-            );
-            CompoundTag dimensionRegistry = loginData.registry().get("minecraft:dimension_type");
-            for (Tag type : dimensionRegistry.<ListTag>get("value").getValue()) {
-                CompoundTag dimension = (CompoundTag) type;
-                String name = dimension.<StringTag>get("name").getValue();
-                int id = dimension.<IntTag>get("id").getValue();
+        loginData = new LoginPacketData(
+                packet.getEntityId(),
+                packet.isHardcore(),
+                packet.getWorldNames(),
+                packet.getRegistry(),
+                packet.getMaxPlayers(),
+                packet.isReducedDebugInfo()
+        );
+        CompoundTag dimensionRegistry = loginData.registry().get("minecraft:dimension_type");
+        for (Tag type : dimensionRegistry.<ListTag>get("value").getValue()) {
+            CompoundTag dimension = (CompoundTag) type;
+            String name = dimension.<StringTag>get("name").getValue();
+            int id = dimension.<IntTag>get("id").getValue();
 
-                levels.put(name, new LevelState(this, name, id, dimension.get("element")));
-            }
-            CompoundTag biomeRegistry = loginData.registry().get("minecraft:worldgen/biome");
-            for (Tag type : biomeRegistry.<ListTag>get("value").getValue()) {
-                CompoundTag biome = (CompoundTag) type;
-                BiomeData biomeData = new BiomeData(biome);
-
-                biomes.put(biomeData.id(), biomeData);
-            }
-            biomesEntryBitsSize = ChunkData.log2RoundUp(biomes.size());
-
-            doImmediateRespawn = !packet.isEnableRespawnScreen();
-            currentDimension = new DimensionData(
-                    packet.getDimension(),
-                    packet.getWorldName(),
-                    packet.getHashedSeed(),
-                    packet.isDebug(),
-                    packet.isFlat()
-            );
-            gameMode = packet.getGameMode();
-            previousGameMode = packet.getPreviousGamemode();
-            serverViewDistance = packet.getViewDistance();
-            serverSimulationDistance = packet.getSimulationDistance();
-            lastDeathPos = packet.getLastDeathPos();
-
-            containerData.put(0, new PlayerInventoryContainer());
-        } catch (Exception e) {
-            log.error("Error while logging join", e);
+            levels.put(name, new LevelState(this, name, id, dimension.get("element")));
         }
+        CompoundTag biomeRegistry = loginData.registry().get("minecraft:worldgen/biome");
+        for (Tag type : biomeRegistry.<ListTag>get("value").getValue()) {
+            CompoundTag biome = (CompoundTag) type;
+            BiomeData biomeData = new BiomeData(biome);
+
+            biomes.put(biomeData.id(), biomeData);
+        }
+        biomesEntryBitsSize = ChunkData.log2RoundUp(biomes.size());
+
+        doImmediateRespawn = !packet.isEnableRespawnScreen();
+        currentDimension = new DimensionData(
+                packet.getDimension(),
+                packet.getWorldName(),
+                packet.getHashedSeed(),
+                packet.isDebug(),
+                packet.isFlat()
+        );
+        gameMode = packet.getGameMode();
+        previousGameMode = packet.getPreviousGamemode();
+        serverViewDistance = packet.getViewDistance();
+        serverSimulationDistance = packet.getSimulationDistance();
+        lastDeathPos = packet.getLastDeathPos();
+
+        containerData.put(0, new PlayerInventoryContainer());
     }
 
     @BusHandler
@@ -229,15 +226,29 @@ public final class SessionDataManager {
     }
 
     @BusHandler
-    public void onHealth(ClientboundSetHealthPacket packet) {
-        this.healthData = new HealthData(packet.getHealth(), packet.getFood(), packet.getSaturation());
+    public void onRespawn(ClientboundRespawnPacket packet) {
+        currentDimension = new DimensionData(
+                packet.getDimension(),
+                packet.getWorldName(),
+                packet.getHashedSeed(),
+                packet.isDebug(),
+                packet.isFlat()
+        );
+        gameMode = packet.getGamemode();
+        previousGameMode = packet.getPreviousGamemode();
+        lastDeathPos = packet.getLastDeathPos();
 
-        if (healthData.health() < 1) {
-            this.isDead = true;
-        }
-
-        log.debug("Health updated: {}", healthData);
+        log.info("Respawned");
     }
+
+    @BusHandler
+    public void onDeath(ClientboundPlayerCombatKillPacket packet) {
+        this.isDead = true;
+    }
+
+    //
+    // Chat packets
+    //
 
     @BusHandler
     public void onPlayerChat(ClientboundPlayerChatPacket packet) {
@@ -271,9 +282,17 @@ public final class SessionDataManager {
         onChat(packet.getContent());
     }
 
+    @BusHandler
+    public void onDisguisedChat(ClientboundDisguisedChatPacket packet) {
+    }
+
     private void onChat(Component message) {
         ServerWreckerAPI.postEvent(new ChatMessageReceiveEvent(connection, message));
     }
+
+    //
+    // Player list packets
+    //
 
     @BusHandler
     public void onPlayerListHeaderFooter(ClientboundTabListPacket packet) {
@@ -310,30 +329,9 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
-    public void onRespawn(ClientboundRespawnPacket packet) {
-        try {
-            currentDimension = new DimensionData(
-                    packet.getDimension(),
-                    packet.getWorldName(),
-                    packet.getHashedSeed(),
-                    packet.isDebug(),
-                    packet.isFlat()
-            );
-            gameMode = packet.getGamemode();
-            previousGameMode = packet.getPreviousGamemode();
-            lastDeathPos = packet.getLastDeathPos();
-
-            log.info("Respawned");
-        } catch (Exception e) {
-            log.error("Error while logging join", e);
-        }
-    }
-
-    @BusHandler
-    public void onDeath(ClientboundPlayerCombatKillPacket packet) {
-        this.isDead = true;
-    }
+    //
+    // Player data packets
+    //
 
     @BusHandler
     public void onSetSimulationDistance(ClientboundSetSimulationDistancePacket packet) {
@@ -361,6 +359,17 @@ public final class SessionDataManager {
     }
 
     @BusHandler
+    public void onHealth(ClientboundSetHealthPacket packet) {
+        this.healthData = new HealthData(packet.getHealth(), packet.getFood(), packet.getSaturation());
+
+        if (healthData.health() < 1) {
+            this.isDead = true;
+        }
+
+        log.debug("Health updated: {}", healthData);
+    }
+
+    @BusHandler
     public void onExperience(ClientboundSetExperiencePacket packet) {
         experienceData = new ExperienceData(packet.getExperience(), packet.getLevel(), packet.getTotalExperience());
     }
@@ -369,6 +378,10 @@ public final class SessionDataManager {
     public void onMapData(ClientboundMapItemDataPacket packet) {
         mapDataStates.computeIfAbsent(packet.getMapId(), k -> new MapDataState()).update(packet);
     }
+
+    //
+    // Inventory packets
+    //
 
     @BusHandler
     public void onSetContainerContent(ClientboundContainerSetContentPacket packet) {
@@ -555,6 +568,39 @@ public final class SessionDataManager {
     }
 
     @BusHandler
+    public void onChunkData(ClientboundChunksBiomesPacket packet) {
+        LevelState level = getCurrentLevel();
+
+        if (level == null) {
+            log.warn("Received section update while not in a level");
+            return;
+        }
+
+        MinecraftCodecHelper codec = session.getCodecHelper();
+
+        for (ChunkBiomeData biomeData : packet.getChunkBiomeData()) {
+            ChunkKey key = new ChunkKey(biomeData.getX(), biomeData.getZ());
+            ChunkData chunkData = level.getChunks().get(key);
+
+            if (chunkData == null) {
+                log.warn("Received biome update for unknown chunk: {}", key);
+                return;
+            }
+
+            ByteBuf buf = Unpooled.wrappedBuffer(biomeData.getBuffer());
+            try {
+                for (int i = 0; chunkData.getSections().length > i; i++) {
+                    ChunkSection section = chunkData.getSections()[i];
+                    DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, biomesEntryBitsSize);
+                    chunkData.getSections()[i] = new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @BusHandler
     public void onBlockDestruction(ClientboundBlockDestructionPacket packet) {
         // Indicates the ten states of a block-breaking animation
     }
@@ -563,6 +609,10 @@ public final class SessionDataManager {
     public void onBlockChangedAck(ClientboundBlockChangedAckPacket packet) {
         // TODO: Implement block break
     }
+
+    //
+    // World border packets
+    //
 
     @BusHandler
     public void onBorderInit(ClientboundInitializeBorderPacket packet) {
@@ -599,54 +649,136 @@ public final class SessionDataManager {
         borderState.setWarningBlocks(packet.getWarningBlocks());
     }
 
+    //
+    // Entity packets
+    //
+
     @BusHandler
-    public void onChunkData(ClientboundChunksBiomesPacket packet) {
-        LevelState level = getCurrentLevel();
+    public void onEntitySpawn(ClientboundAddEntityPacket packet) {
+        EntityState entityState = new EntityState(packet.getEntityId(), packet.getUuid(), packet.getType(), packet.getData());
 
-        if (level == null) {
-            log.warn("Received section update while not in a level");
-            return;
-        }
+        entityState.setPosition(packet.getX(), packet.getY(), packet.getZ());
+        entityState.setRotation(packet.getYaw(), packet.getPitch());
+        entityState.setHeadRotation(packet.getHeadYaw());
+        entityState.setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
 
-        MinecraftCodecHelper codec = session.getCodecHelper();
+        entityTrackerState.addEntity(packet.getEntityId(), entityState);
+    }
 
-        for (ChunkBiomeData biomeData : packet.getChunkBiomeData()) {
-            ChunkKey key = new ChunkKey(biomeData.getX(), biomeData.getZ());
-            ChunkData chunkData = level.getChunks().get(key);
+    @BusHandler
+    public void onPlayerSpawn(ClientboundAddPlayerPacket packet) {
+        PlayerState playerState = new PlayerState(packet.getEntityId(), packet.getUuid());
 
-            if (chunkData == null) {
-                log.warn("Received biome update for unknown chunk: {}", key);
-                return;
-            }
+        playerState.setPosition(packet.getX(), packet.getY(), packet.getZ());
+        playerState.setRotation(packet.getYaw(), packet.getPitch());
 
-            ByteBuf buf = Unpooled.wrappedBuffer(biomeData.getBuffer());
-            try {
-                for (int i = 0; chunkData.getSections().length > i; i++) {
-                    ChunkSection section = chunkData.getSections()[i];
-                    DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, biomesEntryBitsSize);
-                    chunkData.getSections()[i] = new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        entityTrackerState.addEntity(packet.getEntityId(), playerState);
+    }
+
+    @BusHandler
+    public void onExperienceOrbSpawn(ClientboundAddExperienceOrbPacket packet) {
+        ExperienceOrbState experienceOrbState = new ExperienceOrbState(packet.getEntityId(), packet.getExp());
+
+        experienceOrbState.setPosition(packet.getX(), packet.getY(), packet.getZ());
+
+        entityTrackerState.addEntity(packet.getEntityId(), experienceOrbState);
+    }
+
+    @BusHandler
+    public void onEntityRemove(ClientboundRemoveEntitiesPacket packet) {
+        for (int entityId : packet.getEntityIds()) {
+            entityTrackerState.removeEntity(entityId);
         }
     }
 
     @BusHandler
-    public void onEntityMotion(ClientboundSetEntityMotionPacket packet) {
-        try {
-            if (loginData.entityId() == packet.getEntityId()) {
-                double motionX = packet.getMotionX();
-                double motionY = packet.getMotionY();
-                double motionZ = packet.getMotionZ();
-                botMovementManager.setMotion(motionX, motionY, motionZ);
-                log.debug("Bot forced to motion: {} {} {}", motionX, motionY, motionZ);
-            } else {
-                //log.debug("Entity {} moved with motion: {} {} {}", entityId, motionX, motionY, motionZ);
-            }
-        } catch (Exception e) {
-            log.error("Error while logging entity motion", e);
+    public void onEntityData(ClientboundSetEntityDataPacket packet) {
+        if (packet.getEntityId() == loginData.entityId()) {
+            log.info("Received entity data packet for bot, notify the developers!");
+            return;
         }
+
+        // TODO: Implement entity data
+    }
+
+    @BusHandler
+    public void onEntityMotion(ClientboundSetEntityMotionPacket packet) {
+        if (loginData.entityId() == packet.getEntityId()) {
+            double motionX = packet.getMotionX();
+            double motionY = packet.getMotionY();
+            double motionZ = packet.getMotionZ();
+            botMovementManager.setMotion(motionX, motionY, motionZ);
+            log.debug("Bot forced to motion: {} {} {}", motionX, motionY, motionZ);
+        } else {
+            entityTrackerState.getEntity(packet.getEntityId())
+                    .setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
+        }
+    }
+
+    @BusHandler
+    public void onEntityPos(ClientboundMoveEntityPosPacket packet) {
+        if (packet.getEntityId() == loginData.entityId()) {
+            log.info("Received entity position packet for bot, notify the developers!");
+            return;
+        }
+
+        EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+
+        state.addPosition(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
+        state.setOnGround(packet.isOnGround());
+    }
+
+    @BusHandler
+    public void onEntityRot(ClientboundMoveEntityRotPacket packet) {
+        if (packet.getEntityId() == loginData.entityId()) {
+            log.info("Received entity rotation packet for bot, notify the developers!");
+            return;
+        }
+
+        EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+
+        state.setRotation(packet.getYaw(), packet.getPitch());
+        state.setOnGround(packet.isOnGround());
+    }
+
+    @BusHandler
+    public void onEntityRot(ClientboundRotateHeadPacket packet) {
+        if (packet.getEntityId() == loginData.entityId()) {
+            log.info("Received entity rotation packet for bot, notify the developers!");
+            return;
+        }
+
+        EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+
+        state.setHeadRotation(packet.getHeadYaw());
+    }
+
+    @BusHandler
+    public void onEntityPosRot(ClientboundMoveEntityPosRotPacket packet) {
+        if (packet.getEntityId() == loginData.entityId()) {
+            log.info("Received entity position rotation packet for bot, notify the developers!");
+            return;
+        }
+
+        EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+
+        state.addPosition(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
+        state.setRotation(packet.getYaw(), packet.getPitch());
+        state.setOnGround(packet.isOnGround());
+    }
+
+    @BusHandler
+    public void onEntityTeleport(ClientboundTeleportEntityPacket packet) {
+        if (packet.getEntityId() == loginData.entityId()) {
+            log.info("Received entity teleport packet for bot, notify the developers!");
+            return;
+        }
+
+        EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+
+        state.setPosition(packet.getX(), packet.getY(), packet.getZ());
+        state.setRotation(packet.getYaw(), packet.getPitch());
+        state.setOnGround(packet.isOnGround());
     }
 
     @BusHandler
@@ -657,42 +789,30 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onLoginDisconnectPacket(ClientboundLoginDisconnectPacket packet) {
-        try {
-            log.error("Login failed: {}", toPlainText(packet.getReason()));
-        } catch (Exception e) {
-            log.error("Error while logging login failed", e);
-        }
+        log.error("Login failed: {}", toPlainText(packet.getReason()));
     }
 
     @BusHandler
     public void onDisconnectPacket(ClientboundDisconnectPacket packet) {
-        try {
-            log.error("Disconnected: {}", toPlainText(packet.getReason()));
-        } catch (Exception e) {
-            log.error("Error while logging disconnect", e);
-        }
+        log.error("Disconnected: {}", toPlainText(packet.getReason()));
     }
 
     public void onDisconnectEvent(DisconnectedEvent event) {
         String reason = toPlainText(event.getReason());
         Throwable cause = event.getCause();
-        try {
-            if (cause == null) { // Packet wise disconnects have no cause
-                return;
-            }
-
-            if (cause.getClass() == UnexpectedEncryptionException.class) {
-                log.error("Server is online mode!");
-            } else if (reason.contains("Connection refused")) {
-                log.error("Server is not reachable!");
-            } else {
-                log.error("Disconnected: {}", reason);
-            }
-
-            cause.printStackTrace();
-        } catch (Exception e) {
-            log.error("Error while logging disconnect", e);
+        if (cause == null) { // Packet wise disconnects have no cause
+            return;
         }
+
+        if (cause.getClass() == UnexpectedEncryptionException.class) {
+            log.error("Server is online mode!");
+        } else if (reason.contains("Connection refused")) {
+            log.error("Server is not reachable!");
+        } else {
+            log.error("Disconnected: {}", reason);
+        }
+
+        cause.printStackTrace();
     }
 
     private String toPlainText(Component component) {

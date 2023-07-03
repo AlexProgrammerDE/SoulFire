@@ -26,4 +26,41 @@ public class EntityLikeState {
     private double x;
     private double y;
     private double z;
+    private float yaw;
+    private float headYaw;
+    private float pitch;
+    private double motionX;
+    private double motionY;
+    private double motionZ;
+    private boolean onGround;
+
+    public void setPosition(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public void addPosition(double deltaX, double deltaY, double deltaZ) {
+        this.x += deltaX;
+        this.y += deltaY;
+        this.z += deltaZ;
+    }
+
+    public void setRotation(float yaw, float pitch) {
+        this.yaw = yaw;
+        this.pitch = pitch;
+    }
+
+    public void setHeadRotation(float headYaw) {
+        this.headYaw = headYaw;
+    }
+
+    public void setMotion(double motionX, double motionY, double motionZ) {
+        this.motionX = motionX;
+        this.motionY = motionY;
+        this.motionZ = motionZ;
+    }
+
+    public void tick() {
+    }
 }

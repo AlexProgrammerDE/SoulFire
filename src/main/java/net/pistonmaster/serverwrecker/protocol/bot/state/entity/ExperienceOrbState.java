@@ -19,5 +19,12 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.state.entity;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class ExperienceOrbState extends EntityLikeState {
+    private final int entityId;
+    private final int expValue;
 }

@@ -48,7 +48,11 @@ public class SWSessionListener extends SessionAdapter {
 
         botConnection.logger().trace("Received packet: " + packet.toString());
 
-        BusHelper.handlePacket(event1.getPacket(), bus);
+        try {
+            BusHelper.handlePacket(event1.getPacket(), bus);
+        } catch (Throwable t) {
+            botConnection.logger().error("Error while handling packet!", t);
+        }
     }
 
     @Override

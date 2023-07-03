@@ -195,6 +195,7 @@ public class LevelState {
                 }
             }
         }
+
         return boundingBoxList;
     }
 
