@@ -65,6 +65,7 @@ public final class BotMovementManager {
     private boolean flying;
     private int jumpTicks;
     private Vector3d movementTarget;
+    private int ticksWithoutPacket = 0;
 
     public BotMovementManager(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
         this.dataManager = dataManager;
@@ -109,6 +110,7 @@ public final class BotMovementManager {
         if (this.pitch < -90.0F) {
             this.pitch = -90.0F;
         }
+
         if (this.pitch > 90.0F) {
             this.pitch = 90.0F;
         }
@@ -134,9 +136,11 @@ public final class BotMovementManager {
         if (f > maxIncrease) {
             f = maxIncrease;
         }
+
         if (f < -maxIncrease) {
             f = -maxIncrease;
         }
+
         return angle + f;
     }
 
@@ -218,13 +222,21 @@ public final class BotMovementManager {
 
         // Send position packets if changed
         if (positionChanged && rotationChanged) {
+            ticksWithoutPacket = 0;
             sendPosRot();
         } else if (positionChanged) {
+            ticksWithoutPacket = 0;
             sendPos();
         } else if (rotationChanged) {
+            ticksWithoutPacket = 0;
             sendRot();
         } else if (onGroundChanged) {
+            ticksWithoutPacket = 0;
             sendOnGround();
+        } else if (++ticksWithoutPacket > 20) {
+            // Vanilla sends a position packet every 20 ticks if nothing changed
+            ticksWithoutPacket = 0;
+            sendPos();
         }
     }
 

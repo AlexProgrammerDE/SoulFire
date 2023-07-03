@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import com.github.steveice10.opennbt.tag.builtin.*;
 import lombok.Getter;
+import lombok.Setter;
 import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.data.BoundingBoxType;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
@@ -63,6 +64,10 @@ public class LevelState {
     private final int monsterSpawnBlockLightLimit;
     private final byte hasRaids;
     private final byte respawnAnchorWorks;
+    @Setter
+    private long worldAge;
+    @Setter
+    private long time;
 
     public LevelState(SessionDataManager sessionDataManager, String dimensionName, int dimensionId, CompoundTag levelRegistry) {
         this.sessionDataManager = sessionDataManager;

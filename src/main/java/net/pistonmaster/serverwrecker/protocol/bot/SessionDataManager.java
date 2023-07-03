@@ -189,11 +189,12 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onPosition(ClientboundPlayerPositionPacket packet) {
-        double currentX = botMovementManager != null ? botMovementManager.getX() : 0;
-        double currentY = botMovementManager != null ? botMovementManager.getY() : 0;
-        double currentZ = botMovementManager != null ? botMovementManager.getZ() : 0;
-        float currentYaw = botMovementManager != null ? botMovementManager.getYaw() : 0;
-        float currentPitch = botMovementManager != null ? botMovementManager.getPitch() : 0;
+        boolean isInitial = botMovementManager == null;
+        double currentX = isInitial ? 0 : botMovementManager.getX();
+        double currentY = isInitial ? 0 : botMovementManager.getY();
+        double currentZ = isInitial ? 0 : botMovementManager.getZ();
+        float currentYaw = isInitial ? 0 : botMovementManager.getYaw();
+        float currentPitch = isInitial ? 0 : botMovementManager.getPitch();
 
         boolean xRelative = packet.getRelative().contains(PositionElement.X);
         boolean yRelative = packet.getRelative().contains(PositionElement.Y);
@@ -207,7 +208,7 @@ public final class SessionDataManager {
         float yaw = yawRelative ? currentYaw + packet.getYaw() : packet.getYaw();
         float pitch = pitchRelative ? currentPitch + packet.getPitch() : packet.getPitch();
 
-        if (botMovementManager == null) {
+        if (isInitial) {
             botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch);
             log.info("Joined server at position: X {} Y {} Z {}", Math.round(x), Math.round(y), Math.round(z));
         } else {
@@ -216,6 +217,9 @@ public final class SessionDataManager {
         }
 
         session.send(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
+        if (isInitial) {
+            botMovementManager.sendOnGround();
+        }
 
         log.debug("Position updated: {}", botMovementManager);
     }
@@ -507,18 +511,6 @@ public final class SessionDataManager {
     //
 
     @BusHandler
-    public void onChunkForget(ClientboundForgetLevelChunkPacket packet) {
-        LevelState level = getCurrentLevel();
-
-        if (level == null) {
-            log.warn("Received section update while not in a level");
-            return;
-        }
-
-        level.getChunks().remove(new ChunkKey(packet.getX(), packet.getZ()));
-    }
-
-    @BusHandler
     public void onChunkData(ClientboundLevelChunkWithLightPacket packet) {
         MinecraftCodecHelper helper = session.getCodecHelper();
         LevelState level = getCurrentLevel();
@@ -576,6 +568,18 @@ public final class SessionDataManager {
         }
     }
 
+    @BusHandler
+    public void onChunkForget(ClientboundForgetLevelChunkPacket packet) {
+        LevelState level = getCurrentLevel();
+
+        if (level == null) {
+            log.warn("Received section update while not in a level");
+            return;
+        }
+
+        level.getChunks().remove(new ChunkKey(packet.getX(), packet.getZ()));
+    }
+
     //
     // Block packets
     //
@@ -628,6 +632,19 @@ public final class SessionDataManager {
     @BusHandler
     public void onBlockChangedAck(ClientboundBlockChangedAckPacket packet) {
         // TODO: Implement block break
+    }
+
+    @BusHandler
+    public void onLevelTime(ClientboundSetTimePacket packet) {
+        LevelState level = getCurrentLevel();
+
+        if (level == null) {
+            log.warn("Received time update while not in a level");
+            return;
+        }
+
+        level.setWorldAge(packet.getWorldAge());
+        level.setTime(packet.getTime());
     }
 
     //
@@ -729,6 +746,18 @@ public final class SessionDataManager {
         for (var entry : packet.getAttributes()) {
             state.setAttribute(entry);
         }
+    }
+
+    @BusHandler
+    public void onEntityEvent(ClientboundEntityEventPacket packet) {
+        if (packet.getEntityId() == loginData.entityId()) {
+            log.info("Received entity event packet for bot, notify the developers!");
+            return;
+        }
+
+        EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+
+        state.handleEntityEvent(packet.getEvent());
     }
 
     @BusHandler

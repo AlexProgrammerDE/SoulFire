@@ -320,7 +320,7 @@ public class ClientSettings implements InternalAddon {
             boolean allowsListing
     ) implements SettingsObject {
         public static final boolean DEFAULT_SEND_CLIENT_SETTINGS = true;
-        public static final String DEFAULT_CLIENT_LOCALE = "en_US";
+        public static final String DEFAULT_CLIENT_LOCALE = "en_gb";
         public static final int DEFAULT_RENDER_DISTANCE = 8;
         public static final ChatVisibility DEFAULT_CHAT_VISIBILITY = ChatVisibility.FULL;
         public static final boolean DEFAULT_USE_CHAT_COLORS = true;

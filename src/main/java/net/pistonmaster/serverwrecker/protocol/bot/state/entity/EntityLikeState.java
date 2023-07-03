@@ -19,12 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.state.entity;
 
+import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import lombok.Data;
 import net.pistonmaster.serverwrecker.protocol.bot.state.EntityAttributesState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.EntityMetadataState;
 
 @Data
-public class EntityLikeState {
+public abstract class EntityLikeState {
     private final EntityMetadataState metadataState = new EntityMetadataState();
     private final EntityAttributesState attributesState = new EntityAttributesState();
     private double x;
@@ -66,5 +67,8 @@ public class EntityLikeState {
     }
 
     public void tick() {
+    }
+
+    public void handleEntityEvent(EntityEvent event) {
     }
 }
