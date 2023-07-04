@@ -375,7 +375,7 @@ public final class SessionDataManager {
 
         if (botMovementManager != null) {
             botMovementManager.setFlying(abilitiesData.flying());
-            botMovementManager.setFlySpeed(abilitiesData.flySpeed());
+            botMovementManager.setAbilitiesFlySpeed(abilitiesData.flySpeed());
             botMovementManager.setWalkSpeed(abilitiesData.walkSpeed());
         }
     }

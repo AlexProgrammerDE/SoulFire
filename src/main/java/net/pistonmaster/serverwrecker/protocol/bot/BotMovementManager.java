@@ -67,7 +67,7 @@ public final class BotMovementManager {
     @Setter
     private boolean flying;
     @Setter
-    private float flySpeed = 0.05F;
+    private float abilitiesFlySpeed = 0.05F;
     @Setter
     private float walkSpeed = 0.10000000149011612F;
     private int jumpTicks;
@@ -80,7 +80,7 @@ public final class BotMovementManager {
         this.pitch = pitch;
         if (data != null) {
             this.flying = data.flying();
-            this.flySpeed = data.flySpeed();
+            this.abilitiesFlySpeed = data.flySpeed();
             this.walkSpeed = data.walkSpeed();
         }
 
@@ -289,20 +289,21 @@ public final class BotMovementManager {
     }
 
     private void travelFlying(float forward, float vertical, float strafe) {
+        float flySpeed = getFlySpeed();
         // Fly move up and down
         if (this.sneaking) {
             this.moveStrafing = strafe / 0.3F;
             this.moveForward = forward / 0.3F;
-            this.motionY -= this.flySpeed * 3.0F;
+            this.motionY -= flySpeed * 3.0F;
         }
 
         if (this.jumping) {
-            this.motionY += this.flySpeed * 3.0F;
+            this.motionY += flySpeed * 3.0F;
         }
 
         double prevMotionY = this.motionY;
         float prevJumpMovementFactor = this.jumpMovementFactor;
-        this.jumpMovementFactor = this.flySpeed * (this.sprinting ? 2 : 1);
+        this.jumpMovementFactor = flySpeed * (this.sprinting ? 2 : 1);
 
         this.travel(forward, vertical, strafe);
 
@@ -388,26 +389,28 @@ public final class BotMovementManager {
     public void moveRelative(double forward, double up, double strafe, double friction) {
         double distance = strafe * strafe + up * up + forward * forward;
 
-        if (distance >= 1.0E-4F) {
-            distance = Math.sqrt(distance);
-
-            if (distance < 1.0F) {
-                distance = 1.0F;
-            }
-
-            distance = friction / distance;
-            strafe = strafe * distance;
-            up = up * distance;
-            forward = forward * distance;
-
-            double yawRadians = Math.toRadians(this.yaw);
-            double sin = Math.sin(yawRadians);
-            double cos = Math.cos(yawRadians);
-
-            this.motionX += strafe * cos - forward * sin;
-            this.motionY += up;
-            this.motionZ += forward * cos + strafe * sin;
+        if (distance < 1.0E-4F) {
+            return;
         }
+
+        distance = Math.sqrt(distance);
+
+        if (distance < 1.0F) {
+            distance = 1.0F;
+        }
+
+        distance = friction / distance;
+        strafe = strafe * distance;
+        up = up * distance;
+        forward = forward * distance;
+
+        double yawRadians = Math.toRadians(this.yaw);
+        double sin = Math.sin(yawRadians);
+        double cos = Math.cos(yawRadians);
+
+        this.motionX += strafe * cos - forward * sin;
+        this.motionY += up;
+        this.motionZ += forward * cos + strafe * sin;
     }
 
     public boolean moveCollide(double targetX, double targetY, double targetZ) {
@@ -530,6 +533,10 @@ public final class BotMovementManager {
 
     public Vector3d getPlayerPos() {
         return Vector3d.from(this.x, this.y, this.z);
+    }
+
+    public float getFlySpeed() {
+        return isSprinting() ? this.abilitiesFlySpeed * 2.0F : this.abilitiesFlySpeed;
     }
 
     private LevelState getLevelSafe() {
