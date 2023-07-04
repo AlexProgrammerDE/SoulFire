@@ -32,7 +32,7 @@ public class ChunkData {
 
     public ChunkData(LevelState level) {
         this.level = level;
-        sections = new ChunkSection[level.getSectionsCount()];
+        this.sections = new ChunkSection[level.getSectionsCount()];
     }
 
     public static int log2RoundUp(int num) {

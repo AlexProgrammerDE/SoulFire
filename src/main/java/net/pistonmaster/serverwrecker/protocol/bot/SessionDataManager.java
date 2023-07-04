@@ -209,7 +209,7 @@ public final class SessionDataManager {
         float pitch = pitchRelative ? currentPitch + packet.getPitch() : packet.getPitch();
 
         if (isInitial) {
-            botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch);
+            botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch, abilitiesData);
             log.info("Joined server at position: X {} Y {} Z {}", Math.round(x), Math.round(y), Math.round(z));
         } else {
             botMovementManager.setPosition(x, y, z);
@@ -372,6 +372,12 @@ public final class SessionDataManager {
     @BusHandler
     public void onAbilities(ClientboundPlayerAbilitiesPacket packet) {
         abilitiesData = new AbilitiesData(packet.isInvincible(), packet.isFlying(), packet.isCanFly(), packet.isCreative(), packet.getFlySpeed(), packet.getWalkSpeed());
+
+        if (botMovementManager != null) {
+            botMovementManager.setFlying(abilitiesData.flying());
+            botMovementManager.setFlySpeed(abilitiesData.flySpeed());
+            botMovementManager.setWalkSpeed(abilitiesData.walkSpeed());
+        }
     }
 
     @BusHandler

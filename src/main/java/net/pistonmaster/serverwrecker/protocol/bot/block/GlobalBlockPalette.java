@@ -38,13 +38,13 @@ public class GlobalBlockPalette {
     public GlobalBlockPalette(int maxStates) {
         this.maxStates = maxStates;
         this.blockBitsPerEntry = ChunkData.log2RoundUp(maxStates);
-        stateIdToBlockName = new String[maxStates];
-        blockNameToStateId = new Object2ObjectArrayMap<>(maxStates);
+        this.stateIdToBlockName = new String[maxStates];
+        this.blockNameToStateId = new Object2ObjectArrayMap<>(maxStates);
     }
 
     public void add(int id, String name) {
-        stateIdToBlockName[id] = name;
-        blockNameToStateId.put(name, id);
+        this.stateIdToBlockName[id] = name;
+        this.blockNameToStateId.put(name, id);
     }
 
     public String getBlockNameForStateId(int id) {

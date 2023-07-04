@@ -332,7 +332,7 @@ public class ClientSettings implements InternalAddon {
         public static final boolean DEFAULT_RIGHT_PANTS_LEG_ENABLED = true;
         public static final boolean DEFAULT_HAT_ENABLED = true;
         public static final HandPreference DEFAULT_HAND_PREFERENCE = HandPreference.RIGHT_HAND;
-        public static final boolean DEFAULT_TEXT_FILTERING_ENABLED = false;
+        public static final boolean DEFAULT_TEXT_FILTERING_ENABLED = true;
         public static final boolean DEFAULT_ALLOWS_LISTING = true;
     }
 }

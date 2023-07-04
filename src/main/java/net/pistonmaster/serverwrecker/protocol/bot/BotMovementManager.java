@@ -25,13 +25,16 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
 import lombok.Data;
+import lombok.Setter;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.protocol.bot.model.AbilitiesData;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 import net.pistonmaster.serverwrecker.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -40,7 +43,6 @@ import java.util.List;
  */
 @Data
 public final class BotMovementManager {
-    private static final float FLY_SPEED = 0.05F;
     private static final float STEP_HEIGHT = 0.5F;
     @ToString.Exclude
     private final SessionDataManager dataManager;
@@ -62,15 +64,25 @@ public final class BotMovementManager {
     private boolean jumping;
     private boolean sprinting;
     private boolean sneaking;
+    @Setter
     private boolean flying;
+    @Setter
+    private float flySpeed = 0.05F;
+    @Setter
+    private float walkSpeed = 0.10000000149011612F;
     private int jumpTicks;
     private Vector3d movementTarget;
     private int ticksWithoutPacket = 0;
 
-    public BotMovementManager(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
+    public BotMovementManager(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch, @Nullable AbilitiesData data) {
         this.dataManager = dataManager;
         this.yaw = yaw;
         this.pitch = pitch;
+        if (data != null) {
+            this.flying = data.flying();
+            this.flySpeed = data.flySpeed();
+            this.walkSpeed = data.walkSpeed();
+        }
 
         setPosition(x, y, z);
     }
@@ -281,16 +293,16 @@ public final class BotMovementManager {
         if (this.sneaking) {
             this.moveStrafing = strafe / 0.3F;
             this.moveForward = forward / 0.3F;
-            this.motionY -= FLY_SPEED * 3.0F;
+            this.motionY -= this.flySpeed * 3.0F;
         }
 
         if (this.jumping) {
-            this.motionY += FLY_SPEED * 3.0F;
+            this.motionY += this.flySpeed * 3.0F;
         }
 
         double prevMotionY = this.motionY;
         float prevJumpMovementFactor = this.jumpMovementFactor;
-        this.jumpMovementFactor = FLY_SPEED * (this.sprinting ? 2 : 1);
+        this.jumpMovementFactor = this.flySpeed * (this.sprinting ? 2 : 1);
 
         this.travel(forward, vertical, strafe);
 
@@ -370,7 +382,7 @@ public final class BotMovementManager {
     }
 
     private float getAIMoveSpeed() {
-        return this.sprinting ? 0.13000001F : 0.10000000149011612F;
+        return this.sprinting ? 0.13000001F : walkSpeed;
     }
 
     public void moveRelative(double forward, double up, double strafe, double friction) {
