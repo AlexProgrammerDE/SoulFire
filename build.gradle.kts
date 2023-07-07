@@ -6,7 +6,7 @@ plugins {
     id("edu.sc.seis.launch4j") version "3.0.3"
 }
 
-version = "1.1.0"
+version = "1.2.0-SNAPSHOT"
 
 repositories {
     maven("https://repo.opencollab.dev/maven-releases") {
