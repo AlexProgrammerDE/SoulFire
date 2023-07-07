@@ -209,4 +209,7 @@ launch4j {
     copyright.set("© 2023 AlexProgrammerDE")
     copyConfigurable.set(emptyArray<Any>())
     jarFiles.set(project.tasks.shadowJar.get().outputs.files)
+    requires64Bit.set(true)
+    supportUrl.set("https://github.com/AlexProgrammerDE/ServerWrecker/issues")
+    downloadUrl.set("https://www.oracle.com/java/technologies/downloads/#java17")
 }
