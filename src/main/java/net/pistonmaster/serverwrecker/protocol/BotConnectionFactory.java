@@ -28,6 +28,7 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.protocol.bot.BotControlAPI;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
@@ -55,7 +56,8 @@ public record BotConnectionFactory(ServerWrecker serverWrecker, InetSocketAddres
         session.setPostDisconnectHook(() -> botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup));
 
         SessionDataManager sessionDataManager = new SessionDataManager(botConnection);
-        session.setFlag(SWProtocolConstants.SESSION_DATA_MANAGER, sessionDataManager);
+        session.getMeta().setSessionDataManager(sessionDataManager);
+        session.getMeta().setBotControlAPI(new BotControlAPI(sessionDataManager, sessionDataManager.getBotMovementManager()));
 
         DevSettings devSettings = settingsHolder.get(DevSettings.class);
         session.setFlag(BuiltinFlags.PRINT_DEBUG, devSettings.debug());

@@ -58,15 +58,18 @@ public class AutoRegister implements InternalAddon {
 
         // TODO: Add more password options
         if (plainMessage.contains("/register")) {
-            event.connection().sendMessage(autoRegisterSettings.registerCommand().replace("%password%", password));
+            event.connection().botControl()
+                    .sendMessage(autoRegisterSettings.registerCommand().replace("%password%", password));
         } else if (plainMessage.contains("/login")) {
-            event.connection().sendMessage(autoRegisterSettings.loginCommand().replace("%password%", password));
+            event.connection().botControl()
+                    .sendMessage(autoRegisterSettings.loginCommand().replace("%password%", password));
         } else if (plainMessage.contains("/captcha")) {
             String[] split = plainMessage.split(" ");
 
             for (int i = 0; i < split.length; i++) {
                 if (split[i].equals("/captcha")) {
-                    event.connection().sendMessage(autoRegisterSettings.captchaCommand().replace("%captcha%", split[i + 1]));
+                    event.connection().botControl()
+                            .sendMessage(autoRegisterSettings.captchaCommand().replace("%captcha%", split[i + 1]));
                 }
             }
         }

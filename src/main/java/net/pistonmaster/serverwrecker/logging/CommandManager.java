@@ -75,7 +75,7 @@ public class CommandManager {
                             String message = StringArgumentType.getString(c, "message");
                             serverWrecker.getBotConnections().forEach(client -> {
                                 if (client.isOnline()) {
-                                    client.sendMessage(message);
+                                    client.botControl().sendMessage(message);
                                 }
                             });
                             return 1;

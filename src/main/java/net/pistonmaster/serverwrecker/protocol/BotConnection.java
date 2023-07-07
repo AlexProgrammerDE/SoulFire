@@ -25,6 +25,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundCh
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
+import net.pistonmaster.serverwrecker.protocol.bot.BotControlAPI;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
@@ -37,14 +38,6 @@ import java.util.Collections;
 public record BotConnection(BotConnectionFactory factory, ServerWrecker serverWrecker, SettingsHolder settingsHolder,
                             Logger logger, MinecraftProtocol protocol, ViaClientSession session,
                             BotConnectionMeta meta) {
-    public void sendMessage(String message) {
-        if (message.startsWith("/")) {
-            session.send(new ServerboundChatCommandPacket(message.substring(1), Instant.now().toEpochMilli(), 0, Collections.emptyList(), 0, new BitSet()));
-        } else {
-            session.send(new ServerboundChatPacket(message, Instant.now().toEpochMilli(), 0, new byte[0], 0, new BitSet()));
-        }
-    }
-
     public boolean isOnline() {
         return session.isConnected();
     }
@@ -54,7 +47,11 @@ public record BotConnection(BotConnectionFactory factory, ServerWrecker serverWr
     }
 
     public SessionDataManager sessionDataManager() {
-        return session.getFlag(SWProtocolConstants.SESSION_DATA_MANAGER);
+        return meta.getSessionDataManager();
+    }
+
+    public BotControlAPI botControl() {
+        return meta.getBotControlAPI();
     }
 
     public <T extends UnregisterCleanup> T cleanup(T instance) {

@@ -20,10 +20,17 @@
 package net.pistonmaster.serverwrecker.protocol.bot;
 
 import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerState;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerCommandPacket;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.protocol.bot.model.AbilitiesData;
+
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.BitSet;
+import java.util.Collections;
 
 /**
  * This class is used to control the bot.
@@ -33,6 +40,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.model.AbilitiesData;
 public class BotControlAPI {
     private final SessionDataManager sessionDataManager;
     private final BotMovementManager botMovementManager;
+    private final SecureRandom secureRandom = new SecureRandom();
 
     public boolean toggleFlight() {
         AbilitiesData abilitiesData = sessionDataManager.getAbilitiesData();
@@ -73,5 +81,32 @@ public class BotControlAPI {
         ));
 
         return newSneak;
+    }
+
+    public void sendMessage(String message) {
+        Instant now = Instant.now();
+        if (message.startsWith("/")) {
+            String command = message.substring(1);
+            // We only sign chat at the moment because commands require the entire command tree to be handled
+            // Command signing is signing every string parameter in the command because of reporting /msg
+            sessionDataManager.getSession().send(new ServerboundChatCommandPacket(
+                    command,
+                    now.toEpochMilli(),
+                    0L,
+                    Collections.emptyList(),
+                    0,
+                    new BitSet()
+            ));
+        } else {
+            long salt = secureRandom.nextLong();
+            sessionDataManager.getSession().send(new ServerboundChatPacket(
+                    message,
+                    now.toEpochMilli(),
+                    salt,
+                    null,
+                    0,
+                    new BitSet()
+            ));
+        }
     }
 }
