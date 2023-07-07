@@ -36,7 +36,7 @@ through [nightly.link](https://nightly.link/AlexProgrammerDE/ServerWrecker/workf
 
 ## 🔭 Requirements
 
-* Java 17
+* Java 17+
 * Minecraft server (Tested with Spigot/Paper/Purpur/Folia, Velocity/BungeeCord)
 
 ## 🍿 Version support
