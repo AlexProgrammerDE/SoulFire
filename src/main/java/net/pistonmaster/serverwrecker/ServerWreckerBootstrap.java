@@ -104,11 +104,6 @@ public class ServerWreckerBootstrap {
         });
 
         ServerWreckerAPI.postEvent(new CommandManagerInitEvent(commandLine));
-        int exitCode = commandLine.execute(args);
-
-        // Shutdown ServerWrecker first
-        serverWrecker.shutdown(false);
-
-        System.exit(exitCode);
+        commandLine.execute(args);
     }
 }
