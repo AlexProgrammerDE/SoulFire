@@ -64,6 +64,11 @@ which include client-side translation externally.
 ServerWrecker includes a similar implementation as these two proxies
 and is comparable functionality-wise to [ViaFabric](https://github.com/ViaVersion/ViaFabric).
 
+## 🎬 Videos
+
+[Download & install ServerWrecker](https://youtu.be/X9hREa17yAo)
+
+
 ## 📻 Built-in modules
 
 ### AutoRespawn
