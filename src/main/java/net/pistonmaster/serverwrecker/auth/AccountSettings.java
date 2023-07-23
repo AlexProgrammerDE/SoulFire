@@ -22,6 +22,6 @@ package net.pistonmaster.serverwrecker.auth;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
 public record AccountSettings(String nameFormat, boolean shuffleAccounts) implements SettingsObject {
-    public static final String DEFAULT_NAME_FORMAT = "Bot%d";
+    public static final String DEFAULT_NAME_FORMAT = "Bot_%d";
     public static final boolean DEFAULT_SHUFFLE_ACCOUNTS = false;
 }

@@ -17,14 +17,13 @@
 | `--concurrent-connects`          | `1`                               | Amount of bots that can try to connect at the same time      |
 | `--debug`                        | `false`                           | Log additional information useful for debugging the software |
 | `--bots-per-proxy`               | `-1`                              | Amount of bots that can be on a single proxy                 |
-| `--name-format`                  | `Bot%d`                           | Format for bot names. allows integer placeholder '%d'        |
+| `--name-format`                  | `Bot_%d`                          | Format for bot names. allows integer placeholder '%d'        |
 | `--shuffle-accounts`             | `false`                           | Shuffle accounts before connecting                           |
 | `--account-file`                 | `null`                            | File to load accounts from                                   |
 | `--account-type`                 | `null`                            | Type of accounts in the account file                         |
 | `--proxy-file`                   | `null`                            | File to load proxies from                                    |
 | `--proxy-type`                   | `null`                            | Type of proxies in the proxy file                            |
 | `--profile-file`                 | `null`                            | File to load a profile from                                  |
-| `--generate-flags`               | `false`                           | Create a list of flags                                       |
 | `-h`, `--help`                   | `false`                           | Show this help message and exit.                             |
 | `-V`, `--version`                | `false`                           | Print version information and exit.                          |
 | `--auto-reconnect`               | `true`                            | Reconnect bots after being disconnected                      |

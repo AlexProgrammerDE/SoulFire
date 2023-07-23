@@ -115,6 +115,10 @@ public class SWCommandDefinition implements Callable<Integer> {
     public Integer call() {
         if (generateFlags) {
             commandLine.getCommandSpec().options().forEach(option -> {
+                if (option.hidden()) {
+                    return;
+                }
+
                 String name = Arrays.stream(option.names()).map(s -> String.format("`%s`", s)).collect(Collectors.joining(", "));
                 String defaultValue = option.defaultValueString() == null ? "" : String.format("`%s`", option.defaultValueString());
                 String description = option.description() == null ? "" : String.join(", ", option.description());
