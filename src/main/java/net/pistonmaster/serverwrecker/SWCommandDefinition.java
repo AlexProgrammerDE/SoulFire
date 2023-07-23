@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
@@ -28,12 +29,15 @@ import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Command(name = "serverwrecker", mixinStandardHelpOptions = true,
@@ -41,6 +45,8 @@ import java.util.concurrent.Callable;
         description = "Stress test a minecraft server using bots", sortOptions = false)
 public class SWCommandDefinition implements Callable<Integer> {
     private final ServerWrecker serverWrecker;
+    @Setter
+    private CommandLine commandLine;
 
     @Option(names = {"--host", "--target"}, description = "Target url to connect to")
     private String host = BotSettings.DEFAULT_HOST;
@@ -102,8 +108,22 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Option(names = {"--profile-file"}, description = "File to load a profile from")
     private Path profileFile;
 
+    @Option(names = {"--generate-flags"}, description = "Create a list of flags", hidden = true)
+    private boolean generateFlags;
+
     @Override
     public Integer call() {
+        if (generateFlags) {
+            commandLine.getCommandSpec().options().forEach(option -> {
+                String name = Arrays.stream(option.names()).map(s -> String.format("`%s`", s)).collect(Collectors.joining(", "));
+                String defaultValue = option.defaultValueString() == null ? "" : String.format("`%s`", option.defaultValueString());
+                String description = option.description() == null ? "" : String.join(", ", option.description());
+                System.out.printf("| %s | %s | %s |%n", name, defaultValue, description);
+            });
+            serverWrecker.shutdown(true);
+            return 0;
+        }
+
         // Delayed to here, so help and version do not get cut off
         serverWrecker.initConsole();
 

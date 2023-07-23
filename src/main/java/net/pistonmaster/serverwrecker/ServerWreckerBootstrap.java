@@ -94,7 +94,9 @@ public class ServerWreckerBootstrap {
 
     private static void runHeadless(String[] args) {
         ServerWrecker serverWrecker = new ServerWrecker(OperationMode.CLI);
-        CommandLine commandLine = new CommandLine(new SWCommandDefinition(serverWrecker));
+        SWCommandDefinition serverWreckerCommand = new SWCommandDefinition(serverWrecker);
+        CommandLine commandLine = new CommandLine(serverWreckerCommand);
+        serverWreckerCommand.setCommandLine(commandLine);
         commandLine.setCaseInsensitiveEnumValuesAllowed(true);
         commandLine.setUsageHelpAutoWidth(true);
         commandLine.setUsageHelpLongOptionsMaxWidth(30);

@@ -195,7 +195,7 @@ public class ViaClientSession extends TcpSession {
                         pipeline.addLast("vl-prenetty", new PreNettyLengthCodec(userConnection));
                     } else if (isBedrock) {
                         protocolPipeline.add(BedrockBaseProtocol.INSTANCE);
-                        pipeline.addLast("vp-disconnect", new DisconnectHandler());
+                        pipeline.addLast("vb-disconnect", new DisconnectHandler());
                         pipeline.addLast("vb-frame-encapsulation", new RakMessageEncapsulationCodec());
                     }
 
