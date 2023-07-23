@@ -168,6 +168,49 @@ To run ServerWrecker from the command line without a GUI, enter
 
 > **Note:** Some features are not available in CLI mode, we recommend using the GUI.
 
+### Options
+
+`--host`, `--target`: Target url to connect to.
+
+`--port`: Target port to connect to.
+
+`-a`, `--amount`: Amount of bots to connect to the server.
+
+`--min-join-delay`: The minimum delay between bot connections, in milliseconds.
+
+`--max-join-delay`: The maximum delay between bot connections, in milliseconds.
+
+`-mc`, `--mc-version`: Minecraft version of the server to connect to.
+
+`--read-timeout`: Bot read timeout.
+
+`--write-timeout`: Bot write timeout.
+
+`--connect-timeout`: Bot connect timeout.
+
+`--try-srv`: Try to connect to the target using SRV records.
+
+`--concurrent-connects`: Amount of bots that can try to connect at the same time.
+
+`--debug`: Log additional information useful for debugging the software.
+
+`--bots-per-proxy`: Amount of bots that can be on a single proxy.
+
+`--name-format`: Format for bot names. allows integer placeholder '%d'.
+
+`--shuffle-accounts`: Shuffle accounts before connecting.
+
+`--account-file`: File to load accounts from.
+
+`--account-type`: Type of accounts in the account file.
+
+`--proxy-file`: File to load proxies from.
+
+`--proxy-type`: Type of proxies in the proxy file.
+
+`--profile-file`: File to load a profile from.
+
+
 ## 🔧 Build from source
 
 1. Install Java 17
