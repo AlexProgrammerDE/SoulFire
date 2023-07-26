@@ -74,6 +74,24 @@ public class SWBaseListener extends SessionAdapter {
         MinecraftProtocol protocol = (MinecraftProtocol) session.getPacketProtocol();
         if (protocol.getState() == ProtocolState.LOGIN) {
             if (packet instanceof ClientboundHelloPacket helloPacket) {
+                BotSettings botSettings = botConnection.settingsHolder().get(BotSettings.class);
+                MinecraftAccount minecraftAccount = botConnection.meta().getMinecraftAccount();
+                UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
+
+                boolean authSupport = minecraftAccount.isPremiumJava();
+                if (!authSupport) {
+                    botConnection.logger().info("Server sent a encryption request, but we do not support auth... Sending no response.");
+                    return;
+                }
+
+                boolean auth = true;
+                boolean isLegacy = SWConstants.isLegacy(botSettings.protocolVersion());
+                if (isLegacy) {
+                    auth = Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
+                }
+
+                botConnection.logger().debug("Performing mojang request: {}", auth);
+
                 SecretKey key;
                 try {
                     KeyGenerator gen = KeyGenerator.getInstance("AES");
@@ -82,18 +100,6 @@ public class SWBaseListener extends SessionAdapter {
                 } catch (NoSuchAlgorithmException e) {
                     throw new IllegalStateException("Failed to generate shared key.", e);
                 }
-
-                BotSettings botSettings = botConnection.settingsHolder().get(BotSettings.class);
-                MinecraftAccount minecraftAccount = botConnection.meta().getMinecraftAccount();
-                UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
-
-                boolean isLegacy = SWConstants.isLegacy(botSettings.protocolVersion());
-                boolean auth = minecraftAccount.isPremiumJava();
-                if (auth && isLegacy) {
-                    auth = Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
-                }
-
-                botConnection.logger().debug("Doing auth: {}", auth);
 
                 if (auth) {
                     String serverId = botConnection.meta().getSessionService()
