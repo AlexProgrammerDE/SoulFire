@@ -80,13 +80,12 @@ public class SWBaseListener extends SessionAdapter {
 
                 boolean authSupport = minecraftAccount.isPremiumJava();
                 if (!authSupport) {
-                    botConnection.logger().info("Server sent a encryption request, but we do not support auth... Sending no response.");
-                    return;
+                    botConnection.logger().info("Server sent a encryption request, but we're offline mode. Not authenticating with mojang.");
                 }
 
-                boolean auth = true;
+                boolean auth = authSupport;
                 boolean isLegacy = SWConstants.isLegacy(botSettings.protocolVersion());
-                if (isLegacy) {
+                if (auth && isLegacy) {
                     auth = Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
                 }
 
