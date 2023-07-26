@@ -19,16 +19,26 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
+import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
+import com.github.steveice10.mc.protocol.data.game.chunk.BitStorage;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
-import lombok.Getter;
+import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
+import com.github.steveice10.mc.protocol.data.game.chunk.palette.MapPalette;
+import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.cloudburstmc.math.vector.Vector3i;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Map;
 import java.util.Objects;
+import java.util.WeakHashMap;
 
 public class ChunkData {
     private final LevelState level;
-    @Getter
     private final ChunkSection[] sections;
+    private static final Map<Integer, ChunkSection> SECTION_CACHE = new WeakHashMap<>();
 
     public ChunkData(LevelState level) {
         this.level = level;
@@ -39,10 +49,6 @@ public class ChunkData {
         return (int) Math.ceil(Math.log(num) / Math.log(2));
     }
 
-    public void setBlock(Vector3i block, int state) {
-        getSection(block).setBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF, state);
-    }
-
     public int getBlock(Vector3i block) {
         return getSection(block).getBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF);
     }
@@ -51,10 +57,49 @@ public class ChunkData {
         return getSection(level.getSectionIndex(block.getY()));
     }
 
-    private ChunkSection getSection(int sectionIndex) {
+    public ChunkSection getSection(int sectionIndex) {
         ChunkSection section = sections[sectionIndex];
         Objects.requireNonNull(section, "Section " + sectionIndex + " is null!");
 
         return section;
+    }
+
+    public int getSectionCount() {
+        return sections.length;
+    }
+
+    private void setSection(Vector3i block, ChunkSection section) {
+        setSection(level.getSectionIndex(block.getY()), section);
+    }
+
+    public void setSection(int sectionIndex, ChunkSection section) {
+        int sectionHash = section.hashCode();
+        synchronized (SECTION_CACHE) {
+            SECTION_CACHE.compute(sectionHash, (hash, cachedSection) ->
+                    sections[sectionIndex] = cachedSection == null ? section : cachedSection);
+        }
+    }
+
+    public void setBlock(Vector3i block, int state) {
+        ChunkSection targetSection = getSection(block);
+
+        DataPalette originalPalette = targetSection.getChunkData();
+        MinecraftCodecHelper helper = level.getSessionDataManager().getSession().getCodecHelper();
+        ByteBuf content = Unpooled.buffer();
+        helper.writeDataPalette(content, originalPalette);
+
+        DataPalette newChunkPalette;
+        try {
+            newChunkPalette = helper.readDataPalette(content, PaletteType.CHUNK, originalPalette.getGlobalPaletteBits());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            content.release();
+        }
+
+        ChunkSection clone = new ChunkSection(targetSection.getBlockCount(), newChunkPalette, targetSection.getBiomeData());
+        clone.setBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF, state);
+
+        setSection(block, clone);
     }
 }

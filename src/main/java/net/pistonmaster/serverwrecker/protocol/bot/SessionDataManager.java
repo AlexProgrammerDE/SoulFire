@@ -533,8 +533,8 @@ public final class SessionDataManager {
         ChunkData chunkData = level.getChunks().computeIfAbsent(key, k -> new ChunkData(level));
 
         try {
-            for (int i = 0; i < chunkData.getSections().length; i++) {
-                chunkData.getSections()[i] = readChunkSection(buf, helper);
+            for (int i = 0; i < chunkData.getSectionCount(); i++) {
+                chunkData.setSection(i, readChunkSection(buf, helper));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -563,10 +563,10 @@ public final class SessionDataManager {
 
             ByteBuf buf = Unpooled.wrappedBuffer(biomeData.getBuffer());
             try {
-                for (int i = 0; chunkData.getSections().length > i; i++) {
-                    ChunkSection section = chunkData.getSections()[i];
+                for (int i = 0; chunkData.getSectionCount() > i; i++) {
+                    ChunkSection section = chunkData.getSection(i);
                     DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, biomesEntryBitsSize);
-                    chunkData.getSections()[i] = new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette);
+                    chunkData.setSection(i, new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
