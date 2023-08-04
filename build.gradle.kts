@@ -137,7 +137,7 @@ dependencies {
 
     implementation("net.kyori:event-api:5.0.0-SNAPSHOT")
     implementation("ch.jalu:injector:1.0")
-    implementation("org.yaml:snakeyaml:2.0")
+    implementation("org.yaml:snakeyaml:2.1")
 
     val javaFXVersion = "20"
     val javaFXModules = listOf("base", "graphics", "controls", "swing")
