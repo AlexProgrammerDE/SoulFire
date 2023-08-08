@@ -90,7 +90,7 @@ dependencies {
     implementation(libs.velocity.native)
 
     // For advanced account authentication
-    implementation("net.raphimc:MinecraftAuth:2.1.4-SNAPSHOT") {
+    implementation("net.raphimc:MinecraftAuth:2.1.4") {
         exclude("com.google.code.gson", "gson")
         exclude("org.slf4j", "slf4j-api")
     }
