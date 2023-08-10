@@ -102,7 +102,7 @@ dependencies {
 
     implementation("net.raphimc:ViaLegacy:2.2.18")
     implementation("net.raphimc:ViaAprilFools:2.0.8")
-    implementation("net.raphimc:ViaLoader:2.2.7") {
+    implementation("net.raphimc:ViaLoader:2.2.8") {
         exclude("org.slf4j", "slf4j-api")
         exclude("org.yaml", "snakeyaml")
     }
