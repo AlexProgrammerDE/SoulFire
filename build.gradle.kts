@@ -96,12 +96,12 @@ dependencies {
     }
 
     // For supporting multiple Minecraft versions
-    implementation("com.viaversion:viaversion:4.7.0") { isTransitive = false }
-    implementation("com.viaversion:viabackwards:4.7.0") { isTransitive = false }
+    implementation("com.viaversion:viaversion:4.8.0-23w31a-SNAPSHOT") { isTransitive = false }
+    implementation("com.viaversion:viabackwards:4.8.0-23w31a-SNAPSHOT") { isTransitive = false }
     implementation("com.viaversion:viarewind-core:2.0.4-SNAPSHOT")
 
-    implementation("net.raphimc:ViaLegacy:2.2.18")
-    implementation("net.raphimc:ViaAprilFools:2.0.8")
+    implementation("net.raphimc:ViaLegacy:2.2.19-SNAPSHOT")
+    implementation("net.raphimc:ViaAprilFools:2.0.9-SNAPSHOT")
     implementation("net.raphimc:ViaLoader:2.2.8") {
         exclude("org.slf4j", "slf4j-api")
         exclude("org.yaml", "snakeyaml")
