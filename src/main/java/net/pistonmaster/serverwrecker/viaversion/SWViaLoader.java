@@ -23,18 +23,15 @@ import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.CompressionProvider;
-import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.MovementTransmitterProvider;
 import net.pistonmaster.serverwrecker.viaversion.providers.*;
 import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.providers.OldAuthProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.providers.GameProfileFetcher;
-import net.raphimc.vialoader.impl.providers.VLMovementTransmitterProvider;
 
 public class SWViaLoader implements ViaPlatformLoader {
     @Override
     public void load() {
-        Via.getManager().getProviders().use(MovementTransmitterProvider.class, new VLMovementTransmitterProvider());
         Via.getManager().getProviders().use(VersionProvider.class, new SWViaVersionProvider());
         Via.getManager().getProviders().use(CompressionProvider.class, new SWViaCompressionProvider());
 
