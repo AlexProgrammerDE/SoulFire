@@ -2,15 +2,17 @@
 
 <!--suppress HtmlDeprecatedAttribute -->
 <p align="center">
-<a href="https://ci.codemc.io/job/SkinsRestorer/job/SkinsRestorerX-DEV/"><img src="https://ci.codemc.io/job/SkinsRestorer/job/SkinsRestorerX-DEV/badge/icon" alt="Build Status"></a>
+<a href="https://ci.codemc.io/job/AlexProgrammerDE/job/ServerWrecker/"><img src="https://ci.codemc.io/job/AlexProgrammerDE/job/ServerWrecker/badge/icon" alt="Build Status"></a>
 <a href="https://github.com/AlexProgrammerDE/ServerWrecker/actions/workflows/build.yml"><img src="https://github.com/AlexProgrammerDE/ServerWrecker/actions/workflows/build.yml/badge.svg?branch=main" alt="Java CI"></a>
 <a href="https://github.com/AlexProgrammerDE/ServerWrecker/graphs/contributors"><img src="https://img.shields.io/github/contributors/AlexProgrammerDE/ServerWrecker.svg" alt="Contributors"></a>
 <a href="https://github.com/AlexProgrammerDE/ServerWrecker/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AlexProgrammerDE/ServerWrecker.svg" alt="License"></a>
+<a href="https://github.com/AlexProgrammerDE/ServerWrecker/releases/latest"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/AlexProgrammerDE/ServerWrecker/total"></a>
+<a href="https://github.com/AlexProgrammerDE/ServerWrecker/releases/latest"><img src="https://img.shields.io/github/release/AlexProgrammerDE/ServerWrecker.svg" alt="Current Release"></a>
 </p>
 <p align="center"><a href="https://pistonmaster.net/discord"><img src="https://discordapp.com/api/guilds/739784741124833301/embed.png" alt="Discord embed"></a></p>
 
 <p align="center">
-<a href="https://github.com/AlexProgrammerDE/ServerWrecker/releases/latest/download/serverwrecker-1.0.0-all.jar"><img src="https://img.shields.io/badge/DOWNLOAD-LATEST-success?style=for-the-badge" alt="download badge"></a>
+<a href="https://github.com/AlexProgrammerDE/ServerWrecker/releases/latest"><img src="https://img.shields.io/badge/DOWNLOAD-LATEST-success?style=for-the-badge" alt="download badge"></a>
 <a href="https://nightly.link/AlexProgrammerDE/ServerWrecker/workflows/build/main/ServerWrecker.zip"><img src="https://img.shields.io/badge/DOWNLOAD-DEV__BUILD-important?style=for-the-badge" alt="download2 badge"></a>
 </p>
 

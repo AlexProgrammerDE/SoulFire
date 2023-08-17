@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     application
     id("sw.shadow-conventions")
-    id("edu.sc.seis.launch4j") version "3.0.3"
+    id("edu.sc.seis.launch4j") version "3.0.4"
 }
 
 version = "1.2.0-SNAPSHOT"
@@ -90,19 +90,19 @@ dependencies {
     implementation(libs.velocity.native)
 
     // For advanced account authentication
-    implementation("net.raphimc:MinecraftAuth:2.1.4-SNAPSHOT") {
+    implementation("net.raphimc:MinecraftAuth:2.1.4") {
         exclude("com.google.code.gson", "gson")
         exclude("org.slf4j", "slf4j-api")
     }
 
     // For supporting multiple Minecraft versions
-    implementation("com.viaversion:viaversion:4.7.0") { isTransitive = false }
-    implementation("com.viaversion:viabackwards:4.7.0") { isTransitive = false }
+    implementation("com.viaversion:viaversion:4.8.0-23w32a-SNAPSHOT") { isTransitive = false }
+    implementation("com.viaversion:viabackwards:4.8.0-23w32a-SNAPSHOT") { isTransitive = false }
     implementation("com.viaversion:viarewind-core:2.0.4-SNAPSHOT")
 
-    implementation("net.raphimc:ViaLegacy:2.2.17")
-    implementation("net.raphimc:ViaAprilFools:2.0.7")
-    implementation("net.raphimc:ViaLoader:2.2.7") {
+    implementation("net.raphimc:ViaLegacy:2.2.19-SNAPSHOT")
+    implementation("net.raphimc:ViaAprilFools:2.0.9-SNAPSHOT")
+    implementation("net.raphimc:ViaLoader:2.2.8") {
         exclude("org.slf4j", "slf4j-api")
         exclude("org.yaml", "snakeyaml")
     }
