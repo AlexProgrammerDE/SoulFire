@@ -118,7 +118,7 @@ dependencies {
     implementation(libs.flatlaf)
     implementation(libs.flatlaf.intellij.themes)
     implementation(libs.flatlaf.extras)
-    implementation("org.knowm.xchart:xchart:3.8.4")
+    implementation(libs.xchart)
 
     implementation(libs.brigadier)
     implementation(libs.pf4j) {
@@ -127,17 +127,18 @@ dependencies {
     implementation(libs.jansi)
     implementation(libs.guava)
     implementation(libs.gson)
-    implementation("commons-validator:commons-validator:1.7")
-    implementation("commons-io:commons-io:2.13.0")
 
-    implementation("com.thealtening.api:api:4.1.0")
+    implementation(libs.commons.validator)
+    implementation(libs.commons.io)
 
-    implementation("net.kyori:adventure-text-serializer-plain:4.14.0")
-    implementation("net.kyori:adventure-text-serializer-gson:4.14.0")
+    implementation(libs.the.altening)
 
-    implementation("net.kyori:event-api:5.0.0-SNAPSHOT")
-    implementation("ch.jalu:injector:1.0")
-    implementation("org.yaml:snakeyaml:2.0")
+    implementation(libs.kyori.plain)
+    implementation(libs.kyori.gson)
+
+    implementation(libs.kyori.event)
+    implementation(libs.injector)
+    implementation(libs.snakeyaml)
 
     val javaFXVersion = "20"
     val javaFXModules = listOf("base", "graphics", "controls", "swing")

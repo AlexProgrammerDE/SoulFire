@@ -32,7 +32,7 @@ import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.popups.AboutPopup;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import java.awt.*;

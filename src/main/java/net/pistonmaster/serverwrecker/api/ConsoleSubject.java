@@ -22,7 +22,7 @@ package net.pistonmaster.serverwrecker.api;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConsoleSubject {

@@ -31,7 +31,7 @@ import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;

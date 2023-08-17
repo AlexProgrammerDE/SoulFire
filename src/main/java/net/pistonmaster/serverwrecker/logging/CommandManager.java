@@ -37,8 +37,7 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 

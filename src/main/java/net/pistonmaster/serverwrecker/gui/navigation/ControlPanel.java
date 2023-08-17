@@ -22,7 +22,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.AttackState;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 

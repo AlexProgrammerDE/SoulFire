@@ -27,7 +27,7 @@ import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.apache.logging.log4j.Level;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.io.BufferedWriter;

@@ -28,8 +28,8 @@ import net.pistonmaster.serverwrecker.logging.LogAppender;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import com.google.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;

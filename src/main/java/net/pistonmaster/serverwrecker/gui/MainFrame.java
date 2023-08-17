@@ -24,8 +24,8 @@ import com.formdev.flatlaf.util.SystemInfo;
 import javafx.embed.swing.JFXPanel;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import com.google.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.lang.invoke.MethodHandles;

@@ -29,7 +29,7 @@ import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;

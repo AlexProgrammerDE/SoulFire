@@ -19,8 +19,6 @@
  */
 package net.pistonmaster.serverwrecker;
 
-import ch.jalu.injector.Injector;
-import ch.jalu.injector.InjectorBuilder;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.codec.MinecraftCodec;
