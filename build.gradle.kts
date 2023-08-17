@@ -4,6 +4,7 @@ plugins {
     application
     id("sw.shadow-conventions")
     id("edu.sc.seis.launch4j") version "3.0.4"
+    id("com.google.protobuf") version "0.9.4"
 }
 
 version = "1.2.0-SNAPSHOT"
@@ -147,6 +148,15 @@ dependencies {
     javaFXModules.forEach { module ->
         javaFXPlatforms.forEach { platform ->
             implementation("org.openjfx:javafx-$module:$javaFXVersion:$platform")
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs("build/generated/source/proto/main/grpc")
+            srcDirs("build/generated/source/proto/main/java")
         }
     }
 }
