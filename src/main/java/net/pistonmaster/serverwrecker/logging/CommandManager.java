@@ -152,11 +152,12 @@ public class CommandManager {
         ServerWreckerAPI.postEvent(new DispatcherInitEvent(dispatcher));
     }
 
-    public void execute(String command) {
+    public int execute(String command) {
         try {
-            dispatcher.execute(command, consoleSubject);
+            return dispatcher.execute(command, consoleSubject);
         } catch (CommandSyntaxException e) {
             serverWrecker.getLogger().warn(e.getMessage());
+            return 1;
         }
     }
 

@@ -47,23 +47,23 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
     private void sendPreviousLogs(int requestPrevious, StreamObserver<LogResponse> responseObserver) {
         for (String log : logs.getNewest(requestPrevious)) {
-            LogResponse response = LogResponse.newBuilder()
-                    .setMessage(log)
-                    .build();
-
-            responseObserver.onNext(response);
+            publishLine(log, responseObserver);
         }
     }
 
     private record LogEventListener(StreamObserver<LogResponse> responseObserver) implements EventSubscriber<SystemLogEvent> {
         @Override
         public void on(@NonNull SystemLogEvent event) {
-            LogResponse response = LogResponse.newBuilder()
-                    .setMessage(event.message())
-                    .build();
-
-            responseObserver.onNext(response);
+            publishLine(event.message(), responseObserver);
         }
+    }
+
+    private static void publishLine(String line, StreamObserver<LogResponse> responseObserver) {
+        LogResponse response = LogResponse.newBuilder()
+                .setMessage(line)
+                .build();
+
+        responseObserver.onNext(response);
     }
 
     public static class QueueWithMaxSize<E> {

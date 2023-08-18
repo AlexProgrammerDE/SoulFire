@@ -45,6 +45,7 @@ public class RPCServer {
         this.port = port;
         server = serverBuilder
                 .addService(injector.getSingleton(LogServiceImpl.class))
+                .addService(injector.getSingleton(CommandServiceImpl.class))
                 .build();
     }
 
