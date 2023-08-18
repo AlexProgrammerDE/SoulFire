@@ -23,8 +23,8 @@ import ch.jalu.injector.Injector;
 import io.grpc.stub.StreamObserver;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.grpc.logs.LogRequest;
-import net.pistonmaster.serverwrecker.grpc.logs.LogResponse;
+import net.pistonmaster.serverwrecker.grpc.generated.logs.LogRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.logs.LogResponse;
 import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
 import net.pistonmaster.serverwrecker.gui.navigation.CardsContainer;
 

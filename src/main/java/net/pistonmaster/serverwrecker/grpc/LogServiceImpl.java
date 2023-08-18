@@ -23,9 +23,9 @@ import io.grpc.stub.StreamObserver;
 import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.system.SystemLogEvent;
-import net.pistonmaster.serverwrecker.grpc.logs.LogRequest;
-import net.pistonmaster.serverwrecker.grpc.logs.LogResponse;
-import net.pistonmaster.serverwrecker.grpc.logs.LogsServiceGrpc;
+import net.pistonmaster.serverwrecker.grpc.generated.logs.LogRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.logs.LogResponse;
+import net.pistonmaster.serverwrecker.grpc.generated.logs.LogsServiceGrpc;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;

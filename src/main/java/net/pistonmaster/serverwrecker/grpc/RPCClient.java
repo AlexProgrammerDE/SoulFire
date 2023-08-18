@@ -23,7 +23,7 @@ import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import lombok.Getter;
-import net.pistonmaster.serverwrecker.grpc.logs.LogsServiceGrpc;
+import net.pistonmaster.serverwrecker.grpc.generated.logs.LogsServiceGrpc;
 
 public class RPCClient {
     private final ManagedChannel channel;
