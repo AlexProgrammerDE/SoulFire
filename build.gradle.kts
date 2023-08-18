@@ -99,7 +99,7 @@ dependencies {
     }
 
     // For supporting multiple Minecraft versions
-    implementation("com.viaversion:viaversion:4.8.0-23w32a-SNAPSHOT") { isTransitive = false }
+    implementation("com.viaversion:viaversion:4.8.0-23w33a-SNAPSHOT") { isTransitive = false }
     implementation("com.viaversion:viabackwards:4.8.0-23w33a-SNAPSHOT") { isTransitive = false }
     implementation("com.viaversion:viarewind-core:3.0.0-SNAPSHOT")
 
