@@ -47,6 +47,7 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
         int code = commandManager.execute(request.getCommand());
 
         responseObserver.onNext(CommandResponse.newBuilder().setCodeValue(code).build());
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -54,5 +55,6 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
         List<String> suggestions = commandManager.getCompletionSuggestions(request.getCommand());
 
         responseObserver.onNext(CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());
+        responseObserver.onCompleted();
     }
 }
