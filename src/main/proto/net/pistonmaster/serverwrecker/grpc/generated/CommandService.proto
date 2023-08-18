@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option java_multiple_files = true;
 
-package net.pistonmaster.serverwrecker.grpc.command;
+package net.pistonmaster.serverwrecker.grpc.generated.command;
 
 message CommandRequest {
   string command = 1;
@@ -17,6 +17,15 @@ message CommandResponse {
   CommandCode code = 1;
 }
 
+message CommandCompletionRequest {
+  string command = 1;
+}
+
+message CommandCompletionResponse {
+  repeated string suggestions = 1;
+}
+
 service CommandService {
   rpc executeCommand(CommandRequest) returns (CommandResponse);
+  rpc tabCompleteCommand(CommandCompletionRequest) returns (CommandCompletionResponse);
 }
