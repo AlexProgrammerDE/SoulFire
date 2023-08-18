@@ -23,7 +23,7 @@ import ch.jalu.injector.Injector;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;

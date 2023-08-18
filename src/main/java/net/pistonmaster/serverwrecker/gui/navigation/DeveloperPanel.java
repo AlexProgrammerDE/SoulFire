@@ -21,13 +21,13 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.gui.MainPanel;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
-import net.pistonmaster.serverwrecker.logging.LogAppender;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.apache.logging.log4j.Level;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.io.BufferedWriter;
@@ -39,7 +39,7 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
     private final JCheckBox debug = new JCheckBox();
 
     @Inject
-    public DeveloperPanel(ServerWrecker serverWrecker, LogAppender logAppender) {
+    public DeveloperPanel(ServerWrecker serverWrecker, MainPanel mainPanel) {
         serverWrecker.getSettingsManager().registerDuplex(DevSettings.class, this);
 
         setLayout(new GridLayout(0, 2));
@@ -71,14 +71,7 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
 
             serverWrecker.getThreadPool().submit(() -> {
                 try (BufferedWriter writer = Files.newBufferedWriter(selectedFile)) {
-                    logAppender.getLogLines().forEach(entry -> {
-                        try {
-                            writer.write(entry);
-                            writer.newLine();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
+                    writer.write(mainPanel.getMessageLogPanel().getLogs());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

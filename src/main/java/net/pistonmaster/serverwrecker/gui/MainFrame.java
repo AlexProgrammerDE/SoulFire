@@ -22,10 +22,12 @@ package net.pistonmaster.serverwrecker.gui;
 import ch.jalu.injector.Injector;
 import com.formdev.flatlaf.util.SystemInfo;
 import javafx.embed.swing.JFXPanel;
+import lombok.Getter;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.grpc.RPCClient;
 
-import jakarta.annotation.PostConstruct;
-import com.google.inject.Inject;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.lang.invoke.MethodHandles;
@@ -35,13 +37,16 @@ public class MainFrame extends JFrame {
     public static final String MAIN_MENU = "MainMenu";
     private final ServerWrecker serverWrecker;
     private final Injector injector;
+    @Getter
+    private final RPCClient rpcClient;
 
     @Inject
     public MainFrame(ServerWrecker serverWrecker, Injector injector) {
         super("ServerWrecker");
         this.serverWrecker = serverWrecker;
         this.injector = injector;
-        injector.register(JFrame.class, this);
+        this.rpcClient = new RPCClient("localhost", 38765);
+        injector.register(MainFrame.class, this);
         setAppTitle();
     }
 
@@ -60,7 +65,7 @@ public class MainFrame extends JFrame {
         setJMenuBar(injector.getSingleton(SWMenuBar.class));
 
         setLayout(new CardLayout());
-        add(injector.getSingleton(MainPanel.class), MAIN_MENU);
+        add(injector.newInstance(MainPanel.class), MAIN_MENU);
 
         pack();
 

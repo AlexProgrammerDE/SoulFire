@@ -19,8 +19,8 @@
  */
 package net.pistonmaster.serverwrecker;
 
-import com.github.steveice10.mc.auth.data.GameProfile;
-import com.github.steveice10.mc.protocol.MinecraftProtocol;
+import ch.jalu.injector.Injector;
+import ch.jalu.injector.InjectorBuilder;
 import com.github.steveice10.mc.protocol.codec.MinecraftCodec;
 import com.github.steveice10.mc.protocol.codec.MinecraftPacketSerializer;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
@@ -31,10 +31,7 @@ import com.google.gson.JsonObject;
 import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
-import io.netty.channel.EventLoopGroup;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.Getter;
-import lombok.Setter;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -51,7 +48,9 @@ import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.data.TranslationMapper;
+import net.pistonmaster.serverwrecker.grpc.RPCServer;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
+import net.pistonmaster.serverwrecker.logging.LogAppender;
 import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
@@ -106,7 +105,6 @@ public class ServerWrecker {
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
-    private final List<BotConnection> botConnections = new CopyOnWriteArrayList<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final Map<String, String> serviceServerConfig = new HashMap<>();
     private final Gson gson = new Gson();
@@ -129,9 +127,9 @@ public class ServerWrecker {
     private final Path profilesFolder;
     private final Path pluginsFolder;
     private final boolean outdated;
-    @Setter
-    private AttackState attackState = AttackState.STOPPED;
     private boolean shutdown = false;
+    private final Set<AttackManager> attacks = Collections.synchronizedSet(new HashSet<>());
+    private final RPCServer rpcServer;
 
     public ServerWrecker(OperationMode operationMode) {
         this.operationMode = operationMode;
@@ -146,14 +144,24 @@ public class ServerWrecker {
 
         setupLogging(Level.INFO);
 
+        LogAppender logAppender = new LogAppender();
+        logAppender.start();
+        injector.register(LogAppender.class, logAppender);
+        ((org.apache.logging.log4j.core.Logger) LogManager.getRootLogger()).addAppender(logAppender);
+
+        rpcServer = new RPCServer(38765, injector);
+        try {
+            rpcServer.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         settingsManager.registerDuplex(AccountList.class, accountRegistry);
         settingsManager.registerDuplex(ProxyList.class, proxyRegistry);
 
         logger.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
         terminalConsole = injector.getSingleton(SWTerminalConsole.class);
-
-        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
 
         try {
             Files.createDirectories(DATA_FOLDER);
@@ -308,175 +316,11 @@ public class ServerWrecker {
         pluginManager.startPlugins();
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    public void start() {
-        if (!attackState.isStopped()) {
-            throw new IllegalStateException("Attack is already running");
-        }
-
-        SettingsHolder settingsHolder = settingsManager.collectSettings();
-        BotSettings botSettings = settingsHolder.get(BotSettings.class);
-        DevSettings devSettings = settingsHolder.get(DevSettings.class);
-        AccountSettings accountSettings = settingsHolder.get(AccountSettings.class);
-        ProxySettings proxySettings = settingsHolder.get(ProxySettings.class);
-
-        Via.getManager().debugHandler().setEnabled(devSettings.debug());
-        setupLogging(devSettings.debug() ? Level.DEBUG : Level.INFO);
-
-        this.attackState = AttackState.RUNNING;
-
-        logger.info("Preparing bot attack at {}", botSettings.host());
-
-        int botAmount = botSettings.amount(); // How many bots to connect
-        int botsPerProxy = proxySettings.botsPerProxy(); // How many bots per proxy are allowed
-        List<SWProxy> proxies = proxyRegistry.getUsableProxies();
-        int availableProxiesCount = proxies.size(); // How many proxies are available?
-        int maxBots = botsPerProxy > 0 ? botsPerProxy * availableProxiesCount : botAmount; // How many bots can be used at max
-
-        if (botAmount > maxBots) {
-            logger.warn("You have specified {} bots, but only {} are available.", botAmount, maxBots);
-            logger.warn("You need {} more proxies to run this amount of bots.", (botAmount - maxBots) / botsPerProxy);
-            logger.warn("Continuing with {} bots.", maxBots);
-            botAmount = maxBots;
-        }
-
-        List<MinecraftAccount> accounts = new ArrayList<>(accountRegistry.getUsableAccounts());
-        int availableAccounts = accounts.size();
-
-        if (availableAccounts > 0 && botAmount > availableAccounts) {
-            logger.warn("You have specified {} bots, but only {} accounts are available.", botAmount, availableAccounts);
-            logger.warn("Continuing with {} bots.", availableAccounts);
-            botAmount = availableAccounts;
-        }
-
-        if (accountSettings.shuffleAccounts()) {
-            Collections.shuffle(accounts);
-        }
-
-        Map<SWProxy, Integer> proxyUseMap = new Object2IntOpenHashMap<>();
-        for (SWProxy proxy : proxies) {
-            proxyUseMap.put(proxy, 0);
-        }
-
-        // Prepare an event loop group with enough threads for the attack
-        int threads = botAmount;
-        threads *= 2; // We need a monitor thread for each bot
-
-        EventLoopGroup attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(threads, "Attack-Thread");
-
-        boolean isBedrock = SWConstants.isBedrock(botSettings.protocolVersion());
-        InetSocketAddress targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder, attackEventLoopGroup);
-
-        Queue<BotConnectionFactory> factories = new ArrayBlockingQueue<>(botAmount);
-        for (int botId = 1; botId <= botAmount; botId++) {
-            SWProxy proxyData = getProxy(botsPerProxy, proxyUseMap);
-            MinecraftAccount minecraftAccount = getAccount(accountSettings, accounts, botId);
-
-            // AuthData will be used internally instead of the MCProtocol data
-            MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile((UUID) null, "DoNotUseGameProfile"), "");
-
-            // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
-            protocol.setUseDefaultListeners(false);
-
-            factories.add(new BotConnectionFactory(
-                    this,
-                    targetAddress,
-                    settingsHolder,
-                    LoggerFactory.getLogger(minecraftAccount.username()),
-                    protocol,
-                    minecraftAccount,
-                    proxyData,
-                    attackEventLoopGroup
-            ));
-        }
-
-        if (availableProxiesCount == 0) {
-            logger.info("Starting attack at {} with {} bots", botSettings.host(), factories.size());
-        } else {
-            logger.info("Starting attack at {} with {} bots and {} proxies", botSettings.host(), factories.size(), availableProxiesCount);
-        }
-
-        ServerWreckerAPI.postEvent(new AttackStartEvent());
-
-        // Used for concurrent bot connecting
-        ExecutorService connectService = Executors.newFixedThreadPool(botSettings.concurrentConnects());
-
-        boolean isFirst = true;
-        Random random = ThreadLocalRandom.current();
-        while (!factories.isEmpty()) {
-            BotConnectionFactory factory = factories.poll();
-            if (factory == null) {
-                break;
-            }
-
-            if (!isFirst) {
-                try {
-                    TimeUnit.MILLISECONDS.sleep(random.nextInt(botSettings.minJoinDelayMs(), botSettings.maxJoinDelayMs()));
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-
-            logger.debug("Scheduling bot {}", factory.minecraftAccount().username());
-            connectService.execute(() -> {
-                if (attackState.isStopped()) {
-                    return;
-                }
-
-                TimeUtil.waitCondition(attackState::isPaused);
-
-                logger.debug("Connecting bot {}", factory.minecraftAccount().username());
-                try {
-                    botConnections.add(factory.connect().join());
-                } catch (Throwable e) {
-                    logger.error("Error while connecting", e);
-                }
-            });
-
-            isFirst = false;
-        }
-    }
-
-    private MinecraftAccount getAccount(AccountSettings accountSettings, List<MinecraftAccount> accounts, int botId) {
-        if (accounts.isEmpty()) {
-            return new MinecraftAccount(String.format(accountSettings.nameFormat(), botId));
-        }
-
-        return accounts.remove(0);
-    }
-
-    private SWProxy getProxy(int accountsPerProxy, Map<SWProxy, Integer> proxyUseMap) {
-        if (proxyUseMap.isEmpty()) {
-            return null; // No proxies available
-        } else {
-            SWProxy selectedProxy = proxyUseMap.entrySet().stream()
-                    .filter(entry -> accountsPerProxy == -1 || entry.getValue() < accountsPerProxy)
-                    .min(Comparator.comparingInt(Map.Entry::getValue))
-                    .map(Map.Entry::getKey)
-                    .orElseThrow(() -> new IllegalStateException("No proxies available!")); // Should never happen
-
-            // Always present
-            proxyUseMap.computeIfPresent(selectedProxy, (proxy, useCount) -> useCount + 1);
-
-            return selectedProxy;
-        }
-    }
-
-    public void stop() {
-        if (attackState.isStopped()) {
-            return;
-        }
-
-        this.attackState = AttackState.STOPPED;
-        for (BotConnection botConnection : botConnections) {
-            botConnection.disconnect();
-        }
-        for (BotConnection botConnection : botConnections) {
-            botConnection.session().getEventLoopGroup().shutdownGracefully();
-            botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup);
-        }
-        botConnections.clear();
-        ServerWreckerAPI.postEvent(new AttackEndEvent());
+    public void setupLogging(Level level) {
+        Configurator.setRootLevel(level);
+        Configurator.setLevel(logger.getName(), level);
+        Configurator.setLevel("io.netty", level);
+        Configurator.setLevel("org.pf4j", level);
     }
 
     /**
@@ -494,10 +338,17 @@ public class ServerWrecker {
         }
 
         // Shutdown the attack if there is any
-        stop();
+        stopAllAttacks();
 
         // Shutdown scheduled tasks
         threadPool.shutdown();
+
+        // Shut down RPC
+        try {
+            rpcServer.stop();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         // Since we manually removed the shutdown hook, we need to handle the shutdown ourselves.
         LogManager.shutdown(true, true);
@@ -509,10 +360,21 @@ public class ServerWrecker {
         }
     }
 
-    public void setupLogging(Level level) {
-        Configurator.setRootLevel(level);
-        Configurator.setLevel(logger.getName(), level);
-        Configurator.setLevel("io.netty", level);
-        Configurator.setLevel("org.pf4j", level);
+    public void stopAllAttacks() {
+        synchronized (attacks) {
+            for (AttackManager attackManager : attacks) {
+                attackManager.stop();
+            }
+        }
+    }
+
+    public void startAttack() {
+        AttackManager attackManager = injector.getSingleton(AttackManager.class);
+
+        attackManager.start(settingsManager.collectSettings(),
+                new ArrayList<>(proxyRegistry.getUsableProxies()),
+                new ArrayList<>(accountRegistry.getUsableAccounts()));
+
+        attacks.add(attackManager);
     }
 }

@@ -30,7 +30,7 @@ import org.jline.reader.Candidate;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)

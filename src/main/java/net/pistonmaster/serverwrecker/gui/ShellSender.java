@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.logging.CommandManager;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;

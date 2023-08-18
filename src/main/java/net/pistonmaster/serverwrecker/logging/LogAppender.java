@@ -19,35 +19,26 @@
  */
 package net.pistonmaster.serverwrecker.logging;
 
-import lombok.Getter;
-import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
+import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.system.SystemLogEvent;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.Property;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 public class LogAppender extends AbstractAppender {
-    private final MessageLogPanel logPanel;
     private final LogFormatter formatter = new LogFormatter();
-    @Getter
-    private final Queue<String> logLines = new ConcurrentLinkedQueue<>();
 
-    public LogAppender(MessageLogPanel logPanel) {
+    public LogAppender() {
         super("LogPanelAppender", null, null, false, Property.EMPTY_ARRAY);
-        this.logPanel = logPanel;
     }
 
     @Override
     public void append(LogEvent event) {
         String formatted = formatter.format(event);
-        if (formatted.isEmpty()) {
+        if (formatted.isBlank()) {
             return;
         }
 
-        logLines.add(formatted);
-
-        logPanel.log(formatted + "\n");
+        ServerWreckerAPI.postEvent(new SystemLogEvent(formatted));
     }
 }

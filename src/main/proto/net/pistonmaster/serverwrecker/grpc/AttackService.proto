@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package net.pistonmaster.serverwrecker.grpc.attack;
+
+enum AttackCommand {
+  START = 0;
+  STOP = 1;
+  PAUSE = 2;
+}
+
+message AttackRequest {
+  AttackCommand command = 1;
+  int32 threads = 2;
+  string host = 3;
+  int32 port = 4;
+  int32 timeout = 5;
+}
+
+enum AttackResponseCode {
+  SUCCESS = 0;
+  ERROR = 1;
+}
+
+message AttackResponse {
+  AttackResponseCode code = 1;
+}
+
+service AttackService {
+  rpc startAttack(AttackRequest) returns (AttackResponse);
+}

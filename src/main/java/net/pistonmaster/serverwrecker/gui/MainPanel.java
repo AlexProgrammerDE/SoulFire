@@ -20,16 +20,16 @@
 package net.pistonmaster.serverwrecker.gui;
 
 import ch.jalu.injector.Injector;
+import io.grpc.stub.StreamObserver;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.grpc.logs.LogRequest;
+import net.pistonmaster.serverwrecker.grpc.logs.LogResponse;
 import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
 import net.pistonmaster.serverwrecker.gui.navigation.CardsContainer;
-import net.pistonmaster.serverwrecker.logging.LogAppender;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
 
-import jakarta.annotation.PostConstruct;
-import com.google.inject.Inject;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -40,11 +40,14 @@ public class MainPanel extends JPanel {
     @Getter
     private final MessageLogPanel messageLogPanel = new MessageLogPanel(3000);
     private final ShellSender shellSender;
+    private final MainFrame mainFrame;
     private final Injector injector;
     private final CardsContainer cardsContainer;
 
     @PostConstruct
     public void postConstruct() {
+        injector.register(MainPanel.class, this);
+
         JPanel logPanel = createLogPanel();
         cardsContainer.create();
 
@@ -72,10 +75,22 @@ public class MainPanel extends JPanel {
     private JPanel createLogPanel() throws SecurityException {
         JPanel logPanel = new JPanel();
 
-        LogAppender logAppender = new LogAppender(messageLogPanel);
-        logAppender.start();
-        injector.register(LogAppender.class, logAppender);
-        ((Logger) LogManager.getRootLogger()).addAppender(logAppender);
+        LogRequest request = LogRequest.newBuilder().setPrevious(300).build();
+        mainFrame.getRpcClient().getLogStub().subscribe(request, new StreamObserver<>() {
+            @Override
+            public void onNext(LogResponse value) {
+                messageLogPanel.log(value.getMessage() + "\n");
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                t.printStackTrace();
+            }
+
+            @Override
+            public void onCompleted() {
+            }
+        });
 
         JTextField commands = new JTextField();
 

@@ -189,7 +189,7 @@ public class SWCommandDefinition implements Callable<Integer> {
             }
         }
 
-        serverWrecker.start();
+        serverWrecker.startAttack();
         return 0;
     }
 }

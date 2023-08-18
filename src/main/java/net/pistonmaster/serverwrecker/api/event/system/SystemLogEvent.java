@@ -17,18 +17,9 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api;
+package net.pistonmaster.serverwrecker.api.event.system;
 
-import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
 
-import javax.inject.Inject;
-
-@RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ConsoleSubject {
-    private final ServerWrecker serverWrecker;
-
-    public void sendMessage(String message) {
-        serverWrecker.getLogger().info(message);
-    }
+public record SystemLogEvent(String message) implements ServerWreckerEvent {
 }

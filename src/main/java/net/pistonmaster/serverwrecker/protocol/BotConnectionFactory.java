@@ -23,6 +23,7 @@ import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.github.steveice10.packetlib.BuiltinFlags;
 import io.netty.channel.EventLoopGroup;
+import net.pistonmaster.serverwrecker.AttackManager;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
@@ -40,7 +41,7 @@ import org.slf4j.Logger;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
-public record BotConnectionFactory(ServerWrecker serverWrecker, InetSocketAddress targetAddress,
+public record BotConnectionFactory(AttackManager attackManager, InetSocketAddress targetAddress,
                                    SettingsHolder settingsHolder, Logger logger,
                                    MinecraftProtocol protocol, MinecraftAccount minecraftAccount,
                                    SWProxy proxyData, EventLoopGroup eventLoopGroup) {
@@ -52,7 +53,7 @@ public record BotConnectionFactory(ServerWrecker serverWrecker, InetSocketAddres
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
         BotConnectionMeta meta = new BotConnectionMeta(minecraftAccount, targetState);
         ViaClientSession session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
-        BotConnection botConnection = new BotConnection(this, serverWrecker, settingsHolder, logger, protocol, session, meta);
+        BotConnection botConnection = new BotConnection(this, attackManager, attackManager.getServerWrecker(), settingsHolder, logger, protocol, session, meta);
         session.setPostDisconnectHook(() -> botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup));
 
         SessionDataManager sessionDataManager = new SessionDataManager(botConnection);

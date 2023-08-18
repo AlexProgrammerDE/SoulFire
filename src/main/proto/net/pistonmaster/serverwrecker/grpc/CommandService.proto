@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package net.pistonmaster.serverwrecker.grpc.command;
+
+message CommandRequest {
+  string command = 1;
+}
+
+enum CommandCode {
+  SUCCESS = 0;
+  FAILURE = 1;
+}
+
+message CommandResponse {
+  CommandCode code = 1;
+}
+
+service CommandService {
+  rpc executeCommand(CommandRequest) returns (CommandResponse);
+}

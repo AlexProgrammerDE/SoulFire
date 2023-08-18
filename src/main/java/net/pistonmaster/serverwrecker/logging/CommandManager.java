@@ -28,6 +28,7 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.AttackManager;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
@@ -37,7 +38,8 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
-import com.google.inject.Inject;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,8 +54,14 @@ public class CommandManager {
     public void postConstruct() {
         Logger logger = serverWrecker.getLogger();
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("online").executes(c -> {
+            AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+
+            if (attackManager == null) {
+                return 1;
+            }
+
             List<String> online = new ArrayList<>();
-            serverWrecker.getBotConnections().forEach(client -> {
+            attackManager.getBotConnections().forEach(client -> {
                 if (client.isOnline()) {
                     online.add(client.meta().getMinecraftAccount().username());
                 }
@@ -71,8 +79,14 @@ public class CommandManager {
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("say")
                 .then(RequiredArgumentBuilder.<ConsoleSubject, String>argument("message", StringArgumentType.greedyString())
                         .executes(c -> {
+                            AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+
+                            if (attackManager == null) {
+                                return 1;
+                            }
+
                             String message = StringArgumentType.getString(c, "message");
-                            serverWrecker.getBotConnections().forEach(client -> {
+                            attackManager.getBotConnections().forEach(client -> {
                                 if (client.isOnline()) {
                                     client.botControl().sendMessage(message);
                                 }
@@ -80,15 +94,21 @@ public class CommandManager {
                             return 1;
                         })));
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("stats").executes(c -> {
-            if (serverWrecker.getBotConnections().isEmpty()) {
+            AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+
+            if (attackManager == null) {
+                return 1;
+            }
+
+            if (attackManager.getBotConnections().isEmpty()) {
                 logger.info("No bots connected!");
                 return 1;
             }
 
-            logger.info("Total bots: {}", serverWrecker.getBotConnections().size());
+            logger.info("Total bots: {}", attackManager.getBotConnections().size());
             long readTraffic = 0;
             long writeTraffic = 0;
-            for (BotConnection bot : serverWrecker.getBotConnections()) {
+            for (BotConnection bot : attackManager.getBotConnections()) {
                 GlobalTrafficShapingHandler trafficShapingHandler = bot.getTrafficHandler();
 
                 if (trafficShapingHandler == null) {
@@ -104,7 +124,7 @@ public class CommandManager {
 
             long currentReadTraffic = 0;
             long currentWriteTraffic = 0;
-            for (BotConnection bot : serverWrecker.getBotConnections()) {
+            for (BotConnection bot : attackManager.getBotConnections()) {
                 GlobalTrafficShapingHandler trafficShapingHandler = bot.getTrafficHandler();
 
                 if (trafficShapingHandler == null) {

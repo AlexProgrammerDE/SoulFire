@@ -131,6 +131,10 @@ public class MessageLogPanel extends JPanel {
         });
     }
 
+    public String getLogs() {
+        return textComponent.getText();
+    }
+
     @Setter
     private static class NoopDocumentFilter extends DocumentFilter {
         private boolean filter = true;

@@ -40,7 +40,7 @@ import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
 import picocli.CommandLine;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;

@@ -26,12 +26,13 @@ import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.gui.MainFrame;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -46,7 +47,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
     private final JCheckBox shuffleAccounts = new PresetJCheckBox(AccountSettings.DEFAULT_SHUFFLE_ACCOUNTS);
 
     @Inject
-    public AccountPanel(ServerWrecker serverWrecker, JFrame parent) {
+    public AccountPanel(ServerWrecker serverWrecker, MainFrame parent) {
         serverWrecker.getSettingsManager().registerDuplex(AccountSettings.class, this);
 
         setLayout(new GridLayout(2, 1, 10, 10));
@@ -150,7 +151,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         add(accountListPanel);
     }
 
-    private JButton createAccountLoadButton(ServerWrecker serverWrecker, JFrame parent, AuthType type) {
+    private JButton createAccountLoadButton(ServerWrecker serverWrecker, MainFrame parent, AuthType type) {
         String loadText = String.format("Load %s accounts", type);
         String typeText = String.format("%s list file", type);
         JButton button = new JButton(loadText);
@@ -188,7 +189,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         );
     }
 
-    private record LoadAccountsListener(ServerWrecker serverWrecker, JFrame frame,
+    private record LoadAccountsListener(ServerWrecker serverWrecker, MainFrame frame,
                                         FileChooser chooser, AuthType authType) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {

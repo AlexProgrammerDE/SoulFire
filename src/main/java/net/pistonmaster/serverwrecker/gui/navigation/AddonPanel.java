@@ -23,7 +23,7 @@ import lombok.Getter;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;

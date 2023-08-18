@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.gui.MainFrame;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
@@ -29,7 +30,7 @@ import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -43,7 +44,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
     private final JSpinner botsPerProxy = new JSpinner();
 
     @Inject
-    public ProxyPanel(ServerWrecker serverWrecker, JFrame parent) {
+    public ProxyPanel(ServerWrecker serverWrecker, MainFrame parent) {
         serverWrecker.getSettingsManager().registerDuplex(ProxySettings.class, this);
 
         setLayout(new GridLayout(2, 1, 10, 10));
@@ -146,7 +147,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         add(proxyListPanel);
     }
 
-    private JButton createProxyLoadButton(ServerWrecker serverWrecker, JFrame parent, ProxyType type) {
+    private JButton createProxyLoadButton(ServerWrecker serverWrecker, MainFrame parent, ProxyType type) {
         String loadText = String.format("Load %s proxies", type.name());
         String typeText = String.format("%s list file", type.name());
         JButton button = new JButton(loadText);
@@ -182,7 +183,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         );
     }
 
-    private record LoadProxiesListener(ServerWrecker serverWrecker, JFrame frame,
+    private record LoadProxiesListener(ServerWrecker serverWrecker, MainFrame frame,
                                        FileChooser chooser, ProxyType proxyType) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {

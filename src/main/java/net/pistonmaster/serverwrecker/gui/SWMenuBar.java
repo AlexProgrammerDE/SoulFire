@@ -32,7 +32,7 @@ import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.popups.AboutPopup;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import java.awt.*;
@@ -56,7 +56,7 @@ public class SWMenuBar extends JMenuBar {
     }
 
     @Inject
-    public SWMenuBar(ServerWrecker serverWrecker, JFrame frame) {
+    public SWMenuBar(ServerWrecker serverWrecker) {
         JMenu fileMenu = new JMenu("File");
         JMenuItem loadProfile = new JMenuItem("Load Profile");
         loadProfile.addActionListener(e -> {

@@ -19,10 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
+import net.pistonmaster.serverwrecker.AttackManager;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.AttackState;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 
@@ -52,7 +53,7 @@ public class ControlPanel extends JPanel {
 
                     stopButton.setEnabled(true);
 
-                    serverWrecker.start();
+                    serverWrecker.startAttack();
                 } catch (Exception ex) {
                     serverWrecker.getLogger().info(ex.getMessage(), ex);
                 }
@@ -60,15 +61,21 @@ public class ControlPanel extends JPanel {
         });
 
         pauseButton.addActionListener(action -> {
-            if (serverWrecker.getAttackState().isRunning()) {
-                serverWrecker.setAttackState(AttackState.PAUSED);
-            } else if (serverWrecker.getAttackState().isPaused()) {
-                serverWrecker.setAttackState(AttackState.RUNNING);
+            AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+
+            if (attackManager == null) {
+                return;
+            }
+
+            if (attackManager.getAttackState().isRunning()) {
+                attackManager.setAttackState(AttackState.PAUSED);
+            } else if (attackManager.getAttackState().isPaused()) {
+                attackManager.setAttackState(AttackState.RUNNING);
             } else {
                 throw new IllegalStateException("Attack state is not running or paused!");
             }
 
-            if (serverWrecker.getAttackState().isPaused()) {
+            if (attackManager.getAttackState().isPaused()) {
                 serverWrecker.getLogger().info("Paused bot attack");
                 pauseButton.setText("Resume");
             } else {
@@ -78,16 +85,22 @@ public class ControlPanel extends JPanel {
         });
 
         stopButton.addActionListener(action -> {
+            AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+
+            if (attackManager == null) {
+                return;
+            }
+
             startButton.setEnabled(true);
 
             pauseButton.setEnabled(false);
             pauseButton.setText("Pause");
-            serverWrecker.setAttackState(AttackState.PAUSED);
+            attackManager.setAttackState(AttackState.PAUSED);
 
             stopButton.setEnabled(false);
 
             serverWrecker.getLogger().info("Stopping bot attack");
-            serverWrecker.stop();
+            serverWrecker.stopAllAttacks();
         });
     }
 }

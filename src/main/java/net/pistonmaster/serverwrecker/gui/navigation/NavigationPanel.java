@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import ch.jalu.injector.Injector;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 

@@ -57,7 +57,7 @@ public class AutoReconnect implements InternalAddon {
         }
 
         AutoReconnectSettings autoReconnectSettings = event.connection().settingsHolder().get(AutoReconnectSettings.class);
-        if (!autoReconnectSettings.autoReconnect() || event.connection().serverWrecker().getAttackState().isInactive()) {
+        if (!autoReconnectSettings.autoReconnect() || event.connection().attackManager().getAttackState().isInactive()) {
             return;
         }
 
@@ -68,7 +68,7 @@ public class AutoReconnect implements InternalAddon {
             }
 
             event.connection().factory().connect()
-                    .thenAccept(newConnection -> event.connection().serverWrecker().getBotConnections()
+                    .thenAccept(newConnection -> event.connection().attackManager().getBotConnections()
                             .replaceAll(connection1 -> connection1 == event.connection() ? newConnection : connection1));
         }, ThreadLocalRandom.current()
                 .nextInt(autoReconnectSettings.minDelay(), autoReconnectSettings.maxDelay()), TimeUnit.SECONDS);

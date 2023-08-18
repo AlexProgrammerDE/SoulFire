@@ -1,7 +1,9 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.google.protobuf.gradle.*
 
 plugins {
     application
+    idea
     id("sw.shadow-conventions")
     id("edu.sc.seis.launch4j") version "3.0.4"
     id("com.google.protobuf") version "0.9.4"
@@ -99,7 +101,7 @@ dependencies {
     // For supporting multiple Minecraft versions
     implementation("com.viaversion:viaversion:4.8.0-23w32a-SNAPSHOT") { isTransitive = false }
     implementation("com.viaversion:viabackwards:4.8.0-23w32a-SNAPSHOT") { isTransitive = false }
-    implementation("com.viaversion:viarewind-core:2.0.4-SNAPSHOT")
+    implementation("com.viaversion:viarewind-core:3.0.0-SNAPSHOT")
 
     implementation("net.raphimc:ViaLegacy:2.2.19-SNAPSHOT")
     implementation("net.raphimc:ViaAprilFools:2.0.9-SNAPSHOT")
@@ -115,6 +117,12 @@ dependencies {
     implementation("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT") {
         isTransitive = false
     }
+
+    // gRPC
+    implementation(libs.grpc.proto)
+    implementation(libs.grpc.services)
+    implementation(libs.grpc.stub)
+    runtimeOnly(libs.grpc.netty)
 
     implementation(libs.flatlaf)
     implementation(libs.flatlaf.intellij.themes)
@@ -132,7 +140,7 @@ dependencies {
     implementation(libs.commons.validator)
     implementation(libs.commons.io)
 
-    implementation(libs.the.altening)
+    implementation(libs.thealtening)
 
     implementation(libs.kyori.plain)
     implementation(libs.kyori.gson)
@@ -152,12 +160,31 @@ dependencies {
     }
 }
 
-sourceSets {
-    main {
-        java {
-            srcDirs("build/generated/source/proto/main/grpc")
-            srcDirs("build/generated/source/proto/main/java")
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${libs.versions.protoc.get()}"
+    }
+    plugins {
+        id("grpc") {
+            artifact = "io.grpc:protoc-gen-grpc-java:${libs.versions.grpc.get()}"
         }
+    }
+    generateProtoTasks {
+        ofSourceSet("main").forEach {
+            it.plugins {
+                // Apply the "grpc" plugin whose spec is defined above, without options.
+                id("grpc")
+            }
+        }
+    }
+}
+
+idea {
+    module {
+        generatedSourceDirs.addAll(listOf(
+            file("${protobuf.generatedFilesBaseDir}/main/grpc"),
+            file("${protobuf.generatedFilesBaseDir}/main/java")
+        ))
     }
 }
 
