@@ -73,82 +73,28 @@ tasks {
 dependencies {
     implementation(projects.buildData)
 
+    // Log/Console libraries
     implementation(libs.bundles.log4j)
+    implementation(libs.jline)
+    implementation(libs.jansi)
     implementation(libs.terminalconsoleappender)
     implementation(libs.slf4j)
     implementation(libs.disruptor)
 
+    // For command handling
     implementation(libs.brigadier)
 
+    // For CLI support
     implementation(libs.picoli)
     annotationProcessor(libs.picoli.codegen)
 
-    compileOnly(libs.lombok)
-    annotationProcessor(libs.lombok)
-
-    // Main protocol library
-    implementation(libs.mcprotocollib)
-
-    // For advanced encryption and compression
-    implementation(libs.velocity.native)
-
-    // For advanced account authentication
-    implementation("net.raphimc:MinecraftAuth:2.1.4") {
-        exclude("com.google.code.gson", "gson")
-        exclude("org.slf4j", "slf4j-api")
-    }
-
-    // For supporting multiple Minecraft versions
-    implementation("com.viaversion:viaversion:4.8.0-23w32a-SNAPSHOT") { isTransitive = false }
-    implementation("com.viaversion:viabackwards:4.8.0-23w32a-SNAPSHOT") { isTransitive = false }
-    implementation("com.viaversion:viarewind-core:3.0.0-SNAPSHOT")
-
-    implementation("net.raphimc:ViaLegacy:2.2.19-SNAPSHOT")
-    implementation("net.raphimc:ViaAprilFools:2.0.9-SNAPSHOT")
-    implementation("net.raphimc:ViaLoader:2.2.8") {
-        exclude("org.slf4j", "slf4j-api")
-        exclude("org.yaml", "snakeyaml")
-    }
-
-    // For Bedrock support
-    implementation("net.raphimc:ViaBedrock:0.0.2-SNAPSHOT") {
-        exclude("io.netty", "netty-codec-http")
-    }
-    implementation("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT") {
-        isTransitive = false
-    }
-
-    // gRPC
-    implementation(libs.grpc.proto)
-    implementation(libs.grpc.services)
-    implementation(libs.grpc.stub)
-    runtimeOnly(libs.grpc.netty)
-
+    // For GUI support
     implementation(libs.flatlaf)
     implementation(libs.flatlaf.intellij.themes)
     implementation(libs.flatlaf.extras)
     implementation(libs.xchart)
 
-    implementation(libs.brigadier)
-    implementation(libs.pf4j) {
-        isTransitive = false
-    }
-    implementation(libs.jansi)
-    implementation(libs.guava)
-    implementation(libs.gson)
-
-    implementation(libs.commons.validator)
-    implementation(libs.commons.io)
-
-    implementation(libs.thealtening)
-
-    implementation(libs.kyori.plain)
-    implementation(libs.kyori.gson)
-
-    implementation(libs.kyori.event)
-    implementation(libs.injector)
-    implementation(libs.snakeyaml)
-
+    // For JavaFX file editor in GUI
     val javaFXVersion = "20"
     val javaFXModules = listOf("base", "graphics", "controls", "swing")
     val javaFXPlatforms = listOf("linux", "linux-aarch64", "mac", "mac-aarch64", "win")
@@ -158,6 +104,71 @@ dependencies {
             implementation("org.openjfx:javafx-$module:$javaFXVersion:$platform")
         }
     }
+
+    // Main protocol library
+    implementation(libs.mcprotocollib)
+
+    // For advanced encryption and compression
+    implementation(libs.velocity.native)
+
+    // Netty raknet support for ViaBedrock
+    implementation(libs.netty.raknet) {
+        isTransitive = false
+    }
+
+    // For supporting multiple Minecraft versions
+    implementation(libs.via.version) { isTransitive = false }
+    implementation(libs.via.backwards) { isTransitive = false }
+    implementation(libs.via.rewind)
+    implementation(libs.via.legacy)
+    implementation(libs.via.aprilfools)
+    implementation(libs.via.loader) {
+        exclude("org.slf4j", "slf4j-api")
+        exclude("org.yaml", "snakeyaml")
+    }
+
+    // For Bedrock support
+    implementation(libs.via.bedrock) {
+        exclude("io.netty", "netty-codec-http")
+    }
+
+    // For code generation
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
+
+    // For YAML support (ViaVersion)
+    implementation(libs.snakeyaml)
+
+    implementation(libs.kyori.event)
+    implementation(libs.kyori.plain)
+    implementation(libs.kyori.gson)
+
+    implementation(libs.commons.validator)
+    implementation(libs.commons.io)
+
+    implementation(libs.guava)
+    implementation(libs.gson)
+    implementation(libs.pf4j) {
+        isTransitive = false
+    }
+
+    // For microsoft account authentication
+    implementation(libs.minecraftauth) {
+        exclude("com.google.code.gson", "gson")
+        exclude("org.slf4j", "slf4j-api")
+    }
+
+    // For TheAltening account authentication
+    implementation(libs.thealtening)
+
+    // For class injection
+    implementation(libs.injector)
+
+    // gRPC
+    implementation(libs.grpc.proto)
+    implementation(libs.grpc.services)
+    implementation(libs.grpc.stub)
+    runtimeOnly(libs.grpc.netty)
 }
 
 protobuf {
