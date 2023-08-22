@@ -24,7 +24,6 @@ import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
-import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -68,7 +67,6 @@ public class ServerWreckerAPI {
         eventBus.subscribe(clazz, subscriber);
     }
 
-    @SuppressWarnings("unchecked")
     public static void registerListeners(Object listener) {
         for (Method method : listener.getClass().getDeclaredMethods()) {
             if (!method.isAnnotationPresent(EventHandler.class)) {
@@ -94,19 +92,6 @@ public class ServerWreckerAPI {
                         }
                     });
         }
-    }
-
-    public static void unregisterByListenerClass(Class<?> clazz) {
-        eventBus.unsubscribeIf(subscription -> {
-            if (clazz.isInstance(subscription)) {
-                if (subscription instanceof UnregisterCleanup cleanup) {
-                    cleanup.cleanup();
-                }
-                return true;
-            }
-
-            return false;
-        });
     }
 
     public static void registerAddon(Addon addon) {

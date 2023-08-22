@@ -19,18 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.protocol;
 
-import com.github.steveice10.mc.auth.exception.request.InvalidCredentialsException;
-import com.github.steveice10.mc.auth.exception.request.RequestException;
-import com.github.steveice10.mc.auth.exception.request.ServiceUnavailableException;
-import com.github.steveice10.mc.protocol.data.ProtocolState;
 import lombok.Getter;
-import lombok.Setter;
-import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
-import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
-import net.pistonmaster.serverwrecker.auth.service.JavaData;
-import net.pistonmaster.serverwrecker.protocol.bot.BotControlAPI;
-import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
-import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 
 import java.util.ArrayList;
 import java.util.Collections;

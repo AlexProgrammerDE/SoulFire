@@ -21,13 +21,11 @@ package net.pistonmaster.serverwrecker.addons;
 
 import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.util.TickTimer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -45,7 +43,7 @@ public class BotTicker implements InternalAddon, EventSubscriber<PreBotConnectEv
     }
 
     private record BotTickerTask(BotConnection connection, ScheduledExecutorService executor,
-                                 TickTimer tickTimer) implements UnregisterCleanup {
+                                 TickTimer tickTimer) {
         public BotTickerTask {
             executor.scheduleWithFixedDelay(() -> {
                 tickTimer.advanceTime();
@@ -56,11 +54,6 @@ public class BotTicker implements InternalAddon, EventSubscriber<PreBotConnectEv
                     t.printStackTrace();
                 }
             }, 0, 50, TimeUnit.MILLISECONDS); // 20 TPS
-        }
-
-        @Override
-        public void cleanup() {
-            executor.shutdown();
         }
     }
 }

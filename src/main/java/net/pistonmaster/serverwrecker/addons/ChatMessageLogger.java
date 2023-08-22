@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.addons;
 
 import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
@@ -31,7 +30,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -51,7 +49,7 @@ public class ChatMessageLogger implements InternalAddon, EventSubscriber<PreBotC
 
     private record BotChatListener(BotConnection connection, ScheduledExecutorService executor,
                                    Set<String> messageQueue)
-            implements EventSubscriber<ChatMessageReceiveEvent>, UnregisterCleanup {
+            implements EventSubscriber<ChatMessageReceiveEvent> {
         public BotChatListener {
             executor.scheduleAtFixedRate(() -> {
                 Iterator<String> iter = messageQueue.iterator();
@@ -70,11 +68,6 @@ public class ChatMessageLogger implements InternalAddon, EventSubscriber<PreBotC
         @Override
         public void on(@NonNull ChatMessageReceiveEvent event) {
             messageQueue.add(event.parseToText().replace("\n", "\\n"));
-        }
-
-        @Override
-        public void cleanup() {
-            executor.shutdown();
         }
     }
 }

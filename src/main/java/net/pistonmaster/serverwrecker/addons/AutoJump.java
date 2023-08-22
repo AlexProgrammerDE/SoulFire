@@ -24,7 +24,6 @@ import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
-import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
@@ -44,7 +43,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class AutoJump implements InternalAddon {
@@ -80,7 +78,7 @@ public class AutoJump implements InternalAddon {
     }
 
     private record BotJumpThread(BotConnection connection, ScheduledExecutorService executor,
-                                 Set<String> messageQueue) implements UnregisterCleanup {
+                                 Set<String> messageQueue) {
         public BotJumpThread {
             AutoJumpSettings settings = connection.settingsHolder().get(AutoJumpSettings.class);
 
@@ -95,11 +93,6 @@ public class AutoJump implements InternalAddon {
                     movementManager.jump();
                 }
             }, settings.minDelay(), settings.maxDelay());
-        }
-
-        @Override
-        public void cleanup() {
-            executor.shutdown();
         }
     }
 
