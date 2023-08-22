@@ -372,7 +372,7 @@ public class ServerWrecker {
     }
 
     public void startAttack() {
-        AttackManager attackManager = injector.getSingleton(AttackManager.class);
+        AttackManager attackManager = injector.newInstance(AttackManager.class);
 
         attackManager.start(settingsManager.collectSettings(),
                 new ArrayList<>(proxyRegistry.getUsableProxies()),
