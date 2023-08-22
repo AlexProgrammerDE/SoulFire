@@ -64,8 +64,9 @@ public class AutoJump implements InternalAddon {
             return;
         }
 
-        event.connection().cleanup(new BotJumpThread(event.connection(),
-                Executors.newScheduledThreadPool(1), new LinkedHashSet<>()));
+        new BotJumpThread(event.connection(),
+                event.connection().executorManager().newScheduledExecutorService(),
+                new LinkedHashSet<>());
     }
 
     @EventHandler

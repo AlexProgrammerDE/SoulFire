@@ -99,7 +99,6 @@ public class ControlPanel extends JPanel {
 
             stopButton.setEnabled(false);
 
-            serverWrecker.getLogger().info("Stopping bot attack");
             serverWrecker.stopAllAttacks();
         });
     }

@@ -39,8 +39,9 @@ public class BotTicker implements InternalAddon, EventSubscriber<PreBotConnectEv
 
     @Override
     public void on(@NonNull PreBotConnectEvent event) throws Throwable {
-        event.connection().cleanup(new BotTickerTask(event.connection(),
-                Executors.newScheduledThreadPool(1), new TickTimer(20)));
+        new BotTickerTask(event.connection(),
+                event.connection().executorManager().newScheduledExecutorService(),
+                new TickTimer(20));
     }
 
     private record BotTickerTask(BotConnection connection, ScheduledExecutorService executor,

@@ -33,35 +33,33 @@ import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 @Getter
-public class BotConnectionMeta {
-    private final MinecraftAccount minecraftAccount;
-    private final ProtocolState targetState;
-    private final SWSessionService sessionService;
-    @Setter
-    private SessionDataManager sessionDataManager;
-    @Setter
-    private BotControlAPI botControlAPI;
+public class ExecutorManager {
+    private final List<ExecutorService> executors = Collections.synchronizedList(new ArrayList<>());
 
-    public BotConnectionMeta(MinecraftAccount minecraftAccount, ProtocolState targetState) {
-        this.minecraftAccount = minecraftAccount;
-        this.targetState = targetState;
-        this.sessionService = minecraftAccount.isPremiumJava() ? new SWSessionService(minecraftAccount.authType()) : null;
+    public ScheduledExecutorService newScheduledExecutorService() {
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
+        executors.add(executor);
+
+        return executor;
     }
 
-    public void joinServerId(String serverId, ViaClientSession session) {
-        try {
-            JavaData javaData = (JavaData) minecraftAccount.accountData();
-            sessionService.joinServer(javaData.profileId(), javaData.authToken(), serverId);
-            session.getLogger().info("Successfully sent mojang join request!");
-        } catch (ServiceUnavailableException e) {
-            session.disconnect("Login failed: Authentication service unavailable.", e);
-        } catch (InvalidCredentialsException e) {
-            session.disconnect("Login failed: Invalid login session.", e);
-        } catch (RequestException e) {
-            session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
-        }
+    public ExecutorService newExecutorService() {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        executors.add(executor);
+
+        return executor;
+    }
+
+    public void shutdownAll() {
+        executors.forEach(ExecutorService::shutdownNow);
     }
 }

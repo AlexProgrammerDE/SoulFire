@@ -37,7 +37,7 @@ import java.util.BitSet;
 import java.util.Collections;
 
 public record BotConnection(BotConnectionFactory factory, AttackManager attackManager, ServerWrecker serverWrecker, SettingsHolder settingsHolder,
-                            Logger logger, MinecraftProtocol protocol, ViaClientSession session,
+                            Logger logger, MinecraftProtocol protocol, ViaClientSession session, ExecutorManager executorManager,
                             BotConnectionMeta meta) {
     public boolean isOnline() {
         return session.isConnected();
@@ -53,11 +53,6 @@ public record BotConnection(BotConnectionFactory factory, AttackManager attackMa
 
     public BotControlAPI botControl() {
         return meta.getBotControlAPI();
-    }
-
-    public <T extends UnregisterCleanup> T cleanup(T instance) {
-        meta.getUnregisterCleanups().add(instance);
-        return instance;
     }
 
     public void tick(long ticks, float partialTicks) {

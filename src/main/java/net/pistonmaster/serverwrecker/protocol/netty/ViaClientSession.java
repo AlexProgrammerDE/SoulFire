@@ -86,8 +86,6 @@ public class ViaClientSession extends TcpSession {
     @Getter
     private final BotConnectionMeta meta;
     private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
-    @Setter
-    private Runnable postDisconnectHook;
 
     public ViaClientSession(InetSocketAddress targetAddress, Logger logger,
                             PacketProtocol protocol, SWProxy proxy,
@@ -352,11 +350,6 @@ public class ViaClientSession extends TcpSession {
     @Override
     public void disconnect(Component reason, Throwable cause) {
         super.disconnect(reason, cause);
-        try {
-            postDisconnectHook.run();
-        } catch (Exception e) {
-            logger.error("Error occurred while running post-disconnect hook", e);
-        }
     }
 
     public void packetExceptionCaught(ChannelHandlerContext ctx, Throwable cause, Packet packet) {

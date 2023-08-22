@@ -338,7 +338,7 @@ public class ServerWrecker {
         }
 
         // Shutdown the attack if there is any
-        stopAllAttacks();
+        stopAllAttacks().join();
 
         // Shutdown scheduled tasks
         threadPool.shutdown();
@@ -360,11 +360,14 @@ public class ServerWrecker {
         }
     }
 
-    public void stopAllAttacks() {
+    public CompletableFuture<Void> stopAllAttacks() {
         synchronized (attacks) {
+            List<CompletableFuture<Void>> futures = new ArrayList<>();
             for (AttackManager attackManager : attacks) {
-                attackManager.stop();
+                futures.add(attackManager.stop());
             }
+
+            return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
         }
     }
 

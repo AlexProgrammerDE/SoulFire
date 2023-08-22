@@ -23,12 +23,12 @@ import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.viaversion.viaversion.api.Via;
 import io.netty.channel.EventLoopGroup;
+import io.netty.util.concurrent.Future;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.UnregisterCleanup;
 import net.pistonmaster.serverwrecker.api.event.state.AttackEndEvent;
 import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
@@ -52,15 +52,18 @@ import javax.inject.Inject;
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class AttackManager {
-    private final Logger logger = LoggerFactory.getLogger("AttackManager");
+    private static final AtomicInteger ID_COUNTER = new AtomicInteger();
+    private final Logger logger = LoggerFactory.getLogger("AttackManager-" + ID_COUNTER.getAndIncrement());
     @Setter
     private AttackState attackState = AttackState.STOPPED;
     private final List<BotConnection> botConnections = new CopyOnWriteArrayList<>();
     private final ServerWrecker serverWrecker;
+    private static final GameProfile EMPTY_GAME_PROFILE = new GameProfile((UUID) null, "DoNotUseGameProfile");
 
     @SuppressWarnings("UnstableApiUsage")
     public void start(SettingsHolder settingsHolder, List<SWProxy> proxies, List<MinecraftAccount> accounts) {
@@ -124,7 +127,7 @@ public class AttackManager {
             MinecraftAccount minecraftAccount = getAccount(accountSettings, accounts, botId);
 
             // AuthData will be used internally instead of the MCProtocol data
-            MinecraftProtocol protocol = new MinecraftProtocol(new GameProfile((UUID) null, "DoNotUseGameProfile"), "");
+            MinecraftProtocol protocol = new MinecraftProtocol(EMPTY_GAME_PROFILE, null);
 
             // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
             protocol.setUseDefaultListeners(false);
@@ -213,20 +216,47 @@ public class AttackManager {
         }
     }
 
-    public void stop() {
+    public CompletableFuture<Void> stop() {
         if (attackState.isStopped()) {
-            return;
+            return CompletableFuture.completedFuture(null);
         }
 
+        serverWrecker.getLogger().info("Stopping bot attack");
         this.attackState = AttackState.STOPPED;
+
+        return CompletableFuture.runAsync(this::stopInternal);
+    }
+
+    private void stopInternal() {
+        logger.info("Disconnecting bots");
         for (BotConnection botConnection : botConnections) {
             botConnection.disconnect();
         }
+
+        logger.info("Shutting down task executors");
         for (BotConnection botConnection : botConnections) {
-            botConnection.session().getEventLoopGroup().shutdownGracefully();
-            botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup);
+            botConnection.executorManager().shutdownAll();
         }
+
+        logger.info("Shutting down attack event loop group");
+        var shutdownFutures = new ArrayList<Future<?>>();
+        for (BotConnection botConnection : botConnections) {
+            Future<?> future = botConnection.session().getEventLoopGroup().shutdownGracefully();
+            shutdownFutures.add(future);
+        }
+
+        logger.info("Waiting for attack event loops to fully shut down");
+        for (Future<?> future : shutdownFutures) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.error("Error while shutting down", e);
+            }
+        }
+
         botConnections.clear();
         ServerWreckerAPI.postEvent(new AttackEndEvent());
+
+        logger.info("Attack stopped");
     }
 }

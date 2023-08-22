@@ -53,8 +53,8 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
         BotConnectionMeta meta = new BotConnectionMeta(minecraftAccount, targetState);
         ViaClientSession session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
-        BotConnection botConnection = new BotConnection(this, attackManager, attackManager.getServerWrecker(), settingsHolder, logger, protocol, session, meta);
-        session.setPostDisconnectHook(() -> botConnection.meta().getUnregisterCleanups().forEach(UnregisterCleanup::cleanup));
+        BotConnection botConnection = new BotConnection(this, attackManager, attackManager.getServerWrecker(),
+                settingsHolder, logger, protocol, session, new ExecutorManager(), meta);
 
         SessionDataManager sessionDataManager = new SessionDataManager(botConnection);
         session.getMeta().setSessionDataManager(sessionDataManager);

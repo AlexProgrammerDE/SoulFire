@@ -44,8 +44,9 @@ public class ChatMessageLogger implements InternalAddon, EventSubscriber<PreBotC
     @Override
     public void on(@NonNull PreBotConnectEvent event) throws Throwable {
         ServerWreckerAPI.registerListener(ChatMessageReceiveEvent.class,
-                event.connection().cleanup(new BotChatListener(event.connection(),
-                        Executors.newScheduledThreadPool(1), new LinkedHashSet<>())));
+                new BotChatListener(event.connection(),
+                        event.connection().executorManager().newScheduledExecutorService(),
+                        new LinkedHashSet<>()));
     }
 
     private record BotChatListener(BotConnection connection, ScheduledExecutorService executor,
