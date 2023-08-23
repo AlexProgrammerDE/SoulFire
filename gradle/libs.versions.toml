@@ -43,7 +43,7 @@ commons-io = "commons-io:commons-io:2.13.0"
 guava = "com.google.guava:guava:32.1.2-jre"
 gson = "com.google.code.gson:gson:2.10.1"
 pf4j = "org.pf4j:pf4j:3.9.0"
-minecraftauth = "net.raphimc:MinecraftAuth:2.1.4"
+minecraftauth = "net.raphimc:MinecraftAuth:2.1.5"
 thealtening = "com.thealtening.api:api:4.1.0"
 injector = "ch.jalu:injector:1.0"
 grpc-proto = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
