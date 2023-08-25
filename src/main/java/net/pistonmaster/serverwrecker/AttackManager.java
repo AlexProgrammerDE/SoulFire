@@ -254,7 +254,10 @@ public class AttackManager {
             }
         }
 
+        // Leave them for GC to clean up
         botConnections.clear();
+
+        // Notify addons of state change
         ServerWreckerAPI.postEvent(new AttackEndEvent());
 
         logger.info("Attack stopped");
