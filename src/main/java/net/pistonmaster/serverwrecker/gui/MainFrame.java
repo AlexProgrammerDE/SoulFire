@@ -71,7 +71,8 @@ public class MainFrame extends JFrame {
 
         // Calculate 16:9 width from height
         int height = getHeight();
-        int width = height * 16 / 9;
+        double aspectRatio = 16.0 / 9.0;
+        int width = (int) (height * aspectRatio);
 
         setSize(width, height);
         setMinimumSize(new Dimension(width, height));
