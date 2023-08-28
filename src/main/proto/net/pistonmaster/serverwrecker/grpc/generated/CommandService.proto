@@ -21,11 +21,19 @@ message CommandCompletionRequest {
   string command = 1;
 }
 
+message CommandHistoryRequest {
+}
+
 message CommandCompletionResponse {
   repeated string suggestions = 1;
+}
+
+message CommandHistoryResponse {
+  repeated string command = 1;
 }
 
 service CommandService {
   rpc executeCommand(CommandRequest) returns (CommandResponse);
   rpc tabCompleteCommand(CommandCompletionRequest) returns (CommandCompletionResponse);
+  rpc getCommandHistory(CommandHistoryRequest) returns (CommandHistoryResponse);
 }

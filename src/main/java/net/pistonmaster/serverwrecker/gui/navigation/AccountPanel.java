@@ -26,7 +26,7 @@ import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
-import net.pistonmaster.serverwrecker.gui.MainFrame;
+import net.pistonmaster.serverwrecker.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
@@ -47,7 +47,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
     private final JCheckBox shuffleAccounts = new PresetJCheckBox(AccountSettings.DEFAULT_SHUFFLE_ACCOUNTS);
 
     @Inject
-    public AccountPanel(ServerWrecker serverWrecker, MainFrame parent) {
+    public AccountPanel(ServerWrecker serverWrecker, GUIFrame parent) {
         serverWrecker.getSettingsManager().registerDuplex(AccountSettings.class, this);
 
         setLayout(new GridLayout(2, 1, 10, 10));
@@ -151,7 +151,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         add(accountListPanel);
     }
 
-    private JButton createAccountLoadButton(ServerWrecker serverWrecker, MainFrame parent, AuthType type) {
+    private JButton createAccountLoadButton(ServerWrecker serverWrecker, GUIFrame parent, AuthType type) {
         String loadText = String.format("Load %s accounts", type);
         String typeText = String.format("%s list file", type);
         JButton button = new JButton(loadText);
@@ -189,7 +189,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         );
     }
 
-    private record LoadAccountsListener(ServerWrecker serverWrecker, MainFrame frame,
+    private record LoadAccountsListener(ServerWrecker serverWrecker, GUIFrame frame,
                                         FileChooser chooser, AuthType authType) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {

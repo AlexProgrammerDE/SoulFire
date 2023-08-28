@@ -37,10 +37,6 @@ import java.awt.event.KeyEvent;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MainPanel extends JPanel {
-    @Getter
-    private final MessageLogPanel messageLogPanel = new MessageLogPanel(3000);
-    private final ShellSender shellSender;
-    private final MainFrame mainFrame;
     private final Injector injector;
     private final CardsContainer cardsContainer;
 
@@ -48,7 +44,7 @@ public class MainPanel extends JPanel {
     public void postConstruct() {
         injector.register(MainPanel.class, this);
 
-        JPanel logPanel = createLogPanel();
+        JPanel logPanel = injector.getSingleton(LogPanel.class);
         cardsContainer.create();
 
         setLayout(new GridLayout(1, 1));
@@ -70,85 +66,5 @@ public class MainPanel extends JPanel {
         splitPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
         add(splitPane);
-    }
-
-    private JPanel createLogPanel() throws SecurityException {
-        JPanel logPanel = new JPanel();
-
-        LogRequest request = LogRequest.newBuilder().setPrevious(300).build();
-        mainFrame.getRpcClient().getLogStub().subscribe(request, new StreamObserver<>() {
-            @Override
-            public void onNext(LogResponse value) {
-                messageLogPanel.log(value.getMessage() + "\n");
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                t.printStackTrace();
-            }
-
-            @Override
-            public void onCompleted() {
-            }
-        });
-
-        JTextField commands = new JTextField();
-
-        // commands.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
-
-        commands.addActionListener(shellSender);
-        commands.addKeyListener(new KeyAdapter() {
-            private String cachedText = null;
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (shellSender.getPointer() == -1) {
-                    cachedText = commands.getText();
-                }
-
-                int pointer = shellSender.getPointer();
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_UP -> {
-                        if (pointer < shellSender.getCommandHistory().size() - 1) {
-                            shellSender.setPointer(pointer + 1);
-                            commands.setText(shellSender.getCommandHistory().get(shellSender.getPointer()));
-                        }
-                    }
-                    case KeyEvent.VK_DOWN -> {
-                        if (pointer > -1) {
-                            shellSender.setPointer(pointer - 1);
-
-                            if (shellSender.getPointer() == -1) {
-                                commands.setText(cachedText);
-                            } else {
-                                commands.setText(shellSender.getCommandHistory().get(shellSender.getPointer()));
-                            }
-                        } else {
-                            commands.setText(cachedText);
-                        }
-                    }
-                    case KeyEvent.VK_ENTER -> cachedText = null;
-
-                        /*
-                    case KeyEvent.VK_TAB:
-                        e.consume();
-                        ParseResults<ShellSender> results = shellSender.getDispatcher().parse(commands.getText(), shellSender);
-
-                        System.out.println(results.getContext().findSuggestionContext(commands.getCaretPosition()).startPos);
-                        System.out.println(results.getContext().findSuggestionContext(commands.getCaretPosition()).parent.getName());
-                        break;*/
-                }
-            }
-        });
-
-        commands.putClientProperty("JTextField.placeholderText", "Type ServerWrecker commands here...");
-
-        logPanel.setLayout(new BorderLayout());
-        logPanel.add(messageLogPanel, BorderLayout.CENTER);
-        logPanel.add(commands, BorderLayout.SOUTH);
-
-        logPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 0));
-
-        return logPanel;
     }
 }

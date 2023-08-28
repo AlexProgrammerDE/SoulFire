@@ -25,6 +25,8 @@ import io.grpc.ManagedChannelBuilder;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.grpc.generated.logs.LogsServiceGrpc;
 
+import java.util.concurrent.TimeUnit;
+
 public class RPCClient {
     private final ManagedChannel channel;
     @Getter
@@ -32,14 +34,24 @@ public class RPCClient {
 
     public RPCClient(String host, int port) {
         this(ManagedChannelBuilder.forAddress(host, port).usePlaintext());
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+            System.err.println("*** shutting down gRPC client since JVM is shutting down");
+            try {
+                shutdown();
+            } catch (InterruptedException e) {
+                e.printStackTrace(System.err);
+            }
+            System.err.println("*** client shut down");
+        }));
     }
 
     public RPCClient(ManagedChannelBuilder<?> channelBuilder) {
         channel = channelBuilder.build();
-        logStub = LogsServiceGrpc.newStub(channel);
+        logStub = LogsServiceGrpc.newStub(channel).withCompression("gzip");
     }
 
     public void shutdown() throws InterruptedException {
-        channel.shutdown().awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS);
+        channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
     }
 }

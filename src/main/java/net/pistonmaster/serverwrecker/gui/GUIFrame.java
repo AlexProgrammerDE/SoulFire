@@ -33,27 +33,14 @@ import java.awt.*;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
-public class MainFrame extends JFrame {
+public class GUIFrame extends JFrame {
     public static final String MAIN_MENU = "MainMenu";
-    private final ServerWrecker serverWrecker;
-    private final Injector injector;
-    @Getter
-    private final RPCClient rpcClient;
 
-    @Inject
-    public MainFrame(ServerWrecker serverWrecker, Injector injector) {
+    public GUIFrame() {
         super("ServerWrecker");
-        this.serverWrecker = serverWrecker;
-        this.injector = injector;
-        this.rpcClient = new RPCClient("localhost", 38765);
-        injector.register(MainFrame.class, this);
-        setAppTitle();
     }
 
-    @PostConstruct
-    public void postConstruct() {
-        new JFXPanel(); // Initializes the JavaFX Platform
-
+    public void initComponents(Injector injector) {
         if (SystemInfo.isMacOS) {
             // Hide window title because we want to avoid dark-mode name issues
             getRootPane().putClientProperty("apple.awt.windowTitleVisible", false);
@@ -76,26 +63,5 @@ public class MainFrame extends JFrame {
 
         setSize(width, height);
         setMinimumSize(new Dimension(width, height));
-
-        serverWrecker.getLogger().info("Opening GUI!");
-
-        setVisible(true);
-    }
-
-    public void setAppTitle() {
-        try {
-            Toolkit xToolkit = Toolkit.getDefaultToolkit();
-            if (!xToolkit.getClass().getName().equals("sun.awt.X11.XToolkit")) {
-                return;
-            }
-
-            VarHandle CLASS_NAME_VARIABLE = MethodHandles
-                    .privateLookupIn(xToolkit.getClass(), MethodHandles.lookup())
-                    .findStaticVarHandle(xToolkit.getClass(), "awtAppClassName", String.class);
-
-            CLASS_NAME_VARIABLE.set("ServerWrecker");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

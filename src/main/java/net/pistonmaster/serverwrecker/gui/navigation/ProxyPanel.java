@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.gui.MainFrame;
+import net.pistonmaster.serverwrecker.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
@@ -44,7 +44,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
     private final JSpinner botsPerProxy = new JSpinner();
 
     @Inject
-    public ProxyPanel(ServerWrecker serverWrecker, MainFrame parent) {
+    public ProxyPanel(ServerWrecker serverWrecker, GUIFrame parent) {
         serverWrecker.getSettingsManager().registerDuplex(ProxySettings.class, this);
 
         setLayout(new GridLayout(2, 1, 10, 10));
@@ -147,7 +147,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         add(proxyListPanel);
     }
 
-    private JButton createProxyLoadButton(ServerWrecker serverWrecker, MainFrame parent, ProxyType type) {
+    private JButton createProxyLoadButton(ServerWrecker serverWrecker, GUIFrame parent, ProxyType type) {
         String loadText = String.format("Load %s proxies", type.name());
         String typeText = String.format("%s list file", type.name());
         JButton button = new JButton(loadText);
@@ -183,7 +183,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         );
     }
 
-    private record LoadProxiesListener(ServerWrecker serverWrecker, MainFrame frame,
+    private record LoadProxiesListener(ServerWrecker serverWrecker, GUIFrame frame,
                                        FileChooser chooser, ProxyType proxyType) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {

@@ -57,4 +57,12 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
         responseObserver.onNext(CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void getCommandHistory(CommandHistoryRequest request, StreamObserver<CommandHistoryResponse> responseObserver) {
+        List<String> history = commandManager.getCommandHistory();
+
+        responseObserver.onNext(CommandHistoryResponse.newBuilder().addAllCommand(history).build());
+        responseObserver.onCompleted();
+    }
 }

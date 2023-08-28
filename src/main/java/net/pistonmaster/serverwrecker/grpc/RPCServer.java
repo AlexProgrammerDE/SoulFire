@@ -20,10 +20,7 @@
 package net.pistonmaster.serverwrecker.grpc;
 
 import ch.jalu.injector.Injector;
-import io.grpc.Grpc;
-import io.grpc.InsecureServerCredentials;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
+import io.grpc.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +41,14 @@ public class RPCServer {
     public RPCServer(ServerBuilder<?> serverBuilder, int port, Injector injector) {
         this.port = port;
         server = serverBuilder
+                .intercept(new ServerInterceptor() {
+                    @Override
+                    public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers,
+                                                                                 ServerCallHandler<ReqT, RespT> next) {
+                        call.setCompression("gzip");
+                        return next.startCall(call, headers);
+                    }
+                })
                 .addService(injector.getSingleton(LogServiceImpl.class))
                 .addService(injector.getSingleton(CommandServiceImpl.class))
                 .build();
@@ -66,7 +71,7 @@ public class RPCServer {
 
     public void stop() throws InterruptedException {
         if (server != null) {
-            server.shutdown().awaitTermination(30, TimeUnit.SECONDS);
+            server.shutdownNow().awaitTermination(30, TimeUnit.SECONDS);
         }
     }
 }

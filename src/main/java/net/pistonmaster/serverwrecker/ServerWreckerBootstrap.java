@@ -24,18 +24,16 @@ import net.pistonmaster.serverwrecker.addons.*;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.common.OperationMode;
-import net.pistonmaster.serverwrecker.gui.MainFrame;
+import net.pistonmaster.serverwrecker.gui.GUIFrame;
+import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
-import net.pistonmaster.serverwrecker.logging.LogAppender;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
 import org.fusesource.jansi.AnsiConsole;
 import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Set;
-import java.util.concurrent.Executors;
 
 public class ServerWreckerBootstrap {
     static {
@@ -75,14 +73,8 @@ public class ServerWreckerBootstrap {
             ServerWrecker serverWrecker = new ServerWrecker(OperationMode.GUI);
             serverWrecker.initConsole();
 
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    serverWrecker.getInjector().newInstance(MainFrame.class);
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                    LogManager.shutdown(true, true);
-                }
-            });
+            GUIManager guiManager = new GUIManager(serverWrecker);
+            guiManager.initGUI();
         }
     }
 

@@ -33,6 +33,7 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.DispatcherInitEvent;
+import net.pistonmaster.serverwrecker.gui.LogPanel;
 import net.pistonmaster.serverwrecker.gui.MainPanel;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import org.apache.commons.io.FileUtils;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -49,6 +51,7 @@ public class CommandManager {
     private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
     private final ServerWrecker serverWrecker;
     private final ConsoleSubject consoleSubject;
+    private final List<String> commandHistory = Collections.synchronizedList(new ArrayList<>());
 
     @PostConstruct
     public void postConstruct() {
@@ -70,9 +73,9 @@ public class CommandManager {
             return 1;
         }));
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("clear").executes(c -> {
-            MainPanel mainPanel = serverWrecker.getInjector().getIfAvailable(MainPanel.class);
-            if (mainPanel != null) {
-                mainPanel.getMessageLogPanel().clear();
+            LogPanel logPanel = serverWrecker.getInjector().getIfAvailable(LogPanel.class);
+            if (logPanel != null) {
+                logPanel.getMessageLogPanel().clear();
             }
             return 1;
         }));
@@ -152,8 +155,15 @@ public class CommandManager {
         ServerWreckerAPI.postEvent(new DispatcherInitEvent(dispatcher));
     }
 
+    public List<String> getCommandHistory() {
+        synchronized (commandHistory) {
+            return List.copyOf(commandHistory);
+        }
+    }
+
     public int execute(String command) {
         try {
+            commandHistory.add(command);
             return dispatcher.execute(command, consoleSubject);
         } catch (CommandSyntaxException e) {
             serverWrecker.getLogger().warn(e.getMessage());
