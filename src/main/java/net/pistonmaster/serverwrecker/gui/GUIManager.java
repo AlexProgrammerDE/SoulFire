@@ -23,10 +23,8 @@ import ch.jalu.injector.Injector;
 import javafx.embed.swing.JFXPanel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import lombok.extern.slf4j.XSlf4j;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
-import org.apache.logging.log4j.LogManager;
 
 import javax.swing.*;
 import java.awt.*;

@@ -34,7 +34,6 @@ import net.pistonmaster.serverwrecker.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.DispatcherInitEvent;
 import net.pistonmaster.serverwrecker.gui.LogPanel;
-import net.pistonmaster.serverwrecker.gui.MainPanel;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;

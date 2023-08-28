@@ -20,20 +20,13 @@
 package net.pistonmaster.serverwrecker.gui;
 
 import ch.jalu.injector.Injector;
-import io.grpc.stub.StreamObserver;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.grpc.generated.logs.LogRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.logs.LogResponse;
-import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
 import net.pistonmaster.serverwrecker.gui.navigation.CardsContainer;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MainPanel extends JPanel {

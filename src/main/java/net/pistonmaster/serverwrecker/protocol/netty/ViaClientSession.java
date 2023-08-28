@@ -37,7 +37,6 @@ import io.netty.channel.*;
 import io.netty.handler.codec.haproxy.*;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
-import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.auth.service.BedrockData;

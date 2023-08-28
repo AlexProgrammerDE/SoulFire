@@ -20,25 +20,22 @@
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
-import com.github.steveice10.mc.protocol.data.game.chunk.BitStorage;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
-import com.github.steveice10.mc.protocol.data.game.chunk.palette.MapPalette;
 import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
 
 public class ChunkData {
+    private static final Map<Integer, ChunkSection> SECTION_CACHE = new WeakHashMap<>();
     private final LevelState level;
     private final ChunkSection[] sections;
-    private static final Map<Integer, ChunkSection> SECTION_CACHE = new WeakHashMap<>();
 
     public ChunkData(LevelState level) {
         this.level = level;

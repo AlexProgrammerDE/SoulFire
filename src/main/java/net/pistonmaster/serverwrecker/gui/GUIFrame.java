@@ -21,17 +21,9 @@ package net.pistonmaster.serverwrecker.gui;
 
 import ch.jalu.injector.Injector;
 import com.formdev.flatlaf.util.SystemInfo;
-import javafx.embed.swing.JFXPanel;
-import lombok.Getter;
-import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.grpc.RPCClient;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 
 public class GUIFrame extends JFrame {
     public static final String MAIN_MENU = "MainMenu";

@@ -19,12 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.grpc;
 
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.*;
 import lombok.Getter;
-import net.pistonmaster.serverwrecker.grpc.generated.command.CommandServiceGrpc;
-import net.pistonmaster.serverwrecker.grpc.generated.logs.LogsServiceGrpc;
+import net.pistonmaster.serverwrecker.grpc.generated.CommandServiceGrpc;
+import net.pistonmaster.serverwrecker.grpc.generated.LogsServiceGrpc;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.TrustManager;
 import java.util.concurrent.TimeUnit;
 
 public class RPCClient {
@@ -36,8 +37,9 @@ public class RPCClient {
     @Getter
     private final CommandServiceGrpc.CommandServiceBlockingStub commandStubBlocking;
 
-    public RPCClient(String host, int port) {
-        this(ManagedChannelBuilder.forAddress(host, port).usePlaintext());
+    public RPCClient(String host, int port, String jwt) {
+        this(new JwtCredential(jwt), Grpc.newChannelBuilderForAddress(host, port, InsecureChannelCredentials.create())
+                .build());
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
             System.err.println("*** shutting down gRPC client since JVM is shutting down");
@@ -50,11 +52,11 @@ public class RPCClient {
         }));
     }
 
-    public RPCClient(ManagedChannelBuilder<?> channelBuilder) {
-        channel = channelBuilder.build();
-        logStub = LogsServiceGrpc.newStub(channel).withCompression("gzip");
-        commandStub = CommandServiceGrpc.newStub(channel).withCompression("gzip");
-        commandStubBlocking = CommandServiceGrpc.newBlockingStub(channel).withCompression("gzip");
+    public RPCClient(CallCredentials callCredentials, ManagedChannel managedChannel) {
+        channel = managedChannel;
+        logStub = LogsServiceGrpc.newStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
+        commandStub = CommandServiceGrpc.newStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
+        commandStubBlocking = CommandServiceGrpc.newBlockingStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
     }
 
     public void shutdown() throws InterruptedException {

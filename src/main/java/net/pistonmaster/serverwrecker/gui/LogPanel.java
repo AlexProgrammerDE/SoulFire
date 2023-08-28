@@ -23,12 +23,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.pistonmaster.serverwrecker.grpc.generated.command.CommandHistoryRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.command.CommandHistoryResponse;
-import net.pistonmaster.serverwrecker.grpc.generated.command.CommandRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.command.CommandResponse;
-import net.pistonmaster.serverwrecker.grpc.generated.logs.LogRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.logs.LogResponse;
+import net.pistonmaster.serverwrecker.grpc.generated.*;
 import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
 
 import javax.inject.Inject;
@@ -128,9 +123,9 @@ public class LogPanel extends JPanel {
 
     @RequiredArgsConstructor
     private class CommandShellKeyAdapter extends KeyAdapter {
-        private String cachedText = null;
         private final CommandShellAction commandShellAction;
         private final JTextField commands;
+        private String cachedText = null;
 
         @Override
         public void keyPressed(KeyEvent e) {

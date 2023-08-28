@@ -29,8 +29,10 @@ import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import org.slf4j.Logger;
 
-public record BotConnection(BotConnectionFactory factory, AttackManager attackManager, ServerWrecker serverWrecker, SettingsHolder settingsHolder,
-                            Logger logger, MinecraftProtocol protocol, ViaClientSession session, ExecutorManager executorManager,
+public record BotConnection(BotConnectionFactory factory, AttackManager attackManager, ServerWrecker serverWrecker,
+                            SettingsHolder settingsHolder,
+                            Logger logger, MinecraftProtocol protocol, ViaClientSession session,
+                            ExecutorManager executorManager,
                             BotConnectionMeta meta) {
     public boolean isOnline() {
         return session.isConnected();

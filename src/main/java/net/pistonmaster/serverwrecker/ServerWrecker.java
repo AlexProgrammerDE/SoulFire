@@ -31,6 +31,8 @@ import com.google.gson.JsonObject;
 import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.Getter;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
@@ -67,6 +69,8 @@ import org.pf4j.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -74,8 +78,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.ECPrivateKey;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
@@ -115,9 +124,9 @@ public class ServerWrecker {
     private final Path profilesFolder;
     private final Path pluginsFolder;
     private final boolean outdated;
-    private boolean shutdown = false;
     private final Set<AttackManager> attacks = Collections.synchronizedSet(new HashSet<>());
     private final RPCServer rpcServer;
+    private boolean shutdown = false;
 
     public ServerWrecker(OperationMode operationMode, String host, int port) {
         this.operationMode = operationMode;
@@ -137,7 +146,16 @@ public class ServerWrecker {
         injector.register(LogAppender.class, logAppender);
         ((org.apache.logging.log4j.core.Logger) LogManager.getRootLogger()).addAppender(logAppender);
 
-        rpcServer = new RPCServer(port, injector);
+        KeyGenerator keyGen = null;
+        try {
+            keyGen = KeyGenerator.getInstance("HmacSHA256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
+        SecretKey jwtKey = keyGen.generateKey();
+
+        rpcServer = new RPCServer(port, injector, jwtKey);
         try {
             rpcServer.start();
         } catch (IOException e) {
@@ -149,7 +167,12 @@ public class ServerWrecker {
 
         logger.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
-        RPCClient rpcClient = new RPCClient(host, port);
+        String jwt = Jwts.builder()
+                        .setSubject("admin")
+                        .signWith(jwtKey, SignatureAlgorithm.HS256)
+                        .compact();
+
+        RPCClient rpcClient = new RPCClient(host, port, jwt);
         injector.register(RPCClient.class, rpcClient);
 
         terminalConsole = injector.getSingleton(SWTerminalConsole.class);

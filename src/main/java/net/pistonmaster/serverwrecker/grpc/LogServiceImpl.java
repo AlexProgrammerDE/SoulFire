@@ -23,12 +23,14 @@ import io.grpc.stub.StreamObserver;
 import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.system.SystemLogEvent;
-import net.pistonmaster.serverwrecker.grpc.generated.logs.LogRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.logs.LogResponse;
-import net.pistonmaster.serverwrecker.grpc.generated.logs.LogsServiceGrpc;
+import net.pistonmaster.serverwrecker.grpc.generated.LogRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.LogResponse;
+import net.pistonmaster.serverwrecker.grpc.generated.LogsServiceGrpc;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
@@ -37,6 +39,14 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     public LogServiceImpl() {
         ServerWreckerAPI.registerListener(SystemLogEvent.class, event ->
                 logs.add(event.message()));
+    }
+
+    private static void publishLine(String line, StreamObserver<LogResponse> responseObserver) {
+        LogResponse response = LogResponse.newBuilder()
+                .setMessage(line)
+                .build();
+
+        responseObserver.onNext(response);
     }
 
     @Override
@@ -51,19 +61,12 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
         }
     }
 
-    private record LogEventListener(StreamObserver<LogResponse> responseObserver) implements EventSubscriber<SystemLogEvent> {
+    private record LogEventListener(
+            StreamObserver<LogResponse> responseObserver) implements EventSubscriber<SystemLogEvent> {
         @Override
         public void on(@NonNull SystemLogEvent event) {
             publishLine(event.message(), responseObserver);
         }
-    }
-
-    private static void publishLine(String line, StreamObserver<LogResponse> responseObserver) {
-        LogResponse response = LogResponse.newBuilder()
-                .setMessage(line)
-                .build();
-
-        responseObserver.onNext(response);
     }
 
     public static class QueueWithMaxSize<E> {

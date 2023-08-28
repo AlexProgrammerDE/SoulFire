@@ -21,22 +21,11 @@ package net.pistonmaster.serverwrecker.grpc;
 
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
-import net.kyori.event.EventSubscriber;
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.system.SystemLogEvent;
-import net.pistonmaster.serverwrecker.grpc.generated.command.*;
-import net.pistonmaster.serverwrecker.grpc.generated.logs.LogRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.logs.LogResponse;
-import net.pistonmaster.serverwrecker.grpc.generated.logs.LogsServiceGrpc;
+import net.pistonmaster.serverwrecker.grpc.generated.*;
 import net.pistonmaster.serverwrecker.logging.CommandManager;
-import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBase {

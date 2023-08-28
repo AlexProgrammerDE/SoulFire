@@ -58,12 +58,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class AttackManager {
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
+    private static final GameProfile EMPTY_GAME_PROFILE = new GameProfile((UUID) null, "DoNotUseGameProfile");
     private final Logger logger = LoggerFactory.getLogger("AttackManager-" + ID_COUNTER.getAndIncrement());
-    @Setter
-    private AttackState attackState = AttackState.STOPPED;
     private final List<BotConnection> botConnections = new CopyOnWriteArrayList<>();
     private final ServerWrecker serverWrecker;
-    private static final GameProfile EMPTY_GAME_PROFILE = new GameProfile((UUID) null, "DoNotUseGameProfile");
+    @Setter
+    private AttackState attackState = AttackState.STOPPED;
 
     @SuppressWarnings("UnstableApiUsage")
     public void start(SettingsHolder settingsHolder, List<SWProxy> proxies, List<MinecraftAccount> accounts) {

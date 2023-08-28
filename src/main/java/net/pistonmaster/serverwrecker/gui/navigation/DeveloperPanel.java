@@ -22,7 +22,6 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.LogPanel;
-import net.pistonmaster.serverwrecker.gui.MainPanel;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
