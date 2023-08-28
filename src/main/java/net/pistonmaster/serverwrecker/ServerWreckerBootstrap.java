@@ -25,15 +25,14 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
-import net.pistonmaster.serverwrecker.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
-import org.apache.logging.log4j.LogManager;
 import org.fusesource.jansi.AnsiConsole;
 import picocli.CommandLine;
 
-import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Set;
 
 public class ServerWreckerBootstrap {
@@ -63,19 +62,16 @@ public class ServerWreckerBootstrap {
             System.exit(1);
         });
 
+        int port = getAvailablePort();
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
             loadInternalAddons();
-            runHeadless(args);
+            runHeadless(port, args);
         } else {
             ThemeUtil.initFlatLaf();
             ThemeUtil.setLookAndFeel();
 
             loadInternalAddons();
-            ServerWrecker serverWrecker = new ServerWrecker(OperationMode.GUI);
-            serverWrecker.initConsole();
-
-            GUIManager guiManager = new GUIManager(serverWrecker, serverWrecker.getInjector().getSingleton(RPCClient.class));
-            guiManager.initGUI();
+            runGUI(port);
         }
     }
 
@@ -88,8 +84,8 @@ public class ServerWreckerBootstrap {
         addons.forEach(ServerWreckerAPI::registerAddon);
     }
 
-    private static void runHeadless(String[] args) {
-        ServerWrecker serverWrecker = new ServerWrecker(OperationMode.CLI);
+    private static void runHeadless(int port, String[] args) {
+        ServerWrecker serverWrecker = new ServerWrecker(OperationMode.CLI, "localhost", port);
         SWCommandDefinition serverWreckerCommand = new SWCommandDefinition(serverWrecker);
         CommandLine commandLine = new CommandLine(serverWreckerCommand);
         serverWreckerCommand.setCommandLine(commandLine);
@@ -103,5 +99,30 @@ public class ServerWreckerBootstrap {
 
         ServerWreckerAPI.postEvent(new CommandManagerInitEvent(commandLine));
         commandLine.execute(args);
+    }
+
+    private static void runGUI(int port) {
+        ServerWrecker serverWrecker = new ServerWrecker(OperationMode.GUI, "localhost", port);
+        serverWrecker.initConsole();
+
+        GUIManager guiManager = new GUIManager(serverWrecker, serverWrecker.getInjector().getSingleton(RPCClient.class));
+        guiManager.initGUI();
+    }
+
+    private static int getAvailablePort() {
+        int initialPort = 38765;
+
+        while (true) {
+            try {
+                ServerSocket serverSocket = new ServerSocket(initialPort);
+                serverSocket.close();
+                break; // Port is available, exit the loop
+            } catch (IOException e) {
+                System.out.println("Port " + initialPort + " is already in use, trying next port...");
+                initialPort++; // Increment the port number and try again
+            }
+        }
+
+        return initialPort;
     }
 }

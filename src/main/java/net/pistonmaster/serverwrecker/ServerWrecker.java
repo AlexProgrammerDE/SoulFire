@@ -119,7 +119,7 @@ public class ServerWrecker {
     private final Set<AttackManager> attacks = Collections.synchronizedSet(new HashSet<>());
     private final RPCServer rpcServer;
 
-    public ServerWrecker(OperationMode operationMode) {
+    public ServerWrecker(OperationMode operationMode, String host, int port) {
         this.operationMode = operationMode;
         this.profilesFolder = DATA_FOLDER.resolve("profiles");
         this.pluginsFolder = DATA_FOLDER.resolve("plugins");
@@ -137,7 +137,7 @@ public class ServerWrecker {
         injector.register(LogAppender.class, logAppender);
         ((org.apache.logging.log4j.core.Logger) LogManager.getRootLogger()).addAppender(logAppender);
 
-        rpcServer = new RPCServer(38765, injector);
+        rpcServer = new RPCServer(port, injector);
         try {
             rpcServer.start();
         } catch (IOException e) {
@@ -149,7 +149,7 @@ public class ServerWrecker {
 
         logger.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
-        RPCClient rpcClient = new RPCClient("localhost", 38765);
+        RPCClient rpcClient = new RPCClient(host, port);
         injector.register(RPCClient.class, rpcClient);
 
         terminalConsole = injector.getSingleton(SWTerminalConsole.class);
