@@ -19,13 +19,14 @@
  */
 package net.pistonmaster.serverwrecker.grpc;
 
-import io.grpc.*;
+import io.grpc.CallCredentials;
+import io.grpc.Grpc;
+import io.grpc.InsecureChannelCredentials;
+import io.grpc.ManagedChannel;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandServiceGrpc;
 import net.pistonmaster.serverwrecker.grpc.generated.LogsServiceGrpc;
 
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.TrustManager;
 import java.util.concurrent.TimeUnit;
 
 public class RPCClient {

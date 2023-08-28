@@ -78,9 +78,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.security.interfaces.ECPrivateKey;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -146,7 +144,7 @@ public class ServerWrecker {
         injector.register(LogAppender.class, logAppender);
         ((org.apache.logging.log4j.core.Logger) LogManager.getRootLogger()).addAppender(logAppender);
 
-        KeyGenerator keyGen = null;
+        KeyGenerator keyGen;
         try {
             keyGen = KeyGenerator.getInstance("HmacSHA256");
         } catch (NoSuchAlgorithmException e) {
@@ -168,9 +166,9 @@ public class ServerWrecker {
         logger.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
         String jwt = Jwts.builder()
-                        .setSubject("admin")
-                        .signWith(jwtKey, SignatureAlgorithm.HS256)
-                        .compact();
+                .setSubject("admin")
+                .signWith(jwtKey, SignatureAlgorithm.HS256)
+                .compact();
 
         RPCClient rpcClient = new RPCClient(host, port, jwt);
         injector.register(RPCClient.class, rpcClient);
