@@ -19,10 +19,10 @@
  */
 package net.pistonmaster.serverwrecker.grpc;
 
-import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import lombok.Getter;
+import net.pistonmaster.serverwrecker.grpc.generated.command.CommandServiceGrpc;
 import net.pistonmaster.serverwrecker.grpc.generated.logs.LogsServiceGrpc;
 
 import java.util.concurrent.TimeUnit;
@@ -31,6 +31,10 @@ public class RPCClient {
     private final ManagedChannel channel;
     @Getter
     private final LogsServiceGrpc.LogsServiceStub logStub;
+    @Getter
+    private final CommandServiceGrpc.CommandServiceStub commandStub;
+    @Getter
+    private final CommandServiceGrpc.CommandServiceBlockingStub commandStubBlocking;
 
     public RPCClient(String host, int port) {
         this(ManagedChannelBuilder.forAddress(host, port).usePlaintext());
@@ -49,6 +53,8 @@ public class RPCClient {
     public RPCClient(ManagedChannelBuilder<?> channelBuilder) {
         channel = channelBuilder.build();
         logStub = LogsServiceGrpc.newStub(channel).withCompression("gzip");
+        commandStub = CommandServiceGrpc.newStub(channel).withCompression("gzip");
+        commandStubBlocking = CommandServiceGrpc.newBlockingStub(channel).withCompression("gzip");
     }
 
     public void shutdown() throws InterruptedException {

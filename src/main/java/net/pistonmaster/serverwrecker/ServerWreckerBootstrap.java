@@ -24,6 +24,7 @@ import net.pistonmaster.serverwrecker.addons.*;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.common.OperationMode;
+import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
@@ -73,7 +74,7 @@ public class ServerWreckerBootstrap {
             ServerWrecker serverWrecker = new ServerWrecker(OperationMode.GUI);
             serverWrecker.initConsole();
 
-            GUIManager guiManager = new GUIManager(serverWrecker);
+            GUIManager guiManager = new GUIManager(serverWrecker, serverWrecker.getInjector().getSingleton(RPCClient.class));
             guiManager.initGUI();
         }
     }

@@ -21,6 +21,12 @@ package net.pistonmaster.serverwrecker.gui;
 
 import io.grpc.stub.StreamObserver;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import net.pistonmaster.serverwrecker.grpc.generated.command.CommandHistoryRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.command.CommandHistoryResponse;
+import net.pistonmaster.serverwrecker.grpc.generated.command.CommandRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.command.CommandResponse;
 import net.pistonmaster.serverwrecker.grpc.generated.logs.LogRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.logs.LogResponse;
 import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
@@ -28,15 +34,21 @@ import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 public class LogPanel extends JPanel {
     private final MessageLogPanel messageLogPanel = new MessageLogPanel(3000);
+    private final GUIManager guiManager;
 
     @Inject
-    public LogPanel(ShellSender shellSender, GUIManager guiManager) {
+    public LogPanel(GUIManager guiManager) {
+        this.guiManager = guiManager;
+
         LogRequest request = LogRequest.newBuilder().setPrevious(300).build();
         guiManager.getRpcClient().getLogStub().subscribe(request, new StreamObserver<>() {
             @Override
@@ -58,38 +70,96 @@ public class LogPanel extends JPanel {
 
         // commands.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
 
-        commands.addActionListener(shellSender);
-        commands.addKeyListener(new KeyAdapter() {
-            private String cachedText = null;
+        CommandShellAction commandShellAction = new CommandShellAction();
+        commandShellAction.initHistory();
 
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (shellSender.getPointer() == -1) {
-                    cachedText = commands.getText();
+        commands.addActionListener(commandShellAction);
+        commands.addKeyListener(new CommandShellKeyAdapter(commandShellAction, commands));
+
+        commands.putClientProperty("JTextField.placeholderText", "Type ServerWrecker commands here...");
+
+        setLayout(new BorderLayout());
+        add(messageLogPanel, BorderLayout.CENTER);
+        add(commands, BorderLayout.SOUTH);
+
+        setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 0));
+    }
+
+    @Getter
+    private class CommandShellAction extends AbstractAction {
+        private final List<String> commandHistory = new ArrayList<>();
+        @Setter
+        private int pointer = -1;
+
+        public void initHistory() {
+            CommandHistoryResponse response = guiManager.getRpcClient().getCommandStubBlocking().getCommandHistory(CommandHistoryRequest.newBuilder().build());
+            commandHistory.addAll(response.getCommandList());
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            pointer = -1;
+
+            String command = e.getActionCommand();
+
+            if (command.isEmpty()) {
+                return;
+            }
+
+            ((JTextField) e.getSource()).setText(null);
+
+            commandHistory.add(command);
+            guiManager.getRpcClient().getCommandStub().executeCommand(CommandRequest.newBuilder().setCommand(command).build(), new StreamObserver<>() {
+                @Override
+                public void onNext(CommandResponse value) {
                 }
 
-                int pointer = shellSender.getPointer();
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_UP -> {
-                        if (pointer < shellSender.getCommandHistory().size() - 1) {
-                            shellSender.setPointer(pointer + 1);
-                            commands.setText(shellSender.getCommandHistory().get(shellSender.getPointer()));
-                        }
-                    }
-                    case KeyEvent.VK_DOWN -> {
-                        if (pointer > -1) {
-                            shellSender.setPointer(pointer - 1);
+                @Override
+                public void onError(Throwable t) {
+                    t.printStackTrace();
+                }
 
-                            if (shellSender.getPointer() == -1) {
-                                commands.setText(cachedText);
-                            } else {
-                                commands.setText(shellSender.getCommandHistory().get(shellSender.getPointer()));
-                            }
-                        } else {
-                            commands.setText(cachedText);
-                        }
+                @Override
+                public void onCompleted() {
+                }
+            });
+        }
+    }
+
+    @RequiredArgsConstructor
+    private class CommandShellKeyAdapter extends KeyAdapter {
+        private String cachedText = null;
+        private final CommandShellAction commandShellAction;
+        private final JTextField commands;
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            if (commandShellAction.getPointer() == -1) {
+                cachedText = commands.getText();
+            }
+
+            int pointer = commandShellAction.getPointer();
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_UP -> {
+                    if (pointer < commandShellAction.getCommandHistory().size() - 1) {
+                        commandShellAction.setPointer(pointer + 1);
+                        commands.setText(commandShellAction.getCommandHistory().get(commandShellAction.getPointer()));
                     }
-                    case KeyEvent.VK_ENTER -> cachedText = null;
+                }
+                case KeyEvent.VK_DOWN -> {
+                    if (pointer > -1) {
+                        commandShellAction.setPointer(pointer - 1);
+
+                        if (commandShellAction.getPointer() == -1) {
+                            commands.setText(cachedText);
+                        } else {
+                            commands.setText(commandShellAction.getCommandHistory().get(commandShellAction.getPointer()));
+                        }
+                    } else {
+                        commands.setText(cachedText);
+                    }
+                }
+                case KeyEvent.VK_ENTER -> cachedText = null;
 
                         /*
                     case KeyEvent.VK_TAB:
@@ -99,16 +169,7 @@ public class LogPanel extends JPanel {
                         System.out.println(results.getContext().findSuggestionContext(commands.getCaretPosition()).startPos);
                         System.out.println(results.getContext().findSuggestionContext(commands.getCaretPosition()).parent.getName());
                         break;*/
-                }
             }
-        });
-
-        commands.putClientProperty("JTextField.placeholderText", "Type ServerWrecker commands here...");
-
-        setLayout(new BorderLayout());
-        add(messageLogPanel, BorderLayout.CENTER);
-        add(commands, BorderLayout.SOUTH);
-
-        setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 0));
+        }
     }
 }

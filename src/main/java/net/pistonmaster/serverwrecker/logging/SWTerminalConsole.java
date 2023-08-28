@@ -22,6 +22,9 @@ package net.pistonmaster.serverwrecker.logging;
 import lombok.RequiredArgsConstructor;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.grpc.RPCClient;
+import net.pistonmaster.serverwrecker.grpc.generated.command.CommandCompletionRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.command.CommandRequest;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +40,7 @@ import java.util.List;
 public class SWTerminalConsole extends SimpleTerminalConsole {
     private static final Logger logger = LogManager.getLogger("ServerWrecker");
     private final ServerWrecker serverWrecker;
-    private final CommandManager commandManager;
+    private final RPCClient rpcClient;
 
     /**
      * Sets up {@code System.out} and {@code System.err} to redirect to log4j.
@@ -54,7 +57,9 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
 
     @Override
     protected void runCommand(String command) {
-        commandManager.execute(command);
+        rpcClient.getCommandStubBlocking().executeCommand(
+                CommandRequest.newBuilder().setCommand(command).build()
+        );
     }
 
     @Override
@@ -68,7 +73,9 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
                 .appName("ServerWrecker")
                 .completer((reader, parsedLine, list) -> {
                     try {
-                        List<String> offers = commandManager.getCompletionSuggestions(parsedLine.line()); // Console doesn't get harmed much by this...
+                        List<String> offers = rpcClient.getCommandStubBlocking().tabCompleteCommand(
+                                CommandCompletionRequest.newBuilder().setCommand(parsedLine.line()).build()
+                        ).getSuggestionsList(); // Console doesn't get harmed much by this...
                         for (String offer : offers) {
                             list.add(new Candidate(offer));
                         }

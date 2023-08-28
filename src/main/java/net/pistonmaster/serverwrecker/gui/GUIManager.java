@@ -39,8 +39,8 @@ public class GUIManager {
     private final RPCClient rpcClient;
     private final Injector injector;
 
-    public GUIManager(ServerWrecker serverWrecker) {
-        this.rpcClient = new RPCClient("localhost", 38765);
+    public GUIManager(ServerWrecker serverWrecker, RPCClient rpcClient) {
+        this.rpcClient = rpcClient;
         this.injector = serverWrecker.getInjector(); // TODO: Separate injector for GUI
         injector.register(GUIManager.class, this);
     }

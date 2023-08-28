@@ -43,6 +43,7 @@ import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.data.TranslationMapper;
+import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.grpc.RPCServer;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
@@ -147,6 +148,9 @@ public class ServerWrecker {
         settingsManager.registerDuplex(ProxyList.class, proxyRegistry);
 
         logger.info("Starting ServerWrecker v{}...", BuildData.VERSION);
+
+        RPCClient rpcClient = new RPCClient("localhost", 38765);
+        injector.register(RPCClient.class, rpcClient);
 
         terminalConsole = injector.getSingleton(SWTerminalConsole.class);
 

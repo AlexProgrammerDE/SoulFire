@@ -89,6 +89,8 @@ public class CommandManager {
                             }
 
                             String message = StringArgumentType.getString(c, "message");
+                            logger.info("Sending message by all bots: '{}'", message);
+
                             attackManager.getBotConnections().forEach(client -> {
                                 if (client.isOnline()) {
                                     client.botControl().sendMessage(message);

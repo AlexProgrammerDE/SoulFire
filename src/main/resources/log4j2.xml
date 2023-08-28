@@ -24,10 +24,10 @@
         <TerminalConsole name="TerminalConsole">
             <PatternLayout>
                 <LoggerNamePatternSelector
-                        defaultPattern="%highlightError{[%d{HH:mm:ss} %level] [%logger]: %minecraftFormatting{%msg}%n%xEx}">
+                        defaultPattern="%highlightError{[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%n%xEx}">
                     <!-- ServerWrecker doesn't need a prefix -->
                     <PatternMatch key="net.pistonmaster.serverwrecker."
-                                  pattern="%highlightError{[%d{HH:mm:ss} %level]: %minecraftFormatting{%msg}%n%xEx}"/>
+                                  pattern="%highlightError{[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%n%xEx}"/>
                 </LoggerNamePatternSelector>
             </PatternLayout>
         </TerminalConsole>
