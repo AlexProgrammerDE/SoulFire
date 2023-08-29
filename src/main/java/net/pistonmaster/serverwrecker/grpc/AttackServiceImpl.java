@@ -22,9 +22,7 @@ package net.pistonmaster.serverwrecker.grpc;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.grpc.generated.AttackServiceGrpc;
-import net.pistonmaster.serverwrecker.grpc.generated.AttackStartRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.AttackStartResponse;
+import net.pistonmaster.serverwrecker.grpc.generated.*;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 
 import javax.inject.Inject;
@@ -39,6 +37,23 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
 
         int id = serverWrecker.startAttack(settingsHolder);
         responseObserver.onNext(AttackStartResponse.newBuilder().setId(id).build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void toggleAttackState(AttackStateToggleRequest request, StreamObserver<AttackStateToggleResponse> responseObserver) {
+        serverWrecker.toggleAttackState(request.getId(), switch (request.getNewState()) {
+            case PAUSE -> true;
+            case RESUME, UNRECOGNIZED -> false;
+        });
+        responseObserver.onNext(AttackStateToggleResponse.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void stopAttack(AttackStopRequest request, StreamObserver<AttackStopResponse> responseObserver) {
+        serverWrecker.stopAttack(request.getId());
+        responseObserver.onNext(AttackStopResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 }

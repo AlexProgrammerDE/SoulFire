@@ -43,6 +43,7 @@ import net.pistonmaster.serverwrecker.auth.AccountList;
 import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
+import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.data.TranslationMapper;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
@@ -396,5 +397,27 @@ public class ServerWrecker {
         attacks.add(attackManager);
 
         return attackManager.getId();
+    }
+
+    public void toggleAttackState(int id, boolean pause) {
+        synchronized (attacks) {
+            for (AttackManager attackManager : attacks) {
+                if (attackManager.getId() == id) {
+                    attackManager.setAttackState(pause ? AttackState.PAUSED : AttackState.RUNNING);
+                    return;
+                }
+            }
+        }
+    }
+
+    public void stopAttack(int id) {
+        attacks.removeIf(attackManager -> {
+            if (attackManager.getId() == id) {
+                attackManager.stop();
+                return true;
+            } else {
+                return false;
+            }
+        });
     }
 }

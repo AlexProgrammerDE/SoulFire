@@ -23,17 +23,19 @@ import io.grpc.stub.StreamObserver;
 import net.pistonmaster.serverwrecker.AttackManager;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.AttackState;
-import net.pistonmaster.serverwrecker.grpc.generated.AttackStartRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.AttackStartResponse;
+import net.pistonmaster.serverwrecker.grpc.generated.*;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ControlPanel extends JPanel {
     @Inject
     public ControlPanel(ServerWrecker serverWrecker, GUIManager guiManager) {
+        AtomicInteger attackId = new AtomicInteger();
+
         JButton startButton = new JButton("Start");
         JButton pauseButton = new JButton("Pause");
         JButton stopButton = new JButton("Stop");
@@ -60,6 +62,7 @@ public class ControlPanel extends JPanel {
                 @Override
                 public void onNext(AttackStartResponse value) {
                     guiManager.getLogger().debug("Started bot attack with id {}", value.getId());
+                    attackId.set(value.getId());
                 }
 
                 @Override
@@ -74,45 +77,60 @@ public class ControlPanel extends JPanel {
         });
 
         pauseButton.addActionListener(action -> {
-            AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+            boolean pauseText = pauseButton.getText().equals("Pause");
 
-            if (attackManager == null) {
-                return;
-            }
-
-            if (attackManager.getAttackState().isRunning()) {
-                attackManager.setAttackState(AttackState.PAUSED);
-            } else if (attackManager.getAttackState().isPaused()) {
-                attackManager.setAttackState(AttackState.RUNNING);
-            } else {
-                throw new IllegalStateException("Attack state is not running or paused!");
-            }
-
-            if (attackManager.getAttackState().isPaused()) {
+            if (pauseText) {
                 guiManager.getLogger().info("Paused bot attack");
                 pauseButton.setText("Resume");
             } else {
                 guiManager.getLogger().info("Resumed bot attack");
                 pauseButton.setText("Pause");
             }
+
+            var stateTarget = pauseText ? AttackStateToggleRequest.State.PAUSE : AttackStateToggleRequest.State.RESUME;
+
+            guiManager.getRpcClient().getAttackStub().toggleAttackState(AttackStateToggleRequest.newBuilder()
+                    .setId(attackId.get()).setNewState(stateTarget).build(), new StreamObserver<>() {
+                @Override
+                public void onNext(AttackStateToggleResponse value) {
+                    guiManager.getLogger().debug("Toggled bot attack state to {}", stateTarget.name());
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    guiManager.getLogger().error("Error while toggling bot attack!", t);
+                }
+
+                @Override
+                public void onCompleted() {
+                }
+            });
         });
 
         stopButton.addActionListener(action -> {
-            AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
-
-            if (attackManager == null) {
-                return;
-            }
-
             startButton.setEnabled(true);
 
             pauseButton.setEnabled(false);
             pauseButton.setText("Pause");
-            attackManager.setAttackState(AttackState.PAUSED);
 
             stopButton.setEnabled(false);
 
-            serverWrecker.stopAllAttacks();
+            guiManager.getRpcClient().getAttackStub().stopAttack(AttackStopRequest.newBuilder()
+                    .setId(attackId.get()).build(), new StreamObserver<>() {
+                @Override
+                public void onNext(AttackStopResponse value) {
+                    guiManager.getLogger().info("Stopped bot attack with id {}", attackId.get());
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    guiManager.getLogger().error("Error while stopping bot attack!", t);
+                }
+
+                @Override
+                public void onCompleted() {
+                }
+            });
         });
     }
 }
