@@ -19,9 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
+import io.grpc.stub.StreamObserver;
 import net.pistonmaster.serverwrecker.AttackManager;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.common.AttackState;
+import net.pistonmaster.serverwrecker.grpc.generated.AttackStartRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.AttackStartResponse;
+import net.pistonmaster.serverwrecker.gui.GUIManager;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -29,7 +33,7 @@ import java.awt.*;
 
 public class ControlPanel extends JPanel {
     @Inject
-    public ControlPanel(ServerWrecker serverWrecker) {
+    public ControlPanel(ServerWrecker serverWrecker, GUIManager guiManager) {
         JButton startButton = new JButton("Start");
         JButton pauseButton = new JButton("Pause");
         JButton stopButton = new JButton("Stop");
@@ -44,18 +48,27 @@ public class ControlPanel extends JPanel {
         add(stopButton);
 
         startButton.addActionListener(action -> {
-            serverWrecker.getThreadPool().submit(() -> {
-                try {
-                    startButton.setEnabled(false);
+            startButton.setEnabled(false);
 
-                    pauseButton.setEnabled(true);
-                    pauseButton.setText("Pause");
+            pauseButton.setEnabled(true);
+            pauseButton.setText("Pause");
 
-                    stopButton.setEnabled(true);
+            stopButton.setEnabled(true);
 
-                    serverWrecker.startAttack();
-                } catch (Exception ex) {
-                    serverWrecker.getLogger().info(ex.getMessage(), ex);
+            guiManager.getRpcClient().getAttackStub().startAttack(AttackStartRequest.newBuilder()
+                    .setSettings(serverWrecker.getSettingsManager().exportSettings()).build(), new StreamObserver<>() {
+                @Override
+                public void onNext(AttackStartResponse value) {
+                    guiManager.getLogger().info("Started bot attack with id {}", value.getId());
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    guiManager.getLogger().error("Error while starting bot attack!", t);
+                }
+
+                @Override
+                public void onCompleted() {
                 }
             });
         });
@@ -76,10 +89,10 @@ public class ControlPanel extends JPanel {
             }
 
             if (attackManager.getAttackState().isPaused()) {
-                serverWrecker.getLogger().info("Paused bot attack");
+                guiManager.getLogger().info("Paused bot attack");
                 pauseButton.setText("Resume");
             } else {
-                serverWrecker.getLogger().info("Resumed bot attack");
+                guiManager.getLogger().info("Resumed bot attack");
                 pauseButton.setText("Pause");
             }
         });

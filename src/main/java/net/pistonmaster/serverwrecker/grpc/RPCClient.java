@@ -24,23 +24,24 @@ import io.grpc.Grpc;
 import io.grpc.InsecureChannelCredentials;
 import io.grpc.ManagedChannel;
 import lombok.Getter;
+import net.pistonmaster.serverwrecker.builddata.BuildData;
+import net.pistonmaster.serverwrecker.grpc.generated.AttackServiceGrpc;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandServiceGrpc;
 import net.pistonmaster.serverwrecker.grpc.generated.LogsServiceGrpc;
 
 import java.util.concurrent.TimeUnit;
 
+@Getter
 public class RPCClient {
     private final ManagedChannel channel;
-    @Getter
     private final LogsServiceGrpc.LogsServiceStub logStub;
-    @Getter
     private final CommandServiceGrpc.CommandServiceStub commandStub;
-    @Getter
     private final CommandServiceGrpc.CommandServiceBlockingStub commandStubBlocking;
+    private final AttackServiceGrpc.AttackServiceStub attackStub;
 
     public RPCClient(String host, int port, String jwt) {
         this(new JwtCredential(jwt), Grpc.newChannelBuilderForAddress(host, port, InsecureChannelCredentials.create())
-                .build());
+                .userAgent("ServerWreckerJavaClient/" + BuildData.VERSION).build());
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
             System.err.println("*** shutting down gRPC client since JVM is shutting down");
@@ -58,6 +59,7 @@ public class RPCClient {
         logStub = LogsServiceGrpc.newStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
         commandStub = CommandServiceGrpc.newStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
         commandStubBlocking = CommandServiceGrpc.newBlockingStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
+        attackStub = AttackServiceGrpc.newStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
     }
 
     public void shutdown() throws InterruptedException {

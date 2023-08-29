@@ -106,15 +106,23 @@ public class SettingsManager {
 
     public void loadProfile(Path path) throws IOException {
         try {
-            JsonArray settingsHolder = dumpGson.fromJson(Files.readString(path), JsonArray.class);
+            onSettingsLoad(createSettingsHolder(Files.readString(path)));
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+    }
+
+    public SettingsHolder createSettingsHolder(String json) {
+        try {
+            JsonArray settingsHolder = dumpGson.fromJson(json, JsonArray.class);
             List<SettingsObject> settingsObjects = new ArrayList<>();
             for (JsonElement jsonElement : settingsHolder) {
                 settingsObjects.add(settingsTypeGson.fromJson(jsonElement, SettingsObject.class));
             }
 
-            onSettingsLoad(new SettingsHolder(settingsObjects));
+            return new SettingsHolder(settingsObjects);
         } catch (Exception e) {
-            throw new IOException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -122,15 +130,19 @@ public class SettingsManager {
         Files.createDirectories(path.getParent());
 
         try {
-            List<JsonElement> settingsHolder = new ArrayList<>();
-            for (SettingsObject settingsObject : collectSettings().settings()) {
-                settingsHolder.add(settingsTypeGson.toJsonTree(settingsObject));
-            }
-
-            Files.writeString(path, dumpGson.toJson(settingsHolder));
+            Files.writeString(path, exportSettings());
         } catch (Exception e) {
             throw new IOException(e);
         }
+    }
+
+    public String exportSettings() {
+        List<JsonElement> settingsHolder = new ArrayList<>();
+        for (SettingsObject settingsObject : collectSettings().settings()) {
+            settingsHolder.add(settingsTypeGson.toJsonTree(settingsObject));
+        }
+
+        return dumpGson.toJson(settingsHolder);
     }
 
     private record ListenerRegistration<T extends SettingsObject>(Class<T> clazz, SettingsListener<T> listener) {

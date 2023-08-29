@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.LogPanel;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
@@ -39,7 +40,7 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
     private final JCheckBox debug = new JCheckBox();
 
     @Inject
-    public DeveloperPanel(ServerWrecker serverWrecker, LogPanel logPanel) {
+    public DeveloperPanel(ServerWrecker serverWrecker, GUIManager guiManager, LogPanel logPanel) {
         serverWrecker.getSettingsManager().registerDuplex(DevSettings.class, this);
 
         setLayout(new GridLayout(0, 2));
@@ -69,14 +70,14 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
                 return;
             }
 
-            serverWrecker.getThreadPool().submit(() -> {
+            guiManager.getThreadPool().submit(() -> {
                 try (BufferedWriter writer = Files.newBufferedWriter(selectedFile)) {
                     writer.write(logPanel.getMessageLogPanel().getLogs());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                serverWrecker.getLogger().info("Saved log to: {}", selectedFile);
+                guiManager.getLogger().info("Saved log to: {}", selectedFile);
             });
         });
     }

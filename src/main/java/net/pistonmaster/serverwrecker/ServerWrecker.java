@@ -57,6 +57,7 @@ import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 import net.pistonmaster.serverwrecker.util.VersionComparator;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
@@ -384,11 +385,13 @@ public class ServerWrecker {
     }
 
     public void startAttack() {
+        startAttack(settingsManager.collectSettings());
+    }
+
+    public void startAttack(SettingsHolder settingsHolder) {
         AttackManager attackManager = injector.newInstance(AttackManager.class);
 
-        attackManager.start(settingsManager.collectSettings(),
-                new ArrayList<>(proxyRegistry.getUsableProxies()),
-                new ArrayList<>(accountRegistry.getUsableAccounts()));
+        attackManager.start(settingsHolder);
 
         attacks.add(attackManager);
     }

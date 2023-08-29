@@ -25,17 +25,22 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-@Slf4j
+@Getter
 public class GUIManager {
-    @Getter
     private final RPCClient rpcClient;
     private final Injector injector;
+    private final ExecutorService threadPool = Executors.newCachedThreadPool();
+    private final Logger logger = LoggerFactory.getLogger(GUIManager.class);
 
     public GUIManager(ServerWrecker serverWrecker, RPCClient rpcClient) {
         this.rpcClient = rpcClient;
@@ -55,7 +60,7 @@ public class GUIManager {
 
         guiFrame.initComponents(injector);
 
-        log.info("Opening GUI!");
+        logger.info("Opening GUI!");
 
         SwingUtilities.invokeLater(() -> guiFrame.setVisible(true));
     }

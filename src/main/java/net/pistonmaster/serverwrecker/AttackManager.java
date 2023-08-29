@@ -31,6 +31,7 @@ import lombok.Setter;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.state.AttackEndEvent;
 import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
+import net.pistonmaster.serverwrecker.auth.AccountList;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.common.AttackState;
@@ -38,6 +39,7 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.netty.ResolveUtil;
 import net.pistonmaster.serverwrecker.protocol.netty.SWNettyHelper;
+import net.pistonmaster.serverwrecker.proxy.ProxyList;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
@@ -66,10 +68,18 @@ public class AttackManager {
     private AttackState attackState = AttackState.STOPPED;
 
     @SuppressWarnings("UnstableApiUsage")
-    public void start(SettingsHolder settingsHolder, List<SWProxy> proxies, List<MinecraftAccount> accounts) {
+    public void start(SettingsHolder settingsHolder) {
         if (!attackState.isStopped()) {
             throw new IllegalStateException("Attack is already running");
         }
+
+        AccountList accountListSettings = settingsHolder.get(AccountList.class);
+        List<MinecraftAccount> accounts = new ArrayList<>(accountListSettings.accounts()
+                .stream().filter(MinecraftAccount::enabled).toList());
+
+        ProxyList proxyListSettings = settingsHolder.get(ProxyList.class);
+        List<SWProxy> proxies = new ArrayList<>(proxyListSettings.proxies()
+                .stream().filter(SWProxy::enabled).toList());
 
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
         DevSettings devSettings = settingsHolder.get(DevSettings.class);
