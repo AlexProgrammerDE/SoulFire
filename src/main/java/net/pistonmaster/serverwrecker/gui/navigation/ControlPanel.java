@@ -59,7 +59,7 @@ public class ControlPanel extends JPanel {
                     .setSettings(serverWrecker.getSettingsManager().exportSettings()).build(), new StreamObserver<>() {
                 @Override
                 public void onNext(AttackStartResponse value) {
-                    guiManager.getLogger().info("Started bot attack with id {}", value.getId());
+                    guiManager.getLogger().debug("Started bot attack with id {}", value.getId());
                 }
 
                 @Override

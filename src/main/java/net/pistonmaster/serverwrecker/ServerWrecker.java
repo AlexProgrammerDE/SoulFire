@@ -384,15 +384,17 @@ public class ServerWrecker {
         }
     }
 
-    public void startAttack() {
-        startAttack(settingsManager.collectSettings());
+    public int startAttack() {
+        return startAttack(settingsManager.collectSettings());
     }
 
-    public void startAttack(SettingsHolder settingsHolder) {
+    public int startAttack(SettingsHolder settingsHolder) {
         AttackManager attackManager = injector.newInstance(AttackManager.class);
 
         attackManager.start(settingsHolder);
 
         attacks.add(attackManager);
+
+        return attackManager.getId();
     }
 }

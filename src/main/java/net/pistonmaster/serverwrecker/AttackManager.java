@@ -61,7 +61,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AttackManager {
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
     private static final GameProfile EMPTY_GAME_PROFILE = new GameProfile((UUID) null, "DoNotUseGameProfile");
-    private final Logger logger = LoggerFactory.getLogger("AttackManager-" + ID_COUNTER.getAndIncrement());
+    private final int id = ID_COUNTER.getAndIncrement();
+    private final Logger logger = LoggerFactory.getLogger("AttackManager-" + id);
     private final List<BotConnection> botConnections = new CopyOnWriteArrayList<>();
     private final ServerWrecker serverWrecker;
     @Setter
