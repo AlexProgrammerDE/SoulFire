@@ -19,5 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding;
 
-public interface GraphNode {
+import net.pistonmaster.serverwrecker.util.VectorHelper;
+import org.cloudburstmc.math.vector.Vector3d;
+
+public record BlockPosition(Vector3d position) {
+    public BlockPosition {
+        position = VectorHelper.middleOfBlockNormalize(position);
+    }
 }

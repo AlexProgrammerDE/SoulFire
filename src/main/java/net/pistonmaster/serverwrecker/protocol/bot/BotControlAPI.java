@@ -48,8 +48,8 @@ public class BotControlAPI {
             throw new IllegalStateException("You can't fly! (Server said so)");
         }
 
-        boolean newFly = !botMovementManager.isFlying();
-        botMovementManager.setFlying(newFly);
+        boolean newFly = !botMovementManager.getMovementState().isFlying();
+        botMovementManager.getMovementState().setFlying(newFly);
 
         // Let the server know we are flying
         sessionDataManager.getSession().send(new ServerboundPlayerAbilitiesPacket(newFly));
@@ -58,8 +58,8 @@ public class BotControlAPI {
     }
 
     public boolean toggleSprint() {
-        boolean newSprint = !botMovementManager.isSprinting();
-        botMovementManager.setSprinting(newSprint);
+        boolean newSprint = !botMovementManager.getMovementState().isSprinting();
+        botMovementManager.getMovementState().setSprinting(newSprint);
 
         // Let the server know we are sprinting
         sessionDataManager.getSession().send(new ServerboundPlayerCommandPacket(
@@ -71,7 +71,7 @@ public class BotControlAPI {
     }
 
     public boolean toggleSneak() {
-        boolean newSneak = !botMovementManager.isSneaking();
+        boolean newSneak = !botMovementManager.getMovementState().isSneaking();
         botMovementManager.setSneaking(newSneak);
 
         // Let the server know we are sneaking

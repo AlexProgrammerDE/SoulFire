@@ -17,15 +17,16 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.minecraft;
+package net.pistonmaster.serverwrecker.pathfinding;
 
-public enum BasicMovementEnum {
-    NORTH,
-    SOUTH,
-    EAST,
-    WEST,
-    NORTH_EAST,
-    NORTH_WEST,
-    SOUTH_EAST,
-    SOUTH_WEST,
+import org.cloudburstmc.math.vector.Vector3d;
+
+public interface MinecraftAction {
+    Vector3d getTargetPos();
+
+    default BlockPosition getTargetBlockPos() {
+        return new BlockPosition(getTargetPos());
+    }
+
+    double getActionCost();
 }

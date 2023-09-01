@@ -4,24 +4,6 @@ option java_multiple_files = true;
 
 package net.pistonmaster.serverwrecker.grpc.generated;
 
-message Proxy {
-  enum ProxyType {
-    HTTP = 0;
-    SOCKS4 = 1;
-    SOCKS5 = 2;
-  }
-
-  ProxyType type = 1;
-  string host = 2;
-  int32 port = 3;
-  string username = 4;
-  string password = 5;
-}
-
-message Account {
-
-}
-
 message AttackStartRequest {
   string settings = 1;
 }

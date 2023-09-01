@@ -17,8 +17,12 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.minecraft;
+package net.pistonmaster.serverwrecker.pathfinding;
 
+import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
+import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
+import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -26,7 +30,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import java.util.HashSet;
 import java.util.Set;
 
-public record PlayerMovement(Vector3d from, BasicMovementEnum action) implements MinecraftAction {
+public record PlayerMovement(Vector3d from, BasicMovementEnum action, SessionDataManager sessionDataManager) implements MinecraftAction {
     @Override
     public Vector3d getTargetPos() {
         // Make sure we are in the middle of the block
@@ -42,6 +46,36 @@ public record PlayerMovement(Vector3d from, BasicMovementEnum action) implements
             case SOUTH_EAST -> normalizedFrom.add(1, 0, 1);
             case SOUTH_WEST -> normalizedFrom.add(-1, 0, 1);
         };
+    }
+
+    @Override
+    public double getActionCost() {
+        double cost = switch (action) {
+            case NORTH, SOUTH, EAST, WEST -> Costs.STRAIGHT;
+            case NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST -> Costs.DIAGONAL;
+        };
+
+        LevelState levelState = sessionDataManager.getCurrentLevel();
+        if (levelState == null) {
+            return Double.POSITIVE_INFINITY;
+        }
+
+        for (Vector3i requiredFreeBlock : requiredFreeBlocks()) {
+            BlockType blockType = levelState.getBlockTypeAt(requiredFreeBlock);
+            if (BlockTypeHelper.isSolid(blockType)) {
+                cost += Costs.DIG_BLOCK;
+            }
+        }
+
+        for (Vector3i requiredSolidBlock : requiredSolidBlocks()) {
+            BlockType blockType = levelState.getBlockTypeAt(requiredSolidBlock);
+
+            if (!BlockTypeHelper.isSolid(blockType)) {
+                cost += Costs.PLACE_BLOCK;
+            }
+        }
+
+        return cost;
     }
 
     public Set<Vector3i> requiredFreeBlocks() {

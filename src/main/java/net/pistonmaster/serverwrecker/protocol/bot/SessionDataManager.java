@@ -374,7 +374,7 @@ public final class SessionDataManager {
         abilitiesData = new AbilitiesData(packet.isInvincible(), packet.isFlying(), packet.isCanFly(), packet.isCreative(), packet.getFlySpeed(), packet.getWalkSpeed());
 
         if (botMovementManager != null) {
-            botMovementManager.setFlying(abilitiesData.flying());
+            botMovementManager.getMovementState().setFlying(abilitiesData.flying());
             botMovementManager.setAbilitiesFlySpeed(abilitiesData.flySpeed());
             botMovementManager.setWalkSpeed(abilitiesData.walkSpeed());
         }

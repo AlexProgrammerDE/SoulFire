@@ -17,13 +17,30 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.minecraft;
+package net.pistonmaster.serverwrecker.protocol.bot;
 
-import net.pistonmaster.serverwrecker.util.VectorHelper;
-import org.cloudburstmc.math.vector.Vector3d;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-public record BlockPosition(Vector3d position) {
-    public BlockPosition {
-        position = VectorHelper.middleOfBlockNormalize(position);
-    }
+@Getter
+@ToString
+public class MovementState {
+    @Setter
+    private boolean forward;
+    @Setter
+    private boolean backward;
+    @Setter
+    private boolean left;
+    @Setter
+    private boolean right;
+    @Setter
+    private boolean sprinting;
+    @Setter
+    private boolean jumping;
+    @Setter(AccessLevel.PROTECTED)
+    private boolean sneaking;
+    @Setter
+    private boolean flying;
 }

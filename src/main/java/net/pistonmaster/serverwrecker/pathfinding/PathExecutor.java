@@ -17,11 +17,14 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.minecraft;
+package net.pistonmaster.serverwrecker.pathfinding;
 
-import net.pistonmaster.serverwrecker.pathfinding.GraphNode;
-import org.cloudburstmc.math.vector.Vector3d;
+import java.util.Queue;
 
-public interface MinecraftAction extends GraphNode {
-    Vector3d getTargetPos();
+public class PathExecutor {
+    private final Queue<BlockPosition> goals;
+
+    public PathExecutor(Queue<BlockPosition> goals) {
+        this.goals = goals;
+    }
 }

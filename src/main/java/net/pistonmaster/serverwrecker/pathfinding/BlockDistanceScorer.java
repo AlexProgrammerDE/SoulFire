@@ -19,12 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding;
 
-import net.pistonmaster.serverwrecker.pathfinding.minecraft.BlockPosition;
-import net.pistonmaster.serverwrecker.pathfinding.minecraft.MinecraftAction;
-
-import java.util.Map;
-
-
-public interface Graph {
-    Map<BlockPosition, MinecraftAction> getConnections(BlockPosition node);
+public class BlockDistanceScorer {
+    public double computeCost(BlockPosition from, BlockPosition to) {
+        return from.position().distance(to.position());
+    }
 }

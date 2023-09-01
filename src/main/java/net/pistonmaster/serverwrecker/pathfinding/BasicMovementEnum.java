@@ -19,8 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding;
 
-import net.pistonmaster.serverwrecker.pathfinding.minecraft.BlockPosition;
-
-public interface Scorer {
-    double computeCost(BlockPosition from, BlockPosition to);
+public enum BasicMovementEnum {
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST,
+    NORTH_EAST,
+    NORTH_WEST,
+    SOUTH_EAST,
+    SOUTH_WEST,
 }

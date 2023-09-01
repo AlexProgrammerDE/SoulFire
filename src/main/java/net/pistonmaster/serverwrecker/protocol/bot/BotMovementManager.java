@@ -61,17 +61,12 @@ public final class BotMovementManager {
     private float speedInAir = 0.02F;
     private float moveForward;
     private float moveStrafing;
-    private boolean jumping;
-    private boolean sprinting;
-    private boolean sneaking;
-    @Setter
-    private boolean flying;
+    private final MovementState movementState = new MovementState();
     @Setter
     private float abilitiesFlySpeed = 0.05F;
     @Setter
     private float walkSpeed = 0.10000000149011612F;
     private int jumpTicks;
-    private Vector3d movementTarget;
     private int ticksWithoutPacket = 0;
 
     public BotMovementManager(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch, @Nullable AbilitiesData data) {
@@ -79,7 +74,7 @@ public final class BotMovementManager {
         this.yaw = yaw;
         this.pitch = pitch;
         if (data != null) {
-            this.flying = data.flying();
+            this.movementState.setFlying(data.flying());
             this.abilitiesFlySpeed = data.flySpeed();
             this.walkSpeed = data.walkSpeed();
         }
@@ -95,7 +90,7 @@ public final class BotMovementManager {
     }
 
     public void setSneaking(boolean sneaking) {
-        this.sneaking = sneaking;
+        this.movementState.setSneaking(sneaking);
         updateBoundingBox(); // New height, new bounding box
     }
 
@@ -182,7 +177,7 @@ public final class BotMovementManager {
         }
 
         // Jump
-        if (this.jumping) {
+        if (this.movementState.isJumping()) {
             if (this.isInFluid()) {
                 this.motionY += 0.03999999910593033D;
             } else if (this.onGround && this.jumpTicks == 0) {
@@ -196,7 +191,7 @@ public final class BotMovementManager {
         this.moveStrafing *= 0.98F;
         this.moveForward *= 0.98F;
 
-        if (this.flying) {
+        if (this.movementState.isFlying()) {
             this.travelFlying(this.moveForward, 0, this.moveStrafing);
         } else {
             if (this.isInFluid()) {
@@ -210,21 +205,12 @@ public final class BotMovementManager {
 
         this.jumpMovementFactor = this.speedInAir;
 
-        if (this.sprinting) {
+        if (this.movementState.isSprinting()) {
             this.jumpMovementFactor = (float) ((double) this.jumpMovementFactor + (double) this.speedInAir * 0.3D);
 
-            if (this.moveForward <= 0 || this.collision || this.sneaking) {
-                this.sprinting = false;
+            if (this.moveForward <= 0 || this.collision || this.movementState.isSneaking()) {
+                this.movementState.setSprinting(false);
             }
-        }
-
-        if (movementTarget != null) {
-            lookAt(RotationOrigin.FEET, movementTarget);
-
-            double speed = 0.2;
-            this.motionX = -Math.sin(Math.toRadians(this.yaw)) * Math.cos(Math.toRadians(this.pitch)) * speed;
-            this.motionY = -Math.sin(Math.toRadians(this.pitch)) * speed;
-            this.motionZ = Math.cos(Math.toRadians(this.yaw)) * Math.cos(Math.toRadians(this.pitch)) * speed;
         }
 
         // Detect whether positions changed
@@ -281,7 +267,7 @@ public final class BotMovementManager {
     public void jump() {
         this.motionY = 0.42D;
 
-        if (this.sprinting) {
+        if (this.movementState.isSprinting()) {
             float radiansYaw = (float) Math.toRadians(this.yaw);
             this.motionX -= Math.sin(radiansYaw) * 0.2F;
             this.motionZ += Math.cos(radiansYaw) * 0.2F;
@@ -291,19 +277,19 @@ public final class BotMovementManager {
     private void travelFlying(float forward, float vertical, float strafe) {
         float flySpeed = getFlySpeed();
         // Fly move up and down
-        if (this.sneaking) {
+        if (this.movementState.isSneaking()) {
             this.moveStrafing = strafe / 0.3F;
             this.moveForward = forward / 0.3F;
             this.motionY -= flySpeed * 3.0F;
         }
 
-        if (this.jumping) {
+        if (this.movementState.isJumping()) {
             this.motionY += flySpeed * 3.0F;
         }
 
         double prevMotionY = this.motionY;
         float prevJumpMovementFactor = this.jumpMovementFactor;
-        this.jumpMovementFactor = flySpeed * (this.sprinting ? 2 : 1);
+        this.jumpMovementFactor = flySpeed * (this.movementState.isSprinting() ? 2 : 1);
 
         this.travel(forward, vertical, strafe);
 
@@ -311,7 +297,7 @@ public final class BotMovementManager {
         this.jumpMovementFactor = prevJumpMovementFactor;
 
         if (this.onGround) {
-            this.flying = false;
+            this.movementState.setFlying(false);
         }
     }
 
@@ -349,7 +335,7 @@ public final class BotMovementManager {
         this.collision = this.moveCollide(this.motionX, this.motionY, this.motionZ);
 
         // Gravity
-        if (!this.flying) {
+        if (!this.movementState.isFlying()) {
             this.motionY -= 0.08D;
         }
 
@@ -383,7 +369,7 @@ public final class BotMovementManager {
     }
 
     private float getAIMoveSpeed() {
-        return this.sprinting ? 0.13000001F : walkSpeed;
+        return this.movementState.isSprinting() ? 0.13000001F : walkSpeed;
     }
 
     public void moveRelative(double forward, double up, double strafe, double friction) {
@@ -420,7 +406,7 @@ public final class BotMovementManager {
         double originalTargetY = targetY;
         double originalTargetZ = targetZ;
 
-        if (this.onGround && this.sneaking) {
+        if (this.onGround && this.movementState.isSneaking()) {
             for (; targetX != 0.0D && level.getCollisionBoxes(this.boundingBox.offset(targetX, -STEP_HEIGHT, 0.0D)).isEmpty(); originalTargetX = targetX) {
                 if (targetX < 0.05D && targetX >= -0.05D) {
                     targetX = 0.0D;
@@ -504,7 +490,7 @@ public final class BotMovementManager {
     }
 
     public float getEyeHeight() {
-        return this.sneaking ? 1.50F : 1.62F;
+        return this.movementState.isSneaking() ? 1.50F : 1.62F;
     }
 
     public float getBoundingBoxWidth() {
@@ -512,7 +498,7 @@ public final class BotMovementManager {
     }
 
     public float getBoundingBoxHeight() {
-        return this.sneaking ? 1.5F : 1.8F;
+        return this.movementState.isSneaking() ? 1.5F : 1.8F;
     }
 
     public int getBlockPosX() {
@@ -536,7 +522,7 @@ public final class BotMovementManager {
     }
 
     public float getFlySpeed() {
-        return isSprinting() ? this.abilitiesFlySpeed * 2.0F : this.abilitiesFlySpeed;
+        return movementState.isSprinting() ? this.abilitiesFlySpeed * 2.0F : this.abilitiesFlySpeed;
     }
 
     private LevelState getLevelSafe() {
