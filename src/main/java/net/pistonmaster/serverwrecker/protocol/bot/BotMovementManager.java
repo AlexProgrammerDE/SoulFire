@@ -161,6 +161,8 @@ public final class BotMovementManager {
 
         boolean startOnGround = this.onGround;
 
+        this.updateMovementStateInput();
+
         if (this.jumpTicks > 0) {
             --this.jumpTicks;
         }
@@ -236,6 +238,35 @@ public final class BotMovementManager {
             ticksWithoutPacket = 0;
             sendPos();
         }
+    }
+
+    private void updateMovementStateInput() {
+        float moveForward = 0.0F;
+        float moveStrafe = 0.0F;
+
+        if (movementState.isForward()) {
+            moveForward++;
+        }
+
+        if (movementState.isBackward()) {
+            moveForward--;
+        }
+
+        if (movementState.isLeft()) {
+            moveStrafe++;
+        }
+
+        if (movementState.isRight()) {
+            moveStrafe--;
+        }
+
+        if (movementState.isSneaking()) {
+            moveStrafe = (float) ((double) moveStrafe * 0.3D);
+            moveForward = (float) ((double) moveForward * 0.3D);
+        }
+
+        this.moveForward = moveForward;
+        this.moveStrafing = moveStrafe;
     }
 
     public void sendPosRot() {
