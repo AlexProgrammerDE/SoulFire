@@ -43,4 +43,11 @@ public class MovementState {
     private boolean sneaking;
     @Setter
     private boolean flying;
+
+    public void resetWasd() {
+        forward = false;
+        backward = false;
+        left = false;
+        right = false;
+    }
 }

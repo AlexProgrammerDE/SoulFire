@@ -23,6 +23,6 @@ import org.cloudburstmc.math.vector.Vector3d;
 
 public class VectorHelper {
     public static Vector3d middleOfBlockNormalize(Vector3d vector) {
-        return vector.floor().add(0.5, 0.5, 0.5);
+        return vector.floor().add(0.5, 0, 0.5);
     }
 }

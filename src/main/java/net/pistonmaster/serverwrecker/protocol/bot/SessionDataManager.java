@@ -65,6 +65,8 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
+import net.pistonmaster.serverwrecker.pathfinding.*;
+import net.pistonmaster.serverwrecker.pathfinding.goals.PathExecutor;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
@@ -84,6 +86,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -283,18 +286,16 @@ public final class SessionDataManager {
 
         /*
         System.out.println(getCurrentLevel().getBlockTypeAt(botMovementManager.getBlockPos()));
-        RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new MovementScorer(), new MovementScorer());
+        RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new BlockDistanceScorer());
         BlockPosition start = new BlockPosition(botMovementManager.getPlayerPos());
-        BlockPosition target = new BlockPosition(botMovementManager.getPlayerPos().add(4, 0, 2));
+        BlockPosition target = new BlockPosition(botMovementManager.getPlayerPos().add(5, 0, 3));
         System.out.println("Start: " + start);
         System.out.println("Target: " + target);
         List<BlockPosition> actions = routeFinder.findRoute(start, target);
         System.out.println(actions);
-        BlockPosition last = start;
-        for (BlockPosition action : actions) {
-            System.out.println("Move: " + action.position().sub(last.position()));
-            last = action;
-        }
+
+        PathExecutor pathExecutor = new PathExecutor(connection, actions);
+        ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
          */
     }
 

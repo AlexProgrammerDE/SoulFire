@@ -17,14 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding;
+package net.pistonmaster.serverwrecker.pathfinding.goals;
 
-import java.util.Queue;
-
-public class PathExecutor {
-    private final Queue<BlockPosition> goals;
-
-    public PathExecutor(Queue<BlockPosition> goals) {
-        this.goals = goals;
-    }
+public interface Goal {
 }
