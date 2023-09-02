@@ -29,7 +29,9 @@ import com.github.steveice10.mc.protocol.data.status.handler.ServerPingTimeHandl
 import com.github.steveice10.mc.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundKeepAlivePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPingPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundKeepAlivePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundPongPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundHelloPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginCompressionPacket;
@@ -140,9 +142,10 @@ public class SWBaseListener extends SessionAdapter {
                 session.disconnect("Finished");
             }
         } else if (protocol.getState() == ProtocolState.GAME) {
-            if (packet instanceof ClientboundKeepAlivePacket keepAlivePacket
-                    && session.getFlag(MinecraftConstants.AUTOMATIC_KEEP_ALIVE_MANAGEMENT, true)) {
+            if (packet instanceof ClientboundKeepAlivePacket keepAlivePacket) {
                 session.send(new ServerboundKeepAlivePacket(keepAlivePacket.getPingId()));
+            } else if (packet instanceof ClientboundPingPacket pingPacket) {
+                session.send(new ServerboundPongPacket(pingPacket.getId()));
             } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
                 session.disconnect(disconnectPacket.getReason());
             }
