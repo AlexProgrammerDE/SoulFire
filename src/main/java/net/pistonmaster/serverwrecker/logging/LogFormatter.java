@@ -20,36 +20,32 @@
 package net.pistonmaster.serverwrecker.logging;
 
 import org.apache.logging.log4j.core.LogEvent;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.regex.Pattern;
+import org.apache.logging.log4j.core.layout.AbstractStringLayout;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 
 public class LogFormatter {
-    public static final char COLOR_CHAR = '§';
-    public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + COLOR_CHAR + "[0-9A-FK-ORX]");
-
-    //displays the hour and am/pm
-    private final DateFormat dateFormat = new SimpleDateFormat("h:mm a");
-    private final Date date = new Date();
+    private final AbstractStringLayout.Serializer formatter = new PatternLayout.SerializerBuilder()
+            .setAlwaysWriteExceptions(true)
+            .setDisableAnsi(true)
+            .setNoConsoleNoAnsi(true)
+            .setDefaultPattern("[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx")
+            .build();
+    private final AbstractStringLayout.Serializer builtInFormatter = new PatternLayout.SerializerBuilder()
+            .setAlwaysWriteExceptions(true)
+            .setDisableAnsi(true)
+            .setNoConsoleNoAnsi(true)
+            .setDefaultPattern("[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx")
+            .build();
 
     public String format(LogEvent event) {
         StringBuilder builder = new StringBuilder();
 
-        date.setTime(event.getTimeMillis());
-        builder.append(dateFormat.format(date)).append(' ');
-        builder.append(event.getLevel()).append(' ');
-        builder.append('[').append(event.getLoggerName()).append(']').append(' ');
-        builder.append(formatMessage(event));
+        if (event.getLoggerName().startsWith("net.pistonmaster.serverwrecker")) {
+            builtInFormatter.toSerializable(event, builder);
+        } else {
+            formatter.toSerializable(event, builder);
+        }
+
         return builder.toString();
-    }
-
-    public String formatMessage(LogEvent record) {
-        String simpleFormattedMessage = record.getMessage().getFormattedMessage();
-
-        simpleFormattedMessage = STRIP_COLOR_PATTERN.matcher(simpleFormattedMessage).replaceAll("");
-
-        return simpleFormattedMessage;
     }
 }
