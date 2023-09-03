@@ -29,28 +29,21 @@ import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public record PlayerMovement(Vector3d from, BasicMovementEnum action, SessionDataManager sessionDataManager) implements MinecraftAction {
+public record PlayerMovement(Vector3d from, MovementDirection direction, MovementModifier modifier,
+                             SessionDataManager sessionDataManager) implements MinecraftAction {
     @Override
     public Vector3d getTargetPos() {
         // Make sure we are in the middle of the block
         Vector3d normalizedFrom = VectorHelper.middleOfBlockNormalize(this.from);
 
-        return switch (action) {
-            case NORTH -> normalizedFrom.add(0, 0, -1);
-            case SOUTH -> normalizedFrom.add(0, 0, 1);
-            case EAST -> normalizedFrom.add(1, 0, 0);
-            case WEST -> normalizedFrom.add(-1, 0, 0);
-            case NORTH_EAST -> normalizedFrom.add(1, 0, -1);
-            case NORTH_WEST -> normalizedFrom.add(-1, 0, -1);
-            case SOUTH_EAST -> normalizedFrom.add(1, 0, 1);
-            case SOUTH_WEST -> normalizedFrom.add(-1, 0, 1);
-        };
+        return applyModifier(applyDirection(normalizedFrom, direction), modifier);
     }
 
     @Override
     public double getActionCost() {
-        double cost = switch (action) {
+        double cost = switch (direction) {
             case NORTH, SOUTH, EAST, WEST -> Costs.STRAIGHT;
             case NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST -> Costs.DIAGONAL;
         };
@@ -63,7 +56,8 @@ public record PlayerMovement(Vector3d from, BasicMovementEnum action, SessionDat
         for (Vector3i requiredFreeBlock : requiredFreeBlocks()) {
             BlockType blockType = levelState.getBlockTypeAt(requiredFreeBlock);
             if (BlockTypeHelper.isSolid(blockType)) {
-                cost += Costs.DIG_BLOCK;
+                // In the future, add cost of placing here
+                return Double.POSITIVE_INFINITY;
             }
         }
 
@@ -71,7 +65,8 @@ public record PlayerMovement(Vector3d from, BasicMovementEnum action, SessionDat
             BlockType blockType = levelState.getBlockTypeAt(requiredSolidBlock);
 
             if (!BlockTypeHelper.isSolid(blockType)) {
-                cost += Costs.PLACE_BLOCK;
+                // In the future, add cost of digging here
+                return Double.POSITIVE_INFINITY;
             }
         }
 
@@ -80,29 +75,29 @@ public record PlayerMovement(Vector3d from, BasicMovementEnum action, SessionDat
 
     public Set<Vector3i> requiredFreeBlocks() {
         Set<Vector3i> requiredFreeBlocks = new HashSet<>();
-        Vector3i targetPos = getTargetPos().toInt();
         Vector3i fromPos = from.toInt();
 
         // Add the block that is required to be free for straight movement
-        requiredFreeBlocks.add(targetPos);
+        Vector3i targetEdge = applyDirection(fromPos, direction);
+        requiredFreeBlocks.add(targetEdge);
 
         // Add the blocks that are required to be free for diagonal movement
-        switch (action) {
+        switch (direction) {
             case NORTH_EAST -> {
-                requiredFreeBlocks.add(fromPos.add(0, 0, -1));
-                requiredFreeBlocks.add(fromPos.add(1, 0, 0));
+                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.NORTH));
+                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.EAST));
             }
             case NORTH_WEST -> {
-                requiredFreeBlocks.add(fromPos.add(0, 0, -1));
-                requiredFreeBlocks.add(fromPos.add(-1, 0, 0));
+                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.NORTH));
+                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.WEST));
             }
             case SOUTH_EAST -> {
-                requiredFreeBlocks.add(fromPos.add(0, 0, 1));
-                requiredFreeBlocks.add(fromPos.add(1, 0, 0));
+                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.SOUTH));
+                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.EAST));
             }
             case SOUTH_WEST -> {
-                requiredFreeBlocks.add(fromPos.add(0, 0, 1));
-                requiredFreeBlocks.add(fromPos.add(-1, 0, 0));
+                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.SOUTH));
+                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.WEST));
             }
         }
 
@@ -111,37 +106,86 @@ public record PlayerMovement(Vector3d from, BasicMovementEnum action, SessionDat
             requiredFreeBlocks.add(requiredFreeBlock.add(0, 1, 0));
         }
 
+        switch (modifier) {
+            case FALL_1 -> requiredFreeBlocks.add(applyModifier(targetEdge, modifier));
+            case FALL_2 -> {
+                requiredFreeBlocks.add(applyModifier(targetEdge, MovementModifier.FALL_1));
+                requiredFreeBlocks.add(applyModifier(targetEdge, modifier));
+            }
+            case FALL_3 -> {
+                requiredFreeBlocks.add(applyModifier(targetEdge, MovementModifier.FALL_1));
+                requiredFreeBlocks.add(applyModifier(targetEdge, MovementModifier.FALL_2));
+                requiredFreeBlocks.add(applyModifier(targetEdge, modifier));
+            }
+            case JUMP -> {
+                // Shift the blocks up by one
+                requiredFreeBlocks = requiredFreeBlocks.stream()
+                        .map(block -> block.add(0, 1, 0))
+                        .collect(Collectors.toSet());
+
+                // You need to have a block above you free to jump
+                requiredFreeBlocks.add(fromPos.add(0, 1, 0));
+            }
+        }
+
         return requiredFreeBlocks;
     }
 
     public Set<Vector3i> requiredSolidBlocks() {
         Set<Vector3i> requiredSolidBlocks = new HashSet<>();
-        Vector3i targetPos = getTargetPos().toInt();
         Vector3i fromPos = from.toInt();
 
-        // Add the block that is required to be solid for straight movement
-        requiredSolidBlocks.add(targetPos.add(0, -1, 0));
+        Vector3i floorPos = fromPos.add(0, -1, 0);
 
-        // Add the blocks that are required to be solid for diagonal movement
-        switch (action) {
-            case NORTH_EAST -> {
-                requiredSolidBlocks.add(fromPos.add(0, -1, -1));
-                requiredSolidBlocks.add(fromPos.add(1, -1, 0));
-            }
-            case NORTH_WEST -> {
-                requiredSolidBlocks.add(fromPos.add(0, -1, -1));
-                requiredSolidBlocks.add(fromPos.add(-1, -1, 0));
-            }
-            case SOUTH_EAST -> {
-                requiredSolidBlocks.add(fromPos.add(0, -1, 1));
-                requiredSolidBlocks.add(fromPos.add(1, -1, 0));
-            }
-            case SOUTH_WEST -> {
-                requiredSolidBlocks.add(fromPos.add(0, -1, 1));
-                requiredSolidBlocks.add(fromPos.add(-1, -1, 0));
-            }
-        }
+        // Add the block that is required to be solid for straight movement
+        requiredSolidBlocks.add(applyModifier(applyDirection(floorPos, direction), modifier));
 
         return requiredSolidBlocks;
+    }
+
+    private static Vector3i applyDirection(Vector3i pos, MovementDirection direction) {
+        return switch (direction) {
+            case NORTH -> pos.add(0, 0, -1);
+            case SOUTH -> pos.add(0, 0, 1);
+            case EAST -> pos.add(1, 0, 0);
+            case WEST -> pos.add(-1, 0, 0);
+            case NORTH_EAST -> pos.add(1, 0, -1);
+            case NORTH_WEST -> pos.add(-1, 0, -1);
+            case SOUTH_EAST -> pos.add(1, 0, 1);
+            case SOUTH_WEST -> pos.add(-1, 0, 1);
+        };
+    }
+
+    private static Vector3d applyDirection(Vector3d pos, MovementDirection direction) {
+        return switch (direction) {
+            case NORTH -> pos.add(0, 0, -1);
+            case SOUTH -> pos.add(0, 0, 1);
+            case EAST -> pos.add(1, 0, 0);
+            case WEST -> pos.add(-1, 0, 0);
+            case NORTH_EAST -> pos.add(1, 0, -1);
+            case NORTH_WEST -> pos.add(-1, 0, -1);
+            case SOUTH_EAST -> pos.add(1, 0, 1);
+            case SOUTH_WEST -> pos.add(-1, 0, 1);
+        };
+    }
+
+    private static Vector3i applyModifier(Vector3i pos, MovementModifier modifier) {
+        return switch (modifier) {
+            case FALL_1 -> pos.add(0, -1, 0);
+            case FALL_2 -> pos.add(0, -2, 0);
+            case FALL_3 -> pos.add(0, -3, 0);
+            case JUMP -> pos.add(0, 1, 0);
+            default -> pos;
+        };
+    }
+
+    private static Vector3d applyModifier(Vector3d pos, MovementModifier modifier) {
+        return switch (modifier) {
+            case FALL_1 -> pos.add(0, -1, 0);
+            case FALL_2 -> pos.add(0, -2, 0);
+            case FALL_3 -> pos.add(0, -3, 0);
+            case JUMP -> pos.add(0, 1, 0);
+            default -> pos;
+        };
     }
 }

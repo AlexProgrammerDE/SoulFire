@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding;
 
-public enum BasicMovementEnum {
+public enum MovementDirection {
     NORTH,
     SOUTH,
     EAST,

@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.pathfinding.goals;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import net.kyori.event.EventSubscriber;
+import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.pathfinding.BlockPosition;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
@@ -50,11 +51,13 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
         }
 
         if (goals.isEmpty()) {
+            unregister();
             return;
         }
 
         BlockPosition goal = goals.peek();
         if (goal == null) {
+            unregister();
             return;
         }
 
@@ -63,14 +66,35 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
         BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
         Vector3d botPosition = movementManager.getPlayerPos();
 
-        if (botPosition.distance(goal.position()) < 0.5) {
+        double distanceToGoal = botPosition.distance(goal.position());
+        if (distanceToGoal < 0.5) {
             goals.remove();
             System.out.println("Reached goal! " + goal);
-            movementManager.getMovementState().resetWasd();
-            return;
+
+            // Directly use tick to execute next goal
+            goal = goals.peek();
+
+            // If there are no more goals, stop
+            if (goal == null) {
+                System.out.println("Finished all goals!");
+                movementManager.getMovementState().resetAll();
+                unregister();
+                return;
+            }
+
+            goalPosition = goal.position();
         }
 
+        movementManager.getMovementState().resetAll();
         movementManager.lookAt(RotationOrigin.FEET, goalPosition);
         movementManager.getMovementState().setForward(true);
+
+        if (goalPosition.getY() > botPosition.getY()) {
+            movementManager.getMovementState().setJumping(true);
+        }
+    }
+
+    public void unregister() {
+        ServerWreckerAPI.unregisterListener(this);
     }
 }

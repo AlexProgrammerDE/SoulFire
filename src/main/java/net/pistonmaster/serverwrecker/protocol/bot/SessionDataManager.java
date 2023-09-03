@@ -285,17 +285,27 @@ public final class SessionDataManager {
         onChat(Component.text(packet.getContent()));
 
         /*
-        System.out.println(getCurrentLevel().getBlockTypeAt(botMovementManager.getBlockPos()));
-        RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new BlockDistanceScorer());
-        BlockPosition start = new BlockPosition(botMovementManager.getPlayerPos());
-        BlockPosition target = new BlockPosition(botMovementManager.getPlayerPos().add(5, 0, 3));
-        System.out.println("Start: " + start);
-        System.out.println("Target: " + target);
-        List<BlockPosition> actions = routeFinder.findRoute(start, target);
-        System.out.println(actions);
+        String[] split = packet.getContent().split(" ");
+        if (split.length == 0) {
+            return;
+        }
 
-        PathExecutor pathExecutor = new PathExecutor(connection, actions);
-        ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
+        if (split[0].equalsIgnoreCase("walk")) {
+            int x = Integer.parseInt(split[1]);
+            int y = Integer.parseInt(split[2]);
+            int z = Integer.parseInt(split[3]);
+
+            RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new BlockDistanceScorer());
+            BlockPosition start = new BlockPosition(botMovementManager.getPlayerPos());
+            BlockPosition target = new BlockPosition(botMovementManager.getPlayerPos().add(x, y, z));
+            System.out.println("Start: " + start);
+            System.out.println("Target: " + target);
+            List<BlockPosition> actions = routeFinder.findRoute(start, target);
+            System.out.println(actions);
+
+            PathExecutor pathExecutor = new PathExecutor(connection, actions);
+            ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
+        }
          */
     }
 

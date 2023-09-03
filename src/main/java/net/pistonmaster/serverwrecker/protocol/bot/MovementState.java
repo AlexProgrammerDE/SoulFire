@@ -50,4 +50,12 @@ public class MovementState {
         left = false;
         right = false;
     }
+
+    public void resetAll() {
+        resetWasd();
+        sprinting = false;
+        jumping = false;
+        sneaking = false;
+        flying = false;
+    }
 }

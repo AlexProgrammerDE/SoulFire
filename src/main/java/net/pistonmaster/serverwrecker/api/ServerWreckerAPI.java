@@ -94,6 +94,10 @@ public class ServerWreckerAPI {
         }
     }
 
+    public static void unregisterListener(EventSubscriber<? extends ServerWreckerEvent> listener) {
+        eventBus.unsubscribeIf(eventSubscriber -> eventSubscriber.equals(listener));
+    }
+
     public static void registerAddon(Addon addon) {
         addons.add(addon);
         addon.onLoad();

@@ -60,10 +60,16 @@ public record RouteFinder(MinecraftGraph graph, BlockDistanceScorer scorer) {
                 MinecraftRouteNode targetPosNode = routeIndex.computeIfAbsent(actionTargetPos,
                         k -> new MinecraftRouteNode(actionTargetPos));
 
+                double actionCost = action.getActionCost();
+
+                if (actionCost == Double.POSITIVE_INFINITY) {
+                    continue;
+                }
+
                 // Calculate new distance from start to this connection,
                 // Get distance from the current element
                 // and add the distance from the current element to the next element
-                double newSourceCost = current.getSourceCost() + action.getActionCost();
+                double newSourceCost = current.getSourceCost() + actionCost;
                 if (newSourceCost < targetPosNode.getSourceCost()) {
                     targetPosNode.setPrevious(current);
                     targetPosNode.setSourceCost(newSourceCost);

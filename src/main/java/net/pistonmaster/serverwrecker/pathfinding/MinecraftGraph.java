@@ -20,17 +20,12 @@
 package net.pistonmaster.serverwrecker.pathfinding;
 
 import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
-import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 public record MinecraftGraph(SessionDataManager sessionDataManager) {
@@ -43,11 +38,12 @@ public record MinecraftGraph(SessionDataManager sessionDataManager) {
         }
 
         List<MinecraftAction> targetSet = new ArrayList<>();
-        for (BasicMovementEnum action : BasicMovementEnum.values()) {
-            log.debug("Checking action {}", action);
-            PlayerMovement playerMovement = new PlayerMovement(from, action, sessionDataManager);
+        for (MovementDirection action : MovementDirection.values()) {
+            for (MovementModifier modifier : MovementModifier.values()) {
+                PlayerMovement playerMovement = new PlayerMovement(from, action, modifier, sessionDataManager);
 
-            targetSet.add(playerMovement);
+                targetSet.add(playerMovement);
+            }
         }
 
         log.debug("Found {} possible actions for {}", targetSet, node);
