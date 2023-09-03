@@ -17,10 +17,18 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding;
+package net.pistonmaster.serverwrecker.pathfinding.goals;
 
-public class BlockDistanceScorer {
-    public double computeCost(BotWorldState from, BotWorldState to) {
-        return from.position().distance(to.position());
+import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
+import org.cloudburstmc.math.vector.Vector3d;
+
+public record PosGoal(Vector3d goal) implements GoalScorer {
+    public PosGoal(double x, double y, double z) {
+        this(Vector3d.from(x, y, z));
+    }
+
+    @Override
+    public double getScore(BotWorldState worldState) {
+        return worldState.position().distance(goal);
     }
 }

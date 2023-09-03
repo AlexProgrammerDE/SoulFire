@@ -20,16 +20,16 @@
 package net.pistonmaster.serverwrecker.pathfinding;
 
 import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.serverwrecker.pathfinding.goals.Action;
-import net.pistonmaster.serverwrecker.pathfinding.goals.MovementAction;
+import net.pistonmaster.serverwrecker.pathfinding.actions.Action;
+import net.pistonmaster.serverwrecker.pathfinding.actions.MovementAction;
 
 import java.util.*;
 
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, BlockDistanceScorer scorer) {
-    public List<Action> findRoute(BlockPosition from, BlockPosition to) {
+    public List<Action> findRoute(BotWorldState from, BotWorldState to) {
         // Store block positions and the best route to them
-        Map<BlockPosition, MinecraftRouteNode> routeIndex = new HashMap<>();
+        Map<BotWorldState, MinecraftRouteNode> routeIndex = new HashMap<>();
 
         // Store block positions that we need to look at
         Queue<MinecraftRouteNode> openSet = new PriorityQueue<>();
@@ -40,16 +40,16 @@ public record RouteFinder(MinecraftGraph graph, BlockDistanceScorer scorer) {
 
         MinecraftRouteNode current;
         while ((current = openSet.poll()) != null) {
-            log.debug("Looking at node: " + current);
+            log.debug("Looking at node: " + current.getWorldState().position());
 
             // If we found our destination, we can stop looking
-            if (current.getPosition().equals(to)) {
+            if (current.getWorldState().equals(to)) {
                 log.debug("Found our destination!");
 
                 List<Action> route = new ArrayList<>();
                 MinecraftRouteNode previousElement = current;
                 do {
-                    route.add(0, new MovementAction(previousElement.getPosition()));
+                    route.add(0, new MovementAction(previousElement.getWorldState()));
                     previousElement = previousElement.getPrevious();
                 } while (previousElement != null);
 
@@ -57,26 +57,26 @@ public record RouteFinder(MinecraftGraph graph, BlockDistanceScorer scorer) {
                 return route;
             }
 
-            for (var action : graph.getConnections(current.getPosition())) {
+            for (var action : graph.getConnections(current.getWorldState())) {
                 double actionCost = action.getActionCost();
 
                 if (actionCost == Double.POSITIVE_INFINITY) {
                     continue;
                 }
 
-                BlockPosition actionTargetPos = action.getTargetBlockPos();
+                BotWorldState actionTargetState = action.getTargetState();
                 MinecraftRouteNode finalCurrent = current;
-                routeIndex.compute(actionTargetPos, (k, v) -> {
+                routeIndex.compute(actionTargetState, (k, v) -> {
                     // Calculate new distance from start to this connection,
                     // Get distance from the current element
                     // and add the distance from the current element to the next element
                     double newSourceCost = finalCurrent.getSourceCost() + actionCost;
-                    double newTotalRouteScore = newSourceCost + scorer.computeCost(actionTargetPos, to);
+                    double newTotalRouteScore = newSourceCost + scorer.computeCost(actionTargetState, to);
 
                     // The first time we see this node
                     if (v == null) {
-                        var node = new MinecraftRouteNode(actionTargetPos, finalCurrent, action, newSourceCost, newTotalRouteScore);
-                        log.debug("Found a new node: " + node);
+                        var node = new MinecraftRouteNode(actionTargetState, finalCurrent, action, newSourceCost, newTotalRouteScore);
+                        log.debug("Found a new node: " + actionTargetState.position());
                         openSet.add(node);
 
                         return node;
@@ -89,7 +89,7 @@ public record RouteFinder(MinecraftGraph graph, BlockDistanceScorer scorer) {
                         v.setSourceCost(newSourceCost);
                         v.setTotalRouteScore(newTotalRouteScore);
 
-                        log.debug("Found a better route to node: " + v);
+                        log.debug("Found a better route to node: " + actionTargetState.position());
                         openSet.add(v);
                     }
 

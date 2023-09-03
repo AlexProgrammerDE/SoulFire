@@ -29,7 +29,7 @@ import java.util.List;
 
 @Slf4j
 public record MinecraftGraph(SessionDataManager sessionDataManager) {
-    public List<MinecraftAction> getConnections(BlockPosition node) {
+    public List<MinecraftAction> getConnections(BotWorldState node) {
         Vector3d from = node.position();
 
         LevelState levelState = sessionDataManager.getCurrentLevel();

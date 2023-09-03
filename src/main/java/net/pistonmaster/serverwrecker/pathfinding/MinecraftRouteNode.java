@@ -30,9 +30,9 @@ import lombok.ToString;
 @AllArgsConstructor
 class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
     /**
-     * The block position of this node.
+     * The world state of this node.
      */
-    private final BlockPosition position;
+    private final BotWorldState worldState;
     /**
      * The currently best known node to this node.
      */
@@ -50,8 +50,8 @@ class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
      */
     private double totalRouteScore;
 
-    MinecraftRouteNode(BlockPosition position) {
-        this(position, null, null, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+    MinecraftRouteNode(BotWorldState worldState) {
+        this(worldState, null, null, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
     }
 
     @Override

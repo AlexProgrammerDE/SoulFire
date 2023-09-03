@@ -19,10 +19,17 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.goals;
 
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
+import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
+import org.cloudburstmc.math.vector.Vector3d;
 
-public interface Action {
-    boolean isCompleted(BotConnection connection);
+public record PlaceBlockGoal(Vector3d goalBlock) implements GoalScorer {
+    public PlaceBlockGoal(double x, double y, double z) {
+        this(Vector3d.from(x, y, z));
+    }
 
-    void tick(BotConnection connection);
+    // TODO: Implement higher score if block is in placed.
+    @Override
+    public double getScore(BotWorldState worldState) {
+        return worldState.position().distance(goalBlock);
+    }
 }

@@ -19,8 +19,17 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding;
 
-public class BlockDistanceScorer {
-    public double computeCost(BotWorldState from, BotWorldState to) {
-        return from.position().distance(to.position());
+import net.pistonmaster.serverwrecker.util.VectorHelper;
+import org.cloudburstmc.math.vector.Vector3d;
+
+/**
+ * Represents the state of the bot in the world.
+ * This means the positions and in the future also inventory.
+ *
+ * @param position The position of the bot.
+ */
+public record BotWorldState(Vector3d position) {
+    public BotWorldState {
+        position = VectorHelper.middleOfBlockNormalize(position);
     }
 }

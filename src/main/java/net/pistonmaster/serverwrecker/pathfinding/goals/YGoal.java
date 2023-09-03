@@ -17,10 +17,13 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding;
+package net.pistonmaster.serverwrecker.pathfinding.goals;
 
-public class BlockDistanceScorer {
-    public double computeCost(BotWorldState from, BotWorldState to) {
-        return from.position().distance(to.position());
+import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
+
+public record YGoal(double y) implements GoalScorer {
+    @Override
+    public double getScore(BotWorldState worldState) {
+        return Math.abs(worldState.position().getY() - y);
     }
 }

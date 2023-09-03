@@ -66,9 +66,12 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.pathfinding.*;
-import net.pistonmaster.serverwrecker.pathfinding.goals.Action;
-import net.pistonmaster.serverwrecker.pathfinding.goals.PathExecutor;
+import net.pistonmaster.serverwrecker.pathfinding.BlockDistanceScorer;
+import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
+import net.pistonmaster.serverwrecker.pathfinding.MinecraftGraph;
+import net.pistonmaster.serverwrecker.pathfinding.RouteFinder;
+import net.pistonmaster.serverwrecker.pathfinding.actions.Action;
+import net.pistonmaster.serverwrecker.pathfinding.actions.PathExecutor;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
@@ -299,8 +302,8 @@ public final class SessionDataManager {
             double z = Double.parseDouble(split[3]);
 
             RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new BlockDistanceScorer());
-            BlockPosition start = new BlockPosition(botMovementManager.getPlayerPos());
-            BlockPosition target = new BlockPosition(botMovementManager.getPlayerPos().add(x, y, z));
+            BotWorldState start = new BotWorldState(botMovementManager.getPlayerPos());
+            BotWorldState target = new BotWorldState(botMovementManager.getPlayerPos().add(x, y, z));
             System.out.println("Start: " + start);
             System.out.println("Target: " + target);
             List<Action> actions = routeFinder.findRoute(start, target);
@@ -314,8 +317,8 @@ public final class SessionDataManager {
             double z = Double.parseDouble(split[3]);
 
             RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new BlockDistanceScorer());
-            BlockPosition start = new BlockPosition(botMovementManager.getPlayerPos());
-            BlockPosition target = new BlockPosition(Vector3d.from(x, y, z));
+            BotWorldState start = new BotWorldState(botMovementManager.getPlayerPos());
+            BotWorldState target = new BotWorldState(Vector3d.from(x, y, z));
             System.out.println("Start: " + start);
             System.out.println("Target: " + target);
             List<Action> actions = routeFinder.findRoute(start, target);
@@ -334,7 +337,9 @@ public final class SessionDataManager {
         } else if (split[0].equalsIgnoreCase("stop")) {
             botMovementManager.getControlState().resetAll();
         }
+
          */
+
     }
 
     @BusHandler

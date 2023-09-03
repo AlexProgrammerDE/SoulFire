@@ -17,10 +17,19 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding;
+package net.pistonmaster.serverwrecker.pathfinding.goals;
 
-public class BlockDistanceScorer {
-    public double computeCost(BotWorldState from, BotWorldState to) {
-        return from.position().distance(to.position());
+import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
+import org.cloudburstmc.math.vector.Vector3d;
+
+public record CollectBlockGoal(Vector3d goal) implements GoalScorer {
+    public CollectBlockGoal(double x, double y, double z) {
+        this(Vector3d.from(x, y, z));
+    }
+
+    // TODO: When inventory is implemented, check if the block is in the inventory and apply higher score if it is.
+    @Override
+    public double getScore(BotWorldState worldState) {
+        return worldState.position().distance(goal);
     }
 }

@@ -17,10 +17,20 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding;
+package net.pistonmaster.serverwrecker.pathfinding.goals;
 
-public class BlockDistanceScorer {
-    public double computeCost(BotWorldState from, BotWorldState to) {
-        return from.position().distance(to.position());
-    }
+import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
+
+/**
+ * A goal represents something that the user wants the bot to achieve.
+ */
+public interface GoalScorer {
+    /**
+     * Calculates the score for a given block position.
+     * Usually this means the distance from achieving the goal.
+     *
+     * @param worldState the world state to calculate the score for
+     * @return the score for the given world state
+     */
+    double getScore(BotWorldState worldState);
 }

@@ -24,8 +24,9 @@ import org.cloudburstmc.math.vector.Vector3d;
 public interface MinecraftAction {
     Vector3d getTargetPos();
 
-    default BlockPosition getTargetBlockPos() {
-        return new BlockPosition(getTargetPos());
+    default BotWorldState getTargetState() {
+        // TODO: Implement this per-action
+        return new BotWorldState(getTargetPos());
     }
 
     double getActionCost();

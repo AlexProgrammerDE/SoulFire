@@ -20,16 +20,11 @@
 package net.pistonmaster.serverwrecker.pathfinding;
 
 public class Costs {
-    public static final double PRESET_COST = 2_000_000_000;
-    public static final double INFINITY = 2_000_000_001;
-
     public static final double STRAIGHT = 1;
     public static final double DIAGONAL = 1.4142135623730951;
-    public static final double FORWARD_FALL_ONE = 1.4142135623730951;
-    public static final double FORWARD_FALL_TWO = 1.7320508075688772;
-    public static final double FORWARD_FALL_THREE = 2.23606797749979;
-    public static final double DIG_BLOCK = INFINITY;
-    public static final double PLACE_BLOCK = INFINITY;
+    public static final double JUMP = 1.1;
+    public static final double DIG_BLOCK = 10;
+    public static final double PLACE_BLOCK = 10;
 
     private Costs() {
     }

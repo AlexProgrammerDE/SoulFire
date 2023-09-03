@@ -17,13 +17,16 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding;
+package net.pistonmaster.serverwrecker.pathfinding.goals;
 
-import net.pistonmaster.serverwrecker.util.VectorHelper;
+import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
+import org.cloudburstmc.math.vector.Vector2d;
 import org.cloudburstmc.math.vector.Vector3d;
 
-public record BlockPosition(Vector3d position) {
-    public BlockPosition {
-        position = VectorHelper.middleOfBlockNormalize(position);
+public record XZGoal(Vector2d goal) implements GoalScorer {
+    @Override
+    public double getScore(BotWorldState worldState) {
+        Vector3d position = worldState.position();
+        return Vector2d.from(position.getX(), position.getZ()).distance(goal);
     }
 }
