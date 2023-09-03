@@ -38,11 +38,13 @@ public record MinecraftGraph(SessionDataManager sessionDataManager) {
         }
 
         List<MinecraftAction> targetSet = new ArrayList<>();
-        for (MovementDirection action : MovementDirection.values()) {
+        for (MovementDirection direction : MovementDirection.values()) {
             for (MovementModifier modifier : MovementModifier.values()) {
-                PlayerMovement playerMovement = new PlayerMovement(from, action, modifier, sessionDataManager);
+                for (MovementSide side : MovementSide.values()) {
+                    PlayerMovement playerMovement = new PlayerMovement(from, direction, modifier, side, sessionDataManager);
 
-                targetSet.add(playerMovement);
+                    targetSet.add(playerMovement);
+                }
             }
         }
 

@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public record PlayerMovement(Vector3d from, MovementDirection direction, MovementModifier modifier,
-                             SessionDataManager sessionDataManager) implements MinecraftAction {
+                             MovementSide side, SessionDataManager sessionDataManager) implements MinecraftAction {
     @Override
     public Vector3d getTargetPos() {
         // Make sure we are in the middle of the block
@@ -84,20 +84,28 @@ public record PlayerMovement(Vector3d from, MovementDirection direction, Movemen
         // Add the blocks that are required to be free for diagonal movement
         switch (direction) {
             case NORTH_EAST -> {
-                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.NORTH));
-                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.EAST));
+                switch (side) {
+                    case LEFT -> requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.NORTH));
+                    case RIGHT -> requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.EAST));
+                }
             }
             case NORTH_WEST -> {
-                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.NORTH));
-                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.WEST));
+                switch (side) {
+                    case LEFT -> requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.NORTH));
+                    case RIGHT -> requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.WEST));
+                }
             }
             case SOUTH_EAST -> {
-                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.SOUTH));
-                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.EAST));
+                switch (side) {
+                    case LEFT -> requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.SOUTH));
+                    case RIGHT -> requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.EAST));
+                }
             }
             case SOUTH_WEST -> {
-                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.SOUTH));
-                requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.WEST));
+                switch (side) {
+                    case LEFT -> requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.SOUTH));
+                    case RIGHT -> requiredFreeBlocks.add(applyDirection(fromPos, MovementDirection.WEST));
+                }
             }
         }
 

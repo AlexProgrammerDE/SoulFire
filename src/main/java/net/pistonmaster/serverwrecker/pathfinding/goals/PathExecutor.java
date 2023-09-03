@@ -67,7 +67,7 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
         Vector3d botPosition = movementManager.getPlayerPos();
 
         double distanceToGoal = botPosition.distance(goal.position());
-        if (distanceToGoal < 0.5) {
+        if (distanceToGoal < 0.2) {
             goals.remove();
             System.out.println("Reached goal! " + goal);
 
@@ -77,20 +77,22 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
             // If there are no more goals, stop
             if (goal == null) {
                 System.out.println("Finished all goals!");
-                movementManager.getMovementState().resetAll();
+                movementManager.getControlState().resetAll();
                 unregister();
                 return;
             }
 
+            System.out.println("Next goal: " + goal);
+
             goalPosition = goal.position();
         }
 
-        movementManager.getMovementState().resetAll();
+        movementManager.getControlState().resetAll();
         movementManager.lookAt(RotationOrigin.FEET, goalPosition);
-        movementManager.getMovementState().setForward(true);
+        movementManager.getControlState().setForward(true);
 
         if (goalPosition.getY() > botPosition.getY()) {
-            movementManager.getMovementState().setJumping(true);
+            movementManager.getControlState().setJumping(true);
         }
     }
 

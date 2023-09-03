@@ -26,7 +26,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class MovementState {
+public class ControlState {
     @Setter
     private boolean forward;
     @Setter

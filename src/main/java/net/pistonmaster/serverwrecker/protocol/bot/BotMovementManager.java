@@ -61,7 +61,7 @@ public final class BotMovementManager {
     private float speedInAir = 0.02F;
     private float moveForward;
     private float moveStrafing;
-    private final MovementState movementState = new MovementState();
+    private final ControlState controlState = new ControlState();
     @Setter
     private float abilitiesFlySpeed = 0.05F;
     @Setter
@@ -74,7 +74,7 @@ public final class BotMovementManager {
         this.yaw = yaw;
         this.pitch = pitch;
         if (data != null) {
-            this.movementState.setFlying(data.flying());
+            this.controlState.setFlying(data.flying());
             this.abilitiesFlySpeed = data.flySpeed();
             this.walkSpeed = data.walkSpeed();
         }
@@ -90,7 +90,7 @@ public final class BotMovementManager {
     }
 
     public void setSneaking(boolean sneaking) {
-        this.movementState.setSneaking(sneaking);
+        this.controlState.setSneaking(sneaking);
         updateBoundingBox(); // New height, new bounding box
     }
 
@@ -123,19 +123,35 @@ public final class BotMovementManager {
         }
     }
 
+    /**
+     * Updates the rotation to look at a given block or location.
+     *
+     * @param origin The rotation origin, either EYES or FEET.
+     * @param block  The block or location to look at.
+     */
     public void lookAt(RotationOrigin origin, Vector3d block) {
+        float startYaw = this.yaw;
+        float startPitch = this.pitch;
         boolean eyes = origin == RotationOrigin.EYES;
 
         double dx = block.getX() - this.x;
         double dy = block.getY() - (eyes ? this.y + getEyeHeight() : this.y);
         double dz = block.getZ() - this.z;
 
-        double distanceXZ = Math.sqrt(dx * dx + dz * dz);
-        double yaw = Math.toDegrees(Math.atan2(-dx, dz));
-        double pitch = Math.toDegrees(Math.atan2(dy, distanceXZ));
+        double r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        double yaw = -Math.atan2(dx, dz) / Math.PI * 180;
+        if (yaw < 0) {
+            yaw = 360 + yaw;
+        }
+
+        double pitch = -Math.asin(dy / r) / Math.PI * 180;
 
         this.yaw = (float) yaw;
         this.pitch = (float) pitch;
+
+        if (this.yaw != startYaw || this.pitch != startPitch) {
+            sendRot();
+        }
     }
 
     private float updateRotation(float angle, float targetAngle, float maxIncrease) {
@@ -179,7 +195,7 @@ public final class BotMovementManager {
         }
 
         // Jump
-        if (this.movementState.isJumping()) {
+        if (this.controlState.isJumping()) {
             if (this.isInFluid()) {
                 this.motionY += 0.03999999910593033D;
             } else if (this.onGround && this.jumpTicks == 0) {
@@ -193,7 +209,7 @@ public final class BotMovementManager {
         this.moveStrafing *= 0.98F;
         this.moveForward *= 0.98F;
 
-        if (this.movementState.isFlying()) {
+        if (this.controlState.isFlying()) {
             this.travelFlying(this.moveForward, 0, this.moveStrafing);
         } else {
             if (this.isInFluid()) {
@@ -207,11 +223,11 @@ public final class BotMovementManager {
 
         this.jumpMovementFactor = this.speedInAir;
 
-        if (this.movementState.isSprinting()) {
+        if (this.controlState.isSprinting()) {
             this.jumpMovementFactor = (float) ((double) this.jumpMovementFactor + (double) this.speedInAir * 0.3D);
 
-            if (this.moveForward <= 0 || this.collision || this.movementState.isSneaking()) {
-                this.movementState.setSprinting(false);
+            if (this.moveForward <= 0 || this.collision || this.controlState.isSneaking()) {
+                this.controlState.setSprinting(false);
             }
         }
 
@@ -244,23 +260,23 @@ public final class BotMovementManager {
         float moveForward = 0.0F;
         float moveStrafe = 0.0F;
 
-        if (movementState.isForward()) {
+        if (controlState.isForward()) {
             moveForward++;
         }
 
-        if (movementState.isBackward()) {
+        if (controlState.isBackward()) {
             moveForward--;
         }
 
-        if (movementState.isLeft()) {
+        if (controlState.isLeft()) {
             moveStrafe++;
         }
 
-        if (movementState.isRight()) {
+        if (controlState.isRight()) {
             moveStrafe--;
         }
 
-        if (movementState.isSneaking()) {
+        if (controlState.isSneaking()) {
             moveStrafe = (float) ((double) moveStrafe * 0.3D);
             moveForward = (float) ((double) moveForward * 0.3D);
         }
@@ -298,7 +314,7 @@ public final class BotMovementManager {
     public void jump() {
         this.motionY = 0.42D;
 
-        if (this.movementState.isSprinting()) {
+        if (this.controlState.isSprinting()) {
             float radiansYaw = (float) Math.toRadians(this.yaw);
             this.motionX -= Math.sin(radiansYaw) * 0.2F;
             this.motionZ += Math.cos(radiansYaw) * 0.2F;
@@ -308,19 +324,19 @@ public final class BotMovementManager {
     private void travelFlying(float forward, float vertical, float strafe) {
         float flySpeed = getFlySpeed();
         // Fly move up and down
-        if (this.movementState.isSneaking()) {
+        if (this.controlState.isSneaking()) {
             this.moveStrafing = strafe / 0.3F;
             this.moveForward = forward / 0.3F;
             this.motionY -= flySpeed * 3.0F;
         }
 
-        if (this.movementState.isJumping()) {
+        if (this.controlState.isJumping()) {
             this.motionY += flySpeed * 3.0F;
         }
 
         double prevMotionY = this.motionY;
         float prevJumpMovementFactor = this.jumpMovementFactor;
-        this.jumpMovementFactor = flySpeed * (this.movementState.isSprinting() ? 2 : 1);
+        this.jumpMovementFactor = flySpeed * (this.controlState.isSprinting() ? 2 : 1);
 
         this.travel(forward, vertical, strafe);
 
@@ -328,7 +344,7 @@ public final class BotMovementManager {
         this.jumpMovementFactor = prevJumpMovementFactor;
 
         if (this.onGround) {
-            this.movementState.setFlying(false);
+            this.controlState.setFlying(false);
         }
     }
 
@@ -366,7 +382,7 @@ public final class BotMovementManager {
         this.collision = this.moveCollide(this.motionX, this.motionY, this.motionZ);
 
         // Gravity
-        if (!this.movementState.isFlying()) {
+        if (!this.controlState.isFlying()) {
             this.motionY -= 0.08D;
         }
 
@@ -400,7 +416,7 @@ public final class BotMovementManager {
     }
 
     private float getAIMoveSpeed() {
-        return this.movementState.isSprinting() ? 0.13000001F : walkSpeed;
+        return this.controlState.isSprinting() ? 0.13000001F : walkSpeed;
     }
 
     public void moveRelative(double forward, double up, double strafe, double friction) {
@@ -437,7 +453,7 @@ public final class BotMovementManager {
         double originalTargetY = targetY;
         double originalTargetZ = targetZ;
 
-        if (this.onGround && this.movementState.isSneaking()) {
+        if (this.onGround && this.controlState.isSneaking()) {
             for (; targetX != 0.0D && level.getCollisionBoxes(this.boundingBox.offset(targetX, -STEP_HEIGHT, 0.0D)).isEmpty(); originalTargetX = targetX) {
                 if (targetX < 0.05D && targetX >= -0.05D) {
                     targetX = 0.0D;
@@ -479,24 +495,58 @@ public final class BotMovementManager {
             }
         }
 
-        // Get level tiles as bounding boxes
-        List<BoundingBox> boundingBoxList = level.getCollisionBoxes(this.boundingBox.expand(targetX, targetY, targetZ));
+        List<BoundingBox> collisionBoxes = level.getCollisionBoxes(this.boundingBox.expand(targetX, targetY, targetZ));
 
         // Move bounding box
-        for (BoundingBox aABB : boundingBoxList) {
+
+        double targetXCollision = targetX;
+        double targetZCollision = targetZ;
+
+        for (BoundingBox aABB : collisionBoxes) {
+            targetXCollision = aABB.clipXCollide(this.boundingBox, targetXCollision);
+        }
+        this.boundingBox.move(targetXCollision, 0.0F, 0.0F);
+
+        for (BoundingBox aABB : collisionBoxes) {
+            targetZCollision = aABB.clipZCollide(this.boundingBox, targetZCollision);
+        }
+
+        this.boundingBox.move(-targetXCollision, 0.0F, 0.0F);
+
+        double targetZCollision2 = targetZ;
+        double targetXCollision2 = targetX;
+
+        for (BoundingBox aABB : collisionBoxes) {
+            targetZCollision2 = aABB.clipZCollide(this.boundingBox, targetZCollision2);
+        }
+
+        this.boundingBox.move(0.0F, 0.0F, targetZCollision2);
+
+        for (BoundingBox aABB : collisionBoxes) {
+            targetXCollision2 = aABB.clipXCollide(this.boundingBox, targetXCollision2);
+        }
+
+        this.boundingBox.move(0.0F, 0.0F, -targetZCollision2);
+
+        // We did this to check if you can get further with moving first "X and then Z" or first "Z and then X"
+        // We do this to allow walking around corners
+        double totalCollision = Math.abs(targetXCollision) + Math.abs(targetZCollision);
+        double totalCollision2 = Math.abs(targetXCollision2) + Math.abs(targetZCollision2);
+
+        if (totalCollision >= totalCollision2) {
+            targetX = targetXCollision;
+            targetZ = targetZCollision;
+        } else {
+            targetX = targetXCollision2;
+            targetZ = targetZCollision2;
+        }
+
+        this.boundingBox.move(targetX, 0.0F, targetZ);
+
+        for (BoundingBox aABB : collisionBoxes) {
             targetY = aABB.clipYCollide(this.boundingBox, targetY);
         }
         this.boundingBox.move(0.0F, targetY, 0.0F);
-
-        for (BoundingBox aABB : boundingBoxList) {
-            targetX = aABB.clipXCollide(this.boundingBox, targetX);
-        }
-        this.boundingBox.move(targetX, 0.0F, 0.0F);
-
-        for (BoundingBox aABB : boundingBoxList) {
-            targetZ = aABB.clipZCollide(this.boundingBox, targetZ);
-        }
-        this.boundingBox.move(0.0F, 0.0F, targetZ);
 
         this.onGround = originalTargetY != targetY && originalTargetY < 0.0F;
 
@@ -521,7 +571,7 @@ public final class BotMovementManager {
     }
 
     public float getEyeHeight() {
-        return this.movementState.isSneaking() ? 1.50F : 1.62F;
+        return this.controlState.isSneaking() ? 1.50F : 1.62F;
     }
 
     public float getBoundingBoxWidth() {
@@ -529,7 +579,7 @@ public final class BotMovementManager {
     }
 
     public float getBoundingBoxHeight() {
-        return this.movementState.isSneaking() ? 1.5F : 1.8F;
+        return this.controlState.isSneaking() ? 1.5F : 1.8F;
     }
 
     public int getBlockPosX() {
@@ -553,7 +603,7 @@ public final class BotMovementManager {
     }
 
     public float getFlySpeed() {
-        return movementState.isSprinting() ? this.abilitiesFlySpeed * 2.0F : this.abilitiesFlySpeed;
+        return controlState.isSprinting() ? this.abilitiesFlySpeed * 2.0F : this.abilitiesFlySpeed;
     }
 
     private LevelState getLevelSafe() {

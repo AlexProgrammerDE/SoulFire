@@ -98,7 +98,7 @@ public class BoundingBox implements Cloneable {
     /**
      * Check for collision on the X axis
      *
-     * @param otherBoundingBox The other bounding box that is colliding with the this one.
+     * @param otherBoundingBox The other bounding box that is colliding with this one.
      * @param x                Position on the X axis that is colliding
      * @return Returns the corrected x position that collided.
      */
@@ -135,9 +135,9 @@ public class BoundingBox implements Cloneable {
     /**
      * Check for collision on the Y axis
      *
-     * @param otherBoundingBox The other bounding box that is colliding with the this one.
-     * @param y                Position on the X axis that is colliding
-     * @return Returns the corrected x position that collided.
+     * @param otherBoundingBox The other bounding box that is colliding with this one.
+     * @param y                Position on the Y axis that is colliding
+     * @return Returns the corrected y position that collided.
      */
     public double clipYCollide(BoundingBox otherBoundingBox, double y) {
         // Check if the boxes are colliding on the X axis
@@ -170,9 +170,9 @@ public class BoundingBox implements Cloneable {
     }
 
     /**
-     * Check for collision on the Y axis
+     * Check for collision on the Z axis
      *
-     * @param otherBoundingBox The other bounding box that is colliding with the this one.
+     * @param otherBoundingBox The other bounding box that is colliding wit this one.
      * @param z                Position on the X axis that is colliding
      * @return Returns the corrected x position that collided.
      */

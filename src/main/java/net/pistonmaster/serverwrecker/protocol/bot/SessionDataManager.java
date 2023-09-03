@@ -30,6 +30,7 @@ import com.github.steveice10.mc.protocol.data.game.chunk.ChunkBiomeData;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
 import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
+import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.GlobalPos;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PositionElement;
@@ -305,7 +306,18 @@ public final class SessionDataManager {
 
             PathExecutor pathExecutor = new PathExecutor(connection, actions);
             ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
+        } else if (split[0].equalsIgnoreCase("lookat")) {
+            double x = Double.parseDouble(split[1]);
+            double y = Double.parseDouble(split[2]);
+            double z = Double.parseDouble(split[3]);
+
+            botMovementManager.lookAt(RotationOrigin.FEET, Vector3d.from(x, y, z));
+        } else if (split[0].equalsIgnoreCase("forward")) {
+            botMovementManager.getControlState().setForward(true);
+        } else if (split[0].equalsIgnoreCase("stop")) {
+            botMovementManager.getControlState().resetAll();
         }
+
          */
     }
 
@@ -385,7 +397,7 @@ public final class SessionDataManager {
         abilitiesData = new AbilitiesData(packet.isInvincible(), packet.isFlying(), packet.isCanFly(), packet.isCreative(), packet.getFlySpeed(), packet.getWalkSpeed());
 
         if (botMovementManager != null) {
-            botMovementManager.getMovementState().setFlying(abilitiesData.flying());
+            botMovementManager.getControlState().setFlying(abilitiesData.flying());
             botMovementManager.setAbilitiesFlySpeed(abilitiesData.flySpeed());
             botMovementManager.setWalkSpeed(abilitiesData.walkSpeed());
         }

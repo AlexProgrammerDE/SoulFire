@@ -124,21 +124,9 @@ public class SWBaseListener extends SessionAdapter {
                 viaSession.setCompressionThreshold(loginCompressionPacket.getThreshold());
             }
         } else if (protocol.getState() == ProtocolState.STATUS) {
-            if (packet instanceof ClientboundStatusResponsePacket statusResponsePacket) {
-                ServerStatusInfo info = statusResponsePacket.getInfo();
-                ServerInfoHandler handler = session.getFlag(MinecraftConstants.SERVER_INFO_HANDLER_KEY);
-                if (handler != null) {
-                    handler.handle(session, info);
-                }
-
+            if (packet instanceof ClientboundStatusResponsePacket) {
                 session.send(new ServerboundPingRequestPacket(System.currentTimeMillis()));
-            } else if (packet instanceof ClientboundPongResponsePacket pongResponsePacket) {
-                long time = System.currentTimeMillis() - pongResponsePacket.getPingTime();
-                ServerPingTimeHandler handler = session.getFlag(MinecraftConstants.SERVER_PING_TIME_HANDLER_KEY);
-                if (handler != null) {
-                    handler.handle(session, time);
-                }
-
+            } else if (packet instanceof ClientboundPongResponsePacket) {
                 session.disconnect("Finished");
             }
         } else if (protocol.getState() == ProtocolState.GAME) {
