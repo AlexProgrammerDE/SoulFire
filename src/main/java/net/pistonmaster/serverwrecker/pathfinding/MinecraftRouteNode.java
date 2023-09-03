@@ -29,8 +29,18 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
+    /**
+     * The block position of this node.
+     */
     private final BlockPosition position;
+    /**
+     * The currently best known node to this node.
+     */
     private MinecraftRouteNode previous;
+    /**
+     * The action from the previous node that was used to get to this node.
+     */
+    private MinecraftAction previousAction;
     /**
      * The cost of the route from the start node to this node.
      */
@@ -41,7 +51,7 @@ class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
     private double totalRouteScore;
 
     MinecraftRouteNode(BlockPosition position) {
-        this(position, null, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+        this(position, null, null, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
     }
 
     @Override

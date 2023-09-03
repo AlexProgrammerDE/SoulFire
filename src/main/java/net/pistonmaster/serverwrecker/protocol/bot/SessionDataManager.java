@@ -67,6 +67,7 @@ import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.serverwrecker.pathfinding.*;
+import net.pistonmaster.serverwrecker.pathfinding.goals.Action;
 import net.pistonmaster.serverwrecker.pathfinding.goals.PathExecutor;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
@@ -232,6 +233,7 @@ public final class SessionDataManager {
     public void onLookAt(ClientboundPlayerLookAtPacket packet) {
         botMovementManager.lookAt(packet.getOrigin(),
                 Vector3d.from(packet.getX(), packet.getY(), packet.getZ()));
+        botMovementManager.sendRot();
 
         // TODO: Implement entity look at
     }
@@ -291,17 +293,32 @@ public final class SessionDataManager {
             return;
         }
 
-        if (split[0].equalsIgnoreCase("walk")) {
-            int x = Integer.parseInt(split[1]);
-            int y = Integer.parseInt(split[2]);
-            int z = Integer.parseInt(split[3]);
+        if (split[0].equalsIgnoreCase("walkrel")) {
+            double x = Double.parseDouble(split[1]);
+            double y = Double.parseDouble(split[2]);
+            double z = Double.parseDouble(split[3]);
 
             RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new BlockDistanceScorer());
             BlockPosition start = new BlockPosition(botMovementManager.getPlayerPos());
             BlockPosition target = new BlockPosition(botMovementManager.getPlayerPos().add(x, y, z));
             System.out.println("Start: " + start);
             System.out.println("Target: " + target);
-            List<BlockPosition> actions = routeFinder.findRoute(start, target);
+            List<Action> actions = routeFinder.findRoute(start, target);
+            System.out.println(actions);
+
+            PathExecutor pathExecutor = new PathExecutor(connection, actions);
+            ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
+        } else if (split[0].equalsIgnoreCase("walkabs")) {
+            double x = Double.parseDouble(split[1]);
+            double y = Double.parseDouble(split[2]);
+            double z = Double.parseDouble(split[3]);
+
+            RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new BlockDistanceScorer());
+            BlockPosition start = new BlockPosition(botMovementManager.getPlayerPos());
+            BlockPosition target = new BlockPosition(Vector3d.from(x, y, z));
+            System.out.println("Start: " + start);
+            System.out.println("Target: " + target);
+            List<Action> actions = routeFinder.findRoute(start, target);
             System.out.println(actions);
 
             PathExecutor pathExecutor = new PathExecutor(connection, actions);
@@ -317,7 +334,6 @@ public final class SessionDataManager {
         } else if (split[0].equalsIgnoreCase("stop")) {
             botMovementManager.getControlState().resetAll();
         }
-
          */
     }
 

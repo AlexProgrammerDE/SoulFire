@@ -19,5 +19,10 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.goals;
 
-public interface Goal {
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
+
+public interface Action {
+    boolean isCompleted(BotConnection connection);
+
+    void tick(BotConnection connection);
 }

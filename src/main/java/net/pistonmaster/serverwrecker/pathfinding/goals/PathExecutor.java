@@ -19,27 +19,24 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.goals;
 
-import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
-import net.pistonmaster.serverwrecker.pathfinding.BlockPosition;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.cloudburstmc.math.vector.Vector3d;
 
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
-    private final Queue<BlockPosition> goals;
+    private final Queue<Action> actions;
     private final BotConnection connection;
 
-    public PathExecutor(BotConnection connection, List<BlockPosition> goals) {
-        this.goals = new ArrayBlockingQueue<>(goals.size());
-        this.goals.addAll(goals);
+    public PathExecutor(BotConnection connection, List<Action> actions) {
+        this.actions = new ArrayBlockingQueue<>(actions.size());
+        this.actions.addAll(actions);
         this.connection = connection;
     }
 
@@ -50,50 +47,37 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
             return;
         }
 
-        if (goals.isEmpty()) {
+        if (actions.isEmpty()) {
             unregister();
             return;
         }
 
-        BlockPosition goal = goals.peek();
-        if (goal == null) {
+        Action action = actions.peek();
+        if (action == null) {
             unregister();
             return;
         }
 
-        Vector3d goalPosition = goal.position();
-
-        BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
-        Vector3d botPosition = movementManager.getPlayerPos();
-
-        double distanceToGoal = botPosition.distance(goal.position());
-        if (distanceToGoal < 0.2) {
-            goals.remove();
-            System.out.println("Reached goal! " + goal);
+        if (action.isCompleted(connection)) {
+            actions.remove();
+            System.out.println("Reached goal! " + action);
 
             // Directly use tick to execute next goal
-            goal = goals.peek();
+            action = actions.peek();
 
             // If there are no more goals, stop
-            if (goal == null) {
+            if (action == null) {
                 System.out.println("Finished all goals!");
+                BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
                 movementManager.getControlState().resetAll();
                 unregister();
                 return;
             }
 
-            System.out.println("Next goal: " + goal);
-
-            goalPosition = goal.position();
+            System.out.println("Next goal: " + action);
         }
 
-        movementManager.getControlState().resetAll();
-        movementManager.lookAt(RotationOrigin.FEET, goalPosition);
-        movementManager.getControlState().setForward(true);
-
-        if (goalPosition.getY() > botPosition.getY()) {
-            movementManager.getControlState().setJumping(true);
-        }
+        action.tick(connection);
     }
 
     public void unregister() {

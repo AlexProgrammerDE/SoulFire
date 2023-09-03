@@ -51,6 +51,8 @@ public final class BotMovementManager {
     private double z;
     private float yaw;
     private float pitch;
+    private float lastSentYaw;
+    private float lastSentPitch;
     private BoundingBox boundingBox;
     private double motionX;
     private double motionY;
@@ -103,6 +105,10 @@ public final class BotMovementManager {
     public void setRotation(float yaw, float pitch) {
         this.yaw = yaw;
         this.pitch = pitch;
+
+        if (this.yaw != this.lastSentYaw || this.pitch != this.lastSentPitch) {
+            sendRot();
+        }
     }
 
     public void setMotion(double x, double y, double z) {
@@ -130,8 +136,6 @@ public final class BotMovementManager {
      * @param block  The block or location to look at.
      */
     public void lookAt(RotationOrigin origin, Vector3d block) {
-        float startYaw = this.yaw;
-        float startPitch = this.pitch;
         boolean eyes = origin == RotationOrigin.EYES;
 
         double dx = block.getX() - this.x;
@@ -148,10 +152,6 @@ public final class BotMovementManager {
 
         this.yaw = (float) yaw;
         this.pitch = (float) pitch;
-
-        if (this.yaw != startYaw || this.pitch != startPitch) {
-            sendRot();
-        }
     }
 
     private float updateRotation(float angle, float targetAngle, float maxIncrease) {
@@ -286,6 +286,8 @@ public final class BotMovementManager {
     }
 
     public void sendPosRot() {
+        this.lastSentYaw = this.yaw;
+        this.lastSentPitch = this.pitch;
         dataManager.getSession().send(new ServerboundMovePlayerPosRotPacket(this.onGround, this.x, this.y, this.z, this.yaw, this.pitch));
     }
 
@@ -294,6 +296,8 @@ public final class BotMovementManager {
     }
 
     public void sendRot() {
+        this.lastSentYaw = this.yaw;
+        this.lastSentPitch = this.pitch;
         dataManager.getSession().send(new ServerboundMovePlayerRotPacket(this.onGround, this.yaw, this.pitch));
     }
 
