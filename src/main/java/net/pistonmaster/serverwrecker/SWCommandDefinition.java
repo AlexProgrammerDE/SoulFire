@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Command(name = "serverwrecker", mixinStandardHelpOptions = true,
         version = "ServerWrecker v" + BuildData.VERSION, showDefaultValues = true,
-        description = "Stress test a minecraft server using bots", sortOptions = false)
+        description = BuildData.DESCRIPTION, sortOptions = false)
 public class SWCommandDefinition implements Callable<Integer> {
     private final ServerWrecker serverWrecker;
     @Setter
