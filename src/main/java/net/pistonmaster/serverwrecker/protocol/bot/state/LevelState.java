@@ -34,10 +34,7 @@ import net.pistonmaster.serverwrecker.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
@@ -148,14 +145,15 @@ public class LevelState {
         chunkData.setBlock(block, state);
     }
 
-    public int getBlockStateIdAt(Vector3i block) {
+    public OptionalInt getBlockStateIdAt(Vector3i block) {
         ChunkKey chunkKey = new ChunkKey(block);
         ChunkData chunkData = chunks.get(chunkKey);
 
-        // TODO: Maybe load chunk if not found?
-        Objects.requireNonNull(chunkData, "Chunk not found");
+        if (chunkData == null) {
+            return OptionalInt.empty();
+        }
 
-        return chunkData.getBlock(block);
+        return OptionalInt.of(chunkData.getBlock(block));
     }
 
     public boolean isChunkLoaded(Vector3i block) {
@@ -163,18 +161,28 @@ public class LevelState {
         return chunks.containsKey(chunkKey);
     }
 
-    public String getBlockNameAt(Vector3i block) {
-        return sessionDataManager.getServerWrecker().getGlobalBlockPalette().getBlockNameForStateId(getBlockStateIdAt(block));
+    public Optional<String> getBlockNameAt(Vector3i block) {
+        OptionalInt stateId = getBlockStateIdAt(block);
+
+        if (stateId.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return sessionDataManager.getServerWrecker().getGlobalBlockPalette().getBlockNameForStateId(stateId.getAsInt()).describeConstable();
     }
 
-    public BlockType getBlockTypeAt(Vector3i block) {
-        String blockName = getBlockNameAt(block);
-        BlockType blockType = BlockType.getByMcName(blockName);
+    public Optional<BlockType> getBlockTypeAt(Vector3i block) {
+        Optional<String> blockName = getBlockNameAt(block);
+        if (blockName.isEmpty()) {
+            return Optional.empty();
+        }
+
+        BlockType blockType = BlockType.getByMcName(blockName.get());
         if (blockType == null) {
             sessionDataManager.getLog().error("Unknown block: {}", blockName);
             throw new IllegalArgumentException("Unknown block: " + blockName);
         }
-        return blockType;
+        return Optional.of(blockType);
     }
 
     public boolean isOutOfWorld(Vector3i block) {
@@ -209,6 +217,8 @@ public class LevelState {
             return false;
         }
 
-        return getBlockTypeAt(block).boundingBox() == BoundingBoxType.BLOCK;
+        Optional<BlockType> blockType = getBlockTypeAt(block);
+        // Out of level, so we can't go there
+        return blockType.filter(type -> type.boundingBox() == BoundingBoxType.BLOCK).isPresent();
     }
 }

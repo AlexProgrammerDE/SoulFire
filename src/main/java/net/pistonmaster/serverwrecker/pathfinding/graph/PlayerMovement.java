@@ -27,6 +27,7 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,17 +51,26 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         ProjectedLevelState projectedLevelState = previousEntityState.levelState();
 
         for (Vector3i requiredFreeBlock : requiredFreeBlocks()) {
-            BlockType blockType = projectedLevelState.getBlockTypeAt(requiredFreeBlock);
-            if (BlockTypeHelper.isSolid(blockType)) {
+            Optional<BlockType> blockType = projectedLevelState.getBlockTypeAt(requiredFreeBlock);
+            if (blockType.isEmpty()) {
+                // Out of level, so we can't go there
+                return Double.POSITIVE_INFINITY;
+            }
+
+            if (BlockTypeHelper.isSolid(blockType.get())) {
                 // In the future, add cost of placing here
                 return Double.POSITIVE_INFINITY;
             }
         }
 
         for (Vector3i requiredSolidBlock : requiredSolidBlocks()) {
-            BlockType blockType = projectedLevelState.getBlockTypeAt(requiredSolidBlock);
+            Optional<BlockType> blockType = projectedLevelState.getBlockTypeAt(requiredSolidBlock);
+            if (blockType.isEmpty()) {
+                // Out of level, so we can't go there
+                return Double.POSITIVE_INFINITY;
+            }
 
-            if (!BlockTypeHelper.isSolid(blockType)) {
+            if (!BlockTypeHelper.isSolid(blockType.get())) {
                 // In the future, add cost of digging here
                 return Double.POSITIVE_INFINITY;
             }

@@ -20,12 +20,17 @@
 package net.pistonmaster.serverwrecker.pathfinding.execution;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
+import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
 import org.cloudburstmc.math.vector.Vector3d;
 
-public record MovementAction(BotEntityState worldState) implements WorldAction {
+@RequiredArgsConstructor
+public class MovementAction implements WorldAction {
+    private final BotEntityState worldState;
+    private boolean didLook = false;
+
     @Override
     public boolean isCompleted(BotConnection connection) {
         BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
@@ -41,7 +46,14 @@ public record MovementAction(BotEntityState worldState) implements WorldAction {
         Vector3d botPosition = movementManager.getPlayerPos();
 
         movementManager.lookAt(RotationOrigin.EYES, worldState.position());
-        movementManager.setRotation(movementManager.getYaw(), 0);
+        movementManager.setPitch(0);
+
+        // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
+        if (didLook) {
+            movementManager.setLastSentYaw(movementManager.getYaw());
+        } else {
+            didLook = true;
+        }
 
         // Don't let the bot look up or down (makes it look weird)
         movementManager.getControlState().resetAll();

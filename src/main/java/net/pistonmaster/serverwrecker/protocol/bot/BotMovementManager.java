@@ -37,6 +37,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Huge credit to <a href="https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/player/Player.java">LabyStudio/java-minecraft</a>
@@ -49,6 +50,9 @@ public final class BotMovementManager {
     private double x;
     private double y;
     private double z;
+    private double lastSentX;
+    private double lastSentY;
+    private double lastSentZ;
     private float yaw;
     private float pitch;
     private float lastSentYaw;
@@ -105,10 +109,6 @@ public final class BotMovementManager {
     public void setRotation(float yaw, float pitch) {
         this.yaw = yaw;
         this.pitch = pitch;
-
-        if (this.yaw != this.lastSentYaw || this.pitch != this.lastSentPitch) {
-            sendRot();
-        }
     }
 
     public void setMotion(double x, double y, double z) {
@@ -172,9 +172,6 @@ public final class BotMovementManager {
         double startY = this.y;
         double startZ = this.z;
 
-        float startPitch = this.pitch;
-        float startYaw = this.yaw;
-
         boolean startOnGround = this.onGround;
 
         this.updateMovementStateInput();
@@ -233,7 +230,7 @@ public final class BotMovementManager {
 
         // Detect whether positions changed
         boolean positionChanged = startX != this.x || startY != this.y || startZ != this.z;
-        boolean rotationChanged = startPitch != this.pitch || startYaw != this.yaw;
+        boolean rotationChanged = yaw != this.lastSentYaw || pitch != this.lastSentPitch;
         boolean onGroundChanged = startOnGround != this.onGround;
 
         // Send position packets if changed
@@ -286,18 +283,24 @@ public final class BotMovementManager {
     }
 
     public void sendPosRot() {
-        this.lastSentYaw = this.yaw;
-        this.lastSentPitch = this.pitch;
+        lastSentX = x;
+        lastSentY = y;
+        lastSentZ = z;
+        lastSentYaw = yaw;
+        lastSentPitch = pitch;
         dataManager.getSession().send(new ServerboundMovePlayerPosRotPacket(this.onGround, this.x, this.y, this.z, this.yaw, this.pitch));
     }
 
     public void sendPos() {
+        lastSentX = x;
+        lastSentY = y;
+        lastSentZ = z;
         dataManager.getSession().send(new ServerboundMovePlayerPosPacket(this.onGround, this.x, this.y, this.z));
     }
 
     public void sendRot() {
-        this.lastSentYaw = this.yaw;
-        this.lastSentPitch = this.pitch;
+        lastSentYaw = yaw;
+        lastSentPitch = pitch;
         dataManager.getSession().send(new ServerboundMovePlayerRotPacket(this.onGround, this.yaw, this.pitch));
     }
 
@@ -312,7 +315,8 @@ public final class BotMovementManager {
             return false;
         }
 
-        return level.getBlockTypeAt(blockPos).isFluid();
+        Optional<BlockType> blockType = level.getBlockTypeAt(blockPos);
+        return blockType.map(BlockType::isFluid).orElse(false);
     }
 
     public void jump() {
@@ -407,7 +411,13 @@ public final class BotMovementManager {
             return 1.0F;
         }
 
-        BlockType blockType = level.getBlockTypeAt(blockPos);
+        Optional<BlockType> optionalBlockType = level.getBlockTypeAt(blockPos);
+        if (optionalBlockType.isEmpty()) {
+            return 1.0F;
+        }
+
+        BlockType blockType = optionalBlockType.get();
+
         if (blockType == BlockType.SLIME_BLOCK) {
             return 0.8F;
         } else if (blockType == BlockType.ICE || blockType == BlockType.PACKED_ICE) {

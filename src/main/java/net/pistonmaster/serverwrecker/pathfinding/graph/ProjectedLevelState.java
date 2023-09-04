@@ -32,31 +32,47 @@ import java.util.*;
  * This takes a world state and projects changes onto it.
  * This way we calculate the way we can do actions after a block was broken/placed.
  */
-@EqualsAndHashCode
 @RequiredArgsConstructor
 public class ProjectedLevelState {
     private final LevelState levelState;
     private final Map<Vector3i, BlockType> blockLookupCache;
+    private final int blockLookupCacheHash;
 
     public ProjectedLevelState(LevelState levelState) {
-        this(levelState, new HashMap<>());
+        Map<Vector3i, BlockType> blockLookupCache = new HashMap<>();
+        this.levelState = levelState;
+        this.blockLookupCache = blockLookupCache;
+        this.blockLookupCacheHash = blockLookupCache.hashCode();
     }
 
     public ProjectedLevelState withChange(Vector3i position, BlockType blockType) {
         Map<Vector3i, BlockType> blockStateCache = new HashMap<>(blockLookupCache);
         blockStateCache.put(position, blockType);
 
-        return new ProjectedLevelState(levelState, blockStateCache);
+        return new ProjectedLevelState(levelState, blockStateCache, blockStateCache.hashCode());
     }
 
-    public BlockType getBlockTypeAt(Vector3i position) {
-        return blockLookupCache.compute(position, (vector3i, blockType) -> {
+    public Optional<BlockType> getBlockTypeAt(Vector3i position) {
+        return Optional.ofNullable(blockLookupCache.compute(position, (vector3i, blockType) -> {
             // If we already know the block type (thanks to cache), return it
             if (blockType != null) {
                 return blockType;
             }
 
-            return levelState.getBlockTypeAt(vector3i);
-        });
+            return levelState.getBlockTypeAt(vector3i).orElse(null);
+        }));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProjectedLevelState that = (ProjectedLevelState) o;
+        return blockLookupCacheHash == that.blockLookupCacheHash;
+    }
+
+    @Override
+    public int hashCode() {
+        return blockLookupCacheHash;
     }
 }
