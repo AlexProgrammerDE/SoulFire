@@ -66,12 +66,12 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.pathfinding.BlockDistanceScorer;
 import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
 import net.pistonmaster.serverwrecker.pathfinding.MinecraftGraph;
 import net.pistonmaster.serverwrecker.pathfinding.RouteFinder;
 import net.pistonmaster.serverwrecker.pathfinding.actions.Action;
 import net.pistonmaster.serverwrecker.pathfinding.actions.PathExecutor;
+import net.pistonmaster.serverwrecker.pathfinding.goals.PosGoal;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
@@ -301,12 +301,12 @@ public final class SessionDataManager {
             double y = Double.parseDouble(split[2]);
             double z = Double.parseDouble(split[3]);
 
-            RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new BlockDistanceScorer());
-            BotWorldState start = new BotWorldState(botMovementManager.getPlayerPos());
-            BotWorldState target = new BotWorldState(botMovementManager.getPlayerPos().add(x, y, z));
-            System.out.println("Start: " + start);
+            Vector3d target = botMovementManager.getPlayerPos().add(x, y, z);
             System.out.println("Target: " + target);
-            List<Action> actions = routeFinder.findRoute(start, target);
+            RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new PosGoal(target));
+            BotWorldState start = new BotWorldState(botMovementManager.getPlayerPos());
+            System.out.println("Start: " + start);
+            List<Action> actions = routeFinder.findRoute(start);
             System.out.println(actions);
 
             PathExecutor pathExecutor = new PathExecutor(connection, actions);
@@ -316,12 +316,12 @@ public final class SessionDataManager {
             double y = Double.parseDouble(split[2]);
             double z = Double.parseDouble(split[3]);
 
-            RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new BlockDistanceScorer());
-            BotWorldState start = new BotWorldState(botMovementManager.getPlayerPos());
-            BotWorldState target = new BotWorldState(Vector3d.from(x, y, z));
-            System.out.println("Start: " + start);
+            Vector3d target = Vector3d.from(x, y, z);
             System.out.println("Target: " + target);
-            List<Action> actions = routeFinder.findRoute(start, target);
+            RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new PosGoal(target));
+            BotWorldState start = new BotWorldState(botMovementManager.getPlayerPos());
+            System.out.println("Start: " + start);
+            List<Action> actions = routeFinder.findRoute(start);
             System.out.println(actions);
 
             PathExecutor pathExecutor = new PathExecutor(connection, actions);
@@ -336,10 +336,7 @@ public final class SessionDataManager {
             botMovementManager.getControlState().setForward(true);
         } else if (split[0].equalsIgnoreCase("stop")) {
             botMovementManager.getControlState().resetAll();
-        }
-
-         */
-
+        }*/
     }
 
     @BusHandler

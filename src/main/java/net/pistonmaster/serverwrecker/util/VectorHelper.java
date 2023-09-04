@@ -19,10 +19,15 @@
  */
 package net.pistonmaster.serverwrecker.util;
 
+import org.cloudburstmc.math.vector.Vector2d;
 import org.cloudburstmc.math.vector.Vector3d;
 
 public class VectorHelper {
     public static Vector3d middleOfBlockNormalize(Vector3d vector) {
         return vector.floor().add(0.5, 0, 0.5);
+    }
+
+    public static Vector2d middleOfBlockNormalize(Vector2d vector) {
+        return vector.floor().add(0.5, 0.5);
     }
 }

@@ -20,9 +20,14 @@
 package net.pistonmaster.serverwrecker.pathfinding.goals;
 
 import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
+import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 
 public record PosGoal(Vector3d goal) implements GoalScorer {
+    public PosGoal {
+        goal = VectorHelper.middleOfBlockNormalize(goal);
+    }
+
     public PosGoal(double x, double y, double z) {
         this(Vector3d.from(x, y, z));
     }
