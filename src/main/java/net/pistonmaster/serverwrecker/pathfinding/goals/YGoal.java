@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.goals;
 
-import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
+import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 
 public record YGoal(double y) implements GoalScorer {
     public YGoal {
@@ -27,12 +27,12 @@ public record YGoal(double y) implements GoalScorer {
     }
 
     @Override
-    public double computeScore(BotWorldState worldState) {
+    public double computeScore(BotEntityState worldState) {
         return Math.abs(worldState.position().getY() - y);
     }
 
     @Override
-    public boolean isFinished(BotWorldState worldState) {
+    public boolean isFinished(BotEntityState worldState) {
         return worldState.position().getY() == y;
     }
 }

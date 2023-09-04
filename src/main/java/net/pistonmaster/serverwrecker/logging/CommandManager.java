@@ -19,7 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.logging;
 
+import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -32,10 +34,23 @@ import net.pistonmaster.serverwrecker.AttackManager;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.DispatcherInitEvent;
 import net.pistonmaster.serverwrecker.gui.LogPanel;
+import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
+import net.pistonmaster.serverwrecker.pathfinding.RouteFinder;
+import net.pistonmaster.serverwrecker.pathfinding.execution.PathExecutor;
+import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
+import net.pistonmaster.serverwrecker.pathfinding.goals.PosGoal;
+import net.pistonmaster.serverwrecker.pathfinding.goals.XZGoal;
+import net.pistonmaster.serverwrecker.pathfinding.goals.YGoal;
+import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
+import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
+import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
+import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import org.apache.commons.io.FileUtils;
+import org.cloudburstmc.math.vector.Vector3d;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
@@ -149,6 +164,151 @@ public class CommandManager {
                     c.getSource().sendMessage("Available commands:");
                     for (String command : dispatcher.getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
                         c.getSource().sendMessage(command);
+                    }
+                    return 1;
+                }));
+        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("walkxyz").then(RequiredArgumentBuilder.
+                <ConsoleSubject, Double>argument("x", DoubleArgumentType.doubleArg()).then(RequiredArgumentBuilder.
+                <ConsoleSubject, Double>argument("y", DoubleArgumentType.doubleArg()).then(RequiredArgumentBuilder.
+                <ConsoleSubject, Double>argument("z", DoubleArgumentType.doubleArg())
+                .executes(c -> {
+                    AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+
+                    if (attackManager == null) {
+                        return 1;
+                    }
+
+                    double x = DoubleArgumentType.getDouble(c, "x");
+                    double y = DoubleArgumentType.getDouble(c, "y");
+                    double z = DoubleArgumentType.getDouble(c, "z");
+
+                    for (BotConnection bot : attackManager.getBotConnections()) {
+                        SessionDataManager sessionDataManager = bot.sessionDataManager();
+                        BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
+
+                        RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(), new PosGoal(x, y, z));
+                        BotEntityState start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
+                                sessionDataManager.getCurrentLevel()
+                        ));
+                        logger.info("Start: " + start);
+                        List<WorldAction> actions = routeFinder.findRoute(start);
+                        logger.info(actions.toString());
+
+                        PathExecutor pathExecutor = new PathExecutor(bot, actions);
+                        ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
+                    }
+                    return 1;
+                })))));
+        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("walkxz").then(RequiredArgumentBuilder.
+                <ConsoleSubject, Double>argument("x", DoubleArgumentType.doubleArg()).then(RequiredArgumentBuilder.
+                <ConsoleSubject, Double>argument("z", DoubleArgumentType.doubleArg())
+                .executes(c -> {
+                    AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+
+                    if (attackManager == null) {
+                        return 1;
+                    }
+
+                    double x = DoubleArgumentType.getDouble(c, "x");
+                    double z = DoubleArgumentType.getDouble(c, "z");
+
+                    for (BotConnection bot : attackManager.getBotConnections()) {
+                        SessionDataManager sessionDataManager = bot.sessionDataManager();
+                        BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
+
+                        RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(), new XZGoal(x, z));
+                        BotEntityState start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
+                                sessionDataManager.getCurrentLevel()
+                        ));
+                        logger.info("Start: " + start);
+                        List<WorldAction> actions = routeFinder.findRoute(start);
+                        logger.info(actions.toString());
+
+                        PathExecutor pathExecutor = new PathExecutor(bot, actions);
+                        ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
+                    }
+                    return 1;
+                }))));
+        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("walky").then(RequiredArgumentBuilder.
+                <ConsoleSubject, Double>argument("y", DoubleArgumentType.doubleArg())
+                .executes(c -> {
+                    AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+
+                    if (attackManager == null) {
+                        return 1;
+                    }
+
+                    double y = DoubleArgumentType.getDouble(c, "y");
+
+                    for (BotConnection bot : attackManager.getBotConnections()) {
+                        SessionDataManager sessionDataManager = bot.sessionDataManager();
+                        BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
+
+                        RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(), new YGoal(y));
+                        BotEntityState start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
+                                sessionDataManager.getCurrentLevel()
+                        ));
+                        logger.info("Start: " + start);
+                        List<WorldAction> actions = routeFinder.findRoute(start);
+                        logger.info(actions.toString());
+
+                        PathExecutor pathExecutor = new PathExecutor(bot, actions);
+                        ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
+                    }
+                    return 1;
+                })));
+        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("lookat").then(RequiredArgumentBuilder.
+                <ConsoleSubject, Double>argument("x", DoubleArgumentType.doubleArg()).then(RequiredArgumentBuilder.
+                <ConsoleSubject, Double>argument("y", DoubleArgumentType.doubleArg()).then(RequiredArgumentBuilder.
+                <ConsoleSubject, Double>argument("z", DoubleArgumentType.doubleArg())
+                .executes(c -> {
+                    AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+
+                    if (attackManager == null) {
+                        return 1;
+                    }
+
+                    double x = DoubleArgumentType.getDouble(c, "x");
+                    double y = DoubleArgumentType.getDouble(c, "y");
+                    double z = DoubleArgumentType.getDouble(c, "z");
+
+                    for (BotConnection bot : attackManager.getBotConnections()) {
+                        SessionDataManager sessionDataManager = bot.sessionDataManager();
+                        BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
+
+                        botMovementManager.lookAt(RotationOrigin.FEET, Vector3d.from(x, y, z));
+                    }
+                    return 1;
+                })))));
+        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("forward")
+                .executes(c -> {
+                    AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+
+                    if (attackManager == null) {
+                        return 1;
+                    }
+
+                    for (BotConnection bot : attackManager.getBotConnections()) {
+                        SessionDataManager sessionDataManager = bot.sessionDataManager();
+                        BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
+
+                        botMovementManager.getControlState().setForward(true);
+                    }
+                    return 1;
+                }));
+        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("stop")
+                .executes(c -> {
+                    AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+
+                    if (attackManager == null) {
+                        return 1;
+                    }
+
+                    for (BotConnection bot : attackManager.getBotConnections()) {
+                        SessionDataManager sessionDataManager = bot.sessionDataManager();
+                        BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
+
+                        botMovementManager.getControlState().resetAll();
                     }
                     return 1;
                 }));

@@ -17,12 +17,22 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.actions;
+package net.pistonmaster.serverwrecker.pathfinding;
 
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
+import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
+import net.pistonmaster.serverwrecker.util.VectorHelper;
+import org.cloudburstmc.math.vector.Vector3d;
 
-public interface Action {
-    boolean isCompleted(BotConnection connection);
-
-    void tick(BotConnection connection);
+/**
+ * Represents the state of the bot in the level.
+ * This means the positions and in the future also inventory.
+ *
+ * @param position The position of the bot.
+ *                 This is always the middle of the block.
+ * @param levelState The level state of the world the bot is in.
+ */
+public record BotEntityState(Vector3d position, ProjectedLevelState levelState) {
+    public BotEntityState {
+        position = VectorHelper.middleOfBlockNormalize(position);
+    }
 }

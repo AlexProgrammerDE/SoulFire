@@ -17,15 +17,15 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.actions;
+package net.pistonmaster.serverwrecker.pathfinding.execution;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
-import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
+import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
 import org.cloudburstmc.math.vector.Vector3d;
 
-public record MovementAction(BotWorldState worldState) implements Action {
+public record MovementAction(BotEntityState worldState) implements WorldAction {
     @Override
     public boolean isCompleted(BotConnection connection) {
         BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();

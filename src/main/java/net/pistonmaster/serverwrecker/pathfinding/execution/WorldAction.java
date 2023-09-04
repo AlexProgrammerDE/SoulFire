@@ -17,15 +17,12 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding;
+package net.pistonmaster.serverwrecker.pathfinding.execution;
 
-public enum MovementDirection {
-    NORTH,
-    SOUTH,
-    EAST,
-    WEST,
-    NORTH_EAST,
-    NORTH_WEST,
-    SOUTH_EAST,
-    SOUTH_WEST,
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
+
+public interface WorldAction {
+    boolean isCompleted(BotConnection connection);
+
+    void tick(BotConnection connection);
 }

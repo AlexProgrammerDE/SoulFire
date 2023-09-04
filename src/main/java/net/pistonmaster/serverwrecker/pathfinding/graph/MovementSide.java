@@ -17,17 +17,12 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding;
+package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import org.cloudburstmc.math.vector.Vector3d;
-
-public interface MinecraftAction {
-    Vector3d getTargetPos();
-
-    default BotWorldState getTargetState() {
-        // TODO: Implement this per-action
-        return new BotWorldState(getTargetPos());
-    }
-
-    double getActionCost();
+/**
+ * When we run around a wall, what side do we run on?
+ */
+public enum MovementSide {
+    LEFT,
+    RIGHT
 }

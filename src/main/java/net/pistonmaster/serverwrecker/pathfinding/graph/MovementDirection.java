@@ -17,12 +17,15 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding;
+package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-public enum MovementModifier {
-    NORMAL,
-    FALL_1,
-    FALL_2,
-    FALL_3,
-    JUMP;
+public enum MovementDirection {
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST,
+    NORTH_EAST,
+    NORTH_WEST,
+    SOUTH_EAST,
+    SOUTH_WEST,
 }

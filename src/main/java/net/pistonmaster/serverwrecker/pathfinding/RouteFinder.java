@@ -20,17 +20,18 @@
 package net.pistonmaster.serverwrecker.pathfinding;
 
 import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.serverwrecker.pathfinding.actions.Action;
-import net.pistonmaster.serverwrecker.pathfinding.actions.MovementAction;
+import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
+import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
 import net.pistonmaster.serverwrecker.pathfinding.goals.GoalScorer;
+import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 
 import java.util.*;
 
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
-    public List<Action> findRoute(BotWorldState from) {
+    public List<WorldAction> findRoute(BotEntityState from) {
         // Store block positions and the best route to them
-        Map<BotWorldState, MinecraftRouteNode> routeIndex = new HashMap<>();
+        Map<BotEntityState, MinecraftRouteNode> routeIndex = new HashMap<>();
 
         // Store block positions that we need to look at
         Queue<MinecraftRouteNode> openSet = new PriorityQueue<>();
@@ -47,7 +48,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             if (scorer.isFinished(current.getWorldState())) {
                 log.debug("Found our destination!");
 
-                List<Action> route = new ArrayList<>();
+                List<WorldAction> route = new ArrayList<>();
                 MinecraftRouteNode previousElement = current;
                 do {
                     route.add(0, new MovementAction(previousElement.getWorldState()));
@@ -65,7 +66,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                     continue;
                 }
 
-                BotWorldState actionTargetState = action.getTargetState();
+                BotEntityState actionTargetState = action.getTargetState();
                 MinecraftRouteNode finalCurrent = current;
                 routeIndex.compute(actionTargetState, (k, v) -> {
                     // Calculate new distance from start to this connection,

@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.goals;
 
-import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
+import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 
 /**
  * A goal represents something that the user wants the bot to achieve.
@@ -32,7 +32,7 @@ public interface GoalScorer {
      * @param worldState the world state to calculate the score for
      * @return the score for the given world state
      */
-    double computeScore(BotWorldState worldState);
+    double computeScore(BotEntityState worldState);
 
     /**
      * Checks if the given world state indicates that the goal is reached.
@@ -40,5 +40,5 @@ public interface GoalScorer {
      * @param worldState the current world state
      * @return true if the goal is reached, false otherwise
      */
-    boolean isFinished(BotWorldState worldState);
+    boolean isFinished(BotEntityState worldState);
 }

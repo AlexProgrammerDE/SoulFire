@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.goals;
 
-import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
+import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 
@@ -33,12 +33,12 @@ public record PosGoal(Vector3d goal) implements GoalScorer {
     }
 
     @Override
-    public double computeScore(BotWorldState worldState) {
+    public double computeScore(BotEntityState worldState) {
         return worldState.position().distance(goal);
     }
 
     @Override
-    public boolean isFinished(BotWorldState worldState) {
+    public boolean isFinished(BotEntityState worldState) {
         return worldState.position().equals(goal);
     }
 }

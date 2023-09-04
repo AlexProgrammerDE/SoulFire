@@ -17,12 +17,15 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding;
+package net.pistonmaster.serverwrecker.pathfinding.graph;
+
+import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 
 /**
- * When we run around a wall, what side do we run on?
+ * A calculated action that the bot can take on a graph world representation.
  */
-public enum MovementSide {
-    LEFT,
-    RIGHT
+public interface GraphAction {
+    BotEntityState getTargetState();
+
+    double getActionCost();
 }

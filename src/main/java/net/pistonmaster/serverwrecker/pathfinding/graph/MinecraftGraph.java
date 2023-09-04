@@ -17,38 +17,29 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding;
+package net.pistonmaster.serverwrecker.pathfinding.graph;
 
 import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
-import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
-import org.cloudburstmc.math.vector.Vector3d;
+import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public record MinecraftGraph(SessionDataManager sessionDataManager) {
-    public List<MinecraftAction> getConnections(BotWorldState node) {
-        Vector3d from = node.position();
-
-        LevelState levelState = sessionDataManager.getCurrentLevel();
-        if (levelState == null) {
-            return List.of();
-        }
-
-        List<MinecraftAction> targetSet = new ArrayList<>();
+public class MinecraftGraph {
+    public List<GraphAction> getConnections(BotEntityState node) {
+        List<GraphAction> targetSet = new ArrayList<>();
         for (MovementDirection direction : MovementDirection.values()) {
             for (MovementModifier modifier : MovementModifier.values()) {
                 for (MovementSide side : MovementSide.values()) {
-                    PlayerMovement playerMovement = new PlayerMovement(from, direction, modifier, side, sessionDataManager);
+                    PlayerMovement playerMovement = new PlayerMovement(node, direction, modifier, side);
 
                     targetSet.add(playerMovement);
                 }
             }
         }
 
-        log.debug("Found {} possible actions for {}", targetSet, node);
+        log.debug("Found {} possible actions for {}", targetSet.size(), node.position());
 
         return targetSet;
     }

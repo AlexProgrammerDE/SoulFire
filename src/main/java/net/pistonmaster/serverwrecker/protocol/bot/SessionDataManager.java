@@ -66,14 +66,16 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
-import net.pistonmaster.serverwrecker.pathfinding.MinecraftGraph;
+import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.RouteFinder;
-import net.pistonmaster.serverwrecker.pathfinding.actions.Action;
-import net.pistonmaster.serverwrecker.pathfinding.actions.PathExecutor;
+import net.pistonmaster.serverwrecker.pathfinding.execution.PathExecutor;
+import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 import net.pistonmaster.serverwrecker.pathfinding.goals.PosGoal;
 import net.pistonmaster.serverwrecker.pathfinding.goals.XZGoal;
 import net.pistonmaster.serverwrecker.pathfinding.goals.YGoal;
+import net.pistonmaster.serverwrecker.pathfinding.graph.GraphAction;
+import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
+import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
@@ -291,61 +293,6 @@ public final class SessionDataManager {
         }
 
         onChat(Component.text(packet.getContent()));
-
-        /*
-        String[] split = packet.getContent().split(" ");
-        if (split.length == 0) {
-            return;
-        }
-
-        if (split[0].equalsIgnoreCase("walkxyz")) {
-            double x = Double.parseDouble(split[1]);
-            double y = Double.parseDouble(split[2]);
-            double z = Double.parseDouble(split[3]);
-
-            RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new PosGoal(x, y, z));
-            BotWorldState start = new BotWorldState(botMovementManager.getPlayerPos());
-            System.out.println("Start: " + start);
-            List<Action> actions = routeFinder.findRoute(start);
-            System.out.println(actions);
-
-            PathExecutor pathExecutor = new PathExecutor(connection, actions);
-            ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
-        } else if (split[0].equalsIgnoreCase("walkxz")) {
-            double x = Double.parseDouble(split[1]);
-            double z = Double.parseDouble(split[2]);
-
-            RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new XZGoal(x, z));
-            BotWorldState start = new BotWorldState(botMovementManager.getPlayerPos());
-            System.out.println("Start: " + start);
-            List<Action> actions = routeFinder.findRoute(start);
-            System.out.println(actions);
-
-            PathExecutor pathExecutor = new PathExecutor(connection, actions);
-            ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
-        } else if (split[0].equalsIgnoreCase("walky")) {
-            double y = Double.parseDouble(split[1]);
-
-            RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(this), new YGoal(y));
-            BotWorldState start = new BotWorldState(botMovementManager.getPlayerPos());
-            System.out.println("Start: " + start);
-            List<Action> actions = routeFinder.findRoute(start);
-            System.out.println(actions);
-
-            PathExecutor pathExecutor = new PathExecutor(connection, actions);
-            ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
-        } else if (split[0].equalsIgnoreCase("lookat")) {
-            double x = Double.parseDouble(split[1]);
-            double y = Double.parseDouble(split[2]);
-            double z = Double.parseDouble(split[3]);
-
-            botMovementManager.lookAt(RotationOrigin.FEET, Vector3d.from(x, y, z));
-        } else if (split[0].equalsIgnoreCase("forward")) {
-            botMovementManager.getControlState().setForward(true);
-        } else if (split[0].equalsIgnoreCase("stop")) {
-            botMovementManager.getControlState().resetAll();
-        }
-         */
     }
 
     @BusHandler

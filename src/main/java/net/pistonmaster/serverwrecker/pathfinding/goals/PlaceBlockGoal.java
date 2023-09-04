@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.goals;
 
-import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
+import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import org.cloudburstmc.math.vector.Vector3d;
 
 public record PlaceBlockGoal(Vector3d goalBlock) implements GoalScorer {
@@ -29,12 +29,12 @@ public record PlaceBlockGoal(Vector3d goalBlock) implements GoalScorer {
 
     // TODO: Implement higher score if block is in placed.
     @Override
-    public double computeScore(BotWorldState worldState) {
+    public double computeScore(BotEntityState worldState) {
         return worldState.position().distance(goalBlock);
     }
 
     @Override
-    public boolean isFinished(BotWorldState worldState) {
+    public boolean isFinished(BotEntityState worldState) {
         return worldState.position().equals(goalBlock);
     }
 }

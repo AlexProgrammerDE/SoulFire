@@ -17,19 +17,12 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding;
+package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import net.pistonmaster.serverwrecker.util.VectorHelper;
-import org.cloudburstmc.math.vector.Vector3d;
-
-/**
- * Represents the state of the bot in the world.
- * This means the positions and in the future also inventory.
- *
- * @param position The position of the bot.
- */
-public record BotWorldState(Vector3d position) {
-    public BotWorldState {
-        position = VectorHelper.middleOfBlockNormalize(position);
-    }
+public enum MovementModifier {
+    NORMAL,
+    FALL_1,
+    FALL_2,
+    FALL_3,
+    JUMP;
 }

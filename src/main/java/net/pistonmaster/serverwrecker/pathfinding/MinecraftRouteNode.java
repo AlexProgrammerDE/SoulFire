@@ -23,6 +23,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.pistonmaster.serverwrecker.pathfinding.graph.GraphAction;
 
 @Getter
 @Setter
@@ -32,7 +33,7 @@ class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
     /**
      * The world state of this node.
      */
-    private final BotWorldState worldState;
+    private final BotEntityState worldState;
     /**
      * The currently best known node to this node.
      */
@@ -40,7 +41,7 @@ class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
     /**
      * The action from the previous node that was used to get to this node.
      */
-    private MinecraftAction previousAction;
+    private GraphAction previousAction;
     /**
      * The cost of the route from the start node to this node.
      */
@@ -50,7 +51,7 @@ class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
      */
     private double totalRouteScore;
 
-    MinecraftRouteNode(BotWorldState worldState) {
+    MinecraftRouteNode(BotEntityState worldState) {
         this(worldState, null, null, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
     }
 

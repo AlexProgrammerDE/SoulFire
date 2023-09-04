@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.actions;
+package net.pistonmaster.serverwrecker.pathfinding.execution;
 
 import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
@@ -31,12 +31,12 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
-    private final Queue<Action> actions;
+    private final Queue<WorldAction> worldActions;
     private final BotConnection connection;
 
-    public PathExecutor(BotConnection connection, List<Action> actions) {
-        this.actions = new ArrayBlockingQueue<>(actions.size());
-        this.actions.addAll(actions);
+    public PathExecutor(BotConnection connection, List<WorldAction> worldActions) {
+        this.worldActions = new ArrayBlockingQueue<>(worldActions.size());
+        this.worldActions.addAll(worldActions);
         this.connection = connection;
     }
 
@@ -47,26 +47,26 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
             return;
         }
 
-        if (actions.isEmpty()) {
+        if (worldActions.isEmpty()) {
             unregister();
             return;
         }
 
-        Action action = actions.peek();
-        if (action == null) {
+        WorldAction worldAction = worldActions.peek();
+        if (worldAction == null) {
             unregister();
             return;
         }
 
-        if (action.isCompleted(connection)) {
-            actions.remove();
-            System.out.println("Reached goal! " + action);
+        if (worldAction.isCompleted(connection)) {
+            worldActions.remove();
+            System.out.println("Reached goal! " + worldAction);
 
             // Directly use tick to execute next goal
-            action = actions.peek();
+            worldAction = worldActions.peek();
 
             // If there are no more goals, stop
-            if (action == null) {
+            if (worldAction == null) {
                 System.out.println("Finished all goals!");
                 BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
                 movementManager.getControlState().resetAll();
@@ -74,10 +74,10 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
                 return;
             }
 
-            System.out.println("Next goal: " + action);
+            System.out.println("Next goal: " + worldAction);
         }
 
-        action.tick(connection);
+        worldAction.tick(connection);
     }
 
     public void unregister() {
