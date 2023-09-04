@@ -45,11 +45,15 @@ public class MovementAction implements WorldAction {
         BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
         Vector3d botPosition = movementManager.getPlayerPos();
 
+        float previousYaw = movementManager.getYaw();
         movementManager.lookAt(RotationOrigin.EYES, worldState.position());
         movementManager.setPitch(0);
+        float newYaw = movementManager.getYaw();
+
+        float yawDifference = Math.abs(previousYaw - newYaw);
 
         // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
-        if (didLook) {
+        if (didLook && yawDifference > 1) {
             movementManager.setLastSentYaw(movementManager.getYaw());
         } else {
             didLook = true;
