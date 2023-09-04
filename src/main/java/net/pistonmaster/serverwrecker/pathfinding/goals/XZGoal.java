@@ -25,8 +25,14 @@ import org.cloudburstmc.math.vector.Vector3d;
 
 public record XZGoal(Vector2d goal) implements GoalScorer {
     @Override
-    public double getScore(BotWorldState worldState) {
+    public double computeScore(BotWorldState worldState) {
         Vector3d position = worldState.position();
         return Vector2d.from(position.getX(), position.getZ()).distance(goal);
+    }
+
+    @Override
+    public boolean isFinished(BotWorldState worldState) {
+        Vector3d position = worldState.position();
+        return Vector2d.from(position.getX(), position.getZ()).equals(goal);
     }
 }

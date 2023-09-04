@@ -29,7 +29,12 @@ public record CollectBlockGoal(Vector3d goal) implements GoalScorer {
 
     // TODO: When inventory is implemented, check if the block is in the inventory and apply higher score if it is.
     @Override
-    public double getScore(BotWorldState worldState) {
+    public double computeScore(BotWorldState worldState) {
         return worldState.position().distance(goal);
+    }
+
+    @Override
+    public boolean isFinished(BotWorldState worldState) {
+        return worldState.position().equals(goal);
     }
 }

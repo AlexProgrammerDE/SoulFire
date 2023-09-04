@@ -32,7 +32,7 @@ public record MovementAction(BotWorldState worldState) implements Action {
         Vector3d botPosition = movementManager.getPlayerPos();
         double distanceToGoal = botPosition.distance(worldState.position());
 
-        return distanceToGoal < 0.2;
+        return distanceToGoal < 0.5;
     }
 
     @Override

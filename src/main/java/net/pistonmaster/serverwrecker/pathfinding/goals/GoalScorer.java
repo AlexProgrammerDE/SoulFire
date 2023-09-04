@@ -26,11 +26,19 @@ import net.pistonmaster.serverwrecker.pathfinding.BotWorldState;
  */
 public interface GoalScorer {
     /**
-     * Calculates the score for a given block position.
+     * Calculates the estimated score for a given block position to the goal.
      * Usually this means the distance from achieving the goal.
      *
      * @param worldState the world state to calculate the score for
      * @return the score for the given world state
      */
-    double getScore(BotWorldState worldState);
+    double computeScore(BotWorldState worldState);
+
+    /**
+     * Checks if the given world state indicates that the goal is reached.
+     *
+     * @param worldState the current world state
+     * @return true if the goal is reached, false otherwise
+     */
+    boolean isFinished(BotWorldState worldState);
 }

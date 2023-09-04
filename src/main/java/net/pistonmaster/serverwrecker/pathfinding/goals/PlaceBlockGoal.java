@@ -29,7 +29,12 @@ public record PlaceBlockGoal(Vector3d goalBlock) implements GoalScorer {
 
     // TODO: Implement higher score if block is in placed.
     @Override
-    public double getScore(BotWorldState worldState) {
+    public double computeScore(BotWorldState worldState) {
         return worldState.position().distance(goalBlock);
+    }
+
+    @Override
+    public boolean isFinished(BotWorldState worldState) {
+        return worldState.position().equals(goalBlock);
     }
 }

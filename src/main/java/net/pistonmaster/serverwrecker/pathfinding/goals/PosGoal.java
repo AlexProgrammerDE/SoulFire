@@ -28,7 +28,12 @@ public record PosGoal(Vector3d goal) implements GoalScorer {
     }
 
     @Override
-    public double getScore(BotWorldState worldState) {
+    public double computeScore(BotWorldState worldState) {
         return worldState.position().distance(goal);
+    }
+
+    @Override
+    public boolean isFinished(BotWorldState worldState) {
+        return worldState.position().equals(goal);
     }
 }

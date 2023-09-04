@@ -22,19 +22,20 @@ package net.pistonmaster.serverwrecker.pathfinding;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.actions.Action;
 import net.pistonmaster.serverwrecker.pathfinding.actions.MovementAction;
+import net.pistonmaster.serverwrecker.pathfinding.goals.GoalScorer;
 
 import java.util.*;
 
 @Slf4j
-public record RouteFinder(MinecraftGraph graph, BlockDistanceScorer scorer) {
-    public List<Action> findRoute(BotWorldState from, BotWorldState to) {
+public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
+    public List<Action> findRoute(BotWorldState from) {
         // Store block positions and the best route to them
         Map<BotWorldState, MinecraftRouteNode> routeIndex = new HashMap<>();
 
         // Store block positions that we need to look at
         Queue<MinecraftRouteNode> openSet = new PriorityQueue<>();
 
-        MinecraftRouteNode start = new MinecraftRouteNode(from, null, null, 0d, scorer.computeCost(from, to));
+        MinecraftRouteNode start = new MinecraftRouteNode(from, null, null, 0d, scorer.computeScore(from));
         routeIndex.put(from, start);
         openSet.add(start);
 
@@ -43,7 +44,7 @@ public record RouteFinder(MinecraftGraph graph, BlockDistanceScorer scorer) {
             log.debug("Looking at node: " + current.getWorldState().position());
 
             // If we found our destination, we can stop looking
-            if (current.getWorldState().equals(to)) {
+            if (scorer.isFinished(current.getWorldState())) {
                 log.debug("Found our destination!");
 
                 List<Action> route = new ArrayList<>();
@@ -71,7 +72,7 @@ public record RouteFinder(MinecraftGraph graph, BlockDistanceScorer scorer) {
                     // Get distance from the current element
                     // and add the distance from the current element to the next element
                     double newSourceCost = finalCurrent.getSourceCost() + actionCost;
-                    double newTotalRouteScore = newSourceCost + scorer.computeCost(actionTargetState, to);
+                    double newTotalRouteScore = newSourceCost + scorer.computeScore(actionTargetState);
 
                     // The first time we see this node
                     if (v == null) {
