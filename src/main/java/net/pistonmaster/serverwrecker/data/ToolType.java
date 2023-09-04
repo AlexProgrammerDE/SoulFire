@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.data;
 import lombok.Getter;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 
 @Getter
@@ -38,5 +39,36 @@ public enum ToolType {
 
     ToolType(ItemType... itemTypes) {
         this.itemTypes = Set.of(itemTypes);
+    }
+
+    public static boolean isToolFor(ItemType itemType, BlockType blockType) {
+        if (!blockType.diggable()) {
+            return false;
+        }
+
+        String material = blockType.material();
+        String[] materials = material.split(";");
+
+        Optional<ToolType> toolType = matchToolFor(itemType);
+
+        if (toolType.isPresent()) {
+            for (String materialType : materials) {
+                if (toolType.get().mineableId.equals(materialType)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static Optional<ToolType> matchToolFor(ItemType itemType) {
+        for (ToolType toolType : values()) {
+            if (toolType.itemTypes.contains(itemType)) {
+                return Optional.of(toolType);
+            }
+        }
+
+        return Optional.empty();
     }
 }
