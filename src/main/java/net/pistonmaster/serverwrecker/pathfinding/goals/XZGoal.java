@@ -29,6 +29,10 @@ public record XZGoal(Vector2d goal) implements GoalScorer {
         goal = VectorHelper.middleOfBlockNormalize(goal);
     }
 
+    public XZGoal(double x, double z) {
+        this(Vector2d.from(x, z));
+    }
+
     @Override
     public double computeScore(BotWorldState worldState) {
         Vector3d position = worldState.position();
