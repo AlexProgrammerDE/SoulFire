@@ -7,6 +7,8 @@ pluginManagement {
     plugins {
         id("com.github.johnrengelman.shadow") version "8.1.1"
         id("org.cadixdev.licenser") version "0.6.1"
+        id("net.kyori.indra") version "3.1.1"
+        id("net.kyori.indra.git") version "3.1.1"
         id("net.kyori.blossom") version "2.0.1"
     }
 }

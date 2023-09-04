@@ -1,14 +1,19 @@
 plugins {
     id("sw.license-conventions")
+    id("sw.java-conventions")
     id("net.kyori.blossom")
+    id("net.kyori.indra.git")
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_1_8
-java.targetCompatibility = JavaVersion.VERSION_1_8
-
-blossom {
-    replaceToken("{version}", rootProject.version)
-    replaceToken("{description}", rootProject.description)
-    replaceToken("{url}", "https://github.com/AlexProgrammerDE/ServerWrecker")
-    replaceToken("{commit}", rootProject.latestCommitHash())
+sourceSets {
+    main {
+        blossom {
+            javaSources {
+                property("version", rootProject.version.toString())
+                property("description", rootProject.description)
+                property("url", "https://github.com/AlexProgrammerDE/ServerWrecker")
+                property("commit", indraGit.commit()?.name ?: "unknown")
+            }
+        }
+    }
 }

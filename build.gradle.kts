@@ -10,6 +10,7 @@ plugins {
 }
 
 version = "1.2.0-SNAPSHOT"
+description = "Advanced Minecraft Server-Stresser Tool."
 
 repositories {
     maven("https://repo.opencollab.dev/maven-releases") {
