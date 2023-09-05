@@ -74,6 +74,6 @@ public abstract class EntityLikeState {
     }
 
     public void handleEntityEvent(EntityEvent event) {
-        LOGGER.info("Entity event for entity {}: {}", entityId, event.name());
+        LOGGER.debug("Entity event for entity {}: {}", entityId, event.name());
     }
 }
