@@ -79,7 +79,8 @@ public class ServerWreckerBootstrap {
         Set<InternalAddon> addons = Set.of(
                 new BotTicker(), new ClientBrand(), new ClientSettings(),
                 new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
-                new ChatMessageLogger(), new AutoJump(), new ServerListBypass());
+                new AutoTotem(), new AutoJump(),
+                new ChatMessageLogger(), new ServerListBypass());
 
         addons.forEach(ServerWreckerAPI::registerAddon);
     }

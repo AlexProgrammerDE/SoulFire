@@ -29,13 +29,18 @@ public class ExecutorHelper {
                                                  int minDelay, int maxDelay) {
         AtomicInteger delay = new AtomicInteger();
         AtomicInteger counter = new AtomicInteger();
-        executorService.scheduleAtFixedRate(() -> {
+        executorService.scheduleWithFixedDelay(() -> {
             if (counter.get() == 0) {
                 delay.set(ThreadLocalRandom.current().nextInt(minDelay, maxDelay + 1));
             }
 
             if (counter.get() == delay.get()) {
-                runnable.run();
+                try {
+                    runnable.run();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+
                 counter.set(0);
             } else {
                 counter.getAndIncrement();

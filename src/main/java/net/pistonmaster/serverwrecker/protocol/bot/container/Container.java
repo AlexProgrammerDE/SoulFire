@@ -19,36 +19,36 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.container;
 
-import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientInformationPacket;
 import com.viaversion.viaversion.libs.fastutil.ints.Int2IntMap;
 import com.viaversion.viaversion.libs.fastutil.ints.Int2IntOpenHashMap;
 import lombok.Getter;
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
-import java.util.concurrent.CompletableFuture;
+import javax.annotation.Nonnull;
 
 @Getter
 public class Container {
-    private final ItemStack[] slots;
+    private final @Nonnull ContainerSlot[] slots;
     private final int id;
     private final Int2IntMap properties = new Int2IntOpenHashMap();
 
     public Container(int slots, int id) {
-        this.slots = new ItemStack[slots];
+        this.slots = new ContainerSlot[slots];
+        for (int i = 0; i < slots; i++) {
+            this.slots[i] = new ContainerSlot(i, null);
+        }
         this.id = id;
     }
 
-    public void setSlot(int slot, ItemStack item) {
-        slots[slot] = item;
+    public void setSlot(int slot, SWItemStack item) {
+        slots[slot] = new ContainerSlot(slot, item);
     }
 
-    public ItemStack getSlot(int slot) {
+    public @Nonnull ContainerSlot getSlot(int slot) {
         return slots[slot];
     }
 
-    public ItemStack[] getSlots(int start, int end) {
-        ItemStack[] items = new ItemStack[end - start + 1];
+    public ContainerSlot[] getSlots(int start, int end) {
+        ContainerSlot[] items = new ContainerSlot[end - start + 1];
 
         if (end + 1 - start >= 0) {
             System.arraycopy(slots, start, items, 0, end + 1 - start);

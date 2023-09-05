@@ -30,7 +30,6 @@ import com.github.steveice10.mc.protocol.data.game.chunk.ChunkBiomeData;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
 import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
-import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.GlobalPos;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PositionElement;
@@ -66,20 +65,8 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
-import net.pistonmaster.serverwrecker.pathfinding.RouteFinder;
-import net.pistonmaster.serverwrecker.pathfinding.execution.PathExecutor;
-import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
-import net.pistonmaster.serverwrecker.pathfinding.goals.PosGoal;
-import net.pistonmaster.serverwrecker.pathfinding.goals.XZGoal;
-import net.pistonmaster.serverwrecker.pathfinding.goals.YGoal;
-import net.pistonmaster.serverwrecker.pathfinding.graph.GraphAction;
-import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
-import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
-import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
-import net.pistonmaster.serverwrecker.protocol.bot.container.WindowContainer;
+import net.pistonmaster.serverwrecker.protocol.bot.container.*;
 import net.pistonmaster.serverwrecker.protocol.bot.model.*;
 import net.pistonmaster.serverwrecker.protocol.bot.state.*;
 import net.pistonmaster.serverwrecker.protocol.bot.state.entity.EntityLikeState;
@@ -95,7 +82,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -410,7 +396,7 @@ public final class SessionDataManager {
         }
 
         for (int i = 0; i < packet.getItems().length; i++) {
-            container.setSlot(i, packet.getItems()[i]);
+            container.setSlot(i, SWItemStack.from(packet.getItems()[i]));
         }
     }
 
@@ -418,7 +404,7 @@ public final class SessionDataManager {
     public void onSetContainerSlot(ClientboundContainerSetSlotPacket packet) {
         inventoryManager.setLastStateId(packet.getStateId());
         if (packet.getContainerId() == -1 && packet.getSlot() == -1) {
-            inventoryManager.setCursorItem(packet.getItem());
+            inventoryManager.setCursorItem(SWItemStack.from(packet.getItem()));
             return;
         }
 
@@ -429,7 +415,7 @@ public final class SessionDataManager {
             return;
         }
 
-        container.setSlot(packet.getSlot(), packet.getItem());
+        container.setSlot(packet.getSlot(), SWItemStack.from(packet.getItem()));
     }
 
     @BusHandler

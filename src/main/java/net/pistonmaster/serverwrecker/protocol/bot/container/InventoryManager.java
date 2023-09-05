@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol.bot;
+package net.pistonmaster.serverwrecker.protocol.bot.container;
 
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
 import com.github.steveice10.mc.protocol.data.game.inventory.ClickItemAction;
@@ -31,8 +31,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
-import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
+import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
+import org.jetbrains.annotations.ApiStatus;
 
 @Data
 @RequiredArgsConstructor
@@ -43,9 +43,10 @@ public class InventoryManager {
     private Container openContainer;
     private int heldItemSlot = -1;
     private int lastStateId = -1;
-    private ItemStack cursorItem;
+    private SWItemStack cursorItem;
 
-    protected void initPlayerInventory() {
+    @ApiStatus.Internal
+    public void initPlayerInventory() {
         containerData.put(0, new PlayerInventoryContainer());
     }
 
@@ -79,10 +80,15 @@ public class InventoryManager {
     }
 
     public void leftClickSlot(int slot) {
-        ItemStack slotItem;
+        if (openContainer == null) {
+            openPlayerInventory();
+            return;
+        }
+
+        SWItemStack slotItem;
         {
-            ItemStack item = openContainer.getSlot(slot);
-            if (item == null) {
+            ContainerSlot containerSlot = openContainer.getSlot(slot);
+            if (containerSlot.item() == null) {
                 if (cursorItem == null) {
                     return;
                 }
@@ -92,13 +98,13 @@ public class InventoryManager {
                 cursorItem = null;
             } else {
                 if (cursorItem == null) {
-                    cursorItem = item;
+                    cursorItem = containerSlot.item();
                     openContainer.setSlot(slot, null);
                     slotItem = null;
                 } else {
                     slotItem = cursorItem;
                     openContainer.setSlot(slot, cursorItem);
-                    cursorItem = item;
+                    cursorItem = containerSlot.item();
                 }
             }
         }

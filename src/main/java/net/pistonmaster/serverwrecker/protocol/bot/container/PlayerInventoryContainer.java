@@ -19,51 +19,58 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.container;
 
-import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
-
 public class PlayerInventoryContainer extends Container {
     public PlayerInventoryContainer() {
         super(46, 0);
     }
 
-    public ItemStack[] getMainInventory() {
+    public ContainerSlot[] getMainInventory() {
         return getSlots(9, 35);
     }
 
-    public ItemStack[] getHotbar() {
+    public ContainerSlot[] getHotbar() {
         return getSlots(36, 44);
     }
 
-    public ItemStack getOffhand() {
+    /**
+     * Retrieves the storage slots of the container.
+     * This includes the main inventory and the hotbar.
+     *
+     * @return an array of ContainerSlot objects representing the storage slots of the container.
+     */
+    public ContainerSlot[] getStorage() {
+        return getSlots(9, 44);
+    }
+
+    public ContainerSlot getOffhand() {
         return getSlot(45);
     }
 
-    public ItemStack getHelmet() {
+    public ContainerSlot getHelmet() {
         return getSlot(5);
     }
 
-    public ItemStack getChestplate() {
+    public ContainerSlot getChestplate() {
         return getSlot(6);
     }
 
-    public ItemStack getLeggings() {
+    public ContainerSlot getLeggings() {
         return getSlot(7);
     }
 
-    public ItemStack getBoots() {
+    public ContainerSlot getBoots() {
         return getSlot(8);
     }
 
-    public ItemStack getCraftingResult() {
+    public ContainerSlot getCraftingResult() {
         return getSlot(0);
     }
 
-    public ItemStack[] getCraftingGrid() {
+    public ContainerSlot[] getCraftingGrid() {
         return getSlots(1, 4);
     }
 
-    public ItemStack[] getArmor() {
+    public ContainerSlot[] getArmor() {
         return getSlots(5, 8);
     }
 }
