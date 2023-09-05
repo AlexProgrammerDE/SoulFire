@@ -19,6 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.container;
 
+import net.pistonmaster.serverwrecker.data.ArmorType;
+
 import javax.annotation.Nullable;
 
 /**

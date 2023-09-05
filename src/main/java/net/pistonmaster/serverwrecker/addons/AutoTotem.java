@@ -69,7 +69,7 @@ public class AutoTotem implements InternalAddon {
 
     @EventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
-        event.navigationItems().add(new AutoJumpPanel(ServerWreckerAPI.getServerWrecker()));
+        event.navigationItems().add(new AutoTotemPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
     @EventHandler
@@ -113,12 +113,12 @@ public class AutoTotem implements InternalAddon {
         }
     }
 
-    private static class AutoJumpPanel extends NavigationItem implements SettingsDuplex<AutoTotemSettings> {
+    private static class AutoTotemPanel extends NavigationItem implements SettingsDuplex<AutoTotemSettings> {
         private final JCheckBox autoTotem;
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        public AutoJumpPanel(ServerWrecker serverWrecker) {
+        public AutoTotemPanel(ServerWrecker serverWrecker) {
             super();
             serverWrecker.getSettingsManager().registerDuplex(AutoTotemSettings.class, this);
 
@@ -141,12 +141,12 @@ public class AutoTotem implements InternalAddon {
 
         @Override
         public String getNavigationName() {
-            return "Auto Jump";
+            return "Auto Totem";
         }
 
         @Override
         public String getNavigationId() {
-            return "auto-jump";
+            return "auto-totem";
         }
 
         @Override
@@ -167,7 +167,7 @@ public class AutoTotem implements InternalAddon {
     }
 
     private static class AutoTotemCommand implements SettingsProvider<AutoTotemSettings> {
-        @CommandLine.Option(names = {"--auto-totem"}, description = "Do auto jump?")
+        @CommandLine.Option(names = {"--auto-totem"}, description = "Do auto totem?")
         private boolean autoTotem = AutoTotemSettings.DEFAULT_AUTO_TOTEM;
         @CommandLine.Option(names = {"--totem-min-delay"}, description = "Minimum delay between using totems")
         private int minDelay = AutoTotemSettings.DEFAULT_MIN_DELAY;

@@ -89,26 +89,27 @@ public class InventoryManager {
         {
             ContainerSlot containerSlot = openContainer.getSlot(slot);
             if (containerSlot.item() == null) {
+                // The target slot is empty, and we don't have an item in our cursor
                 if (cursorItem == null) {
                     return;
                 }
 
-                openContainer.setSlot(slot, cursorItem);
+                // Place the cursor into empty slot
                 slotItem = cursorItem;
                 cursorItem = null;
+            } else if (cursorItem == null) {
+                // Take the slot into the cursor
+                slotItem = null;
+                cursorItem = containerSlot.item();
             } else {
-                if (cursorItem == null) {
-                    cursorItem = containerSlot.item();
-                    openContainer.setSlot(slot, null);
-                    slotItem = null;
-                } else {
-                    slotItem = cursorItem;
-                    openContainer.setSlot(slot, cursorItem);
-                    cursorItem = containerSlot.item();
-                }
+                // Swap the cursor and the slot
+                slotItem = cursorItem;
+
+                cursorItem = containerSlot.item();
             }
         }
 
+        openContainer.setSlot(slot, slotItem);
         Int2ObjectMap<ItemStack> changes = new Int2ObjectArrayMap<>(1);
         changes.put(slot, slotItem);
 
