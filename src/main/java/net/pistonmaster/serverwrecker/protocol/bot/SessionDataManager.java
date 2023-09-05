@@ -104,6 +104,7 @@ public final class SessionDataManager {
     private final EntityTrackerState entityTrackerState = new EntityTrackerState();
     private final EntityMetadataState selfMetadata = new EntityMetadataState();
     private final EntityAttributesState selfAttributeState = new EntityAttributesState();
+    private final PlayerMetaState playerMetaState = new PlayerMetaState();
     private final InventoryManager inventoryManager = new InventoryManager(this);
     private @Nullable ServerPlayData serverPlayData;
     private BorderState borderState;
@@ -745,7 +746,7 @@ public final class SessionDataManager {
     @BusHandler
     public void onEntityEvent(ClientboundEntityEventPacket packet) {
         if (packet.getEntityId() == loginData.entityId()) {
-            log.info("Received entity event packet {} for bot, notify the developers!", packet.getEvent().name());
+            playerMetaState.handleEntityEvent(packet.getEvent());
             return;
         }
 

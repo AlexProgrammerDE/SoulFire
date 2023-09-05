@@ -21,14 +21,21 @@ package net.pistonmaster.serverwrecker.protocol.bot.state.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 public class PlayerState extends EntityLikeState {
-    private final int entityId;
     private final UUID uuid;
     private float yaw;
     private float pitch;
+
+    public PlayerState(int entityId, UUID uuid) {
+        super(entityId);
+        this.uuid = uuid;
+    }
 }
