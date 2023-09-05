@@ -34,8 +34,8 @@ public class WindowContainer extends Container {
     private final ContainerType containerType;
     private final Component title;
 
-    public WindowContainer(BotConnection botConnection, ContainerType containerType, Component title, int id) {
-        super(botConnection, switch (containerType) {
+    public WindowContainer(ContainerType containerType, Component title, int id) {
+        super(switch (containerType) {
             case GENERIC_9X1, GENERIC_3X3 -> 9 + INVENTORY_SIZE;
             case GENERIC_9X2 -> 18 + INVENTORY_SIZE;
             case GENERIC_9X3, SHULKER_BOX -> 27 + INVENTORY_SIZE;

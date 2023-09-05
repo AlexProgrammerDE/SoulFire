@@ -34,9 +34,6 @@ import lombok.ToString;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
 
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-
 @Data
 @RequiredArgsConstructor
 public class InventoryManager {
@@ -49,7 +46,7 @@ public class InventoryManager {
     private ItemStack cursorItem;
 
     protected void initPlayerInventory() {
-        containerData.put(0, new PlayerInventoryContainer(dataManager.getConnection()));
+        containerData.put(0, new PlayerInventoryContainer());
     }
 
     public PlayerInventoryContainer getPlayerInventory() {

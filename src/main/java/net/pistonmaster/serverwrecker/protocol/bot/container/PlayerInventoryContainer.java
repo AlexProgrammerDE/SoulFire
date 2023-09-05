@@ -23,8 +23,8 @@ import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
 public class PlayerInventoryContainer extends Container {
-    public PlayerInventoryContainer(BotConnection botConnection) {
-        super(botConnection, 46, 0);
+    public PlayerInventoryContainer() {
+        super(46, 0);
     }
 
     public ItemStack[] getMainInventory() {

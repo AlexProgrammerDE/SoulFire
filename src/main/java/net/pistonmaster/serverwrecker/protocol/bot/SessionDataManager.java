@@ -451,9 +451,8 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onOpenScreen(ClientboundOpenScreenPacket packet) {
-        WindowContainer container = new WindowContainer(connection, packet.getType(), packet.getTitle(), packet.getContainerId());
-        inventoryManager.setContainer(packet.getContainerId(), new WindowContainer(connection,
-                packet.getType(), packet.getTitle(), packet.getContainerId()));
+        WindowContainer container = new WindowContainer(packet.getType(), packet.getTitle(), packet.getContainerId());
+        inventoryManager.setContainer(packet.getContainerId(), container);
         inventoryManager.setOpenContainer(container);
     }
 
