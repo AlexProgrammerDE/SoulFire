@@ -20,17 +20,23 @@
 package net.pistonmaster.serverwrecker.protocol.bot.container;
 
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientInformationPacket;
 import com.viaversion.viaversion.libs.fastutil.ints.Int2IntMap;
 import com.viaversion.viaversion.libs.fastutil.ints.Int2IntOpenHashMap;
 import lombok.Getter;
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
+
+import java.util.concurrent.CompletableFuture;
 
 @Getter
 public class Container {
+    private final BotConnection botConnection;
     private final ItemStack[] slots;
     private final int id;
     private final Int2IntMap properties = new Int2IntOpenHashMap();
 
-    public Container(int slots, int id) {
+    public Container(BotConnection botConnection, int slots, int id) {
+        this.botConnection = botConnection;
         this.slots = new ItemStack[slots];
         this.id = id;
     }

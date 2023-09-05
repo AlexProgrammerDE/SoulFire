@@ -115,10 +115,10 @@ public final class SessionDataManager {
     private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
     private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
-    private final Int2ObjectMap<Container> containerData = new Int2ObjectOpenHashMap<>();
     private final EntityTrackerState entityTrackerState = new EntityTrackerState();
     private final EntityMetadataState selfMetadata = new EntityMetadataState();
     private final EntityAttributesState selfAttributeState = new EntityAttributesState();
+    private final InventoryManager inventoryManager = new InventoryManager(this);
     private @Nullable ServerPlayData serverPlayData;
     private BorderState borderState;
     private BotMovementManager botMovementManager;
@@ -136,8 +136,6 @@ public final class SessionDataManager {
     private @Nullable AbilitiesData abilitiesData;
     private @Nullable DefaultSpawnData defaultSpawnData;
     private @Nullable ExperienceData experienceData;
-    private int openContainerId = -1;
-    private int heldItemSlot = -1;
     private int biomesEntryBitsSize = -1;
     private @Nullable ChunkKey centerChunk;
     private boolean isDead = false;
@@ -195,8 +193,7 @@ public final class SessionDataManager {
         serverViewDistance = packet.getViewDistance();
         serverSimulationDistance = packet.getSimulationDistance();
         lastDeathPos = packet.getLastDeathPos();
-
-        containerData.put(0, new PlayerInventoryContainer());
+        inventoryManager.initPlayerInventory();
     }
 
     @BusHandler
@@ -404,7 +401,8 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onSetContainerContent(ClientboundContainerSetContentPacket packet) {
-        Container container = containerData.get(packet.getContainerId());
+        inventoryManager.setLastStateId(packet.getStateId());
+        Container container = inventoryManager.getContainer(packet.getContainerId());
 
         if (container == null) {
             log.warn("Received container content update for unknown container {}", packet.getContainerId());
@@ -418,7 +416,13 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onSetContainerSlot(ClientboundContainerSetSlotPacket packet) {
-        Container container = containerData.get(packet.getContainerId());
+        inventoryManager.setLastStateId(packet.getStateId());
+        if (packet.getContainerId() == -1 && packet.getSlot() == -1) {
+            inventoryManager.setCursorItem(packet.getItem());
+            return;
+        }
+
+        Container container = inventoryManager.getContainer(packet.getContainerId());
 
         if (container == null) {
             log.warn("Received container slot update for unknown container {}", packet.getContainerId());
@@ -430,7 +434,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onSetContainerData(ClientboundContainerSetDataPacket packet) {
-        Container container = containerData.get(packet.getContainerId());
+        Container container = inventoryManager.getContainer(packet.getContainerId());
 
         if (container == null) {
             log.warn("Received container data update for unknown container {}", packet.getContainerId());
@@ -442,13 +446,15 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onSetSlot(ClientboundSetCarriedItemPacket packet) {
-        heldItemSlot = packet.getSlot();
+        inventoryManager.setHeldItemSlot(packet.getSlot());
     }
 
     @BusHandler
     public void onOpenScreen(ClientboundOpenScreenPacket packet) {
-        containerData.put(packet.getContainerId(), new WindowContainer(packet.getType(), packet.getTitle(), packet.getContainerId()));
-        openContainerId = packet.getContainerId();
+        WindowContainer container = new WindowContainer(connection, packet.getType(), packet.getTitle(), packet.getContainerId());
+        inventoryManager.setContainer(packet.getContainerId(), new WindowContainer(connection,
+                packet.getType(), packet.getTitle(), packet.getContainerId()));
+        inventoryManager.setOpenContainer(container);
     }
 
     @BusHandler
@@ -461,7 +467,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onCloseContainer(ClientboundContainerClosePacket packet) {
-        openContainerId = -1;
+        inventoryManager.setOpenContainer(null);
     }
 
     @BusHandler
@@ -754,7 +760,7 @@ public final class SessionDataManager {
     @BusHandler
     public void onEntityEvent(ClientboundEntityEventPacket packet) {
         if (packet.getEntityId() == loginData.entityId()) {
-            log.info("Received entity event packet for bot, notify the developers!");
+            log.info("Received entity event packet {} for bot, notify the developers!", packet.getEvent().name());
             return;
         }
 

@@ -19,8 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.viaversion.platform;
 
-import de.gerrygames.viarewind.api.ViaRewindConfigImpl;
-import de.gerrygames.viarewind.api.ViaRewindPlatform;
+import com.viaversion.viarewind.api.ViaRewindConfigImpl;
+import com.viaversion.viarewind.api.ViaRewindPlatform;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.viaversion.JLoggerToSLF4J;
 import org.slf4j.LoggerFactory;

@@ -19,12 +19,19 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding;
 
+import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
+
 public class Costs {
     public static final double STRAIGHT = 1;
     public static final double DIAGONAL = 1.4142135623730951;
     public static final double JUMP = 1.1;
     public static final double DIG_BLOCK = 10;
     public static final double PLACE_BLOCK = 10;
+
+    public static double calculateCostForBlock(PlayerInventoryContainer inventory, BlockType blockType) {
+        return 1;
+    }
 
     private Costs() {
     }

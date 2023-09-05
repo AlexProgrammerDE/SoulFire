@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.protocol.bot.container;
 import com.github.steveice10.mc.protocol.data.game.inventory.ContainerType;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
 @Getter
 public class WindowContainer extends Container {
@@ -33,8 +34,8 @@ public class WindowContainer extends Container {
     private final ContainerType containerType;
     private final Component title;
 
-    public WindowContainer(ContainerType containerType, Component title, int id) {
-        super(switch (containerType) {
+    public WindowContainer(BotConnection botConnection, ContainerType containerType, Component title, int id) {
+        super(botConnection, switch (containerType) {
             case GENERIC_9X1, GENERIC_3X3 -> 9 + INVENTORY_SIZE;
             case GENERIC_9X2 -> 18 + INVENTORY_SIZE;
             case GENERIC_9X3, SHULKER_BOX -> 27 + INVENTORY_SIZE;
