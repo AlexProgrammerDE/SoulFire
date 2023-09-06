@@ -101,7 +101,10 @@ public class AutoTotem implements InternalAddon {
 
                     SWItemStack item = slot.item();
                     if (item.getType() == ItemType.TOTEM_OF_UNDYING) {
-                        inventoryManager.lockInventoryControl();
+                        if (!inventoryManager.tryInventoryControl()) {
+                            return;
+                        }
+
                         try {
                             inventoryManager.leftClickSlot(slot.slot());
                             try {
@@ -113,7 +116,7 @@ public class AutoTotem implements InternalAddon {
                         } finally {
                             inventoryManager.unlockInventoryControl();
                         }
-                        break;
+                        return;
                     }
                 }
             }, settings.minDelay(), settings.maxDelay());

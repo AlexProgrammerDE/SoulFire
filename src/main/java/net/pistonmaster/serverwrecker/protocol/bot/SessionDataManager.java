@@ -106,6 +106,7 @@ public final class SessionDataManager {
     private final EntityAttributesState selfAttributeState = new EntityAttributesState();
     private final PlayerMetaState playerMetaState = new PlayerMetaState();
     private final InventoryManager inventoryManager = new InventoryManager(this);
+    private final BotActionManager botActionManager = new BotActionManager(this);
     private @Nullable ServerPlayData serverPlayData;
     private BorderState borderState;
     private BotMovementManager botMovementManager;

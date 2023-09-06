@@ -46,7 +46,7 @@ public class InventoryManager {
     @ToString.Exclude
     private final SessionDataManager dataManager;
     private Container openContainer;
-    private int heldItemSlot = -1;
+    private int heldItemSlot = 0;
     private int lastStateId = -1;
     private SWItemStack cursorItem;
 
@@ -55,6 +55,11 @@ public class InventoryManager {
      */
     public void lockInventoryControl() {
         inventoryControlLock.lock();
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean tryInventoryControl() {
+        return inventoryControlLock.tryLock();
     }
 
     public void unlockInventoryControl() {

@@ -24,7 +24,9 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundCh
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerCommandPacket;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import net.pistonmaster.serverwrecker.protocol.bot.model.AbilitiesData;
 
 import java.security.SecureRandom;
@@ -41,6 +43,9 @@ public class BotControlAPI {
     private final SessionDataManager sessionDataManager;
     private final BotMovementManager botMovementManager;
     private final SecureRandom secureRandom = new SecureRandom();
+    @Getter
+    @Setter
+    private int sequenceNumber = 0;
 
     public boolean toggleFlight() {
         AbilitiesData abilitiesData = sessionDataManager.getAbilitiesData();

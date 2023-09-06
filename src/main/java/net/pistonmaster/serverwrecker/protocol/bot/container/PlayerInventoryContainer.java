@@ -32,6 +32,10 @@ public class PlayerInventoryContainer extends Container {
         return getSlots(36, 44);
     }
 
+    public ContainerSlot getHotbarSlot(int slot) {
+        return getSlot(36 + slot);
+    }
+
     /**
      * Retrieves the storage slots of the container.
      * This includes the main inventory and the hotbar.
