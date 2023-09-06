@@ -40,11 +40,13 @@ import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.util.TimeUtil;
 import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class AutoTotem implements InternalAddon {
     @Override
@@ -99,13 +101,18 @@ public class AutoTotem implements InternalAddon {
 
                     SWItemStack item = slot.item();
                     if (item.getType() == ItemType.TOTEM_OF_UNDYING) {
-                        inventoryManager.leftClickSlot(slot.slot());
+                        inventoryManager.lockInventoryControl();
                         try {
-                            Thread.sleep(50);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
+                            inventoryManager.leftClickSlot(slot.slot());
+                            try {
+                                Thread.sleep(50);
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
+                            inventoryManager.leftClickSlot(offhandSlot.slot());
+                        } finally {
+                            inventoryManager.unlockInventoryControl();
                         }
-                        inventoryManager.leftClickSlot(offhandSlot.slot());
                         break;
                     }
                 }

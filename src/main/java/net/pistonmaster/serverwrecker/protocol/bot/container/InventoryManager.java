@@ -34,16 +34,32 @@ import lombok.ToString;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 @Data
 @RequiredArgsConstructor
 public class InventoryManager {
     private final Int2ObjectMap<Container> containerData = new Int2ObjectOpenHashMap<>();
+    private final Lock inventoryControlLock = new ReentrantLock();
     @ToString.Exclude
     private final SessionDataManager dataManager;
     private Container openContainer;
     private int heldItemSlot = -1;
     private int lastStateId = -1;
     private SWItemStack cursorItem;
+
+    /**
+     * The inventory has a control lock to prevent multiple threads from moving items at the same time.
+     */
+    public void lockInventoryControl() {
+        inventoryControlLock.lock();
+    }
+
+    public void unlockInventoryControl() {
+        inventoryControlLock.unlock();
+    }
 
     @ApiStatus.Internal
     public void initPlayerInventory() {
@@ -80,6 +96,11 @@ public class InventoryManager {
     }
 
     public void leftClickSlot(int slot) {
+        if (inventoryControlLock.tryLock()) {
+            inventoryControlLock.unlock();
+            throw new IllegalStateException("You need to lock the inventoryControlLock before calling this method!");
+        }
+
         if (openContainer == null) {
             openPlayerInventory();
             return;

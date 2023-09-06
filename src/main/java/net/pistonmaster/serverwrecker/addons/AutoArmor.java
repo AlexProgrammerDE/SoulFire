@@ -133,14 +133,19 @@ public class AutoArmor implements InternalAddon {
             }
 
             bestItem.ifPresent(bestItemSlot -> {
-                inventoryManager.leftClickSlot(bestItemSlot.slot());
-                TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-                inventoryManager.leftClickSlot(targetSlot.slot());
-                TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-
-                if (inventoryManager.getCursorItem() != null) {
+                inventoryManager.lockInventoryControl();
+                try {
                     inventoryManager.leftClickSlot(bestItemSlot.slot());
                     TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+                    inventoryManager.leftClickSlot(targetSlot.slot());
+                    TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+
+                    if (inventoryManager.getCursorItem() != null) {
+                        inventoryManager.leftClickSlot(bestItemSlot.slot());
+                        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+                    }
+                } finally {
+                    inventoryManager.unlockInventoryControl();
                 }
             });
         }
