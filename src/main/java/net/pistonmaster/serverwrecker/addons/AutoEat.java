@@ -102,7 +102,7 @@ public class AutoEat implements InternalAddon {
                     ItemType itemType = slot.item().getType();
                     FoodType foodType = FoodType.VALUES.stream()
                             .filter(type -> type.itemType() == itemType)
-                            .findFirst()
+                            .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
                             .orElse(null);
 
                     if (foodType == null || DangerFood.VALUES.contains(foodType)) {
@@ -131,7 +131,7 @@ public class AutoEat implements InternalAddon {
                     ItemType itemType = slot.item().getType();
                     FoodType foodType = FoodType.VALUES.stream()
                             .filter(type -> type.itemType() == itemType)
-                            .findFirst()
+                            .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
                             .orElse(null);
 
                     if (foodType == null || DangerFood.VALUES.contains(foodType)) {
