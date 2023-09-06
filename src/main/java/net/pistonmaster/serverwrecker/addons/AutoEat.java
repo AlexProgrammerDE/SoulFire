@@ -95,6 +95,8 @@ public class AutoEat implements InternalAddon {
 
                 int i = 0;
                 for (ContainerSlot slot : playerInventory.getHotbar()) {
+                    int hotbarSlot = i++;
+
                     if (slot.item() == null) {
                         continue;
                     }
@@ -114,13 +116,13 @@ public class AutoEat implements InternalAddon {
                     }
 
                     try {
-                        inventoryManager.setHeldItemSlot(i);
+                        inventoryManager.setHeldItemSlot(hotbarSlot);
                         inventoryManager.sendHeldItemChange();
                         sessionDataManager.getBotActionManager().useItemInHand(Hand.MAIN_HAND);
+                        return;
                     } finally {
                         inventoryManager.unlockInventoryControl();
                     }
-                    i++;
                 }
 
                 for (ContainerSlot slot : playerInventory.getMainInventory()) {
@@ -150,10 +152,10 @@ public class AutoEat implements InternalAddon {
                         }
 
                         sessionDataManager.getBotActionManager().useItemInHand(Hand.MAIN_HAND);
+                        return;
                     } finally {
                         inventoryManager.unlockInventoryControl();
                     }
-                    i++;
                 }
             }, settings.minDelay(), settings.maxDelay());
         }
