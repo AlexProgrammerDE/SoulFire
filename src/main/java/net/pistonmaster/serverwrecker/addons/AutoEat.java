@@ -42,11 +42,13 @@ import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryCont
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.util.TimeUtil;
 import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class AutoEat implements InternalAddon {
     @Override
@@ -119,6 +121,9 @@ public class AutoEat implements InternalAddon {
                         inventoryManager.setHeldItemSlot(hotbarSlot);
                         inventoryManager.sendHeldItemChange();
                         sessionDataManager.getBotActionManager().useItemInHand(Hand.MAIN_HAND);
+
+                        // Wait before eating again
+                        TimeUtil.waitTime(2, TimeUnit.SECONDS);
                         return;
                     } finally {
                         inventoryManager.unlockInventoryControl();
@@ -151,6 +156,8 @@ public class AutoEat implements InternalAddon {
                             inventoryManager.leftClickSlot(slot.slot());
                         }
 
+                        // Wait before eating again
+                        TimeUtil.waitTime(2, TimeUnit.SECONDS);
                         sessionDataManager.getBotActionManager().useItemInHand(Hand.MAIN_HAND);
                         return;
                     } finally {
