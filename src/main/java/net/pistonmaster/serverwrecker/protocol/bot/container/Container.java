@@ -25,11 +25,12 @@ import lombok.Getter;
 
 import javax.annotation.Nonnull;
 
-@Getter
 public class Container {
+    @Getter
     private final @Nonnull ContainerSlot[] slots;
+    @Getter
     private final int id;
-    private final Int2IntMap properties = new Int2IntOpenHashMap();
+    private Int2IntMap properties;
 
     public Container(int slots, int id) {
         this.slots = new ContainerSlot[slots];
@@ -58,10 +59,19 @@ public class Container {
     }
 
     public void setProperty(int property, int value) {
+        // Lazy init to save a little memory
+        if (properties == null) {
+            properties = new Int2IntOpenHashMap();
+        }
+
         properties.put(property, value);
     }
 
     public int getProperty(int property) {
+        if (properties == null) {
+            return 0;
+        }
+
         return properties.getOrDefault(property, 0);
     }
 }

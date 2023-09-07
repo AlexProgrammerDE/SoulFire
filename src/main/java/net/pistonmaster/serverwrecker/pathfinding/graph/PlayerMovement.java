@@ -84,7 +84,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         // Make sure we are in the middle of the block
         Vector3d position = applyModifier(applyDirection(previousEntityState.position(), direction), modifier);
 
-        return new BotEntityState(position, previousEntityState.levelState());
+        return new BotEntityState(position, previousEntityState.levelState(), previousEntityState.inventory());
     }
 
     @Override

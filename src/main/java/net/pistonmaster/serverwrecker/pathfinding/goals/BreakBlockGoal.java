@@ -22,8 +22,8 @@ package net.pistonmaster.serverwrecker.pathfinding.goals;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import org.cloudburstmc.math.vector.Vector3d;
 
-public record CollectBlockGoal(Vector3d goal) implements GoalScorer {
-    public CollectBlockGoal(double x, double y, double z) {
+public record BreakBlockGoal(Vector3d goal) implements GoalScorer {
+    public BreakBlockGoal(double x, double y, double z) {
         this(Vector3d.from(x, y, z));
     }
 

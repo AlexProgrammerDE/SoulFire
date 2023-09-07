@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding;
 
+import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -31,7 +32,7 @@ import org.cloudburstmc.math.vector.Vector3d;
  *                   This is always the middle of the block.
  * @param levelState The level state of the world the bot is in.
  */
-public record BotEntityState(Vector3d position, ProjectedLevelState levelState) {
+public record BotEntityState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory) {
     public BotEntityState {
         position = VectorHelper.middleOfBlockNormalize(position);
     }

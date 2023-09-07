@@ -36,32 +36,30 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ProjectedLevelState {
     private final LevelState levelState;
-    private final Map<Vector3i, BlockType> blockLookupCache;
-    private final int blockLookupCacheHash;
+    private final Map<Vector3i, BlockType> blockChanges;
+    private final int blockChangesHash;
 
     public ProjectedLevelState(LevelState levelState) {
-        Map<Vector3i, BlockType> blockLookupCache = new HashMap<>();
+        Map<Vector3i, BlockType> blockChanges = new HashMap<>();
         this.levelState = levelState;
-        this.blockLookupCache = blockLookupCache;
-        this.blockLookupCacheHash = blockLookupCache.hashCode();
+        this.blockChanges = blockChanges;
+        this.blockChangesHash = blockChanges.hashCode();
     }
 
     public ProjectedLevelState withChange(Vector3i position, BlockType blockType) {
-        Map<Vector3i, BlockType> blockStateCache = new HashMap<>(blockLookupCache);
-        blockStateCache.put(position, blockType);
+        Map<Vector3i, BlockType> blockChanges = new HashMap<>(this.blockChanges);
+        blockChanges.put(position, blockType);
 
-        return new ProjectedLevelState(levelState, blockStateCache, blockStateCache.hashCode());
+        return new ProjectedLevelState(levelState, blockChanges, blockChanges.hashCode());
     }
 
     public Optional<BlockType> getBlockTypeAt(Vector3i position) {
-        return Optional.ofNullable(blockLookupCache.compute(position, (vector3i, blockType) -> {
-            // If we already know the block type (thanks to cache), return it
-            if (blockType != null) {
-                return blockType;
-            }
+        BlockType blockType = blockChanges.get(position);
+        if (blockType != null) {
+            return Optional.of(blockType);
+        }
 
-            return levelState.getBlockTypeAt(vector3i).orElse(null);
-        }));
+        return levelState.getBlockTypeAt(position);
     }
 
     @Override
@@ -69,11 +67,11 @@ public class ProjectedLevelState {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ProjectedLevelState that = (ProjectedLevelState) o;
-        return blockLookupCacheHash == that.blockLookupCacheHash;
+        return blockChangesHash == that.blockChangesHash;
     }
 
     @Override
     public int hashCode() {
-        return blockLookupCacheHash;
+        return blockChangesHash;
     }
 }

@@ -45,6 +45,7 @@ import net.pistonmaster.serverwrecker.pathfinding.goals.PosGoal;
 import net.pistonmaster.serverwrecker.pathfinding.goals.XZGoal;
 import net.pistonmaster.serverwrecker.pathfinding.goals.YGoal;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
+import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
@@ -189,6 +190,8 @@ public class CommandManager {
                         RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(), new PosGoal(x, y, z));
                         BotEntityState start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
                                 sessionDataManager.getCurrentLevel()
+                        ), new ProjectedInventory(
+                                sessionDataManager.getInventoryManager().getPlayerInventory()
                         ));
                         logger.info("Start: " + start);
                         List<WorldAction> actions = routeFinder.findRoute(start);
@@ -219,6 +222,8 @@ public class CommandManager {
                         RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(), new XZGoal(x, z));
                         BotEntityState start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
                                 sessionDataManager.getCurrentLevel()
+                        ), new ProjectedInventory(
+                                sessionDataManager.getInventoryManager().getPlayerInventory()
                         ));
                         logger.info("Start: " + start);
                         List<WorldAction> actions = routeFinder.findRoute(start);
@@ -247,6 +252,8 @@ public class CommandManager {
                         RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(), new YGoal(y));
                         BotEntityState start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
                                 sessionDataManager.getCurrentLevel()
+                        ), new ProjectedInventory(
+                                sessionDataManager.getInventoryManager().getPlayerInventory()
                         ));
                         logger.info("Start: " + start);
                         List<WorldAction> actions = routeFinder.findRoute(start);
