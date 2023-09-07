@@ -23,7 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record FoodType(ItemType itemType, int foodPoints, double saturation, double effectiveQuality, double saturationRatio) {
+public record FoodType(ItemType itemType, int foodPoints, double saturation, double effectiveQuality,
+                       double saturationRatio) {
     public static final List<FoodType> VALUES = new ArrayList<>();
 
     public static final FoodType APPLE = register(new FoodType(ItemType.APPLE, 4, 2.4, 6.4, 0.6));

@@ -47,6 +47,7 @@ public final class BotMovementManager {
     private static final float STEP_HEIGHT = 0.5F;
     @ToString.Exclude
     private final SessionDataManager dataManager;
+    private final ControlState controlState = new ControlState();
     private double x;
     private double y;
     private double z;
@@ -67,7 +68,6 @@ public final class BotMovementManager {
     private float speedInAir = 0.02F;
     private float moveForward;
     private float moveStrafing;
-    private final ControlState controlState = new ControlState();
     @Setter
     private float abilitiesFlySpeed = 0.05F;
     @Setter

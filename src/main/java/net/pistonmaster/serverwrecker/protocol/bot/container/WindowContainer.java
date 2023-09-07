@@ -22,7 +22,6 @@ package net.pistonmaster.serverwrecker.protocol.bot.container;
 import com.github.steveice10.mc.protocol.data.game.inventory.ContainerType;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
 @Getter
 public class WindowContainer extends Container {

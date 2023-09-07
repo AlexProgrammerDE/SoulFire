@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.ObjectData;
 import com.github.steveice10.mc.protocol.data.game.entity.type.EntityType;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

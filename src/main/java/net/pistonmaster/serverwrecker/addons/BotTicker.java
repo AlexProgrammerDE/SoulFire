@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.addons;
 
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
-import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.util.TickTimer;

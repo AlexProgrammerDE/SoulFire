@@ -19,13 +19,14 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * An immutable representation of the world state.

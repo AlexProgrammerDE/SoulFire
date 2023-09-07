@@ -29,10 +29,10 @@ public class Costs {
     public static final double DIG_BLOCK = 10;
     public static final double PLACE_BLOCK = 10;
 
-    public static double calculateCostForBlock(PlayerInventoryContainer inventory, BlockType blockType) {
-        return 1;
+    private Costs() {
     }
 
-    private Costs() {
+    public static double calculateCostForBlock(PlayerInventoryContainer inventory, BlockType blockType) {
+        return 1;
     }
 }

@@ -33,6 +33,52 @@ import java.util.stream.Collectors;
 
 public record PlayerMovement(BotEntityState previousEntityState, MovementDirection direction, MovementModifier modifier,
                              MovementSide side) implements GraphAction {
+    private static Vector3i applyDirection(Vector3i pos, MovementDirection direction) {
+        return switch (direction) {
+            case NORTH -> pos.add(0, 0, -1);
+            case SOUTH -> pos.add(0, 0, 1);
+            case EAST -> pos.add(1, 0, 0);
+            case WEST -> pos.add(-1, 0, 0);
+            case NORTH_EAST -> pos.add(1, 0, -1);
+            case NORTH_WEST -> pos.add(-1, 0, -1);
+            case SOUTH_EAST -> pos.add(1, 0, 1);
+            case SOUTH_WEST -> pos.add(-1, 0, 1);
+        };
+    }
+
+    private static Vector3d applyDirection(Vector3d pos, MovementDirection direction) {
+        return switch (direction) {
+            case NORTH -> pos.add(0, 0, -1);
+            case SOUTH -> pos.add(0, 0, 1);
+            case EAST -> pos.add(1, 0, 0);
+            case WEST -> pos.add(-1, 0, 0);
+            case NORTH_EAST -> pos.add(1, 0, -1);
+            case NORTH_WEST -> pos.add(-1, 0, -1);
+            case SOUTH_EAST -> pos.add(1, 0, 1);
+            case SOUTH_WEST -> pos.add(-1, 0, 1);
+        };
+    }
+
+    private static Vector3i applyModifier(Vector3i pos, MovementModifier modifier) {
+        return switch (modifier) {
+            case FALL_1 -> pos.add(0, -1, 0);
+            case FALL_2 -> pos.add(0, -2, 0);
+            case FALL_3 -> pos.add(0, -3, 0);
+            case JUMP -> pos.add(0, 1, 0);
+            default -> pos;
+        };
+    }
+
+    private static Vector3d applyModifier(Vector3d pos, MovementModifier modifier) {
+        return switch (modifier) {
+            case FALL_1 -> pos.add(0, -1, 0);
+            case FALL_2 -> pos.add(0, -2, 0);
+            case FALL_3 -> pos.add(0, -3, 0);
+            case JUMP -> pos.add(0, 1, 0);
+            default -> pos;
+        };
+    }
+
     @Override
     public BotEntityState getTargetState() {
         // Make sure we are in the middle of the block
@@ -155,51 +201,5 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         requiredSolidBlocks.add(applyModifier(applyDirection(floorPos, direction), modifier));
 
         return requiredSolidBlocks;
-    }
-
-    private static Vector3i applyDirection(Vector3i pos, MovementDirection direction) {
-        return switch (direction) {
-            case NORTH -> pos.add(0, 0, -1);
-            case SOUTH -> pos.add(0, 0, 1);
-            case EAST -> pos.add(1, 0, 0);
-            case WEST -> pos.add(-1, 0, 0);
-            case NORTH_EAST -> pos.add(1, 0, -1);
-            case NORTH_WEST -> pos.add(-1, 0, -1);
-            case SOUTH_EAST -> pos.add(1, 0, 1);
-            case SOUTH_WEST -> pos.add(-1, 0, 1);
-        };
-    }
-
-    private static Vector3d applyDirection(Vector3d pos, MovementDirection direction) {
-        return switch (direction) {
-            case NORTH -> pos.add(0, 0, -1);
-            case SOUTH -> pos.add(0, 0, 1);
-            case EAST -> pos.add(1, 0, 0);
-            case WEST -> pos.add(-1, 0, 0);
-            case NORTH_EAST -> pos.add(1, 0, -1);
-            case NORTH_WEST -> pos.add(-1, 0, -1);
-            case SOUTH_EAST -> pos.add(1, 0, 1);
-            case SOUTH_WEST -> pos.add(-1, 0, 1);
-        };
-    }
-
-    private static Vector3i applyModifier(Vector3i pos, MovementModifier modifier) {
-        return switch (modifier) {
-            case FALL_1 -> pos.add(0, -1, 0);
-            case FALL_2 -> pos.add(0, -2, 0);
-            case FALL_3 -> pos.add(0, -3, 0);
-            case JUMP -> pos.add(0, 1, 0);
-            default -> pos;
-        };
-    }
-
-    private static Vector3d applyModifier(Vector3d pos, MovementModifier modifier) {
-        return switch (modifier) {
-            case FALL_1 -> pos.add(0, -1, 0);
-            case FALL_2 -> pos.add(0, -2, 0);
-            case FALL_3 -> pos.add(0, -3, 0);
-            case JUMP -> pos.add(0, 1, 0);
-            default -> pos;
-        };
     }
 }

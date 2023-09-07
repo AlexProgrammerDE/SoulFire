@@ -20,9 +20,7 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import io.grpc.stub.StreamObserver;
-import net.pistonmaster.serverwrecker.AttackManager;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.grpc.generated.*;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 

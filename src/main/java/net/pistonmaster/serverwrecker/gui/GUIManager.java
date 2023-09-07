@@ -22,7 +22,6 @@ package net.pistonmaster.serverwrecker.gui;
 import ch.jalu.injector.Injector;
 import javafx.embed.swing.JFXPanel;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import org.slf4j.Logger;

@@ -19,13 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.protocol;
 
-import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.github.steveice10.mc.protocol.data.handshake.HandshakeIntent;
-import com.github.steveice10.mc.protocol.data.status.ServerStatusInfo;
-import com.github.steveice10.mc.protocol.data.status.handler.ServerInfoHandler;
-import com.github.steveice10.mc.protocol.data.status.handler.ServerPingTimeHandler;
 import com.github.steveice10.mc.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundKeepAlivePacket;

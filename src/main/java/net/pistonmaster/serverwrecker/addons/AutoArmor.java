@@ -25,7 +25,6 @@ import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
-import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.data.ArmorType;

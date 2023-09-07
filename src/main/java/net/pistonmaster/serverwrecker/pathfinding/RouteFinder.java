@@ -20,8 +20,8 @@
 package net.pistonmaster.serverwrecker.pathfinding;
 
 import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
+import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 import net.pistonmaster.serverwrecker.pathfinding.goals.GoalScorer;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 
