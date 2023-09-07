@@ -1,6 +1,6 @@
 [versions]
 log4j = "2.20.0"
-grpc = "1.57.2"
+grpc = "1.58.0"
 protobuf = "3.24.2"
 protoc = "3.24.0"
 
@@ -43,7 +43,7 @@ commons-validator = "commons-validator:commons-validator:1.7"
 commons-io = "commons-io:commons-io:2.13.0"
 guava = "com.google.guava:guava:32.1.2-jre"
 gson = "com.google.code.gson:gson:2.10.1"
-pf4j = "org.pf4j:pf4j:3.9.0"
+pf4j = "org.pf4j:pf4j:3.10.0"
 minecraftauth = "net.raphimc:MinecraftAuth:2.1.5"
 thealtening = "com.thealtening.api:api:4.1.0"
 injector = "ch.jalu:injector:1.0"
