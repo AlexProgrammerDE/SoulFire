@@ -24,7 +24,7 @@ import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
-import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
+import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.data.ItemType;
@@ -40,13 +40,11 @@ import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
-import net.pistonmaster.serverwrecker.util.TimeUtil;
 import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class AutoTotem implements InternalAddon {
     @Override
@@ -55,7 +53,7 @@ public class AutoTotem implements InternalAddon {
     }
 
     @EventHandler
-    public void onPreConnect(PreBotConnectEvent event) {
+    public void onJoined(BotJoinedEvent event) {
         if (!event.connection().settingsHolder().has(AutoTotemSettings.class)) {
             return;
         }

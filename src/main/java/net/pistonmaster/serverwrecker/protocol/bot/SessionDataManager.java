@@ -62,6 +62,7 @@ import lombok.ToString;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
@@ -208,6 +209,8 @@ public final class SessionDataManager {
         if (isInitial) {
             botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch, abilitiesData);
             log.info("Joined server at position: X {} Y {} Z {}", Math.round(x), Math.round(y), Math.round(z));
+
+            ServerWreckerAPI.postEvent(new BotJoinedEvent(connection));
         } else {
             botMovementManager.setPosition(x, y, z);
             botMovementManager.setRotation(yaw, pitch);

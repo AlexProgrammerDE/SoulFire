@@ -24,6 +24,7 @@ import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
+import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
@@ -57,7 +58,7 @@ public class AutoArmor implements InternalAddon {
     }
 
     @EventHandler
-    public void onPreConnect(PreBotConnectEvent event) {
+    public void onJoined(BotJoinedEvent event) {
         if (!event.connection().settingsHolder().has(AutoArmorSettings.class)) {
             return;
         }

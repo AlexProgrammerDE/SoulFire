@@ -21,6 +21,8 @@ package net.pistonmaster.serverwrecker.addons;
 
 import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.EventHandler;
+import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.util.TickTimer;
@@ -29,14 +31,14 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class BotTicker implements InternalAddon, EventSubscriber<PreBotConnectEvent> {
+public class BotTicker implements InternalAddon {
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListener(PreBotConnectEvent.class, this);
+        ServerWreckerAPI.registerListeners(this);
     }
 
-    @Override
-    public void on(@NonNull PreBotConnectEvent event) throws Throwable {
+    @EventHandler
+    public void onJoined(BotJoinedEvent event) {
         new BotTickerTask(event.connection(),
                 event.connection().executorManager().newScheduledExecutorService(),
                 new TickTimer(20));
