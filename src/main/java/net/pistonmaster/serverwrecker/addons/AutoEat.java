@@ -26,7 +26,6 @@ import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.EventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
-import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.data.DangerFood;
@@ -79,7 +78,7 @@ public class AutoEat implements InternalAddon {
 
     @EventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
-        AddonCLIHelper.registerCommands(event.commandLine(), AutoEatSettings.class, new AutoTotemCommand());
+        AddonCLIHelper.registerCommands(event.commandLine(), AutoEatSettings.class, new AutoEatCommand());
     }
 
     private record BotEatThread(BotConnection connection, ScheduledExecutorService executor) {
@@ -222,7 +221,7 @@ public class AutoEat implements InternalAddon {
         }
     }
 
-    private static class AutoTotemCommand implements SettingsProvider<AutoEatSettings> {
+    private static class AutoEatCommand implements SettingsProvider<AutoEatSettings> {
         @CommandLine.Option(names = {"--auto-eat"}, description = "Do auto eat?")
         private boolean autoEat = AutoEatSettings.DEFAULT_AUTO_EAT;
         @CommandLine.Option(names = {"--eat-min-delay"}, description = "Minimum delay between eating")
