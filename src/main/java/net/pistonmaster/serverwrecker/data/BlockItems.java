@@ -40,8 +40,4 @@ public class BlockItems {
     public static boolean isBlockItem(ItemType itemType) {
         return VALUES.contains(itemType);
     }
-
-    public static void main(String[] args) {
-        System.out.println(VALUES);
-    }
 }
