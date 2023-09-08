@@ -17,12 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.util;
+package net.pistonmaster.serverwrecker.data;
 
-import net.pistonmaster.serverwrecker.data.BlockType;
-
-public class BlockTypeHelper {
-    public static boolean isSolid(BlockType type) {
-        return type.blockShapeType().collisionHeight() > 0.1;
-    }
+public record BlockShape(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
 }

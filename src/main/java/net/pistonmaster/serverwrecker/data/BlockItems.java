@@ -31,7 +31,7 @@ public class BlockItems {
                 if (blockType.diggable()
                         && blockType.boundingBox() == BoundingBoxType.BLOCK
                         && itemType.name().equals(blockType.name())
-                        && blockType.collisionHeight() == 1) {
+                        && blockType.blockShapeType().collisionHeight() == 1) {
                     VALUES.add(itemType);
                 }
             }

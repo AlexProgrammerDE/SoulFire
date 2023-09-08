@@ -6,7 +6,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 public record BlockType(int id, String name, String displayName, double hardness, double resistance,
                         int stackSize, boolean diggable, BoundingBoxType boundingBox, List<ItemType> tools,
-                        double collisionHeight) {
+                        BlockShapeType blockShapeType) {
     public static final List<BlockType> VALUES = new ArrayList<>();
 
     // VALUES REPLACE

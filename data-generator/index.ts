@@ -13,10 +13,35 @@ if (mcData == null) {
   const getNameOfItemId = (id: number): string | null => {
     return mcData.items[id].name.toUpperCase();
   }
+  const getNameOfShapeId = (id: number): string | null => {
+    return "SHAPE_" + id
+  }
 
   fs.mkdirSync("output", {recursive: true})
 
-  if (config["generate-blocks"]) {
+  {
+    let enumValues: string[] = []
+    for (const item of Object.keys(mcData.blockCollisionShapes.shapes)) {
+      const id = Number(item)
+      const shape = mcData.blockCollisionShapes.shapes[item as any]
+
+      let shapeData = item
+      const shapeList: string[] = []
+      for (const shapePart of shape) {
+        shapeList.push(`${shapePart[0]},${shapePart[1]},${shapePart[2]},${shapePart[3]},${shapePart[4]},${shapePart[5]}`)
+      }
+      if (shapeList.length > 0) {
+        shapeData += "|"
+      }
+      shapeData += shapeList.join("|")
+
+      enumValues.push(shapeData)
+    }
+
+    fs.writeFileSync("output/blockshapes.txt", enumValues.join("\n"))
+  }
+
+  {
     let result = fs.readFileSync("templates/BlockType.java", "utf-8");
     let enumValues: string[] = []
     for (const block of mcData.blocksArray) {
@@ -31,25 +56,18 @@ if (mcData == null) {
       }
       harvestData += ")"
 
-      let collisionHeight = 0
+      let defaultShape = 0
       const collisionShapes = mcData.blockCollisionShapes.blocks[block.name]
       if (collisionShapes) {
-        let minShape
         // noinspection SuspiciousTypeOfGuard
         if (typeof collisionShapes === "number") {
-          minShape = collisionShapes
+          defaultShape = collisionShapes
         } else {
-          minShape = collisionShapes[0]
-        }
-
-        // Work around typing mistake in node-minecraft-data
-        const shape = mcData.blockCollisionShapes.shapes[String(minShape) as any]
-        if (shape && shape.length > 0) {
-          collisionHeight = shape[0][4]
+          defaultShape = collisionShapes[0]
         }
       }
 
-      enumValues.push(`public static final BlockType ${block.name.toUpperCase()} = register(new BlockType(${block.id}, "${block.name}", "${block.displayName}", ${block.hardness ?? -1}, ${block.resistance}, ${block.stackSize}, ${block.diggable}, BoundingBoxType.${block.boundingBox.toUpperCase()}, ${harvestData}, ${collisionHeight}));`)
+      enumValues.push(`public static final BlockType ${block.name.toUpperCase()} = register(new BlockType(${block.id}, "${block.name}", "${block.displayName}", ${block.hardness ?? -1}, ${block.resistance}, ${block.stackSize}, ${block.diggable}, BoundingBoxType.${block.boundingBox.toUpperCase()}, ${harvestData}, BlockShapeType.getById(${defaultShape})));`)
     }
 
     result = result.replace(enumReplace, enumValues.join("\n    "))
@@ -57,7 +75,7 @@ if (mcData == null) {
     fs.writeFileSync("output/BlockType.java", result)
   }
 
-  if (config["generate-items"]) {
+  {
     let result = fs.readFileSync("templates/ItemType.java", "utf-8");
     let enumValues: string[] = []
     for (const item of mcData.itemsArray) {
@@ -69,7 +87,7 @@ if (mcData == null) {
     fs.writeFileSync("output/ItemType.java", result)
   }
 
-  if (config["generate-entities"]) {
+  {
     let result = fs.readFileSync("templates/EntityType.java", "utf-8");
     let enumValues: string[] = []
     for (const item of mcData.entitiesArray) {
@@ -81,7 +99,7 @@ if (mcData == null) {
     fs.writeFileSync("output/EntityType.java", result)
   }
 
-  if (config["generate-food"]) {
+  {
     let result = fs.readFileSync("templates/FoodType.java", "utf-8");
     let enumValues: string[] = []
     for (const food of mcData.foodsArray) {

@@ -6,10 +6,6 @@ plugins {
 }
 
 tasks {
-    processResources {
-        expand("version" to version, "description" to description)
-    }
-
     jar {
         archiveClassifier.set("unshaded")
         from(project.rootProject.file("LICENSE"))
