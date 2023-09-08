@@ -17,9 +17,17 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.data;
+package net.pistonmaster.serverwrecker.protocol.bot.block;
 
-public enum BoundingBoxType {
-    EMPTY,
-    BLOCK
+import net.pistonmaster.serverwrecker.data.BlockType;
+
+public record BlockStateMeta(String blockName, int stateIndex) {
+    public BlockType getBlockType() {
+        BlockType blockType = BlockType.getByMcName(blockName);
+        if (blockType == null) {
+            throw new IllegalArgumentException("Unknown block: " + blockName);
+        }
+
+        return blockType;
+    }
 }

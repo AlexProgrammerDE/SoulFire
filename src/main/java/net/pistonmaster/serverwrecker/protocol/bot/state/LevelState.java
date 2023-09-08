@@ -22,9 +22,11 @@ package net.pistonmaster.serverwrecker.protocol.bot.state;
 import com.github.steveice10.opennbt.tag.builtin.*;
 import lombok.Getter;
 import lombok.Setter;
+import net.pistonmaster.serverwrecker.data.BlockShape;
+import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.data.BlockType;
-import net.pistonmaster.serverwrecker.data.BoundingBoxType;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.MCUniform;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.UniformOrInt;
@@ -158,28 +160,19 @@ public class LevelState {
         return chunks.containsKey(chunkKey);
     }
 
-    public Optional<String> getBlockNameAt(Vector3i block) {
+    public Optional<BlockStateMeta> getBlockStateAt(Vector3i block) {
         OptionalInt stateId = getBlockStateIdAt(block);
 
         if (stateId.isEmpty()) {
             return Optional.empty();
         }
 
-        return sessionDataManager.getServerWrecker().getGlobalBlockPalette().getBlockNameForStateId(stateId.getAsInt()).describeConstable();
+        return Optional.ofNullable(sessionDataManager.getServerWrecker()
+                .getGlobalBlockPalette().getBlockStateForStateId(stateId.getAsInt()));
     }
 
     public Optional<BlockType> getBlockTypeAt(Vector3i block) {
-        Optional<String> blockName = getBlockNameAt(block);
-        if (blockName.isEmpty()) {
-            return Optional.empty();
-        }
-
-        BlockType blockType = BlockType.getByMcName(blockName.get());
-        if (blockType == null) {
-            sessionDataManager.getLog().error("Unknown block: {}", blockName);
-            throw new IllegalArgumentException("Unknown block: " + blockName);
-        }
-        return Optional.of(blockType);
+        return getBlockStateAt(block).map(BlockStateMeta::getBlockType);
     }
 
     public boolean isOutOfWorld(Vector3i block) {
@@ -199,23 +192,46 @@ public class LevelState {
         for (int x = minX; x < maxX; x++) {
             for (int y = minY; y < maxY; y++) {
                 for (int z = minZ; z < maxZ; z++) {
-                    if (this.isSolidBlockAt(Vector3i.from(x, y, z))) {
-                        boundingBoxList.add(new BoundingBox(x, y, z, x + 1, y + 1, z + 1));
+                    Vector3i block = Vector3i.from(x, y, z);
+                    if (isOutOfWorld(block)) {
+                        continue;
+                    }
+
+                    Optional<BlockStateMeta> blockState = getBlockStateAt(block);
+                    if (blockState.isEmpty()) {
+                        continue;
+                    }
+
+                    BlockType blockType = blockState.get().getBlockType();
+                    if (blockType.blockShapeTypes().isEmpty()) {
+                        continue;
+                    }
+
+                    BlockShapeType blockShapeType;
+                    if (blockType.blockShapeTypes().size() == 1) {
+                        blockShapeType = blockType.blockShapeTypes().get(0);
+                    } else {
+                        blockShapeType = blockType.blockShapeTypes().get(blockState.get().stateIndex());
+                    }
+
+                    if (blockShapeType.blockShapes().isEmpty()) {
+                        continue;
+                    }
+
+                    for (BlockShape shape : blockShapeType.blockShapes()) {
+                        double bbMinX = x + shape.minX();
+                        double bbMinY = y + shape.minY();
+                        double bbMinZ = z + shape.minZ();
+                        double bbMaxX = x + shape.maxX();
+                        double bbMaxY = y + shape.maxY();
+                        double bbMaxZ = z + shape.maxZ();
+
+                        boundingBoxList.add(new BoundingBox(bbMinX, bbMinY, bbMinZ, bbMaxX, bbMaxY, bbMaxZ));
                     }
                 }
             }
         }
 
         return boundingBoxList;
-    }
-
-    private boolean isSolidBlockAt(Vector3i block) {
-        if (isOutOfWorld(block)) {
-            return false;
-        }
-
-        Optional<BlockType> blockType = getBlockTypeAt(block);
-        // Out of level, so we can't go there
-        return blockType.filter(type -> type.boundingBox() == BoundingBoxType.BLOCK).isPresent();
     }
 }

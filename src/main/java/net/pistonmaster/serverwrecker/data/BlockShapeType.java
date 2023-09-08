@@ -29,9 +29,9 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
     public static final List<BlockShapeType> VALUES = new ArrayList<>();
 
     static {
-        try (InputStream inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("blockshapetypes.txt");) {
+        try (InputStream inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockshapes.txt");) {
             if (inputStream == null) {
-                throw new IllegalStateException("blockshapetypes.txt not found!");
+                throw new IllegalStateException("blockshapes.txt not found!");
             }
 
             String[] lines = new String(inputStream.readAllBytes()).split("\n");
@@ -47,12 +47,12 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
                         String part = parts[i];
                         String[] subParts = part.split(",");
                         blockShapes.add(new BlockShape(
-                                Integer.parseInt(subParts[0]),
-                                Integer.parseInt(subParts[1]),
-                                Integer.parseInt(subParts[2]),
-                                Integer.parseInt(subParts[3]),
-                                Integer.parseInt(subParts[4]),
-                                Integer.parseInt(subParts[5])
+                                Double.parseDouble(subParts[0]),
+                                Double.parseDouble(subParts[1]),
+                                Double.parseDouble(subParts[2]),
+                                Double.parseDouble(subParts[3]),
+                                Double.parseDouble(subParts[4]),
+                                Double.parseDouble(subParts[5])
                         ));
                     }
                 }

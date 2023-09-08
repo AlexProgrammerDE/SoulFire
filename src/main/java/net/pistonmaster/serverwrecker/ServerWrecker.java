@@ -51,6 +51,7 @@ import net.pistonmaster.serverwrecker.grpc.RPCServer;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.LogAppender;
 import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.serverwrecker.protocol.packet.SWClientboundStatusResponsePacket;
 import net.pistonmaster.serverwrecker.proxy.ProxyList;
@@ -214,15 +215,17 @@ public class ServerWrecker {
         }
 
         // Create global palette
-        Map<Integer, String> stateMap = new HashMap<>();
+        Map<Integer, BlockStateMeta> stateMap = new HashMap<>();
         for (Map.Entry<String, JsonElement> blockEntry : blocks.entrySet()) {
+            int i = 0;
             for (JsonElement state : blockEntry.getValue().getAsJsonObject().get("states").getAsJsonArray()) {
-                stateMap.put(state.getAsJsonObject().get("id").getAsInt(), blockEntry.getKey());
+                stateMap.put(state.getAsJsonObject().get("id").getAsInt(), new BlockStateMeta(blockEntry.getKey(), i));
+                i++;
             }
         }
 
         globalBlockPalette = new GlobalBlockPalette(stateMap.size());
-        for (Map.Entry<Integer, String> entry : stateMap.entrySet()) {
+        for (Map.Entry<Integer, BlockStateMeta> entry : stateMap.entrySet()) {
             globalBlockPalette.add(entry.getKey(), entry.getValue());
         }
 

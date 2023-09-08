@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record BlockType(int id, String name, String displayName, double hardness, double resistance,
-                        int stackSize, boolean diggable, BoundingBoxType boundingBox, List<ItemType> tools,
-                        BlockShapeType blockShapeType) {
+public record BlockType(int id, String name, String displayName, double hardness, int stackSize,
+                        boolean diggable, List<ItemType> tools, List<BlockShapeType> blockShapeTypes) {
     public static final List<BlockType> VALUES = new ArrayList<>();
 
     // VALUES REPLACE

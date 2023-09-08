@@ -25,18 +25,23 @@ import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.github.steveice10.packetlib.event.session.PacketSendingEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import com.github.steveice10.packetlib.packet.Packet;
-import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSendingEvent;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
-import net.pistonmaster.serverwrecker.util.BusHelper;
+import net.pistonmaster.serverwrecker.util.BusInvoker;
 
-@RequiredArgsConstructor
 public class SWSessionListener extends SessionAdapter {
     private final SessionDataManager bus;
     private final BotConnection botConnection;
+    private final BusInvoker busInvoker;
+
+    public SWSessionListener(SessionDataManager bus, BotConnection botConnection) {
+        this.bus = bus;
+        this.botConnection = botConnection;
+        this.busInvoker = new BusInvoker(bus);
+    }
 
     @Override
     public void packetReceived(Session session, Packet packet) {
@@ -46,10 +51,10 @@ public class SWSessionListener extends SessionAdapter {
             return;
         }
 
-        botConnection.logger().trace("Received packet: " + packet.toString());
+        botConnection.logger().trace("Received packet: " + packet.getClass().getSimpleName());
 
         try {
-            BusHelper.handlePacket(event1.getPacket(), bus);
+            busInvoker.handlePacket(event1.getPacket());
         } catch (Throwable t) {
             botConnection.logger().error("Error while handling packet!", t);
         }
@@ -66,7 +71,7 @@ public class SWSessionListener extends SessionAdapter {
             return;
         }
 
-        botConnection.logger().debug("Sending packet: " + event.getPacket().toString());
+        botConnection.logger().debug("Sending packet: " + event.getPacket().getClass().getSimpleName());
     }
 
     @Override

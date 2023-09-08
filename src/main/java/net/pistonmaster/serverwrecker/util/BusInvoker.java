@@ -20,12 +20,23 @@
 package net.pistonmaster.serverwrecker.util;
 
 import com.github.steveice10.packetlib.packet.Packet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
-public class BusHelper {
-    public static void handlePacket(Packet packet, Object bus) {
+public class BusInvoker {
+    private final Object bus;
+    private final Map<Class<?>, MethodHandle> handlers = new HashMap<>();
+
+    public BusInvoker(Object bus) {
+        this.bus = bus;
+        MethodHandles.Lookup publicLookup = MethodHandles.publicLookup();
+
         for (Method declaredMethod : bus.getClass().getDeclaredMethods()) {
             if (!declaredMethod.isAnnotationPresent(BusHandler.class)) {
                 continue;
@@ -36,13 +47,22 @@ public class BusHelper {
             }
 
             Class<?> parameter = declaredMethod.getParameterTypes()[0];
-            if (parameter.isAssignableFrom(packet.getClass())) {
-                try {
-                    declaredMethod.invoke(bus, packet);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
+
+            try {
+                handlers.put(parameter, publicLookup.unreflect(declaredMethod));
+            } catch (ReflectiveOperationException e) {
+                throw new IllegalStateException("Failed to create method handle for " + declaredMethod, e);
             }
         }
+    }
+
+    public void handlePacket(Packet packet) throws Throwable {
+        MethodHandle method = handlers.get(packet.getClass());
+
+        if (method == null) {
+            return;
+        }
+
+        method.invoke(bus, packet);
     }
 }

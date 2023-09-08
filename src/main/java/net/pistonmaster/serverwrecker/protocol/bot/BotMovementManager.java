@@ -405,7 +405,7 @@ public final class BotMovementManager {
             return 1.0F;
         }
 
-        Vector3i blockPos = this.getPlayerPos().add(Vector3d.from(0, -0.5, 0)).toInt();
+        Vector3i blockPos = this.getPlayerPos().add(0, -0.5, 0).toInt();
         LevelState level = getLevelSafe();
         if (level.isOutOfWorld(blockPos)) {
             return 1.0F;
@@ -512,7 +512,6 @@ public final class BotMovementManager {
         List<BoundingBox> collisionBoxes = level.getCollisionBoxes(this.boundingBox.expand(targetX, targetY, targetZ));
 
         // Move bounding box
-
         double targetXCollision = targetX;
         double targetZCollision = targetZ;
 

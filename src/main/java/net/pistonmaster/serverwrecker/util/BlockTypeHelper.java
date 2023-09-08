@@ -23,6 +23,10 @@ import net.pistonmaster.serverwrecker.data.BlockType;
 
 public class BlockTypeHelper {
     public static boolean isSolid(BlockType type) {
-        return type.blockShapeType().collisionHeight() > 0.1;
+        if (type.blockShapeTypes().isEmpty()) {
+            return false;
+        }
+
+        return type.blockShapeTypes().get(0).collisionHeight() > 0.1;
     }
 }

@@ -207,13 +207,7 @@ tasks.compileJava.get().apply {
     options.compilerArgs.add("-Aproject=${project.name}")
 }
 
-val mcFolder = File("${rootDir}/assets/minecraft")
-if (!mcFolder.exists()) {
-    throw IllegalStateException("Minecraft folder not found!")
-}
-
 tasks.named<Jar>("jar").get().apply {
-    registerMCJar()
     manifest {
         attributes["Main-Class"] = "net.pistonmaster.serverwrecker.ServerWreckerBootstrap"
         attributes["Add-Opens"] = moduleOpens.joinToString(" ")
@@ -221,7 +215,6 @@ tasks.named<Jar>("jar").get().apply {
 }
 
 tasks.named<ShadowJar>("shadowJar").get().apply {
-    registerMCJar()
     excludes.addAll(
         setOf(
             "META-INF/*.DSA",
@@ -235,22 +228,6 @@ tasks.named<ShadowJar>("shadowJar").get().apply {
         )
     )
 }
-
-fun CopySpec.registerMCJar() {
-    from(mcFolder) {
-        into("minecraft")
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    }
-}
-
-val copyMinecraft = tasks.create("copyMinecraft") {
-    copy {
-        from(mcFolder)
-        into(layout.buildDirectory.file("resources/main/minecraft"))
-    }
-}
-
-tasks.named("processResources").get().dependsOn(copyMinecraft)
 
 launch4j {
     mainClassName.set("ServerWrecker")

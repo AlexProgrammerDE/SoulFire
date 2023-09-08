@@ -28,10 +28,12 @@ public class BlockItems {
     static {
         for (ItemType itemType : ItemType.VALUES) {
             for (BlockType blockType : BlockType.VALUES) {
+                List<BlockShapeType> blockShapeTypes = blockType.blockShapeTypes();
+
                 if (blockType.diggable()
-                        && blockType.boundingBox() == BoundingBoxType.BLOCK
+                        && !blockShapeTypes.isEmpty()
                         && itemType.name().equals(blockType.name())
-                        && blockType.blockShapeType().collisionHeight() == 1) {
+                        && blockShapeTypes.get(0).collisionHeight() == 1) {
                     VALUES.add(itemType);
                 }
             }
