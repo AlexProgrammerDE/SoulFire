@@ -20,17 +20,19 @@ if (mcData == null) {
     let result = fs.readFileSync("templates/BlockType.java", "utf-8");
     let enumValues: string[] = []
     for (const block of mcData.blocksArray) {
-      let harvestData: string | null = null
+      let harvestData: string | null = "List.of("
       if (block.harvestTools) {
         const harvestTools = block.harvestTools;
-        harvestData = "Map.ofEntries("
         const toolList: string[] = []
         for (const tool of Object.keys(harvestTools)) {
-          toolList.push(`Map.entry(ItemType.${getNameOfItemId(Number(tool))}, ${harvestTools[tool]})`)
+          toolList.push(`ItemType.${getNameOfItemId(Number(tool))}`)
         }
-        harvestData += toolList.join(", ") + ")"
+        harvestData += toolList.join(", ")
       }
-      enumValues.push(`public static final BlockType ${block.name.toUpperCase()} = register(new BlockType(${block.id}, "${block.name}", "${block.displayName}", ${block.hardness ?? -1}, ${block.resistance}, ${block.stackSize}, ${block.diggable}, "${block.material}", BoundingBoxType.${block.boundingBox.toUpperCase()}));`)
+
+      harvestData += ")"
+
+      enumValues.push(`public static final BlockType ${block.name.toUpperCase()} = register(new BlockType(${block.id}, "${block.name}", "${block.displayName}", ${block.hardness ?? -1}, ${block.resistance}, ${block.stackSize}, ${block.diggable}, BoundingBoxType.${block.boundingBox.toUpperCase()}, ${harvestData}));`)
     }
 
     result = result.replace(enumReplace, enumValues.join("\n    "))
