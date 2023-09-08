@@ -29,10 +29,27 @@ if (mcData == null) {
         }
         harvestData += toolList.join(", ")
       }
-
       harvestData += ")"
 
-      enumValues.push(`public static final BlockType ${block.name.toUpperCase()} = register(new BlockType(${block.id}, "${block.name}", "${block.displayName}", ${block.hardness ?? -1}, ${block.resistance}, ${block.stackSize}, ${block.diggable}, BoundingBoxType.${block.boundingBox.toUpperCase()}, ${harvestData}));`)
+      let collisionHeight = 0
+      const collisionShapes = mcData.blockCollisionShapes.blocks[block.name]
+      if (collisionShapes) {
+        let minShape
+        // noinspection SuspiciousTypeOfGuard
+        if (typeof collisionShapes === "number") {
+          minShape = collisionShapes
+        } else {
+          minShape = collisionShapes[0]
+        }
+
+        // Work around typing mistake in node-minecraft-data
+        const shape = mcData.blockCollisionShapes.shapes[String(minShape) as any]
+        if (shape && shape.length > 0) {
+          collisionHeight = shape[0][4]
+        }
+      }
+
+      enumValues.push(`public static final BlockType ${block.name.toUpperCase()} = register(new BlockType(${block.id}, "${block.name}", "${block.displayName}", ${block.hardness ?? -1}, ${block.resistance}, ${block.stackSize}, ${block.diggable}, BoundingBoxType.${block.boundingBox.toUpperCase()}, ${harvestData}, ${collisionHeight}));`)
     }
 
     result = result.replace(enumReplace, enumValues.join("\n    "))

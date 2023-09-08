@@ -47,6 +47,7 @@ public class LevelState {
     private final String infiniburn;
     private final String effects;
     private final byte ultrawarm;
+    @Getter
     private final int height;
     private final int logicalHeight;
     private final byte natural;
@@ -97,10 +98,6 @@ public class LevelState {
         this.monsterSpawnBlockLightLimit = levelRegistry.<IntTag>get("monster_spawn_block_light_limit").getValue();
         this.hasRaids = levelRegistry.<ByteTag>get("has_raids").getValue();
         this.respawnAnchorWorks = levelRegistry.<ByteTag>get("respawn_anchor_works").getValue();
-    }
-
-    public int getHeight() {
-        return this.height;
     }
 
     public int getMinBuildHeight() {

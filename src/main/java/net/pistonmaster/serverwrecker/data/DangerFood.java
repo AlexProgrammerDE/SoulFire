@@ -21,6 +21,9 @@ package net.pistonmaster.serverwrecker.data;
 
 import java.util.List;
 
+/**
+ * Food to avoid eating or else you may get hurt!
+ */
 public class DangerFood {
     public static final List<FoodType> VALUES = List.of(
             FoodType.POISONOUS_POTATO, // Poison
@@ -31,4 +34,8 @@ public class DangerFood {
             FoodType.PUFFERFISH, // Poison, Nausea and Hunger
             FoodType.CHICKEN // Hunger (Raw chicken)
     );
+
+    public static boolean isDangerFood(FoodType foodType) {
+        return VALUES.contains(foodType);
+    }
 }

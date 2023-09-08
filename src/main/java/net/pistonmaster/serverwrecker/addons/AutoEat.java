@@ -109,7 +109,7 @@ public class AutoEat implements InternalAddon {
                             .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
                             .orElse(null);
 
-                    if (foodType == null || DangerFood.VALUES.contains(foodType)) {
+                    if (foodType == null || DangerFood.isDangerFood(foodType)) {
                         continue;
                     }
 
@@ -141,7 +141,7 @@ public class AutoEat implements InternalAddon {
                             .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
                             .orElse(null);
 
-                    if (foodType == null || DangerFood.VALUES.contains(foodType)) {
+                    if (foodType == null || DangerFood.isDangerFood(foodType)) {
                         continue;
                     }
 
