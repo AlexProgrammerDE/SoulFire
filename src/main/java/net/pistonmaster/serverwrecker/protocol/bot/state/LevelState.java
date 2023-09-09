@@ -172,7 +172,7 @@ public class LevelState {
     }
 
     public Optional<BlockType> getBlockTypeAt(Vector3i block) {
-        return getBlockStateAt(block).map(BlockStateMeta::getBlockType);
+        return getBlockStateAt(block).map(BlockStateMeta::blockType);
     }
 
     public boolean isOutOfWorld(Vector3i block) {
@@ -202,7 +202,7 @@ public class LevelState {
                         continue;
                     }
 
-                    BlockType blockType = blockState.get().getBlockType();
+                    BlockType blockType = blockState.get().blockType();
                     if (blockType.blockShapeTypes().isEmpty()) {
                         continue;
                     }

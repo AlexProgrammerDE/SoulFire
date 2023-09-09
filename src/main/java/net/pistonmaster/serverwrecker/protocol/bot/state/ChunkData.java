@@ -56,7 +56,7 @@ public class ChunkData {
 
     public ChunkSection getSection(int sectionIndex) {
         ChunkSection section = sections[sectionIndex];
-        Objects.requireNonNull(section, "Section " + sectionIndex + " is null!");
+        Objects.requireNonNull(section, () -> "Section " + sectionIndex + " is null!");
 
         return section;
     }

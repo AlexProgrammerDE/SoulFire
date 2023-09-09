@@ -127,7 +127,7 @@ public class AttackManager {
         int threads = botAmount;
         threads *= 2; // We need a monitor thread for each bot
 
-        EventLoopGroup attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(threads, "Attack-Thread");
+        EventLoopGroup attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(threads, String.format("Attack-%d-Thread", id));
 
         boolean isBedrock = SWConstants.isBedrock(botSettings.protocolVersion());
         InetSocketAddress targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder, attackEventLoopGroup);

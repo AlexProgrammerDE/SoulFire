@@ -21,13 +21,10 @@ package net.pistonmaster.serverwrecker.protocol.bot.block;
 
 import net.pistonmaster.serverwrecker.data.BlockType;
 
-public record BlockStateMeta(String blockName, int stateIndex) {
-    public BlockType getBlockType() {
-        BlockType blockType = BlockType.getByMcName(blockName);
-        if (blockType == null) {
-            throw new IllegalArgumentException("Unknown block: " + blockName);
-        }
+import java.util.Objects;
 
-        return blockType;
+public record BlockStateMeta(BlockType blockType, int stateIndex) {
+    public BlockStateMeta(String blockName, int stateIndex) {
+        this(Objects.requireNonNull(BlockType.getByMcName(blockName), "BlockType was null!"), stateIndex);
     }
 }
