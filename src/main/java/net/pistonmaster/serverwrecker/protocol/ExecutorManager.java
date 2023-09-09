@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.protocol;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,25 +28,36 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 @Getter
+@RequiredArgsConstructor
 public class ExecutorManager {
     private final List<ExecutorService> executors = Collections.synchronizedList(new ArrayList<>());
+    private final String threadPrefix;
 
-    public ScheduledExecutorService newScheduledExecutorService() {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    public ScheduledExecutorService newScheduledExecutorService(String threadName) {
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(getThreadFactory(threadName));
 
         executors.add(executor);
 
         return executor;
     }
 
-    public ExecutorService newExecutorService() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+    public ExecutorService newExecutorService(String threadName) {
+        ExecutorService executor = Executors.newSingleThreadExecutor(getThreadFactory(threadName));
 
         executors.add(executor);
 
         return executor;
+    }
+
+    private ThreadFactory getThreadFactory(String threadName) {
+        return runnable -> {
+            Thread thread = new Thread(runnable);
+            thread.setName(threadPrefix + "-" + threadName);
+            return thread;
+        };
     }
 
     public void shutdownAll() {

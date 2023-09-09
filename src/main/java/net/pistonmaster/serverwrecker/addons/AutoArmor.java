@@ -68,7 +68,7 @@ public class AutoArmor implements InternalAddon {
         }
 
         new BotArmorThread(event.connection(),
-                event.connection().executorManager().newScheduledExecutorService());
+                event.connection().executorManager().newScheduledExecutorService("AutoJump"));
     }
 
     @EventHandler

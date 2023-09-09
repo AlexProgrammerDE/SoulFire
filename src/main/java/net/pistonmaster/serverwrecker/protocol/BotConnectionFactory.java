@@ -52,7 +52,7 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
         BotConnectionMeta meta = new BotConnectionMeta(minecraftAccount, targetState);
         ViaClientSession session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
         BotConnection botConnection = new BotConnection(this, attackManager, attackManager.getServerWrecker(),
-                settingsHolder, logger, protocol, session, new ExecutorManager(), meta);
+                settingsHolder, logger, protocol, session, new ExecutorManager("ServerWrecker-Attack-" + attackManager.getId()), meta);
 
         SessionDataManager sessionDataManager = new SessionDataManager(botConnection);
         session.getMeta().setSessionDataManager(sessionDataManager);

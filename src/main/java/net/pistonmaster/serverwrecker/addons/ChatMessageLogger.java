@@ -61,7 +61,7 @@ public class ChatMessageLogger implements InternalAddon {
 
         ServerWreckerAPI.registerListener(ChatMessageReceiveEvent.class,
                 new BotChatListener(event.connection(),
-                        event.connection().executorManager().newScheduledExecutorService(),
+                        event.connection().executorManager().newScheduledExecutorService("Chat"),
                         new LinkedHashSet<>(), chatMessageSettings));
     }
 

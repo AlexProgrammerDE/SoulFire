@@ -37,7 +37,7 @@ public class BotTicker implements InternalAddon {
     @EventHandler
     public void onPreConnect(PreBotConnectEvent event) {
         new BotTickerTask(event.connection(),
-                event.connection().executorManager().newScheduledExecutorService(),
+                event.connection().executorManager().newScheduledExecutorService("Tick"),
                 new TickTimer(20));
     }
 

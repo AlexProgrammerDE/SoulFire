@@ -64,7 +64,7 @@ public class AutoTotem implements InternalAddon {
         }
 
         new BotTotemThread(event.connection(),
-                event.connection().executorManager().newScheduledExecutorService());
+                event.connection().executorManager().newScheduledExecutorService("AutoTotem"));
     }
 
     @EventHandler

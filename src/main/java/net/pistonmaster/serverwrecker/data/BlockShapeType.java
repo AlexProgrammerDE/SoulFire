@@ -92,13 +92,7 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
             return false;
         }
 
-        BlockShape blockShape = blockShapes.get(0);
-        return blockShape.minX() == 0
-                && blockShape.minY() == 0
-                && blockShape.minZ() == 0
-                && blockShape.maxX() == 1
-                && blockShape.maxY() == 1
-                && blockShape.maxZ() == 1;
+        return blockShapes.get(0).isFullBlock();
     }
 
     public boolean hasNoCollisions() {

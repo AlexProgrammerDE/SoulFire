@@ -68,7 +68,7 @@ public class AutoEat implements InternalAddon {
         }
 
         new BotEatThread(event.connection(),
-                event.connection().executorManager().newScheduledExecutorService());
+                event.connection().executorManager().newScheduledExecutorService("AutoEat"));
     }
 
     @EventHandler

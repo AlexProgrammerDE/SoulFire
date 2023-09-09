@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding;
 
+import com.google.common.base.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
@@ -31,6 +32,8 @@ import java.util.*;
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     public List<WorldAction> findRoute(BotEntityState from) {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
         // Store block positions and the best route to them
         Map<BotEntityState, MinecraftRouteNode> routeIndex = new HashMap<>();
 
@@ -59,6 +62,9 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 } while (previousElement != null);
 
                 log.debug("Route: " + route);
+
+                stopwatch.stop();
+                log.info("Took " + stopwatch.elapsed().toMillis() + "ms to find route");
                 return route;
             }
 
@@ -105,6 +111,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             }
         }
 
+        stopwatch.stop();
         throw new IllegalStateException("No route found");
     }
 }
