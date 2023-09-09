@@ -20,8 +20,6 @@
 package net.pistonmaster.serverwrecker.util;
 
 import com.github.steveice10.packetlib.packet.Packet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;

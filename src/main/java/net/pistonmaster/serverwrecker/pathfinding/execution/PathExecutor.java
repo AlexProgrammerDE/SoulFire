@@ -41,7 +41,7 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
     }
 
     @Override
-    public void on(@NonNull BotPreTickEvent event) throws Throwable {
+    public void on(@NonNull BotPreTickEvent event) {
         BotConnection connection = event.connection();
         if (connection != this.connection) {
             return;

@@ -64,7 +64,7 @@ public class AutoRespawn implements InternalAddon {
                 return;
             }
 
-            String message = event.getConnection().serverWrecker().getMessageSerializer().serialize(combatKillPacket.getMessage());
+            String message = event.getConnection().serverWrecker().getPlainMessageSerializer().serialize(combatKillPacket.getMessage());
             event.getConnection().logger().info("[AutoRespawn] Died with killer: {} and message: '{}'",
                     combatKillPacket.getPlayerId(), message);
 

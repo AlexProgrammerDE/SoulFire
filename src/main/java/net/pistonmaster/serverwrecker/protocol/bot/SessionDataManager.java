@@ -878,7 +878,7 @@ public final class SessionDataManager {
     }
 
     private String toPlainText(Component component) {
-        return serverWrecker.getMessageSerializer().serialize(component);
+        return serverWrecker.getPlainMessageSerializer().serialize(component);
     }
 
     public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {

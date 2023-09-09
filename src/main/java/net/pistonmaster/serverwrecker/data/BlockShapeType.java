@@ -29,7 +29,7 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
     public static final List<BlockShapeType> VALUES = new ArrayList<>();
 
     static {
-        try (InputStream inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockshapes.txt");) {
+        try (InputStream inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockshapes.txt")) {
             if (inputStream == null) {
                 throw new IllegalStateException("blockshapes.txt not found!");
             }

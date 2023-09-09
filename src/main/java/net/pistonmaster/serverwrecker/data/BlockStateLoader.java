@@ -30,7 +30,7 @@ public class BlockStateLoader {
     private static final Map<String, List<BlockShapeType>> BLOCK_SHAPES = new HashMap<>();
 
     static {
-        try (InputStream inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockstates.txt");) {
+        try (InputStream inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockstates.txt")) {
             if (inputStream == null) {
                 throw new IllegalStateException("blockstates.txt not found!");
             }

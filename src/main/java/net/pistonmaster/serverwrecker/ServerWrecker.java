@@ -108,7 +108,7 @@ public class ServerWrecker {
     private final Gson gson = new Gson();
     private final Map<String, String> mojangTranslations = new HashMap<>();
     private final GlobalBlockPalette globalBlockPalette;
-    private final PlainTextComponentSerializer messageSerializer;
+    private final PlainTextComponentSerializer plainMessageSerializer;
     private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
     private final SWTerminalConsole terminalConsole;
     private final AccountRegistry accountRegistry = new AccountRegistry(this);
@@ -198,7 +198,7 @@ public class ServerWrecker {
             mojangTranslations.put(translationEntry.getKey(), translationEntry.getValue().getAsString());
         }
 
-        this.messageSerializer = PlainTextComponentSerializer.builder().flattener(
+        this.plainMessageSerializer = PlainTextComponentSerializer.builder().flattener(
                 ComponentFlattener.basic().toBuilder()
                         .mapper(TranslatableComponent.class, new TranslationMapper(this, logger)).build()
         ).build();

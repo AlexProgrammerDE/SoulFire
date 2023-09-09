@@ -28,6 +28,6 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
  */
 public record ChatMessageReceiveEvent(BotConnection connection, Component message) implements ServerWreckerEvent {
     public String parseToText() {
-        return connection.serverWrecker().getMessageSerializer().serialize(message);
+        return connection.serverWrecker().getPlainMessageSerializer().serialize(message);
     }
 }
