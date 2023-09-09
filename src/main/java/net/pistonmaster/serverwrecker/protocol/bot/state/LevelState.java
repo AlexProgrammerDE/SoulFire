@@ -202,19 +202,8 @@ public class LevelState {
                         continue;
                     }
 
-                    BlockType blockType = blockState.get().blockType();
-                    if (blockType.blockShapeTypes().isEmpty()) {
-                        continue;
-                    }
-
-                    BlockShapeType blockShapeType;
-                    if (blockType.blockShapeTypes().size() == 1) {
-                        blockShapeType = blockType.blockShapeTypes().get(0);
-                    } else {
-                        blockShapeType = blockType.blockShapeTypes().get(blockState.get().stateIndex());
-                    }
-
-                    if (blockShapeType.blockShapes().isEmpty()) {
+                    BlockShapeType blockShapeType = blockState.get().blockShapeType();
+                    if (blockShapeType == null || blockShapeType.hasNoCollisions()) {
                         continue;
                     }
 

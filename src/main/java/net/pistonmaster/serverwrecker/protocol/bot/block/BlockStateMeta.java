@@ -19,12 +19,29 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.block;
 
+import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.data.BlockType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public record BlockStateMeta(BlockType blockType, int stateIndex) {
+public record BlockStateMeta(BlockType blockType, @Nullable BlockShapeType blockShapeType) {
     public BlockStateMeta(String blockName, int stateIndex) {
         this(Objects.requireNonNull(BlockType.getByMcName(blockName), "BlockType was null!"), stateIndex);
+    }
+
+    private BlockStateMeta(BlockType blockType, int stateIndex) {
+        this(blockType, getBlockShapeType(blockType, stateIndex));
+    }
+
+    private static BlockShapeType getBlockShapeType(BlockType blockType, int stateIndex) {
+        int size = blockType.blockShapeTypes().size();
+        if (size == 0) {
+            return null;
+        } else if (size == 1) {
+            return blockType.blockShapeTypes().get(0);
+        } else {
+            return blockType.blockShapeTypes().get(stateIndex);
+        }
     }
 }

@@ -82,4 +82,26 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
     public double collisionHeight() {
         return blockShapes.stream().mapToDouble(BlockShape::maxY).max().orElse(0);
     }
+
+    public boolean isFullBlock() {
+        if (blockShapes.isEmpty()) {
+            return false;
+        }
+
+        if (blockShapes.size() > 1) {
+            return false;
+        }
+
+        BlockShape blockShape = blockShapes.get(0);
+        return blockShape.minX() == 0
+                && blockShape.minY() == 0
+                && blockShape.minZ() == 0
+                && blockShape.maxX() == 1
+                && blockShape.maxY() == 1
+                && blockShape.maxZ() == 1;
+    }
+
+    public boolean hasNoCollisions() {
+        return blockShapes.isEmpty();
+    }
 }

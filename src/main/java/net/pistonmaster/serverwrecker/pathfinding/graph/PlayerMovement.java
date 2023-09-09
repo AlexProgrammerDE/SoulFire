@@ -19,12 +19,12 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
-import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -168,27 +168,45 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         ProjectedInventory projectedInventory = previousEntityState.inventory();
 
         for (Vector3i requiredFreeBlock : requiredFreeBlocks()) {
-            Optional<BlockType> blockType = projectedLevelState.getBlockTypeAt(requiredFreeBlock);
+            Optional<BlockStateMeta> blockType = projectedLevelState.getBlockStateAt(requiredFreeBlock);
             if (blockType.isEmpty()) {
                 // Out of level, so we can't go there
                 return GraphInstructions.IMPOSSIBLE;
             }
 
-            if (BlockTypeHelper.isSolid(blockType.get())) {
-                // In the future, add cost of placing here
+            BlockShapeType blockShapeType = blockType.get().blockShapeType();
+
+            // Collision block like stone
+            if (blockShapeType != null && !blockShapeType.hasNoCollisions()) {
+                // In the future, add cost of breaking here
                 return GraphInstructions.IMPOSSIBLE;
             }
         }
 
         for (Vector3i requiredSolidBlock : requiredSolidBlocks()) {
-            Optional<BlockType> blockType = projectedLevelState.getBlockTypeAt(requiredSolidBlock);
+            Optional<BlockStateMeta> blockType = projectedLevelState.getBlockStateAt(requiredSolidBlock);
             if (blockType.isEmpty()) {
                 // Out of level, so we can't go there
                 return GraphInstructions.IMPOSSIBLE;
             }
 
-            if (!BlockTypeHelper.isSolid(blockType.get())) {
-                // In the future, add cost of digging here
+            BlockShapeType blockShapeType = blockType.get().blockShapeType();
+
+            // Empty block like air or grass
+            if (blockShapeType == null) {
+                // In the future, add cost of placing here if block is replaceable (like air)
+                return GraphInstructions.IMPOSSIBLE;
+            }
+
+            // Block with a current state that has no collision (Like open fence gate)
+            if (blockShapeType.hasNoCollisions()) {
+                // Could destroy and place block here, but that's too much work
+                return GraphInstructions.IMPOSSIBLE;
+            }
+
+            // Prevent walking over cake, fences, etc.
+            if (!blockShapeType.isFullBlock()) {
+                // Could destroy and place block here, but that's too much work
                 return GraphInstructions.IMPOSSIBLE;
             }
         }

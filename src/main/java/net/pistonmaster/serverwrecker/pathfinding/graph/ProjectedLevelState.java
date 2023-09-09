@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -36,30 +36,30 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ProjectedLevelState {
     private final LevelState levelState;
-    private final Map<Vector3i, BlockType> blockChanges;
+    private final Map<Vector3i, BlockStateMeta> blockChanges;
     private final int blockChangesHash;
 
     public ProjectedLevelState(LevelState levelState) {
-        Map<Vector3i, BlockType> blockChanges = new HashMap<>();
+        Map<Vector3i, BlockStateMeta> blockChanges = new HashMap<>();
         this.levelState = levelState;
         this.blockChanges = blockChanges;
         this.blockChangesHash = blockChanges.hashCode();
     }
 
-    public ProjectedLevelState withChange(Vector3i position, BlockType blockType) {
-        Map<Vector3i, BlockType> blockChanges = new HashMap<>(this.blockChanges);
-        blockChanges.put(position, blockType);
+    public ProjectedLevelState withChange(Vector3i position, BlockStateMeta blockStateMeta) {
+        Map<Vector3i, BlockStateMeta> blockChanges = new HashMap<>(this.blockChanges);
+        blockChanges.put(position, blockStateMeta);
 
         return new ProjectedLevelState(levelState, blockChanges, blockChanges.hashCode());
     }
 
-    public Optional<BlockType> getBlockTypeAt(Vector3i position) {
-        BlockType blockType = blockChanges.get(position);
+    public Optional<BlockStateMeta> getBlockStateAt(Vector3i position) {
+        BlockStateMeta blockType = blockChanges.get(position);
         if (blockType != null) {
             return Optional.of(blockType);
         }
 
-        return levelState.getBlockTypeAt(position);
+        return levelState.getBlockStateAt(position);
     }
 
     @Override

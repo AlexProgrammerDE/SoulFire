@@ -33,7 +33,7 @@ public class BlockItems {
                 if (blockType.diggable()
                         && !blockShapeTypes.isEmpty()
                         && itemType.name().equals(blockType.name())
-                        && blockShapeTypes.get(0).collisionHeight() == 1) {
+                        && blockShapeTypes.get(0).isFullBlock()) {
                     VALUES.add(itemType);
                 }
             }

@@ -19,8 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
-
 /**
  * A calculated action that the bot can take on a graph world representation.
  */
