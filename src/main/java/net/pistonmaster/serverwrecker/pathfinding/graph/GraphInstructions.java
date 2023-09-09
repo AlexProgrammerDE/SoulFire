@@ -20,10 +20,18 @@
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
+import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 
-/**
- * A calculated action that the bot can take on a graph world representation.
- */
-public interface GraphAction {
-    GraphInstructions getInstructions();
+import java.util.List;
+
+public record GraphInstructions(BotEntityState targetState, double actionCost, List<WorldAction> actions) {
+    public static final GraphInstructions IMPOSSIBLE = new GraphInstructions();
+
+    private GraphInstructions() {
+        this(null, Double.POSITIVE_INFINITY, null);
+    }
+
+    public boolean isImpossible() {
+        return actionCost == Double.POSITIVE_INFINITY;
+    }
 }

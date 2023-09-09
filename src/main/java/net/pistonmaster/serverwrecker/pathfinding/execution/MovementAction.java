@@ -21,21 +21,23 @@ package net.pistonmaster.serverwrecker.pathfinding.execution;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
 import org.cloudburstmc.math.vector.Vector3d;
 
+@ToString
 @RequiredArgsConstructor
 public class MovementAction implements WorldAction {
-    private final BotEntityState worldState;
+    private final Vector3d position;
     private boolean didLook = false;
 
     @Override
     public boolean isCompleted(BotConnection connection) {
         BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
         Vector3d botPosition = movementManager.getPlayerPos();
-        double distanceToGoal = botPosition.distance(worldState.position());
+        double distanceToGoal = botPosition.distance(position);
 
         return distanceToGoal < 0.5;
     }
@@ -46,7 +48,7 @@ public class MovementAction implements WorldAction {
         Vector3d botPosition = movementManager.getPlayerPos();
 
         float previousYaw = movementManager.getYaw();
-        movementManager.lookAt(RotationOrigin.EYES, worldState.position());
+        movementManager.lookAt(RotationOrigin.EYES, position);
         movementManager.setPitch(0);
         float newYaw = movementManager.getYaw();
 
@@ -63,7 +65,7 @@ public class MovementAction implements WorldAction {
         movementManager.getControlState().resetAll();
         movementManager.getControlState().setForward(true);
 
-        if (worldState.position().getY() > botPosition.getY()) {
+        if (position.getY() > botPosition.getY()) {
             movementManager.getControlState().setJumping(true);
         }
     }

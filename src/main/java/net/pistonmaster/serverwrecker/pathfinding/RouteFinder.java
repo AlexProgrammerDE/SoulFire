@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 import net.pistonmaster.serverwrecker.pathfinding.goals.GoalScorer;
+import net.pistonmaster.serverwrecker.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 
 import java.util.*;
@@ -36,7 +37,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         // Store block positions that we need to look at
         Queue<MinecraftRouteNode> openSet = new PriorityQueue<>();
 
-        MinecraftRouteNode start = new MinecraftRouteNode(from, null, null, 0d, scorer.computeScore(from));
+        MinecraftRouteNode start = new MinecraftRouteNode(from, null, List.of(new MovementAction(from.position())), 0d, scorer.computeScore(from));
         routeIndex.put(from, start);
         openSet.add(start);
 
@@ -51,7 +52,9 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 List<WorldAction> route = new ArrayList<>();
                 MinecraftRouteNode previousElement = current;
                 do {
-                    route.add(0, new MovementAction(previousElement.getWorldState()));
+                    for (var action : previousElement.getPreviousActions()) {
+                        route.add(0, action);
+                    }
                     previousElement = previousElement.getPrevious();
                 } while (previousElement != null);
 
@@ -60,13 +63,15 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             }
 
             for (var action : graph.getConnections(current.getWorldState())) {
-                double actionCost = action.getActionCost();
+                GraphInstructions instructions = action.getInstructions();
 
-                if (actionCost == Double.POSITIVE_INFINITY) {
+                if (instructions.isImpossible()) {
                     continue;
                 }
 
-                BotEntityState actionTargetState = action.getTargetState();
+                double actionCost = instructions.actionCost();
+                BotEntityState actionTargetState = instructions.targetState();
+                List<WorldAction> worldActions = instructions.actions();
                 MinecraftRouteNode finalCurrent = current;
                 routeIndex.compute(actionTargetState, (k, v) -> {
                     // Calculate new distance from start to this connection,
@@ -77,7 +82,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
                     // The first time we see this node
                     if (v == null) {
-                        var node = new MinecraftRouteNode(actionTargetState, finalCurrent, action, newSourceCost, newTotalRouteScore);
+                        var node = new MinecraftRouteNode(actionTargetState, finalCurrent, worldActions, newSourceCost, newTotalRouteScore);
                         log.debug("Found a new node: " + actionTargetState.position());
                         openSet.add(node);
 
@@ -87,7 +92,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                     // If we found a better route to this node, update it
                     if (newSourceCost < v.getSourceCost()) {
                         v.setPrevious(finalCurrent);
-                        v.setPreviousAction(action);
+                        v.setPreviousActions(worldActions);
                         v.setSourceCost(newSourceCost);
                         v.setTotalRouteScore(newTotalRouteScore);
 

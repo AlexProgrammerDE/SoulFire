@@ -22,13 +22,13 @@ package net.pistonmaster.serverwrecker.pathfinding.graph;
 import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
+import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
+import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public record PlayerMovement(BotEntityState previousEntityState, MovementDirection direction, MovementModifier modifier,
@@ -77,52 +77,6 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             case JUMP -> pos.add(0, 1, 0);
             default -> pos;
         };
-    }
-
-    @Override
-    public BotEntityState getTargetState() {
-        // Make sure we are in the middle of the block
-        Vector3d position = applyModifier(applyDirection(previousEntityState.position(), direction), modifier);
-
-        return new BotEntityState(position, previousEntityState.levelState(), previousEntityState.inventory());
-    }
-
-    @Override
-    public double getActionCost() {
-        double cost = switch (direction) {
-            case NORTH, SOUTH, EAST, WEST -> Costs.STRAIGHT;
-            case NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST -> Costs.DIAGONAL;
-        };
-
-        ProjectedLevelState projectedLevelState = previousEntityState.levelState();
-
-        for (Vector3i requiredFreeBlock : requiredFreeBlocks()) {
-            Optional<BlockType> blockType = projectedLevelState.getBlockTypeAt(requiredFreeBlock);
-            if (blockType.isEmpty()) {
-                // Out of level, so we can't go there
-                return Double.POSITIVE_INFINITY;
-            }
-
-            if (BlockTypeHelper.isSolid(blockType.get())) {
-                // In the future, add cost of placing here
-                return Double.POSITIVE_INFINITY;
-            }
-        }
-
-        for (Vector3i requiredSolidBlock : requiredSolidBlocks()) {
-            Optional<BlockType> blockType = projectedLevelState.getBlockTypeAt(requiredSolidBlock);
-            if (blockType.isEmpty()) {
-                // Out of level, so we can't go there
-                return Double.POSITIVE_INFINITY;
-            }
-
-            if (!BlockTypeHelper.isSolid(blockType.get())) {
-                // In the future, add cost of digging here
-                return Double.POSITIVE_INFINITY;
-            }
-        }
-
-        return cost;
     }
 
     public Set<Vector3i> requiredFreeBlocks() {
@@ -201,5 +155,51 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         requiredSolidBlocks.add(applyModifier(applyDirection(floorPos, direction), modifier));
 
         return requiredSolidBlocks;
+    }
+
+    @Override
+    public GraphInstructions getInstructions() {
+        double cost = switch (direction) {
+            case NORTH, SOUTH, EAST, WEST -> Costs.STRAIGHT;
+            case NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST -> Costs.DIAGONAL;
+        };
+        List<WorldAction> actions = new ArrayList<>();
+        ProjectedLevelState projectedLevelState = previousEntityState.levelState();
+        ProjectedInventory projectedInventory = previousEntityState.inventory();
+
+        for (Vector3i requiredFreeBlock : requiredFreeBlocks()) {
+            Optional<BlockType> blockType = projectedLevelState.getBlockTypeAt(requiredFreeBlock);
+            if (blockType.isEmpty()) {
+                // Out of level, so we can't go there
+                return GraphInstructions.IMPOSSIBLE;
+            }
+
+            if (BlockTypeHelper.isSolid(blockType.get())) {
+                // In the future, add cost of placing here
+                return GraphInstructions.IMPOSSIBLE;
+            }
+        }
+
+        for (Vector3i requiredSolidBlock : requiredSolidBlocks()) {
+            Optional<BlockType> blockType = projectedLevelState.getBlockTypeAt(requiredSolidBlock);
+            if (blockType.isEmpty()) {
+                // Out of level, so we can't go there
+                return GraphInstructions.IMPOSSIBLE;
+            }
+
+            if (!BlockTypeHelper.isSolid(blockType.get())) {
+                // In the future, add cost of digging here
+                return GraphInstructions.IMPOSSIBLE;
+            }
+        }
+
+        Vector3d targetPosition = applyModifier(applyDirection(previousEntityState.position(), direction), modifier);
+        actions.add(new MovementAction(targetPosition));
+
+        return new GraphInstructions(new BotEntityState(
+                targetPosition,
+                projectedLevelState,
+                projectedInventory
+        ), cost, List.copyOf(actions));
     }
 }
