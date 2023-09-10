@@ -35,7 +35,7 @@ class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
     /**
      * The world state of this node.
      */
-    private final BotEntityState worldState;
+    private final BotEntityState entityState;
     /**
      * The currently best known node to this node.
      */

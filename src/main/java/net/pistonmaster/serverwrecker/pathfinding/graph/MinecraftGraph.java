@@ -27,7 +27,7 @@ import java.util.List;
 
 @Slf4j
 public class MinecraftGraph {
-    public List<GraphAction> getConnections(BotEntityState node) {
+    public List<GraphAction> getActions(BotEntityState node) {
         List<GraphAction> targetSet = new ArrayList<>();
         for (MovementDirection direction : MovementDirection.values()) {
             for (MovementModifier modifier : MovementModifier.values()) {

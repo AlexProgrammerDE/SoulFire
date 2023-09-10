@@ -60,6 +60,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CommandManager {
@@ -269,18 +270,21 @@ public class CommandManager {
             bot.executorManager().newExecutorService("Pathfinding").execute(() -> {
                 SessionDataManager sessionDataManager = bot.sessionDataManager();
                 BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
-
                 RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(), goalScorer);
-                BotEntityState start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
-                        sessionDataManager.getCurrentLevel()
-                ), new ProjectedInventory(
-                        sessionDataManager.getInventoryManager().getPlayerInventory()
-                ));
-                logger.info("Start: " + start);
-                List<WorldAction> actions = routeFinder.findRoute(start);
-                logger.info("Calculated path with {} actions", actions.size());
 
-                PathExecutor pathExecutor = new PathExecutor(bot, actions);
+                Supplier<List<WorldAction>> findPath = () -> {
+                    BotEntityState start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
+                            sessionDataManager.getCurrentLevel()
+                    ), new ProjectedInventory(
+                            sessionDataManager.getInventoryManager().getPlayerInventory()
+                    ));
+                    logger.info("Start: " + start);
+                    List<WorldAction> actions = routeFinder.findRoute(start);
+                    logger.info("Calculated path with {} actions", actions.size());
+                    return actions;
+                };
+
+                PathExecutor pathExecutor = new PathExecutor(bot, findPath.get(), findPath);
                 ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
             });
         }

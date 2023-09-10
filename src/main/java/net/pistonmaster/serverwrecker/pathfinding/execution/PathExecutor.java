@@ -29,15 +29,18 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.function.Supplier;
 
 public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
     private final Queue<WorldAction> worldActions;
     private final BotConnection connection;
+    private final Supplier<List<WorldAction>> findPath;
 
-    public PathExecutor(BotConnection connection, List<WorldAction> worldActions) {
+    public PathExecutor(BotConnection connection, List<WorldAction> worldActions, Supplier<List<WorldAction>> findPath) {
         this.worldActions = new ArrayBlockingQueue<>(worldActions.size());
         this.worldActions.addAll(worldActions);
         this.connection = connection;
+        this.findPath = findPath;
     }
 
     @Override
@@ -58,23 +61,32 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
             return;
         }
 
+        if (worldAction instanceof RecalculatePathAction) {
+            connection.logger().info("Recalculating path!");
+            List<WorldAction> newActions = findPath.get();
+            PathExecutor newExecutor = new PathExecutor(connection, newActions, findPath);
+            ServerWreckerAPI.registerListener(BotPreTickEvent.class, newExecutor);
+            unregister();
+            return;
+        }
+
         if (worldAction.isCompleted(connection)) {
             worldActions.remove();
-            System.out.println("Reached goal! " + worldAction);
+            connection.logger().info("Reached goal! " + worldAction);
 
             // Directly use tick to execute next goal
             worldAction = worldActions.peek();
 
             // If there are no more goals, stop
             if (worldAction == null) {
-                System.out.println("Finished all goals!");
+                connection.logger().info("Finished all goals!");
                 BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
                 movementManager.getControlState().resetAll();
                 unregister();
                 return;
             }
 
-            System.out.println("Next goal: " + worldAction);
+            connection.logger().debug("Next goal: " + worldAction);
         }
 
         worldAction.tick(connection);

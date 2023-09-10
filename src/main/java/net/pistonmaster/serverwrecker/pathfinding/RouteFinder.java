@@ -25,12 +25,17 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
+import net.pistonmaster.serverwrecker.pathfinding.execution.RecalculatePathAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 import net.pistonmaster.serverwrecker.pathfinding.goals.GoalScorer;
+import net.pistonmaster.serverwrecker.pathfinding.graph.GraphAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
+import net.pistonmaster.serverwrecker.pathfinding.graph.OutOfLevelException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
@@ -52,29 +57,34 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
         MinecraftRouteNode current;
         while ((current = openSet.dequeue()) != null) {
-            log.debug("Looking at node: {}", current.getWorldState().position());
+            log.debug("Looking at node: {}", current.getEntityState().position());
 
             // If we found our destination, we can stop looking
-            if (scorer.isFinished(current.getWorldState())) {
-                log.debug("Found our destination!");
-
-                List<WorldAction> route = new ArrayList<>();
-                MinecraftRouteNode previousElement = current;
-                do {
-                    for (var action : previousElement.getPreviousActions()) {
-                        route.add(0, action);
-                    }
-
-                    previousElement = previousElement.getPrevious();
-                } while (previousElement != null);
-
+            if (scorer.isFinished(current.getEntityState())) {
                 stopwatch.stop();
-                log.info("Took {}ms to find route", stopwatch.elapsed().toMillis());
-                return route;
+                log.info("Success! Took {}ms to find route", stopwatch.elapsed().toMillis());
+
+                return getActions(current);
             }
 
-            for (var action : graph.getConnections(current.getWorldState())) {
-                GraphInstructions instructions = action.getInstructions();
+            for (var action : graph.getActions(current.getEntityState())) {
+                GraphInstructions instructions;
+                try {
+                    instructions = action.getInstructions();
+                } catch (OutOfLevelException e) {
+                    log.debug("Found a node out of the level: {}", current.getEntityState().position());
+
+                    // This is the best node we found so far
+                    // We will add a recalculating action and return the best route
+                    MinecraftRouteNode recalculatingNode = new MinecraftRouteNode(
+                            current.getEntityState(),
+                            current,
+                            List.of(new RecalculatePathAction()),
+                            current.getSourceCost(), current.getTotalRouteScore()
+                    );
+
+                    return getActions(recalculatingNode);
+                }
 
                 if (instructions.isImpossible()) {
                     continue;
@@ -119,5 +129,19 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         stopwatch.stop();
         log.info("Failed to find route after {}ms", stopwatch.elapsed().toMillis());
         throw new IllegalStateException("No route found");
+    }
+
+    private static List<WorldAction> getActions(MinecraftRouteNode current) {
+        List<WorldAction> actions = new ArrayList<>();
+        MinecraftRouteNode previousElement = current;
+        do {
+            for (var action : previousElement.getPreviousActions()) {
+                actions.add(0, action);
+            }
+
+            previousElement = previousElement.getPrevious();
+        } while (previousElement != null);
+
+        return actions;
     }
 }

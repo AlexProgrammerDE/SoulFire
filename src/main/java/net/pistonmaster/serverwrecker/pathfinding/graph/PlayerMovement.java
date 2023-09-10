@@ -203,8 +203,8 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
     private Optional<List<WorldAction>> requireFreeBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
         Optional<BlockStateMeta> blockType = level.getBlockStateAt(block);
         if (blockType.isEmpty()) {
-            // Out of level, so we can't go there
-            return Optional.empty();
+            // Out of level, so we can't go there, so we'll recalculate
+            throw new OutOfLevelException();
         }
 
         BlockShapeType blockShapeType = blockType.get().blockShapeType();
@@ -224,21 +224,28 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         Vector3i floorPos = fromPosInt.add(0, -1, 0);
 
         // Add the block that is required to be solid for straight movement
-        Optional<List<WorldAction>> floor = requireSolidBlock(applyModifier(applyDirection(floorPos, direction), modifier), level, inventory);
-        if (floor.isEmpty()) {
+        if (requireSolidHelper(applyModifier(applyDirection(floorPos, direction), modifier), level, inventory, actions)) {
             return Optional.empty();
-        } else {
-            actions.addAll(floor.get());
         }
 
         return Optional.of(actions);
     }
 
+    private boolean requireSolidHelper(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory, List<WorldAction> actions) {
+        Optional<List<WorldAction>> blockActions = requireSolidBlock(block, level, inventory);
+        if (blockActions.isEmpty()) {
+            return true;
+        } else {
+            actions.addAll(blockActions.get());
+            return false;
+        }
+    }
+
     private Optional<List<WorldAction>> requireSolidBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
         Optional<BlockStateMeta> blockType = level.getBlockStateAt(block);
         if (blockType.isEmpty()) {
-            // Out of level, so we can't go there
-            return Optional.empty();
+            // Out of level, so we can't go there, so we'll recalculate
+            throw new OutOfLevelException();
         }
 
         BlockShapeType blockShapeType = blockType.get().blockShapeType();
