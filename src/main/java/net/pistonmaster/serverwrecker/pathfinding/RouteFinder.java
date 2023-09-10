@@ -73,6 +73,8 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                     instructions = action.getInstructions();
                 } catch (OutOfLevelException e) {
                     log.debug("Found a node out of the level: {}", current.getEntityState().position());
+                    stopwatch.stop();
+                    log.info("Took {}ms to find route to this point", stopwatch.elapsed().toMillis());
 
                     // This is the best node we found so far
                     // We will add a recalculating action and return the best route
@@ -82,7 +84,6 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                             List.of(new RecalculatePathAction()),
                             current.getSourceCost(), current.getTotalRouteScore()
                     );
-
                     return getActions(recalculatingNode);
                 }
 
