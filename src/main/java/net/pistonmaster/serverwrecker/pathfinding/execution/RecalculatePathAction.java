@@ -38,4 +38,9 @@ public class RecalculatePathAction implements WorldAction {
     public void tick(BotConnection connection) {
         throw new UnsupportedOperationException("Should be handled separately!");
     }
+
+    @Override
+    public int getAllowedTicks() {
+        throw new UnsupportedOperationException("Should be handled separately!");
+    }
 }

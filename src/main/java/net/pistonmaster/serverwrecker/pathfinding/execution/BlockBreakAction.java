@@ -54,4 +54,10 @@ public class BlockBreakAction implements WorldAction {
 
         // TODO: Break block
     }
+
+    @Override
+    public int getAllowedTicks() {
+        // 30-seconds max to break a block
+        return 30 * 20;
+    }
 }

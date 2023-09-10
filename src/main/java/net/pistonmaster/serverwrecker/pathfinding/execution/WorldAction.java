@@ -25,4 +25,6 @@ public interface WorldAction {
     boolean isCompleted(BotConnection connection);
 
     void tick(BotConnection connection);
+
+    int getAllowedTicks();
 }

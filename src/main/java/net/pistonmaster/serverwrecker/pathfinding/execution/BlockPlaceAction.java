@@ -56,4 +56,10 @@ public class BlockPlaceAction implements WorldAction {
 
         // TODO: Place block
     }
+
+    @Override
+    public int getAllowedTicks() {
+        // 3-seconds max to break a block
+        return 3 * 20;
+    }
 }

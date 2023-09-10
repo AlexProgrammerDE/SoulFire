@@ -42,7 +42,7 @@ public class MovementAction implements WorldAction {
             return false;
         }
 
-        return botPosition.distance(position) < 0.05;
+        return botPosition.distance(position) < 0.3;
     }
 
     @Override
@@ -72,5 +72,11 @@ public class MovementAction implements WorldAction {
         if (position.getY() > botPosition.getY()) {
             movementManager.getControlState().setJumping(true);
         }
+    }
+
+    @Override
+    public int getAllowedTicks() {
+        // 5-seconds max to walk to a block
+        return 5 * 20;
     }
 }

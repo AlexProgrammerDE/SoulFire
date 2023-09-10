@@ -35,6 +35,7 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
     private final Queue<WorldAction> worldActions;
     private final BotConnection connection;
     private final Supplier<List<WorldAction>> findPath;
+    private int ticks = 0;
 
     public PathExecutor(BotConnection connection, List<WorldAction> worldActions, Supplier<List<WorldAction>> findPath) {
         this.worldActions = new ArrayBlockingQueue<>(worldActions.size());
@@ -62,17 +63,22 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
         }
 
         if (worldAction instanceof RecalculatePathAction) {
-            connection.logger().info("Recalculating path!");
-            List<WorldAction> newActions = findPath.get();
-            PathExecutor newExecutor = new PathExecutor(connection, newActions, findPath);
-            ServerWreckerAPI.registerListener(BotPreTickEvent.class, newExecutor);
-            unregister();
+            connection.logger().info("Recalculating path...");
+            recalculatePath();
+            return;
+        }
+
+        if (ticks > 0 && ticks >= worldAction.getAllowedTicks()) {
+            connection.logger().warn("Took too long to complete action: {}", worldAction);
+            connection.logger().warn("Recalculating path...");
+            recalculatePath();
             return;
         }
 
         if (worldAction.isCompleted(connection)) {
             worldActions.remove();
-            connection.logger().info("Reached goal! " + worldAction);
+            connection.logger().info("Reached goal in {} ticks!", ticks);
+            ticks = 0;
 
             // Directly use tick to execute next goal
             worldAction = worldActions.peek();
@@ -86,13 +92,26 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
                 return;
             }
 
-            connection.logger().debug("Next goal: " + worldAction);
+            connection.logger().debug("Next goal: {}", worldAction);
         }
 
+        ticks++;
         worldAction.tick(connection);
+    }
+
+    public void register() {
+        ServerWreckerAPI.registerListener(BotPreTickEvent.class, this);
     }
 
     public void unregister() {
         ServerWreckerAPI.unregisterListener(this);
+    }
+
+    private void recalculatePath() {
+        this.unregister();
+
+        List<WorldAction> newActions = findPath.get();
+        PathExecutor newExecutor = new PathExecutor(connection, newActions, findPath);
+        newExecutor.register();
     }
 }

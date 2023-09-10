@@ -285,7 +285,7 @@ public class CommandManager {
                 };
 
                 PathExecutor pathExecutor = new PathExecutor(bot, findPath.get(), findPath);
-                ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
+                pathExecutor.register();
             });
         }
     }
