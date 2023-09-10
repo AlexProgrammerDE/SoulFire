@@ -30,15 +30,19 @@ import org.cloudburstmc.math.vector.Vector3d;
 @RequiredArgsConstructor
 public class MovementAction implements WorldAction {
     private final Vector3d position;
+    private final int yawOffset;
     private boolean didLook = false;
 
     @Override
     public boolean isCompleted(BotConnection connection) {
         BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
         Vector3d botPosition = movementManager.getPlayerPos();
-        double distanceToGoal = botPosition.distance(position);
+        if (botPosition.getY() != position.getY()) {
+            // We want to be on the same Y level
+            return false;
+        }
 
-        return distanceToGoal < 0.5;
+        return botPosition.distance(position) < 0.05;
     }
 
     @Override
@@ -49,12 +53,13 @@ public class MovementAction implements WorldAction {
         float previousYaw = movementManager.getYaw();
         movementManager.lookAt(RotationOrigin.EYES, position);
         movementManager.setPitch(0);
+        movementManager.setYaw(movementManager.getYaw() + yawOffset);
         float newYaw = movementManager.getYaw();
 
         float yawDifference = Math.abs(previousYaw - newYaw);
 
         // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
-        if (didLook && yawDifference > 1) {
+        if (didLook && yawDifference > 5) {
             movementManager.setLastSentYaw(movementManager.getYaw());
         } else {
             didLook = true;

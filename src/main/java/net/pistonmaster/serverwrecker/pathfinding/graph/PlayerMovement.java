@@ -296,7 +296,16 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         }
 
         Vector3d targetPosition = applyModifier(applyDirection(previousEntityState.position(), direction), modifier);
-        actions.add(new MovementAction(targetPosition));
+
+        int yawOffset = 0;
+        if (side != null) {
+            yawOffset = switch (side) {
+                case LEFT -> 10;
+                case RIGHT -> -10;
+            };
+        }
+
+        actions.add(new MovementAction(targetPosition, yawOffset));
 
         return new GraphInstructions(new BotEntityState(
                 targetPosition,
