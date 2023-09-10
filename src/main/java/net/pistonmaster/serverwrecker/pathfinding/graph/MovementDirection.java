@@ -27,5 +27,9 @@ public enum MovementDirection {
     NORTH_EAST,
     NORTH_WEST,
     SOUTH_EAST,
-    SOUTH_WEST,
+    SOUTH_WEST;
+
+    public boolean isDiagonal() {
+        return this == NORTH_EAST || this == NORTH_WEST || this == SOUTH_EAST || this == SOUTH_WEST;
+    }
 }

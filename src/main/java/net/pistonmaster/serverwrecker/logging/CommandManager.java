@@ -41,6 +41,7 @@ import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.RouteFinder;
 import net.pistonmaster.serverwrecker.pathfinding.execution.PathExecutor;
 import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
+import net.pistonmaster.serverwrecker.pathfinding.goals.GoalScorer;
 import net.pistonmaster.serverwrecker.pathfinding.goals.PosGoal;
 import net.pistonmaster.serverwrecker.pathfinding.goals.XZGoal;
 import net.pistonmaster.serverwrecker.pathfinding.goals.YGoal;
@@ -173,95 +174,28 @@ public class CommandManager {
                 <ConsoleSubject, Double>argument("y", DoubleArgumentType.doubleArg()).then(RequiredArgumentBuilder.
                 <ConsoleSubject, Double>argument("z", DoubleArgumentType.doubleArg())
                 .executes(c -> {
-                    AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
-
-                    if (attackManager == null) {
-                        return 1;
-                    }
-
                     double x = DoubleArgumentType.getDouble(c, "x");
                     double y = DoubleArgumentType.getDouble(c, "y");
                     double z = DoubleArgumentType.getDouble(c, "z");
 
-                    for (BotConnection bot : attackManager.getBotConnections()) {
-                        SessionDataManager sessionDataManager = bot.sessionDataManager();
-                        BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
-
-                        RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(), new PosGoal(x, y, z));
-                        BotEntityState start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
-                                sessionDataManager.getCurrentLevel()
-                        ), new ProjectedInventory(
-                                sessionDataManager.getInventoryManager().getPlayerInventory()
-                        ));
-                        logger.info("Start: " + start);
-                        List<WorldAction> actions = routeFinder.findRoute(start);
-                        logger.info(actions.toString());
-
-                        PathExecutor pathExecutor = new PathExecutor(bot, actions);
-                        ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
-                    }
+                    executePathfinding(new PosGoal(x, y, z));
                     return 1;
                 })))));
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("walkxz").then(RequiredArgumentBuilder.
                 <ConsoleSubject, Double>argument("x", DoubleArgumentType.doubleArg()).then(RequiredArgumentBuilder.
                 <ConsoleSubject, Double>argument("z", DoubleArgumentType.doubleArg())
                 .executes(c -> {
-                    AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
-
-                    if (attackManager == null) {
-                        return 1;
-                    }
-
                     double x = DoubleArgumentType.getDouble(c, "x");
                     double z = DoubleArgumentType.getDouble(c, "z");
 
-                    for (BotConnection bot : attackManager.getBotConnections()) {
-                        SessionDataManager sessionDataManager = bot.sessionDataManager();
-                        BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
-
-                        RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(), new XZGoal(x, z));
-                        BotEntityState start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
-                                sessionDataManager.getCurrentLevel()
-                        ), new ProjectedInventory(
-                                sessionDataManager.getInventoryManager().getPlayerInventory()
-                        ));
-                        logger.info("Start: " + start);
-                        List<WorldAction> actions = routeFinder.findRoute(start);
-                        logger.info(actions.toString());
-
-                        PathExecutor pathExecutor = new PathExecutor(bot, actions);
-                        ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
-                    }
+                    executePathfinding(new XZGoal(x, z));
                     return 1;
                 }))));
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("walky").then(RequiredArgumentBuilder.
                 <ConsoleSubject, Double>argument("y", DoubleArgumentType.doubleArg())
                 .executes(c -> {
-                    AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
-
-                    if (attackManager == null) {
-                        return 1;
-                    }
-
                     double y = DoubleArgumentType.getDouble(c, "y");
-
-                    for (BotConnection bot : attackManager.getBotConnections()) {
-                        SessionDataManager sessionDataManager = bot.sessionDataManager();
-                        BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
-
-                        RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(), new YGoal(y));
-                        BotEntityState start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
-                                sessionDataManager.getCurrentLevel()
-                        ), new ProjectedInventory(
-                                sessionDataManager.getInventoryManager().getPlayerInventory()
-                        ));
-                        logger.info("Start: " + start);
-                        List<WorldAction> actions = routeFinder.findRoute(start);
-                        logger.info(actions.toString());
-
-                        PathExecutor pathExecutor = new PathExecutor(bot, actions);
-                        ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
-                    }
+                    executePathfinding(new YGoal(y));
                     return 1;
                 })));
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("lookat").then(RequiredArgumentBuilder.
@@ -321,6 +255,35 @@ public class CommandManager {
                 }));
 
         ServerWreckerAPI.postEvent(new DispatcherInitEvent(dispatcher));
+    }
+
+    private void executePathfinding(GoalScorer goalScorer) {
+        AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+
+        if (attackManager == null) {
+            return;
+        }
+
+        for (BotConnection bot : attackManager.getBotConnections()) {
+            Logger logger = bot.logger();
+            bot.executorManager().newExecutorService("Pathfinding").execute(() -> {
+                SessionDataManager sessionDataManager = bot.sessionDataManager();
+                BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
+
+                RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(), goalScorer);
+                BotEntityState start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
+                        sessionDataManager.getCurrentLevel()
+                ), new ProjectedInventory(
+                        sessionDataManager.getInventoryManager().getPlayerInventory()
+                ));
+                logger.info("Start: " + start);
+                List<WorldAction> actions = routeFinder.findRoute(start);
+                logger.info("Calculated path with {} actions", actions.size());
+
+                PathExecutor pathExecutor = new PathExecutor(bot, actions);
+                ServerWreckerAPI.registerListener(BotPreTickEvent.class, pathExecutor);
+            });
+        }
     }
 
     public List<String> getCommandHistory() {

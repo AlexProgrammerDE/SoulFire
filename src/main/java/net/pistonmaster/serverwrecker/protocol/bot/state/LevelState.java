@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import com.github.steveice10.opennbt.tag.builtin.*;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.data.BlockShape;
@@ -37,12 +38,11 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class LevelState {
     private final SessionDataManager sessionDataManager;
-    private final Map<ChunkKey, ChunkData> chunks = new ConcurrentHashMap<>();
+    private final Map<ChunkKey, ChunkData> chunks = Collections.synchronizedMap(new Object2ObjectOpenHashMap<>());
     private final String dimensionName;
     private final int dimensionId;
     private final UniformOrInt monsterSpawnLightLevel;
@@ -145,8 +145,7 @@ public class LevelState {
     }
 
     public OptionalInt getBlockStateIdAt(Vector3i block) {
-        ChunkKey chunkKey = new ChunkKey(block);
-        ChunkData chunkData = chunks.get(chunkKey);
+        ChunkData chunkData = chunks.get(new ChunkKey(block));
 
         if (chunkData == null) {
             return OptionalInt.empty();

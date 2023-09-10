@@ -17,26 +17,17 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol.bot.model;
+package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
 
-public record ChunkKey(int chunkX, int chunkZ, int calculatedHash) {
-    public ChunkKey(Vector3i block) {
-        this(SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
-    }
+@Getter
+@RequiredArgsConstructor
+public enum BodyPart {
+    FEET(Vector3i.from(0, 0, 0)),
+    HEAD(Vector3i.from(0, 1, 0));
 
-    public ChunkKey(int chunkX, int chunkZ) {
-        this(chunkX, chunkZ, calculateHash(chunkX, chunkZ));
-    }
-
-    public static int calculateHash(int chunkX, int chunkZ) {
-        return (chunkX << 16) | (chunkZ & 0xFFFF);
-    }
-
-    @Override
-    public int hashCode() {
-        return calculatedHash;
-    }
+    private final Vector3i offset;
 }

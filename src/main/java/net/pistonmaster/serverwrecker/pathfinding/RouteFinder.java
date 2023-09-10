@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.pathfinding;
 
 import com.google.common.base.Stopwatch;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
@@ -35,18 +36,21 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         Stopwatch stopwatch = Stopwatch.createStarted();
 
         // Store block positions and the best route to them
-        Map<BotEntityState, MinecraftRouteNode> routeIndex = new HashMap<>();
+        Map<BotEntityState, MinecraftRouteNode> routeIndex = new Object2ObjectOpenHashMap<>();
 
         // Store block positions that we need to look at
         Queue<MinecraftRouteNode> openSet = new PriorityQueue<>();
 
-        MinecraftRouteNode start = new MinecraftRouteNode(from, null, List.of(new MovementAction(from.position())), 0d, scorer.computeScore(from));
+        double startScore = scorer.computeScore(from);
+        log.debug("Start score (Usually distance): {}", startScore);
+
+        MinecraftRouteNode start = new MinecraftRouteNode(from, null, List.of(new MovementAction(from.position())), 0d, startScore);
         routeIndex.put(from, start);
         openSet.add(start);
 
         MinecraftRouteNode current;
         while ((current = openSet.poll()) != null) {
-            log.debug("Looking at node: " + current.getWorldState().position());
+            log.debug("Looking at node: {}", current.getWorldState().position());
 
             // If we found our destination, we can stop looking
             if (scorer.isFinished(current.getWorldState())) {
@@ -58,13 +62,12 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                     for (var action : previousElement.getPreviousActions()) {
                         route.add(0, action);
                     }
+
                     previousElement = previousElement.getPrevious();
                 } while (previousElement != null);
 
-                log.debug("Route: " + route);
-
                 stopwatch.stop();
-                log.info("Took " + stopwatch.elapsed().toMillis() + "ms to find route");
+                log.info("Took {}ms to find route", stopwatch.elapsed().toMillis());
                 return route;
             }
 
@@ -89,7 +92,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                     // The first time we see this node
                     if (v == null) {
                         var node = new MinecraftRouteNode(actionTargetState, finalCurrent, worldActions, newSourceCost, newTotalRouteScore);
-                        log.debug("Found a new node: " + actionTargetState.position());
+                        log.debug("Found a new node: {}", actionTargetState.position());
                         openSet.add(node);
 
                         return node;
@@ -102,7 +105,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                         v.setSourceCost(newSourceCost);
                         v.setTotalRouteScore(newTotalRouteScore);
 
-                        log.debug("Found a better route to node: " + actionTargetState.position());
+                        log.debug("Found a better route to node: {}", actionTargetState.position());
                         openSet.add(v);
                     }
 
@@ -112,6 +115,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         }
 
         stopwatch.stop();
+        log.info("Failed to find route after {}ms", stopwatch.elapsed().toMillis());
         throw new IllegalStateException("No route found");
     }
 }

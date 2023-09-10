@@ -19,12 +19,14 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -38,28 +40,29 @@ public class ProjectedLevelState {
     private final LevelState levelState;
     private final Map<Vector3i, BlockStateMeta> blockChanges;
     private final int blockChangesHash;
+    private final Map<Vector3i, BlockStateMeta> blockStateCache;
 
     public ProjectedLevelState(LevelState levelState) {
-        Map<Vector3i, BlockStateMeta> blockChanges = new HashMap<>();
         this.levelState = levelState;
-        this.blockChanges = blockChanges;
+        this.blockChanges = Collections.emptyMap();
         this.blockChangesHash = blockChanges.hashCode();
+        this.blockStateCache = new Object2ObjectOpenHashMap<>();
     }
 
     public ProjectedLevelState withChange(Vector3i position, BlockStateMeta blockStateMeta) {
-        Map<Vector3i, BlockStateMeta> blockChanges = new HashMap<>(this.blockChanges);
+        Map<Vector3i, BlockStateMeta> blockChanges = new Object2ObjectArrayMap<>(this.blockChanges.size() + 1);
+        blockChanges.putAll(this.blockChanges);
         blockChanges.put(position, blockStateMeta);
 
-        return new ProjectedLevelState(levelState, blockChanges, blockChanges.hashCode());
+        Map<Vector3i, BlockStateMeta> blockStateCache = new Object2ObjectOpenHashMap<>(this.blockStateCache);
+        blockStateCache.put(position, blockStateMeta);
+
+        return new ProjectedLevelState(levelState, blockChanges, blockChanges.hashCode(), blockStateCache);
     }
 
     public Optional<BlockStateMeta> getBlockStateAt(Vector3i position) {
-        BlockStateMeta blockType = blockChanges.get(position);
-        if (blockType != null) {
-            return Optional.of(blockType);
-        }
-
-        return levelState.getBlockStateAt(position);
+        return Optional.ofNullable(blockStateCache.computeIfAbsent(position, k ->
+                levelState.getBlockStateAt(k).orElse(null)));
     }
 
     @Override

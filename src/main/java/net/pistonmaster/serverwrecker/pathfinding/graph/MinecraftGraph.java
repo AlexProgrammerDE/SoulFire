@@ -31,10 +31,12 @@ public class MinecraftGraph {
         List<GraphAction> targetSet = new ArrayList<>();
         for (MovementDirection direction : MovementDirection.values()) {
             for (MovementModifier modifier : MovementModifier.values()) {
-                for (MovementSide side : MovementSide.values()) {
-                    PlayerMovement playerMovement = new PlayerMovement(node, direction, modifier, side);
-
-                    targetSet.add(playerMovement);
+                if (direction.isDiagonal()) {
+                    for (MovementSide side : MovementSide.values()) {
+                        targetSet.add(new PlayerMovement(node, direction, modifier, side));
+                    }
+                } else {
+                    targetSet.add(new PlayerMovement(node, direction, modifier, null));
                 }
             }
         }

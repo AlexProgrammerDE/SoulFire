@@ -152,6 +152,7 @@ dependencies {
     implementation(libs.pf4j) {
         isTransitive = false
     }
+    implementation(libs.fastutil)
 
     // For microsoft account authentication
     implementation(libs.minecraftauth) {

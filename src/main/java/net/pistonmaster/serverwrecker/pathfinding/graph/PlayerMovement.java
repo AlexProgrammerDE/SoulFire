@@ -28,9 +28,12 @@ import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
+@SuppressWarnings("CollectionAddAllCanBeReplacedWithConstructor")
 public record PlayerMovement(BotEntityState previousEntityState, MovementDirection direction, MovementModifier modifier,
                              MovementSide side) implements GraphAction {
     private static Vector3i applyDirection(Vector3i pos, MovementDirection direction) {
@@ -69,6 +72,14 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         };
     }
 
+    private static Vector3i applyJumpShift(Vector3i pos, MovementModifier modifier) {
+        if (modifier == MovementModifier.JUMP) {
+            return pos.add(0, 1, 0);
+        } else {
+            return pos;
+        }
+    }
+
     private static Vector3d applyModifier(Vector3d pos, MovementModifier modifier) {
         return switch (modifier) {
             case FALL_1 -> pos.add(0, -1, 0);
@@ -79,82 +90,178 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         };
     }
 
-    public Set<Vector3i> requiredFreeBlocks() {
-        Set<Vector3i> requiredFreeBlocks = new HashSet<>();
+    private Optional<List<WorldAction>> requireFreeBlocks(ProjectedLevelState level, ProjectedInventory inventory) {
+        List<WorldAction> actions = new ArrayList<>();
         Vector3i fromPosInt = previousEntityState.position().toInt();
 
-        // Add the block that is required to be free for straight movement
-        Vector3i targetEdge = applyDirection(fromPosInt, direction);
-        requiredFreeBlocks.add(targetEdge);
+        if (modifier == MovementModifier.JUMP) {
+            // Make head block free (maybe head block is a slab)
+            if (requireFreeHelper(fromPosInt.add(0, 1, 0), level, inventory, actions)) {
+                return Optional.empty();
+            }
+
+            // Make block above head block free
+            if (requireFreeHelper(fromPosInt.add(0, 2, 0), level, inventory, actions)) {
+                return Optional.empty();
+            }
+        }
 
         // Add the blocks that are required to be free for diagonal movement
-        switch (direction) {
-            case NORTH_EAST -> {
-                switch (side) {
-                    case LEFT -> requiredFreeBlocks.add(applyDirection(fromPosInt, MovementDirection.NORTH));
-                    case RIGHT -> requiredFreeBlocks.add(applyDirection(fromPosInt, MovementDirection.EAST));
+        if (direction.isDiagonal()) {
+            Vector3i corner = null;
+            switch (direction) {
+                case NORTH_EAST -> {
+                    switch (side) {
+                        case LEFT -> corner = applyDirection(fromPosInt, MovementDirection.NORTH);
+                        case RIGHT -> corner = applyDirection(fromPosInt, MovementDirection.EAST);
+                    }
+                }
+                case NORTH_WEST -> {
+                    switch (side) {
+                        case LEFT -> corner = applyDirection(fromPosInt, MovementDirection.NORTH);
+                        case RIGHT -> corner = applyDirection(fromPosInt, MovementDirection.WEST);
+                    }
+                }
+                case SOUTH_EAST -> {
+                    switch (side) {
+                        case LEFT -> corner = applyDirection(fromPosInt, MovementDirection.SOUTH);
+                        case RIGHT -> corner = applyDirection(fromPosInt, MovementDirection.EAST);
+                    }
+                }
+                case SOUTH_WEST -> {
+                    switch (side) {
+                        case LEFT -> corner = applyDirection(fromPosInt, MovementDirection.SOUTH);
+                        case RIGHT -> corner = applyDirection(fromPosInt, MovementDirection.WEST);
+                    }
                 }
             }
-            case NORTH_WEST -> {
-                switch (side) {
-                    case LEFT -> requiredFreeBlocks.add(applyDirection(fromPosInt, MovementDirection.NORTH));
-                    case RIGHT -> requiredFreeBlocks.add(applyDirection(fromPosInt, MovementDirection.WEST));
-                }
-            }
-            case SOUTH_EAST -> {
-                switch (side) {
-                    case LEFT -> requiredFreeBlocks.add(applyDirection(fromPosInt, MovementDirection.SOUTH));
-                    case RIGHT -> requiredFreeBlocks.add(applyDirection(fromPosInt, MovementDirection.EAST));
-                }
-            }
-            case SOUTH_WEST -> {
-                switch (side) {
-                    case LEFT -> requiredFreeBlocks.add(applyDirection(fromPosInt, MovementDirection.SOUTH));
-                    case RIGHT -> requiredFreeBlocks.add(applyDirection(fromPosInt, MovementDirection.WEST));
+
+            // This should never happen
+            assert corner != null;
+
+            for (BodyPart bodyPart : BodyPart.values()) {
+                // Apply jump shift to target edge and offset for body part
+                if (requireFreeHelper(applyJumpShift(corner, modifier).add(bodyPart.getOffset()), level, inventory, actions)) {
+                    return Optional.empty();
                 }
             }
         }
 
-        // Add the blocks that are required to be free for the head of the player
-        for (Vector3i requiredFreeBlock : Set.copyOf(requiredFreeBlocks)) {
-            requiredFreeBlocks.add(requiredFreeBlock.add(0, 1, 0));
+        Vector3i targetEdge = applyDirection(fromPosInt, direction);
+
+        for (BodyPart bodyPart : BodyPart.values()) {
+            // Apply jump shift to target diagonal and offset for body part
+            if (requireFreeHelper(applyJumpShift(targetEdge, modifier).add(bodyPart.getOffset()), level, inventory, actions)) {
+                return Optional.empty();
+            }
         }
 
+        // Require free blocks to fall into the target position
         switch (modifier) {
-            case FALL_1 -> requiredFreeBlocks.add(applyModifier(targetEdge, modifier));
+            case FALL_1 -> {
+                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_1), level, inventory, actions)) {
+                    return Optional.empty();
+                }
+            }
             case FALL_2 -> {
-                requiredFreeBlocks.add(applyModifier(targetEdge, MovementModifier.FALL_1));
-                requiredFreeBlocks.add(applyModifier(targetEdge, modifier));
+                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_1), level, inventory, actions)) {
+                    return Optional.empty();
+                }
+
+                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_2), level, inventory, actions)) {
+                    return Optional.empty();
+                }
             }
             case FALL_3 -> {
-                requiredFreeBlocks.add(applyModifier(targetEdge, MovementModifier.FALL_1));
-                requiredFreeBlocks.add(applyModifier(targetEdge, MovementModifier.FALL_2));
-                requiredFreeBlocks.add(applyModifier(targetEdge, modifier));
-            }
-            case JUMP -> {
-                // Shift the blocks up by one
-                requiredFreeBlocks = requiredFreeBlocks.stream()
-                        .map(block -> block.add(0, 1, 0))
-                        .collect(Collectors.toSet());
+                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_1), level, inventory, actions)) {
+                    return Optional.empty();
+                }
 
-                // You need to have a block above you free to jump
-                requiredFreeBlocks.add(fromPosInt.add(0, 1, 0));
+                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_2), level, inventory, actions)) {
+                    return Optional.empty();
+                }
+
+                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_3), level, inventory, actions)) {
+                    return Optional.empty();
+                }
             }
         }
 
-        return requiredFreeBlocks;
+        return Optional.of(actions);
     }
 
-    public Set<Vector3i> requiredSolidBlocks() {
-        Set<Vector3i> requiredSolidBlocks = new HashSet<>();
-        Vector3i fromPosInt = previousEntityState.position().toInt();
+    private boolean requireFreeHelper(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory, List<WorldAction> actions) {
+        Optional<List<WorldAction>> blockActions = requireFreeBlock(block, level, inventory);
+        if (blockActions.isEmpty()) {
+            return true;
+        } else {
+            actions.addAll(blockActions.get());
+            return false;
+        }
+    }
 
+    private Optional<List<WorldAction>> requireFreeBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
+        Optional<BlockStateMeta> blockType = level.getBlockStateAt(block);
+        if (blockType.isEmpty()) {
+            // Out of level, so we can't go there
+            return Optional.empty();
+        }
+
+        BlockShapeType blockShapeType = blockType.get().blockShapeType();
+
+        // Collision block like stone
+        if (blockShapeType != null && !blockShapeType.hasNoCollisions()) {
+            // In the future, add cost of breaking here
+            return Optional.empty();
+        }
+
+        return Optional.of(List.of());
+    }
+
+    private Optional<List<WorldAction>> requireSolidBlocks(ProjectedLevelState level, ProjectedInventory inventory) {
+        List<WorldAction> actions = new ArrayList<>();
+        Vector3i fromPosInt = previousEntityState.position().toInt();
         Vector3i floorPos = fromPosInt.add(0, -1, 0);
 
         // Add the block that is required to be solid for straight movement
-        requiredSolidBlocks.add(applyModifier(applyDirection(floorPos, direction), modifier));
+        Optional<List<WorldAction>> floor = requireSolidBlock(applyModifier(applyDirection(floorPos, direction), modifier), level, inventory);
+        if (floor.isEmpty()) {
+            return Optional.empty();
+        } else {
+            actions.addAll(floor.get());
+        }
 
-        return requiredSolidBlocks;
+        return Optional.of(actions);
+    }
+
+    private Optional<List<WorldAction>> requireSolidBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
+        Optional<BlockStateMeta> blockType = level.getBlockStateAt(block);
+        if (blockType.isEmpty()) {
+            // Out of level, so we can't go there
+            return Optional.empty();
+        }
+
+        BlockShapeType blockShapeType = blockType.get().blockShapeType();
+
+        // Empty block like air or grass
+        if (blockShapeType == null) {
+            // In the future, add cost of placing here if block is replaceable (like air)
+            return Optional.empty();
+        }
+
+        // Block with a current state that has no collision (Like open fence gate)
+        if (blockShapeType.hasNoCollisions()) {
+            // Could destroy and place block here, but that's too much work
+            return Optional.empty();
+        }
+
+        // Prevent walking over cake, fences, etc.
+        if (!blockShapeType.isFullBlock()) {
+            // Could destroy and place block here, but that's too much work
+            return Optional.empty();
+        }
+
+        return Optional.of(List.of());
     }
 
     @Override
@@ -167,48 +274,18 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         ProjectedLevelState projectedLevelState = previousEntityState.levelState();
         ProjectedInventory projectedInventory = previousEntityState.inventory();
 
-        for (Vector3i requiredFreeBlock : requiredFreeBlocks()) {
-            Optional<BlockStateMeta> blockType = projectedLevelState.getBlockStateAt(requiredFreeBlock);
-            if (blockType.isEmpty()) {
-                // Out of level, so we can't go there
-                return GraphInstructions.IMPOSSIBLE;
-            }
-
-            BlockShapeType blockShapeType = blockType.get().blockShapeType();
-
-            // Collision block like stone
-            if (blockShapeType != null && !blockShapeType.hasNoCollisions()) {
-                // In the future, add cost of breaking here
-                return GraphInstructions.IMPOSSIBLE;
-            }
+        Optional<List<WorldAction>> freeActions = requireFreeBlocks(projectedLevelState, projectedInventory);
+        if (freeActions.isEmpty()) {
+            return GraphInstructions.IMPOSSIBLE;
+        } else {
+            actions.addAll(freeActions.get());
         }
 
-        for (Vector3i requiredSolidBlock : requiredSolidBlocks()) {
-            Optional<BlockStateMeta> blockType = projectedLevelState.getBlockStateAt(requiredSolidBlock);
-            if (blockType.isEmpty()) {
-                // Out of level, so we can't go there
-                return GraphInstructions.IMPOSSIBLE;
-            }
-
-            BlockShapeType blockShapeType = blockType.get().blockShapeType();
-
-            // Empty block like air or grass
-            if (blockShapeType == null) {
-                // In the future, add cost of placing here if block is replaceable (like air)
-                return GraphInstructions.IMPOSSIBLE;
-            }
-
-            // Block with a current state that has no collision (Like open fence gate)
-            if (blockShapeType.hasNoCollisions()) {
-                // Could destroy and place block here, but that's too much work
-                return GraphInstructions.IMPOSSIBLE;
-            }
-
-            // Prevent walking over cake, fences, etc.
-            if (!blockShapeType.isFullBlock()) {
-                // Could destroy and place block here, but that's too much work
-                return GraphInstructions.IMPOSSIBLE;
-            }
+        Optional<List<WorldAction>> solidActions = requireSolidBlocks(projectedLevelState, projectedInventory);
+        if (solidActions.isEmpty()) {
+            return GraphInstructions.IMPOSSIBLE;
+        } else {
+            actions.addAll(solidActions.get());
         }
 
         Vector3d targetPosition = applyModifier(applyDirection(previousEntityState.position(), direction), modifier);
@@ -218,6 +295,6 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
                 targetPosition,
                 projectedLevelState,
                 projectedInventory
-        ), cost, List.copyOf(actions));
+        ), cost, Collections.unmodifiableList(actions));
     }
 }
