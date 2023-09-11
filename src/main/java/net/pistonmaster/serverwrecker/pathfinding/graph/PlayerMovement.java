@@ -36,6 +36,10 @@ import java.util.Optional;
 @SuppressWarnings("CollectionAddAllCanBeReplacedWithConstructor")
 public record PlayerMovement(BotEntityState previousEntityState, MovementDirection direction, MovementModifier modifier,
                              MovementSide side) implements GraphAction {
+    // Optional.of() takes a few milliseconds, so we'll just cache it
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static final Optional<List<WorldAction>> EMPTY_LIST = Optional.of(Collections.emptyList());
+
     private static Vector3i applyDirection(Vector3i pos, MovementDirection direction) {
         return switch (direction) {
             case NORTH -> pos.add(0, 0, -1);
@@ -201,13 +205,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
     }
 
     private Optional<List<WorldAction>> requireFreeBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
-        Optional<BlockStateMeta> blockType = level.getBlockStateAt(block);
-        if (blockType.isEmpty()) {
-            // Out of level, so we can't go there, so we'll recalculate
-            throw new OutOfLevelException();
-        }
-
-        BlockShapeType blockShapeType = blockType.get().blockShapeType();
+        BlockShapeType blockShapeType = getBlockShapeType(level, block);
 
         // Collision block like stone
         if (blockShapeType != null && !blockShapeType.hasNoCollisions()) {
@@ -215,7 +213,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             return Optional.empty();
         }
 
-        return Optional.of(List.of());
+        return EMPTY_LIST;
     }
 
     private Optional<List<WorldAction>> requireSolidBlocks(ProjectedLevelState level, ProjectedInventory inventory) {
@@ -242,13 +240,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
     }
 
     private Optional<List<WorldAction>> requireSolidBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
-        Optional<BlockStateMeta> blockType = level.getBlockStateAt(block);
-        if (blockType.isEmpty()) {
-            // Out of level, so we can't go there, so we'll recalculate
-            throw new OutOfLevelException();
-        }
-
-        BlockShapeType blockShapeType = blockType.get().blockShapeType();
+        BlockShapeType blockShapeType = getBlockShapeType(level, block);
 
         // Empty block like air or grass
         if (blockShapeType == null) {
@@ -268,7 +260,17 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             return Optional.empty();
         }
 
-        return Optional.of(List.of());
+        return EMPTY_LIST;
+    }
+
+    private BlockShapeType getBlockShapeType(ProjectedLevelState level, Vector3i block) {
+        Optional<BlockStateMeta> blockType = level.getBlockStateAt(block);
+        if (blockType.isEmpty()) {
+            // Out of level, so we can't go there, so we'll recalculate
+            throw new OutOfLevelException();
+        }
+
+        return blockType.get().blockShapeType();
     }
 
     @Override
@@ -311,6 +313,6 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
                 targetPosition,
                 projectedLevelState,
                 projectedInventory
-        ), cost, Collections.unmodifiableList(actions));
+        ), cost, actions);
     }
 }
