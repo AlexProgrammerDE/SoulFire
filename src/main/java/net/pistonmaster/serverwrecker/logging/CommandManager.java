@@ -277,7 +277,7 @@ public class CommandManager {
                     ), new ProjectedInventory(
                             sessionDataManager.getInventoryManager().getPlayerInventory()
                     ));
-                    logger.info("Start: " + start);
+                    logger.info("Start: {}", start);
                     List<WorldAction> actions = routeFinder.findRoute(start);
                     logger.info("Calculated path with {} actions", actions.size());
                     return actions;

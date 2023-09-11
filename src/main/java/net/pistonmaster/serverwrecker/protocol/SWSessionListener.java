@@ -71,7 +71,7 @@ public class SWSessionListener extends SessionAdapter {
             return;
         }
 
-        botConnection.logger().debug("Sending packet: " + event.getPacket().getClass().getSimpleName());
+        botConnection.logger().debug("Sending packet: {}", event.getPacket().getClass().getSimpleName());
     }
 
     @Override
