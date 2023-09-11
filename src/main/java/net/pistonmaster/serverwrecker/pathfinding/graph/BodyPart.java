@@ -29,5 +29,11 @@ public enum BodyPart {
     FEET(Vector3i.from(0, 0, 0)),
     HEAD(Vector3i.from(0, 1, 0));
 
+    // Iterating over BodyPart.values() is slower than iteration over a static array
+    public static final Vector3i[] BODY_PARTS = new Vector3i[]{
+            BodyPart.FEET.getOffset(),
+            BodyPart.HEAD.getOffset()
+    };
+
     private final Vector3i offset;
 }

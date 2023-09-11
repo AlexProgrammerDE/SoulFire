@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.viaversion.platform;
 
-import com.viaversion.viarewind.api.ViaRewindConfigImpl;
+import com.viaversion.viarewind.ViaRewindConfig;
 import com.viaversion.viarewind.api.ViaRewindPlatform;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.viaversion.JLoggerToSLF4J;
@@ -39,6 +39,6 @@ public class SWViaRewind implements ViaRewindPlatform {
     }
 
     public void init() {
-        init(new ViaRewindConfigImpl(dataFolder.resolve("config.yml").toFile()));
+        init(new ViaRewindConfig(dataFolder.resolve("config.yml").toFile()));
     }
 }

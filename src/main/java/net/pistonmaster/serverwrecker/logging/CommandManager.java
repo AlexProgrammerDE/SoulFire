@@ -34,7 +34,6 @@ import net.pistonmaster.serverwrecker.AttackManager;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.DispatcherInitEvent;
 import net.pistonmaster.serverwrecker.gui.LogPanel;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;

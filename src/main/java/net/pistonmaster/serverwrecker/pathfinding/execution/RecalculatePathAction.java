@@ -19,13 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.execution;
 
-import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
-import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
-import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
-import org.cloudburstmc.math.vector.Vector3i;
 
 @ToString
 public class RecalculatePathAction implements WorldAction {

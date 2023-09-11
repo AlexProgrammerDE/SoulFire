@@ -139,9 +139,9 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             // This should never happen
             assert corner != null;
 
-            for (BodyPart bodyPart : BodyPart.values()) {
+            for (Vector3i bodyOffset : BodyPart.BODY_PARTS) {
                 // Apply jump shift to target edge and offset for body part
-                if (requireFreeHelper(applyJumpShift(corner, modifier).add(bodyPart.getOffset()), level, inventory, actions)) {
+                if (requireFreeHelper(applyJumpShift(corner, modifier).add(bodyOffset), level, inventory, actions)) {
                     return Optional.empty();
                 }
             }
@@ -149,9 +149,9 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
 
         Vector3i targetEdge = applyDirection(fromPosInt, direction);
 
-        for (BodyPart bodyPart : BodyPart.values()) {
+        for (Vector3i bodyOffset : BodyPart.BODY_PARTS) {
             // Apply jump shift to target diagonal and offset for body part
-            if (requireFreeHelper(applyJumpShift(targetEdge, modifier).add(bodyPart.getOffset()), level, inventory, actions)) {
+            if (requireFreeHelper(applyJumpShift(targetEdge, modifier).add(bodyOffset), level, inventory, actions)) {
                 return Optional.empty();
             }
         }

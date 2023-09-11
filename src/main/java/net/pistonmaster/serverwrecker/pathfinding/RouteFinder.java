@@ -28,7 +28,6 @@ import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.RecalculatePathAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 import net.pistonmaster.serverwrecker.pathfinding.goals.GoalScorer;
-import net.pistonmaster.serverwrecker.pathfinding.graph.GraphAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.pathfinding.graph.OutOfLevelException;
@@ -39,6 +38,20 @@ import java.util.Map;
 
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
+    private static List<WorldAction> getActions(MinecraftRouteNode current) {
+        List<WorldAction> actions = new ArrayList<>();
+        MinecraftRouteNode previousElement = current;
+        do {
+            for (var action : previousElement.getPreviousActions()) {
+                actions.add(0, action);
+            }
+
+            previousElement = previousElement.getPrevious();
+        } while (previousElement != null);
+
+        return actions;
+    }
+
     public List<WorldAction> findRoute(BotEntityState from) {
         Stopwatch stopwatch = Stopwatch.createStarted();
 
@@ -55,8 +68,10 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         routeIndex.put(from, start);
         openSet.enqueue(start);
 
-        MinecraftRouteNode current;
-        while ((current = openSet.dequeue()) != null) {
+        MinecraftRouteNode element;
+        while ((element = openSet.dequeue()) != null) {
+            // To have a local field to use in lambdas
+            MinecraftRouteNode current = element;
             log.debug("Looking at node: {}", current.getEntityState().position());
 
             // If we found our destination, we can stop looking
@@ -94,17 +109,16 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 double actionCost = instructions.actionCost();
                 BotEntityState actionTargetState = instructions.targetState();
                 List<WorldAction> worldActions = instructions.actions();
-                MinecraftRouteNode finalCurrent = current;
                 routeIndex.compute(actionTargetState, (k, v) -> {
                     // Calculate new distance from start to this connection,
                     // Get distance from the current element
                     // and add the distance from the current element to the next element
-                    double newSourceCost = finalCurrent.getSourceCost() + actionCost;
+                    double newSourceCost = current.getSourceCost() + actionCost;
                     double newTotalRouteScore = newSourceCost + scorer.computeScore(actionTargetState);
 
                     // The first time we see this node
                     if (v == null) {
-                        var node = new MinecraftRouteNode(actionTargetState, finalCurrent, worldActions, newSourceCost, newTotalRouteScore);
+                        var node = new MinecraftRouteNode(actionTargetState, current, worldActions, newSourceCost, newTotalRouteScore);
                         log.debug("Found a new node: {}", actionTargetState.position());
                         openSet.enqueue(node);
 
@@ -113,7 +127,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
                     // If we found a better route to this node, update it
                     if (newSourceCost < v.getSourceCost()) {
-                        v.setPrevious(finalCurrent);
+                        v.setPrevious(current);
                         v.setPreviousActions(worldActions);
                         v.setSourceCost(newSourceCost);
                         v.setTotalRouteScore(newTotalRouteScore);
@@ -130,19 +144,5 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         stopwatch.stop();
         log.info("Failed to find route after {}ms", stopwatch.elapsed().toMillis());
         throw new IllegalStateException("No route found");
-    }
-
-    private static List<WorldAction> getActions(MinecraftRouteNode current) {
-        List<WorldAction> actions = new ArrayList<>();
-        MinecraftRouteNode previousElement = current;
-        do {
-            for (var action : previousElement.getPreviousActions()) {
-                actions.add(0, action);
-            }
-
-            previousElement = previousElement.getPrevious();
-        } while (previousElement != null);
-
-        return actions;
     }
 }
