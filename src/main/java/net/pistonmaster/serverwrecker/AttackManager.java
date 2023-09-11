@@ -227,7 +227,6 @@ public class AttackManager {
 
     public CompletableFuture<Void> stop() {
         if (attackState.isStopped()) {
-            System.err.println("Attack is already stopped!");
             return CompletableFuture.completedFuture(null);
         }
 
@@ -240,16 +239,27 @@ public class AttackManager {
     private void stopInternal() {
         logger.info("Disconnecting bots");
         do {
-            var disconnectFuture = new ArrayList<CompletableFuture<?>>();
+            Set<EventLoopGroup> eventLoopGroups = new HashSet<>();
+            var disconnectFuture = new ArrayList<CompletableFuture<Void>>();
             for (BotConnection botConnection : List.copyOf(botConnections)) {
                 disconnectFuture.add(botConnection.gracefulShutdown());
+                eventLoopGroups.add(botConnection.session().getEventLoopGroup());
                 botConnections.remove(botConnection);
             }
 
             logger.info("Waiting for all bots to fully disconnect");
-            for (CompletableFuture<?> future : disconnectFuture) {
+            for (CompletableFuture<Void> future : disconnectFuture) {
                 try {
                     future.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.error("Error while shutting down", e);
+                }
+            }
+
+            logger.info("Shutting down attack event loop groups");
+            for (EventLoopGroup eventLoopGroup : eventLoopGroups) {
+                try {
+                    eventLoopGroup.shutdownGracefully().get();
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while shutting down", e);
                 }

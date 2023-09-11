@@ -75,14 +75,15 @@ public record BotConnection(UUID connectionId, BotConnectionFactory factory, Att
     public CompletableFuture<Void> gracefulShutdown() {
         return CompletableFuture.runAsync(() -> {
             session.disconnect("Disconnect");
-            TimeUtil.waitTime(100, TimeUnit.MILLISECONDS);
+
+            // Give the server one second to handle the disconnect
+            TimeUtil.waitTime(1, TimeUnit.SECONDS);
+
+            // Shut down all executors
             executorManager.shutdownAll();
+
+            // Let threads finish that didn't immediately interrupt
             TimeUtil.waitTime(100, TimeUnit.MILLISECONDS);
-            try {
-                session.getEventLoopGroup().shutdownGracefully().get();
-            } catch (InterruptedException | ExecutionException e) {
-                logger.error("Error while shutting down!", e);
-            }
         });
     }
 }

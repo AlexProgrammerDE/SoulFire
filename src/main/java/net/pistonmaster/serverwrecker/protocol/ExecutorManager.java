@@ -75,7 +75,6 @@ public class ExecutorManager {
     public void shutdownAll() {
         shutdown = true;
         executors.forEach(ExecutorService::shutdownNow);
-        executors.clear();
     }
 
     private record NamedRunnable(Runnable runnable, String name) implements Runnable {

@@ -324,7 +324,7 @@ public class ViaClientSession extends TcpSession {
     @Override
     public void send(Packet packet) {
         Channel channel = getChannel();
-        if (channel == null) {
+        if (channel == null || !channel.isActive() || eventLoopGroup.isShutdown()) {
             return;
         }
 

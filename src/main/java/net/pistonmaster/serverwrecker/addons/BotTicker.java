@@ -49,7 +49,7 @@ public class BotTicker implements InternalAddon {
             try {
                 connection.tick(tickTimer.ticks, tickTimer.partialTicks);
             } catch (Throwable t) {
-                t.printStackTrace();
+                connection.logger().error("Exception ticking bot", t);
             }
         }, 0, 50, TimeUnit.MILLISECONDS); // 20 TPS
     }
