@@ -36,6 +36,7 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +45,7 @@ import java.util.Optional;
  */
 @Data
 public final class BotMovementManager {
-    private static final float STEP_HEIGHT = 0.5F;
+    private static final double STEP_HEIGHT = 0.6D;
     @ToString.Exclude
     private final SessionDataManager dataManager;
     private final ControlState controlState = new ControlState();
@@ -63,7 +64,7 @@ public final class BotMovementManager {
     private double motionY;
     private double motionZ;
     private boolean onGround = false;
-    private boolean collision = false;
+    private boolean horizontalCollision = false;
     private float jumpMovementFactor = 0.02F;
     private float speedInAir = 0.02F;
     private float moveForward;
@@ -223,7 +224,7 @@ public final class BotMovementManager {
         if (this.controlState.isSprinting()) {
             this.jumpMovementFactor = (float) ((double) this.jumpMovementFactor + (double) this.speedInAir * 0.3D);
 
-            if (this.moveForward <= 0 || this.collision || this.controlState.isSneaking()) {
+            if (this.moveForward <= 0 || this.horizontalCollision || this.controlState.isSneaking()) {
                 this.controlState.setSprinting(false);
             }
         }
@@ -361,7 +362,7 @@ public final class BotMovementManager {
         float friction = 0.02F;
 
         this.moveRelative(forward, vertical, strafe, friction);
-        this.collision = this.moveCollide(-this.motionX, this.motionY, -this.motionZ);
+        this.horizontalCollision = this.moveCollide(-this.motionX, this.motionY, -this.motionZ);
 
         this.motionX *= slipperiness;
         this.motionY *= 0.800000011920929D;
@@ -387,7 +388,7 @@ public final class BotMovementManager {
         float slipperiness = this.getBlockSlipperiness() * 0.91F;
 
         // Move
-        this.collision = this.moveCollide(this.motionX, this.motionY, this.motionZ);
+        this.horizontalCollision = this.moveCollide(this.motionX, this.motionY, this.motionZ);
 
         // Gravity
         if (!this.controlState.isFlying()) {
@@ -460,119 +461,112 @@ public final class BotMovementManager {
         this.motionZ += forward * cos + strafe * sin;
     }
 
-    public boolean moveCollide(double targetX, double targetY, double targetZ) {
+    public boolean moveCollide(double dx, double dy, double dz) {
         LevelState level = getLevelSafe();
-        // Target position
-        double originalTargetX = targetX;
-        double originalTargetY = targetY;
-        double originalTargetZ = targetZ;
 
+        // Store initial values
+        double originalDx = dx;
+        double originalDy = dy;
+        double originalDz = dz;
+
+        // Do not walking off edges when sneaking
         if (this.onGround && this.controlState.isSneaking()) {
-            for (; targetX != 0.0D && level.getCollisionBoxes(this.boundingBox.offset(targetX, -STEP_HEIGHT, 0.0D)).isEmpty(); originalTargetX = targetX) {
-                if (targetX < 0.05D && targetX >= -0.05D) {
-                    targetX = 0.0D;
-                } else if (targetX > 0.0D) {
-                    targetX -= 0.05D;
+            for (; dx != 0.0D && level.getCollisionBoxes(this.boundingBox.offset(dx, -STEP_HEIGHT, 0.0D)).isEmpty(); originalDx = dx) {
+                if (dx < 0.05D && dx >= -0.05D) {
+                    dx = 0.0D;
+                } else if (dx > 0.0D) {
+                    dx -= 0.05D;
                 } else {
-                    targetX += 0.05D;
+                    dx += 0.05D;
                 }
             }
 
-            for (; targetZ != 0.0D && level.getCollisionBoxes(this.boundingBox.offset(0.0D, -STEP_HEIGHT, targetZ)).isEmpty(); originalTargetZ = targetZ) {
-                if (targetZ < 0.05D && targetZ >= -0.05D) {
-                    targetZ = 0.0D;
-                } else if (targetZ > 0.0D) {
-                    targetZ -= 0.05D;
+            for (; dz != 0.0D && level.getCollisionBoxes(this.boundingBox.offset(0.0D, -STEP_HEIGHT, dz)).isEmpty(); originalDz = dz) {
+                if (dz < 0.05D && dz >= -0.05D) {
+                    dz = 0.0D;
+                } else if (dz > 0.0D) {
+                    dz -= 0.05D;
                 } else {
-                    targetZ += 0.05D;
+                    dz += 0.05D;
                 }
             }
 
-            for (; targetX != 0.0D && targetZ != 0.0D && level.getCollisionBoxes(this.boundingBox.offset(targetX, -STEP_HEIGHT, targetZ)).isEmpty(); originalTargetZ = targetZ) {
-                if (targetX < 0.05D && targetX >= -0.05D) {
-                    targetX = 0.0D;
-                } else if (targetX > 0.0D) {
-                    targetX -= 0.05D;
+            for (; dx != 0.0D && dz != 0.0D && level.getCollisionBoxes(this.boundingBox.offset(dx, -STEP_HEIGHT, dz)).isEmpty(); originalDz = dz) {
+                if (dx < 0.05D && dx >= -0.05D) {
+                    dx = 0.0D;
+                } else if (dx > 0.0D) {
+                    dx -= 0.05D;
                 } else {
-                    targetX += 0.05D;
+                    dx += 0.05D;
                 }
 
-                originalTargetX = targetX;
+                originalDx = dx;
 
-                if (targetZ < 0.05D && targetZ >= -0.05D) {
-                    targetZ = 0.0D;
-                } else if (targetZ > 0.0D) {
-                    targetZ -= 0.05D;
+                if (dz < 0.05D && dz >= -0.05D) {
+                    dz = 0.0D;
+                } else if (dz > 0.0D) {
+                    dz -= 0.05D;
                 } else {
-                    targetZ += 0.05D;
+                    dz += 0.05D;
                 }
             }
         }
 
-        List<BoundingBox> collisionBoxes = level.getCollisionBoxes(this.boundingBox.expand(targetX, targetY, targetZ));
-
-        // Move bounding box
-        double targetXCollision = targetX;
-        double targetZCollision = targetZ;
-
-        for (BoundingBox aABB : collisionBoxes) {
-            targetXCollision = aABB.clipXCollide(this.boundingBox, targetXCollision);
-        }
-        this.boundingBox.move(targetXCollision, 0.0F, 0.0F);
-
-        for (BoundingBox aABB : collisionBoxes) {
-            targetZCollision = aABB.clipZCollide(this.boundingBox, targetZCollision);
-        }
-
-        this.boundingBox.move(-targetXCollision, 0.0F, 0.0F);
-
-        double targetZCollision2 = targetZ;
-        double targetXCollision2 = targetX;
-
-        for (BoundingBox aABB : collisionBoxes) {
-            targetZCollision2 = aABB.clipZCollide(this.boundingBox, targetZCollision2);
-        }
-
-        this.boundingBox.move(0.0F, 0.0F, targetZCollision2);
-
-        for (BoundingBox aABB : collisionBoxes) {
-            targetXCollision2 = aABB.clipXCollide(this.boundingBox, targetXCollision2);
-        }
-
-        this.boundingBox.move(0.0F, 0.0F, -targetZCollision2);
-
-        // We did this to check if you can get further with moving first "X and then Z" or first "Z and then X"
-        // We do this to allow walking around corners
-        double totalCollision = Math.abs(targetXCollision) + Math.abs(targetZCollision);
-        double totalCollision2 = Math.abs(targetXCollision2) + Math.abs(targetZCollision2);
-
-        if (totalCollision >= totalCollision2) {
-            targetX = targetXCollision;
-            targetZ = targetZCollision;
-        } else {
-            targetX = targetXCollision2;
-            targetZ = targetZCollision2;
-        }
-
-        this.boundingBox.move(targetX, 0.0F, targetZ);
-
-        for (BoundingBox aABB : collisionBoxes) {
-            targetY = aABB.clipYCollide(this.boundingBox, targetY);
-        }
-        this.boundingBox.move(0.0F, targetY, 0.0F);
-
-        this.onGround = originalTargetY != targetY && originalTargetY < 0.0F;
-
-        // Stop motion on collision
-        if (originalTargetX != targetX) {
+        // Stop the motion when sneaking on an edge
+        if (originalDx != dx) {
             this.motionX = 0.0F;
         }
-        if (originalTargetY != targetY) {
-            this.motionY = 0.0F;
-        }
-        if (originalTargetZ != targetZ) {
+
+        if (originalDz != dz) {
             this.motionZ = 0.0F;
         }
+
+        // Check for collisions and calculate collisions based on that
+        List<BoundingBox> collisionBoxes = level.getCollisionBoxes(this.boundingBox.expand(dx, dy, dz));
+        BestXZMoveData bestXZMoveData = getBestMove(collisionBoxes, this.boundingBox, dx, dz);
+
+        // Check if walking up solves the collisions, and thus we'll be able to walk upstairs
+        if (this.onGround && !collisionBoxes.isEmpty()) {
+            double highestCollision = collisionBoxes.stream().map(b -> b.maxY).max(Comparator.naturalOrder()).orElse(0.0D);
+            double highestDeltaY =  highestCollision - this.boundingBox.minY;
+            double stepHeight = STEP_HEIGHT;
+            if (highestDeltaY > 0.0D && highestDeltaY < stepHeight) {
+                stepHeight = highestDeltaY;
+            }
+
+            BoundingBox stepBoundingBox = this.boundingBox.offset(0.0D, stepHeight, 0.0D);
+            List<BoundingBox> stepCollisionBoxes = level.getCollisionBoxes(stepBoundingBox.expand(dx, 0, dz));
+
+            boolean canWalkUp = true;
+            for (BoundingBox aABB : stepCollisionBoxes) {
+                double dyCollision = aABB.clipYCollide(stepBoundingBox, dy);
+                if (dyCollision != dy) {
+                    canWalkUp = false;
+                    break;
+                }
+            }
+
+            if (canWalkUp) {
+                BestXZMoveData bestStepXZMoveData = getBestMove(stepCollisionBoxes, stepBoundingBox, dx, dz);
+                if (bestStepXZMoveData.totalMotion > bestXZMoveData.totalMotion) {
+                    bestXZMoveData = bestStepXZMoveData;
+                    collisionBoxes = stepCollisionBoxes;
+                    dy = stepHeight;
+                }
+            }
+        }
+
+        dx = bestXZMoveData.dx;
+        dz = bestXZMoveData.dz;
+
+        this.boundingBox.move(dx, 0.0F, dz);
+
+        for (BoundingBox aABB : collisionBoxes) {
+            dy = aABB.clipYCollide(this.boundingBox, dy);
+        }
+        this.boundingBox.move(0.0F, dy, 0.0F);
+
+        this.onGround = originalDy != dy && originalDy < 0.0F;
 
         // Update position
         this.x = ((this.boundingBox.minX + this.boundingBox.maxX) / 2.0F);
@@ -580,7 +574,47 @@ public final class BotMovementManager {
         this.z = ((this.boundingBox.minZ + this.boundingBox.maxZ) / 2.0F);
 
         // Horizontal collision?
-        return originalTargetX != targetX || originalTargetZ != targetZ;
+        return originalDx != dx || originalDz != dz;
+    }
+
+    private BestXZMoveData getBestMove(List<BoundingBox> collisionBoxes, BoundingBox boundingBox, double dx, double dz) {
+        BoundingBox cornerCheck = boundingBox.clone();
+        double targetXCollision = dx;
+        double targetZCollision = dz;
+
+        for (BoundingBox aABB : collisionBoxes) {
+            targetXCollision = aABB.clipXCollide(cornerCheck, targetXCollision);
+        }
+        cornerCheck.move(targetXCollision, 0.0F, 0.0F);
+
+        for (BoundingBox aABB : collisionBoxes) {
+            targetZCollision = aABB.clipZCollide(cornerCheck, targetZCollision);
+        }
+
+        BoundingBox cornerCheck2 = boundingBox.clone();
+        double targetZCollision2 = dz;
+        double targetXCollision2 = dx;
+
+        for (BoundingBox aABB : collisionBoxes) {
+            targetZCollision2 = aABB.clipZCollide(cornerCheck2, targetZCollision2);
+        }
+
+        cornerCheck2.move(0.0F, 0.0F, targetZCollision2);
+
+        for (BoundingBox aABB : collisionBoxes) {
+            targetXCollision2 = aABB.clipXCollide(cornerCheck2, targetXCollision2);
+        }
+
+        // We did this to check if you can get further with moving first "X and then Z" or first "Z and then X"
+        // We do this to allow walking around corners
+        double totalCollision = Math.abs(targetXCollision) + Math.abs(targetZCollision);
+        double totalCollision2 = Math.abs(targetXCollision2) + Math.abs(targetZCollision2);
+
+        if (totalCollision >= totalCollision2) {
+            return new BestXZMoveData(totalCollision, targetXCollision, targetZCollision);
+        } else {
+            return new BestXZMoveData(totalCollision2, targetXCollision2, targetZCollision2);
+        }
     }
 
     public float getEyeHeight() {
@@ -624,5 +658,8 @@ public final class BotMovementManager {
         LevelState level = dataManager.getCurrentLevel();
         assert level != null;
         return level;
+    }
+
+    private record BestXZMoveData(double totalMotion, double dx, double dz) {
     }
 }

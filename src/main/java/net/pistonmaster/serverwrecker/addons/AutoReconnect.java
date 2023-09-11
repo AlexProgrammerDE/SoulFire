@@ -69,7 +69,7 @@ public class AutoReconnect implements InternalAddon {
                 return;
             }
 
-            connection.gracefulShutdown().join();
+            connection.gracefulDisconnect().join();
             BotConnection newConnection = connection.factory().prepareConnection();
 
             connection.attackManager().getBotConnections()

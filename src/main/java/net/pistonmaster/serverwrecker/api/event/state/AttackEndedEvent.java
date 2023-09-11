@@ -21,5 +21,5 @@ package net.pistonmaster.serverwrecker.api.event.state;
 
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
 
-public class AttackEndedEvent implements ServerWreckerEvent {
+public record AttackEndedEvent(int attackId) implements ServerWreckerEvent {
 }

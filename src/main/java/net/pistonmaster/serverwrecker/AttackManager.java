@@ -160,7 +160,7 @@ public class AttackManager {
             logger.info("Starting attack at {} with {} bots and {} proxies", botSettings.host(), factories.size(), availableProxiesCount);
         }
 
-        ServerWreckerAPI.postEvent(new AttackStartEvent());
+        ServerWreckerAPI.postEvent(new AttackStartEvent(id));
 
         // Used for concurrent bot connecting
         ExecutorService connectService = Executors.newFixedThreadPool(botSettings.concurrentConnects());
@@ -242,7 +242,7 @@ public class AttackManager {
             Set<EventLoopGroup> eventLoopGroups = new HashSet<>();
             var disconnectFuture = new ArrayList<CompletableFuture<Void>>();
             for (BotConnection botConnection : List.copyOf(botConnections)) {
-                disconnectFuture.add(botConnection.gracefulShutdown());
+                disconnectFuture.add(botConnection.gracefulDisconnect());
                 eventLoopGroups.add(botConnection.session().getEventLoopGroup());
                 botConnections.remove(botConnection);
             }
@@ -267,7 +267,7 @@ public class AttackManager {
         } while (!botConnections.isEmpty()); // To make sure really all bots are disconnected
 
         // Notify addons of state change
-        ServerWreckerAPI.postEvent(new AttackEndedEvent());
+        ServerWreckerAPI.postEvent(new AttackEndedEvent(id));
 
         logger.info("Attack stopped");
     }

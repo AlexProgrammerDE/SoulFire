@@ -214,7 +214,10 @@ public class LevelState {
                         double bbMaxY = y + shape.maxY();
                         double bbMaxZ = z + shape.maxZ();
 
-                        boundingBoxList.add(new BoundingBox(bbMinX, bbMinY, bbMinZ, bbMaxX, bbMaxY, bbMaxZ));
+                        BoundingBox blockBoundingBox = new BoundingBox(bbMinX, bbMinY, bbMinZ, bbMaxX, bbMaxY, bbMaxZ);
+                        if (blockBoundingBox.intersects(aabb)) {
+                            boundingBoxList.add(blockBoundingBox);
+                        }
                     }
                 }
             }

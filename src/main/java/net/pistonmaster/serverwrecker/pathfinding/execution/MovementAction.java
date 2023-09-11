@@ -24,7 +24,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
+import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import org.cloudburstmc.math.vector.Vector3d;
+
+import java.util.Optional;
 
 @ToString
 @RequiredArgsConstructor
@@ -37,12 +42,25 @@ public class MovementAction implements WorldAction {
     public boolean isCompleted(BotConnection connection) {
         BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
         Vector3d botPosition = movementManager.getPlayerPos();
-        if (botPosition.getY() != position.getY()) {
-            // We want to be on the same Y level
+        LevelState levelState = connection.sessionDataManager().getCurrentLevel();
+        if (levelState == null) {
             return false;
         }
 
-        return botPosition.distance(position) < 0.3;
+        Optional<BlockStateMeta> blockMeta = levelState.getBlockStateAt(position.toInt());
+        boolean insideBlock = blockMeta.isPresent() && !BlockTypeHelper.isEmpty(blockMeta.get());
+
+        if (insideBlock) {
+            // We are inside a block, so being close is good enough
+            double distance = botPosition.distance(position);
+            return distance <= 1;
+        } else if (botPosition.getY() != position.getY()) {
+            // We want to be on the same Y level
+            return false;
+        } else {
+            double distance = botPosition.distance(position);
+            return distance < 0.3;
+        }
     }
 
     @Override

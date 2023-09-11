@@ -19,7 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.util;
 
+import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 
 public class BlockTypeHelper {
     public static boolean isCarpet(BlockType type) {
@@ -28,5 +30,14 @@ public class BlockTypeHelper {
         }
 
         return type.blockShapeTypes().get(0).collisionHeight() <= 0.1;
+    }
+
+    public static boolean isEmpty(BlockStateMeta meta) {
+        BlockShapeType type = meta.blockShapeType();
+        if (type == null) {
+            return true;
+        }
+
+        return type.hasNoCollisions();
     }
 }

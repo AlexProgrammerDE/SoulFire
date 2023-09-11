@@ -37,6 +37,7 @@ public record BlockStateMeta(BlockType blockType, @Nullable BlockShapeType block
     private static BlockShapeType getBlockShapeType(BlockType blockType, int stateIndex) {
         int size = blockType.blockShapeTypes().size();
         if (size == 0) {
+            // This block has no shape, this is for example for air or grass
             return null;
         } else if (size == 1) {
             return blockType.blockShapeTypes().get(0);

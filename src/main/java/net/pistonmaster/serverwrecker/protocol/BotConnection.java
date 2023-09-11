@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.protocol;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
-import io.netty.util.concurrent.Future;
 import net.pistonmaster.serverwrecker.AttackManager;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.protocol.bot.BotControlAPI;
@@ -33,7 +32,6 @@ import org.slf4j.Logger;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public record BotConnection(UUID connectionId, BotConnectionFactory factory, AttackManager attackManager, ServerWrecker serverWrecker,
@@ -72,7 +70,7 @@ public record BotConnection(UUID connectionId, BotConnectionFactory factory, Att
         return session.getFlag(SWProtocolConstants.TRAFFIC_HANDLER);
     }
 
-    public CompletableFuture<Void> gracefulShutdown() {
+    public CompletableFuture<Void> gracefulDisconnect() {
         return CompletableFuture.runAsync(() -> {
             session.disconnect("Disconnect");
 
