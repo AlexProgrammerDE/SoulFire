@@ -37,21 +37,22 @@ import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public record BotConnectionFactory(AttackManager attackManager, InetSocketAddress targetAddress,
                                    SettingsHolder settingsHolder, Logger logger,
                                    MinecraftProtocol protocol, MinecraftAccount minecraftAccount,
                                    SWProxy proxyData, EventLoopGroup eventLoopGroup) {
-    public CompletableFuture<BotConnection> connect() {
-        return CompletableFuture.supplyAsync(() -> connectInternal(ProtocolState.LOGIN));
+    public BotConnection prepareConnection() {
+        return prepareConnectionInternal(ProtocolState.LOGIN);
     }
 
-    public BotConnection connectInternal(ProtocolState targetState) {
+    public BotConnection prepareConnectionInternal(ProtocolState targetState) {
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
         BotConnectionMeta meta = new BotConnectionMeta(minecraftAccount, targetState);
         ViaClientSession session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
-        BotConnection botConnection = new BotConnection(this, attackManager, attackManager.getServerWrecker(),
+        BotConnection botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.getServerWrecker(),
                 settingsHolder, logger, protocol, session, new ExecutorManager("ServerWrecker-Attack-" + attackManager.getId()), meta);
 
         SessionDataManager sessionDataManager = new SessionDataManager(botConnection);
@@ -69,8 +70,6 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
         session.addListener(new SWSessionListener(sessionDataManager, botConnection));
 
         ServerWreckerAPI.postEvent(new PreBotConnectEvent(botConnection));
-
-        session.connect(true);
 
         return botConnection;
     }

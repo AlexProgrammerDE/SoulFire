@@ -54,17 +54,54 @@ public class AutoTotem implements InternalAddon {
 
     @EventHandler
     public void onJoined(BotJoinedEvent event) {
-        if (!event.connection().settingsHolder().has(AutoTotemSettings.class)) {
+        BotConnection connection = event.connection();
+        if (!connection.settingsHolder().has(AutoTotemSettings.class)) {
             return;
         }
 
-        AutoTotemSettings settings = event.connection().settingsHolder().get(AutoTotemSettings.class);
+        AutoTotemSettings settings = connection.settingsHolder().get(AutoTotemSettings.class);
         if (!settings.autoTotem()) {
             return;
         }
 
-        new BotTotemThread(event.connection(),
-                event.connection().executorManager().newScheduledExecutorService("AutoTotem"));
+        ScheduledExecutorService executor = connection.executorManager().newScheduledExecutorService("AutoTotem");
+        ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
+            SessionDataManager sessionDataManager = connection.sessionDataManager();
+            InventoryManager inventoryManager = sessionDataManager.getInventoryManager();
+            PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
+            ContainerSlot offhandSlot = playerInventory.getOffhand();
+
+            // We only want to use totems if there are no items in the offhand
+            if (offhandSlot.item() != null) {
+                return;
+            }
+
+            for (ContainerSlot slot : playerInventory.getStorage()) {
+                if (slot.item() == null) {
+                    continue;
+                }
+
+                SWItemStack item = slot.item();
+                if (item.getType() == ItemType.TOTEM_OF_UNDYING) {
+                    if (!inventoryManager.tryInventoryControl()) {
+                        return;
+                    }
+
+                    try {
+                        inventoryManager.leftClickSlot(slot.slot());
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                        inventoryManager.leftClickSlot(offhandSlot.slot());
+                    } finally {
+                        inventoryManager.unlockInventoryControl();
+                    }
+                    return;
+                }
+            }
+        }, settings.minDelay(), settings.maxDelay());
     }
 
     @EventHandler
@@ -81,43 +118,6 @@ public class AutoTotem implements InternalAddon {
         public BotTotemThread {
             AutoTotemSettings settings = connection.settingsHolder().get(AutoTotemSettings.class);
 
-            ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
-                SessionDataManager sessionDataManager = connection.sessionDataManager();
-                InventoryManager inventoryManager = sessionDataManager.getInventoryManager();
-                PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
-                ContainerSlot offhandSlot = playerInventory.getOffhand();
-
-                // We only want to use totems if there are no items in the offhand
-                if (offhandSlot.item() != null) {
-                    return;
-                }
-
-                for (ContainerSlot slot : playerInventory.getStorage()) {
-                    if (slot.item() == null) {
-                        continue;
-                    }
-
-                    SWItemStack item = slot.item();
-                    if (item.getType() == ItemType.TOTEM_OF_UNDYING) {
-                        if (!inventoryManager.tryInventoryControl()) {
-                            return;
-                        }
-
-                        try {
-                            inventoryManager.leftClickSlot(slot.slot());
-                            try {
-                                Thread.sleep(50);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                            inventoryManager.leftClickSlot(offhandSlot.slot());
-                        } finally {
-                            inventoryManager.unlockInventoryControl();
-                        }
-                        return;
-                    }
-                }
-            }, settings.minDelay(), settings.maxDelay());
         }
     }
 

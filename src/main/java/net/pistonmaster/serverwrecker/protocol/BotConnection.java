@@ -21,25 +21,32 @@ package net.pistonmaster.serverwrecker.protocol;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
+import io.netty.util.concurrent.Future;
 import net.pistonmaster.serverwrecker.AttackManager;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.protocol.bot.BotControlAPI;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
+import net.pistonmaster.serverwrecker.util.TimeUtil;
 import org.slf4j.Logger;
 
-public record BotConnection(BotConnectionFactory factory, AttackManager attackManager, ServerWrecker serverWrecker,
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+public record BotConnection(UUID connectionId, BotConnectionFactory factory, AttackManager attackManager, ServerWrecker serverWrecker,
                             SettingsHolder settingsHolder,
                             Logger logger, MinecraftProtocol protocol, ViaClientSession session,
-                            ExecutorManager executorManager,
-                            BotConnectionMeta meta) {
-    public boolean isOnline() {
-        return session.isConnected();
+                            ExecutorManager executorManager, BotConnectionMeta meta) {
+    public CompletableFuture<Void> connect() {
+        return CompletableFuture.runAsync(() -> session.connect(true));
+
     }
 
-    public void disconnect() {
-        session.disconnect("Disconnect");
+    public boolean isOnline() {
+        return session.isConnected();
     }
 
     public SessionDataManager sessionDataManager() {
@@ -63,5 +70,19 @@ public record BotConnection(BotConnectionFactory factory, AttackManager attackMa
 
     public GlobalTrafficShapingHandler getTrafficHandler() {
         return session.getFlag(SWProtocolConstants.TRAFFIC_HANDLER);
+    }
+
+    public CompletableFuture<Void> gracefulShutdown() {
+        return CompletableFuture.runAsync(() -> {
+            session.disconnect("Disconnect");
+            TimeUtil.waitTime(100, TimeUnit.MILLISECONDS);
+            executorManager.shutdownAll();
+            TimeUtil.waitTime(100, TimeUnit.MILLISECONDS);
+            try {
+                session.getEventLoopGroup().shutdownGracefully().get();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.error("Error while shutting down!", e);
+            }
+        });
     }
 }

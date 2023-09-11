@@ -36,23 +36,21 @@ public class BotTicker implements InternalAddon {
 
     @EventHandler
     public void onPreConnect(PreBotConnectEvent event) {
-        new BotTickerTask(event.connection(),
+        startTicker(event.connection(),
                 event.connection().executorManager().newScheduledExecutorService("Tick"),
                 new TickTimer(20));
     }
 
-    private record BotTickerTask(BotConnection connection, ScheduledExecutorService executor,
-                                 TickTimer tickTimer) {
-        public BotTickerTask {
-            executor.scheduleWithFixedDelay(() -> {
-                tickTimer.advanceTime();
+    private void startTicker(BotConnection connection, ScheduledExecutorService executor,
+                             TickTimer tickTimer) {
+        executor.scheduleWithFixedDelay(() -> {
+            tickTimer.advanceTime();
 
-                try {
-                    connection.tick(tickTimer.ticks, tickTimer.partialTicks);
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
-            }, 0, 50, TimeUnit.MILLISECONDS); // 20 TPS
-        }
+            try {
+                connection.tick(tickTimer.ticks, tickTimer.partialTicks);
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+        }, 0, 50, TimeUnit.MILLISECONDS); // 20 TPS
     }
 }

@@ -23,13 +23,12 @@ import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.viaversion.viaversion.api.Via;
 import io.netty.channel.EventLoopGroup;
-import io.netty.util.concurrent.Future;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.state.AttackEndEvent;
+import net.pistonmaster.serverwrecker.api.event.state.AttackEndedEvent;
 import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
 import net.pistonmaster.serverwrecker.auth.AccountList;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
@@ -69,7 +68,7 @@ public class AttackManager {
     private AttackState attackState = AttackState.STOPPED;
 
     @SuppressWarnings("UnstableApiUsage")
-    public void start(SettingsHolder settingsHolder) {
+    public CompletableFuture<Void> start(SettingsHolder settingsHolder) {
         if (!attackState.isStopped()) {
             throw new IllegalStateException("Attack is already running");
         }
@@ -166,40 +165,39 @@ public class AttackManager {
         // Used for concurrent bot connecting
         ExecutorService connectService = Executors.newFixedThreadPool(botSettings.concurrentConnects());
 
-        boolean isFirst = true;
-        Random random = ThreadLocalRandom.current();
-        while (!factories.isEmpty()) {
-            BotConnectionFactory factory = factories.poll();
-            if (factory == null) {
-                break;
-            }
+        return CompletableFuture.runAsync(() -> {
+            Random random = ThreadLocalRandom.current();
+            while (!factories.isEmpty()) {
+                BotConnectionFactory factory = factories.poll();
+                if (factory == null) {
+                    break;
+                }
 
-            if (!isFirst) {
+                logger.debug("Scheduling bot {}", factory.minecraftAccount().username());
+                connectService.execute(() -> {
+                    if (attackState.isStopped()) {
+                        return;
+                    }
+
+                    TimeUtil.waitCondition(attackState::isPaused);
+
+                    logger.debug("Connecting bot {}", factory.minecraftAccount().username());
+                    BotConnection botConnection = factory.prepareConnection();
+                    botConnections.add(botConnection);
+                    try {
+                        botConnection.connect().get();
+                    } catch (Throwable e) {
+                        logger.error("Error while connecting", e);
+                    }
+                });
+
                 try {
                     TimeUnit.MILLISECONDS.sleep(random.nextInt(botSettings.minJoinDelayMs(), botSettings.maxJoinDelayMs()));
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                 }
             }
-
-            logger.debug("Scheduling bot {}", factory.minecraftAccount().username());
-            connectService.execute(() -> {
-                if (attackState.isStopped()) {
-                    return;
-                }
-
-                TimeUtil.waitCondition(attackState::isPaused);
-
-                logger.debug("Connecting bot {}", factory.minecraftAccount().username());
-                try {
-                    botConnections.add(factory.connect().join());
-                } catch (Throwable e) {
-                    logger.error("Error while connecting", e);
-                }
-            });
-
-            isFirst = false;
-        }
+        });
     }
 
     private MinecraftAccount getAccount(AccountSettings accountSettings, List<MinecraftAccount> accounts, int botId) {
@@ -229,10 +227,11 @@ public class AttackManager {
 
     public CompletableFuture<Void> stop() {
         if (attackState.isStopped()) {
+            System.err.println("Attack is already stopped!");
             return CompletableFuture.completedFuture(null);
         }
 
-        serverWrecker.getLogger().info("Stopping bot attack");
+        logger.info("Stopping bot attack");
         this.attackState = AttackState.STOPPED;
 
         return CompletableFuture.runAsync(this::stopInternal);
@@ -240,36 +239,25 @@ public class AttackManager {
 
     private void stopInternal() {
         logger.info("Disconnecting bots");
-        for (BotConnection botConnection : botConnections) {
-            botConnection.disconnect();
-        }
-
-        logger.info("Shutting down task executors");
-        for (BotConnection botConnection : botConnections) {
-            botConnection.executorManager().shutdownAll();
-        }
-
-        logger.info("Shutting down attack event loop group");
-        var shutdownFutures = new ArrayList<Future<?>>();
-        for (BotConnection botConnection : botConnections) {
-            Future<?> future = botConnection.session().getEventLoopGroup().shutdownGracefully();
-            shutdownFutures.add(future);
-        }
-
-        logger.info("Waiting for attack event loops to fully shut down");
-        for (Future<?> future : shutdownFutures) {
-            try {
-                future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                logger.error("Error while shutting down", e);
+        do {
+            var disconnectFuture = new ArrayList<CompletableFuture<?>>();
+            for (BotConnection botConnection : List.copyOf(botConnections)) {
+                disconnectFuture.add(botConnection.gracefulShutdown());
+                botConnections.remove(botConnection);
             }
-        }
 
-        // Leave them for GC to clean up
-        botConnections.clear();
+            logger.info("Waiting for all bots to fully disconnect");
+            for (CompletableFuture<?> future : disconnectFuture) {
+                try {
+                    future.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.error("Error while shutting down", e);
+                }
+            }
+        } while (!botConnections.isEmpty()); // To make sure really all bots are disconnected
 
         // Notify addons of state change
-        ServerWreckerAPI.postEvent(new AttackEndEvent());
+        ServerWreckerAPI.postEvent(new AttackEndedEvent());
 
         logger.info("Attack stopped");
     }

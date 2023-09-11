@@ -394,10 +394,9 @@ public class ServerWrecker {
 
     public int startAttack(SettingsHolder settingsHolder) {
         AttackManager attackManager = injector.newInstance(AttackManager.class);
+        attacks.add(attackManager);
 
         attackManager.start(settingsHolder);
-
-        attacks.add(attackManager);
 
         return attackManager.getId();
     }
@@ -416,7 +415,7 @@ public class ServerWrecker {
     public void stopAttack(int id) {
         attacks.removeIf(attackManager -> {
             if (attackManager.getId() == id) {
-                attackManager.stop();
+                attackManager.stop().join();
                 return true;
             } else {
                 return false;

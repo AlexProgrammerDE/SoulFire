@@ -42,7 +42,6 @@ import picocli.CommandLine;
 import javax.swing.*;
 import java.awt.*;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class AutoJump implements InternalAddon {
@@ -53,18 +52,28 @@ public class AutoJump implements InternalAddon {
 
     @EventHandler
     public void onJoined(BotJoinedEvent event) {
-        if (!event.connection().settingsHolder().has(AutoJumpSettings.class)) {
+        BotConnection connection = event.connection();
+        if (!connection.settingsHolder().has(AutoJumpSettings.class)) {
             return;
         }
 
-        AutoJumpSettings settings = event.connection().settingsHolder().get(AutoJumpSettings.class);
+        AutoJumpSettings settings = connection.settingsHolder().get(AutoJumpSettings.class);
         if (!settings.autoJump()) {
             return;
         }
 
-        new BotJumpThread(event.connection(),
-                event.connection().executorManager().newScheduledExecutorService("AutoJump"),
-                new LinkedHashSet<>());
+        ScheduledExecutorService executor = connection.executorManager().newScheduledExecutorService("AutoJump");
+        ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
+            SessionDataManager sessionDataManager = connection.sessionDataManager();
+            LevelState level = sessionDataManager.getCurrentLevel();
+            BotMovementManager movementManager = sessionDataManager.getBotMovementManager();
+            if (level != null && movementManager != null
+                    && level.isChunkLoaded(movementManager.getBlockPos())
+                    && movementManager.isOnGround()) {
+                connection.logger().info("[AutoJump] Jumping!");
+                movementManager.jump();
+            }
+        }, settings.minDelay(), settings.maxDelay());
     }
 
     @EventHandler
@@ -75,25 +84,6 @@ public class AutoJump implements InternalAddon {
     @EventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), AutoJumpSettings.class, new AutoJumpCommand());
-    }
-
-    private record BotJumpThread(BotConnection connection, ScheduledExecutorService executor,
-                                 Set<String> messageQueue) {
-        public BotJumpThread {
-            AutoJumpSettings settings = connection.settingsHolder().get(AutoJumpSettings.class);
-
-            ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
-                SessionDataManager sessionDataManager = connection.sessionDataManager();
-                LevelState level = sessionDataManager.getCurrentLevel();
-                BotMovementManager movementManager = sessionDataManager.getBotMovementManager();
-                if (level != null && movementManager != null
-                        && level.isChunkLoaded(movementManager.getBlockPos())
-                        && movementManager.isOnGround()) {
-                    connection.logger().info("[AutoJump] Jumping!");
-                    movementManager.jump();
-                }
-            }, settings.minDelay(), settings.maxDelay());
-        }
     }
 
     private static class AutoJumpPanel extends NavigationItem implements SettingsDuplex<AutoJumpSettings> {

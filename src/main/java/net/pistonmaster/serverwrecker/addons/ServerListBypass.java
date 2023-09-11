@@ -55,14 +55,18 @@ public class ServerListBypass implements InternalAddon {
         }
 
         BotConnectionFactory factory = event.connection().factory();
-        if (factory.settingsHolder().has(ServerListBypassSettings.class)) {
-            ServerListBypassSettings settings = factory.settingsHolder().get(ServerListBypassSettings.class);
-
-            if (settings.serverListBypass()) {
-                factory.connectInternal(ProtocolState.STATUS);
-                TimeUtil.waitTime(ThreadLocalRandom.current().nextInt(settings.minDelay(), settings.maxDelay() + 1), TimeUnit.SECONDS);
-            }
+        if (!factory.settingsHolder().has(ServerListBypassSettings.class)) {
+            return;
         }
+
+        ServerListBypassSettings settings = factory.settingsHolder().get(ServerListBypassSettings.class);
+
+        if (!settings.serverListBypass()) {
+            return;
+        }
+
+        factory.prepareConnectionInternal(ProtocolState.STATUS).connect().join();
+        TimeUtil.waitTime(ThreadLocalRandom.current().nextInt(settings.minDelay(), settings.maxDelay() + 1), TimeUnit.SECONDS);
     }
 
     @EventHandler

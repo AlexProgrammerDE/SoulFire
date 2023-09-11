@@ -39,6 +39,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
+import net.pistonmaster.serverwrecker.protocol.bot.model.HealthData;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
@@ -58,17 +59,98 @@ public class AutoEat implements InternalAddon {
 
     @EventHandler
     public void onJoined(BotJoinedEvent event) {
-        if (!event.connection().settingsHolder().has(AutoEatSettings.class)) {
+        BotConnection connection = event.connection();
+        if (!connection.settingsHolder().has(AutoEatSettings.class)) {
             return;
         }
 
-        AutoEatSettings settings = event.connection().settingsHolder().get(AutoEatSettings.class);
+        AutoEatSettings settings = connection.settingsHolder().get(AutoEatSettings.class);
         if (!settings.autoEat()) {
             return;
         }
 
-        new BotEatThread(event.connection(),
-                event.connection().executorManager().newScheduledExecutorService("AutoEat"));
+        ScheduledExecutorService executor = connection.executorManager().newScheduledExecutorService("AutoEat");
+        ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
+            SessionDataManager sessionDataManager = connection.sessionDataManager();
+
+            HealthData healthData = sessionDataManager.getHealthData();
+            if (healthData == null || healthData.food() >= 20) {
+                return;
+            }
+
+            InventoryManager inventoryManager = sessionDataManager.getInventoryManager();
+            PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
+
+            int i = 0;
+            for (ContainerSlot slot : playerInventory.getHotbar()) {
+                int hotbarSlot = i++;
+
+                if (slot.item() == null) {
+                    continue;
+                }
+
+                ItemType itemType = slot.item().getType();
+                FoodType foodType = FoodType.VALUES.stream()
+                        .filter(type -> type.itemType() == itemType)
+                        .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
+                        .orElse(null);
+
+                if (foodType == null || DangerFood.isDangerFood(foodType)) {
+                    continue;
+                }
+
+                if (!inventoryManager.tryInventoryControl()) {
+                    return;
+                }
+
+                try {
+                    inventoryManager.setHeldItemSlot(hotbarSlot);
+                    inventoryManager.sendHeldItemChange();
+                    sessionDataManager.getBotActionManager().useItemInHand(Hand.MAIN_HAND);
+
+                    // Wait before eating again
+                    TimeUtil.waitTime(2, TimeUnit.SECONDS);
+                    return;
+                } finally {
+                    inventoryManager.unlockInventoryControl();
+                }
+            }
+
+            for (ContainerSlot slot : playerInventory.getMainInventory()) {
+                if (slot.item() == null) {
+                    continue;
+                }
+
+                ItemType itemType = slot.item().getType();
+                FoodType foodType = FoodType.VALUES.stream()
+                        .filter(type -> type.itemType() == itemType)
+                        .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
+                        .orElse(null);
+
+                if (foodType == null || DangerFood.isDangerFood(foodType)) {
+                    continue;
+                }
+
+                if (!inventoryManager.tryInventoryControl()) {
+                    return;
+                }
+
+                try {
+                    inventoryManager.leftClickSlot(slot.slot());
+                    inventoryManager.leftClickSlot(playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot()).slot());
+                    if (inventoryManager.getCursorItem() != null) {
+                        inventoryManager.leftClickSlot(slot.slot());
+                    }
+
+                    // Wait before eating again
+                    TimeUtil.waitTime(2, TimeUnit.SECONDS);
+                    sessionDataManager.getBotActionManager().useItemInHand(Hand.MAIN_HAND);
+                    return;
+                } finally {
+                    inventoryManager.unlockInventoryControl();
+                }
+            }
+        }, settings.minDelay(), settings.maxDelay());
     }
 
     @EventHandler
@@ -79,93 +161,6 @@ public class AutoEat implements InternalAddon {
     @EventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), AutoEatSettings.class, new AutoEatCommand());
-    }
-
-    private record BotEatThread(BotConnection connection, ScheduledExecutorService executor) {
-        public BotEatThread {
-            AutoEatSettings settings = connection.settingsHolder().get(AutoEatSettings.class);
-
-            ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
-                SessionDataManager sessionDataManager = connection.sessionDataManager();
-
-                if (sessionDataManager.getHealthData().food() >= 20) {
-                    return;
-                }
-
-                InventoryManager inventoryManager = sessionDataManager.getInventoryManager();
-                PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
-
-                int i = 0;
-                for (ContainerSlot slot : playerInventory.getHotbar()) {
-                    int hotbarSlot = i++;
-
-                    if (slot.item() == null) {
-                        continue;
-                    }
-
-                    ItemType itemType = slot.item().getType();
-                    FoodType foodType = FoodType.VALUES.stream()
-                            .filter(type -> type.itemType() == itemType)
-                            .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
-                            .orElse(null);
-
-                    if (foodType == null || DangerFood.isDangerFood(foodType)) {
-                        continue;
-                    }
-
-                    if (!inventoryManager.tryInventoryControl()) {
-                        return;
-                    }
-
-                    try {
-                        inventoryManager.setHeldItemSlot(hotbarSlot);
-                        inventoryManager.sendHeldItemChange();
-                        sessionDataManager.getBotActionManager().useItemInHand(Hand.MAIN_HAND);
-
-                        // Wait before eating again
-                        TimeUtil.waitTime(2, TimeUnit.SECONDS);
-                        return;
-                    } finally {
-                        inventoryManager.unlockInventoryControl();
-                    }
-                }
-
-                for (ContainerSlot slot : playerInventory.getMainInventory()) {
-                    if (slot.item() == null) {
-                        continue;
-                    }
-
-                    ItemType itemType = slot.item().getType();
-                    FoodType foodType = FoodType.VALUES.stream()
-                            .filter(type -> type.itemType() == itemType)
-                            .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
-                            .orElse(null);
-
-                    if (foodType == null || DangerFood.isDangerFood(foodType)) {
-                        continue;
-                    }
-
-                    if (!inventoryManager.tryInventoryControl()) {
-                        return;
-                    }
-
-                    try {
-                        inventoryManager.leftClickSlot(slot.slot());
-                        inventoryManager.leftClickSlot(playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot()).slot());
-                        if (inventoryManager.getCursorItem() != null) {
-                            inventoryManager.leftClickSlot(slot.slot());
-                        }
-
-                        // Wait before eating again
-                        TimeUtil.waitTime(2, TimeUnit.SECONDS);
-                        sessionDataManager.getBotActionManager().useItemInHand(Hand.MAIN_HAND);
-                        return;
-                    } finally {
-                        inventoryManager.unlockInventoryControl();
-                    }
-                }
-            }, settings.minDelay(), settings.maxDelay());
-        }
     }
 
     private static class AutoEatPanel extends NavigationItem implements SettingsDuplex<AutoEatSettings> {

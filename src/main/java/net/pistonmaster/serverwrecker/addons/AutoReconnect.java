@@ -30,6 +30,7 @@ import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEven
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
@@ -52,24 +53,29 @@ public class AutoReconnect implements InternalAddon {
 
     @EventHandler
     public void onDisconnect(BotDisconnectedEvent event) {
-        if (!event.connection().settingsHolder().has(AutoReconnectSettings.class)) {
+        BotConnection connection = event.connection();
+        if (!connection.settingsHolder().has(AutoReconnectSettings.class)) {
             return;
         }
 
-        AutoReconnectSettings autoReconnectSettings = event.connection().settingsHolder().get(AutoReconnectSettings.class);
-        if (!autoReconnectSettings.autoReconnect() || event.connection().attackManager().getAttackState().isInactive()) {
+        AutoReconnectSettings autoReconnectSettings = connection.settingsHolder().get(AutoReconnectSettings.class);
+        if (!autoReconnectSettings.autoReconnect() || connection.attackManager().getAttackState().isInactive()) {
             return;
         }
 
         scheduler.schedule(() -> {
-            EventLoopGroup eventLoopGroup = event.connection().session().getEventLoopGroup();
+            EventLoopGroup eventLoopGroup = connection.session().getEventLoopGroup();
             if (eventLoopGroup.isShuttingDown() || eventLoopGroup.isShutdown() || eventLoopGroup.isTerminated()) {
                 return;
             }
 
-            event.connection().factory().connect()
-                    .thenAccept(newConnection -> event.connection().attackManager().getBotConnections()
-                            .replaceAll(connection1 -> connection1 == event.connection() ? newConnection : connection1));
+            connection.gracefulShutdown().join();
+            BotConnection newConnection = connection.factory().prepareConnection();
+
+            connection.attackManager().getBotConnections()
+                    .replaceAll(connectionEntry -> connectionEntry == connection ? newConnection : connectionEntry);
+
+            newConnection.connect();
         }, ThreadLocalRandom.current()
                 .nextInt(autoReconnectSettings.minDelay(), autoReconnectSettings.maxDelay()), TimeUnit.SECONDS);
     }

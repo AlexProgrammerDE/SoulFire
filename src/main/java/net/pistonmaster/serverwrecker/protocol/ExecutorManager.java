@@ -23,21 +23,25 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 
 @Getter
 @RequiredArgsConstructor
 public class ExecutorManager {
     private final List<ExecutorService> executors = Collections.synchronizedList(new ArrayList<>());
     private final String threadPrefix;
+    private boolean shutdown = false;
 
     public ScheduledExecutorService newScheduledExecutorService(String threadName) {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(getThreadFactory(threadName));
+        if (shutdown) {
+            throw new IllegalStateException("Cannot create new executor after shutdown!");
+        }
+
+        ScheduledExecutorService executor = new FinalizableScheduledDelegatedExecutorService(
+                Executors.newSingleThreadScheduledExecutor(getThreadFactory(threadName)));
 
         executors.add(executor);
 
@@ -45,6 +49,10 @@ public class ExecutorManager {
     }
 
     public ExecutorService newExecutorService(String threadName) {
+        if (shutdown) {
+            throw new IllegalStateException("Cannot create new executor after shutdown!");
+        }
+
         ExecutorService executor = Executors.newSingleThreadExecutor(getThreadFactory(threadName));
 
         executors.add(executor);
@@ -55,12 +63,134 @@ public class ExecutorManager {
     private ThreadFactory getThreadFactory(String threadName) {
         return runnable -> {
             Thread thread = new Thread(runnable);
-            thread.setName(threadPrefix + "-" + threadName);
+            String usedThreadName = threadName;
+            if (runnable instanceof NamedRunnable named) {
+                usedThreadName = named.name();
+            }
+            thread.setName(threadPrefix + "-" + usedThreadName);
             return thread;
         };
     }
 
     public void shutdownAll() {
+        shutdown = true;
         executors.forEach(ExecutorService::shutdownNow);
+        executors.clear();
+    }
+
+    private record NamedRunnable(Runnable runnable, String name) implements Runnable {
+        @Override
+        public void run() {
+            runnable.run();
+        }
+    }
+
+    @SuppressWarnings("NullableProblems")
+    private static class DelegatedExecutorService
+            implements ExecutorService {
+        private final ExecutorService e;
+
+        DelegatedExecutorService(ExecutorService executor) {
+            e = executor;
+        }
+
+        public void execute(Runnable command) {
+            e.execute(command);
+        }
+
+        public void shutdown() {
+            e.shutdown();
+        }
+
+        public List<Runnable> shutdownNow() {
+            return e.shutdownNow();
+        }
+
+        public boolean isShutdown() {
+            return e.isShutdown();
+        }
+
+        public boolean isTerminated() {
+            return e.isTerminated();
+        }
+
+        public boolean awaitTermination(long timeout, TimeUnit unit)
+                throws InterruptedException {
+            return e.awaitTermination(timeout, unit);
+        }
+
+        public Future<?> submit(Runnable task) {
+            return e.submit(task);
+        }
+
+        public <T> Future<T> submit(Callable<T> task) {
+            return e.submit(task);
+        }
+
+        public <T> Future<T> submit(Runnable task, T result) {
+            return e.submit(task, result);
+        }
+
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
+                throws InterruptedException {
+            return e.invokeAll(tasks);
+        }
+
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks,
+                                             long timeout, TimeUnit unit)
+                throws InterruptedException {
+            return e.invokeAll(tasks, timeout, unit);
+        }
+
+        public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
+                throws InterruptedException, ExecutionException {
+            return e.invokeAny(tasks);
+        }
+
+        public <T> T invokeAny(Collection<? extends Callable<T>> tasks,
+                               long timeout, TimeUnit unit)
+                throws InterruptedException, ExecutionException, TimeoutException {
+            return e.invokeAny(tasks, timeout, unit);
+        }
+    }
+
+    @SuppressWarnings("NullableProblems")
+    private static class DelegatedScheduledExecutorService
+            extends DelegatedExecutorService
+            implements ScheduledExecutorService {
+        private final ScheduledExecutorService e;
+
+        DelegatedScheduledExecutorService(ScheduledExecutorService executor) {
+            super(executor);
+            e = executor;
+        }
+
+        public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+            return e.schedule(command, delay, unit);
+        }
+
+        public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+            return e.schedule(callable, delay, unit);
+        }
+
+        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+            return e.scheduleAtFixedRate(command, initialDelay, period, unit);
+        }
+
+        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+            return e.scheduleWithFixedDelay(command, initialDelay, delay, unit);
+        }
+    }
+
+    private static class FinalizableScheduledDelegatedExecutorService
+            extends DelegatedScheduledExecutorService {
+        FinalizableScheduledDelegatedExecutorService(ScheduledExecutorService executor) {
+            super(executor);
+        }
+
+        @SuppressWarnings("removal")
+        protected void finalize() {
+            super.shutdown();
+        }
     }
 }

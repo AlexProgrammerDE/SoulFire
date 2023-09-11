@@ -45,8 +45,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class AutoRespawn implements InternalAddon {
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
@@ -68,7 +66,7 @@ public class AutoRespawn implements InternalAddon {
             event.getConnection().logger().info("[AutoRespawn] Died with killer: {} and message: '{}'",
                     combatKillPacket.getPlayerId(), message);
 
-            scheduler.schedule(() ->
+            event.getConnection().executorManager().newScheduledExecutorService("Respawn").schedule(() ->
                             event.getConnection().session().send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
                     ThreadLocalRandom.current().nextInt(autoRespawnSettings.minDelay(), autoRespawnSettings.maxDelay()), TimeUnit.SECONDS);
         }

@@ -67,8 +67,24 @@ public class AutoArmor implements InternalAddon {
             return;
         }
 
-        new BotArmorThread(event.connection(),
-                event.connection().executorManager().newScheduledExecutorService("AutoJump"));
+        ScheduledExecutorService executor = event.connection().executorManager().newScheduledExecutorService("AutoJump");
+        BotConnection connection = event.connection();
+        ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
+            SessionDataManager sessionDataManager = connection.sessionDataManager();
+            InventoryManager inventoryManager = sessionDataManager.getInventoryManager();
+            PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
+
+            Map<ArmorType, ContainerSlot> armorTypes = Map.of(
+                    ArmorType.HELMET, playerInventory.getHelmet(),
+                    ArmorType.CHESTPLATE, playerInventory.getChestplate(),
+                    ArmorType.LEGGINGS, playerInventory.getLeggings(),
+                    ArmorType.BOOTS, playerInventory.getBoots()
+            );
+
+            for (Map.Entry<ArmorType, ContainerSlot> entry : armorTypes.entrySet()) {
+                putOn(inventoryManager, playerInventory, entry.getValue(), entry.getKey());
+            }
+        }, settings.minDelay(), settings.maxDelay());
     }
 
     @EventHandler
@@ -81,77 +97,54 @@ public class AutoArmor implements InternalAddon {
         AddonCLIHelper.registerCommands(event.commandLine(), AutoArmorSettings.class, new AutoArmorCommand());
     }
 
-    private record BotArmorThread(BotConnection connection, ScheduledExecutorService executor) {
-        public BotArmorThread {
-            AutoArmorSettings settings = connection.settingsHolder().get(AutoArmorSettings.class);
+    private static void putOn(InventoryManager inventoryManager, PlayerInventoryContainer inventory, ContainerSlot targetSlot, ArmorType armorType) {
+        Optional<ContainerSlot> bestItem = Arrays.stream(inventory.getStorage()).filter(s -> {
+            if (s.item() == null) {
+                return false;
+            }
 
-            ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
-                SessionDataManager sessionDataManager = connection.sessionDataManager();
-                InventoryManager inventoryManager = sessionDataManager.getInventoryManager();
-                PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
+            return armorType.getItemTypes().contains(s.item().getType());
+        }).reduce((first, second) -> {
+            assert first.item() != null;
 
-                Map<ArmorType, ContainerSlot> armorTypes = Map.of(
-                        ArmorType.HELMET, playerInventory.getHelmet(),
-                        ArmorType.CHESTPLATE, playerInventory.getChestplate(),
-                        ArmorType.LEGGINGS, playerInventory.getLeggings(),
-                        ArmorType.BOOTS, playerInventory.getBoots()
-                );
+            int firstIndex = armorType.getItemTypes().indexOf(first.item().getType());
+            int secondIndex = armorType.getItemTypes().indexOf(second.item().getType());
 
-                for (Map.Entry<ArmorType, ContainerSlot> entry : armorTypes.entrySet()) {
-                    putOn(inventoryManager, playerInventory, entry.getValue(), entry.getKey());
-                }
-            }, settings.minDelay(), settings.maxDelay());
+            return firstIndex > secondIndex ? first : second;
+        });
+
+        if (bestItem.isEmpty() || bestItem.get().item() == null) {
+            return;
         }
 
-        private void putOn(InventoryManager inventoryManager, PlayerInventoryContainer inventory, ContainerSlot targetSlot, ArmorType armorType) {
-            Optional<ContainerSlot> bestItem = Arrays.stream(inventory.getStorage()).filter(s -> {
-                if (s.item() == null) {
-                    return false;
-                }
+        if (targetSlot.item() != null) {
+            int targetIndex = armorType.getItemTypes().indexOf(targetSlot.item().getType());
+            int bestIndex = armorType.getItemTypes().indexOf(bestItem.get().item().getType());
 
-                return armorType.getItemTypes().contains(s.item().getType());
-            }).reduce((first, second) -> {
-                assert first.item() != null;
+            if (targetIndex >= bestIndex) {
+                return;
+            }
+        }
 
-                int firstIndex = armorType.getItemTypes().indexOf(first.item().getType());
-                int secondIndex = armorType.getItemTypes().indexOf(second.item().getType());
-
-                return firstIndex > secondIndex ? first : second;
-            });
-
-            if (bestItem.isEmpty() || bestItem.get().item() == null) {
+        bestItem.ifPresent(bestItemSlot -> {
+            if (!inventoryManager.tryInventoryControl()) {
                 return;
             }
 
-            if (targetSlot.item() != null) {
-                int targetIndex = armorType.getItemTypes().indexOf(targetSlot.item().getType());
-                int bestIndex = armorType.getItemTypes().indexOf(bestItem.get().item().getType());
+            try {
+                inventoryManager.leftClickSlot(bestItemSlot.slot());
+                TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+                inventoryManager.leftClickSlot(targetSlot.slot());
+                TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
 
-                if (targetIndex >= bestIndex) {
-                    return;
-                }
-            }
-
-            bestItem.ifPresent(bestItemSlot -> {
-                if (!inventoryManager.tryInventoryControl()) {
-                    return;
-                }
-
-                try {
+                if (inventoryManager.getCursorItem() != null) {
                     inventoryManager.leftClickSlot(bestItemSlot.slot());
                     TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-                    inventoryManager.leftClickSlot(targetSlot.slot());
-                    TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-
-                    if (inventoryManager.getCursorItem() != null) {
-                        inventoryManager.leftClickSlot(bestItemSlot.slot());
-                        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-                    }
-                } finally {
-                    inventoryManager.unlockInventoryControl();
                 }
-            });
-        }
+            } finally {
+                inventoryManager.unlockInventoryControl();
+            }
+        });
     }
 
     private static class AutoArmorPanel extends NavigationItem implements SettingsDuplex<AutoArmorSettings> {
