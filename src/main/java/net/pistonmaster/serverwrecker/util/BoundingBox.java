@@ -22,6 +22,9 @@ package net.pistonmaster.serverwrecker.util;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.cloudburstmc.math.vector.Vector3d;
+
+import java.util.Optional;
 
 /**
  * Taken from: <a href="https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/util/BoundingBox.java">LabyStudio/java-minecraft</a>
@@ -38,6 +41,10 @@ public class BoundingBox implements Cloneable {
     public double maxX;
     public double maxY;
     public double maxZ;
+
+    public BoundingBox(Vector3d min, Vector3d max) {
+        this(min.getX(), min.getY(), min.getZ(), max.getX(), max.getY(), max.getZ());
+    }
 
     /**
      * Expand the bounding box. Positive and negative numbers controls which side of the box should grow.
@@ -253,6 +260,38 @@ public class BoundingBox implements Cloneable {
      */
     public BoundingBox offset(double x, double y, double z) {
         return new BoundingBox(this.minX + x, this.minY + y, this.minZ + z, this.maxX + x, this.maxY + y, this.maxZ + z);
+    }
+
+    public Optional<Vector3d> getIntersection(Vector3d origin, Vector3d direction) {
+        double x1 = origin.getX();
+        double y1 = origin.getY();
+        double z1 = origin.getZ();
+        double x2 = direction.getX();
+        double y2 = direction.getY();
+        double z2 = direction.getZ();
+
+        double xMin = this.minX;
+        double yMin = this.minY;
+        double zMin = this.minZ;
+        double xMax = this.maxX;
+        double yMax = this.maxY;
+        double zMax = this.maxZ;
+
+        double txMin = (xMin - x1) / x2;
+        double txMax = (xMax - x1) / x2;
+        double tyMin = (yMin - y1) / y2;
+        double tyMax = (yMax - y1) / y2;
+        double tzMin = (zMin - z1) / z2;
+        double tzMax = (zMax - z1) / z2;
+
+        double tMin = Math.max(Math.max(Math.min(txMin, txMax), Math.min(tyMin, tyMax)), Math.min(tzMin, tzMax));
+        double tMax = Math.min(Math.min(Math.max(txMin, txMax), Math.max(tyMin, tyMax)), Math.max(tzMin, tzMax));
+
+        if (tMax < 0 || tMin > tMax) {
+            return Optional.empty();
+        }
+
+        return Optional.of(origin.add(direction.mul(tMin)));
     }
 
     @Override

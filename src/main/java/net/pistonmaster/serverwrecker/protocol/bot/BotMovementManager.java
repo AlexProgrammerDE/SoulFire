@@ -660,6 +660,19 @@ public final class BotMovementManager {
         return level;
     }
 
+    public Vector3d getEyePosition() {
+        return Vector3d.from(this.x, this.y + getEyeHeight(), this.z);
+    }
+
+    public Vector3d getRotationVector() {
+        float yawRadians = (float) Math.toRadians(this.yaw);
+        float pitchRadians = (float) Math.toRadians(this.pitch);
+        double x = -Math.sin(yawRadians) * Math.cos(pitchRadians);
+        double y = -Math.sin(pitchRadians);
+        double z = Math.cos(yawRadians) * Math.cos(pitchRadians);
+        return Vector3d.from(x, y, z);
+    }
+
     private record BestXZMoveData(double totalMotion, double dx, double dz) {
     }
 }
