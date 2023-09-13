@@ -62,7 +62,7 @@ public class BlockBreakAction implements WorldAction {
             movementManager.lookAt(RotationOrigin.EYES, blockPosition.toDouble());
         }
 
-        if (!putOnHotbar) {
+        if (!putOnHotbar && toolType != null) {
             InventoryManager inventoryManager = connection.sessionDataManager().getInventoryManager();
             PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
             ContainerSlot heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());

@@ -19,9 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
+import net.pistonmaster.serverwrecker.pathfinding.execution.BlockBreakAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
@@ -94,18 +96,19 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         };
     }
 
-    private Optional<List<WorldAction>> requireFreeBlocks(ProjectedLevelState level, ProjectedInventory inventory) {
+    private Optional<ActionCosts> requireFreeBlocks(ProjectedLevelState level, ProjectedInventory inventory) {
         List<WorldAction> actions = new ArrayList<>();
+        AtomicDouble cost = new AtomicDouble();
         Vector3i fromPosInt = previousEntityState.position().toInt();
 
         if (modifier == MovementModifier.JUMP) {
             // Make head block free (maybe head block is a slab)
-            if (requireFreeHelper(fromPosInt.add(0, 1, 0), level, inventory, actions)) {
+            if (requireFreeHelper(fromPosInt.add(0, 1, 0), level, inventory, actions, cost)) {
                 return Optional.empty();
             }
 
             // Make block above head block free
-            if (requireFreeHelper(fromPosInt.add(0, 2, 0), level, inventory, actions)) {
+            if (requireFreeHelper(fromPosInt.add(0, 2, 0), level, inventory, actions, cost)) {
                 return Optional.empty();
             }
         }
@@ -145,7 +148,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
 
             for (Vector3i bodyOffset : BodyPart.BODY_PARTS) {
                 // Apply jump shift to target edge and offset for body part
-                if (requireFreeHelper(applyJumpShift(corner, modifier).add(bodyOffset), level, inventory, actions)) {
+                if (requireFreeHelper(applyJumpShift(corner, modifier).add(bodyOffset), level, inventory, actions, cost)) {
                     return Optional.empty();
                 }
             }
@@ -155,7 +158,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
 
         for (Vector3i bodyOffset : BodyPart.BODY_PARTS) {
             // Apply jump shift to target diagonal and offset for body part
-            if (requireFreeHelper(applyJumpShift(targetEdge, modifier).add(bodyOffset), level, inventory, actions)) {
+            if (requireFreeHelper(applyJumpShift(targetEdge, modifier).add(bodyOffset), level, inventory, actions, cost)) {
                 return Optional.empty();
             }
         }
@@ -163,84 +166,97 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         // Require free blocks to fall into the target position
         switch (modifier) {
             case FALL_1 -> {
-                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_1), level, inventory, actions)) {
+                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_1), level, inventory, actions, cost)) {
                     return Optional.empty();
                 }
             }
             case FALL_2 -> {
-                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_1), level, inventory, actions)) {
+                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_1), level, inventory, actions, cost)) {
                     return Optional.empty();
                 }
 
-                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_2), level, inventory, actions)) {
+                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_2), level, inventory, actions, cost)) {
                     return Optional.empty();
                 }
             }
             case FALL_3 -> {
-                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_1), level, inventory, actions)) {
+                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_1), level, inventory, actions, cost)) {
                     return Optional.empty();
                 }
 
-                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_2), level, inventory, actions)) {
+                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_2), level, inventory, actions, cost)) {
                     return Optional.empty();
                 }
 
-                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_3), level, inventory, actions)) {
+                if (requireFreeHelper(applyModifier(targetEdge, MovementModifier.FALL_3), level, inventory, actions, cost)) {
                     return Optional.empty();
                 }
             }
         }
 
-        return Optional.of(actions);
+        return Optional.of(new ActionCosts(cost.get(), actions));
     }
 
-    private boolean requireFreeHelper(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory, List<WorldAction> actions) {
-        Optional<List<WorldAction>> blockActions = requireFreeBlock(block, level, inventory);
+    private boolean requireFreeHelper(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory, List<WorldAction> actions, AtomicDouble cost) {
+        Optional<ActionCosts> blockActions = requireFreeBlock(block, level, inventory);
         if (blockActions.isEmpty()) {
             return true;
         } else {
-            actions.addAll(blockActions.get());
+            actions.addAll(blockActions.get().actions());
+            cost.addAndGet(blockActions.get().cost());
             return false;
         }
     }
 
-    private Optional<List<WorldAction>> requireFreeBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
-        BlockShapeType blockShapeType = getBlockShapeType(level, block);
+    private Optional<ActionCosts> requireFreeBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
+        BlockStateMeta blockStateMeta = getBlockShapeType(level, block);
 
         // Collision block like stone
-        if (!blockShapeType.hasNoCollisions()) {
+        if (!blockStateMeta.blockShapeType().hasNoCollisions()) {
             // In the future, add cost of breaking here
             return Optional.empty();
         }
 
-        return EMPTY_LIST;
+        Optional<Costs.BlockMiningCosts> blockMiningCosts = Costs.calculateBlockCost(inventory, blockStateMeta);
+
+        // No way to break block
+        if (blockMiningCosts.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Costs.BlockMiningCosts costs = blockMiningCosts.get();
+
+        // Add cost of breaking block
+        return Optional.of(new ActionCosts(costs.miningCost(), List.of(new BlockBreakAction(block, costs.toolType()))));
     }
 
-    private Optional<List<WorldAction>> requireSolidBlocks(ProjectedLevelState level, ProjectedInventory inventory) {
+    private Optional<ActionCosts> requireSolidBlocks(ProjectedLevelState level, ProjectedInventory inventory) {
         List<WorldAction> actions = new ArrayList<>();
+        AtomicDouble cost = new AtomicDouble();
         Vector3i fromPosInt = previousEntityState.position().toInt();
         Vector3i floorPos = fromPosInt.add(0, -1, 0);
 
         // Add the block that is required to be solid for straight movement
-        if (requireSolidHelper(applyModifier(applyDirection(floorPos, direction), modifier), level, inventory, actions)) {
+        if (requireSolidHelper(applyModifier(applyDirection(floorPos, direction), modifier), level, inventory, actions, cost)) {
             return Optional.empty();
         }
 
-        return Optional.of(actions);
+        return Optional.of(new ActionCosts(cost.get(), actions));
     }
 
-    private boolean requireSolidHelper(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory, List<WorldAction> actions) {
-        Optional<List<WorldAction>> blockActions = requireSolidBlock(block, level, inventory);
+    private boolean requireSolidHelper(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory, List<WorldAction> actions, AtomicDouble cost) {
+        Optional<ActionCosts> blockActions = requireSolidBlock(block, level, inventory);
         if (blockActions.isEmpty()) {
             return true;
         } else {
-            actions.addAll(blockActions.get());
+            actions.addAll(blockActions.get().actions());
+            cost.addAndGet(blockActions.get().cost());
             return false;
         }
     }
 
-    private Optional<List<WorldAction>> requireSolidBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
-        BlockShapeType blockShapeType = getBlockShapeType(level, block);
+    private Optional<ActionCosts> requireSolidBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
+        BlockShapeType blockShapeType = getBlockShapeType(level, block).blockShapeType();
 
         // Block with a current state that has no collision (Like air, grass, open fence)
         if (blockShapeType.hasNoCollisions()) {
@@ -248,23 +264,18 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             return Optional.empty();
         }
 
-        // Prevent walking over cake, fences, etc.
+        // Prevent walking over cake, slabs, fences, etc.
         if (!blockShapeType.isFullBlock()) {
             // Could destroy and place block here, but that's too much work
             return Optional.empty();
         }
 
-        return EMPTY_LIST;
+        return Optional.of(new ActionCosts(0, Collections.emptyList()));
     }
 
-    private BlockShapeType getBlockShapeType(ProjectedLevelState level, Vector3i block) {
-        Optional<BlockStateMeta> blockType = level.getBlockStateAt(block);
-        if (blockType.isEmpty()) {
-            // Out of level, so we can't go there, so we'll recalculate
-            throw new OutOfLevelException();
-        }
-
-        return blockType.get().blockShapeType();
+    private BlockStateMeta getBlockShapeType(ProjectedLevelState level, Vector3i block) {
+        // If out of level, we can't go there, so we'll recalculate
+        return level.getBlockStateAt(block).orElseThrow(OutOfLevelException::new);
     }
 
     @Override
@@ -277,18 +288,20 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         ProjectedLevelState projectedLevelState = previousEntityState.levelState();
         ProjectedInventory projectedInventory = previousEntityState.inventory();
 
-        Optional<List<WorldAction>> freeActions = requireFreeBlocks(projectedLevelState, projectedInventory);
+        Optional<ActionCosts> freeActions = requireFreeBlocks(projectedLevelState, projectedInventory);
         if (freeActions.isEmpty()) {
             return GraphInstructions.IMPOSSIBLE;
         } else {
-            actions.addAll(freeActions.get());
+            actions.addAll(freeActions.get().actions());
+            cost += freeActions.get().cost();
         }
 
-        Optional<List<WorldAction>> solidActions = requireSolidBlocks(projectedLevelState, projectedInventory);
+        Optional<ActionCosts> solidActions = requireSolidBlocks(projectedLevelState, projectedInventory);
         if (solidActions.isEmpty()) {
             return GraphInstructions.IMPOSSIBLE;
         } else {
-            actions.addAll(solidActions.get());
+            actions.addAll(solidActions.get().actions());
+            cost += solidActions.get().cost();
         }
 
         Vector3d targetPosition = applyModifier(applyDirection(previousEntityState.position(), direction), modifier);
@@ -316,5 +329,8 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
                 projectedLevelState,
                 projectedInventory
         ), cost, actions);
+    }
+
+    private record ActionCosts(double cost, List<WorldAction> actions) {
     }
 }
