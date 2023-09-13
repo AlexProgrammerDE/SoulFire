@@ -59,6 +59,7 @@ public class BlockBreakAction implements WorldAction {
     @Override
     public void tick(BotConnection connection) {
         BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
+        movementManager.getControlState().resetAll();
 
         if (!didLook) {
             didLook = true;
