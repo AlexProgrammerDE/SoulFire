@@ -202,7 +202,7 @@ public class LevelState {
                     }
 
                     BlockShapeType blockShapeType = blockState.get().blockShapeType();
-                    if (blockShapeType == null || blockShapeType.hasNoCollisions()) {
+                    if (blockShapeType.hasNoCollisions()) {
                         continue;
                     }
 

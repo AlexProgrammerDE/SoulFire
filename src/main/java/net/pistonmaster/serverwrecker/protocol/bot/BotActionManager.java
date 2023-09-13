@@ -30,6 +30,7 @@ import lombok.ToString;
 import net.pistonmaster.serverwrecker.data.BlockShape;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -79,7 +80,7 @@ public class BotActionManager {
         }
 
         Optional<BlockStateMeta> blockState = levelState.getBlockStateAt(againstBlock);
-        if (blockState.isEmpty() || blockState.get().blockShapeType() == null) {
+        if (blockState.isEmpty()) {
             return;
         }
 
@@ -141,5 +142,39 @@ public class BotActionManager {
             case WEST -> blockPosDouble.add(0, 0.5, 0.5);
             case EAST -> blockPosDouble.add(1, 0.5, 0.5);
         };
+    }
+
+    public Optional<BlockPlaceData> findBlockToPlaceAgainst(Vector3i targetPos, List<Vector3i> ignoreBlocks) {
+        LevelState levelState = dataManager.getCurrentLevel();
+        if (levelState == null) {
+            return Optional.empty();
+        }
+
+        for (Direction direction : Direction.values()) {
+            Vector3i blockPos = targetPos.add(switch (direction) {
+                case DOWN -> Vector3i.from(0, -1, 0);
+                case UP -> Vector3i.from(0, 1, 0);
+                case NORTH -> Vector3i.from(0, 0, -1);
+                case SOUTH -> Vector3i.from(0, 0, 1);
+                case WEST -> Vector3i.from(-1, 0, 0);
+                case EAST -> Vector3i.from(1, 0, 0);
+            });
+
+            if (ignoreBlocks.contains(blockPos)) {
+                continue;
+            }
+
+            Optional<BlockStateMeta> blockState = levelState.getBlockStateAt(blockPos);
+            if (blockState.isEmpty() || !blockState.get().blockShapeType().isFullBlock()) {
+                continue;
+            }
+
+            return Optional.of(new BlockPlaceData(blockPos, direction));
+        }
+
+        return Optional.empty();
+    }
+
+    public record BlockPlaceData(Vector3i againstPos, Direction blockFace) {
     }
 }

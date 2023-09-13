@@ -25,7 +25,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public record BlockStateMeta(BlockType blockType, @Nullable BlockShapeType blockShapeType) {
+public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType) {
+    private static final BlockShapeType EMPTY_SHAPE = BlockShapeType.getById(0);
+
     public BlockStateMeta(String blockName, int stateIndex) {
         this(Objects.requireNonNull(BlockType.getByMcName(blockName), "BlockType was null!"), stateIndex);
     }
@@ -37,8 +39,8 @@ public record BlockStateMeta(BlockType blockType, @Nullable BlockShapeType block
     private static BlockShapeType getBlockShapeType(BlockType blockType, int stateIndex) {
         int size = blockType.blockShapeTypes().size();
         if (size == 0) {
-            // This block has no shape, this is for example for air or grass
-            return null;
+            // This block has no shape stored, this is for example for air or grass
+            return EMPTY_SHAPE;
         } else if (size == 1) {
             return blockType.blockShapeTypes().get(0);
         } else {

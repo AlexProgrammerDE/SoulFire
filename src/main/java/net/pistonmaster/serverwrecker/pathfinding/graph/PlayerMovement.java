@@ -208,7 +208,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         BlockShapeType blockShapeType = getBlockShapeType(level, block);
 
         // Collision block like stone
-        if (blockShapeType != null && !blockShapeType.hasNoCollisions()) {
+        if (!blockShapeType.hasNoCollisions()) {
             // In the future, add cost of breaking here
             return Optional.empty();
         }
@@ -242,13 +242,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
     private Optional<List<WorldAction>> requireSolidBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
         BlockShapeType blockShapeType = getBlockShapeType(level, block);
 
-        // Empty block like air or grass
-        if (blockShapeType == null) {
-            // In the future, add cost of placing here if block is replaceable (like air)
-            return Optional.empty();
-        }
-
-        // Block with a current state that has no collision (Like open fence gate)
+        // Block with a current state that has no collision (Like air, grass, open fence)
         if (blockShapeType.hasNoCollisions()) {
             // Could destroy and place block here, but that's too much work
             return Optional.empty();
