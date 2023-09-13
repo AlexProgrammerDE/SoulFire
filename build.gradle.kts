@@ -5,7 +5,7 @@ plugins {
     application
     idea
     id("sw.shadow-conventions")
-    id("edu.sc.seis.launch4j") version "3.0.4"
+    id("edu.sc.seis.launch4j") version "3.0.5"
     id("com.google.protobuf") version "0.9.4"
 }
 
