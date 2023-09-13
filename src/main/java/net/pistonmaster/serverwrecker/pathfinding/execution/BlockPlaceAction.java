@@ -23,17 +23,26 @@ import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
+import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
+import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
+import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
+import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
+import net.pistonmaster.serverwrecker.util.TimeUtil;
 import org.cloudburstmc.math.vector.Vector3i;
+
+import java.util.concurrent.TimeUnit;
 
 @ToString
 @RequiredArgsConstructor
 public class BlockPlaceAction implements WorldAction {
     private final Vector3i blockPosition;
-    private final BlockType blockType;
+    private final ItemType blockType;
     private boolean didLook = false;
+    private boolean putOnHotbar = false;
 
     @Override
     public boolean isCompleted(BotConnection connection) {
@@ -42,7 +51,7 @@ public class BlockPlaceAction implements WorldAction {
             return false;
         }
 
-        return levelState.getBlockTypeAt(blockPosition).map(type -> type == blockType).orElse(false);
+        return levelState.getBlockTypeAt(blockPosition).map(type -> type.name().equals(blockType.name())).orElse(false);
     }
 
     @Override
@@ -52,6 +61,63 @@ public class BlockPlaceAction implements WorldAction {
         if (!didLook) {
             didLook = true;
             movementManager.lookAt(RotationOrigin.EYES, blockPosition.toDouble());
+        }
+
+        if (!putOnHotbar) {
+            InventoryManager inventoryManager = connection.sessionDataManager().getInventoryManager();
+            PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
+            ContainerSlot heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
+            if (heldSlot.item() != null) {
+                SWItemStack item = heldSlot.item();
+                if (item.getType() == blockType) {
+                    putOnHotbar = true;
+                    return;
+                }
+            }
+
+            for (ContainerSlot hotbarSlot : playerInventory.getHotbar()) {
+                if (hotbarSlot.item() == null) {
+                    continue;
+                }
+
+                SWItemStack item = hotbarSlot.item();
+                if (item.getType() == blockType) {
+                    inventoryManager.setHeldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
+                    inventoryManager.sendHeldItemChange();
+                    putOnHotbar = true;
+                    return;
+                }
+            }
+
+            for (ContainerSlot slot : playerInventory.getMainInventory()) {
+                if (slot.item() == null) {
+                    continue;
+                }
+
+                SWItemStack item = slot.item();
+                if (item.getType() == blockType) {
+                    if (!inventoryManager.tryInventoryControl()) {
+                        return;
+                    }
+
+                    try {
+                        inventoryManager.leftClickSlot(slot.slot());
+                        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+                        inventoryManager.leftClickSlot(playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot()).slot());
+                        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+
+                        if (inventoryManager.getCursorItem() != null) {
+                            inventoryManager.leftClickSlot(slot.slot());
+                            TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+                        }
+                    } finally {
+                        inventoryManager.unlockInventoryControl();
+                    }
+
+                    putOnHotbar = true;
+                    return;
+                }
+            }
         }
 
         // TODO: Place block

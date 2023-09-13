@@ -77,4 +77,28 @@ public class PlayerInventoryContainer extends Container {
     public ContainerSlot[] getArmor() {
         return getSlots(5, 8);
     }
+
+    public boolean isHotbar(ContainerSlot slot) {
+        return isHotbar(slot.slot());
+    }
+
+    public boolean isHotbar(int slot) {
+        return slot >= 36 && slot <= 44;
+    }
+
+    public int toHotbarIndex(ContainerSlot slot) {
+        return toHotbarIndex(slot.slot());
+    }
+
+    public int toHotbarIndex(int slot) {
+        return slot - 36;
+    }
+
+    public boolean isMainInventory(ContainerSlot slot) {
+        return isMainInventory(slot.slot());
+    }
+
+    public boolean isMainInventory(int slot) {
+        return slot >= 9 && slot <= 35;
+    }
 }

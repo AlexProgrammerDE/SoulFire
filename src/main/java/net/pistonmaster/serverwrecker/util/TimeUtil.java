@@ -30,7 +30,7 @@ public class TimeUtil {
         try {
             unit.sleep(time);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
     }
 

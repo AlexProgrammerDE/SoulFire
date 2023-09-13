@@ -303,6 +303,14 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
 
         actions.add(new MovementAction(targetPosition, yawOffset));
 
+        // Add additional "discouraged" costs to prevent the bot from doing too much parkour when it's not needed
+        switch (modifier) {
+            case FALL_1 -> cost += Costs.FALL_1;
+            case FALL_2 -> cost += Costs.FALL_2;
+            case FALL_3 -> cost += Costs.FALL_3;
+            case JUMP -> cost += Costs.JUMP;
+        }
+
         return new GraphInstructions(new BotEntityState(
                 targetPosition,
                 projectedLevelState,

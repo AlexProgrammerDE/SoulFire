@@ -20,19 +20,58 @@
 package net.pistonmaster.serverwrecker.pathfinding;
 
 import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.data.ItemType;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public class Costs {
     public static final double STRAIGHT = 1;
     public static final double DIAGONAL = 1.4142135623730951;
-    public static final double JUMP = 1.1;
-    public static final double DIG_BLOCK = 10;
+    public static final double JUMP = 0.3;
+    public static final double FALL_1 = 0.1;
+    public static final double FALL_2 = 0.2;
+    public static final double FALL_3 = 0.3;
+    public static final double DIG_BLOCK_WITHOUT_TOOL = 10;
+    public static final double DIG_BLOCK_WITH_TOOL = 5;
     public static final double PLACE_BLOCK = 10;
 
     private Costs() {
     }
 
-    public static double calculateCostForBlock(PlayerInventoryContainer inventory, BlockType blockType) {
-        return 1;
+    public static Optional<BlockMiningCosts> calculateBlockCost(PlayerInventoryContainer inventory, BlockStateMeta blockStateMeta) {
+        BlockType blockType = blockStateMeta.blockType();
+
+        // Don't try to find a way to dig bedrock
+        if (!blockType.diggable()) {
+            return Optional.empty();
+        }
+
+        // We only want to dig full blocks (not slabs, stairs, etc.), removes a lot of edge cases
+        if (!blockStateMeta.blockShapeType().isFullBlock()) {
+            return Optional.empty();
+        }
+
+        if (blockType.tools().isEmpty()) {
+            return Optional.of(new BlockMiningCosts(DIG_BLOCK_WITHOUT_TOOL, null));
+        }
+
+        for (ContainerSlot slot : inventory.getStorage()) {
+            if (slot.item() == null) {
+                continue;
+            }
+
+            if (blockType.tools().contains(slot.item().getType())) {
+                return Optional.of(new BlockMiningCosts(DIG_BLOCK_WITH_TOOL, slot.item().getType()));
+            }
+        }
+
+        return Optional.of(new BlockMiningCosts(DIG_BLOCK_WITHOUT_TOOL, null));
+    }
+
+    public record BlockMiningCosts(double miningCost, @Nullable ItemType toolType) {
     }
 }

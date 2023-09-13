@@ -22,16 +22,26 @@ package net.pistonmaster.serverwrecker.pathfinding.execution;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
+import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
+import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
+import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
+import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
+import net.pistonmaster.serverwrecker.util.TimeUtil;
 import org.cloudburstmc.math.vector.Vector3i;
+
+import java.util.concurrent.TimeUnit;
 
 @ToString
 @RequiredArgsConstructor
 public class BlockBreakAction implements WorldAction {
     private final Vector3i blockPosition;
+    private final ItemType toolType;
     private boolean didLook = false;
+    private boolean putOnHotbar = false;
 
     @Override
     public boolean isCompleted(BotConnection connection) {
@@ -52,7 +62,64 @@ public class BlockBreakAction implements WorldAction {
             movementManager.lookAt(RotationOrigin.EYES, blockPosition.toDouble());
         }
 
-        // TODO: Break block
+        if (!putOnHotbar) {
+            InventoryManager inventoryManager = connection.sessionDataManager().getInventoryManager();
+            PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
+            ContainerSlot heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
+            if (heldSlot.item() != null) {
+                SWItemStack item = heldSlot.item();
+                if (item.getType() == toolType) {
+                    putOnHotbar = true;
+                    return;
+                }
+            }
+
+            for (ContainerSlot hotbarSlot : playerInventory.getHotbar()) {
+                if (hotbarSlot.item() == null) {
+                    continue;
+                }
+
+                SWItemStack item = hotbarSlot.item();
+                if (item.getType() == toolType) {
+                    inventoryManager.setHeldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
+                    inventoryManager.sendHeldItemChange();
+                    putOnHotbar = true;
+                    return;
+                }
+            }
+
+            for (ContainerSlot slot : playerInventory.getMainInventory()) {
+                if (slot.item() == null) {
+                    continue;
+                }
+
+                SWItemStack item = slot.item();
+                if (item.getType() == toolType) {
+                    if (!inventoryManager.tryInventoryControl()) {
+                        return;
+                    }
+
+                    try {
+                        inventoryManager.leftClickSlot(slot.slot());
+                        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+                        inventoryManager.leftClickSlot(playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot()).slot());
+                        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+
+                        if (inventoryManager.getCursorItem() != null) {
+                            inventoryManager.leftClickSlot(slot.slot());
+                            TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+                        }
+                    } finally {
+                        inventoryManager.unlockInventoryControl();
+                    }
+
+                    putOnHotbar = true;
+                    return;
+                }
+            }
+        }
+
+        // TODO: Implement breaking blocks
     }
 
     @Override

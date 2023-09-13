@@ -40,11 +40,13 @@ import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.util.TimeUtil;
 import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class AutoTotem implements InternalAddon {
     @Override
@@ -89,11 +91,7 @@ public class AutoTotem implements InternalAddon {
 
                     try {
                         inventoryManager.leftClickSlot(slot.slot());
-                        try {
-                            Thread.sleep(50);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
+                        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
                         inventoryManager.leftClickSlot(offhandSlot.slot());
                     } finally {
                         inventoryManager.unlockInventoryControl();
@@ -112,13 +110,6 @@ public class AutoTotem implements InternalAddon {
     @EventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), AutoTotemSettings.class, new AutoTotemCommand());
-    }
-
-    private record BotTotemThread(BotConnection connection, ScheduledExecutorService executor) {
-        public BotTotemThread {
-            AutoTotemSettings settings = connection.settingsHolder().get(AutoTotemSettings.class);
-
-        }
     }
 
     private static class AutoTotemPanel extends NavigationItem implements SettingsDuplex<AutoTotemSettings> {
