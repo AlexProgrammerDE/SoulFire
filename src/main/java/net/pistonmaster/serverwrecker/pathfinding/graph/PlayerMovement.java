@@ -40,7 +40,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
                              MovementSide side) implements GraphAction {
     // Optional.of() takes a few milliseconds, so we'll just cache it
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static final Optional<List<WorldAction>> EMPTY_LIST = Optional.of(Collections.emptyList());
+    private static final Optional<ActionCosts> EMPTY_COST = Optional.of(new ActionCosts(0, Collections.emptyList()));
 
     private static Vector3i applyDirection(Vector3i pos, MovementDirection direction) {
         return switch (direction) {
@@ -211,10 +211,9 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
     private Optional<ActionCosts> requireFreeBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
         BlockStateMeta blockStateMeta = getBlockShapeType(level, block);
 
-        // Collision block like stone
-        if (!blockStateMeta.blockShapeType().hasNoCollisions()) {
-            // In the future, add cost of breaking here
-            return Optional.empty();
+        // No need to break blocks like air or grass
+        if (blockStateMeta.blockShapeType().hasNoCollisions()) {
+            return EMPTY_COST;
         }
 
         Optional<Costs.BlockMiningCosts> blockMiningCosts = Costs.calculateBlockCost(inventory, blockStateMeta);

@@ -22,6 +22,8 @@ package net.pistonmaster.serverwrecker.protocol.bot;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
+import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerAction;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerActionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundUseItemOnPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundUseItemPacket;
 import lombok.Data;
@@ -30,7 +32,6 @@ import lombok.ToString;
 import net.pistonmaster.serverwrecker.data.BlockShape;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
-import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -40,6 +41,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Manages mostly block and interaction related stuff that requires to keep track of sequence numbers.
@@ -58,6 +60,10 @@ public class BotActionManager {
     public void useItemInHand(Hand hand) {
         incrementSequenceNumber();
         dataManager.getSession().send(new ServerboundUseItemPacket(hand, sequenceNumber));
+    }
+
+    public void placeBlock(Hand hand, BlockPlaceData blockPlaceData) {
+        placeBlock(hand, blockPlaceData.againstPos(), blockPlaceData.blockFace());
     }
 
     public void placeBlock(Hand hand, Vector3i againstBlock, Direction againstFace) {
@@ -173,6 +179,43 @@ public class BotActionManager {
         }
 
         return Optional.empty();
+    }
+
+    public CompletableFuture<Void> breakBlock(Vector3i blockPos) {
+        return CompletableFuture.runAsync(() -> {
+            incrementSequenceNumber();
+            Direction blockFace = getBlockFaceLookedAt(blockPos);
+            dataManager.getSession().send(new ServerboundPlayerActionPacket(
+                    PlayerAction.START_DIGGING,
+                    blockPos,
+                    blockFace,
+                    sequenceNumber
+            ));
+        });
+    }
+
+    public Direction getBlockFaceLookedAt(Vector3i blockPos) {
+        Vector3d eyePosition = dataManager.getBotMovementManager().getEyePosition();
+        Vector3d headRotation = dataManager.getBotMovementManager().getRotationVector();
+        Vector3d blockPosDouble = blockPos.toDouble();
+        BoundingBox blockBoundingBox = new BoundingBox(blockPosDouble, blockPosDouble.add(1, 1, 1));
+        Optional<Vector3f> intersection = blockBoundingBox.getIntersection(eyePosition, headRotation).map(Vector3d::toFloat);
+        if (intersection.isEmpty()) {
+            return null;
+        }
+
+        Vector3f intersectionFloat = intersection.get();
+        Vector3f blockPosFloat = blockPos.toFloat();
+        Vector3f relativeIntersection = intersectionFloat.sub(blockPosFloat);
+
+        // Check side the intersection is the closest to
+        if (relativeIntersection.getX() > relativeIntersection.getY() && relativeIntersection.getX() > relativeIntersection.getZ()) {
+            return intersectionFloat.getX() > blockPosFloat.getX() ? Direction.EAST : Direction.WEST;
+        } else if (relativeIntersection.getY() > relativeIntersection.getZ()) {
+            return intersectionFloat.getY() > blockPosFloat.getY() ? Direction.UP : Direction.DOWN;
+        } else {
+            return intersectionFloat.getZ() > blockPosFloat.getZ() ? Direction.SOUTH : Direction.NORTH;
+        }
     }
 
     public record BlockPlaceData(Vector3i againstPos, Direction blockFace) {

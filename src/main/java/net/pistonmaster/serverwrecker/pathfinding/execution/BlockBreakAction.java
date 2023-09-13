@@ -31,8 +31,10 @@ import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryCont
 import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
+import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @ToString
@@ -42,6 +44,7 @@ public class BlockBreakAction implements WorldAction {
     private final ItemType toolType;
     private boolean didLook = false;
     private boolean putOnHotbar = false;
+    private CompletableFuture<Void> breakFuture;
 
     @Override
     public boolean isCompleted(BotConnection connection) {
@@ -59,7 +62,12 @@ public class BlockBreakAction implements WorldAction {
 
         if (!didLook) {
             didLook = true;
-            movementManager.lookAt(RotationOrigin.EYES, blockPosition.toDouble());
+            float previousYaw = movementManager.getYaw();
+            float previousPitch = movementManager.getPitch();
+            movementManager.lookAt(RotationOrigin.EYES, VectorHelper.middleOfBlockNormalize(blockPosition.toDouble()));
+            if (previousPitch != movementManager.getPitch() || previousYaw != movementManager.getYaw()) {
+                movementManager.sendRot();
+            }
         }
 
         if (!putOnHotbar && toolType != null) {
@@ -119,7 +127,9 @@ public class BlockBreakAction implements WorldAction {
             }
         }
 
-        // TODO: Implement breaking blocks
+        if (breakFuture == null || breakFuture.isCancelled() || breakFuture.isCompletedExceptionally()) {
+            breakFuture = connection.sessionDataManager().getBotActionManager().breakBlock(blockPosition);
+        }
     }
 
     @Override

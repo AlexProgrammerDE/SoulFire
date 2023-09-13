@@ -279,7 +279,7 @@ public class CommandManager {
                     ));
                     logger.info("Start: {}", start);
                     List<WorldAction> actions = routeFinder.findRoute(start);
-                    logger.info("Calculated path with {} actions", actions.size());
+                    logger.info("Calculated path with {} actions: {}", actions.size(), actions);
                     return actions;
                 };
 

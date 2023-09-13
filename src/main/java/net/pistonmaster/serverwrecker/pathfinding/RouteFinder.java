@@ -33,6 +33,7 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.pathfinding.graph.OutOfLevelException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +43,11 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         List<WorldAction> actions = new ArrayList<>();
         MinecraftRouteNode previousElement = current;
         do {
-            for (var action : previousElement.getPreviousActions()) {
+            List<WorldAction> previousActions = new ArrayList<>(previousElement.getPreviousActions());
+
+            // So they get executed in the right order
+            Collections.reverse(previousActions);
+            for (var action : previousActions) {
                 actions.add(0, action);
             }
 

@@ -19,10 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.execution;
 
-import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
@@ -41,7 +39,6 @@ import java.util.concurrent.TimeUnit;
 public class BlockPlaceAction implements WorldAction {
     private final Vector3i blockPosition;
     private final ItemType blockType;
-    private boolean didLook = false;
     private boolean putOnHotbar = false;
 
     @Override
@@ -57,11 +54,6 @@ public class BlockPlaceAction implements WorldAction {
     @Override
     public void tick(BotConnection connection) {
         BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
-
-        if (!didLook) {
-            didLook = true;
-            movementManager.lookAt(RotationOrigin.EYES, blockPosition.toDouble());
-        }
 
         if (!putOnHotbar) {
             InventoryManager inventoryManager = connection.sessionDataManager().getInventoryManager();
