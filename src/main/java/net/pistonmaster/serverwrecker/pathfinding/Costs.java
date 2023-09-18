@@ -24,7 +24,6 @@ import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
-import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -43,7 +42,7 @@ public class Costs {
     private Costs() {
     }
 
-    public static Optional<BlockMiningCosts> calculateBlockCost(ProjectedInventory inventory, BlockStateMeta blockStateMeta) {
+    public static Optional<BlockMiningCosts> calculateBlockBreakCost(ProjectedInventory inventory, BlockStateMeta blockStateMeta) {
         BlockType blockType = blockStateMeta.blockType();
 
         // Don't try to find a way to dig bedrock

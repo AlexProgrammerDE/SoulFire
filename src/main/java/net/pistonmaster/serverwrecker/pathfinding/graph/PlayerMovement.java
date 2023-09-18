@@ -41,6 +41,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
     // Optional.of() takes a few milliseconds, so we'll just cache it
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static final Optional<ActionCosts> EMPTY_COST = Optional.of(new ActionCosts(0, Collections.emptyList()));
+    private static final boolean ALLOW_BLOCK_ACTIONS = false;
 
     private static Vector3i applyDirection(Vector3i pos, MovementDirection direction) {
         return switch (direction) {
@@ -216,7 +217,11 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             return EMPTY_COST;
         }
 
-        Optional<Costs.BlockMiningCosts> blockMiningCosts = Costs.calculateBlockCost(inventory, blockStateMeta);
+        if (!ALLOW_BLOCK_ACTIONS) {
+            return Optional.empty();
+        }
+
+        Optional<Costs.BlockMiningCosts> blockMiningCosts = Costs.calculateBlockBreakCost(inventory, blockStateMeta);
 
         // No way to break block
         if (blockMiningCosts.isEmpty()) {
@@ -259,6 +264,10 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
 
         // Block with a current state that has no collision (Like air, grass, open fence)
         if (blockShapeType.hasNoCollisions()) {
+            if (!ALLOW_BLOCK_ACTIONS) {
+                return Optional.empty();
+            }
+
             // Could destroy and place block here, but that's too much work
             return Optional.empty();
         }
@@ -269,7 +278,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             return Optional.empty();
         }
 
-        return Optional.of(new ActionCosts(0, Collections.emptyList()));
+        return EMPTY_COST;
     }
 
     private BlockStateMeta getBlockShapeType(ProjectedLevelState level, Vector3i block) {
