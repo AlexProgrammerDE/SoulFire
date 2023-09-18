@@ -34,9 +34,7 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
                 throw new IllegalStateException("blockshapes.txt not found!");
             }
 
-            String[] lines = new String(inputStream.readAllBytes()).split("\n");
-
-            for (String line : lines) {
+            new String(inputStream.readAllBytes()).lines().forEach(line -> {
                 String[] parts = line.split("\\|");
 
                 int id = Integer.parseInt(parts[0]);
@@ -58,7 +56,7 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
                 }
 
                 VALUES.add(new BlockShapeType(id, blockShapes));
-            }
+            });
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

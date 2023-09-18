@@ -44,9 +44,7 @@ public class ProxyRegistry implements SettingsDuplex<ProxyList> {
     public void loadFromString(String file, ProxyType proxyType) {
         List<SWProxy> newProxies = new ArrayList<>();
 
-        String[] proxyLines = file.split("\n");
-
-        Arrays.stream(proxyLines)
+        file.lines()
                 .filter(line -> !line.isBlank())
                 .distinct()
                 .map(line -> fromString(line, proxyType))

@@ -35,9 +35,7 @@ public class BlockStateLoader {
                 throw new IllegalStateException("blockstates.txt not found!");
             }
 
-            String[] lines = new String(inputStream.readAllBytes()).split("\n");
-
-            for (String line : lines) {
+            new String(inputStream.readAllBytes()).lines().forEach(line -> {
                 String[] parts = line.split("\\|");
                 String name = parts[0];
 
@@ -55,7 +53,7 @@ public class BlockStateLoader {
                 }
 
                 BLOCK_SHAPES.put(name, blockShapeTypes);
-            }
+            });
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

@@ -64,9 +64,7 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
                 throw new IllegalArgumentException("Invalid JSON!");
             }
         } else {
-            String[] accountLines = file.split("\n");
-
-            Arrays.stream(accountLines)
+            file.lines()
                     .filter(line -> !line.isBlank())
                     .distinct()
                     .map(account -> fromString(account, authType))
