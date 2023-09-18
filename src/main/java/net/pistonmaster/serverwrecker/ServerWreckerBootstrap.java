@@ -23,6 +23,7 @@ import io.netty.util.ResourceLeakDetector;
 import net.pistonmaster.serverwrecker.addons.*;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.cli.SWCommandDefinition;
 import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
