@@ -9,7 +9,7 @@ plugins {
     id("com.google.protobuf") version "0.9.4"
 }
 
-version = "1.2.0-SNAPSHOT"
+version = "1.2.0"
 description = "Advanced Minecraft Server-Stresser Tool."
 
 repositories {
