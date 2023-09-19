@@ -17,11 +17,12 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker;
+package net.pistonmaster.serverwrecker.cli;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;

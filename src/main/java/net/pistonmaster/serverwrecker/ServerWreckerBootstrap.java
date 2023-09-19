@@ -23,6 +23,7 @@ import io.netty.util.ResourceLeakDetector;
 import net.pistonmaster.serverwrecker.addons.*;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.cli.SWCommandDefinition;
 import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
@@ -33,7 +34,7 @@ import picocli.CommandLine;
 import java.awt.*;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.Set;
+import java.util.List;
 
 public class ServerWreckerBootstrap {
     static {
@@ -76,7 +77,7 @@ public class ServerWreckerBootstrap {
     }
 
     private static void loadInternalAddons() {
-        Set<InternalAddon> addons = Set.of(
+        List<InternalAddon> addons = List.of(
                 new BotTicker(), new ClientBrand(), new ClientSettings(),
                 new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
                 new AutoTotem(), new AutoJump(), new AutoArmor(), new AutoEat(),
