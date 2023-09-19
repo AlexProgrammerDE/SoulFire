@@ -30,19 +30,16 @@ import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.slf4j.Logger;
 import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -60,7 +57,7 @@ public class ChatMessageLogger implements InternalAddon {
         }
 
         ServerWreckerAPI.registerListener(ChatMessageReceiveEvent.class,
-                new BotChatListener(event.connection(),
+                new BotChatListener(event.connection().connectionId(), event.connection().logger(),
                         event.connection().executorManager().newScheduledExecutorService("Chat"),
                         new LinkedHashSet<>(), chatMessageSettings));
     }
@@ -75,7 +72,7 @@ public class ChatMessageLogger implements InternalAddon {
         AddonCLIHelper.registerCommands(event.commandLine(), ChatMessageSettings.class, new ChatMessageCommand());
     }
 
-    private record BotChatListener(BotConnection connection, ScheduledExecutorService executor,
+    private record BotChatListener(UUID connectionId, Logger logger, ScheduledExecutorService executor,
                                    Set<String> messageQueue, ChatMessageSettings chatMessageSettings)
             implements EventSubscriber<ChatMessageReceiveEvent> {
         public BotChatListener {
@@ -88,14 +85,14 @@ public class ChatMessageLogger implements InternalAddon {
                         continue;
                     }
 
-                    connection.logger().info("[Chat] Received Message: {}", message);
+                    logger.info("[Chat] Received Message: {}", message);
                 }
             }, 0, chatMessageSettings.interval(), TimeUnit.SECONDS);
         }
 
         @Override
         public void on(@NonNull ChatMessageReceiveEvent event) {
-            if (event.connection() != connection) {
+            if (!event.connection().connectionId().equals(connectionId)) {
                 return;
             }
 
