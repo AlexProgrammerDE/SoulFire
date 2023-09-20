@@ -184,9 +184,11 @@ or run `java -jar serverwrecker.jar --help`.
 
 ## 🌈 Community
 
-Feel free to join our discord community server:
+Feel free to join our Discord community server:
 
 [![Discord Banner](https://discord.com/api/guilds/739784741124833301/widget.png?style=banner2)](https://discord.gg/CDrcxzH)
+
+If you find any bugs or want to request new features, open a issue on GitHub.
 
 ## 🌟 Star History
 
