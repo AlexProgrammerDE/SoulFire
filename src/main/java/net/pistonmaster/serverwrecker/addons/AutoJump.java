@@ -41,7 +41,6 @@ import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.LinkedHashSet;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class AutoJump implements InternalAddon {

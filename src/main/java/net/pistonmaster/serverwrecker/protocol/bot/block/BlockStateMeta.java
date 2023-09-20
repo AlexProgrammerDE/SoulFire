@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.protocol.bot.block;
 
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.data.BlockType;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 

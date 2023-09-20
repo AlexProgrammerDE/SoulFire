@@ -44,6 +44,7 @@ import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
+import net.pistonmaster.serverwrecker.util.RandomUtil;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
 import org.apache.logging.log4j.Level;
 import org.slf4j.Logger;
@@ -166,7 +167,6 @@ public class AttackManager {
         ExecutorService connectService = Executors.newFixedThreadPool(botSettings.concurrentConnects());
 
         return CompletableFuture.runAsync(() -> {
-            Random random = ThreadLocalRandom.current();
             while (!factories.isEmpty()) {
                 BotConnectionFactory factory = factories.poll();
                 if (factory == null) {
@@ -191,11 +191,7 @@ public class AttackManager {
                     }
                 });
 
-                try {
-                    TimeUnit.MILLISECONDS.sleep(random.nextInt(botSettings.minJoinDelayMs(), botSettings.maxJoinDelayMs()));
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
+                TimeUtil.waitTime(RandomUtil.getRandomInt(botSettings.minJoinDelayMs(), botSettings.maxJoinDelayMs()), TimeUnit.MILLISECONDS);
             }
         });
     }

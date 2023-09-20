@@ -34,12 +34,12 @@ import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.util.RandomUtil;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
 import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class ServerListBypass implements InternalAddon {
@@ -66,7 +66,7 @@ public class ServerListBypass implements InternalAddon {
         }
 
         factory.prepareConnectionInternal(ProtocolState.STATUS).connect().join();
-        TimeUtil.waitTime(ThreadLocalRandom.current().nextInt(settings.minDelay(), settings.maxDelay() + 1), TimeUnit.SECONDS);
+        TimeUtil.waitTime(RandomUtil.getRandomInt(settings.minDelay(), settings.maxDelay()), TimeUnit.SECONDS);
     }
 
     @EventHandler

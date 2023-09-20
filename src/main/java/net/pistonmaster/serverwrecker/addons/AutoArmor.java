@@ -51,52 +51,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class AutoArmor implements InternalAddon {
-    @Override
-    public void onLoad() {
-        ServerWreckerAPI.registerListeners(this);
-    }
-
-    @EventHandler
-    public void onJoined(BotJoinedEvent event) {
-        if (!event.connection().settingsHolder().has(AutoArmorSettings.class)) {
-            return;
-        }
-
-        AutoArmorSettings settings = event.connection().settingsHolder().get(AutoArmorSettings.class);
-        if (!settings.autoArmor()) {
-            return;
-        }
-
-        ScheduledExecutorService executor = event.connection().executorManager().newScheduledExecutorService("AutoJump");
-        BotConnection connection = event.connection();
-        ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
-            SessionDataManager sessionDataManager = connection.sessionDataManager();
-            InventoryManager inventoryManager = sessionDataManager.getInventoryManager();
-            PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
-
-            Map<ArmorType, ContainerSlot> armorTypes = Map.of(
-                    ArmorType.HELMET, playerInventory.getHelmet(),
-                    ArmorType.CHESTPLATE, playerInventory.getChestplate(),
-                    ArmorType.LEGGINGS, playerInventory.getLeggings(),
-                    ArmorType.BOOTS, playerInventory.getBoots()
-            );
-
-            for (Map.Entry<ArmorType, ContainerSlot> entry : armorTypes.entrySet()) {
-                putOn(inventoryManager, playerInventory, entry.getValue(), entry.getKey());
-            }
-        }, settings.minDelay(), settings.maxDelay());
-    }
-
-    @EventHandler
-    public void onAddonPanel(AddonPanelInitEvent event) {
-        event.navigationItems().add(new AutoArmorPanel(ServerWreckerAPI.getServerWrecker()));
-    }
-
-    @EventHandler
-    public void onCommandLine(CommandManagerInitEvent event) {
-        AddonCLIHelper.registerCommands(event.commandLine(), AutoArmorSettings.class, new AutoArmorCommand());
-    }
-
     private static void putOn(InventoryManager inventoryManager, PlayerInventoryContainer inventory, ContainerSlot targetSlot, ArmorType armorType) {
         Optional<ContainerSlot> bestItem = Arrays.stream(inventory.getStorage()).filter(s -> {
             if (s.item() == null) {
@@ -145,6 +99,52 @@ public class AutoArmor implements InternalAddon {
                 inventoryManager.unlockInventoryControl();
             }
         });
+    }
+
+    @Override
+    public void onLoad() {
+        ServerWreckerAPI.registerListeners(this);
+    }
+
+    @EventHandler
+    public void onJoined(BotJoinedEvent event) {
+        if (!event.connection().settingsHolder().has(AutoArmorSettings.class)) {
+            return;
+        }
+
+        AutoArmorSettings settings = event.connection().settingsHolder().get(AutoArmorSettings.class);
+        if (!settings.autoArmor()) {
+            return;
+        }
+
+        ScheduledExecutorService executor = event.connection().executorManager().newScheduledExecutorService("AutoJump");
+        BotConnection connection = event.connection();
+        ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
+            SessionDataManager sessionDataManager = connection.sessionDataManager();
+            InventoryManager inventoryManager = sessionDataManager.getInventoryManager();
+            PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
+
+            Map<ArmorType, ContainerSlot> armorTypes = Map.of(
+                    ArmorType.HELMET, playerInventory.getHelmet(),
+                    ArmorType.CHESTPLATE, playerInventory.getChestplate(),
+                    ArmorType.LEGGINGS, playerInventory.getLeggings(),
+                    ArmorType.BOOTS, playerInventory.getBoots()
+            );
+
+            for (Map.Entry<ArmorType, ContainerSlot> entry : armorTypes.entrySet()) {
+                putOn(inventoryManager, playerInventory, entry.getValue(), entry.getKey());
+            }
+        }, settings.minDelay(), settings.maxDelay());
+    }
+
+    @EventHandler
+    public void onAddonPanel(AddonPanelInitEvent event) {
+        event.navigationItems().add(new AutoArmorPanel(ServerWreckerAPI.getServerWrecker()));
+    }
+
+    @EventHandler
+    public void onCommandLine(CommandManagerInitEvent event) {
+        AddonCLIHelper.registerCommands(event.commandLine(), AutoArmorSettings.class, new AutoArmorCommand());
     }
 
     private static class AutoArmorPanel extends NavigationItem implements SettingsDuplex<AutoArmorSettings> {

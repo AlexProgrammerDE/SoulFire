@@ -34,13 +34,13 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.util.RandomUtil;
 import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class AutoReconnect implements InternalAddon {
@@ -76,8 +76,7 @@ public class AutoReconnect implements InternalAddon {
                     .replaceAll(connectionEntry -> connectionEntry == connection ? newConnection : connectionEntry);
 
             newConnection.connect();
-        }, ThreadLocalRandom.current()
-                .nextInt(autoReconnectSettings.minDelay(), autoReconnectSettings.maxDelay()), TimeUnit.SECONDS);
+        }, RandomUtil.getRandomInt(autoReconnectSettings.minDelay(), autoReconnectSettings.maxDelay()), TimeUnit.SECONDS);
     }
 
     @EventHandler

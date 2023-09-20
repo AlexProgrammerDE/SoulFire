@@ -19,8 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.api;
 
+import net.pistonmaster.serverwrecker.util.RandomUtil;
+
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,7 +32,7 @@ public class ExecutorHelper {
         AtomicInteger counter = new AtomicInteger();
         executorService.scheduleWithFixedDelay(() -> {
             if (counter.get() == 0) {
-                delay.set(ThreadLocalRandom.current().nextInt(minDelay, maxDelay + 1));
+                delay.set(RandomUtil.getRandomInt(minDelay, maxDelay));
             }
 
             if (counter.get() == delay.get()) {

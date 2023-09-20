@@ -528,7 +528,7 @@ public final class BotMovementManager {
         // Check if walking up solves the collisions, and thus we'll be able to walk upstairs
         if (this.onGround && !collisionBoxes.isEmpty()) {
             double highestCollision = collisionBoxes.stream().map(b -> b.maxY).max(Comparator.naturalOrder()).orElse(0.0D);
-            double highestDeltaY =  highestCollision - this.boundingBox.minY;
+            double highestDeltaY = highestCollision - this.boundingBox.minY;
             double stepHeight = STEP_HEIGHT;
             if (highestDeltaY > 0.0D && highestDeltaY < stepHeight) {
                 stepHeight = highestDeltaY;

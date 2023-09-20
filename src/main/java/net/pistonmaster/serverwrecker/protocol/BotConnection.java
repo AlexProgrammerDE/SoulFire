@@ -34,7 +34,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public record BotConnection(UUID connectionId, BotConnectionFactory factory, AttackManager attackManager, ServerWrecker serverWrecker,
+public record BotConnection(UUID connectionId, BotConnectionFactory factory, AttackManager attackManager,
+                            ServerWrecker serverWrecker,
                             SettingsHolder settingsHolder,
                             Logger logger, MinecraftProtocol protocol, ViaClientSession session,
                             ExecutorManager executorManager, BotConnectionMeta meta) {

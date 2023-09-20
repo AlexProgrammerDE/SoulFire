@@ -35,13 +35,11 @@ import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.util.RandomUtil;
 import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class AutoRespawn implements InternalAddon {
@@ -68,7 +66,7 @@ public class AutoRespawn implements InternalAddon {
 
             event.getConnection().executorManager().newScheduledExecutorService("Respawn").schedule(() ->
                             event.getConnection().session().send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
-                    ThreadLocalRandom.current().nextInt(autoRespawnSettings.minDelay(), autoRespawnSettings.maxDelay()), TimeUnit.SECONDS);
+                    RandomUtil.getRandomInt(autoRespawnSettings.minDelay(), autoRespawnSettings.maxDelay()), TimeUnit.SECONDS);
         }
     }
 

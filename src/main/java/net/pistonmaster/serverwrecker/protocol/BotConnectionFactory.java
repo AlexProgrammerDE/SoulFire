@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public record BotConnectionFactory(AttackManager attackManager, InetSocketAddress targetAddress,
                                    SettingsHolder settingsHolder, Logger logger,
