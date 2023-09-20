@@ -21,9 +21,10 @@ package net.pistonmaster.serverwrecker.addons;
 
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
+import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.EventHandler;
+import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
@@ -103,10 +104,9 @@ public class AutoArmor implements InternalAddon {
 
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListeners(this);
+        AddonHelper.registerBotEventConsumer(BotJoinedEvent.class, this::onJoined);
     }
 
-    @EventHandler
     public void onJoined(BotJoinedEvent event) {
         if (!event.connection().settingsHolder().has(AutoArmorSettings.class)) {
             return;
@@ -137,12 +137,12 @@ public class AutoArmor implements InternalAddon {
         }, settings.minDelay(), settings.maxDelay());
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new AutoArmorPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), AutoArmorSettings.class, new AutoArmorCommand());
     }

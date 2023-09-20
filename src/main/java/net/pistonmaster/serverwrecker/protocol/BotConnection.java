@@ -21,8 +21,11 @@ package net.pistonmaster.serverwrecker.protocol;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
+import net.kyori.event.EventBus;
 import net.pistonmaster.serverwrecker.AttackManager;
 import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
+import net.pistonmaster.serverwrecker.api.event.attack.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.protocol.bot.BotControlAPI;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
@@ -35,13 +38,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public record BotConnection(UUID connectionId, BotConnectionFactory factory, AttackManager attackManager,
-                            ServerWrecker serverWrecker,
-                            SettingsHolder settingsHolder,
+                            ServerWrecker serverWrecker, SettingsHolder settingsHolder,
                             Logger logger, MinecraftProtocol protocol, ViaClientSession session,
-                            ExecutorManager executorManager, BotConnectionMeta meta) {
+                            ExecutorManager executorManager, BotConnectionMeta meta,
+                            EventBus<ServerWreckerBotEvent> eventBus) {
     public CompletableFuture<Void> connect() {
-        return CompletableFuture.runAsync(() -> session.connect(true));
-
+        return CompletableFuture.runAsync(() -> {
+            attackManager.getEventBus().post(new PreBotConnectEvent(this));
+            session.connect(true);
+        });
     }
 
     public boolean isOnline() {

@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.api.event.lifecycle;
 
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
 import picocli.CommandLine;
 
 /**
@@ -27,5 +27,5 @@ import picocli.CommandLine;
  *
  * @param commandLine The command line
  */
-public record CommandManagerInitEvent(CommandLine commandLine) implements ServerWreckerEvent {
+public record CommandManagerInitEvent(CommandLine commandLine) implements ServerWreckerGlobalEvent {
 }

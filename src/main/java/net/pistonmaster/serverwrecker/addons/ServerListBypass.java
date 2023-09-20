@@ -22,14 +22,16 @@ package net.pistonmaster.serverwrecker.addons;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
+import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.EventHandler;
-import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
+import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
+import net.pistonmaster.serverwrecker.api.event.attack.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
@@ -46,21 +48,21 @@ public class ServerListBypass implements InternalAddon {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
+        AddonHelper.registerAttackEventConsumer(PreBotConnectEvent.class, this::onPreConnect);
     }
 
-    @EventHandler
     public void onPreConnect(PreBotConnectEvent event) {
-        if (event.connection().meta().getTargetState() == ProtocolState.STATUS) {
+        BotConnection connection = event.connection();
+        if (connection.meta().getTargetState() == ProtocolState.STATUS) {
             return;
         }
 
-        BotConnectionFactory factory = event.connection().factory();
-        if (!factory.settingsHolder().has(ServerListBypassSettings.class)) {
+        BotConnectionFactory factory = connection.factory();
+        if (!connection.settingsHolder().has(ServerListBypassSettings.class)) {
             return;
         }
 
-        ServerListBypassSettings settings = factory.settingsHolder().get(ServerListBypassSettings.class);
-
+        ServerListBypassSettings settings = connection.settingsHolder().get(ServerListBypassSettings.class);
         if (!settings.serverListBypass()) {
             return;
         }
@@ -69,12 +71,12 @@ public class ServerListBypass implements InternalAddon {
         TimeUtil.waitTime(RandomUtil.getRandomInt(settings.minDelay(), settings.maxDelay()), TimeUnit.SECONDS);
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new ServerListBypassPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), ServerListBypassSettings.class, new ServerListBypassCommand());
     }

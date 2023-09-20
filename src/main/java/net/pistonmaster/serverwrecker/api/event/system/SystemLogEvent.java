@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.api.event.system;
 
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
 
-public record SystemLogEvent(String message) implements ServerWreckerEvent {
+public record SystemLogEvent(String message) implements ServerWreckerGlobalEvent {
 }

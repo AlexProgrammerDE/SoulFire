@@ -27,9 +27,10 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.state.AttackEndedEvent;
-import net.pistonmaster.serverwrecker.api.event.state.AttackStartEvent;
+import net.kyori.event.EventBus;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerAttackEvent;
+import net.pistonmaster.serverwrecker.api.event.attack.AttackEndedEvent;
+import net.pistonmaster.serverwrecker.api.event.attack.AttackStartEvent;
 import net.pistonmaster.serverwrecker.auth.AccountList;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
@@ -63,6 +64,7 @@ public class AttackManager {
     private static final GameProfile EMPTY_GAME_PROFILE = new GameProfile((UUID) null, "DoNotUseGameProfile");
     private final int id = ID_COUNTER.getAndIncrement();
     private final Logger logger = LoggerFactory.getLogger("AttackManager-" + id);
+    private final EventBus<ServerWreckerAttackEvent> eventBus = EventBus.create(ServerWreckerAttackEvent.class);
     private final List<BotConnection> botConnections = new CopyOnWriteArrayList<>();
     private final ServerWrecker serverWrecker;
     @Setter
@@ -161,7 +163,7 @@ public class AttackManager {
             logger.info("Starting attack at {} with {} bots and {} proxies", botSettings.host(), factories.size(), availableProxiesCount);
         }
 
-        ServerWreckerAPI.postEvent(new AttackStartEvent(id));
+        eventBus.post(new AttackStartEvent(this));
 
         // Used for concurrent bot connecting
         ExecutorService connectService = Executors.newFixedThreadPool(botSettings.concurrentConnects());
@@ -184,6 +186,8 @@ public class AttackManager {
                     logger.debug("Connecting bot {}", factory.minecraftAccount().username());
                     BotConnection botConnection = factory.prepareConnection();
                     botConnections.add(botConnection);
+
+
                     try {
                         botConnection.connect().get();
                     } catch (Throwable e) {
@@ -263,7 +267,7 @@ public class AttackManager {
         } while (!botConnections.isEmpty()); // To make sure really all bots are disconnected
 
         // Notify addons of state change
-        ServerWreckerAPI.postEvent(new AttackEndedEvent(id));
+        eventBus.post(new AttackEndedEvent(this));
 
         logger.info("Attack stopped");
     }

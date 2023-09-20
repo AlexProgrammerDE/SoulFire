@@ -19,9 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
+import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.EventHandler;
-import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
+import net.pistonmaster.serverwrecker.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.util.TickTimer;
 
@@ -32,10 +32,10 @@ public class BotTicker implements InternalAddon {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
+        AddonHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, this::onConnectionInit);
     }
 
-    @EventHandler
-    public void onPreConnect(PreBotConnectEvent event) {
+    public void onConnectionInit(BotConnectionInitEvent event) {
         startTicker(event.connection(),
                 event.connection().executorManager().newScheduledExecutorService("Tick"),
                 new TickTimer(20));

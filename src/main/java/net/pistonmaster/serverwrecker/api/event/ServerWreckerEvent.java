@@ -19,5 +19,5 @@
  */
 package net.pistonmaster.serverwrecker.api.event;
 
-public interface ServerWreckerEvent {
+public sealed interface ServerWreckerEvent permits ServerWreckerGlobalEvent, ServerWreckerAttackEvent, ServerWreckerBotEvent {
 }

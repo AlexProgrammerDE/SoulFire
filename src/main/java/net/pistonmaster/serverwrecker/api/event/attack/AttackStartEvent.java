@@ -17,17 +17,10 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event.lifecycle;
+package net.pistonmaster.serverwrecker.api.event.attack;
 
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
+import net.pistonmaster.serverwrecker.AttackManager;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerAttackEvent;
 
-import java.util.List;
-
-/**
- * Add yourself to the addon panel by adding a {@link NavigationItem} to the list.
- *
- * @param navigationItems The list of navigation items.
- */
-public record AddonPanelInitEvent(List<NavigationItem> navigationItems) implements ServerWreckerGlobalEvent {
+public record AttackStartEvent(AttackManager attackManager) implements ServerWreckerAttackEvent {
 }

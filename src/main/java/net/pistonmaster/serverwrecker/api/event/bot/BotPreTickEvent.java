@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.api.event.bot;
 
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
 /**
@@ -27,5 +27,5 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
  *
  * @param connection The bot connection
  */
-public record BotPreTickEvent(BotConnection connection) implements ServerWreckerEvent {
+public record BotPreTickEvent(BotConnection connection) implements ServerWreckerBotEvent {
 }

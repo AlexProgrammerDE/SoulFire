@@ -24,17 +24,22 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.event.AbstractCancellable;
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
 /**
  * This event is called when a packet is sent to the connected server.
  * Setter is used to change the packet by a plugin.
  */
-@Getter
 @AllArgsConstructor
-public class SWPacketSendingEvent extends AbstractCancellable implements ServerWreckerEvent {
+public class SWPacketSendingEvent extends AbstractCancellable implements ServerWreckerBotEvent {
     private final BotConnection connection;
+    @Getter
     @Setter
     private MinecraftPacket packet;
+
+    @Override
+    public BotConnection connection() {
+        return connection;
+    }
 }

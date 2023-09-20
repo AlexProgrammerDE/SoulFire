@@ -39,6 +39,7 @@ import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.pistonmaster.serverwrecker.api.Addon;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.attack.AttackInitEvent;
 import net.pistonmaster.serverwrecker.auth.AccountList;
 import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
@@ -394,6 +395,8 @@ public class ServerWrecker {
 
     public int startAttack(SettingsHolder settingsHolder) {
         AttackManager attackManager = injector.newInstance(AttackManager.class);
+        ServerWreckerAPI.postEvent(new AttackInitEvent(attackManager));
+
         attacks.add(attackManager);
 
         attackManager.start(settingsHolder);

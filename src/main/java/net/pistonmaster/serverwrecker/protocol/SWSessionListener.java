@@ -25,7 +25,6 @@ import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.github.steveice10.packetlib.event.session.PacketSendingEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import com.github.steveice10.packetlib.packet.Packet;
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSendingEvent;
@@ -46,7 +45,7 @@ public class SWSessionListener extends SessionAdapter {
     @Override
     public void packetReceived(Session session, Packet packet) {
         SWPacketReceiveEvent event1 = new SWPacketReceiveEvent(botConnection, (MinecraftPacket) packet);
-        ServerWreckerAPI.postEvent(event1);
+        botConnection.eventBus().post(event1);
         if (event1.cancelled()) {
             return;
         }
@@ -63,7 +62,7 @@ public class SWSessionListener extends SessionAdapter {
     @Override
     public void packetSending(PacketSendingEvent event) {
         SWPacketSendingEvent event1 = new SWPacketSendingEvent(botConnection, event.getPacket());
-        ServerWreckerAPI.postEvent(event1);
+        botConnection.eventBus().post(event1);
         event.setPacket(event1.getPacket());
         event.setCancelled(event1.cancelled());
 
@@ -82,6 +81,6 @@ public class SWSessionListener extends SessionAdapter {
             t.printStackTrace();
         }
 
-        ServerWreckerAPI.postEvent(new BotDisconnectedEvent(botConnection));
+        botConnection.eventBus().post(new BotDisconnectedEvent(botConnection));
     }
 }

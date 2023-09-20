@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.protocol.netty;
 
 import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDelimiterPacket;
 import com.github.steveice10.packetlib.BuiltinFlags;
 import com.github.steveice10.packetlib.codec.PacketCodecHelper;
 import com.github.steveice10.packetlib.crypt.PacketEncryption;
@@ -85,6 +86,7 @@ public class ViaClientSession extends TcpSession {
     @Getter
     private final BotConnectionMeta meta;
     private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
+    private boolean delimiterBlockProcessing = false;
 
     public ViaClientSession(InetSocketAddress targetAddress, Logger logger,
                             PacketProtocol protocol, SWProxy proxy,
@@ -311,10 +313,20 @@ public class ViaClientSession extends TcpSession {
             return;
         }
 
-        packetTickQueue.add(packet);
+        if (packet instanceof ClientboundDelimiterPacket) {
+            // Block or unlock packets for processing
+            delimiterBlockProcessing = !delimiterBlockProcessing;
+        } else {
+            packetTickQueue.add(packet);
+        }
     }
 
     public void tick() {
+        // The server said we should block packets for processing until we get another delimiter packet
+        if (delimiterBlockProcessing) {
+            return;
+        }
+
         Packet packet;
         while ((packet = packetTickQueue.poll()) != null) {
             super.callPacketReceived(packet);

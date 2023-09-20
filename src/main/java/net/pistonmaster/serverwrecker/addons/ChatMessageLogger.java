@@ -22,10 +22,11 @@ package net.pistonmaster.serverwrecker.addons;
 import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
+import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.EventHandler;
+import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
+import net.pistonmaster.serverwrecker.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
@@ -47,27 +48,27 @@ public class ChatMessageLogger implements InternalAddon {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
+        AddonHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, this::onConnectionInit);
     }
 
-    @EventHandler
-    public void on(@NonNull PreBotConnectEvent event) throws Throwable {
+    public void onConnectionInit(BotConnectionInitEvent event) {
         ChatMessageSettings chatMessageSettings = event.connection().settingsHolder().get(ChatMessageSettings.class);
         if (!chatMessageSettings.logChat()) {
             return;
         }
 
-        ServerWreckerAPI.registerListener(ChatMessageReceiveEvent.class,
+        event.connection().eventBus().subscribe(ChatMessageReceiveEvent.class,
                 new BotChatListener(event.connection().connectionId(), event.connection().logger(),
                         event.connection().executorManager().newScheduledExecutorService("Chat"),
                         new LinkedHashSet<>(), chatMessageSettings));
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new ChatMessagePanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), ChatMessageSettings.class, new ChatMessageCommand());
     }

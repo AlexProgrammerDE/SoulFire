@@ -22,8 +22,9 @@ package net.pistonmaster.serverwrecker.addons;
 import io.netty.channel.EventLoopGroup;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
+import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.EventHandler;
+import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
@@ -49,9 +50,9 @@ public class AutoReconnect implements InternalAddon {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
+        AddonHelper.registerBotEventConsumer(BotDisconnectedEvent.class, this::onDisconnect);
     }
 
-    @EventHandler
     public void onDisconnect(BotDisconnectedEvent event) {
         BotConnection connection = event.connection();
         if (!connection.settingsHolder().has(AutoReconnectSettings.class)) {
@@ -79,12 +80,12 @@ public class AutoReconnect implements InternalAddon {
         }, RandomUtil.getRandomInt(autoReconnectSettings.minDelay(), autoReconnectSettings.maxDelay()), TimeUnit.SECONDS);
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new AutoReconnectPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), AutoReconnectSettings.class, new AutoReconnectCommand());
     }

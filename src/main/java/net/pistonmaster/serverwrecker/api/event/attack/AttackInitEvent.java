@@ -17,9 +17,14 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event.state;
+package net.pistonmaster.serverwrecker.api.event.attack;
 
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.AttackManager;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
 
-public record AttackStartEvent(int attackId) implements ServerWreckerEvent {
+/**
+ * This event is called right after an AttackManager is created and before any attack is scheduled.
+ * This is intentionally in a global scope for any listener to subscribe to this AttackManager.
+ */
+public record AttackInitEvent(AttackManager attackManager) implements ServerWreckerGlobalEvent {
 }

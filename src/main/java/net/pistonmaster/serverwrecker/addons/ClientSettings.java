@@ -27,8 +27,9 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundCl
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
+import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.EventHandler;
+import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
@@ -52,16 +53,16 @@ public class ClientSettings implements InternalAddon {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
+        AddonHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, this::onPacket);
     }
 
-    @EventHandler
     public void onPacket(SWPacketReceiveEvent event) {
         if (event.getPacket() instanceof ClientboundPlayerAbilitiesPacket) { // Recommended packet to use
-            if (!event.getConnection().settingsHolder().has(ClientSettingsSettings.class)) {
+            if (!event.connection().settingsHolder().has(ClientSettingsSettings.class)) {
                 return;
             }
 
-            ClientSettingsSettings settings = event.getConnection().settingsHolder().get(ClientSettingsSettings.class);
+            ClientSettingsSettings settings = event.connection().settingsHolder().get(ClientSettingsSettings.class);
             if (!settings.sendClientSettings()) {
                 return;
             }
@@ -89,7 +90,7 @@ public class ClientSettings implements InternalAddon {
                 skinParts.add(SkinPart.HAT);
             }
 
-            event.getConnection().session().send(new ServerboundClientInformationPacket(
+            event.connection().session().send(new ServerboundClientInformationPacket(
                     settings.clientLocale(),
                     settings.renderDistance(),
                     settings.chatVisibility(),
@@ -102,12 +103,12 @@ public class ClientSettings implements InternalAddon {
         }
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new ClientSettingsPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), ClientSettingsSettings.class, new ClientSettingsCommand());
     }

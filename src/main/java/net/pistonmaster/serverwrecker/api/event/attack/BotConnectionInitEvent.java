@@ -17,16 +17,21 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event.bot;
+package net.pistonmaster.serverwrecker.api.event.attack;
 
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
+import net.pistonmaster.serverwrecker.AttackManager;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerAttackEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
 /**
- * Called when the bot finished joining the server.
- * This event is called after the server confirms the spawn location and the "World Loading" screen is gone.
- *
- * @param connection The bot connection
+ * The event is called the moment after a bot connection object was created.
+ * The BotConnection instance has all fields filled, but most methods are unusable as the bot is not connected yet.
+ * <br>
+ * This event is recommended for when you want to add an addon listener to the bot connection.
  */
-public record BotJoinedEvent(BotConnection connection) implements ServerWreckerBotEvent {
+public record BotConnectionInitEvent(BotConnection connection) implements ServerWreckerAttackEvent {
+    @Override
+    public AttackManager attackManager() {
+        return connection.attackManager();
+    }
 }

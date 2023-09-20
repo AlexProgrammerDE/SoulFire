@@ -17,9 +17,10 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event.state;
+package net.pistonmaster.serverwrecker.api.event.attack;
 
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.AttackManager;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerAttackEvent;
 
-public record AttackEndedEvent(int attackId) implements ServerWreckerEvent {
+public record AttackEndedEvent(AttackManager attackManager) implements ServerWreckerAttackEvent {
 }

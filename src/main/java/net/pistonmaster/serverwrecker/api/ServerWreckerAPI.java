@@ -22,8 +22,8 @@ package net.pistonmaster.serverwrecker.api;
 import net.kyori.event.EventBus;
 import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.api.event.EventHandler;
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class ServerWreckerAPI {
-    private static final EventBus<ServerWreckerEvent> eventBus = EventBus.create(ServerWreckerEvent.class);
+    private static final EventBus<ServerWreckerGlobalEvent> eventBus = EventBus.create(ServerWreckerGlobalEvent.class);
     private static final List<Addon> addons = new ArrayList<>();
     private static ServerWrecker serverWrecker;
 
@@ -61,18 +61,18 @@ public class ServerWreckerAPI {
         ServerWreckerAPI.serverWrecker = serverWrecker;
     }
 
-    public static void postEvent(ServerWreckerEvent event) {
+    public static void postEvent(ServerWreckerGlobalEvent event) {
         eventBus.post(event);
     }
 
-    public static <T extends ServerWreckerEvent> void registerListener(Class<T> clazz, EventSubscriber<? super T> subscriber) {
+    public static <T extends ServerWreckerGlobalEvent> void registerListener(Class<T> clazz, EventSubscriber<? super T> subscriber) {
         eventBus.subscribe(clazz, subscriber);
     }
 
     public static void registerListeners(Object listener) {
         MethodHandles.Lookup publicLookup = MethodHandles.publicLookup();
         for (Method method : listener.getClass().getDeclaredMethods()) {
-            if (!method.isAnnotationPresent(EventHandler.class)) {
+            if (!method.isAnnotationPresent(GlobalEventHandler.class)) {
                 continue;
             }
 
@@ -80,8 +80,8 @@ public class ServerWreckerAPI {
                 throw new IllegalArgumentException("Listener method must have exactly one parameter!");
             }
 
-            if (!ServerWreckerEvent.class.isAssignableFrom(method.getParameterTypes()[0])) {
-                throw new IllegalArgumentException("Listener method parameter must be a subclass of ServerWreckerEvent!");
+            if (!ServerWreckerGlobalEvent.class.isAssignableFrom(method.getParameterTypes()[0])) {
+                throw new IllegalArgumentException("Listener method parameter must be a subclass of ServerWreckerGlobalEvent!");
             }
 
             method.setAccessible(true);
@@ -89,7 +89,7 @@ public class ServerWreckerAPI {
             try {
                 MethodHandle methodHandle = publicLookup.unreflect(method);
 
-                registerListener(method.getParameterTypes()[0].asSubclass(ServerWreckerEvent.class),
+                registerListener(method.getParameterTypes()[0].asSubclass(ServerWreckerGlobalEvent.class),
                         event -> {
                             try {
                                 methodHandle.invoke(listener, event);
@@ -103,7 +103,7 @@ public class ServerWreckerAPI {
         }
     }
 
-    public static void unregisterListener(EventSubscriber<? extends ServerWreckerEvent> listener) {
+    public static void unregisterListener(EventSubscriber<? extends ServerWreckerGlobalEvent> listener) {
         eventBus.unsubscribeIf(eventSubscriber -> eventSubscriber.equals(listener));
     }
 

@@ -22,11 +22,11 @@ package net.pistonmaster.serverwrecker.api.event.gui;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import net.kyori.event.Cancellable;
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
 
 @ToString
 @EqualsAndHashCode
-public class WindowCloseEvent implements ServerWreckerEvent, Cancellable {
+public class WindowCloseEvent implements ServerWreckerGlobalEvent, Cancellable {
     private boolean cancelled;
 
     @Override

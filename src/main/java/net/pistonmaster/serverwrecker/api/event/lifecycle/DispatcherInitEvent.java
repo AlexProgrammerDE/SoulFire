@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.api.event.lifecycle;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.pistonmaster.serverwrecker.api.ConsoleSubject;
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
 
 /**
  * Add yourself to the command dispatcher to add custom commands.
@@ -29,5 +29,6 @@ import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
  *
  * @param commandDispatcher The command dispatcher.
  */
-public record DispatcherInitEvent(CommandDispatcher<ConsoleSubject> commandDispatcher) implements ServerWreckerEvent {
+public record DispatcherInitEvent(
+        CommandDispatcher<ConsoleSubject> commandDispatcher) implements ServerWreckerGlobalEvent {
 }

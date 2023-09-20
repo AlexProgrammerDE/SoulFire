@@ -26,8 +26,9 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
+import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.EventHandler;
+import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
@@ -45,38 +46,38 @@ public class ClientBrand implements InternalAddon {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
+        AddonHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, this::onPacket);
     }
 
-    @EventHandler
     public void onPacket(SWPacketReceiveEvent event) {
         if (event.getPacket() instanceof ClientboundLoginPacket) { // Recommended packet to use
-            if (!event.getConnection().settingsHolder().has(ClientBrandSettings.class)) {
+            if (!event.connection().settingsHolder().has(ClientBrandSettings.class)) {
                 return;
             }
 
-            ClientBrandSettings clientBrandSettings = event.getConnection().settingsHolder().get(ClientBrandSettings.class);
+            ClientBrandSettings clientBrandSettings = event.connection().settingsHolder().get(ClientBrandSettings.class);
 
             if (!clientBrandSettings.sendClientBrand()) {
                 return;
             }
 
             ByteBuf buf = Unpooled.buffer();
-            event.getConnection().session().getCodecHelper()
+            event.connection().session().getCodecHelper()
                     .writeString(buf, clientBrandSettings.clientBrand());
 
-            event.getConnection().session().send(new ServerboundCustomPayloadPacket(
+            event.connection().session().send(new ServerboundCustomPayloadPacket(
                     "minecraft:brand",
                     ByteBufUtil.getBytes(buf)
             ));
         }
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new ClientBrandPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), ClientBrandSettings.class, new ClientBrandCommand());
     }

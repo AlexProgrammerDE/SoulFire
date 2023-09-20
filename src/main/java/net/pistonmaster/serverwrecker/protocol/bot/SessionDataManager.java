@@ -61,7 +61,6 @@ import lombok.Getter;
 import lombok.ToString;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
@@ -213,7 +212,7 @@ public final class SessionDataManager {
             botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch, abilitiesData);
             log.info("Joined server at position: X {} Y {} Z {}", Math.round(x), Math.round(y), Math.round(z));
 
-            ServerWreckerAPI.postEvent(new BotJoinedEvent(connection));
+            connection.eventBus().post(new BotJoinedEvent(connection));
         } else {
             botMovementManager.setPosition(x, y, z);
             botMovementManager.setRotation(yaw, pitch);
@@ -296,7 +295,7 @@ public final class SessionDataManager {
     }
 
     private void onChat(Component message) {
-        ServerWreckerAPI.postEvent(new ChatMessageReceiveEvent(connection, message));
+        connection.eventBus().post(new ChatMessageReceiveEvent(connection, message));
     }
 
     //
@@ -904,7 +903,7 @@ public final class SessionDataManager {
     }
 
     public void tick() {
-        ServerWreckerAPI.postEvent(new BotPreTickEvent(connection));
+        connection.eventBus().post(new BotPreTickEvent(connection));
 
         if (borderState != null) {
             borderState.tick();
@@ -916,6 +915,6 @@ public final class SessionDataManager {
             botMovementManager.tick();
         }
 
-        ServerWreckerAPI.postEvent(new BotPostTickEvent(connection));
+        connection.eventBus().post(new BotPostTickEvent(connection));
     }
 }

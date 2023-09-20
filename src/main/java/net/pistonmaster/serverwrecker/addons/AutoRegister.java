@@ -21,8 +21,9 @@ package net.pistonmaster.serverwrecker.addons;
 
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
+import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.EventHandler;
+import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
@@ -40,9 +41,9 @@ public class AutoRegister implements InternalAddon {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
+        AddonHelper.registerBotEventConsumer(ChatMessageReceiveEvent.class, this::onChat);
     }
 
-    @EventHandler
     public void onChat(ChatMessageReceiveEvent event) {
         if (!event.connection().settingsHolder().has(AutoRegisterSettings.class)) {
             return;
@@ -75,12 +76,12 @@ public class AutoRegister implements InternalAddon {
         }
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new AutoRegisterPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), AutoRegisterSettings.class, new AutoRegisterCommand());
     }

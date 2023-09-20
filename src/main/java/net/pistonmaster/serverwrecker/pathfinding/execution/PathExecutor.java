@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.pathfinding.execution;
 
 import net.kyori.event.EventSubscriber;
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.kyori.event.EventSubscription;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
@@ -35,6 +35,7 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
     private final Queue<WorldAction> worldActions;
     private final BotConnection connection;
     private final Supplier<List<WorldAction>> findPath;
+    private EventSubscription subscription;
     private int ticks = 0;
 
     public PathExecutor(BotConnection connection, List<WorldAction> worldActions, Supplier<List<WorldAction>> findPath) {
@@ -100,11 +101,11 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
     }
 
     public void register() {
-        ServerWreckerAPI.registerListener(BotPreTickEvent.class, this);
+        subscription = connection.eventBus().subscribe(BotPreTickEvent.class, this);
     }
 
     public void unregister() {
-        ServerWreckerAPI.unregisterListener(this);
+        subscription.unsubscribe();
     }
 
     private void recalculatePath() {

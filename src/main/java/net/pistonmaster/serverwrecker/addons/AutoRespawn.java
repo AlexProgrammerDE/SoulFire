@@ -24,8 +24,9 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
+import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.EventHandler;
+import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
@@ -46,36 +47,36 @@ public class AutoRespawn implements InternalAddon {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
+        AddonHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, this::onPacket);
     }
 
-    @EventHandler
     public void onPacket(SWPacketReceiveEvent event) {
         if (event.getPacket() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
-            if (!event.getConnection().settingsHolder().has(AutoRespawnSettings.class)) {
+            if (!event.connection().settingsHolder().has(AutoRespawnSettings.class)) {
                 return;
             }
 
-            AutoRespawnSettings autoRespawnSettings = event.getConnection().settingsHolder().get(AutoRespawnSettings.class);
+            AutoRespawnSettings autoRespawnSettings = event.connection().settingsHolder().get(AutoRespawnSettings.class);
             if (!autoRespawnSettings.autoRespawn()) {
                 return;
             }
 
-            String message = event.getConnection().serverWrecker().getPlainMessageSerializer().serialize(combatKillPacket.getMessage());
-            event.getConnection().logger().info("[AutoRespawn] Died with killer: {} and message: '{}'",
+            String message = event.connection().serverWrecker().getPlainMessageSerializer().serialize(combatKillPacket.getMessage());
+            event.connection().logger().info("[AutoRespawn] Died with killer: {} and message: '{}'",
                     combatKillPacket.getPlayerId(), message);
 
-            event.getConnection().executorManager().newScheduledExecutorService("Respawn").schedule(() ->
-                            event.getConnection().session().send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
+            event.connection().executorManager().newScheduledExecutorService("Respawn").schedule(() ->
+                            event.connection().session().send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
                     RandomUtil.getRandomInt(autoRespawnSettings.minDelay(), autoRespawnSettings.maxDelay()), TimeUnit.SECONDS);
         }
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new AutoRespawnPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @EventHandler
+    @GlobalEventHandler
     public void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), AutoRespawnSettings.class, new AutoRespawnCommand());
     }

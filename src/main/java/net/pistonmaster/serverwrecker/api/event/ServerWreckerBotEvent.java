@@ -17,17 +17,13 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event.lifecycle;
+package net.pistonmaster.serverwrecker.api.event;
 
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-
-import java.util.List;
+import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
 /**
- * Add yourself to the addon panel by adding a {@link NavigationItem} to the list.
- *
- * @param navigationItems The list of navigation items.
+ * Represents a bot event of a ServerWrecker bot in an attack.
  */
-public record AddonPanelInitEvent(List<NavigationItem> navigationItems) implements ServerWreckerGlobalEvent {
+public non-sealed interface ServerWreckerBotEvent extends ServerWreckerEvent {
+    BotConnection connection();
 }

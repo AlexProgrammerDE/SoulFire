@@ -19,8 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.api.event.bot;
 
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerEvent;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
-public record BotDisconnectedEvent(BotConnection connection) implements ServerWreckerEvent {
+public record BotDisconnectedEvent(BotConnection connection) implements ServerWreckerBotEvent {
 }

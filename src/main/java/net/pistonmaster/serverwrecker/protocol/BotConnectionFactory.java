@@ -23,9 +23,10 @@ import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.github.steveice10.packetlib.BuiltinFlags;
 import io.netty.channel.EventLoopGroup;
+import net.kyori.event.EventBus;
 import net.pistonmaster.serverwrecker.AttackManager;
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.bot.PreBotConnectEvent;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
+import net.pistonmaster.serverwrecker.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.protocol.bot.BotControlAPI;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
@@ -52,7 +53,8 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
         BotConnectionMeta meta = new BotConnectionMeta(minecraftAccount, targetState);
         ViaClientSession session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
         BotConnection botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.getServerWrecker(),
-                settingsHolder, logger, protocol, session, new ExecutorManager("ServerWrecker-Attack-" + attackManager.getId()), meta);
+                settingsHolder, logger, protocol, session, new ExecutorManager("ServerWrecker-Attack-" + attackManager.getId()), meta,
+                EventBus.create(ServerWreckerBotEvent.class));
 
         SessionDataManager sessionDataManager = new SessionDataManager(botConnection);
         session.getMeta().setSessionDataManager(sessionDataManager);
@@ -68,7 +70,7 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
         session.addListener(new SWBaseListener(botConnection, targetState));
         session.addListener(new SWSessionListener(sessionDataManager, botConnection));
 
-        ServerWreckerAPI.postEvent(new PreBotConnectEvent(botConnection));
+        attackManager.getEventBus().post(new BotConnectionInitEvent(botConnection));
 
         return botConnection;
     }

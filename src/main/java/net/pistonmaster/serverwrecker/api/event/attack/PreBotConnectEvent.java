@@ -17,17 +17,22 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event.bot;
+package net.pistonmaster.serverwrecker.api.event.attack;
 
-import net.kyori.adventure.text.Component;
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
+import net.pistonmaster.serverwrecker.AttackManager;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerAttackEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
 /**
- * This event is called when a chat message is received from the server.
+ * The event is called when the bot is about to connect to the server in the attack.
+ * The BotConnection instance has all fields filled, but most methods are unusable as the bot is not connected.
+ * This also runs async off the main thread of the attack, so you can do blocking operations for the attack here.
+ * <br>
+ * This event is recommended for when you want to add a pre-connect hook like for server list ping.
  */
-public record ChatMessageReceiveEvent(BotConnection connection, Component message) implements ServerWreckerBotEvent {
-    public String parseToText() {
-        return connection.serverWrecker().getPlainMessageSerializer().serialize(message);
+public record PreBotConnectEvent(BotConnection connection) implements ServerWreckerAttackEvent {
+    @Override
+    public AttackManager attackManager() {
+        return connection.attackManager();
     }
 }
