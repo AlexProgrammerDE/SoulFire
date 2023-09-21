@@ -14,17 +14,31 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        maven("https://repo.opencollab.dev/maven-releases")
-        maven("https://repo.opencollab.dev/maven-snapshots")
-        maven("https://jitpack.io/") {
-            name = "JitPack Repository"
+        maven("https://repo.opencollab.dev/maven-releases") {
+            name = "OpenCollab Releases"
         }
-        maven("https://libraries.minecraft.net/") {
-            name = "Minecraft Repository"
+        maven("https://repo.opencollab.dev/maven-snapshots") {
+            name = "OpenCollab Snapshots"
+        }
+        maven("https://repo.papermc.io/repository/maven-public/") {
+            name = "PaperMC Repository"
+        }
+        maven("https://repo.viaversion.com/") {
+            name = "ViaVersion Repository"
+        }
+        maven("https://maven.lenni0451.net/releases") {
+            name = "Lenni0451"
+        }
+        maven("https://maven.lenni0451.net/snapshots") {
+            name = "Lenni0451 Snapshots"
         }
         maven("https://oss.sonatype.org/content/repositories/snapshots/") {
             name = "Sonatype Repository"
+        }
+        maven("https://jitpack.io/") {
+            name = "JitPack Repository"
         }
         mavenCentral()
     }
