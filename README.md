@@ -70,7 +70,6 @@ and is comparable functionality-wise to [ViaFabric](https://github.com/ViaVersio
 
 [Download & install ServerWrecker](https://youtu.be/X9hREa17yAo)
 
-
 ## 📻 Built-in modules
 
 ### AutoRespawn
@@ -184,9 +183,11 @@ or run `java -jar serverwrecker.jar --help`.
 
 ## 🌈 Community
 
-Feel free to join our discord community server:
+Feel free to join our Discord community server:
 
 [![Discord Banner](https://discord.com/api/guilds/739784741124833301/widget.png?style=banner2)](https://discord.gg/CDrcxzH)
+
+This project is in active development, so if you have any feature requests or issues please submit them here on GitHub. PRs are welcome, too. :octocat:
 
 ## 🌟 Star History
 
