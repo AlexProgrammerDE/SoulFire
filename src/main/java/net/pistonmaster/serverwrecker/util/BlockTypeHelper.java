@@ -31,6 +31,20 @@ public class BlockTypeHelper {
         return type.blockShapeTypes().get(0).collisionHeight() <= 0.1;
     }
 
+    public static boolean isReplaceable(BlockType type) {
+        return isAir(type) || isFluid(type);
+    }
+
+    public static boolean isAir(BlockType type) {
+        return type == BlockType.AIR
+                || type == BlockType.CAVE_AIR
+                || type == BlockType.VOID_AIR;
+    }
+
+    public static boolean isFluid(BlockType type) {
+        return type == BlockType.WATER || type == BlockType.LAVA;
+    }
+
     public static boolean isEmpty(BlockStateMeta meta) {
         return meta.blockShapeType().hasNoCollisions();
     }
