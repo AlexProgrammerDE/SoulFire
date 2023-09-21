@@ -9,7 +9,7 @@
 <a href="https://github.com/AlexProgrammerDE/ServerWrecker/releases/latest"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/AlexProgrammerDE/ServerWrecker/total"></a>
 <a href="https://github.com/AlexProgrammerDE/ServerWrecker/releases/latest"><img src="https://img.shields.io/github/release/AlexProgrammerDE/ServerWrecker.svg" alt="Current Release"></a>
 </p>
-<p align="center"><a href="https://pistonmaster.net/discord"><img src="https://discordapp.com/api/guilds/739784741124833301/embed.png" alt="Discord embed"></a></p>
+<p align="center"><a href="https://discord.gg/vHgRd6YZmH"><img src="https://discordapp.com/api/guilds/739784741124833301/embed.png" alt="Discord embed"></a></p>
 
 <p align="center">
 <a href="https://github.com/AlexProgrammerDE/ServerWrecker/releases/latest"><img src="https://img.shields.io/badge/DOWNLOAD-LATEST-success?style=for-the-badge" alt="download badge"></a>
@@ -185,7 +185,7 @@ or run `java -jar serverwrecker.jar --help`.
 
 Feel free to join our Discord community server:
 
-[![Discord Banner](https://discord.com/api/guilds/739784741124833301/widget.png?style=banner2)](https://discord.gg/CDrcxzH)
+[![Discord Banner](https://discord.com/api/guilds/739784741124833301/widget.png?style=banner2)](https://discord.gg/vHgRd6YZmH)
 
 This project is in active development, so if you have any feature requests or issues please submit them here on GitHub. PRs are welcome, too. :octocat:
 
