@@ -8,7 +8,7 @@ plugins {
     id("com.google.protobuf") version "0.9.4"
 }
 
-version = "1.2.0"
+version = "1.2.1-SNAPSHOT"
 description = "Advanced Minecraft Server-Stresser Tool."
 
 val moduleOpens = setOf(
