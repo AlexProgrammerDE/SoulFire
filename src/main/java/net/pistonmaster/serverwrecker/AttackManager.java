@@ -149,7 +149,7 @@ public class AttackManager {
                     this,
                     targetAddress,
                     settingsHolder,
-                    LoggerFactory.getLogger(String.format("Bot-" + minecraftAccount.username())),
+                    LoggerFactory.getLogger(minecraftAccount.username()),
                     protocol,
                     minecraftAccount,
                     proxyData,

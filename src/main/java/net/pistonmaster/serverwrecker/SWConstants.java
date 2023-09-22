@@ -28,7 +28,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class SWConstants {
-    public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.v1_20;
+    public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.v1_20_2;
 
     public static List<ProtocolVersion> getVersionsSorted() {
         List<ProtocolVersion> normalVersions = new ArrayList<>();
