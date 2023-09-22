@@ -29,6 +29,8 @@ import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
 import org.fusesource.jansi.AnsiConsole;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 import java.awt.*;
@@ -37,6 +39,8 @@ import java.net.ServerSocket;
 import java.util.List;
 
 public class ServerWreckerBootstrap {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerBootstrap.class);
+
     static {
         System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
 
@@ -58,10 +62,8 @@ public class ServerWreckerBootstrap {
             AnsiConsole.systemInstall();
         }
 
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            throwable.printStackTrace();
-            System.exit(1);
-        });
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) ->
+                LOGGER.error("Exception in thread {}", thread.getName(), throwable));
 
         int port = getAvailablePort();
         if (GraphicsEnvironment.isHeadless() || args.length > 0) {
@@ -95,7 +97,7 @@ public class ServerWreckerBootstrap {
         commandLine.setUsageHelpAutoWidth(true);
         commandLine.setUsageHelpLongOptionsMaxWidth(30);
         commandLine.setExecutionExceptionHandler((ex, cmdLine, parseResult) -> {
-            ex.printStackTrace();
+            LOGGER.error("Exception while executing command", ex);
             return 1;
         });
 

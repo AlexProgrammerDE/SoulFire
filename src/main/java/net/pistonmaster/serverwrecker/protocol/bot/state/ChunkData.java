@@ -19,15 +19,10 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
-import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
-import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
@@ -79,22 +74,12 @@ public class ChunkData {
 
     public void setBlock(Vector3i block, int state) {
         ChunkSection targetSection = getSection(block);
-
-        DataPalette originalPalette = targetSection.getChunkData();
-        MinecraftCodecHelper helper = level.getSessionDataManager().getSession().getCodecHelper();
-        ByteBuf content = Unpooled.buffer();
-        helper.writeDataPalette(content, originalPalette);
-
-        DataPalette newChunkPalette;
-        try {
-            newChunkPalette = helper.readDataPalette(content, PaletteType.CHUNK, originalPalette.getGlobalPaletteBits());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            content.release();
-        }
-
-        ChunkSection clone = new ChunkSection(targetSection.getBlockCount(), newChunkPalette, targetSection.getBiomeData());
+        ChunkSection clone = new ChunkSection(
+                targetSection.getBlockCount(),
+                // Clone chunk data palette only
+                new DataPalette(targetSection.getChunkData()),
+                targetSection.getBiomeData()
+        );
         clone.setBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF, state);
 
         setSection(block, clone);

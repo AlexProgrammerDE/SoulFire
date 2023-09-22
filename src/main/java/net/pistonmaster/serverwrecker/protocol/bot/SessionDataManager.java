@@ -32,22 +32,25 @@ import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
 import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.GlobalPos;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
+import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerSpawnInfo;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PositionElement;
 import com.github.steveice10.mc.protocol.data.game.level.block.BlockChangeEntry;
 import com.github.steveice10.mc.protocol.data.game.level.notify.RainStrengthValue;
 import com.github.steveice10.mc.protocol.data.game.level.notify.RespawnScreenValue;
 import com.github.steveice10.mc.protocol.data.game.level.notify.ThunderStrengthValue;
+import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundDisconnectPacket;
+import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundResourcePackPacket;
+import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundResourcePackPacket;
+import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddPlayerPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.*;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundResourcePackPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
@@ -75,7 +78,6 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.*;
 import net.pistonmaster.serverwrecker.protocol.bot.state.entity.EntityLikeState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.entity.EntityState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.entity.ExperienceOrbState;
-import net.pistonmaster.serverwrecker.protocol.bot.state.entity.PlayerState;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.util.BusHandler;
@@ -145,16 +147,9 @@ public final class SessionDataManager {
     }
 
     @BusHandler
-    public void onJoin(ClientboundLoginPacket packet) {
-        loginData = new LoginPacketData(
-                packet.getEntityId(),
-                packet.isHardcore(),
-                packet.getWorldNames(),
-                packet.getRegistry(),
-                packet.getMaxPlayers(),
-                packet.isReducedDebugInfo()
-        );
-        CompoundTag dimensionRegistry = loginData.registry().get("minecraft:dimension_type");
+    public void onRegistry(ClientboundRegistryDataPacket packet) {
+        CompoundTag registry = packet.getRegistry();
+        CompoundTag dimensionRegistry = registry.get("minecraft:dimension_type");
         for (Tag type : dimensionRegistry.<ListTag>get("value").getValue()) {
             CompoundTag dimension = (CompoundTag) type;
             String name = dimension.<StringTag>get("name").getValue();
@@ -162,7 +157,7 @@ public final class SessionDataManager {
 
             levels.put(name, new LevelState(this, name, id, dimension.get("element")));
         }
-        CompoundTag biomeRegistry = loginData.registry().get("minecraft:worldgen/biome");
+        CompoundTag biomeRegistry = registry.get("minecraft:worldgen/biome");
         for (Tag type : biomeRegistry.<ListTag>get("value").getValue()) {
             CompoundTag biome = (CompoundTag) type;
             BiomeData biomeData = new BiomeData(biome);
@@ -170,21 +165,37 @@ public final class SessionDataManager {
             biomes.put(biomeData.id(), biomeData);
         }
         biomesEntryBitsSize = ChunkData.log2RoundUp(biomes.size());
+    }
+
+    @BusHandler
+    public void onJoin(ClientboundLoginPacket packet) {
+        loginData = new LoginPacketData(
+                packet.getEntityId(),
+                packet.isHardcore(),
+                packet.getWorldNames(),
+                packet.getMaxPlayers(),
+                packet.isReducedDebugInfo()
+        );
 
         doImmediateRespawn = !packet.isEnableRespawnScreen();
-        currentDimension = new DimensionData(
-                packet.getDimension(),
-                packet.getWorldName(),
-                packet.getHashedSeed(),
-                packet.isDebug(),
-                packet.isFlat()
-        );
-        gameMode = packet.getGameMode();
-        previousGameMode = packet.getPreviousGamemode();
         serverViewDistance = packet.getViewDistance();
         serverSimulationDistance = packet.getSimulationDistance();
-        lastDeathPos = packet.getLastDeathPos();
+
+        processSpawnInfo(packet.getCommonPlayerSpawnInfo());
         inventoryManager.initPlayerInventory();
+    }
+
+    private void processSpawnInfo(PlayerSpawnInfo spawnInfo) {
+        currentDimension = new DimensionData(
+                spawnInfo.getDimension(),
+                spawnInfo.getWorldName(),
+                spawnInfo.getHashedSeed(),
+                spawnInfo.isDebug(),
+                spawnInfo.isFlat()
+        );
+        gameMode = spawnInfo.getGameMode();
+        previousGameMode = spawnInfo.getPreviousGamemode();
+        lastDeathPos = spawnInfo.getLastDeathPos();
     }
 
     @BusHandler
@@ -237,16 +248,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onRespawn(ClientboundRespawnPacket packet) {
-        currentDimension = new DimensionData(
-                packet.getDimension(),
-                packet.getWorldName(),
-                packet.getHashedSeed(),
-                packet.isDebug(),
-                packet.isFlat()
-        );
-        gameMode = packet.getGamemode();
-        previousGameMode = packet.getPreviousGamemode();
-        lastDeathPos = packet.getLastDeathPos();
+        processSpawnInfo(packet.getCommonPlayerSpawnInfo());
 
         log.info("Respawned");
     }
@@ -701,16 +703,6 @@ public final class SessionDataManager {
         entityState.setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
 
         entityTrackerState.addEntity(packet.getEntityId(), entityState);
-    }
-
-    @BusHandler
-    public void onPlayerSpawn(ClientboundAddPlayerPacket packet) {
-        PlayerState playerState = new PlayerState(packet.getEntityId(), packet.getUuid());
-
-        playerState.setPosition(packet.getX(), packet.getY(), packet.getZ());
-        playerState.setRotation(packet.getYaw(), packet.getPitch());
-
-        entityTrackerState.addEntity(packet.getEntityId(), playerState);
     }
 
     @BusHandler

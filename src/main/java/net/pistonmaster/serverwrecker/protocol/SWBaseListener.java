@@ -22,18 +22,23 @@ package net.pistonmaster.serverwrecker.protocol;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.github.steveice10.mc.protocol.data.handshake.HandshakeIntent;
+import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundDisconnectPacket;
+import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundKeepAlivePacket;
+import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundPingPacket;
+import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundKeepAlivePacket;
+import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundPongPacket;
+import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundFinishConfigurationPacket;
+import com.github.steveice10.mc.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
 import com.github.steveice10.mc.protocol.packet.handshake.serverbound.ClientIntentionPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDisconnectPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundKeepAlivePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPingPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundKeepAlivePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundPongPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundStartConfigurationPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundConfigurationAcknowledgedPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundHelloPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginCompressionPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundHelloPacket;
 import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundKeyPacket;
+import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
 import com.github.steveice10.mc.protocol.packet.status.clientbound.ClientboundPongResponsePacket;
 import com.github.steveice10.mc.protocol.packet.status.clientbound.ClientboundStatusResponsePacket;
 import com.github.steveice10.mc.protocol.packet.status.serverbound.ServerboundPingRequestPacket;
@@ -113,7 +118,7 @@ public class SWBaseListener extends SessionAdapter {
                     session.setFlag(SWProtocolConstants.ENCRYPTION_SECRET_KEY, key);
                 }
             } else if (packet instanceof ClientboundGameProfilePacket) {
-                protocol.setState(ProtocolState.GAME);
+                session.send(new ServerboundLoginAcknowledgedPacket());
             } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {
                 session.disconnect(loginDisconnectPacket.getReason());
             } else if (packet instanceof ClientboundLoginCompressionPacket loginCompressionPacket) {
@@ -132,15 +137,21 @@ public class SWBaseListener extends SessionAdapter {
                 session.send(new ServerboundPongPacket(pingPacket.getId()));
             } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
                 session.disconnect(disconnectPacket.getReason());
+            } else if (packet instanceof ClientboundStartConfigurationPacket) {
+                session.send(new ServerboundConfigurationAcknowledgedPacket());
+            }
+        } else if (protocol.getState() == ProtocolState.CONFIGURATION) {
+            if (packet instanceof ClientboundFinishConfigurationPacket) {
+                session.send(new ServerboundFinishConfigurationPacket());
             }
         }
     }
 
     @Override
     public void packetSent(Session session, Packet packet) {
+        MinecraftProtocol protocol = (MinecraftProtocol) session.getPacketProtocol();
         if (packet instanceof ClientIntentionPacket) {
             // Once the HandshakePacket has been sent, switch to the next protocol mode.
-            MinecraftProtocol protocol = (MinecraftProtocol) session.getPacketProtocol();
             protocol.setState(this.targetState);
 
             if (this.targetState == ProtocolState.LOGIN) {
@@ -157,6 +168,12 @@ public class SWBaseListener extends SessionAdapter {
             } else {
                 session.send(new ServerboundStatusRequestPacket());
             }
+        } else if (packet instanceof ServerboundLoginAcknowledgedPacket) {
+            protocol.setState(ProtocolState.CONFIGURATION); // LOGIN -> CONFIGURATION
+        } else if (packet instanceof ServerboundFinishConfigurationPacket) {
+            protocol.setState(ProtocolState.GAME); // CONFIGURATION -> GAME
+        } else if (packet instanceof ServerboundConfigurationAcknowledgedPacket) {
+            protocol.setState(ProtocolState.CONFIGURATION); // GAME -> CONFIGURATION
         }
     }
 

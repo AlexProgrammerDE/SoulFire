@@ -100,7 +100,7 @@ public class ServerWrecker {
                         new MinecraftPacketSerializer<>(SWClientboundStatusResponsePacket::new)));
     }
 
-    private final Logger logger = LoggerFactory.getLogger("ServerWrecker");
+    private final Logger logger = LoggerFactory.getLogger(ServerWrecker.class);
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
