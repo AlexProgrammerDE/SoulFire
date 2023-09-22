@@ -2,6 +2,7 @@ import config from 'generator-config.json'
 import mcDataPackage from 'minecraft-data'
 import fs from 'fs'
 import process from 'process'
+import * as path from "path";
 
 const mcData = mcDataPackage(config.version)
 const enumReplace = "// VALUES REPLACE"
@@ -143,6 +144,10 @@ if (mcData == null) {
 
     fs.writeFileSync("output/FoodType.java", result)
   }
+
+  {
+    fs.writeFileSync("output/tags.json", JSON.stringify(readDirectoryTree("tags", true, ""), null, 2))
+  }
 }
 
 function stringArrayToJavaList(array?: string[]): string {
@@ -159,4 +164,44 @@ function valueToNullStringFallback(fallback: any, array?: any): string {
   }
 
   return `"${array}"`
+}
+
+function readDirectoryTree(dirPath: string, root: boolean, namePrefix: string): any {
+  let result: any = {};
+
+  const files = fs.readdirSync(dirPath);
+
+  for (const file of files) {
+    if (root && (file === "point_of_interest_type"
+      || file === "instrument"
+      || file === "worldgen")) {
+      continue;
+    }
+
+    const filePath = path.join(dirPath, file);
+    const stats = fs.statSync(filePath);
+
+    if (stats.isDirectory()) {
+      // Recursively read subdirectories
+      if (root) {
+        result[file] = readDirectoryTree(filePath, false, "");
+      } else {
+        result = {...result, ...readDirectoryTree(filePath, false, root ? "" : namePrefix + file + "/")};
+      }
+    } else if (stats.isFile()) {
+      // Read and extract values array from files
+      try {
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const jsonData = JSON.parse(fileContent);
+        if (jsonData && jsonData.values && Array.isArray(jsonData.values)) {
+          result[namePrefix + file.replace(".json", "")] = jsonData.values.map((value: any) => value.replace("minecraft:", ""));
+        }
+      } catch (error) {
+        // Handle any errors while reading or parsing files
+        console.error(`Error processing file ${file}: ${error}`);
+      }
+    }
+  }
+
+  return result;
 }

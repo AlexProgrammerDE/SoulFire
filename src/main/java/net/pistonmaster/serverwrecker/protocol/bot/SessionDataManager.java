@@ -40,6 +40,7 @@ import com.github.steveice10.mc.protocol.data.game.level.notify.RespawnScreenVal
 import com.github.steveice10.mc.protocol.data.game.level.notify.ThunderStrengthValue;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundResourcePackPacket;
+import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundResourcePackPacket;
 import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.*;
@@ -78,6 +79,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.*;
 import net.pistonmaster.serverwrecker.protocol.bot.state.entity.EntityLikeState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.entity.EntityState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.entity.ExperienceOrbState;
+import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.util.BusHandler;
@@ -112,6 +114,7 @@ public final class SessionDataManager {
     private final PlayerMetaState playerMetaState = new PlayerMetaState();
     private final InventoryManager inventoryManager = new InventoryManager(this);
     private final BotActionManager botActionManager = new BotActionManager(this);
+    private final TagsState tagsState = new TagsState();
     private @Nullable ServerPlayData serverPlayData;
     private BorderState borderState;
     private BotMovementManager botMovementManager;
@@ -367,6 +370,11 @@ public final class SessionDataManager {
             botMovementManager.setAbilitiesFlySpeed(abilitiesData.flySpeed());
             botMovementManager.setWalkSpeed(abilitiesData.walkSpeed());
         }
+    }
+
+    @BusHandler
+    public void onUpdateTags(ClientboundUpdateTagsPacket packet) {
+        tagsState.handleTagData(serverWrecker, packet.getTags());
     }
 
     @BusHandler

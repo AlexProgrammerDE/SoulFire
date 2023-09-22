@@ -73,7 +73,7 @@ public class CommandManager {
     public void postConstruct() {
         Logger logger = serverWrecker.getLogger();
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("online").executes(c -> {
-            AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+            AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
             if (attackManager == null) {
                 return 1;
@@ -98,7 +98,7 @@ public class CommandManager {
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("say")
                 .then(RequiredArgumentBuilder.<ConsoleSubject, String>argument("message", StringArgumentType.greedyString())
                         .executes(c -> {
-                            AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+                            AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                             if (attackManager == null) {
                                 return 1;
@@ -115,7 +115,7 @@ public class CommandManager {
                             return 1;
                         })));
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("stats").executes(c -> {
-            AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+            AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
             if (attackManager == null) {
                 return 1;
@@ -203,7 +203,7 @@ public class CommandManager {
                 <ConsoleSubject, Double>argument("y", DoubleArgumentType.doubleArg()).then(RequiredArgumentBuilder.
                 <ConsoleSubject, Double>argument("z", DoubleArgumentType.doubleArg())
                 .executes(c -> {
-                    AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+                    AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                     if (attackManager == null) {
                         return 1;
@@ -223,7 +223,7 @@ public class CommandManager {
                 })))));
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("forward")
                 .executes(c -> {
-                    AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+                    AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                     if (attackManager == null) {
                         return 1;
@@ -239,7 +239,7 @@ public class CommandManager {
                 }));
         dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("stop")
                 .executes(c -> {
-                    AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+                    AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                     if (attackManager == null) {
                         return 1;
@@ -258,7 +258,7 @@ public class CommandManager {
     }
 
     private void executePathfinding(GoalScorer goalScorer) {
-        AttackManager attackManager = serverWrecker.getAttacks().stream().findFirst().orElse(null);
+        AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
         if (attackManager == null) {
             return;

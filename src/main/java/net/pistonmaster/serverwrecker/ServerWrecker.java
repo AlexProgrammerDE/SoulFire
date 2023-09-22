@@ -109,6 +109,7 @@ public class ServerWrecker {
     private final Map<String, String> serviceServerConfig = new HashMap<>();
     private final Gson gson = new Gson();
     private final Map<String, String> mojangTranslations = new HashMap<>();
+    private final JsonObject tagData;
     private final GlobalBlockPalette globalBlockPalette;
     private final PlainTextComponentSerializer plainMessageSerializer;
     private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
@@ -232,6 +233,16 @@ public class ServerWrecker {
         }
 
         logger.info("Loaded {} block states", stateMap.size());
+        ;
+
+        try (InputStream stream = ServerWrecker.class.getClassLoader().getResourceAsStream("minecraft/tags.json")) {
+            Objects.requireNonNull(stream, "tags.json not found");
+            tagData = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        logger.info("Loaded tags");
+        ;
 
         // Init via
         Path viaPath = DATA_FOLDER.resolve("ViaVersion");
