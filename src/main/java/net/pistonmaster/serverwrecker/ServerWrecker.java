@@ -33,6 +33,7 @@ import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import lombok.Getter;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
@@ -126,7 +127,7 @@ public class ServerWrecker {
     private final Path profilesFolder;
     private final Path pluginsFolder;
     private final boolean outdated;
-    private final Set<AttackManager> attacks = Collections.synchronizedSet(new HashSet<>());
+    private final Map<Integer, AttackManager> attacks = Collections.synchronizedMap(new Int2ObjectArrayMap<>());
     private final RPCServer rpcServer;
     private boolean shutdown = false;
 
@@ -355,7 +356,7 @@ public class ServerWrecker {
             logger.info("Shutting down...");
         }
 
-        // Shutdown the attack if there is any
+        // Shutdown the attacks if there is any
         stopAllAttacks().join();
 
         // Shutdown scheduled tasks
@@ -365,7 +366,7 @@ public class ServerWrecker {
         try {
             rpcServer.stop();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error("Failed to stop RPC server", e);
         }
 
         // Since we manually removed the shutdown hook, we need to handle the shutdown ourselves.
@@ -378,17 +379,6 @@ public class ServerWrecker {
         }
     }
 
-    public CompletableFuture<Void> stopAllAttacks() {
-        synchronized (attacks) {
-            List<CompletableFuture<Void>> futures = new ArrayList<>();
-            for (AttackManager attackManager : attacks) {
-                futures.add(attackManager.stop());
-            }
-
-            return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
-        }
-    }
-
     public int startAttack() {
         return startAttack(settingsManager.collectSettings());
     }
@@ -397,7 +387,7 @@ public class ServerWrecker {
         AttackManager attackManager = injector.newInstance(AttackManager.class);
         ServerWreckerAPI.postEvent(new AttackInitEvent(attackManager));
 
-        attacks.add(attackManager);
+        attacks.put(attackManager.getId(), attackManager);
 
         attackManager.start(settingsHolder);
 
@@ -405,24 +395,15 @@ public class ServerWrecker {
     }
 
     public void toggleAttackState(int id, boolean pause) {
-        synchronized (attacks) {
-            for (AttackManager attackManager : attacks) {
-                if (attackManager.getId() == id) {
-                    attackManager.setAttackState(pause ? AttackState.PAUSED : AttackState.RUNNING);
-                    return;
-                }
-            }
-        }
+        attacks.get(id).setAttackState(pause ? AttackState.PAUSED : AttackState.RUNNING);
     }
 
-    public void stopAttack(int id) {
-        attacks.removeIf(attackManager -> {
-            if (attackManager.getId() == id) {
-                attackManager.stop().join();
-                return true;
-            } else {
-                return false;
-            }
-        });
+    public CompletableFuture<Void> stopAllAttacks() {
+        return CompletableFuture.allOf(Set.copyOf(attacks.keySet()).stream()
+                .map(this::stopAttack).toArray(CompletableFuture[]::new));
+    }
+
+    public CompletableFuture<Void> stopAttack(int id) {
+        return attacks.remove(id).stop();
     }
 }
