@@ -117,7 +117,7 @@ public class ControlPanel extends JPanel {
                     .setId(attackId.get()).build(), new StreamObserver<>() {
                 @Override
                 public void onNext(AttackStopResponse value) {
-                    guiManager.getLogger().info("Stopped bot attack with id {}", attackId.get());
+                    guiManager.getLogger().info("Stop of attack {} has been scheduled, follow logs for progress", attackId.get());
                 }
 
                 @Override

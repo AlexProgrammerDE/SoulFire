@@ -374,7 +374,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onUpdateTags(ClientboundUpdateTagsPacket packet) {
-        tagsState.handleTagData(serverWrecker, packet.getTags());
+        tagsState.handleTagData(packet.getTags());
     }
 
     @BusHandler

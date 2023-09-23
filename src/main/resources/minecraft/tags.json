@@ -222,6 +222,10 @@
       "#wooden_buttons",
       "#stone_buttons"
     ],
+    "camel_sand_step_sound_blocks": [
+      "#sand",
+      "#concrete_powder"
+    ],
     "campfires": [
       "campfire",
       "soul_campfire"
@@ -320,6 +324,24 @@
       "#logs",
       "#leaves",
       "#wart_blocks"
+    ],
+    "concrete_powder": [
+      "white_concrete_powder",
+      "orange_concrete_powder",
+      "magenta_concrete_powder",
+      "light_blue_concrete_powder",
+      "yellow_concrete_powder",
+      "lime_concrete_powder",
+      "pink_concrete_powder",
+      "gray_concrete_powder",
+      "light_gray_concrete_powder",
+      "cyan_concrete_powder",
+      "purple_concrete_powder",
+      "blue_concrete_powder",
+      "brown_concrete_powder",
+      "green_concrete_powder",
+      "red_concrete_powder",
+      "black_concrete_powder"
     ],
     "convertable_to_mud": [
       "dirt",
@@ -544,7 +566,9 @@
       "flowering_azalea",
       "mangrove_propagule",
       "cherry_leaves",
-      "pink_petals"
+      "pink_petals",
+      "chorus_flower",
+      "spore_blossom"
     ],
     "foxes_spawnable_on": [
       "grass_block",
@@ -1203,28 +1227,13 @@
       "snow",
       "soul_sand",
       "dirt_path",
-      "white_concrete_powder",
-      "orange_concrete_powder",
-      "magenta_concrete_powder",
-      "light_blue_concrete_powder",
-      "yellow_concrete_powder",
-      "lime_concrete_powder",
-      "pink_concrete_powder",
-      "gray_concrete_powder",
-      "light_gray_concrete_powder",
-      "cyan_concrete_powder",
-      "purple_concrete_powder",
-      "blue_concrete_powder",
-      "brown_concrete_powder",
-      "green_concrete_powder",
-      "red_concrete_powder",
-      "black_concrete_powder",
       "soul_soil",
       "rooted_dirt",
       "muddy_mangrove_roots",
       "mud",
       "suspicious_sand",
-      "suspicious_gravel"
+      "suspicious_gravel",
+      "#concrete_powder"
     ],
     "mooshrooms_spawnable_on": [
       "mycelium"
@@ -2087,6 +2096,13 @@
     "always_hurts_ender_dragons": [
       "#is_explosion"
     ],
+    "always_kills_armor_stands": [
+      "arrow",
+      "trident",
+      "mob_projectile",
+      "fireball",
+      "wither_skull"
+    ],
     "always_most_significant_fall": [
       "out_of_world"
     ],
@@ -2190,6 +2206,11 @@
     "no_impact": [
       "drown"
     ],
+    "no_knockback": [
+      "explosion",
+      "player_explosion",
+      "bad_respawn_point"
+    ],
     "witch_resistant_to": [
       "magic",
       "indirect_magic",
@@ -2278,6 +2299,10 @@
       "dragon_fireball",
       "wither_skull"
     ],
+    "non_controlling_rider": [
+      "slime",
+      "magma_cube"
+    ],
     "powder_snow_walkable_mobs": [
       "rabbit",
       "endermite",
@@ -2344,8 +2369,7 @@
       "entity_interact",
       "entity_mount",
       "entity_place",
-      "entity_roar",
-      "entity_shake",
+      "entity_action",
       "equip",
       "explode",
       "fluid_pickup",
@@ -2363,6 +2387,7 @@
       "step",
       "swim",
       "teleport",
+      "unequip",
       "resonate_1",
       "resonate_2",
       "resonate_3",
@@ -2401,8 +2426,7 @@
       "entity_interact",
       "entity_mount",
       "entity_place",
-      "entity_roar",
-      "entity_shake",
+      "entity_action",
       "equip",
       "explode",
       "fluid_pickup",
@@ -2420,6 +2444,7 @@
       "step",
       "swim",
       "teleport",
+      "unequip",
       "resonate_1",
       "resonate_2",
       "resonate_3",
@@ -2726,7 +2751,9 @@
       "flowering_azalea",
       "mangrove_propagule",
       "cherry_leaves",
-      "pink_petals"
+      "pink_petals",
+      "chorus_flower",
+      "spore_blossom"
     ],
     "fox_food": [
       "sweet_berries",
