@@ -6,6 +6,7 @@ plugins {
     idea
     id("sw.shadow-conventions")
     id("com.google.protobuf") version "0.9.4"
+    id("net.kyori.indra.checkstyle") version "3.1.3"
 }
 
 version = "1.2.1-SNAPSHOT"
