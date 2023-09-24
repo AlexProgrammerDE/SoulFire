@@ -38,8 +38,8 @@ public class SWSessionService extends Service {
     private static final URI DEFAULT_MOJANG_BASE_URI = URI.create("https://sessionserver.mojang.com/session/minecraft/");
     @SuppressWarnings("HttpUrlsUsage")
     private static final URI DEFAULT_THE_ALTENING_BASE_URI = URI.create("http://sessionserver.thealtening.com/session/minecraft/");
+    private static final URI DEFAULT_EASYMC_BASE_URI = URI.create("https://sessionserver.easymc.io/session/minecraft/");
     private static final String JOIN_ENDPOINT = "join";
-    private final AuthType authType;
 
     /**
      * Creates a new SessionService instance.
@@ -50,9 +50,9 @@ public class SWSessionService extends Service {
         super(switch (authType) {
             case MICROSOFT_JAVA -> DEFAULT_MOJANG_BASE_URI;
             case THE_ALTENING -> DEFAULT_THE_ALTENING_BASE_URI;
+            case EASYMC -> DEFAULT_EASYMC_BASE_URI;
             default -> throw new IllegalStateException("Unexpected value: " + authType);
         });
-        this.authType = authType;
     }
 
     /**
@@ -90,6 +90,7 @@ public class SWSessionService extends Service {
                 profileId.toString().replace("-", ""), // Remove dashes from UUID
                 serverId
         );
+
         HTTP.makeRequest(this.getProxy(), this.getEndpointUri(JOIN_ENDPOINT), request, null);
     }
 

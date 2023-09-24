@@ -21,13 +21,11 @@ package net.pistonmaster.serverwrecker.auth.service;
 
 import com.google.gson.Gson;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.auth.HttpHelper;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
-import net.pistonmaster.serverwrecker.util.UUIDHelper;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpPost;
@@ -36,6 +34,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -44,10 +44,9 @@ import java.util.List;
 import java.util.UUID;
 
 public class SWEasyMCAuthService implements MCAuthService {
-    @SuppressWarnings("HttpUrlsUsage") // The Altening doesn't support encrypted HTTPS
-    private static final URI AUTHENTICATE_ENDPOINT = URI.create("http://authserver.thealtening.com/authenticate");
-    private static final String PASSWORD = "ServerWreckerIsCool"; // Password doesn't matter for The Altening
+    private static final URI AUTHENTICATE_ENDPOINT = URI.create("https://api.easymc.io/v1/token/redeem");
     private final Gson gson = new Gson();
+    private static final Logger LOGGER = LoggerFactory.getLogger(SWEasyMCAuthService.class);
 
     private static CloseableHttpClient createHttpClient(SWProxy proxyData) {
         List<Header> headers = new ArrayList<>();
@@ -60,18 +59,22 @@ public class SWEasyMCAuthService implements MCAuthService {
 
     public MinecraftAccount login(String altToken, SWProxy proxyData) throws IOException {
         try (CloseableHttpClient httpClient = createHttpClient(proxyData)) {
-            AuthenticationRequest request = new AuthenticationRequest(altToken, PASSWORD, UUID.randomUUID().toString());
+            AuthenticationRequest request = new AuthenticationRequest(altToken);
             HttpPost httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
             httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
-            AuthenticateRefreshResponse response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
-                    AuthenticateRefreshResponse.class);
+            TokenRedeemResponse response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
+                    TokenRedeemResponse.class);
+
+            if (response.getMessage() != null) {
+                LOGGER.info("EasyMC has a message for you (This is not a error): {}", response.getMessage());
+            }
 
             return new MinecraftAccount(
-                    AuthType.THE_ALTENING,
-                    response.getSelectedProfile().getName(),
+                    AuthType.EASYMC,
+                    response.getMcName(),
                     new JavaData(
-                            UUIDHelper.convertToDashed(response.getSelectedProfile().getId()),
-                            response.getAccessToken(),
+                            UUID.fromString(response.getUuid()),
+                            response.getSession(),
                             -1
                     ),
                     true
@@ -81,27 +84,14 @@ public class SWEasyMCAuthService implements MCAuthService {
         }
     }
 
-    private record Agent(String name, int version) {
-    }
-
-    @RequiredArgsConstructor
-    private static class AuthenticationRequest {
-        private final Agent agent = new Agent("Minecraft", 1);
-        private final String username;
-        private final String password;
-        private final String clientToken;
-        private final boolean requestUser = true;
+    private record AuthenticationRequest(String token) {
     }
 
     @Getter
-    private static class AuthenticateRefreshResponse {
-        private String accessToken;
-        private ResponseGameProfile selectedProfile;
-    }
-
-    @Getter
-    private static class ResponseGameProfile {
-        private String id;
-        private String name;
+    private static class TokenRedeemResponse {
+        private String mcName;
+        private String uuid;
+        private String session;
+        private String message;
     }
 }
