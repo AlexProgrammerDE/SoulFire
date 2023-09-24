@@ -27,10 +27,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.auth.service.JavaData;
-import net.pistonmaster.serverwrecker.auth.service.SWBedrockMicrosoftAuthService;
-import net.pistonmaster.serverwrecker.auth.service.SWJavaMicrosoftAuthService;
-import net.pistonmaster.serverwrecker.auth.service.SWTheAlteningAuthService;
+import net.pistonmaster.serverwrecker.auth.service.*;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -102,13 +99,13 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
 
         String[] split = account.split(":");
 
-        switch (authType) {
+        return switch (authType) {
             case OFFLINE -> {
                 if (account.contains(":")) {
                     throw new IllegalArgumentException("Invalid account!");
                 }
 
-                return new MinecraftAccount(account);
+                yield new MinecraftAccount(account);
             }
             case MICROSOFT_JAVA, MICROSOFT_BEDROCK -> {
                 if (split.length < 2) {
@@ -122,9 +119,9 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
 
                 try {
                     if (authType == AuthType.MICROSOFT_JAVA) {
-                        return new SWJavaMicrosoftAuthService().login(email, password, null);
+                        yield new SWJavaMicrosoftAuthService().login(email, password, null);
                     } else {
-                        return new SWBedrockMicrosoftAuthService().login(email, password, null);
+                        yield new SWBedrockMicrosoftAuthService().login(email, password, null);
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -139,13 +136,26 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
                 expectEmail(altToken);
 
                 try {
-                    return new SWTheAlteningAuthService().login(altToken, null);
+                    yield new SWTheAlteningAuthService().login(altToken, null);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }
-            default -> throw new IllegalArgumentException("Invalid auth type!");
-        }
+            case EASYMC -> {
+                if (split.length < 1) {
+                    throw new IllegalArgumentException("Invalid account!");
+                }
+
+                String altToken = split[0].trim();
+                expectEmail(altToken);
+
+                try {
+                    yield new SWEasyMCAuthService().login(altToken, null);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
     }
 
     private boolean isEmail(String account) {

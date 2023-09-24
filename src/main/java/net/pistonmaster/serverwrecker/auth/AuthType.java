@@ -28,6 +28,7 @@ public enum AuthType {
     MICROSOFT_JAVA("Microsoft Java"),
     MICROSOFT_BEDROCK("Microsoft Bedrock"),
     THE_ALTENING("The Altening"),
+    EASYMC("EasyMC"),
     OFFLINE("Offline");
 
     private final String displayName;
