@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.addons;
 
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
+import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -50,7 +50,7 @@ public class ClientBrand implements InternalAddon {
     }
 
     public void onPacket(SWPacketReceiveEvent event) {
-        if (event.getPacket() instanceof ClientboundLoginPacket) { // Recommended packet to use
+        if (event.getPacket() instanceof ClientboundGameProfilePacket) {
             if (!event.connection().settingsHolder().has(ClientBrandSettings.class)) {
                 return;
             }

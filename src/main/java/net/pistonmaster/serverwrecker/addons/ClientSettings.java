@@ -23,7 +23,7 @@ import com.github.steveice10.mc.protocol.data.game.entity.player.HandPreference;
 import com.github.steveice10.mc.protocol.data.game.setting.ChatVisibility;
 import com.github.steveice10.mc.protocol.data.game.setting.SkinPart;
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundClientInformationPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
+import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
@@ -57,7 +57,7 @@ public class ClientSettings implements InternalAddon {
     }
 
     public void onPacket(SWPacketReceiveEvent event) {
-        if (event.getPacket() instanceof ClientboundPlayerAbilitiesPacket) { // Recommended packet to use
+        if (event.getPacket() instanceof ClientboundGameProfilePacket) {
             if (!event.connection().settingsHolder().has(ClientSettingsSettings.class)) {
                 return;
             }
