@@ -19,8 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.auth;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.raphimc.mcauth.util.MicrosoftConstants;
@@ -38,7 +36,6 @@ import org.apache.http.message.BasicHeader;
 
 import java.util.List;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class HttpHelper {
     private HttpHelper() {
     }
