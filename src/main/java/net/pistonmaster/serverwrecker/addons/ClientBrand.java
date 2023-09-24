@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.addons;
 
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
-import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
+import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -29,7 +29,7 @@ import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
-import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
+import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSentEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
@@ -46,11 +46,11 @@ public class ClientBrand implements InternalAddon {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
-        AddonHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, this::onPacket);
+        AddonHelper.registerBotEventConsumer(SWPacketSentEvent.class, this::onPacket);
     }
 
-    public void onPacket(SWPacketReceiveEvent event) {
-        if (event.getPacket() instanceof ClientboundGameProfilePacket) {
+    public void onPacket(SWPacketSentEvent event) {
+        if (event.packet() instanceof ServerboundLoginAcknowledgedPacket) {
             if (!event.connection().settingsHolder().has(ClientBrandSettings.class)) {
                 return;
             }

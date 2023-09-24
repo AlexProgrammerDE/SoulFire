@@ -23,14 +23,14 @@ import com.github.steveice10.mc.protocol.data.game.entity.player.HandPreference;
 import com.github.steveice10.mc.protocol.data.game.setting.ChatVisibility;
 import com.github.steveice10.mc.protocol.data.game.setting.SkinPart;
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundClientInformationPacket;
-import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
+import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
-import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
+import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSentEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
@@ -53,11 +53,11 @@ public class ClientSettings implements InternalAddon {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);
-        AddonHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, this::onPacket);
+        AddonHelper.registerBotEventConsumer(SWPacketSentEvent.class, this::onPacket);
     }
 
-    public void onPacket(SWPacketReceiveEvent event) {
-        if (event.getPacket() instanceof ClientboundGameProfilePacket) {
+    public void onPacket(SWPacketSentEvent event) {
+        if (event.packet() instanceof ServerboundLoginAcknowledgedPacket) {
             if (!event.connection().settingsHolder().has(ClientSettingsSettings.class)) {
                 return;
             }

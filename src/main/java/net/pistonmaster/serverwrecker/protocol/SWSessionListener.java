@@ -28,6 +28,7 @@ import com.github.steveice10.packetlib.packet.Packet;
 import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSendingEvent;
+import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSentEvent;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.util.BusInvoker;
 
@@ -50,7 +51,7 @@ public class SWSessionListener extends SessionAdapter {
             return;
         }
 
-        botConnection.logger().trace("Received packet: " + packet.getClass().getSimpleName());
+        botConnection.logger().trace("Received packet: {}", packet.getClass().getSimpleName());
 
         try {
             busInvoker.handlePacket(event1.getPacket());
@@ -74,11 +75,19 @@ public class SWSessionListener extends SessionAdapter {
     }
 
     @Override
+    public void packetSent(Session session, Packet packet) {
+        SWPacketSentEvent event = new SWPacketSentEvent(botConnection, (MinecraftPacket) packet);
+        botConnection.eventBus().post(event);
+
+        botConnection.logger().trace("Sent packet: {}", packet.getClass().getSimpleName());
+    }
+
+    @Override
     public void disconnected(DisconnectedEvent event) {
         try {
             bus.onDisconnectEvent(event);
         } catch (Throwable t) {
-            t.printStackTrace();
+            botConnection.logger().error("Error while handling disconnect event!", t);
         }
 
         botConnection.eventBus().post(new BotDisconnectedEvent(botConnection));
