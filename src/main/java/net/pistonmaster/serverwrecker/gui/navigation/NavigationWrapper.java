@@ -26,7 +26,7 @@ public class NavigationWrapper {
     private NavigationWrapper() {
     }
 
-    public static JPanel createWrapper(CardsContainer container, String target, NavigationItem item) {
+    public static JPanel createBackWrapper(CardsContainer container, String target, NavigationItem item) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
 
@@ -34,19 +34,14 @@ public class NavigationWrapper {
         topBar.setLayout(new BorderLayout());
 
         JButton back = new JButton("Back");
-
-        back.addActionListener(action -> {
-            ((CardLayout) container.getLayout()).show(container, target);
-        });
+        CardLayout cardLayout = (CardLayout) container.getLayout();
+        back.addActionListener(action -> cardLayout.show(container, target));
 
         topBar.add(back, BorderLayout.PAGE_END);
-
         topBar.setSize(new Dimension(topBar.getWidth(), 20));
-
         topBar.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         panel.add(topBar, BorderLayout.NORTH);
-
         panel.add(item, BorderLayout.CENTER);
 
         return panel;

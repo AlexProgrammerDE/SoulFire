@@ -21,6 +21,10 @@ package net.pistonmaster.serverwrecker.settings;
 
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 
-public record DevSettings(boolean debug) implements SettingsObject {
-    public static final boolean DEFAULT_DEBUG = false;
+public record DevSettings(boolean viaDebug, boolean nettyDebug, boolean grpcDebug,
+                          boolean coreDebug) implements SettingsObject {
+    public static final boolean DEFAULT_VIA_DEBUG = false;
+    public static final boolean DEFAULT_NETTY_DEBUG = false;
+    public static final boolean DEFAULT_GRPC_DEBUG = false;
+    public static final boolean DEFAULT_CORE_DEBUG = false;
 }

@@ -143,8 +143,6 @@ public class ServerWrecker {
         // Init API
         ServerWreckerAPI.setServerWrecker(this);
 
-        setupLogging(Level.INFO);
-
         LogAppender logAppender = new LogAppender();
         logAppender.start();
         injector.register(LogAppender.class, logAppender);
@@ -344,11 +342,18 @@ public class ServerWrecker {
         pluginManager.startPlugins();
     }
 
-    public void setupLogging(Level level) {
+    @SuppressWarnings("UnstableApiUsage")
+    public void setupLogging(DevSettings devSettings) {
+        Via.getManager().debugHandler().setEnabled(devSettings.viaDebug());
+
+        Level level = devSettings.coreDebug() ? Level.DEBUG : Level.INFO;
+        Level nettyLevel = devSettings.nettyDebug() ? Level.DEBUG : Level.INFO;
+        Level grpcLevel = devSettings.grpcDebug() ? Level.DEBUG : Level.INFO;
         Configurator.setRootLevel(level);
         Configurator.setLevel(logger.getName(), level);
-        Configurator.setLevel("io.netty", level);
         Configurator.setLevel("org.pf4j", level);
+        Configurator.setLevel("io.netty", nettyLevel);
+        Configurator.setLevel("io.grpc", grpcLevel);
     }
 
     /**

@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.protocol;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
-import com.github.steveice10.packetlib.BuiltinFlags;
 import io.netty.channel.EventLoopGroup;
 import net.kyori.event.EventBus;
 import net.pistonmaster.serverwrecker.AttackManager;
@@ -33,7 +32,6 @@ import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
-import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import org.slf4j.Logger;
 
@@ -59,9 +57,6 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
         SessionDataManager sessionDataManager = new SessionDataManager(botConnection);
         session.getMeta().setSessionDataManager(sessionDataManager);
         session.getMeta().setBotControlAPI(new BotControlAPI(sessionDataManager, sessionDataManager.getBotMovementManager()));
-
-        DevSettings devSettings = settingsHolder.get(DevSettings.class);
-        session.setFlag(BuiltinFlags.PRINT_DEBUG, devSettings.debug());
 
         session.setConnectTimeout(botSettings.connectTimeout());
         session.setReadTimeout(botSettings.readTimeout());

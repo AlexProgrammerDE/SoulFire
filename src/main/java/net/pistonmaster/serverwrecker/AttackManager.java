@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
-import com.viaversion.viaversion.api.Via;
 import io.netty.channel.EventLoopGroup;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.Getter;
@@ -47,7 +46,6 @@ import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.util.RandomUtil;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
-import org.apache.logging.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,12 +83,10 @@ public class AttackManager {
                 .stream().filter(SWProxy::enabled).toList());
 
         BotSettings botSettings = settingsHolder.get(BotSettings.class);
-        DevSettings devSettings = settingsHolder.get(DevSettings.class);
         AccountSettings accountSettings = settingsHolder.get(AccountSettings.class);
         ProxySettings proxySettings = settingsHolder.get(ProxySettings.class);
 
-        Via.getManager().debugHandler().setEnabled(devSettings.debug());
-        serverWrecker.setupLogging(devSettings.debug() ? Level.DEBUG : Level.INFO);
+        serverWrecker.setupLogging(settingsHolder.get(DevSettings.class));
 
         this.attackState = AttackState.RUNNING;
 

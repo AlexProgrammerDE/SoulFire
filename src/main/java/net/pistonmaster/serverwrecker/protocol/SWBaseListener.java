@@ -169,7 +169,6 @@ public class SWBaseListener extends SessionAdapter {
                 session.send(new ServerboundStatusRequestPacket());
             }
         } else if (packet instanceof ServerboundLoginAcknowledgedPacket) {
-            System.out.println("Login acknowledged!");
             protocol.setState(ProtocolState.CONFIGURATION); // LOGIN -> CONFIGURATION
         } else if (packet instanceof ServerboundFinishConfigurationPacket) {
             protocol.setState(ProtocolState.GAME); // CONFIGURATION -> GAME

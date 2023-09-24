@@ -36,17 +36,17 @@ import java.util.Collections;
 import java.util.List;
 
 public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotSettings> {
-    private final JTextField hostInput;
-    private final JTextField portInput;
-    private final JCheckBox trySrv;
-    private final JSpinner minJoinDelayMs;
-    private final JSpinner maxJoinDelayMs;
-    private final JSpinner amount;
-    private final JComboBox<ProtocolVersion> versionBox;
-    private final JSpinner readTimeout;
-    private final JSpinner writeTimeout;
-    private final JSpinner connectTimeout;
-    private final JSpinner concurrentConnects;
+    private final JTextField hostInput = new JTextField(BotSettings.DEFAULT_HOST);
+    private final JTextField portInput = new JTextField(String.valueOf(BotSettings.DEFAULT_PORT));
+    private final JCheckBox trySrv = new PresetJCheckBox(BotSettings.DEFAULT_TRY_SRV);
+    private final JSpinner minJoinDelayMs = new JSpinner();
+    private final JSpinner maxJoinDelayMs = new JSpinner();
+    private final JSpinner amount = new JSpinner();
+    private final JComboBox<ProtocolVersion> versionBox = new JComboBox<>();
+    private final JSpinner readTimeout = new JSpinner();
+    private final JSpinner writeTimeout = new JSpinner();
+    private final JSpinner connectTimeout = new JSpinner();
+    private final JSpinner concurrentConnects = new JSpinner();
 
     @Inject
     public SettingsPanel(ServerWrecker serverWrecker) {
@@ -55,57 +55,46 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
         setLayout(new GridLayout(0, 2));
 
         add(new JLabel("Host: "));
-        hostInput = new JTextField(BotSettings.DEFAULT_HOST);
         add(hostInput);
 
         add(new JLabel("Port: "));
-        portInput = new JTextField(String.valueOf(BotSettings.DEFAULT_PORT));
         add(portInput);
 
         add(new JLabel("Min join delay (ms): "));
-        minJoinDelayMs = new JSpinner();
         minJoinDelayMs.setValue(BotSettings.DEFAULT_MIN_JOIN_DELAY_MS);
         add(minJoinDelayMs);
 
         add(new JLabel("Max join delay (ms): "));
-        maxJoinDelayMs = new JSpinner();
         maxJoinDelayMs.setValue(BotSettings.DEFAULT_MAX_JOIN_DELAY_MS);
         add(maxJoinDelayMs);
 
         JMinMaxHelper.applyLink(minJoinDelayMs, maxJoinDelayMs);
 
         add(new JLabel("Amount: "));
-        amount = new JSpinner();
         amount.setValue(BotSettings.DEFAULT_AMOUNT);
         add(amount);
 
         add(new JLabel("Version: "));
-        versionBox = new JComboBox<>();
         versionBox.setRenderer(new ProtocolVersionRenderer());
         registerVersions();
         add(versionBox);
 
         add(new JLabel("Read Timeout: "));
-        readTimeout = new JSpinner();
         readTimeout.setValue(BotSettings.DEFAULT_READ_TIMEOUT);
         add(readTimeout);
 
         add(new JLabel("Write Timeout: "));
-        writeTimeout = new JSpinner();
         writeTimeout.setValue(BotSettings.DEFAULT_WRITE_TIMEOUT);
         add(writeTimeout);
 
         add(new JLabel("Connect Timeout: "));
-        connectTimeout = new JSpinner();
         connectTimeout.setValue(BotSettings.DEFAULT_CONNECT_TIMEOUT);
         add(connectTimeout);
 
         add(new JLabel("Try SRV record resolving: "));
-        trySrv = new PresetJCheckBox(BotSettings.DEFAULT_TRY_SRV);
         add(trySrv);
 
         add(new JLabel("Concurrent Connects: "));
-        concurrentConnects = new JSpinner();
         concurrentConnects.setValue(BotSettings.DEFAULT_CONCURRENT_CONNECTS);
         add(concurrentConnects);
     }

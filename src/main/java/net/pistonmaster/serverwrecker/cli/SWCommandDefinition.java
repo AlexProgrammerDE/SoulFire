@@ -82,8 +82,17 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Option(names = {"--concurrent-connects"}, description = "Amount of bots that can try to connect at the same time")
     private int concurrentConnects = BotSettings.DEFAULT_CONCURRENT_CONNECTS;
 
-    @Option(names = {"--debug"}, description = "Log additional information useful for debugging the software")
-    private boolean debug = DevSettings.DEFAULT_DEBUG;
+    @Option(names = {"--via-debug"}, description = "Set Via* to debug mode")
+    private boolean viaDebug = DevSettings.DEFAULT_VIA_DEBUG;
+
+    @Option(names = {"--netty-debug"}, description = "Set Netty to debug mode")
+    private boolean nettyDebug = DevSettings.DEFAULT_NETTY_DEBUG;
+
+    @Option(names = {"--grpc-debug"}, description = "Set gRPC to debug mode")
+    private boolean gRPCDebug = DevSettings.DEFAULT_GRPC_DEBUG;
+
+    @Option(names = {"--core-debug"}, description = "Set core loggers to debug mode")
+    private boolean coreDebug = DevSettings.DEFAULT_CORE_DEBUG;
 
     @Option(names = {"--bots-per-proxy"}, description = "Amount of bots that can be on a single proxy")
     private int botsPerProxy = ProxySettings.DEFAULT_BOTS_PER_PROXY;
@@ -149,7 +158,10 @@ public class SWCommandDefinition implements Callable<Integer> {
 
         serverWrecker.getSettingsManager().registerProvider(DevSettings.class,
                 () -> new DevSettings(
-                        debug
+                        viaDebug,
+                        nettyDebug,
+                        gRPCDebug,
+                        coreDebug
                 ));
 
         serverWrecker.getSettingsManager().registerProvider(AccountSettings.class,
