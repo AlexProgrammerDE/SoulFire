@@ -99,108 +99,97 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
 
         String[] split = account.split(":");
 
-        return switch (authType) {
-            case OFFLINE -> {
-                if (account.contains(":")) {
-                    throw new IllegalArgumentException("Invalid account!");
+        try {
+            return switch (authType) {
+                case OFFLINE -> {
+                    if (account.contains(":")) {
+                        throw new IllegalArgumentException("Invalid account!");
+                    }
+
+                    yield new MinecraftAccount(account);
                 }
+                case MICROSOFT_JAVA, MICROSOFT_BEDROCK -> {
+                    if (split.length < 2) {
+                        throw new IllegalArgumentException("Invalid account!");
+                    }
 
-                yield new MinecraftAccount(account);
-            }
-            case MICROSOFT_JAVA, MICROSOFT_BEDROCK -> {
-                if (split.length < 2) {
-                    throw new IllegalArgumentException("Invalid account!");
-                }
-
-                String email = split[0].trim();
-                expectEmail(email);
-
-                String password = split[1].trim();
-
-                try {
+                    String email = expectEmail(split[0].trim());
+                    String password = split[1].trim();
                     if (authType == AuthType.MICROSOFT_JAVA) {
                         yield new SWJavaMicrosoftAuthService().login(email, password, null);
                     } else {
                         yield new SWBedrockMicrosoftAuthService().login(email, password, null);
                     }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
                 }
-            }
-            case THE_ALTENING -> {
-                if (split.length < 1) {
-                    throw new IllegalArgumentException("Invalid account!");
-                }
+                case THE_ALTENING -> {
+                    if (split.length < 1) {
+                        throw new IllegalArgumentException("Invalid account!");
+                    }
 
-                String altToken = split[0].trim();
-                expectEmail(altToken);
-
-                try {
-                    yield new SWTheAlteningAuthService().login(altToken, null);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    yield new SWTheAlteningAuthService().login(split[0].trim(), null);
                 }
-            }
-            case EASYMC -> {
-                if (split.length < 1) {
-                    throw new IllegalArgumentException("Invalid account!");
-                }
+                case EASYMC -> {
+                    if (split.length < 1) {
+                        throw new IllegalArgumentException("Invalid account!");
+                    }
 
-                String altToken = split[0].trim();
-                expectEmail(altToken);
-
-                try {
-                    yield new SWEasyMCAuthService().login(altToken, null);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    yield new SWEasyMCAuthService().login(split[0].trim(), null);
                 }
-            }
-        };
+            };
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private boolean isEmail(String account) {
         return EmailValidator.getInstance().isValid(account);
     }
 
-    private void expectEmail(String account) {
+    private String expectEmail(String account) {
         if (!isEmail(account)) {
             throw new IllegalArgumentException("Invalid email!");
         }
+
+        return account;
     }
 
     private MinecraftAccount fromJsonType(AccountJsonType type, AuthType authType) {
         Objects.requireNonNull(type, "Account type cannot be null");
-        String username = Objects.requireNonNull(type.username, "Username not found").trim();
-        UUID profileId = type.profileId == null ? null : UUID.fromString(type.profileId.trim());
 
         String authToken = type.authToken == null ? null : type.authToken.trim();
-        long tokenExpireAt = authType == AuthType.OFFLINE ? -1 : type.tokenExpireAt;
-
-        String email = type.email == null ? null : type.email.trim();
-        expectEmail(email);
-
-        String password = type.password == null ? null : type.password.trim();
-
         if (authToken != null) {
+            String username = Objects.requireNonNull(type.username, "Username not found").trim();
+            UUID profileId = type.profileId == null ? null : UUID.fromString(type.profileId.trim());
+            long tokenExpireAt = authType == AuthType.OFFLINE ? -1 : type.tokenExpireAt;
+
             return new MinecraftAccount(authType, username, new JavaData(profileId, authToken, tokenExpireAt), true);
         }
 
-        switch (authType) {
-            case MICROSOFT_JAVA -> {
-                try {
-                    return new SWJavaMicrosoftAuthService().login(email, password, null);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            case THE_ALTENING -> {
-                try {
-                    return new SWTheAlteningAuthService().login(email, null);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            default -> throw new IllegalArgumentException("Could not create a auth token!");
+        try {
+            return switch (authType) {
+                case MICROSOFT_JAVA -> new SWJavaMicrosoftAuthService().login(
+                        expectEmail(Objects.requireNonNull(type.email, "E-Mail token cannot be null").trim()),
+                        Objects.requireNonNull(type.password, "Password cannot be null").trim(),
+                        null
+                );
+                case MICROSOFT_BEDROCK -> new SWBedrockMicrosoftAuthService().login(
+                        expectEmail(Objects.requireNonNull(type.email, "E-Mail token cannot be null").trim()),
+                        Objects.requireNonNull(type.password, "Password cannot be null").trim(),
+                        null
+                );
+                case THE_ALTENING -> new SWTheAlteningAuthService().login(
+                        Objects.requireNonNull(type.altToken, "Alt token cannot be null").trim(),
+                        null
+                );
+                case EASYMC -> new SWEasyMCAuthService().login(
+                        Objects.requireNonNull(type.altToken, "Alt token cannot be null").trim(),
+                        null);
+                case OFFLINE -> new MinecraftAccount(
+                        Objects.requireNonNull(type.username, "Username not found").trim()
+                );
+            };
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -245,12 +234,17 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
     @AllArgsConstructor
     @NoArgsConstructor
     private static class AccountJsonType {
+        // Prefilled fields, username filled for offline
         private String username;
         private String profileId;
         private String authToken;
         private long tokenExpireAt;
 
+        // Java and bedrock
         private String email;
         private String password;
+
+        // TheAltening and EasyMC
+        private String altToken;
     }
 }
