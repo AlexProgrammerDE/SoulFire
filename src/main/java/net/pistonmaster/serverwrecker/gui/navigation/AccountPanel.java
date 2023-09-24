@@ -29,6 +29,7 @@ import net.pistonmaster.serverwrecker.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
+import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;
@@ -61,6 +62,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.MICROSOFT_JAVA));
         addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.MICROSOFT_BEDROCK));
         addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.THE_ALTENING));
+        addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.EASYMC));
 
         accountOptionsPanel.add(addAccountPanel);
 
@@ -149,7 +151,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
     }
 
     private JButton createAccountLoadButton(ServerWrecker serverWrecker, GUIFrame parent, AuthType type) {
-        String loadText = String.format("Load %s accounts", type);
+        String loadText = SwingTextUtils.htmlCenterText(String.format("Load %s accounts", type));
         String typeText = String.format("%s list file", type);
         JButton button = new JButton(loadText);
 

@@ -37,14 +37,14 @@ public class CardsContainer extends JPanel {
     private final Injector injector;
 
     public void create() {
+        setLayout(new CardLayout());
+
         panels.add(injector.getSingleton(SettingsPanel.class));
         AddonPanel addonPanel = injector.getSingleton(AddonPanel.class);
         panels.add(addonPanel);
         panels.add(injector.getSingleton(AccountPanel.class));
         panels.add(injector.getSingleton(ProxyPanel.class));
         panels.add(injector.getSingleton(DeveloperPanel.class));
-
-        setLayout(new CardLayout());
 
         NavigationPanel navigationPanel = injector.getSingleton(NavigationPanel.class);
         add(navigationPanel, NAVIGATION_MENU);

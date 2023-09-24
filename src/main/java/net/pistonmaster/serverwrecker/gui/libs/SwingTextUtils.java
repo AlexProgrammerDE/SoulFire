@@ -52,4 +52,8 @@ public class SwingTextUtils {
 
         return pane;
     }
+
+    public static String htmlCenterText(String text) {
+        return "<html><center>" + text + "</center></html>";
+    }
 }

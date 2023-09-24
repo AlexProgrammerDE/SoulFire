@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import ch.jalu.injector.Injector;
+import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -31,12 +32,12 @@ public class NavigationPanel extends JPanel {
         super();
 
         setLayout(new GridLayout(3, 3, 10, 10));
+        CardLayout cardLayout = (CardLayout) container.getLayout();
 
         for (NavigationItem item : container.getPanels()) {
-            JButton button = new JButton(item.getNavigationName());
-            button.addActionListener(action -> {
-                ((CardLayout) container.getLayout()).show(container, item.getNavigationId());
-            });
+            JButton button = new JButton(SwingTextUtils.htmlCenterText(item.getNavigationName()));
+
+            button.addActionListener(action -> cardLayout.show(container, item.getNavigationId()));
 
             add(button);
         }

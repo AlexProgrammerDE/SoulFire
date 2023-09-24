@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
+import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -38,13 +39,12 @@ public class AddonPanel extends NavigationItem {
         ServerWreckerAPI.postEvent(new AddonPanelInitEvent(navigationItems));
 
         setLayout(new GridLayout(3, 3, 10, 10));
+        CardLayout cardLayout = (CardLayout) container.getLayout();
 
         for (NavigationItem item : navigationItems) {
-            JButton button = new JButton(item.getNavigationName());
-            button.addActionListener(action -> {
-                ((CardLayout) container.getLayout()).show(container, item.getNavigationId());
-            });
+            JButton button = new JButton(SwingTextUtils.htmlCenterText(item.getNavigationName()));
 
+            button.addActionListener(action -> cardLayout.show(container, item.getNavigationId()));
             button.setSize(new Dimension(50, 50));
 
             add(button);

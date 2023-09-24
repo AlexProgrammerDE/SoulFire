@@ -24,6 +24,7 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
+import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
@@ -148,7 +149,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
     }
 
     private JButton createProxyLoadButton(ServerWrecker serverWrecker, GUIFrame parent, ProxyType type) {
-        String loadText = String.format("Load %s proxies", type.name());
+        String loadText = SwingTextUtils.htmlCenterText(String.format("Load %s proxies", type.name()));
         String typeText = String.format("%s list file", type.name());
         JButton button = new JButton(loadText);
 
