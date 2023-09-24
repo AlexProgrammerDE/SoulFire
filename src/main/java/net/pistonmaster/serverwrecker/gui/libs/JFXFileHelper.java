@@ -27,6 +27,9 @@ import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
 public class JFXFileHelper {
+    private JFXFileHelper() {
+    }
+
     public static Path showOpenDialog(FileChooser fileChooser) {
         CompletableFuture<Path> future = new CompletableFuture<>();
         Platform.runLater(() -> {

@@ -29,6 +29,8 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
  * This also runs async off the main thread of the attack, so you can do blocking operations for the attack here.
  * <br>
  * This event is recommended for when you want to add a pre-connect hook like for server list ping.
+ *
+ * @param connection The bot connection instance.
  */
 public record PreBotConnectEvent(BotConnection connection) implements ServerWreckerAttackEvent {
     @Override

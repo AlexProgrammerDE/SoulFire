@@ -20,8 +20,14 @@
 package net.pistonmaster.serverwrecker.util;
 
 public class MathHelper {
+    private MathHelper() {
+    }
+
     /**
      * Returns the greatest integer less than or equal to the double argument
+     *
+     * @param value A double
+     * @return The greatest integer less than or equal to the double argument
      */
     public static int floorDouble(double value) {
         int i = (int) value;

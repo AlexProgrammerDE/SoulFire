@@ -152,7 +152,7 @@ public class AutoArmor implements InternalAddon {
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        public AutoArmorPanel(ServerWrecker serverWrecker) {
+        AutoArmorPanel(ServerWrecker serverWrecker) {
             super();
             serverWrecker.getSettingsManager().registerDuplex(AutoArmorSettings.class, this);
 

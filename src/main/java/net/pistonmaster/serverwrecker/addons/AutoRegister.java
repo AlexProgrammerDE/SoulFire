@@ -93,7 +93,7 @@ public class AutoRegister implements InternalAddon {
         private final JTextField captchaCommand;
         private final JTextField passwordFormat;
 
-        public AutoRegisterPanel(ServerWrecker serverWrecker) {
+        AutoRegisterPanel(ServerWrecker serverWrecker) {
             super();
             serverWrecker.getSettingsManager().registerDuplex(AutoRegisterSettings.class, this);
 

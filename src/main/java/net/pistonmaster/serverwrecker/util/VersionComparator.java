@@ -22,6 +22,9 @@ package net.pistonmaster.serverwrecker.util;
 import java.util.Arrays;
 
 public class VersionComparator {
+    private VersionComparator() {
+    }
+
     public static boolean isNewer(String currentVersion, String checkVersion) {
         currentVersion = currentVersion.replace("-SNAPSHOT", "");
         checkVersion = checkVersion.replace("-SNAPSHOT", "");

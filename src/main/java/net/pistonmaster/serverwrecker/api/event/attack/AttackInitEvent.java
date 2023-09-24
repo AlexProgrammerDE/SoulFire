@@ -25,6 +25,8 @@ import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
 /**
  * This event is called right after an AttackManager is created and before any attack is scheduled.
  * This is intentionally in a global scope for any listener to subscribe to this AttackManager.
+ *
+ * @param attackManager The attack manager instance.
  */
 public record AttackInitEvent(AttackManager attackManager) implements ServerWreckerGlobalEvent {
 }

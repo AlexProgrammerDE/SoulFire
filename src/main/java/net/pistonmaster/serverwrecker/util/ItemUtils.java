@@ -23,6 +23,9 @@ import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.data.ItemType;
 
 public class ItemUtils {
+    private ItemUtils() {
+    }
+
     public static boolean isToolFor(ItemType itemType, BlockType blockType) {
         if (!blockType.diggable()) {
             return false;

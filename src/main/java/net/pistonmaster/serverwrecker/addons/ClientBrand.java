@@ -86,7 +86,7 @@ public class ClientBrand implements InternalAddon {
         private final JCheckBox sendClientBrand;
         private final JTextField clientBrand;
 
-        public ClientBrandPanel(ServerWrecker serverWrecker) {
+        ClientBrandPanel(ServerWrecker serverWrecker) {
             super();
             serverWrecker.getSettingsManager().registerDuplex(ClientBrandSettings.class, this);
 

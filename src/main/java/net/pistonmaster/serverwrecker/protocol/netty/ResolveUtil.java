@@ -40,6 +40,9 @@ public class ResolveUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResolveUtil.class);
     private static final Pattern IP_REGEX = Pattern.compile("\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b");
 
+    private ResolveUtil() {
+    }
+
     public static InetSocketAddress resolveAddress(boolean isBedrock, SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup) {
         BotSettings settings = settingsHolder.get(BotSettings.class);
         String host = settings.host();

@@ -23,8 +23,6 @@ import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
@@ -61,6 +59,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static net.pistonmaster.serverwrecker.logging.BrigadierHelper.argument;
+import static net.pistonmaster.serverwrecker.logging.BrigadierHelper.literal;
+
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CommandManager {
     @Getter
@@ -72,7 +73,7 @@ public class CommandManager {
     @PostConstruct
     public void postConstruct() {
         Logger logger = serverWrecker.getLogger();
-        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("online").executes(c -> {
+        dispatcher.register(literal("online").executes(c -> {
             AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
             if (attackManager == null) {
@@ -88,15 +89,15 @@ public class CommandManager {
             c.getSource().sendMessage(online.size() + " bots online: " + String.join(", ", online));
             return 1;
         }));
-        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("clear").executes(c -> {
+        dispatcher.register(literal("clear").executes(c -> {
             LogPanel logPanel = serverWrecker.getInjector().getIfAvailable(LogPanel.class);
             if (logPanel != null) {
                 logPanel.getMessageLogPanel().clear();
             }
             return 1;
         }));
-        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("say")
-                .then(RequiredArgumentBuilder.<ConsoleSubject, String>argument("message", StringArgumentType.greedyString())
+        dispatcher.register(literal("say")
+                .then(argument("message", StringArgumentType.greedyString())
                         .executes(c -> {
                             AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
@@ -114,7 +115,7 @@ public class CommandManager {
                             });
                             return 1;
                         })));
-        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("stats").executes(c -> {
+        dispatcher.register(literal("stats").executes(c -> {
             AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
             if (attackManager == null) {
@@ -161,7 +162,7 @@ public class CommandManager {
 
             return 1;
         }));
-        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("help")
+        dispatcher.register(literal("help")
                 .executes(c -> {
                     c.getSource().sendMessage("Available commands:");
                     for (String command : dispatcher.getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
@@ -169,59 +170,59 @@ public class CommandManager {
                     }
                     return 1;
                 }));
-        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("walkxyz").then(RequiredArgumentBuilder.
-                <ConsoleSubject, Double>argument("x", DoubleArgumentType.doubleArg()).then(RequiredArgumentBuilder.
-                <ConsoleSubject, Double>argument("y", DoubleArgumentType.doubleArg()).then(RequiredArgumentBuilder.
-                <ConsoleSubject, Double>argument("z", DoubleArgumentType.doubleArg())
-                .executes(c -> {
-                    double x = DoubleArgumentType.getDouble(c, "x");
-                    double y = DoubleArgumentType.getDouble(c, "y");
-                    double z = DoubleArgumentType.getDouble(c, "z");
+        dispatcher.register(literal("walkxyz")
+                .then(argument("x", DoubleArgumentType.doubleArg())
+                        .then(argument("y", DoubleArgumentType.doubleArg())
+                                .then(argument("z", DoubleArgumentType.doubleArg())
+                                        .executes(c -> {
+                                            double x = DoubleArgumentType.getDouble(c, "x");
+                                            double y = DoubleArgumentType.getDouble(c, "y");
+                                            double z = DoubleArgumentType.getDouble(c, "z");
 
-                    executePathfinding(new PosGoal(x, y, z));
-                    return 1;
-                })))));
-        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("walkxz").then(RequiredArgumentBuilder.
-                <ConsoleSubject, Double>argument("x", DoubleArgumentType.doubleArg()).then(RequiredArgumentBuilder.
-                <ConsoleSubject, Double>argument("z", DoubleArgumentType.doubleArg())
-                .executes(c -> {
-                    double x = DoubleArgumentType.getDouble(c, "x");
-                    double z = DoubleArgumentType.getDouble(c, "z");
+                                            executePathfinding(new PosGoal(x, y, z));
+                                            return 1;
+                                        })))));
+        dispatcher.register(literal("walkxz")
+                .then(argument("x", DoubleArgumentType.doubleArg())
+                        .then(argument("z", DoubleArgumentType.doubleArg())
+                                .executes(c -> {
+                                    double x = DoubleArgumentType.getDouble(c, "x");
+                                    double z = DoubleArgumentType.getDouble(c, "z");
 
-                    executePathfinding(new XZGoal(x, z));
-                    return 1;
-                }))));
-        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("walky").then(RequiredArgumentBuilder.
-                <ConsoleSubject, Double>argument("y", DoubleArgumentType.doubleArg())
-                .executes(c -> {
-                    double y = DoubleArgumentType.getDouble(c, "y");
-                    executePathfinding(new YGoal(y));
-                    return 1;
-                })));
-        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("lookat").then(RequiredArgumentBuilder.
-                <ConsoleSubject, Double>argument("x", DoubleArgumentType.doubleArg()).then(RequiredArgumentBuilder.
-                <ConsoleSubject, Double>argument("y", DoubleArgumentType.doubleArg()).then(RequiredArgumentBuilder.
-                <ConsoleSubject, Double>argument("z", DoubleArgumentType.doubleArg())
-                .executes(c -> {
-                    AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+                                    executePathfinding(new XZGoal(x, z));
+                                    return 1;
+                                }))));
+        dispatcher.register(literal("walky")
+                .then(argument("y", DoubleArgumentType.doubleArg())
+                        .executes(c -> {
+                            double y = DoubleArgumentType.getDouble(c, "y");
+                            executePathfinding(new YGoal(y));
+                            return 1;
+                        })));
+        dispatcher.register(literal("lookat")
+                .then(argument("x", DoubleArgumentType.doubleArg())
+                        .then(argument("y", DoubleArgumentType.doubleArg())
+                                .then(argument("z", DoubleArgumentType.doubleArg())
+                                        .executes(c -> {
+                                            AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
-                    if (attackManager == null) {
-                        return 1;
-                    }
+                                            if (attackManager == null) {
+                                                return 1;
+                                            }
 
-                    double x = DoubleArgumentType.getDouble(c, "x");
-                    double y = DoubleArgumentType.getDouble(c, "y");
-                    double z = DoubleArgumentType.getDouble(c, "z");
+                                            double x = DoubleArgumentType.getDouble(c, "x");
+                                            double y = DoubleArgumentType.getDouble(c, "y");
+                                            double z = DoubleArgumentType.getDouble(c, "z");
 
-                    for (BotConnection bot : attackManager.getBotConnections()) {
-                        SessionDataManager sessionDataManager = bot.sessionDataManager();
-                        BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
+                                            for (BotConnection bot : attackManager.getBotConnections()) {
+                                                SessionDataManager sessionDataManager = bot.sessionDataManager();
+                                                BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
 
-                        botMovementManager.lookAt(RotationOrigin.FEET, Vector3d.from(x, y, z));
-                    }
-                    return 1;
-                })))));
-        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("forward")
+                                                botMovementManager.lookAt(RotationOrigin.FEET, Vector3d.from(x, y, z));
+                                            }
+                                            return 1;
+                                        })))));
+        dispatcher.register(literal("forward")
                 .executes(c -> {
                     AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
@@ -237,7 +238,7 @@ public class CommandManager {
                     }
                     return 1;
                 }));
-        dispatcher.register(LiteralArgumentBuilder.<ConsoleSubject>literal("stop")
+        dispatcher.register(literal("stop")
                 .executes(c -> {
                     AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 

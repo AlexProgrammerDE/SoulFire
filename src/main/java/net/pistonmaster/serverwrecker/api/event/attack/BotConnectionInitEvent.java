@@ -28,6 +28,8 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
  * The BotConnection instance has all fields filled, but most methods are unusable as the bot is not connected yet.
  * <br>
  * This event is recommended for when you want to add an addon listener to the bot connection.
+ *
+ * @param connection The bot connection instance.
  */
 public record BotConnectionInitEvent(BotConnection connection) implements ServerWreckerAttackEvent {
     @Override

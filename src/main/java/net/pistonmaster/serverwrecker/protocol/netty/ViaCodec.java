@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.protocol.netty;
 
-
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.packet.State;

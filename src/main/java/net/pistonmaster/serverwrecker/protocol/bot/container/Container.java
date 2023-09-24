@@ -19,8 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.container;
 
-import com.viaversion.viaversion.libs.fastutil.ints.Int2IntMap;
-import com.viaversion.viaversion.libs.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import lombok.Getter;
 
 import javax.annotation.Nonnull;

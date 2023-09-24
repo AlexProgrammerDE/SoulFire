@@ -32,6 +32,9 @@ public class MapColorUtils {
     private static final Color[] MAP_COLORS;
     private static final IndexColorModel MAP_COLOR_MODEL;
 
+    private MapColorUtils() {
+    }
+
     static {
         final MapColor[] baseMapColors = MapColor.values();
 
@@ -44,10 +47,10 @@ public class MapColorUtils {
             MAP_COLORS[i * 4 + 3] = generateShade(bc, 135.0);
         }
 
-        byte[] r = new byte[MAP_COLORS.length],
-                g = new byte[MAP_COLORS.length],
-                b = new byte[MAP_COLORS.length],
-                a = new byte[MAP_COLORS.length];
+        byte[] r = new byte[MAP_COLORS.length];
+        byte[] g = new byte[MAP_COLORS.length];
+        byte[] b = new byte[MAP_COLORS.length];
+        byte[] a = new byte[MAP_COLORS.length];
 
         for (int i = 0; i < MAP_COLORS.length; ++i) {
             Color mc = MAP_COLORS[i];

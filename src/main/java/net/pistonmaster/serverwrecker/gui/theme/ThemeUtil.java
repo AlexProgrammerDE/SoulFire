@@ -37,6 +37,9 @@ public class ThemeUtil {
     public static final SettingsManager THEME_MANAGER = new SettingsManager(ThemeSettings.class);
     public static final ThemeProvider THEME_PROVIDER = new ThemeProvider(FlatDarculaLaf.class);
 
+    private ThemeUtil() {
+    }
+
     static {
         THEME_MANAGER.registerDuplex(ThemeSettings.class, THEME_PROVIDER);
 

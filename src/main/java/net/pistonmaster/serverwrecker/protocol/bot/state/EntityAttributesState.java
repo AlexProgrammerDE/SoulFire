@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
-import com.viaversion.viaversion.libs.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Data;
 
 import java.util.Map;

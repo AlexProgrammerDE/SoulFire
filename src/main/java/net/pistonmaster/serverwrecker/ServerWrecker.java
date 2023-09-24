@@ -233,7 +233,6 @@ public class ServerWrecker {
         }
 
         logger.info("Loaded {} block states", stateMap.size());
-        ;
 
         try (InputStream stream = ServerWrecker.class.getClassLoader().getResourceAsStream("minecraft/tags.json")) {
             Objects.requireNonNull(stream, "tags.json not found");
@@ -242,7 +241,6 @@ public class ServerWrecker {
             throw new RuntimeException(e);
         }
         logger.info("Loaded tags");
-        ;
 
         // Init via
         Path viaPath = DATA_FOLDER.resolve("ViaVersion");

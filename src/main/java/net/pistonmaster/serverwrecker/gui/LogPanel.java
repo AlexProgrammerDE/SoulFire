@@ -155,15 +155,15 @@ public class LogPanel extends JPanel {
                     }
                 }
                 case KeyEvent.VK_ENTER -> cachedText = null;
-
-                        /*
+                /*
                     case KeyEvent.VK_TAB:
                         e.consume();
                         ParseResults<ShellSender> results = shellSender.getDispatcher().parse(commands.getText(), shellSender);
 
                         System.out.println(results.getContext().findSuggestionContext(commands.getCaretPosition()).startPos);
                         System.out.println(results.getContext().findSuggestionContext(commands.getCaretPosition()).parent.getName());
-                        break;*/
+                        break;
+                */
             }
         }
     }

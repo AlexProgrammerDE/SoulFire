@@ -22,6 +22,9 @@ package net.pistonmaster.serverwrecker.util;
 import java.util.UUID;
 
 public class UUIDHelper {
+    private UUIDHelper() {
+    }
+
     public static UUID convertToDashed(String noDashes) {
         StringBuilder idBuff = new StringBuilder(noDashes);
         idBuff.insert(20, '-');

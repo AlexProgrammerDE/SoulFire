@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.viaversion;
 
-
 import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.exception.CancelDecoderException;
 import io.netty.buffer.ByteBuf;

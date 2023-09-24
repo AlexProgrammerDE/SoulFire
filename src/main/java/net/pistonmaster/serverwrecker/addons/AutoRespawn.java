@@ -86,7 +86,7 @@ public class AutoRespawn implements InternalAddon {
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        public AutoRespawnPanel(ServerWrecker serverWrecker) {
+        AutoRespawnPanel(ServerWrecker serverWrecker) {
             super();
             serverWrecker.getSettingsManager().registerDuplex(AutoRespawnSettings.class, this);
 

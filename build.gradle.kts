@@ -176,6 +176,11 @@ idea {
     }
 }
 
+tasks.withType<Checkstyle>() {
+    exclude("**/net/pistonmaster/serverwrecker/data**")
+    exclude("**/net/pistonmaster/serverwrecker/grpc/generated**")
+}
+
 tasks.compileJava.get().apply {
     options.compilerArgs.add("-Aproject=${project.name}")
 }

@@ -91,7 +91,7 @@ public class AutoJump implements InternalAddon {
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        public AutoJumpPanel(ServerWrecker serverWrecker) {
+        AutoJumpPanel(ServerWrecker serverWrecker) {
             super();
             serverWrecker.getSettingsManager().registerDuplex(AutoJumpSettings.class, this);
 

@@ -30,6 +30,9 @@ import java.util.List;
 public class SWConstants {
     public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.v1_20_2;
 
+    private SWConstants() {
+    }
+
     public static List<ProtocolVersion> getVersionsSorted() {
         List<ProtocolVersion> normalVersions = new ArrayList<>();
         List<ProtocolVersion> legacyVersions = new ArrayList<>();

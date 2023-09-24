@@ -95,7 +95,7 @@ public class AutoReconnect implements InternalAddon {
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        public AutoReconnectPanel(ServerWrecker serverWrecker) {
+        AutoReconnectPanel(ServerWrecker serverWrecker) {
             super();
             serverWrecker.getSettingsManager().registerDuplex(AutoReconnectSettings.class, this);
 

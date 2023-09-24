@@ -24,6 +24,9 @@ import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
 import picocli.CommandLine;
 
 public class AddonCLIHelper {
+    private AddonCLIHelper() {
+    }
+
     public static <T extends SettingsObject> void registerCommands(CommandLine commandLine, Class<T> clazz, SettingsProvider<T> command) {
         CommandLine.Model.CommandSpec sourceCommandSpec = CommandLine.Model.CommandSpec.forAnnotatedObject(command);
         CommandLine.Model.CommandSpec targetCommandSpec = commandLine.getCommandSpec();

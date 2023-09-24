@@ -48,6 +48,9 @@ public class SWNettyHelper {
     public static final Class<? extends Channel> CHANNEL_CLASS;
     public static final Class<? extends DatagramChannel> DATAGRAM_CHANNEL_CLASS;
 
+    private SWNettyHelper() {
+    }
+
     static {
         TransportHelper.TransportMethod transportMethod = TransportHelper.determineTransportMethod();
         switch (transportMethod) {

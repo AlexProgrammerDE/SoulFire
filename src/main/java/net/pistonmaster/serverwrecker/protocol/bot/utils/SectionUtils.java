@@ -20,6 +20,8 @@
 package net.pistonmaster.serverwrecker.protocol.bot.utils;
 
 public class SectionUtils {
+    private SectionUtils() {
+    }
 
     public static int blockToSection(int block) {
         return block >> 4;

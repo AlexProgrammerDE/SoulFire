@@ -38,6 +38,9 @@ public class ServerWreckerAPI {
     private static final List<Addon> addons = new ArrayList<>();
     private static ServerWrecker serverWrecker;
 
+    private ServerWreckerAPI() {
+    }
+
     /**
      * Get the current ServerWrecker instance for access to internals.
      *

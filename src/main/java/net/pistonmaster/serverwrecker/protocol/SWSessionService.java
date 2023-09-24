@@ -43,6 +43,8 @@ public class SWSessionService extends Service {
 
     /**
      * Creates a new SessionService instance.
+     *
+     * @param authType Authentication type to use.
      */
     public SWSessionService(AuthType authType) {
         super(switch (authType) {

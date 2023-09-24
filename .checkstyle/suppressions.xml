@@ -3,11 +3,12 @@
 <suppressions>
     <!-- no javadoc on test and internal classes -->
     <suppress files="src[\\/]test[\\/]java[\\/].*" checks="(FilteringWriteTag|JavadocPackage|MissingJavadoc.*)"/>
-    <suppress files=".*[\\/]src[\\/]main[\\/]java[\\/]net[\\/]kyori[\\/]indra[\\/]internal[\\/].*" checks="(FilteringWriteTag|JavadocPackage|MissingJavadoc.*)"/>
-    <suppress files=".*[\\/]src[\\/].*[\\/]java[\\/]net[\\/]kyori[\\/]indra[\\/]([^\\/]+)[\\/]internal[\\/].*" checks="(FilteringWriteTag|JavadocPackage|MissingJavadoc.*)"/>
 
     <!-- no package JD on multirelease variants -->
     <suppress files="src[\\/]main[\\/]java\d+[\\/].*" checks="JavadocPackage"/>
+
+    <!-- Allow ViaVersion packages to use ViaVersion shaded libraries -->
+    <suppress files=".*[\\/]src[\\/].*[\\/]java[\\/]net[\\/]pistonmaster[\\/]serverwrecker[\\/]viaversion[\\/].*" checks="IllegalImport"/>
 
     <!-- Gradle forces us to use get/set prefixes -->
     <suppress checks="MethodName"/>

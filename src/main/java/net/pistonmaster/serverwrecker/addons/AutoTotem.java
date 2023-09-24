@@ -118,7 +118,7 @@ public class AutoTotem implements InternalAddon {
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        public AutoTotemPanel(ServerWrecker serverWrecker) {
+        AutoTotemPanel(ServerWrecker serverWrecker) {
             super();
             serverWrecker.getSettingsManager().registerDuplex(AutoTotemSettings.class, this);
 

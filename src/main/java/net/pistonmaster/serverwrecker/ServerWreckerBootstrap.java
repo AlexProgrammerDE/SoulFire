@@ -41,6 +41,9 @@ import java.util.List;
 public class ServerWreckerBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerBootstrap.class);
 
+    private ServerWreckerBootstrap() {
+    }
+
     static {
         System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
 

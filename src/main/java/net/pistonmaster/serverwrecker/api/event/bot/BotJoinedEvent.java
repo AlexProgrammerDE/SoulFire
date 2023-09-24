@@ -26,7 +26,7 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
  * Called when the bot finished joining the server.
  * This event is called after the server confirms the spawn location and the "World Loading" screen is gone.
  *
- * @param connection The bot connection
+ * @param connection The bot connection instance.
  */
 public record BotJoinedEvent(BotConnection connection) implements ServerWreckerBotEvent {
 }

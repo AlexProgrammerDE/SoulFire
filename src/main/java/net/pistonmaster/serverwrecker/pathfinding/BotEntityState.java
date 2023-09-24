@@ -31,6 +31,7 @@ import org.cloudburstmc.math.vector.Vector3d;
  * @param position   The position of the bot.
  *                   This is always the middle of the block.
  * @param levelState The level state of the world the bot is in.
+ * @param inventory  The inventory state of the bot.
  */
 public record BotEntityState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory) {
     public BotEntityState {

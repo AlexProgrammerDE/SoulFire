@@ -8,16 +8,12 @@
     <!-- https://checkstyle.org/config_filefilters.html#BeforeExecutionExclusionFileFilter -->
     <module name="BeforeExecutionExclusionFileFilter">
         <property name="fileNamePattern" value="module\-info\.java$"/>
-        <property name="fileNamePattern" value=".*[\\/]src[\\/]main[\\/]java[\\/]net[\\/]pistonmaster[\\/]serverwrecker[\\/]data[\\/].*"/>
     </module>
 
     <!-- https://checkstyle.org/config_whitespace.html#FileTabCharacter -->
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
     </module>
-
-    <!-- https://checkstyle.org/config_javadoc.html#JavadocPackage -->
-    <module name="JavadocPackage"/>
 
     <!-- https://checkstyle.org/config_misc.html#NewlineAtEndOfFile -->
     <module name="NewlineAtEndOfFile"/>
@@ -46,9 +42,6 @@
             <property name="tagOrder" value="@author, @exception, @param, @return, @serial, @serialData, @serialField, @throws, @see, @since, @sinceMinecraft, @version, @deprecated"/>
         </module>
 
-        <!-- https://checkstyle.org/config_imports.html#AvoidStarImport -->
-        <module name="AvoidStarImport"/>
-
         <!-- https://checkstyle.org/config_misc.html#AvoidEscapedUnicodeCharacters -->
         <module name="AvoidEscapedUnicodeCharacters">
             <property name="allowByTailComment" value="true"/>
@@ -58,13 +51,6 @@
 
         <!-- https://checkstyle.org/config_misc.html#CommentsIndentation -->
         <module name="CommentsIndentation"/>
-
-        <!-- https://checkstyle.org/config_imports.html#CustomImportOrder -->
-        <module name="CustomImportOrder">
-            <property name="customImportOrderRules" value="THIRD_PARTY_PACKAGE###STATIC"/>
-            <property name="standardPackageRegExp" value="^$"/>
-            <property name="sortImportsInGroupAlphabetically" value="true"/>
-        </module>
 
         <!-- https://checkstyle.org/config_whitespace.html#EmptyForInitializerPad -->
         <module name="EmptyForInitializerPad"/>
@@ -85,15 +71,6 @@
             <property name="checkLastCaseGroup" value="true"/>
         </module>
 
-        <!-- https://checkstyle.org/config_design.html#FinalClass -->
-        <module name="FinalClass"/>
-
-        <!-- https://checkstyle.org/config_coding.html#FinalLocalVariable -->
-        <module name="FinalLocalVariable">
-            <property name="tokens" value="PARAMETER_DEF, VARIABLE_DEF"/> <!-- add PARAMETER_DEF -->
-            <property name="validateEnhancedForLoopVariable" value="true"/>
-        </module>
-
         <!-- https://checkstyle.org/config_whitespace.html#GenericWhitespace -->
         <module name="GenericWhitespace"/>
 
@@ -102,7 +79,7 @@
 
         <!-- https://checkstyle.org/config_imports.html#IllegalImport -->
         <module name="IllegalImport">
-            <property name="illegalPkgs" value="sun, jdk, com.sun"/>
+            <property name="illegalPkgs" value="sun, jdk, com.sun, com.viaversion.viaversion.libs"/>
         </module>
 
         <!-- https://checkstyle.org/config_coding.html#IllegalTokenText -->
@@ -110,16 +87,6 @@
             <property name="format" value="($|[^\\])\\u00(09|0(a|A)|0(c|C)|0(d|D)|22|27|5(C|c))|\\(0(10|11|12|14|15|42|47)|134)"/>
             <property name="message" value="Consider using special escape sequence instead of octal value or Unicode escaped value."/>
             <property name="tokens" value="CHAR_LITERAL, STRING_LITERAL"/>
-        </module>
-
-        <!-- https://checkstyle.org/config_misc.html#Indentation -->
-        <module name="Indentation">
-            <property name="arrayInitIndent" value="2"/>
-            <property name="basicOffset" value="2"/>
-            <property name="braceAdjustment" value="0"/>
-            <property name="caseIndent" value="2"/>
-            <property name="lineWrappingIndentation" value="0"/>
-            <property name="throwsIndent" value="2"/>
         </module>
 
         <!-- https://checkstyle.org/config_javadoc.html#InvalidJavadocPosition -->
@@ -156,15 +123,6 @@
         <!-- https://checkstyle.org/config_whitespace.html#MethodParamPad -->
         <module name="MethodParamPad"/>
 
-        <!-- https://checkstyle.org/config_javadoc.html#MissingJavadocMethod -->
-        <module name="MissingJavadocMethod"/>
-
-        <!-- https://checkstyle.org/config_javadoc.html#MissingJavadocPackage -->
-        <module name="MissingJavadocPackage"/>
-
-        <!-- https://checkstyle.org/config_javadoc.html#MissingJavadocType -->
-        <module name="MissingJavadocType"/>
-
         <!-- https://checkstyle.org/config_coding.html#MultipleVariableDeclarations -->
         <module name="MultipleVariableDeclarations"/>
 
@@ -179,7 +137,7 @@
 
         <!-- https://checkstyle.org/config_whitespace.html#NoWhitespaceAfter -->
         <module name="NoWhitespaceAfter">
-            <property name="allowLineBreaks" value="false"/>
+            <property name="allowLineBreaks" value="true"/>
         </module>
 
         <!-- https://checkstyle.org/config_whitespace.html#NoWhitespaceBefore -->
@@ -207,7 +165,7 @@
 
         <!-- https://checkstyle.org/config_coding.html#RequireThis -->
         <module name="RequireThis">
-            <property name="validateOnlyOverlapping" value="false"/>
+            <property name="validateOnlyOverlapping" value="true"/>
         </module>
 
         <!-- https://checkstyle.org/config_blocks.html#RightCurly -->
@@ -245,9 +203,6 @@
             <property name="validateComments" value="true"/>
         </module>
 
-        <!-- https://checkstyle.org/config_javadoc.html#SummaryJavadoc -->
-        <module name="SummaryJavadoc"/>
-
         <!-- https://checkstyle.org/config_annotation.html#SuppressWarningsHolder -->
         <module name="SuppressWarningsHolder"/>
 
@@ -266,25 +221,6 @@
             <property name="allowEmptyTypes" value="true"/>
             <property name="allowEmptyLambdas" value="true"/>
             <property name="tokens" value="ASSIGN, COLON, BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN, COLON, DIV, DIV_ASSIGN, EQUAL, GE, GT, LAND, LCURLY, LE, LOR, LT, MINUS, MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, QUESTION, RCURLY, SL, SLIST, SL_ASSIGN, SR, SR_ASSIGN, STAR, STAR_ASSIGN, LITERAL_ASSERT, TYPE_EXTENSION_AND"/>
-        </module>
-
-        <!--
-        #####################
-        #### third-party ####
-        #####################
-        -->
-
-        <!-- https://gitlab.com/stellardrift/stylecheck/-/blob/trunk/src/main/java/ca/stellardrift/stylecheck/AnnotationsCloseToType.java -->
-        <module name="AnnotationsCloseToType"/>
-
-        <!-- https://checkstyle.org/config_javadoc.html#WriteTag -->
-        <!-- https://gitlab.com/stellardrift/stylecheck/-/blob/trunk/src/main/java/ca/stellardrift/stylecheck/FilteringWriteTag.java -->
-        <module name="FilteringWriteTag">
-            <property name="tag" value="@since\s"/>
-            <property name="tagFormat" value="\d\.\d+\.\d+"/>
-            <property name="tagSeverity" value="ignore"/>
-            <property name="minimumScope" value="public"/>
-            <property name="tokens" value="INTERFACE_DEF, CLASS_DEF, ENUM_DEF, ANNOTATION_DEF, RECORD_DEF, METHOD_DEF, CTOR_DEF, ANNOTATION_FIELD_DEF, RECORD_DEF, COMPACT_CTOR_DEF"/>
         </module>
     </module>
 </module>

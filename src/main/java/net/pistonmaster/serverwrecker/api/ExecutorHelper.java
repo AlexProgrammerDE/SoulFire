@@ -26,6 +26,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExecutorHelper {
+    private ExecutorHelper() {
+    }
+
     public static void executeRandomDelaySeconds(ScheduledExecutorService executorService, Runnable runnable,
                                                  int minDelay, int maxDelay) {
         AtomicInteger delay = new AtomicInteger();

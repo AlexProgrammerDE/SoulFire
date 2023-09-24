@@ -25,7 +25,7 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
 /**
  * Called when the bot has ticked. This event is called inside the tick loop.
  *
- * @param connection The bot connection
+ * @param connection The bot connection instance.
  */
 public record BotPostTickEvent(BotConnection connection) implements ServerWreckerBotEvent {
 }

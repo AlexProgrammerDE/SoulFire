@@ -28,6 +28,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class SwingTextUtils {
+    private SwingTextUtils() {
+    }
+
     public static JTextPane createPane(@Language("html") String text) {
         JTextPane pane = new JTextPane();
         pane.setContentType("text/html");

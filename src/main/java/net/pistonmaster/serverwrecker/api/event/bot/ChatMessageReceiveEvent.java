@@ -25,6 +25,9 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
 /**
  * This event is called when a chat message is received from the server.
+ *
+ * @param connection The bot connection instance.
+ * @param message The message that was received.
  */
 public record ChatMessageReceiveEvent(BotConnection connection, Component message) implements ServerWreckerBotEvent {
     public String parseToText() {

@@ -105,7 +105,7 @@ public class ChatMessageLogger implements InternalAddon {
         private final JCheckBox logChat;
         private final JSpinner interval;
 
-        public ChatMessagePanel(ServerWrecker serverWrecker) {
+        ChatMessagePanel(ServerWrecker serverWrecker) {
             super();
             serverWrecker.getSettingsManager().registerDuplex(ChatMessageSettings.class, this);
 
@@ -144,7 +144,6 @@ public class ChatMessageLogger implements InternalAddon {
             );
         }
     }
-
 
     private static class ChatMessageCommand implements SettingsProvider<ChatMessageSettings> {
         @CommandLine.Option(names = {"--log-chat"}, description = "Log chat to terminal")

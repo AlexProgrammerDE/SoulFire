@@ -29,12 +29,16 @@ import net.pistonmaster.serverwrecker.api.event.attack.BotConnectionInitEvent;
  * This class contains helper methods for addons to use to make their life easier.
  */
 public class AddonHelper {
+    private AddonHelper() {
+    }
+
     /**
      * Registers a consumer that is called on its event on every bot of every attack.
      * This skips the boilerplate of creating a listener and subscribing to the events of both the attack manager init and pre bot connect.
      * The only reason for this to exist is to streamline the process of creating a bot listener.
      * Since most addons only hook into the bot connection and not any global or attack events, this is the easiest way to do it.
      *
+     * @param clazz    The class of the bot event.
      * @param consumer The consumer that is called when the event is posted.
      * @param <T>      The type of the bot event.
      * @see #registerAttackEventConsumer(Class, EventSubscriber)

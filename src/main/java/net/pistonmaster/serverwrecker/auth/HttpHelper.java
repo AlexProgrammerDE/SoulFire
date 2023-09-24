@@ -40,6 +40,9 @@ import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class HttpHelper {
+    private HttpHelper() {
+    }
+
     public static CloseableHttpClient createMCAuthHttpClient(SWProxy proxyData) {
         List<Header> headers = MicrosoftConstants.getDefaultHeaders();
         headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "ServerWrecker/" + BuildData.VERSION));

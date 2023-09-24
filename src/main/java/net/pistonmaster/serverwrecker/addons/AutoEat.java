@@ -169,7 +169,7 @@ public class AutoEat implements InternalAddon {
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        public AutoEatPanel(ServerWrecker serverWrecker) {
+        AutoEatPanel(ServerWrecker serverWrecker) {
             super();
             serverWrecker.getSettingsManager().registerDuplex(AutoEatSettings.class, this);
 

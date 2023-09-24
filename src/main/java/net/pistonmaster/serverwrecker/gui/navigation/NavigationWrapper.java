@@ -23,6 +23,9 @@ import javax.swing.*;
 import java.awt.*;
 
 public class NavigationWrapper {
+    private NavigationWrapper() {
+    }
+
     public static JPanel createWrapper(CardsContainer container, String target, NavigationItem item) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());

@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
-
 import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.auth.AccountRegistry;
@@ -84,9 +83,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
         String[] columnNames = {"Username", "Type", "Enabled"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
-            final Class<?>[] columnTypes = new Class<?>[]{
-                    String.class, AuthType.class, Boolean.class
-            };
+            final Class<?>[] columnTypes = new Class<?>[] {String.class, AuthType.class, Boolean.class};
 
             @Override
             public Class<?> getColumnClass(int columnIndex) {

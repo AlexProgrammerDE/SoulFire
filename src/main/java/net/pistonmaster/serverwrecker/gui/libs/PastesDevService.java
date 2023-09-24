@@ -39,6 +39,9 @@ import java.util.List;
 public class PastesDevService {
     private static final Gson gson = new Gson();
 
+    private PastesDevService() {
+    }
+
     private static CloseableHttpClient createHttpClient() {
         List<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType()));

@@ -33,6 +33,10 @@ public class TagsState {
     private final Map<String, Set<ItemType>> itemTags = new Object2ObjectOpenHashMap<>();
     private final Map<String, Set<EntityType>> entityTags = new Object2ObjectOpenHashMap<>();
 
+    private static String stripMinecraft(String input) {
+        return input.replace("minecraft:", "");
+    }
+
     public void handleTagData(Map<String, Map<String, int[]>> tags) {
         for (Map.Entry<String, Map<String, int[]>> registry : tags.entrySet()) {
             String registryKey = stripMinecraft(registry.getKey());
@@ -77,9 +81,5 @@ public class TagsState {
                 entitySet.add(EntityType.getById(i));
             }
         }
-    }
-
-    private static String stripMinecraft(String input) {
-        return input.replace("minecraft:", "");
     }
 }

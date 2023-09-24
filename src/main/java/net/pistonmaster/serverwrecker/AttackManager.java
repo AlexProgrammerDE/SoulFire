@@ -187,7 +187,6 @@ public class AttackManager {
                     BotConnection botConnection = factory.prepareConnection();
                     botConnections.add(botConnection);
 
-
                     try {
                         botConnection.connect().get();
                     } catch (Throwable e) {

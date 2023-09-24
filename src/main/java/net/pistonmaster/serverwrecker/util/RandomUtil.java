@@ -22,6 +22,9 @@ package net.pistonmaster.serverwrecker.util;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomUtil {
+    private RandomUtil() {
+    }
+
     public static int getRandomInt(int min, int max) {
         if (min > max) {
             throw new IllegalArgumentException("max must be greater than min");

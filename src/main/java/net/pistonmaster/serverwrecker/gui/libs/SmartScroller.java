@@ -30,22 +30,22 @@ import java.awt.event.AdjustmentListener;
  * The SmartScroller will attempt to keep the viewport positioned based on
  * the users interaction with the scrollbar. The normal behaviour is to keep
  * the viewport positioned to see new data as it is dynamically added.
- * <p>
+ * <br/>
  * Assuming vertical scrolling and data is added to the bottom:
- * <p>
+ * <br/>
  * - when the viewport is at the bottom and new data is added,
  * then automatically scroll the viewport to the bottom
  * - when the viewport is not at the bottom and new data is added,
  * then do nothing with the viewport
- * <p>
+ * <br/>
  * Assuming vertical scrolling and data is added to the top:
- * <p>
+ * <br/>
  * - when the viewport is at the top and new data is added,
  * then do nothing with the viewport
  * - when the viewport is not at the top and new data is added, then adjust
  * the viewport to the relative position it was at before the data was added
- * <p>
- * Similiar logic would apply for horizontal scrolling.
+ * <br/>
+ * Similar logic would apply for horizontal scrolling.
  */
 public class SmartScroller implements AdjustmentListener {
     public final static int HORIZONTAL = 0;

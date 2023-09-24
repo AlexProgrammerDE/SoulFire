@@ -22,6 +22,9 @@ package net.pistonmaster.serverwrecker.gui.libs;
 import javax.swing.*;
 
 public class JMinMaxHelper {
+    private JMinMaxHelper() {
+    }
+
     /**
      * Force min to be less than max and max to be more than min by changing the other value.
      *

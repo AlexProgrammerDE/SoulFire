@@ -23,6 +23,9 @@ import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 
 public class BlockTypeHelper {
+    private BlockTypeHelper() {
+    }
+
     public static boolean isCarpet(BlockType type) {
         if (type.blockShapeTypes().isEmpty()) {
             return false;

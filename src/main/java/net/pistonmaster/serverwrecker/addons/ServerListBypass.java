@@ -86,7 +86,7 @@ public class ServerListBypass implements InternalAddon {
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        public ServerListBypassPanel(ServerWrecker serverWrecker) {
+        ServerListBypassPanel(ServerWrecker serverWrecker) {
             super();
             serverWrecker.getSettingsManager().registerDuplex(ServerListBypassSettings.class, this);
 

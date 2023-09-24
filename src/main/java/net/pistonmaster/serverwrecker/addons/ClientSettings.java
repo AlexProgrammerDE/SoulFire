@@ -130,7 +130,7 @@ public class ClientSettings implements InternalAddon {
         private final JCheckBox textFilteringEnabled;
         private final JCheckBox allowsListing;
 
-        public ClientSettingsPanel(ServerWrecker serverWrecker) {
+        ClientSettingsPanel(ServerWrecker serverWrecker) {
             super();
             serverWrecker.getSettingsManager().registerDuplex(ClientSettingsSettings.class, this);
 
