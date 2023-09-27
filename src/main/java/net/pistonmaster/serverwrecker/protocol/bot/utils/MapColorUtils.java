@@ -82,7 +82,7 @@ public class MapColorUtils {
     }
 
     /**
-     * Keep in sync with: <a href="https://minecraft.fandom.com/wiki/Map_item_format?veaction=edit&section=8">Minecraft Fandom Page</a>
+     * Keep in sync with: <a href="https://minecraft.wiki/w/Map_item_format#Color_table">Minecraft Wiki Page</a>
      */
     private enum MapColor {
         NONE(0, 0, 0),
