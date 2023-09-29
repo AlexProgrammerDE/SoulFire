@@ -25,11 +25,12 @@ performance.
 * Configurable options for every attack like the number of bots, join delay and more
 * Load and save profiles for quick access
 * Support for online and offline mode servers
-* Huge version support
-* Use Microsoft, The Altening or Offline accounts
+* Supports almost every Minecraft version (Release, April Fools Snapshots, Beta, Alpha, Classic and even Bedrock Edition)
+* Use Microsoft, The Altening, EasyMC or Offline accounts
 * Use HTTP/SOCKS4/SOCKS5 proxies
 * Multiple modules like AutoRespawn and also AutoRegister for cracked servers
 * Console command support
+* WIP Astar Pathfinding
 
 ## ✨ Nightly builds
 
