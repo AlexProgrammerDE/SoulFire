@@ -33,9 +33,9 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class ProxyRegistry implements SettingsDuplex<ProxyList> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyRegistry.class);
     private final List<SWProxy> proxies = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyRegistry.class);
 
     public void loadFromFile(Path file, ProxyType proxyType) throws IOException {
         loadFromString(Files.readString(file), proxyType);

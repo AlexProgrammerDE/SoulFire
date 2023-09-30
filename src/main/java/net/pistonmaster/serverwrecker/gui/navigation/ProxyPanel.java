@@ -44,8 +44,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySettings> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyPanel.class);
     private final JSpinner botsPerProxy = new JSpinner();
-    private static Logger LOGGER = LoggerFactory.getLogger(ProxyPanel.class);
 
     @Inject
     public ProxyPanel(ServerWrecker serverWrecker, GUIFrame parent) {

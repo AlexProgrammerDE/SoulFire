@@ -211,13 +211,10 @@ tasks.named<ShadowJar>("shadowJar").get().apply {
 }
 
 graalvmNative {
-    metadataRepository {
-        enabled.set(true)
-    }
     binaries {
         named("main") {
             javaLauncher.set(javaToolchains.launcherFor {
-                languageVersion.set(JavaLanguageVersion.of(21))
+                languageVersion.set(JavaLanguageVersion.of(17))
             })
 
             // Netty
@@ -236,7 +233,15 @@ graalvmNative {
                 "--initialize-at-run-time=org.slf4j.impl.StaticLoggerBinder"
             )
 
-            imageName.set("serverwrecker")
+            // Allow GSON at build time
+            buildArgs(
+                "--initialize-at-build-time=com.google.gson"
+            )
+
+            // Core
+            buildArgs(
+                "--initialize-at-build-time=net.pistonmaster.serverwrecker.data"
+            )
 
             sharedLibrary.set(false)
         }

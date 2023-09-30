@@ -45,8 +45,8 @@ import java.util.UUID;
 
 public class SWEasyMCAuthService implements MCAuthService {
     private static final URI AUTHENTICATE_ENDPOINT = URI.create("https://api.easymc.io/v1/token/redeem");
-    private final Gson gson = new Gson();
     private static final Logger LOGGER = LoggerFactory.getLogger(SWEasyMCAuthService.class);
+    private final Gson gson = new Gson();
 
     private static CloseableHttpClient createHttpClient(SWProxy proxyData) {
         List<Header> headers = new ArrayList<>();

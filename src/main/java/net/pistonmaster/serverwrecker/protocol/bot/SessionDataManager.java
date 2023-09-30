@@ -69,6 +69,7 @@ import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
+import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.container.Container;
 import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
@@ -888,7 +889,7 @@ public final class SessionDataManager {
         int blockCount = buf.readShort();
 
         DataPalette chunkPalette = codec.readDataPalette(buf, PaletteType.CHUNK,
-                ServerWrecker.GLOBAL_BLOCK_PALETTE.getBlockBitsPerEntry());
+                ResourceData.GLOBAL_BLOCK_PALETTE.getBlockBitsPerEntry());
         DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME,
                 biomesEntryBitsSize);
         return new ChunkSection(blockCount, chunkPalette, biomePalette);

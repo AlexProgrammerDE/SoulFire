@@ -48,9 +48,6 @@ public class SWNettyHelper {
     public static final Class<? extends Channel> CHANNEL_CLASS;
     public static final Class<? extends DatagramChannel> DATAGRAM_CHANNEL_CLASS;
 
-    private SWNettyHelper() {
-    }
-
     static {
         TransportHelper.TransportMethod transportMethod = TransportHelper.determineTransportMethod();
         switch (transportMethod) {
@@ -72,6 +69,9 @@ public class SWNettyHelper {
             }
             default -> throw new IllegalStateException("Unexpected value: " + transportMethod);
         }
+    }
+
+    private SWNettyHelper() {
     }
 
     public static EventLoopGroup createEventLoopGroup(int threads, String name) {

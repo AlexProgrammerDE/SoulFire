@@ -23,10 +23,10 @@ import com.github.steveice10.opennbt.tag.builtin.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.Setter;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.data.BlockShape;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
@@ -167,7 +167,7 @@ public class LevelState {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(ServerWrecker.GLOBAL_BLOCK_PALETTE.getBlockStateForStateId(stateId.getAsInt()));
+        return Optional.ofNullable(ResourceData.GLOBAL_BLOCK_PALETTE.getBlockStateForStateId(stateId.getAsInt()));
     }
 
     public Optional<BlockType> getBlockTypeAt(Vector3i block) {

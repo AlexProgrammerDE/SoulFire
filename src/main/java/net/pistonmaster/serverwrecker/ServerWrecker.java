@@ -26,7 +26,6 @@ import com.github.steveice10.mc.protocol.codec.MinecraftPacketSerializer;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.github.steveice10.packetlib.codec.PacketDefinition;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
@@ -47,14 +46,13 @@ import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.common.OperationMode;
+import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.data.TranslationMapper;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.grpc.RPCServer;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.SWLogAppender;
 import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
-import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
-import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.serverwrecker.protocol.packet.SWClientboundStatusResponsePacket;
 import net.pistonmaster.serverwrecker.proxy.ProxyList;
 import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
@@ -85,7 +83,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -95,62 +96,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ServerWrecker {
     public static final Logger LOGGER = LoggerFactory.getLogger(ServerWrecker.class);
     public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
-    public static final GlobalBlockPalette GLOBAL_BLOCK_PALETTE;
     public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER;
-    private static final Gson gson = new Gson();
 
-    // Static initialization allows us to preload this in a native image
+    // Static, but the preloading happens in ResourceData since we don't wanna init any constructors
     static {
-        // Override status packet, so we can support any version
-        MinecraftCodec.CODEC.getCodec(ProtocolState.STATUS)
-                .registerClientbound(new PacketDefinition<>(0x00,
-                        SWClientboundStatusResponsePacket.class,
-                        new MinecraftPacketSerializer<>(SWClientboundStatusResponsePacket::new)));
-
-        // Load translations
-        JsonObject translations;
-        try (InputStream stream = ServerWrecker.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
-            Objects.requireNonNull(stream, "en_us.json not found");
-            translations = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        Map<String, String> mojangTranslations = new HashMap<>();
-        for (Map.Entry<String, JsonElement> translationEntry : translations.entrySet()) {
-            mojangTranslations.put(translationEntry.getKey(), translationEntry.getValue().getAsString());
-        }
-
         PLAIN_MESSAGE_SERIALIZER = PlainTextComponentSerializer.builder().flattener(
                 ComponentFlattener.basic().toBuilder()
-                        .mapper(TranslatableComponent.class, new TranslationMapper(mojangTranslations)).build()
+                        .mapper(TranslatableComponent.class, new TranslationMapper(ResourceData.MOJANG_TRANSLATIONS)).build()
         ).build();
-
-        // Load block states
-        JsonObject blocks;
-        try (InputStream stream = ServerWrecker.class.getClassLoader().getResourceAsStream("minecraft/blocks.json")) {
-            Objects.requireNonNull(stream, "blocks.json not found");
-            blocks = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        // Load global palette
-        Map<Integer, BlockStateMeta> stateMap = new HashMap<>();
-        for (Map.Entry<String, JsonElement> blockEntry : blocks.entrySet()) {
-            int i = 0;
-            for (JsonElement state : blockEntry.getValue().getAsJsonObject().get("states").getAsJsonArray()) {
-                stateMap.put(state.getAsJsonObject().get("id").getAsInt(), new BlockStateMeta(blockEntry.getKey(), i));
-                i++;
-            }
-        }
-
-        GLOBAL_BLOCK_PALETTE = new GlobalBlockPalette(stateMap.size());
-        for (Map.Entry<Integer, BlockStateMeta> entry : stateMap.entrySet()) {
-            GLOBAL_BLOCK_PALETTE.add(entry.getKey(), entry.getValue());
-        }
     }
 
+    private final Gson gson = new Gson();
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
@@ -230,6 +186,12 @@ public class ServerWrecker {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        // Override status packet, so we can support any version
+        MinecraftCodec.CODEC.getCodec(ProtocolState.STATUS)
+                .registerClientbound(new PacketDefinition<>(0x00,
+                        SWClientboundStatusResponsePacket.class,
+                        new MinecraftPacketSerializer<>(SWClientboundStatusResponsePacket::new)));
 
         // Init via
         Path viaPath = DATA_FOLDER.resolve("ViaVersion");

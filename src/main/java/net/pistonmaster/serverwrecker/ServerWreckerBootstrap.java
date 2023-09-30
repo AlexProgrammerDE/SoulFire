@@ -24,9 +24,6 @@ import io.netty.util.ResourceLeakDetector;
 import java.awt.*;
 
 public class ServerWreckerBootstrap {
-    private ServerWreckerBootstrap() {
-    }
-
     static {
         System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
 
@@ -41,6 +38,9 @@ public class ServerWreckerBootstrap {
         if (System.getProperty("io.netty.leakDetection.level") == null) {
             ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
         }
+    }
+
+    private ServerWreckerBootstrap() {
     }
 
     public static void main(String[] args) {

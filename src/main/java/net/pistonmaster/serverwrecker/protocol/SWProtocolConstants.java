@@ -20,10 +20,10 @@
 package net.pistonmaster.serverwrecker.protocol;
 
 public class SWProtocolConstants {
-    private SWProtocolConstants() {
-    }
-
     public static final String ENCRYPTION_SECRET_KEY = "encryption-secret-key";
     public static final String VIA_USER_CONNECTION = "via-user-connection";
     public static final String TRAFFIC_HANDLER = "netty-traffic-handler";
+
+    private SWProtocolConstants() {
+    }
 }

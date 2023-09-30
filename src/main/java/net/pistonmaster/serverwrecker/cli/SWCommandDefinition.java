@@ -47,8 +47,8 @@ import java.util.stream.Collectors;
         version = "ServerWrecker v" + BuildData.VERSION, showDefaultValues = true,
         description = BuildData.DESCRIPTION, sortOptions = false)
 public class SWCommandDefinition implements Callable<Integer> {
-    private final ServerWrecker serverWrecker;
     private static final Logger LOGGER = LoggerFactory.getLogger(SWCommandDefinition.class);
+    private final ServerWrecker serverWrecker;
     @Setter
     private CommandLine commandLine;
 

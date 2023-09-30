@@ -32,9 +32,6 @@ public class MapColorUtils {
     private static final Color[] MAP_COLORS;
     private static final IndexColorModel MAP_COLOR_MODEL;
 
-    private MapColorUtils() {
-    }
-
     static {
         final MapColor[] baseMapColors = MapColor.values();
 
@@ -61,6 +58,9 @@ public class MapColorUtils {
         }
 
         MAP_COLOR_MODEL = new IndexColorModel(8, MAP_COLORS.length, r, g, b, a);
+    }
+
+    private MapColorUtils() {
     }
 
     private static Color generateShade(Color c, double shade) {

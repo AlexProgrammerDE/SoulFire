@@ -45,9 +45,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AccountPanel extends NavigationItem implements SettingsDuplex<AccountSettings> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccountPanel.class);
     private final JTextField nameFormat;
     private final JCheckBox shuffleAccounts = new PresetJCheckBox(AccountSettings.DEFAULT_SHUFFLE_ACCOUNTS);
-    private static final Logger LOGGER = LoggerFactory.getLogger(AccountPanel.class);
 
     @Inject
     public AccountPanel(ServerWrecker serverWrecker, GUIFrame parent) {
@@ -88,7 +88,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
         String[] columnNames = {"Username", "Type", "Enabled"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
-            final Class<?>[] columnTypes = new Class<?>[] {String.class, AuthType.class, Boolean.class};
+            final Class<?>[] columnTypes = new Class<?>[]{String.class, AuthType.class, Boolean.class};
 
             @Override
             public Class<?> getColumnClass(int columnIndex) {

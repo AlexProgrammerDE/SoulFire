@@ -25,6 +25,8 @@ import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.util.SystemInfo;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicLookAndFeel;
@@ -36,9 +38,7 @@ public class ThemeUtil {
     public static final Path THEME_PATH = ServerWrecker.DATA_FOLDER.resolve("theme.json");
     public static final SettingsManager THEME_MANAGER = new SettingsManager(ThemeSettings.class);
     public static final ThemeProvider THEME_PROVIDER = new ThemeProvider(FlatDarculaLaf.class);
-
-    private ThemeUtil() {
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(ThemeUtil.class);
 
     static {
         THEME_MANAGER.registerDuplex(ThemeSettings.class, THEME_PROVIDER);
@@ -47,9 +47,12 @@ public class ThemeUtil {
             try {
                 THEME_MANAGER.loadProfile(THEME_PATH);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Failed to load theme settings!", e);
             }
         }
+    }
+
+    private ThemeUtil() {
     }
 
     /**
@@ -75,13 +78,13 @@ public class ThemeUtil {
 
             FlatAnimatedLafChange.hideSnapshotWithAnimation();
         } catch (UnsupportedLookAndFeelException | ReflectiveOperationException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to set theme!", e);
         }
 
         try {
             THEME_MANAGER.saveProfile(THEME_PATH);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to save theme settings!", e);
         }
     }
 

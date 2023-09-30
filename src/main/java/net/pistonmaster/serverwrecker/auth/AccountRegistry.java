@@ -39,10 +39,10 @@ import java.util.*;
 
 @RequiredArgsConstructor
 public class AccountRegistry implements SettingsDuplex<AccountList> {
+    public static final Logger LOGGER = LoggerFactory.getLogger(AccountRegistry.class);
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final List<MinecraftAccount> accounts = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
-    public static final Logger LOGGER = LoggerFactory.getLogger(AccountRegistry.class);
 
     public void loadFromFile(Path file, AuthType authType) throws IOException {
         loadFromString(Files.readString(file), authType);

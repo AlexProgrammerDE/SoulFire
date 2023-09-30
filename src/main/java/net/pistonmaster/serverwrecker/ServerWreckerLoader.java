@@ -47,8 +47,10 @@ public class ServerWreckerLoader {
             AnsiConsole.systemInstall();
         }
 
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) ->
-                LOGGER.error("Exception in thread {}", thread.getName(), throwable));
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            LOGGER.error("Exception in thread {}", thread.getName(), throwable);
+            throwable.printStackTrace();
+        });
     }
 
     public static void injectTheme() {

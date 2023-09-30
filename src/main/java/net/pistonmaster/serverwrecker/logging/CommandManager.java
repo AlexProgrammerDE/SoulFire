@@ -65,12 +65,12 @@ import static net.pistonmaster.serverwrecker.logging.BrigadierHelper.literal;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CommandManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandManager.class);
     @Getter
     private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
     private final ServerWrecker serverWrecker;
     private final ConsoleSubject consoleSubject;
     private final List<String> commandHistory = Collections.synchronizedList(new ArrayList<>());
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommandManager.class);
 
     @PostConstruct
     public void postConstruct() {
