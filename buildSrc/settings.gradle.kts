@@ -1,1 +1,1 @@
-rootProject.name = "serverwrecker-buildSrc"
+rootProject.name = "serverwrecker-buildsrc"
