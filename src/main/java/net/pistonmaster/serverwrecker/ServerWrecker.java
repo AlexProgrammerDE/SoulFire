@@ -51,7 +51,7 @@ import net.pistonmaster.serverwrecker.data.TranslationMapper;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.grpc.RPCServer;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
-import net.pistonmaster.serverwrecker.logging.LogAppender;
+import net.pistonmaster.serverwrecker.logging.SWLogAppender;
 import net.pistonmaster.serverwrecker.logging.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
@@ -80,6 +80,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -92,30 +93,73 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 public class ServerWrecker {
+    public static final Logger LOGGER = LoggerFactory.getLogger(ServerWrecker.class);
     public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
+    public static final GlobalBlockPalette GLOBAL_BLOCK_PALETTE;
+    public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER;
+    private static final Gson gson = new Gson();
 
+    // Static initialization allows us to preload this in a native image
     static {
+        // Override status packet, so we can support any version
         MinecraftCodec.CODEC.getCodec(ProtocolState.STATUS)
                 .registerClientbound(new PacketDefinition<>(0x00,
                         SWClientboundStatusResponsePacket.class,
                         new MinecraftPacketSerializer<>(SWClientboundStatusResponsePacket::new)));
+
+        // Load translations
+        JsonObject translations;
+        try (InputStream stream = ServerWrecker.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
+            Objects.requireNonNull(stream, "en_us.json not found");
+            translations = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        Map<String, String> mojangTranslations = new HashMap<>();
+        for (Map.Entry<String, JsonElement> translationEntry : translations.entrySet()) {
+            mojangTranslations.put(translationEntry.getKey(), translationEntry.getValue().getAsString());
+        }
+
+        PLAIN_MESSAGE_SERIALIZER = PlainTextComponentSerializer.builder().flattener(
+                ComponentFlattener.basic().toBuilder()
+                        .mapper(TranslatableComponent.class, new TranslationMapper(mojangTranslations)).build()
+        ).build();
+
+        // Load block states
+        JsonObject blocks;
+        try (InputStream stream = ServerWrecker.class.getClassLoader().getResourceAsStream("minecraft/blocks.json")) {
+            Objects.requireNonNull(stream, "blocks.json not found");
+            blocks = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Load global palette
+        Map<Integer, BlockStateMeta> stateMap = new HashMap<>();
+        for (Map.Entry<String, JsonElement> blockEntry : blocks.entrySet()) {
+            int i = 0;
+            for (JsonElement state : blockEntry.getValue().getAsJsonObject().get("states").getAsJsonArray()) {
+                stateMap.put(state.getAsJsonObject().get("id").getAsInt(), new BlockStateMeta(blockEntry.getKey(), i));
+                i++;
+            }
+        }
+
+        GLOBAL_BLOCK_PALETTE = new GlobalBlockPalette(stateMap.size());
+        for (Map.Entry<Integer, BlockStateMeta> entry : stateMap.entrySet()) {
+            GLOBAL_BLOCK_PALETTE.add(entry.getKey(), entry.getValue());
+        }
     }
 
-    private final Logger logger = LoggerFactory.getLogger(ServerWrecker.class);
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final Map<String, String> serviceServerConfig = new HashMap<>();
-    private final Gson gson = new Gson();
-    private final Map<String, String> mojangTranslations = new HashMap<>();
-    private final JsonObject tagData;
-    private final GlobalBlockPalette globalBlockPalette;
-    private final PlainTextComponentSerializer plainMessageSerializer;
     private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
     private final SWTerminalConsole terminalConsole;
-    private final AccountRegistry accountRegistry = new AccountRegistry(this);
-    private final ProxyRegistry proxyRegistry = new ProxyRegistry(this);
+    private final AccountRegistry accountRegistry = new AccountRegistry();
+    private final ProxyRegistry proxyRegistry = new ProxyRegistry();
     private final SettingsManager settingsManager = new SettingsManager(
             BotSettings.class,
             DevSettings.class,
@@ -143,9 +187,9 @@ public class ServerWrecker {
         // Init API
         ServerWreckerAPI.setServerWrecker(this);
 
-        LogAppender logAppender = new LogAppender();
+        SWLogAppender logAppender = new SWLogAppender();
         logAppender.start();
-        injector.register(LogAppender.class, logAppender);
+        injector.register(SWLogAppender.class, logAppender);
         ((org.apache.logging.log4j.core.Logger) LogManager.getRootLogger()).addAppender(logAppender);
 
         KeyGenerator keyGen;
@@ -167,7 +211,7 @@ public class ServerWrecker {
         settingsManager.registerDuplex(AccountList.class, accountRegistry);
         settingsManager.registerDuplex(ProxyList.class, proxyRegistry);
 
-        logger.info("Starting ServerWrecker v{}...", BuildData.VERSION);
+        LOGGER.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
         String jwt = Jwts.builder()
                 .setSubject("admin")
@@ -186,59 +230,6 @@ public class ServerWrecker {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        JsonObject translations;
-        try (InputStream stream = ServerWrecker.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
-            Objects.requireNonNull(stream, "en_us.json not found");
-            translations = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        for (Map.Entry<String, JsonElement> translationEntry : translations.entrySet()) {
-            mojangTranslations.put(translationEntry.getKey(), translationEntry.getValue().getAsString());
-        }
-
-        this.plainMessageSerializer = PlainTextComponentSerializer.builder().flattener(
-                ComponentFlattener.basic().toBuilder()
-                        .mapper(TranslatableComponent.class, new TranslationMapper(this, logger)).build()
-        ).build();
-
-        logger.info("Loaded {} mojang translations", mojangTranslations.size());
-
-        // Load block states
-        JsonObject blocks;
-        try (InputStream stream = ServerWrecker.class.getClassLoader().getResourceAsStream("minecraft/blocks.json")) {
-            Objects.requireNonNull(stream, "blocks.json not found");
-            blocks = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        // Create global palette
-        Map<Integer, BlockStateMeta> stateMap = new HashMap<>();
-        for (Map.Entry<String, JsonElement> blockEntry : blocks.entrySet()) {
-            int i = 0;
-            for (JsonElement state : blockEntry.getValue().getAsJsonObject().get("states").getAsJsonArray()) {
-                stateMap.put(state.getAsJsonObject().get("id").getAsInt(), new BlockStateMeta(blockEntry.getKey(), i));
-                i++;
-            }
-        }
-
-        globalBlockPalette = new GlobalBlockPalette(stateMap.size());
-        for (Map.Entry<Integer, BlockStateMeta> entry : stateMap.entrySet()) {
-            globalBlockPalette.add(entry.getKey(), entry.getValue());
-        }
-
-        logger.info("Loaded {} block states", stateMap.size());
-
-        try (InputStream stream = ServerWrecker.class.getClassLoader().getResourceAsStream("minecraft/tags.json")) {
-            Objects.requireNonNull(stream, "tags.json not found");
-            tagData = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        logger.info("Loaded tags");
 
         // Init via
         Path viaPath = DATA_FOLDER.resolve("ViaVersion");
@@ -283,15 +274,15 @@ public class ServerWrecker {
 
         initPlugins(pluginsFolder);
 
-        logger.info("Checking for updates...");
+        LOGGER.info("Checking for updates...");
         outdated = checkForUpdates();
 
-        logger.info("Finished loading!");
+        LOGGER.info("Finished loading!");
     }
 
     private boolean checkForUpdates() {
         try {
-            URL url = new URL("https://api.github.com/repos/AlexProgrammerDE/ServerWrecker/releases/latest");
+            URL url = URI.create("https://api.github.com/repos/AlexProgrammerDE/ServerWrecker/releases/latest").toURL();
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("User-Agent", "ServerWrecker");
@@ -299,7 +290,7 @@ public class ServerWrecker {
             connection.setReadTimeout(5000);
 
             if (connection.getResponseCode() != 200) {
-                logger.warn("Failed to check for updates: {}", connection.getResponseCode());
+                LOGGER.warn("Failed to check for updates: {}", connection.getResponseCode());
                 return false;
             }
 
@@ -310,11 +301,11 @@ public class ServerWrecker {
 
             String latestVersion = response.get("tag_name").getAsString();
             if (VersionComparator.isNewer(BuildData.VERSION, latestVersion)) {
-                logger.warn("ServerWrecker is outdated! Current version: {}, latest version: {}", BuildData.VERSION, latestVersion);
+                LOGGER.warn("ServerWrecker is outdated! Current version: {}, latest version: {}", BuildData.VERSION, latestVersion);
                 return true;
             }
         } catch (IOException e) {
-            logger.warn("Failed to check for updates", e);
+            LOGGER.warn("Failed to check for updates", e);
         }
 
         return false;
@@ -329,7 +320,7 @@ public class ServerWrecker {
         try {
             Files.createDirectories(pluginDir);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to create plugin directory", e);
         }
 
         // create the plugin manager
@@ -350,7 +341,7 @@ public class ServerWrecker {
         Level nettyLevel = devSettings.nettyDebug() ? Level.DEBUG : Level.INFO;
         Level grpcLevel = devSettings.grpcDebug() ? Level.DEBUG : Level.INFO;
         Configurator.setRootLevel(level);
-        Configurator.setLevel(logger.getName(), level);
+        Configurator.setLevel(LOGGER.getName(), level);
         Configurator.setLevel("org.pf4j", level);
         Configurator.setLevel("io.netty", nettyLevel);
         Configurator.setLevel("io.grpc", grpcLevel);
@@ -367,7 +358,7 @@ public class ServerWrecker {
         }
 
         if (explicitExit) {
-            logger.info("Shutting down...");
+            LOGGER.info("Shutting down...");
         }
 
         // Shutdown the attacks if there is any
@@ -380,7 +371,7 @@ public class ServerWrecker {
         try {
             rpcServer.stop();
         } catch (InterruptedException e) {
-            logger.error("Failed to stop RPC server", e);
+            LOGGER.error("Failed to stop RPC server", e);
         }
 
         // Since we manually removed the shutdown hook, we need to handle the shutdown ourselves.
@@ -404,6 +395,8 @@ public class ServerWrecker {
         attacks.put(attackManager.getId(), attackManager);
 
         attackManager.start(settingsHolder);
+
+        LOGGER.debug("Started attack with id {}", attackManager.getId());
 
         return attackManager.getId();
     }

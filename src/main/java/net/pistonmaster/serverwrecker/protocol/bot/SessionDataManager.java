@@ -877,7 +877,7 @@ public final class SessionDataManager {
     }
 
     private String toPlainText(Component component) {
-        return serverWrecker.getPlainMessageSerializer().serialize(component);
+        return ServerWrecker.PLAIN_MESSAGE_SERIALIZER.serialize(component);
     }
 
     public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {
@@ -888,7 +888,7 @@ public final class SessionDataManager {
         int blockCount = buf.readShort();
 
         DataPalette chunkPalette = codec.readDataPalette(buf, PaletteType.CHUNK,
-                serverWrecker.getGlobalBlockPalette().getBlockBitsPerEntry());
+                ServerWrecker.GLOBAL_BLOCK_PALETTE.getBlockBitsPerEntry());
         DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME,
                 biomesEntryBitsSize);
         return new ChunkSection(blockCount, chunkPalette, biomePalette);

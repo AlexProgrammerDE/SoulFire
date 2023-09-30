@@ -22,6 +22,8 @@ package net.pistonmaster.serverwrecker.settings.lib;
 import com.google.gson.*;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.pistonmaster.serverwrecker.auth.service.AccountData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -39,6 +41,7 @@ import java.util.Base64;
 import java.util.List;
 
 public class SettingsManager {
+    public static final Logger LOGGER = LoggerFactory.getLogger(SettingsManager.class);
     private final List<ListenerRegistration<?>> listeners = new ArrayList<>();
     private final List<ProviderRegistration<?>> providers = new ArrayList<>();
     private final Class<? extends SettingsObject>[] registeredSettings;

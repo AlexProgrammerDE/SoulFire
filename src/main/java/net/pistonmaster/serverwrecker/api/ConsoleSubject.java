@@ -20,15 +20,16 @@
 package net.pistonmaster.serverwrecker.api;
 
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConsoleSubject {
-    private final ServerWrecker serverWrecker;
+    private static final Logger LOGGER = LoggerFactory.getLogger("Console");
 
     public void sendMessage(String message) {
-        serverWrecker.getLogger().info(message);
+        LOGGER.info(message);
     }
 }

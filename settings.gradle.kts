@@ -2,6 +2,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {
+        mavenCentral()
         gradlePluginPortal()
     }
     plugins {
@@ -9,10 +10,14 @@ pluginManagement {
         id("org.cadixdev.licenser") version "0.6.1"
         id("net.kyori.indra") version "3.1.3"
         id("net.kyori.indra.git") version "3.1.3"
+        id("net.kyori.indra.checkstyle") version "3.1.3"
         id("net.kyori.blossom") version "2.1.0"
+        id("org.graalvm.buildtools.native") version "0.9.27"
+        id("com.google.protobuf") version "0.9.4"
     }
 }
 
+@Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {

@@ -30,6 +30,8 @@ import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -46,6 +48,7 @@ import java.util.stream.Collectors;
         description = BuildData.DESCRIPTION, sortOptions = false)
 public class SWCommandDefinition implements Callable<Integer> {
     private final ServerWrecker serverWrecker;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SWCommandDefinition.class);
     @Setter
     private CommandLine commandLine;
 
@@ -179,7 +182,7 @@ public class SWCommandDefinition implements Callable<Integer> {
             try {
                 serverWrecker.getAccountRegistry().loadFromFile(accountFile, authType);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Failed to load accounts!", e);
                 return 1;
             }
         }
@@ -188,7 +191,7 @@ public class SWCommandDefinition implements Callable<Integer> {
             try {
                 serverWrecker.getProxyRegistry().loadFromFile(proxyFile, proxyType);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Failed to load proxies!", e);
                 return 1;
             }
         }
@@ -202,8 +205,7 @@ public class SWCommandDefinition implements Callable<Integer> {
             }
         }
 
-        int id = serverWrecker.startAttack();
-        serverWrecker.getLogger().debug("Started attack with id {}", id);
+        serverWrecker.startAttack();
         return 0;
     }
 }

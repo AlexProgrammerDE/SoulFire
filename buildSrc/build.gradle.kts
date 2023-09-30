@@ -13,3 +13,9 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("org.apache.maven:maven-model:4.0.0-alpha-7")
 }
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}

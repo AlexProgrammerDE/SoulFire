@@ -51,6 +51,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import org.apache.commons.io.FileUtils;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -69,10 +70,10 @@ public class CommandManager {
     private final ServerWrecker serverWrecker;
     private final ConsoleSubject consoleSubject;
     private final List<String> commandHistory = Collections.synchronizedList(new ArrayList<>());
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandManager.class);
 
     @PostConstruct
     public void postConstruct() {
-        Logger logger = serverWrecker.getLogger();
         dispatcher.register(literal("online").executes(c -> {
             AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
@@ -106,7 +107,7 @@ public class CommandManager {
                             }
 
                             String message = StringArgumentType.getString(c, "message");
-                            logger.info("Sending message by all bots: '{}'", message);
+                            LOGGER.info("Sending message by all bots: '{}'", message);
 
                             attackManager.getBotConnections().forEach(client -> {
                                 if (client.isOnline()) {
@@ -123,11 +124,11 @@ public class CommandManager {
             }
 
             if (attackManager.getBotConnections().isEmpty()) {
-                logger.info("No bots connected!");
+                LOGGER.info("No bots connected!");
                 return 1;
             }
 
-            logger.info("Total bots: {}", attackManager.getBotConnections().size());
+            LOGGER.info("Total bots: {}", attackManager.getBotConnections().size());
             long readTraffic = 0;
             long writeTraffic = 0;
             for (BotConnection bot : attackManager.getBotConnections()) {
@@ -141,8 +142,8 @@ public class CommandManager {
                 writeTraffic += trafficShapingHandler.trafficCounter().cumulativeWrittenBytes();
             }
 
-            logger.info("Total read traffic: {}", FileUtils.byteCountToDisplaySize(readTraffic));
-            logger.info("Total write traffic: {}", FileUtils.byteCountToDisplaySize(writeTraffic));
+            LOGGER.info("Total read traffic: {}", FileUtils.byteCountToDisplaySize(readTraffic));
+            LOGGER.info("Total write traffic: {}", FileUtils.byteCountToDisplaySize(writeTraffic));
 
             long currentReadTraffic = 0;
             long currentWriteTraffic = 0;
@@ -157,8 +158,8 @@ public class CommandManager {
                 currentWriteTraffic += trafficShapingHandler.trafficCounter().lastWriteThroughput();
             }
 
-            logger.info("Current read traffic: {}/s", FileUtils.byteCountToDisplaySize(currentReadTraffic));
-            logger.info("Current write traffic: {}/s", FileUtils.byteCountToDisplaySize(currentWriteTraffic));
+            LOGGER.info("Current read traffic: {}/s", FileUtils.byteCountToDisplaySize(currentReadTraffic));
+            LOGGER.info("Current write traffic: {}/s", FileUtils.byteCountToDisplaySize(currentWriteTraffic));
 
             return 1;
         }));
@@ -301,7 +302,7 @@ public class CommandManager {
             commandHistory.add(command);
             return dispatcher.execute(command, consoleSubject);
         } catch (CommandSyntaxException e) {
-            serverWrecker.getLogger().warn(e.getMessage());
+            LOGGER.warn(e.getMessage());
             return 1;
         }
     }

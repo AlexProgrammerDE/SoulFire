@@ -31,6 +31,9 @@ import net.pistonmaster.serverwrecker.api.event.gui.WindowCloseEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.popups.AboutPopup;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -43,6 +46,7 @@ import java.util.List;
 
 public class SWMenuBar extends JMenuBar {
     private static final List<Class<? extends BasicLookAndFeel>> THEMES;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SWMenuBar.class);
 
     static {
         List<Class<? extends BasicLookAndFeel>> tempThemes = new ArrayList<>(List.of(
@@ -69,9 +73,9 @@ public class SWMenuBar extends JMenuBar {
             if (selectedFile != null) {
                 try {
                     serverWrecker.getSettingsManager().loadProfile(selectedFile);
-                    serverWrecker.getLogger().info("Loaded profile!");
+                    SettingsManager.LOGGER.info("Loaded profile!");
                 } catch (IOException ex) {
-                    serverWrecker.getLogger().warn("Failed to load profile!", ex);
+                    SettingsManager.LOGGER.warn("Failed to load profile!", ex);
                 }
             }
         });
@@ -94,9 +98,9 @@ public class SWMenuBar extends JMenuBar {
 
                 try {
                     serverWrecker.getSettingsManager().saveProfile(Path.of(path));
-                    serverWrecker.getLogger().info("Saved profile!");
+                    SettingsManager.LOGGER.info("Saved profile!");
                 } catch (IOException ex) {
-                    serverWrecker.getLogger().warn("Failed to save profile!", ex);
+                    SettingsManager.LOGGER.warn("Failed to save profile!", ex);
                 }
             }
         });

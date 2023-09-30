@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.data;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +35,7 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
                 throw new IllegalStateException("blockshapes.txt not found!");
             }
 
-            new String(inputStream.readAllBytes()).lines().forEach(line -> {
+            new String(inputStream.readAllBytes(), StandardCharsets.UTF_8).lines().forEach(line -> {
                 String[] parts = line.split("\\|");
 
                 int id = Integer.parseInt(parts[0]);

@@ -1,12 +1,13 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.google.protobuf.gradle.*
+import com.google.protobuf.gradle.id
 
 plugins {
     application
     idea
     id("sw.shadow-conventions")
-    id("com.google.protobuf") version "0.9.4"
-    id("net.kyori.indra.checkstyle") version "3.1.3"
+    id("com.google.protobuf")
+    id("net.kyori.indra.checkstyle")
+    id("org.graalvm.buildtools.native")
 }
 
 version = "1.2.1-SNAPSHOT"
@@ -169,10 +170,12 @@ protobuf {
 
 idea {
     module {
-        generatedSourceDirs.addAll(listOf(
-            file("${protobuf.generatedFilesBaseDir}/main/grpc"),
-            file("${protobuf.generatedFilesBaseDir}/main/java")
-        ))
+        generatedSourceDirs.addAll(
+            listOf(
+                file("${protobuf.generatedFilesBaseDir}/main/grpc"),
+                file("${protobuf.generatedFilesBaseDir}/main/java")
+            )
+        )
     }
 }
 
@@ -205,4 +208,37 @@ tasks.named<ShadowJar>("shadowJar").get().apply {
             "velocity-plugin.json"
         )
     )
+}
+
+graalvmNative {
+    metadataRepository {
+        enabled.set(true)
+    }
+    binaries {
+        named("main") {
+            javaLauncher.set(javaToolchains.launcherFor {
+                languageVersion.set(JavaLanguageVersion.of(21))
+            })
+
+            // Netty
+            buildArgs(
+                "--initialize-at-run-time=io.netty.util.internal.logging",
+                "--initialize-at-run-time=io.netty.util.AbstractReferenceCounted",
+                "--initialize-at-run-time=io.netty.handler.ssl",
+                "--initialize-at-run-time=io.netty.channel.AbstractChannel",
+                "--initialize-at-run-time=io.netty"
+            )
+
+            // Logging
+            buildArgs(
+                "--initialize-at-run-time=org.slf4j.LoggerFactory",
+                "--initialize-at-run-time=org.slf4j.simple.SimpleLogger",
+                "--initialize-at-run-time=org.slf4j.impl.StaticLoggerBinder"
+            )
+
+            imageName.set("serverwrecker")
+
+            sharedLibrary.set(false)
+        }
+    }
 }

@@ -20,8 +20,9 @@
 package net.pistonmaster.serverwrecker.proxy;
 
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,7 +35,7 @@ import java.util.List;
 public class ProxyRegistry implements SettingsDuplex<ProxyList> {
     private final List<SWProxy> proxies = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
-    private final ServerWrecker serverWrecker;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyRegistry.class);
 
     public void loadFromFile(Path file, ProxyType proxyType) throws IOException {
         loadFromString(Files.readString(file), proxyType);
@@ -50,7 +51,7 @@ public class ProxyRegistry implements SettingsDuplex<ProxyList> {
                 .forEach(newProxies::add);
 
         this.proxies.addAll(newProxies);
-        serverWrecker.getLogger().info("Loaded {} proxies!", newProxies.size());
+        LOGGER.info("Loaded {} proxies!", newProxies.size());
 
         loadHooks.forEach(Runnable::run);
     }

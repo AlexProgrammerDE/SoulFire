@@ -31,6 +31,8 @@ import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -45,6 +47,7 @@ import java.util.List;
 public class AccountPanel extends NavigationItem implements SettingsDuplex<AccountSettings> {
     private final JTextField nameFormat;
     private final JCheckBox shuffleAccounts = new PresetJCheckBox(AccountSettings.DEFAULT_SHUFFLE_ACCOUNTS);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccountPanel.class);
 
     @Inject
     public AccountPanel(ServerWrecker serverWrecker, GUIFrame parent) {
@@ -197,13 +200,12 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
                 return;
             }
 
-            serverWrecker.getLogger().info("Opening: {}", accountFile.getFileName());
-
+            LOGGER.info("Opening: {}", accountFile.getFileName());
             serverWrecker.getThreadPool().submit(() -> {
                 try {
                     serverWrecker.getAccountRegistry().loadFromFile(accountFile, authType);
                 } catch (Throwable e) {
-                    e.printStackTrace();
+                    LOGGER.error("Failed to load accounts!", e);
                 }
             });
         }

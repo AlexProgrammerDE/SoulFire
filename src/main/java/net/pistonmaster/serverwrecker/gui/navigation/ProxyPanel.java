@@ -30,6 +30,8 @@ import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -43,6 +45,7 @@ import java.util.List;
 
 public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySettings> {
     private final JSpinner botsPerProxy = new JSpinner();
+    private static Logger LOGGER = LoggerFactory.getLogger(ProxyPanel.class);
 
     @Inject
     public ProxyPanel(ServerWrecker serverWrecker, GUIFrame parent) {
@@ -193,13 +196,12 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
                 return;
             }
 
-            serverWrecker.getLogger().info("Opening: {}", proxyFile.getFileName());
-
+            LOGGER.info("Opening: {}", proxyFile.getFileName());
             serverWrecker.getThreadPool().submit(() -> {
                 try {
                     serverWrecker.getProxyRegistry().loadFromFile(proxyFile, proxyType);
                 } catch (Throwable e) {
-                    e.printStackTrace();
+                    LOGGER.warn("Failed to load proxies!", e);
                 }
             });
         }

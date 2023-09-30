@@ -25,10 +25,10 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.Property;
 
-public class LogAppender extends AbstractAppender {
+public class SWLogAppender extends AbstractAppender {
     private final LogFormatter formatter = new LogFormatter();
 
-    public LogAppender() {
+    public SWLogAppender() {
         super("LogPanelAppender", null, null, false, Property.EMPTY_ARRAY);
     }
 

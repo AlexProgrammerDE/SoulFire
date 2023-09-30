@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.viaversion.StorableSession;
 
 import java.util.List;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
@@ -72,6 +73,7 @@ public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         if (PipelineUtil.containsCause(cause, CancelCodecException.class)
@@ -87,10 +89,10 @@ public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
         // Decoder exception
         if ((PipelineUtil.containsCause(cause, InformativeException.class)
-                && info.getProtocolInfo().getState() != State.HANDSHAKE)
+                && info.getProtocolInfo().getServerState() != State.HANDSHAKE)
                 || Via.getManager().debugHandler().enabled()) {
-            info.get(StorableSession.class).session().getLogger()
-                    .error("A ViaVersion error has occurred:", cause);
+            Objects.requireNonNull(info.get(StorableSession.class), "Storable Session missing")
+                    .session().getLogger().error("A ViaVersion error has occurred:", cause);
         }
     }
 }

@@ -20,27 +20,10 @@
 package net.pistonmaster.serverwrecker;
 
 import io.netty.util.ResourceLeakDetector;
-import net.pistonmaster.serverwrecker.addons.*;
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
-import net.pistonmaster.serverwrecker.cli.SWCommandDefinition;
-import net.pistonmaster.serverwrecker.common.OperationMode;
-import net.pistonmaster.serverwrecker.grpc.RPCClient;
-import net.pistonmaster.serverwrecker.gui.GUIManager;
-import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
-import org.fusesource.jansi.AnsiConsole;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import picocli.CommandLine;
 
 import java.awt.*;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.List;
 
 public class ServerWreckerBootstrap {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerBootstrap.class);
-
     private ServerWreckerBootstrap() {
     }
 
@@ -61,75 +44,18 @@ public class ServerWreckerBootstrap {
     }
 
     public static void main(String[] args) {
-        if (System.console() != null) {
-            AnsiConsole.systemInstall();
-        }
+        ServerWreckerLoader.injectJvm();
 
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) ->
-                LOGGER.error("Exception in thread {}", thread.getName(), throwable));
-
-        int port = getAvailablePort();
-        if (GraphicsEnvironment.isHeadless() || args.length > 0) {
-            loadInternalAddons();
-            runHeadless(port, args);
+        int port = ServerWreckerLoader.getAvailablePort();
+        boolean isHeadless = GraphicsEnvironment.isHeadless() || args.length > 0;
+        if (isHeadless) {
+            ServerWreckerLoader.loadInternalAddons();
+            ServerWreckerLoader.runHeadless(port, args);
         } else {
-            ThemeUtil.initFlatLaf();
-            ThemeUtil.setLookAndFeel();
+            ServerWreckerLoader.injectTheme();
 
-            loadInternalAddons();
-            runGUI(port);
+            ServerWreckerLoader.loadInternalAddons();
+            ServerWreckerLoader.runGUI(port);
         }
-    }
-
-    private static void loadInternalAddons() {
-        List<InternalAddon> addons = List.of(
-                new BotTicker(), new ClientBrand(), new ClientSettings(),
-                new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
-                new AutoTotem(), new AutoJump(), new AutoArmor(), new AutoEat(),
-                new ChatMessageLogger(), new ServerListBypass());
-
-        addons.forEach(ServerWreckerAPI::registerAddon);
-    }
-
-    private static void runHeadless(int port, String[] args) {
-        ServerWrecker serverWrecker = new ServerWrecker(OperationMode.CLI, "localhost", port);
-        SWCommandDefinition serverWreckerCommand = new SWCommandDefinition(serverWrecker);
-        CommandLine commandLine = new CommandLine(serverWreckerCommand);
-        serverWreckerCommand.setCommandLine(commandLine);
-        commandLine.setCaseInsensitiveEnumValuesAllowed(true);
-        commandLine.setUsageHelpAutoWidth(true);
-        commandLine.setUsageHelpLongOptionsMaxWidth(30);
-        commandLine.setExecutionExceptionHandler((ex, cmdLine, parseResult) -> {
-            LOGGER.error("Exception while executing command", ex);
-            return 1;
-        });
-
-        ServerWreckerAPI.postEvent(new CommandManagerInitEvent(commandLine));
-        commandLine.execute(args);
-    }
-
-    private static void runGUI(int port) {
-        ServerWrecker serverWrecker = new ServerWrecker(OperationMode.GUI, "localhost", port);
-        serverWrecker.initConsole();
-
-        GUIManager guiManager = new GUIManager(serverWrecker, serverWrecker.getInjector().getSingleton(RPCClient.class));
-        guiManager.initGUI();
-    }
-
-    private static int getAvailablePort() {
-        int initialPort = 38765;
-
-        while (true) {
-            try {
-                ServerSocket serverSocket = new ServerSocket(initialPort);
-                serverSocket.close();
-                break; // Port is available, exit the loop
-            } catch (IOException e) {
-                System.out.println("Port " + initialPort + " is already in use, trying next port...");
-                initialPort++; // Increment the port number and try again
-            }
-        }
-
-        return initialPort;
     }
 }

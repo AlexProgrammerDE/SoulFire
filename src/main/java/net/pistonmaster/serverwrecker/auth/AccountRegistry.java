@@ -26,10 +26,11 @@ import com.google.gson.JsonSyntaxException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.auth.service.*;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,7 +42,7 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final List<MinecraftAccount> accounts = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
-    private final ServerWrecker serverWrecker;
+    public static final Logger LOGGER = LoggerFactory.getLogger(AccountRegistry.class);
 
     public void loadFromFile(Path file, AuthType authType) throws IOException {
         loadFromString(Files.readString(file), authType);
@@ -69,7 +70,7 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
         }
 
         this.accounts.addAll(newAccounts);
-        serverWrecker.getLogger().info("Loaded {} accounts!", newAccounts.size());
+        LOGGER.info("Loaded {} accounts!", newAccounts.size());
         loadHooks.forEach(Runnable::run);
     }
 
