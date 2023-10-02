@@ -91,7 +91,7 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
                 throw new IllegalArgumentException("Amount is bigger than max size!");
             }
 
-            List<E> list = new ArrayList<>(queue);
+            var list = new ArrayList<>(queue);
             var size = list.size();
             var start = size - amount;
 

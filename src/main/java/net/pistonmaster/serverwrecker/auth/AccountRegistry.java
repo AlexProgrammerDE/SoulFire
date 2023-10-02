@@ -49,7 +49,7 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
     }
 
     public void loadFromString(String file, AuthType authType) {
-        List<MinecraftAccount> newAccounts = new ArrayList<>();
+        var newAccounts = new ArrayList<MinecraftAccount>();
 
         if (isSupportedJson(file)) {
             if (isArray(file)) {

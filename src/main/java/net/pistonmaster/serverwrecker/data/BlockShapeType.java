@@ -38,7 +38,7 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
                 var parts = line.split("\\|");
 
                 var id = Integer.parseInt(parts[0]);
-                List<BlockShape> blockShapes = new ArrayList<>();
+                var blockShapes = new ArrayList<BlockShape>();
 
                 if (parts.length > 1) {
                     for (var i = 1; i < parts.length; i++) {

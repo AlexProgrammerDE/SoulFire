@@ -33,7 +33,6 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class PastesDevService {
     private static final Gson gson = new Gson();
@@ -42,7 +41,7 @@ public class PastesDevService {
     }
 
     private static CloseableHttpClient createHttpClient() {
-        List<Header> headers = new ArrayList<>();
+        var headers = new ArrayList<Header>();
         headers.add(new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType()));
         headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en"));
         headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "ServerWrecker/" + BuildData.VERSION));

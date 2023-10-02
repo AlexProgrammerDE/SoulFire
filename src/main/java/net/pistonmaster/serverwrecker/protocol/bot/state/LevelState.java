@@ -177,7 +177,7 @@ public class LevelState {
     }
 
     public List<BoundingBox> getCollisionBoxes(BoundingBox aabb) {
-        List<BoundingBox> boundingBoxList = new ArrayList<>();
+        var boundingBoxList = new ArrayList<BoundingBox>();
 
         var minX = MathHelper.floorDouble(aabb.minX);
         var maxX = MathHelper.floorDouble(aabb.maxX + 1.0);

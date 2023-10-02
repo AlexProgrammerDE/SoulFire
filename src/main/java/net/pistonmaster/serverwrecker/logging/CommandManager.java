@@ -76,7 +76,7 @@ public class CommandManager {
                 return 1;
             }
 
-            List<String> online = new ArrayList<>();
+            var online = new ArrayList<String>();
             attackManager.getBotConnections().forEach(client -> {
                 if (client.isOnline()) {
                     online.add(client.meta().getMinecraftAccount().username());

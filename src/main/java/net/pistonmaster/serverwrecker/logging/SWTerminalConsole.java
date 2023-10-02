@@ -34,7 +34,6 @@ import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 
 import javax.inject.Inject;
-import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class SWTerminalConsole extends SimpleTerminalConsole {
@@ -73,7 +72,7 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
                 .appName("ServerWrecker")
                 .completer((reader, parsedLine, list) -> {
                     try {
-                        List<String> offers = rpcClient.getCommandStubBlocking().tabCompleteCommand(
+                        var offers = rpcClient.getCommandStubBlocking().tabCompleteCommand(
                                 CommandCompletionRequest.newBuilder().setCommand(parsedLine.line()).build()
                         ).getSuggestionsList(); // Console doesn't get harmed much by this...
                         for (var offer : offers) {

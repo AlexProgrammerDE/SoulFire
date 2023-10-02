@@ -37,7 +37,6 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
 
 public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySettings> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyPanel.class);
@@ -118,7 +117,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
 
         proxyList.addPropertyChangeListener(evt -> {
             if ("tableCellEditor".equals(evt.getPropertyName()) && !proxyList.isEditing()) {
-                List<SWProxy> proxies = new ArrayList<>();
+                var = new ArrayList<SWProxy>();
 
                 for (var i = 0; i < proxyList.getRowCount(); i++) {
                     var row = new Object[proxyList.getColumnCount()];

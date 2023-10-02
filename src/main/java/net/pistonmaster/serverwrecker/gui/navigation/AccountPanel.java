@@ -38,7 +38,6 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
 
 public class AccountPanel extends NavigationItem implements SettingsDuplex<AccountSettings> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountPanel.class);
@@ -120,7 +119,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
         accountList.addPropertyChangeListener(evt -> {
             if ("tableCellEditor".equals(evt.getPropertyName()) && !accountList.isEditing()) {
-                List<MinecraftAccount> accounts = new ArrayList<>();
+                var accounts = new ArrayList<MinecraftAccount>();
 
                 for (var i = 0; i < accountList.getRowCount(); i++) {
                     var row = new Object[accountList.getColumnCount()];

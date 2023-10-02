@@ -107,7 +107,7 @@ public class BotActionManager {
     }
 
     private Optional<Vector3f> rayCastToBlock(BlockShapeType shapeType, Vector3d eyePosition, Vector3d headRotation, Vector3d targetPosition) {
-        List<Vector3f> intersections = new ArrayList<>();
+        var intersections = new ArrayList<Vector3f>();
 
         for (var shape : shapeType.blockShapes()) {
             var boundingBox = new BoundingBox(shape.minX(), shape.minY(), shape.minZ(), shape.maxX(), shape.maxY(), shape.maxZ());

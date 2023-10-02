@@ -42,7 +42,7 @@ public class ProxyRegistry implements SettingsDuplex<ProxyList> {
     }
 
     public void loadFromString(String file, ProxyType proxyType) {
-        List<SWProxy> newProxies = new ArrayList<>();
+        var newProxies = new ArrayList<SWProxy>();
 
         file.lines()
                 .filter(line -> !line.isBlank())

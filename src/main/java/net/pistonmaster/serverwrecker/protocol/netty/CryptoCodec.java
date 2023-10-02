@@ -27,25 +27,20 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
 
 import javax.crypto.SecretKey;
+import java.security.GeneralSecurityException;
 import java.util.List;
 
 public class CryptoCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
-    private SecretKey keyEncode;
-    private SecretKey keyDecode;
-    private VelocityCipher encoder;
-    private VelocityCipher decoder;
+    private final VelocityCipher encoder;
+    private final VelocityCipher decoder;
 
     public CryptoCodec(SecretKey keyEncode, SecretKey keyDecode) {
-        this.keyEncode = keyEncode;
-        this.keyDecode = keyDecode;
-    }
-
-    @Override
-    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        encoder = Natives.cipher.get().forEncryption(keyEncode);
-        decoder = Natives.cipher.get().forDecryption(keyDecode);
-        keyEncode = null;
-        keyDecode = null;
+        try {
+            this.encoder = Natives.cipher.get().forEncryption(keyEncode);
+            this.decoder = Natives.cipher.get().forDecryption(keyDecode);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Unable to initialize cipher", e);
+        }
     }
 
     @Override

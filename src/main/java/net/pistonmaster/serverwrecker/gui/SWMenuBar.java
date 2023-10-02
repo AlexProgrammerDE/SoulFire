@@ -32,8 +32,6 @@ import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.popups.AboutPopup;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -46,10 +44,9 @@ import java.util.List;
 
 public class SWMenuBar extends JMenuBar {
     private static final List<Class<? extends BasicLookAndFeel>> THEMES;
-    private static final Logger LOGGER = LoggerFactory.getLogger(SWMenuBar.class);
 
     static {
-        List<Class<? extends BasicLookAndFeel>> tempThemes = new ArrayList<>(List.of(
+        var tempThemes = new ArrayList<>(List.of(
                 FlatDarculaLaf.class,
                 FlatIntelliJLaf.class,
                 FlatMacDarkLaf.class,
