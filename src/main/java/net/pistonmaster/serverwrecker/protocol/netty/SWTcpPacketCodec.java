@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.protocol.netty;
 
-
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.github.steveice10.mc.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
