@@ -27,7 +27,6 @@ import com.github.steveice10.packetlib.crypt.PacketEncryption;
 import com.github.steveice10.packetlib.event.session.PacketSendingEvent;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
-import com.github.steveice10.packetlib.tcp.TcpPacketCodec;
 import com.github.steveice10.packetlib.tcp.TcpSession;
 import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.exception.CancelCodecException;
@@ -207,7 +206,7 @@ public class ViaClientSession extends TcpSession {
                     // Inject Via codec
                     pipeline.addLast("via-codec", new ViaCodec(userConnection));
 
-                    pipeline.addLast("codec", new TcpPacketCodec(ViaClientSession.this, true));
+                    pipeline.addLast("codec", new SWTcpPacketCodec(ViaClientSession.this));
                     pipeline.addLast("manager", ViaClientSession.this);
 
                     addHAProxySupport(pipeline);
