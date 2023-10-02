@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import io.netty.channel.EventLoopGroup;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -115,7 +116,7 @@ public class AttackManager {
             Collections.shuffle(accounts);
         }
 
-        Map<SWProxy, Integer> proxyUseMap = new Object2IntOpenHashMap<>();
+        Object2IntMap<SWProxy> proxyUseMap = new Object2IntOpenHashMap<>();
         for (SWProxy proxy : proxies) {
             proxyUseMap.put(proxy, 0);
         }
@@ -202,18 +203,18 @@ public class AttackManager {
         return accounts.remove(0);
     }
 
-    private Optional<SWProxy> getProxy(int accountsPerProxy, Map<SWProxy, Integer> proxyUseMap) {
+    private Optional<SWProxy> getProxy(int accountsPerProxy, Object2IntMap<SWProxy> proxyUseMap) {
         if (proxyUseMap.isEmpty()) {
             return Optional.empty(); // No proxies available
         }
 
-        var selectedProxy = proxyUseMap.entrySet().stream()
-                .filter(entry -> accountsPerProxy == -1 || entry.getValue() < accountsPerProxy)
+        var selectedProxy = proxyUseMap.object2IntEntrySet().stream()
+                .filter(entry -> accountsPerProxy == -1 || entry.getIntValue() < accountsPerProxy)
                 .min(Comparator.comparingInt(Map.Entry::getValue))
                 .orElseThrow(() -> new IllegalStateException("No proxies available!")); // Should never happen
 
         // Always present
-        selectedProxy.setValue(selectedProxy.getValue() + 1);
+        selectedProxy.setValue(selectedProxy.getIntValue() + 1);
 
         return Optional.of(selectedProxy.getKey());
     }
