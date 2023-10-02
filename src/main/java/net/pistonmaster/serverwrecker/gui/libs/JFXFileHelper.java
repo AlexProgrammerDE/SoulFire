@@ -22,7 +22,6 @@ package net.pistonmaster.serverwrecker.gui.libs;
 import javafx.application.Platform;
 import javafx.stage.FileChooser;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 

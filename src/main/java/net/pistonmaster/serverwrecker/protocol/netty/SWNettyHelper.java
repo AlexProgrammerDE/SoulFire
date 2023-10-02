@@ -41,7 +41,6 @@ import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 
-import java.net.InetSocketAddress;
 import java.util.concurrent.ThreadFactory;
 
 public class SWNettyHelper {

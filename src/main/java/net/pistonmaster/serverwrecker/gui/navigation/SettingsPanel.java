@@ -33,7 +33,6 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotSettings> {
     private final JTextField hostInput = new JTextField(BotSettings.DEFAULT_HOST);

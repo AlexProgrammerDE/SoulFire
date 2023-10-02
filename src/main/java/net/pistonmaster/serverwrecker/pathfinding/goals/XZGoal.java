@@ -22,7 +22,6 @@ package net.pistonmaster.serverwrecker.pathfinding.goals;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector2d;
-import org.cloudburstmc.math.vector.Vector3d;
 
 public record XZGoal(Vector2d goal) implements GoalScorer {
     public XZGoal {

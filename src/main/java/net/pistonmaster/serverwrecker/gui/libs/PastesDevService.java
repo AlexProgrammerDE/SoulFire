@@ -24,7 +24,6 @@ import net.pistonmaster.serverwrecker.auth.HttpHelper;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;

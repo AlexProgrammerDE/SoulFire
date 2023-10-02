@@ -25,7 +25,6 @@ import net.pistonmaster.serverwrecker.grpc.generated.*;
 import net.pistonmaster.serverwrecker.logging.CommandManager;
 
 import javax.inject.Inject;
-import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBase {

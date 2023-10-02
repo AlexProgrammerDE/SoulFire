@@ -23,13 +23,8 @@ import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
-import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
-import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import org.cloudburstmc.math.vector.Vector3d;
-
-import java.util.Optional;
 
 @ToString
 @RequiredArgsConstructor

@@ -29,10 +29,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import net.pistonmaster.serverwrecker.data.BlockShape;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
-import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
-import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;

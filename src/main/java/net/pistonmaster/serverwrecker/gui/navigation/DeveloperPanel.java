@@ -30,10 +30,8 @@ import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class DeveloperPanel extends NavigationItem implements SettingsDuplex<DevSettings> {
     private final JCheckBox viaDebug = new JCheckBox();

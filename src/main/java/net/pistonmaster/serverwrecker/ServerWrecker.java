@@ -238,6 +238,17 @@ public class ServerWrecker {
         LOGGER.info("Finished loading!");
     }
 
+    public static void setupLogging(DevSettings devSettings) {
+        var level = devSettings.coreDebug() ? Level.DEBUG : Level.INFO;
+        var nettyLevel = devSettings.nettyDebug() ? Level.DEBUG : Level.INFO;
+        var grpcLevel = devSettings.grpcDebug() ? Level.DEBUG : Level.INFO;
+        Configurator.setRootLevel(level);
+        Configurator.setLevel(LOGGER.getName(), level);
+        Configurator.setLevel("org.pf4j", level);
+        Configurator.setLevel("io.netty", nettyLevel);
+        Configurator.setLevel("io.grpc", grpcLevel);
+    }
+
     private boolean checkForUpdates() {
         try {
             var url = URI.create("https://api.github.com/repos/AlexProgrammerDE/ServerWrecker/releases/latest").toURL();
@@ -295,17 +306,6 @@ public class ServerWrecker {
     public void setupLoggingAndVia(DevSettings devSettings) {
         Via.getManager().debugHandler().setEnabled(devSettings.viaDebug());
         setupLogging(devSettings);
-    }
-
-    public static void setupLogging(DevSettings devSettings) {
-        var level = devSettings.coreDebug() ? Level.DEBUG : Level.INFO;
-        var nettyLevel = devSettings.nettyDebug() ? Level.DEBUG : Level.INFO;
-        var grpcLevel = devSettings.grpcDebug() ? Level.DEBUG : Level.INFO;
-        Configurator.setRootLevel(level);
-        Configurator.setLevel(LOGGER.getName(), level);
-        Configurator.setLevel("org.pf4j", level);
-        Configurator.setLevel("io.netty", nettyLevel);
-        Configurator.setLevel("io.grpc", grpcLevel);
     }
 
     /**

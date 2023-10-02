@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.execution.BlockBreakAction;

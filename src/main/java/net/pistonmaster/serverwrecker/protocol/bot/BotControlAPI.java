@@ -27,7 +27,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.pistonmaster.serverwrecker.protocol.bot.model.AbilitiesData;
 
 import java.security.SecureRandom;
 import java.time.Instant;

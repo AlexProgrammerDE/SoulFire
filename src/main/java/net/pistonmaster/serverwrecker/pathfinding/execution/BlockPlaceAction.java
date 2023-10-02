@@ -23,12 +23,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
-import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
-import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
-import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
-import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
-import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
 import org.cloudburstmc.math.vector.Vector3i;
 
