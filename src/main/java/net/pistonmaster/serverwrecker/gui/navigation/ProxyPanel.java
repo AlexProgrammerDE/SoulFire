@@ -19,12 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
-import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
-import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
+import net.pistonmaster.serverwrecker.gui.popups.ImportTextDialog;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
@@ -36,8 +35,6 @@ import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -151,16 +148,17 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
     }
 
     private JButton createProxyLoadButton(ServerWrecker serverWrecker, GUIFrame parent, ProxyType type) {
-        var loadText = SwingTextUtils.htmlCenterText(String.format("Load %s proxies", type.name()));
-        var typeText = String.format("%s list file", type.name());
-        var button = new JButton(loadText);
+        var button = new JButton(SwingTextUtils.htmlCenterText(String.format("Load %s proxies", type)));
 
-        var chooser = new FileChooser();
-        chooser.setInitialDirectory(Path.of(System.getProperty("user.dir")).toFile());
-        chooser.setTitle(loadText);
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(typeText, "*.txt"));
+        button.addActionListener(e -> new ImportTextDialog(
+                Path.of(System.getProperty("user.dir")),
+                String.format("Load %s proxies", type),
+                String.format("%s list file", type),
+                serverWrecker,
+                parent,
+                text -> serverWrecker.getProxyRegistry().loadFromString(text, type)
+        ));
 
-        button.addActionListener(new LoadProxiesListener(serverWrecker, parent, chooser, type));
         return button;
     }
 
@@ -184,25 +182,5 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         return new ProxySettings(
                 (int) botsPerProxy.getValue()
         );
-    }
-
-    private record LoadProxiesListener(ServerWrecker serverWrecker, GUIFrame frame,
-                                       FileChooser chooser, ProxyType proxyType) implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent) {
-            var proxyFile = JFXFileHelper.showOpenDialog(chooser);
-            if (proxyFile == null) {
-                return;
-            }
-
-            LOGGER.info("Opening: {}", proxyFile.getFileName());
-            serverWrecker.getThreadPool().submit(() -> {
-                try {
-                    serverWrecker.getProxyRegistry().loadFromFile(proxyFile, proxyType);
-                } catch (Throwable e) {
-                    LOGGER.warn("Failed to load proxies!", e);
-                }
-            });
-        }
     }
 }

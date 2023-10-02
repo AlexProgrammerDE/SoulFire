@@ -29,7 +29,7 @@ public class JFXFileHelper {
     private JFXFileHelper() {
     }
 
-    public static Path showOpenDialog(FileChooser fileChooser) {
+    public static CompletableFuture<Path> showOpenDialog(FileChooser fileChooser) {
         var future = new CompletableFuture<Path>();
         Platform.runLater(() -> {
             var file = fileChooser.showOpenDialog(null);
@@ -39,10 +39,11 @@ public class JFXFileHelper {
                 future.complete(null);
             }
         });
-        return future.join();
+
+        return future;
     }
 
-    public static Path showSaveDialog(FileChooser fileChooser) {
+    public static CompletableFuture<Path> showSaveDialog(FileChooser fileChooser) {
         var future = new CompletableFuture<Path>();
         Platform.runLater(() -> {
             var file = fileChooser.showSaveDialog(null);
@@ -52,6 +53,7 @@ public class JFXFileHelper {
                 future.complete(null);
             }
         });
-        return future.join();
+
+        return future;
     }
 }

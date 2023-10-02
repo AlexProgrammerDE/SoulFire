@@ -23,51 +23,149 @@ import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
-import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Consumer;
 
-public class ImportTextDialog extends JPopupMenu {
+public class ImportTextDialog extends JDialog {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImportTextDialog.class);
 
-    public ImportTextDialog(String loadText, String typeText, ServerWrecker serverWrecker, GUIFrame frame, Consumer<String> consumer) {
-        setBorder(new EmptyBorder(10, 10, 10, 10));
+    public ImportTextDialog(Path initialDirectory, String loadText, String typeText, ServerWrecker serverWrecker, GUIFrame frame, Consumer<String> consumer) {
+        super(frame, loadText, true);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        var button = new JButton(SwingTextUtils.htmlCenterText(loadText));
+        var contentPane = new JPanel();
+        contentPane.setLayout(new BorderLayout());
+        contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        var buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        var loadFromFileButton = new JButton("Load from File");
 
         var chooser = new FileChooser();
-        chooser.setInitialDirectory(Path.of(System.getProperty("user.dir")).toFile());
+        chooser.setInitialDirectory(initialDirectory.toFile());
         chooser.setTitle(loadText);
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(typeText, "*.txt"));
 
-        button.addActionListener(new ImportFileListener(serverWrecker, frame, chooser, consumer));
+        loadFromFileButton.addActionListener(new ImportFileListener(serverWrecker, frame, chooser, consumer, this));
+
+        var getFromClipboardButton = new JButton("Get from Clipboard");
+
+        getFromClipboardButton.addActionListener(new ImportClipboardListener(serverWrecker, frame, chooser, consumer, this));
+
+        buttonPanel.add(loadFromFileButton);
+        buttonPanel.add(getFromClipboardButton);
+
+        var textArea = new JTextArea(5, 20);
+        textArea.setWrapStyleWord(true);
+        textArea.setLineWrap(true);
+
+        var textScrollPane = new JScrollPane(textArea);
+        var submitButton = new JButton("Submit");
+
+        submitButton.addActionListener(new SubmitTextListener(serverWrecker, frame, chooser, consumer, this, textArea));
+
+        var inputPanel = new JPanel(new BorderLayout());
+        inputPanel.add(textScrollPane, BorderLayout.CENTER);
+        inputPanel.add(submitButton, BorderLayout.EAST);
+
+        contentPane.add(buttonPanel, BorderLayout.NORTH);
+        contentPane.add(inputPanel, BorderLayout.CENTER);
+
+        setContentPane(contentPane);
+
+        pack();
+        setLocationRelativeTo(frame);
+        setVisible(true);
     }
 
     private record ImportFileListener(ServerWrecker serverWrecker, GUIFrame frame,
-                                      FileChooser chooser, Consumer<String> consumer) implements ActionListener {
+                                      FileChooser chooser, Consumer<String> consumer,
+                                      ImportTextDialog dialog) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            var accountFile = JFXFileHelper.showOpenDialog(chooser);
-            if (accountFile == null) {
-                return;
-            }
+            dialog.dispose();
 
-            LOGGER.info("Opening: {}", accountFile.getFileName());
+            JFXFileHelper.showOpenDialog(chooser).thenAcceptAsync(file -> {
+                if (file == null) {
+                    return;
+                }
+
+                if (!Files.isReadable(file)) {
+                    LOGGER.error("File is not readable!");
+                    return;
+                }
+
+                LOGGER.info("Opening: {}", file.getFileName());
+
+                try {
+                    consumer.accept(Files.readString(file));
+                } catch (Throwable e) {
+                    LOGGER.error("Failed to import text!", e);
+                }
+            }, serverWrecker.getThreadPool());
+        }
+    }
+
+    private record ImportClipboardListener(ServerWrecker serverWrecker, GUIFrame frame,
+                                           FileChooser chooser, Consumer<String> consumer,
+                                           ImportTextDialog dialog) implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            dialog.dispose();
+
             serverWrecker.getThreadPool().submit(() -> {
                 try {
-                    consumer.accept(Files.readString(accountFile));
+                    getClipboard().ifPresent(consumer);
                 } catch (Throwable e) {
-                    LOGGER.error("Failed to load accounts!", e);
+                    LOGGER.error("Failed to import text!", e);
                 }
             });
+        }
+    }
+
+    private record SubmitTextListener(ServerWrecker serverWrecker, GUIFrame frame,
+                                      FileChooser chooser, Consumer<String> consumer,
+                                      ImportTextDialog dialog, JTextArea textArea) implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            dialog.dispose();
+
+            serverWrecker.getThreadPool().submit(() -> {
+                try {
+                    consumer.accept(textArea.getText());
+                } catch (Throwable e) {
+                    LOGGER.error("Failed to import text!", e);
+                }
+            });
+        }
+    }
+
+    private static Optional<String> getClipboard() {
+        var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+
+        var contents = clipboard.getContents(null);
+
+        if (contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            try {
+                return ((String) contents.getTransferData(DataFlavor.stringFlavor)).describeConstable();
+            } catch (UnsupportedFlavorException | IOException e) {
+                LOGGER.error("Failed to get clipboard!", e);
+                return Optional.empty();
+            }
+        } else {
+            LOGGER.error("Clipboard does not contain text!");
+            return Optional.empty();
         }
     }
 }

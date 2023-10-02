@@ -68,16 +68,18 @@ public class SWMenuBar extends JMenuBar {
             chooser.setInitialDirectory(serverWrecker.getProfilesFolder().toFile());
             chooser.setTitle("Load Profile");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ServerWrecker profile", "*.json"));
-            var selectedFile = JFXFileHelper.showOpenDialog(chooser);
+            JFXFileHelper.showOpenDialog(chooser).thenAcceptAsync(file -> {
+                if (file == null) {
+                    return;
+                }
 
-            if (selectedFile != null) {
                 try {
-                    serverWrecker.getSettingsManager().loadProfile(selectedFile);
+                    serverWrecker.getSettingsManager().loadProfile(file);
                     SettingsManager.LOGGER.info("Loaded profile!");
                 } catch (IOException ex) {
                     SettingsManager.LOGGER.warn("Failed to load profile!", ex);
                 }
-            }
+            }, serverWrecker.getThreadPool());
         });
 
         fileMenu.add(loadProfile);
@@ -87,11 +89,13 @@ public class SWMenuBar extends JMenuBar {
             chooser.setInitialDirectory(serverWrecker.getProfilesFolder().toFile());
             chooser.setTitle("Save Profile");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ServerWrecker profile", "*.json"));
-            var selectedFile = JFXFileHelper.showSaveDialog(chooser);
+            JFXFileHelper.showSaveDialog(chooser).thenAcceptAsync(file -> {
+                if (file == null) {
+                    return;
+                }
 
-            if (selectedFile != null) {
                 // Add .json if not present
-                var path = selectedFile.toString();
+                var path = file.toString();
                 if (!path.endsWith(".json")) {
                     path += ".json";
                 }
@@ -102,7 +106,7 @@ public class SWMenuBar extends JMenuBar {
                 } catch (IOException ex) {
                     SettingsManager.LOGGER.warn("Failed to save profile!", ex);
                 }
-            }
+            }, serverWrecker.getThreadPool());
         });
 
         fileMenu.add(saveProfile);

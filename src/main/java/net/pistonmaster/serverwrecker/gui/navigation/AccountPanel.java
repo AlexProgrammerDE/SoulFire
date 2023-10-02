@@ -19,16 +19,15 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
-import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
-import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
+import net.pistonmaster.serverwrecker.gui.popups.ImportTextDialog;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +36,6 @@ import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -152,16 +149,17 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
     }
 
     private JButton createAccountLoadButton(ServerWrecker serverWrecker, GUIFrame parent, AuthType type) {
-        var loadText = SwingTextUtils.htmlCenterText(String.format("Load %s accounts", type));
-        var typeText = String.format("%s list file", type);
-        var button = new JButton(loadText);
+        var button = new JButton(SwingTextUtils.htmlCenterText(String.format("Load %s accounts", type)));
 
-        var chooser = new FileChooser();
-        chooser.setInitialDirectory(Path.of(System.getProperty("user.dir")).toFile());
-        chooser.setTitle(loadText);
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(typeText, "*.txt"));
+        button.addActionListener(e -> new ImportTextDialog(
+                Path.of(System.getProperty("user.dir")),
+                String.format("Load %s accounts", type),
+                String.format("%s list file", type),
+                serverWrecker,
+                parent,
+                text -> serverWrecker.getAccountRegistry().loadFromString(text, type)
+        ));
 
-        button.addActionListener(new LoadAccountsListener(serverWrecker, parent, chooser, type));
         return button;
     }
 
@@ -187,25 +185,5 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
                 nameFormat.getText(),
                 shuffleAccounts.isSelected()
         );
-    }
-
-    private record LoadAccountsListener(ServerWrecker serverWrecker, GUIFrame frame,
-                                        FileChooser chooser, AuthType authType) implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent) {
-            var accountFile = JFXFileHelper.showOpenDialog(chooser);
-            if (accountFile == null) {
-                return;
-            }
-
-            LOGGER.info("Opening: {}", accountFile.getFileName());
-            serverWrecker.getThreadPool().submit(() -> {
-                try {
-                    serverWrecker.getAccountRegistry().loadFromFile(accountFile, authType);
-                } catch (Throwable e) {
-                    LOGGER.error("Failed to load accounts!", e);
-                }
-            });
-        }
     }
 }

@@ -66,20 +66,18 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
             chooser.setInitialDirectory(ServerWrecker.DATA_FOLDER.toFile());
             chooser.setTitle("Save Log");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log Files", "*.log"));
-            var selectedFile = JFXFileHelper.showSaveDialog(chooser);
-            if (selectedFile == null) {
-                return;
-            }
-
-            guiManager.getThreadPool().submit(() -> {
-                try (var writer = Files.newBufferedWriter(selectedFile)) {
-                    writer.write(logPanel.getMessageLogPanel().getLogs());
-                } catch (IOException e) {
-                    e.printStackTrace();
+            JFXFileHelper.showSaveDialog(chooser).thenAcceptAsync(file -> {
+                if (file == null) {
+                    return;
                 }
 
-                guiManager.getLogger().info("Saved log to: {}", selectedFile);
-            });
+                try (var writer = Files.newBufferedWriter(file)) {
+                    writer.write(logPanel.getMessageLogPanel().getLogs());
+                    guiManager.getLogger().info("Saved log to: {}", file);
+                } catch (IOException e) {
+                    guiManager.getLogger().error("Failed to save log!", e);
+                }
+            }, serverWrecker.getThreadPool());
         });
     }
 
