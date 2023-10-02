@@ -68,7 +68,6 @@ public class AttackManager {
     @Setter
     private AttackState attackState = AttackState.STOPPED;
 
-    @SuppressWarnings("UnstableApiUsage")
     public CompletableFuture<Void> start(SettingsHolder settingsHolder) {
         if (!attackState.isStopped()) {
             throw new IllegalStateException("Attack is already running");
@@ -132,7 +131,7 @@ public class AttackManager {
 
         Queue<BotConnectionFactory> factories = new ArrayBlockingQueue<>(botAmount);
         for (int botId = 1; botId <= botAmount; botId++) {
-            SWProxy proxyData = getProxy(botsPerProxy, proxyUseMap);
+            SWProxy proxyData = getProxy(botsPerProxy, proxyUseMap).orElse(null);
             MinecraftAccount minecraftAccount = getAccount(accountSettings, accounts, botId);
 
             // AuthData will be used internally instead of the MCProtocol data
@@ -203,21 +202,20 @@ public class AttackManager {
         return accounts.remove(0);
     }
 
-    private SWProxy getProxy(int accountsPerProxy, Map<SWProxy, Integer> proxyUseMap) {
+    private Optional<SWProxy> getProxy(int accountsPerProxy, Map<SWProxy, Integer> proxyUseMap) {
         if (proxyUseMap.isEmpty()) {
-            return null; // No proxies available
-        } else {
-            SWProxy selectedProxy = proxyUseMap.entrySet().stream()
-                    .filter(entry -> accountsPerProxy == -1 || entry.getValue() < accountsPerProxy)
-                    .min(Comparator.comparingInt(Map.Entry::getValue))
-                    .map(Map.Entry::getKey)
-                    .orElseThrow(() -> new IllegalStateException("No proxies available!")); // Should never happen
-
-            // Always present
-            proxyUseMap.computeIfPresent(selectedProxy, (proxy, useCount) -> useCount + 1);
-
-            return selectedProxy;
+            return Optional.empty(); // No proxies available
         }
+
+        var selectedProxy = proxyUseMap.entrySet().stream()
+                .filter(entry -> accountsPerProxy == -1 || entry.getValue() < accountsPerProxy)
+                .min(Comparator.comparingInt(Map.Entry::getValue))
+                .orElseThrow(() -> new IllegalStateException("No proxies available!")); // Should never happen
+
+        // Always present
+        selectedProxy.setValue(selectedProxy.getValue() + 1);
+
+        return Optional.of(selectedProxy.getKey());
     }
 
     public CompletableFuture<Void> stop() {
