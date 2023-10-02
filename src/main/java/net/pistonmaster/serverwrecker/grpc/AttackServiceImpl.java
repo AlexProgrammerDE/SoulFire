@@ -33,9 +33,9 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
 
     @Override
     public void startAttack(AttackStartRequest request, StreamObserver<AttackStartResponse> responseObserver) {
-        SettingsHolder settingsHolder = serverWrecker.getSettingsManager().createSettingsHolder(request.getSettings());
+        var settingsHolder = serverWrecker.getSettingsManager().createSettingsHolder(request.getSettings());
 
-        int id = serverWrecker.startAttack(settingsHolder);
+        var id = serverWrecker.startAttack(settingsHolder);
         responseObserver.onNext(AttackStartResponse.newBuilder().setId(id).build());
         responseObserver.onCompleted();
     }

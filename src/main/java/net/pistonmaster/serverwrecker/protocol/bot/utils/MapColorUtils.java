@@ -33,24 +33,24 @@ public class MapColorUtils {
     private static final IndexColorModel MAP_COLOR_MODEL;
 
     static {
-        final MapColor[] baseMapColors = MapColor.values();
+        final var baseMapColors = MapColor.values();
 
         MAP_COLORS = new Color[baseMapColors.length * 4];
-        for (int i = 0; i < baseMapColors.length; ++i) {
-            Color bc = baseMapColors[i].color;
+        for (var i = 0; i < baseMapColors.length; ++i) {
+            var bc = baseMapColors[i].color;
             MAP_COLORS[i * 4] = generateShade(bc, 180.0);
             MAP_COLORS[i * 4 + 1] = generateShade(bc, 220.0);
             MAP_COLORS[i * 4 + 2] = bc; // 255, so no need to generate a shade
             MAP_COLORS[i * 4 + 3] = generateShade(bc, 135.0);
         }
 
-        byte[] r = new byte[MAP_COLORS.length];
-        byte[] g = new byte[MAP_COLORS.length];
-        byte[] b = new byte[MAP_COLORS.length];
-        byte[] a = new byte[MAP_COLORS.length];
+        var r = new byte[MAP_COLORS.length];
+        var g = new byte[MAP_COLORS.length];
+        var b = new byte[MAP_COLORS.length];
+        var a = new byte[MAP_COLORS.length];
 
-        for (int i = 0; i < MAP_COLORS.length; ++i) {
-            Color mc = MAP_COLORS[i];
+        for (var i = 0; i < MAP_COLORS.length; ++i) {
+            var mc = MAP_COLORS[i];
             r[i] = (byte) mc.getRed();
             g[i] = (byte) mc.getGreen();
             b[i] = (byte) mc.getBlue();
@@ -69,12 +69,12 @@ public class MapColorUtils {
     }
 
     public static BufferedImage generateFromData(MapData mapData) {
-        int width = mapData.getColumns();
-        int height = mapData.getRows();
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_INDEXED, MAP_COLOR_MODEL);
-        for (int i = 0; i < width; ++i) {
-            for (int j = 0; j < height; ++j) {
-                Color c = MAP_COLORS[mapData.getData()[i + j * width]];
+        var width = mapData.getColumns();
+        var height = mapData.getRows();
+        var image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_INDEXED, MAP_COLOR_MODEL);
+        for (var i = 0; i < width; ++i) {
+            for (var j = 0; j < height; ++j) {
+                var c = MAP_COLORS[mapData.getData()[i + j * width]];
                 image.setRGB(i, j, c.getRGB());
             }
         }

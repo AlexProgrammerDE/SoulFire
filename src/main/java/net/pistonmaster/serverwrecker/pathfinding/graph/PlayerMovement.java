@@ -99,8 +99,8 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
 
     private Optional<ActionCosts> requireFreeBlocks(ProjectedLevelState level, ProjectedInventory inventory) {
         List<WorldAction> actions = new ArrayList<>();
-        AtomicDouble cost = new AtomicDouble();
-        Vector3i fromPosInt = previousEntityState.position().toInt();
+        var cost = new AtomicDouble();
+        var fromPosInt = previousEntityState.position().toInt();
 
         if (modifier == MovementModifier.JUMP) {
             // Make head block free (maybe head block is a slab)
@@ -147,7 +147,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             // This should never happen
             assert corner != null;
 
-            for (Vector3i bodyOffset : BodyPart.BODY_PARTS) {
+            for (var bodyOffset : BodyPart.BODY_PARTS) {
                 // Apply jump shift to target edge and offset for body part
                 if (requireFreeHelper(applyJumpShift(corner, modifier).add(bodyOffset), level, inventory, actions, cost)) {
                     return Optional.empty();
@@ -155,9 +155,9 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             }
         }
 
-        Vector3i targetEdge = applyDirection(fromPosInt, direction);
+        var targetEdge = applyDirection(fromPosInt, direction);
 
-        for (Vector3i bodyOffset : BodyPart.BODY_PARTS) {
+        for (var bodyOffset : BodyPart.BODY_PARTS) {
             // Apply jump shift to target diagonal and offset for body part
             if (requireFreeHelper(applyJumpShift(targetEdge, modifier).add(bodyOffset), level, inventory, actions, cost)) {
                 return Optional.empty();
@@ -199,7 +199,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
     }
 
     private boolean requireFreeHelper(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory, List<WorldAction> actions, AtomicDouble cost) {
-        Optional<ActionCosts> blockActions = requireFreeBlock(block, level, inventory);
+        var blockActions = requireFreeBlock(block, level, inventory);
         if (blockActions.isEmpty()) {
             return true;
         } else {
@@ -210,7 +210,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
     }
 
     private Optional<ActionCosts> requireFreeBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
-        BlockStateMeta blockStateMeta = getBlockShapeType(level, block);
+        var blockStateMeta = getBlockShapeType(level, block);
 
         // No need to break blocks like air or grass
         if (blockStateMeta.blockShapeType().hasNoCollisions()) {
@@ -221,24 +221,24 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             return Optional.empty();
         }
 
-        Optional<Costs.BlockMiningCosts> blockMiningCosts = Costs.calculateBlockBreakCost(inventory, blockStateMeta);
+        var blockMiningCosts = Costs.calculateBlockBreakCost(inventory, blockStateMeta);
 
         // No way to break block
         if (blockMiningCosts.isEmpty()) {
             return Optional.empty();
         }
 
-        Costs.BlockMiningCosts costs = blockMiningCosts.get();
+        var costs = blockMiningCosts.get();
 
         // Add cost of breaking block
         return Optional.of(new ActionCosts(costs.miningCost(), List.of(new BlockBreakAction(block, costs.toolType()))));
     }
 
     private Optional<ActionCosts> requireSolidBlocks(ProjectedLevelState level, ProjectedInventory inventory) {
-        List<WorldAction> actions = new ArrayList<>();
-        AtomicDouble cost = new AtomicDouble();
-        Vector3i fromPosInt = previousEntityState.position().toInt();
-        Vector3i floorPos = fromPosInt.add(0, -1, 0);
+        var actions = new ArrayList<WorldAction>();
+        var cost = new AtomicDouble();
+        var fromPosInt = previousEntityState.position().toInt();
+        var floorPos = fromPosInt.add(0, -1, 0);
 
         // Add the block that is required to be solid for straight movement
         if (requireSolidHelper(applyModifier(applyDirection(floorPos, direction), modifier), level, inventory, actions, cost)) {
@@ -249,7 +249,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
     }
 
     private boolean requireSolidHelper(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory, List<WorldAction> actions, AtomicDouble cost) {
-        Optional<ActionCosts> blockActions = requireSolidBlock(block, level, inventory);
+        var blockActions = requireSolidBlock(block, level, inventory);
         if (blockActions.isEmpty()) {
             return true;
         } else {
@@ -260,7 +260,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
     }
 
     private Optional<ActionCosts> requireSolidBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
-        BlockShapeType blockShapeType = getBlockShapeType(level, block).blockShapeType();
+        var blockShapeType = getBlockShapeType(level, block).blockShapeType();
 
         // Block with a current state that has no collision (Like air, grass, open fence)
         if (blockShapeType.hasNoCollisions()) {
@@ -288,15 +288,15 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
 
     @Override
     public GraphInstructions getInstructions() {
-        double cost = switch (direction) {
+        var cost = switch (direction) {
             case NORTH, SOUTH, EAST, WEST -> Costs.STRAIGHT;
             case NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST -> Costs.DIAGONAL;
         };
         List<WorldAction> actions = new ArrayList<>();
-        ProjectedLevelState projectedLevelState = previousEntityState.levelState();
-        ProjectedInventory projectedInventory = previousEntityState.inventory();
+        var projectedLevelState = previousEntityState.levelState();
+        var projectedInventory = previousEntityState.inventory();
 
-        Optional<ActionCosts> freeActions = requireFreeBlocks(projectedLevelState, projectedInventory);
+        var freeActions = requireFreeBlocks(projectedLevelState, projectedInventory);
         if (freeActions.isEmpty()) {
             return GraphInstructions.IMPOSSIBLE;
         } else {
@@ -304,7 +304,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             cost += freeActions.get().cost();
         }
 
-        Optional<ActionCosts> solidActions = requireSolidBlocks(projectedLevelState, projectedInventory);
+        var solidActions = requireSolidBlocks(projectedLevelState, projectedInventory);
         if (solidActions.isEmpty()) {
             return GraphInstructions.IMPOSSIBLE;
         } else {
@@ -312,9 +312,9 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             cost += solidActions.get().cost();
         }
 
-        Vector3d targetPosition = applyModifier(applyDirection(previousEntityState.position(), direction), modifier);
+        var targetPosition = applyModifier(applyDirection(previousEntityState.position(), direction), modifier);
 
-        int yawOffset = 0;
+        var yawOffset = 0;
         if (side != null) {
             yawOffset = switch (side) {
                 case LEFT -> 10;

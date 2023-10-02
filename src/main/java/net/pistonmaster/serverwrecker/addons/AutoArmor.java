@@ -32,8 +32,6 @@ import net.pistonmaster.serverwrecker.data.ArmorType;
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
@@ -47,13 +45,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class AutoArmor implements InternalAddon {
     private static void putOn(InventoryManager inventoryManager, PlayerInventoryContainer inventory, ContainerSlot targetSlot, ArmorType armorType) {
-        Optional<ContainerSlot> bestItem = Arrays.stream(inventory.getStorage()).filter(s -> {
+        var bestItem = Arrays.stream(inventory.getStorage()).filter(s -> {
             if (s.item() == null) {
                 return false;
             }
@@ -62,8 +58,8 @@ public class AutoArmor implements InternalAddon {
         }).reduce((first, second) -> {
             assert first.item() != null;
 
-            int firstIndex = armorType.getItemTypes().indexOf(first.item().getType());
-            int secondIndex = armorType.getItemTypes().indexOf(second.item().getType());
+            var firstIndex = armorType.getItemTypes().indexOf(first.item().getType());
+            var secondIndex = armorType.getItemTypes().indexOf(second.item().getType());
 
             return firstIndex > secondIndex ? first : second;
         });
@@ -73,8 +69,8 @@ public class AutoArmor implements InternalAddon {
         }
 
         if (targetSlot.item() != null) {
-            int targetIndex = armorType.getItemTypes().indexOf(targetSlot.item().getType());
-            int bestIndex = armorType.getItemTypes().indexOf(bestItem.get().item().getType());
+            var targetIndex = armorType.getItemTypes().indexOf(targetSlot.item().getType());
+            var bestIndex = armorType.getItemTypes().indexOf(bestItem.get().item().getType());
 
             if (targetIndex >= bestIndex) {
                 return;
@@ -112,26 +108,26 @@ public class AutoArmor implements InternalAddon {
             return;
         }
 
-        AutoArmorSettings settings = event.connection().settingsHolder().get(AutoArmorSettings.class);
+        var settings = event.connection().settingsHolder().get(AutoArmorSettings.class);
         if (!settings.autoArmor()) {
             return;
         }
 
-        ScheduledExecutorService executor = event.connection().executorManager().newScheduledExecutorService("AutoJump");
-        BotConnection connection = event.connection();
+        var executor = event.connection().executorManager().newScheduledExecutorService("AutoJump");
+        var connection = event.connection();
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
-            SessionDataManager sessionDataManager = connection.sessionDataManager();
-            InventoryManager inventoryManager = sessionDataManager.getInventoryManager();
-            PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
+            var sessionDataManager = connection.sessionDataManager();
+            var inventoryManager = sessionDataManager.getInventoryManager();
+            var playerInventory = inventoryManager.getPlayerInventory();
 
-            Map<ArmorType, ContainerSlot> armorTypes = Map.of(
+            var armorTypes = Map.of(
                     ArmorType.HELMET, playerInventory.getHelmet(),
                     ArmorType.CHESTPLATE, playerInventory.getChestplate(),
                     ArmorType.LEGGINGS, playerInventory.getLeggings(),
                     ArmorType.BOOTS, playerInventory.getBoots()
             );
 
-            for (Map.Entry<ArmorType, ContainerSlot> entry : armorTypes.entrySet()) {
+            for (var entry : armorTypes.entrySet()) {
                 putOn(inventoryManager, playerInventory, entry.getValue(), entry.getKey());
             }
         }, settings.minDelay(), settings.maxDelay());

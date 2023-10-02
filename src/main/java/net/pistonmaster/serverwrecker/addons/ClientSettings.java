@@ -45,7 +45,6 @@ import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -62,12 +61,12 @@ public class ClientSettings implements InternalAddon {
                 return;
             }
 
-            ClientSettingsSettings settings = event.connection().settingsHolder().get(ClientSettingsSettings.class);
+            var settings = event.connection().settingsHolder().get(ClientSettingsSettings.class);
             if (!settings.sendClientSettings()) {
                 return;
             }
 
-            List<SkinPart> skinParts = new ArrayList<>();
+            var skinParts = new ArrayList<SkinPart>();
             if (settings.capeEnabled()) {
                 skinParts.add(SkinPart.CAPE);
             }

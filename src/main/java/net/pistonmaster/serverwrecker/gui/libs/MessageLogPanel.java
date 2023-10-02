@@ -51,7 +51,7 @@ public class MessageLogPanel extends JPanel {
 
         textComponent.setFont(new JLabel().getFont());
         textComponent.setEditable(true);
-        DefaultCaret caret = (DefaultCaret) textComponent.getCaret();
+        var caret = (DefaultCaret) textComponent.getCaret();
         caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         document = textComponent.getDocument();
         document.addDocumentListener(new LimitLinesDocumentListener(numLines, true));
@@ -61,7 +61,7 @@ public class MessageLogPanel extends JPanel {
 
         textComponent.addCaretListener(e -> updatePopup());
 
-        JScrollPane scrollText = new JScrollPane();
+        var scrollText = new JScrollPane();
         scrollText.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
         scrollText.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollText.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -74,16 +74,16 @@ public class MessageLogPanel extends JPanel {
     }
 
     private void updatePopup() {
-        JPopupMenu popupMenu = new JPopupMenu();
+        var popupMenu = new JPopupMenu();
         if (textComponent.getSelectedText() != null) {
-            JMenuItem copyItem = new JMenuItem("Copy");
+            var copyItem = new JMenuItem("Copy");
             copyItem.addActionListener(e -> textComponent.copy());
             popupMenu.add(copyItem);
 
-            JMenuItem cutItem = new JMenuItem("Upload to pastes.dev");
+            var cutItem = new JMenuItem("Upload to pastes.dev");
             cutItem.addActionListener(e -> {
                 try {
-                    String url = "https://pastes.dev/" + PastesDevService.upload(textComponent.getSelectedText());
+                    var url = "https://pastes.dev/" + PastesDevService.upload(textComponent.getSelectedText());
                     JOptionPane.showMessageDialog(this,
                             SwingTextUtils.createPane("Uploaded to: <a href='" + url + "'>" + url + "</a>"),
                             "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -100,7 +100,7 @@ public class MessageLogPanel extends JPanel {
             popupMenu.addSeparator();
         }
 
-        JMenuItem clearItem = new JMenuItem("Clear");
+        var clearItem = new JMenuItem("Clear");
         clearItem.addActionListener(e -> clear());
         popupMenu.add(clearItem);
         textComponent.setComponentPopupMenu(popupMenu);
@@ -123,7 +123,7 @@ public class MessageLogPanel extends JPanel {
         SwingUtilities.invokeLater(() -> {
             try {
                 noopDocumentFilter.setFilter(false);
-                int offset = document.getLength();
+                var offset = document.getLength();
                 document.insertString(offset, line, defaultAttributes);
                 noopDocumentFilter.setFilter(true);
             } catch (BadLocationException ignored) {

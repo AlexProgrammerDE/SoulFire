@@ -40,41 +40,41 @@ public class MovementAction implements WorldAction {
 
     @Override
     public boolean isCompleted(BotConnection connection) {
-        BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
-        Vector3d botPosition = movementManager.getPlayerPos();
-        LevelState levelState = connection.sessionDataManager().getCurrentLevel();
+        var movementManager = connection.sessionDataManager().getBotMovementManager();
+        var botPosition = movementManager.getPlayerPos();
+        var levelState = connection.sessionDataManager().getCurrentLevel();
         if (levelState == null) {
             return false;
         }
 
-        Optional<BlockStateMeta> blockMeta = levelState.getBlockStateAt(position.toInt());
-        boolean insideBlock = blockMeta.isPresent() && !BlockTypeHelper.isEmpty(blockMeta.get());
+        var blockMeta = levelState.getBlockStateAt(position.toInt());
+        var insideBlock = blockMeta.isPresent() && !BlockTypeHelper.isEmpty(blockMeta.get());
 
         if (insideBlock) {
             // We are inside a block, so being close is good enough
-            double distance = botPosition.distance(position);
+            var distance = botPosition.distance(position);
             return distance <= 1;
         } else if (botPosition.getY() != position.getY()) {
             // We want to be on the same Y level
             return false;
         } else {
-            double distance = botPosition.distance(position);
+            var distance = botPosition.distance(position);
             return distance < 0.3;
         }
     }
 
     @Override
     public void tick(BotConnection connection) {
-        BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
-        Vector3d botPosition = movementManager.getPlayerPos();
+        var movementManager = connection.sessionDataManager().getBotMovementManager();
+        var botPosition = movementManager.getPlayerPos();
 
-        float previousYaw = movementManager.getYaw();
+        var previousYaw = movementManager.getYaw();
         movementManager.lookAt(RotationOrigin.EYES, position);
         movementManager.setPitch(0);
         movementManager.setYaw(movementManager.getYaw() + yawOffset);
-        float newYaw = movementManager.getYaw();
+        var newYaw = movementManager.getYaw();
 
-        float yawDifference = Math.abs(previousYaw - newYaw);
+        var yawDifference = Math.abs(previousYaw - newYaw);
 
         // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
         if (didLook && yawDifference > 5) {

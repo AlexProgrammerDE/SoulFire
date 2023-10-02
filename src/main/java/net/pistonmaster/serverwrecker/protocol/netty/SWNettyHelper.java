@@ -49,7 +49,7 @@ public class SWNettyHelper {
     public static final Class<? extends DatagramChannel> DATAGRAM_CHANNEL_CLASS;
 
     static {
-        TransportHelper.TransportMethod transportMethod = TransportHelper.determineTransportMethod();
+        var transportMethod = TransportHelper.determineTransportMethod();
         switch (transportMethod) {
             case IO_URING -> {
                 CHANNEL_CLASS = IOUringSocketChannel.class;
@@ -89,7 +89,7 @@ public class SWNettyHelper {
     }
 
     public static void addProxy(ChannelPipeline pipeline, SWProxy proxy) {
-        InetSocketAddress address = proxy.getInetSocketAddress();
+        var address = proxy.getInetSocketAddress();
         switch (proxy.type()) {
             case HTTP -> {
                 if (proxy.hasCredentials()) {

@@ -59,12 +59,12 @@ public class ProxyRegistry implements SettingsDuplex<ProxyList> {
     private SWProxy fromString(String proxy, ProxyType proxyType) {
         proxy = proxy.trim();
 
-        String[] split = proxy.split(":");
+        var split = proxy.split(":");
 
-        String host = split[0];
-        int port = Integer.parseInt(split[1]);
-        String username = getIndexOrNull(split, 2);
-        String password = getIndexOrNull(split, 3);
+        var host = split[0];
+        var port = Integer.parseInt(split[1]);
+        var username = getIndexOrNull(split, 2);
+        var password = getIndexOrNull(split, 3);
 
         return new SWProxy(proxyType, host, port, username, password, true);
     }

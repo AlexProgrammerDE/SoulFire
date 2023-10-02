@@ -34,7 +34,7 @@ public class SWLogAppender extends AbstractAppender {
 
     @Override
     public void append(LogEvent event) {
-        String formatted = formatter.format(event);
+        var formatted = formatter.format(event);
         if (formatted.isBlank()) {
             return;
         }

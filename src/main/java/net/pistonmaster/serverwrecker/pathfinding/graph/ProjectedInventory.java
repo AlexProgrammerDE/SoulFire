@@ -47,17 +47,17 @@ public class ProjectedInventory {
     }
 
     public ProjectedInventory withChange(int slot, SWItemStack itemStack) {
-        Int2ObjectMap<ContainerSlot> slotChanges = new Int2ObjectOpenHashMap<>(this.slotChanges);
+        var slotChanges = new Int2ObjectOpenHashMap<ContainerSlot>(this.slotChanges);
         slotChanges.put(slot, new ContainerSlot(slot, itemStack));
 
         return new ProjectedInventory(playerInventory, slotChanges, slotChanges.hashCode());
     }
 
     public ContainerSlot[] getStorage() {
-        ContainerSlot[] storage = playerInventory.getStorage();
+        var storage = playerInventory.getStorage();
 
-        for (int i = 0; i < storage.length; i++) {
-            Optional<ContainerSlot> cachedSlot = populateCache(storage[i]);
+        for (var i = 0; i < storage.length; i++) {
+            var cachedSlot = populateCache(storage[i]);
             if (cachedSlot.isPresent()) {
                 storage[i] = cachedSlot.get();
             }
@@ -67,7 +67,7 @@ public class ProjectedInventory {
     }
 
     private Optional<ContainerSlot> populateCache(ContainerSlot slot) {
-        ContainerSlot cachedSlot = slotChanges.get(slot.slot());
+        var cachedSlot = slotChanges.get(slot.slot());
         if (cachedSlot != null) {
             return Optional.of(cachedSlot);
         }
@@ -79,7 +79,7 @@ public class ProjectedInventory {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ProjectedInventory that = (ProjectedInventory) o;
+        var that = (ProjectedInventory) o;
         return slotChangesHash == that.slotChangesHash;
     }
 

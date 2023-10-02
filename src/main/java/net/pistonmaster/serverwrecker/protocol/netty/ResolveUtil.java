@@ -19,11 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.protocol.netty;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.AddressedEnvelope;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.codec.dns.*;
-import io.netty.resolver.dns.DnsNameResolver;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
@@ -44,12 +41,12 @@ public class ResolveUtil {
     }
 
     public static InetSocketAddress resolveAddress(boolean isBedrock, SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup) {
-        BotSettings settings = settingsHolder.get(BotSettings.class);
-        String host = settings.host();
-        int port = settings.port();
+        var settings = settingsHolder.get(BotSettings.class);
+        var host = settings.host();
+        var port = settings.port();
 
         if (!isBedrock && settings.trySrv()) {
-            Optional<InetSocketAddress> resolved = resolveSrv(host, port, eventLoopGroup);
+            var resolved = resolveSrv(host, port, eventLoopGroup);
             if (resolved.isPresent()) {
                 return resolved.get();
             }
@@ -66,15 +63,15 @@ public class ResolveUtil {
             return Optional.empty();
         }
 
-        String name = "_minecraft._tcp." + host;
+        var name = "_minecraft._tcp." + host;
         LOGGER.debug("[PacketLib] Attempting SRV lookup for \"{}\".", name);
 
-        try (DnsNameResolver resolver = new DnsNameResolverBuilder(eventLoopGroup.next())
+        try (var resolver = new DnsNameResolverBuilder(eventLoopGroup.next())
                 .channelType(SWNettyHelper.DATAGRAM_CHANNEL_CLASS)
                 .build()) {
-            AddressedEnvelope<DnsResponse, InetSocketAddress> envelope = resolver.query(new DefaultDnsQuestion(name, DnsRecordType.SRV)).get();
+            var envelope = resolver.query(new DefaultDnsQuestion(name, DnsRecordType.SRV)).get();
 
-            DnsResponse response = envelope.content();
+            var response = envelope.content();
             if (response.count(DnsSection.ANSWER) == 0) {
                 LOGGER.debug("[PacketLib] No SRV record found.");
                 return Optional.empty();
@@ -86,7 +83,7 @@ public class ResolveUtil {
                 return Optional.empty();
             }
 
-            ByteBuf buf = record.content();
+            var buf = record.content();
             buf.skipBytes(4); // Skip priority and weight.
 
             port = buf.readUnsignedShort();
@@ -106,7 +103,7 @@ public class ResolveUtil {
 
     private static InetSocketAddress resolveByHost(String host, int port) {
         try {
-            InetAddress resolved = InetAddress.getByName(host);
+            var resolved = InetAddress.getByName(host);
             LOGGER.debug("[PacketLib] Resolved {} -> {}", host, resolved.getHostAddress());
             return new InetSocketAddress(resolved, port);
         } catch (UnknownHostException e) {

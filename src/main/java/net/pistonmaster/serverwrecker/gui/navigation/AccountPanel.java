@@ -55,10 +55,10 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
         setLayout(new GridLayout(2, 1, 10, 10));
 
-        JPanel accountOptionsPanel = new JPanel();
+        var accountOptionsPanel = new JPanel();
         accountOptionsPanel.setLayout(new GridLayout(2, 1, 10, 10));
 
-        JPanel addAccountPanel = new JPanel();
+        var addAccountPanel = new JPanel();
         addAccountPanel.setLayout(new GridLayout(1, 3, 10, 10));
 
         addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.OFFLINE));
@@ -69,7 +69,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
         accountOptionsPanel.add(addAccountPanel);
 
-        JPanel accountSettingsPanel = new JPanel();
+        var accountSettingsPanel = new JPanel();
         accountSettingsPanel.setLayout(new GridLayout(0, 2));
 
         accountSettingsPanel.add(new JLabel("Shuffle accounts: "));
@@ -83,11 +83,11 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
         add(accountOptionsPanel);
 
-        JPanel accountListPanel = new JPanel();
+        var accountListPanel = new JPanel();
         accountListPanel.setLayout(new GridLayout(1, 1));
 
-        String[] columnNames = {"Username", "Type", "Enabled"};
-        DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+        var columnNames = new String[]{"Username", "Type", "Enabled"};
+        var model = new DefaultTableModel(columnNames, 0) {
             final Class<?>[] columnTypes = new Class<?>[]{String.class, AuthType.class, Boolean.class};
 
             @Override
@@ -96,17 +96,17 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
             }
         };
 
-        JTable accountList = new JTable(model);
+        var accountList = new JTable(model);
 
         serverWrecker.getAccountRegistry().addLoadHook(() -> {
             model.getDataVector().removeAllElements();
 
-            AccountRegistry registry = serverWrecker.getAccountRegistry();
-            List<MinecraftAccount> accounts = registry.getAccounts();
-            int registrySize = accounts.size();
-            Object[][] dataVector = new Object[registrySize][];
-            for (int i = 0; i < registrySize; i++) {
-                MinecraftAccount account = accounts.get(i);
+            var registry = serverWrecker.getAccountRegistry();
+            var accounts = registry.getAccounts();
+            var registrySize = accounts.size();
+            var dataVector = new Object[registrySize][];
+            for (var i = 0; i < registrySize; i++) {
+                var account = accounts.get(i);
 
                 dataVector[i] = new Object[]{
                         account.username(),
@@ -127,17 +127,17 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
             if ("tableCellEditor".equals(evt.getPropertyName()) && !accountList.isEditing()) {
                 List<MinecraftAccount> accounts = new ArrayList<>();
 
-                for (int i = 0; i < accountList.getRowCount(); i++) {
-                    Object[] row = new Object[accountList.getColumnCount()];
-                    for (int j = 0; j < accountList.getColumnCount(); j++) {
+                for (var i = 0; i < accountList.getRowCount(); i++) {
+                    var row = new Object[accountList.getColumnCount()];
+                    for (var j = 0; j < accountList.getColumnCount(); j++) {
                         row[j] = accountList.getValueAt(i, j);
                     }
 
-                    String username = (String) row[0];
-                    AuthType authType = (AuthType) row[1];
-                    boolean enabled = (boolean) row[2];
+                    var username = (String) row[0];
+                    var authType = (AuthType) row[1];
+                    var enabled = (boolean) row[2];
 
-                    MinecraftAccount account = serverWrecker.getAccountRegistry().getAccount(username, authType);
+                    var account = serverWrecker.getAccountRegistry().getAccount(username, authType);
 
                     accounts.add(new MinecraftAccount(authType, username, account.accountData(), enabled));
                 }
@@ -146,7 +146,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
             }
         });
 
-        JScrollPane scrollPane = new JScrollPane(accountList);
+        var scrollPane = new JScrollPane(accountList);
 
         accountListPanel.add(scrollPane);
 
@@ -154,11 +154,11 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
     }
 
     private JButton createAccountLoadButton(ServerWrecker serverWrecker, GUIFrame parent, AuthType type) {
-        String loadText = SwingTextUtils.htmlCenterText(String.format("Load %s accounts", type));
-        String typeText = String.format("%s list file", type);
-        JButton button = new JButton(loadText);
+        var loadText = SwingTextUtils.htmlCenterText(String.format("Load %s accounts", type));
+        var typeText = String.format("%s list file", type);
+        var button = new JButton(loadText);
 
-        FileChooser chooser = new FileChooser();
+        var chooser = new FileChooser();
         chooser.setInitialDirectory(Path.of(System.getProperty("user.dir")).toFile());
         chooser.setTitle(loadText);
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(typeText, "*.txt"));
@@ -195,7 +195,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
                                         FileChooser chooser, AuthType authType) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            Path accountFile = JFXFileHelper.showOpenDialog(chooser);
+            var accountFile = JFXFileHelper.showOpenDialog(chooser);
             if (accountFile == null) {
                 return;
             }

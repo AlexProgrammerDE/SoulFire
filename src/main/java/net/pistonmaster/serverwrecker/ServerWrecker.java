@@ -37,7 +37,6 @@ import lombok.Getter;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.pistonmaster.serverwrecker.api.Addon;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackInitEvent;
 import net.pistonmaster.serverwrecker.auth.AccountList;
@@ -73,13 +72,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
@@ -143,7 +139,7 @@ public class ServerWrecker {
         // Init API
         ServerWreckerAPI.setServerWrecker(this);
 
-        SWLogAppender logAppender = new SWLogAppender();
+        var logAppender = new SWLogAppender();
         logAppender.start();
         injector.register(SWLogAppender.class, logAppender);
         ((org.apache.logging.log4j.core.Logger) LogManager.getRootLogger()).addAppender(logAppender);
@@ -155,7 +151,7 @@ public class ServerWrecker {
             throw new RuntimeException(e);
         }
 
-        SecretKey jwtKey = keyGen.generateKey();
+        var jwtKey = keyGen.generateKey();
 
         rpcServer = new RPCServer(port, injector, jwtKey);
         try {
@@ -169,12 +165,12 @@ public class ServerWrecker {
 
         LOGGER.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
-        String jwt = Jwts.builder()
+        var jwt = Jwts.builder()
                 .setSubject("admin")
                 .signWith(jwtKey, SignatureAlgorithm.HS256)
                 .compact();
 
-        RPCClient rpcClient = new RPCClient(host, port, jwt);
+        var rpcClient = new RPCClient(host, port, jwt);
         injector.register(RPCClient.class, rpcClient);
 
         terminalConsole = injector.getSingleton(SWTerminalConsole.class);
@@ -194,8 +190,8 @@ public class ServerWrecker {
                         new MinecraftPacketSerializer<>(SWClientboundStatusResponsePacket::new)));
 
         // Init via
-        Path viaPath = DATA_FOLDER.resolve("ViaVersion");
-        SWViaPlatform platform = new SWViaPlatform(viaPath);
+        var viaPath = DATA_FOLDER.resolve("ViaVersion");
+        var platform = new SWViaPlatform(viaPath);
 
         Via.init(ViaManagerImpl.builder()
                 .platform(platform)
@@ -218,19 +214,19 @@ public class ServerWrecker {
             new SWViaBedrock(DATA_FOLDER.resolve("ViaBedrock")).init();
         });
 
-        ViaManagerImpl manager = (ViaManagerImpl) Via.getManager();
+        var manager = (ViaManagerImpl) Via.getManager();
         manager.init();
 
         manager.getPlatform().getConf().setCheckForUpdates(false);
 
         manager.onServerLoaded();
 
-        SettingsPanel settingsPanel = injector.getIfAvailable(SettingsPanel.class);
+        var settingsPanel = injector.getIfAvailable(SettingsPanel.class);
         if (settingsPanel != null) {
             settingsPanel.registerVersions();
         }
 
-        for (Addon addon : ServerWreckerAPI.getAddons()) {
+        for (var addon : ServerWreckerAPI.getAddons()) {
             addon.onEnable(this);
         }
 
@@ -244,8 +240,8 @@ public class ServerWrecker {
 
     private boolean checkForUpdates() {
         try {
-            URL url = URI.create("https://api.github.com/repos/AlexProgrammerDE/ServerWrecker/releases/latest").toURL();
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            var url = URI.create("https://api.github.com/repos/AlexProgrammerDE/ServerWrecker/releases/latest").toURL();
+            var connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("User-Agent", "ServerWrecker");
             connection.setConnectTimeout(5000);
@@ -257,11 +253,11 @@ public class ServerWrecker {
             }
 
             JsonObject response;
-            try (InputStream stream = connection.getInputStream()) {
+            try (var stream = connection.getInputStream()) {
                 response = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
             }
 
-            String latestVersion = response.get("tag_name").getAsString();
+            var latestVersion = response.get("tag_name").getAsString();
             if (VersionComparator.isNewer(BuildData.VERSION, latestVersion)) {
                 LOGGER.warn("ServerWrecker is outdated! Current version: {}, latest version: {}", BuildData.VERSION, latestVersion);
                 return true;
@@ -299,9 +295,9 @@ public class ServerWrecker {
     public void setupLogging(DevSettings devSettings) {
         Via.getManager().debugHandler().setEnabled(devSettings.viaDebug());
 
-        Level level = devSettings.coreDebug() ? Level.DEBUG : Level.INFO;
-        Level nettyLevel = devSettings.nettyDebug() ? Level.DEBUG : Level.INFO;
-        Level grpcLevel = devSettings.grpcDebug() ? Level.DEBUG : Level.INFO;
+        var level = devSettings.coreDebug() ? Level.DEBUG : Level.INFO;
+        var nettyLevel = devSettings.nettyDebug() ? Level.DEBUG : Level.INFO;
+        var grpcLevel = devSettings.grpcDebug() ? Level.DEBUG : Level.INFO;
         Configurator.setRootLevel(level);
         Configurator.setLevel(LOGGER.getName(), level);
         Configurator.setLevel("org.pf4j", level);
@@ -351,7 +347,7 @@ public class ServerWrecker {
     }
 
     public int startAttack(SettingsHolder settingsHolder) {
-        AttackManager attackManager = injector.newInstance(AttackManager.class);
+        var attackManager = injector.newInstance(AttackManager.class);
         ServerWreckerAPI.postEvent(new AttackInitEvent(attackManager));
 
         attacks.put(attackManager.getId(), attackManager);

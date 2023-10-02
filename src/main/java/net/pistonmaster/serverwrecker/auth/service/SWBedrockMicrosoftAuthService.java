@@ -24,22 +24,18 @@ import net.pistonmaster.serverwrecker.auth.HttpHelper;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.raphimc.mcauth.MinecraftAuth;
-import net.raphimc.mcauth.step.bedrock.StepMCChain;
 import net.raphimc.mcauth.step.msa.StepCredentialsMsaCode;
-import net.raphimc.mcauth.step.xbl.StepXblXstsToken;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.io.IOException;
-import java.util.UUID;
 
 public class SWBedrockMicrosoftAuthService implements MCAuthService {
     public MinecraftAccount login(String email, String password, SWProxy proxyData) throws IOException {
-        try (CloseableHttpClient httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-            StepMCChain.MCChain mcChain = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(httpClient,
+        try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
+            var mcChain = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(httpClient,
                     new StepCredentialsMsaCode.MsaCredentials(email, password));
 
-            StepXblXstsToken.XblXsts<?> xblXsts = mcChain.prevResult();
-            UUID deviceId = xblXsts.initialXblSession().prevResult2().id();
+            var xblXsts = mcChain.prevResult();
+            var deviceId = xblXsts.initialXblSession().prevResult2().id();
             return new MinecraftAccount(AuthType.MICROSOFT_BEDROCK, mcChain.displayName(),
                     new BedrockData(
                             mcChain.mojangJwt(),

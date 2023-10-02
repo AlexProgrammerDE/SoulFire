@@ -31,8 +31,8 @@ public class ExecutorHelper {
 
     public static void executeRandomDelaySeconds(ScheduledExecutorService executorService, Runnable runnable,
                                                  int minDelay, int maxDelay) {
-        AtomicInteger delay = new AtomicInteger();
-        AtomicInteger counter = new AtomicInteger();
+        var delay = new AtomicInteger();
+        var counter = new AtomicInteger();
         executorService.scheduleWithFixedDelay(() -> {
             if (counter.get() == 0) {
                 delay.set(RandomUtil.getRandomInt(minDelay, maxDelay));

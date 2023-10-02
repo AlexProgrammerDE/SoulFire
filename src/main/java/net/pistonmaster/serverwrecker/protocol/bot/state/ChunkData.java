@@ -50,7 +50,7 @@ public class ChunkData {
     }
 
     public ChunkSection getSection(int sectionIndex) {
-        ChunkSection section = sections[sectionIndex];
+        var section = sections[sectionIndex];
         Objects.requireNonNull(section, () -> "Section " + sectionIndex + " is null!");
 
         return section;
@@ -65,7 +65,7 @@ public class ChunkData {
     }
 
     public void setSection(int sectionIndex, ChunkSection section) {
-        int sectionHash = section.hashCode();
+        var sectionHash = section.hashCode();
         synchronized (SECTION_CACHE) {
             SECTION_CACHE.compute(sectionHash, (hash, cachedSection) ->
                     sections[sectionIndex] = cachedSection == null ? section : cachedSection);
@@ -73,8 +73,8 @@ public class ChunkData {
     }
 
     public void setBlock(Vector3i block, int state) {
-        ChunkSection targetSection = getSection(block);
-        ChunkSection clone = new ChunkSection(
+        var targetSection = getSection(block);
+        var clone = new ChunkSection(
                 targetSection.getBlockCount(),
                 // Clone chunk data palette only
                 new DataPalette(targetSection.getChunkData()),

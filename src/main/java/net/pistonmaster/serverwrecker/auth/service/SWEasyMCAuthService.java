@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class SWEasyMCAuthService implements MCAuthService {
@@ -49,7 +48,7 @@ public class SWEasyMCAuthService implements MCAuthService {
     private final Gson gson = new Gson();
 
     private static CloseableHttpClient createHttpClient(SWProxy proxyData) {
-        List<Header> headers = new ArrayList<>();
+        var headers = new ArrayList<Header>();
         headers.add(new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType()));
         headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en"));
         headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "ServerWrecker/" + BuildData.VERSION));
@@ -58,11 +57,11 @@ public class SWEasyMCAuthService implements MCAuthService {
     }
 
     public MinecraftAccount login(String altToken, SWProxy proxyData) throws IOException {
-        try (CloseableHttpClient httpClient = createHttpClient(proxyData)) {
-            AuthenticationRequest request = new AuthenticationRequest(altToken);
-            HttpPost httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
+        try (var httpClient = createHttpClient(proxyData)) {
+            var request = new AuthenticationRequest(altToken);
+            var httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
             httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
-            TokenRedeemResponse response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
+            var response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
                     TokenRedeemResponse.class);
 
             if (response.getMessage() != null) {

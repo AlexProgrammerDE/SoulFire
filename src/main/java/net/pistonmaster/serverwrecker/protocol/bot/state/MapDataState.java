@@ -50,17 +50,17 @@ public class MapDataState {
     }
 
     private void mergeIntoMap(MapData source) {
-        int width = source.getColumns();
-        int height = source.getRows();
+        var width = source.getColumns();
+        var height = source.getRows();
 
-        int xOffset = source.getX();
-        int yOffset = source.getY();
-        for (int i = 0; i < width; ++i) {
-            for (int j = 0; j < height; ++j) {
-                byte colorData = source.getData()[i + j * width];
+        var xOffset = source.getX();
+        var yOffset = source.getY();
+        for (var i = 0; i < width; ++i) {
+            for (var j = 0; j < height; ++j) {
+                var colorData = source.getData()[i + j * width];
 
-                int x = xOffset + i;
-                int y = yOffset + j;
+                var x = xOffset + i;
+                var y = yOffset + j;
                 this.mapData.getData()[x + y * 128] = colorData;
             }
         }

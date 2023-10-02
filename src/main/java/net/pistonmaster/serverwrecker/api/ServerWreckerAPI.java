@@ -25,9 +25,7 @@ import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -73,8 +71,8 @@ public class ServerWreckerAPI {
     }
 
     public static void registerListeners(Object listener) {
-        MethodHandles.Lookup publicLookup = MethodHandles.publicLookup();
-        for (Method method : listener.getClass().getDeclaredMethods()) {
+        var publicLookup = MethodHandles.publicLookup();
+        for (var method : listener.getClass().getDeclaredMethods()) {
             if (!method.isAnnotationPresent(GlobalEventHandler.class)) {
                 continue;
             }
@@ -90,7 +88,7 @@ public class ServerWreckerAPI {
             method.setAccessible(true);
 
             try {
-                MethodHandle methodHandle = publicLookup.unreflect(method);
+                var methodHandle = publicLookup.unreflect(method);
 
                 registerListener(method.getParameterTypes()[0].asSubclass(ServerWreckerGlobalEvent.class),
                         event -> {

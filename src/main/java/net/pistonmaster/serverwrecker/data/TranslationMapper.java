@@ -36,19 +36,16 @@ public class TranslationMapper implements Function<TranslatableComponent, String
 
     @Override
     public String apply(TranslatableComponent component) {
-        String translation = mojangTranslations.get(component.key());
+        var translation = mojangTranslations.get(component.key());
 
         if (translation == null) {
             logger.warn("Missing translation for key: " + component.key());
             return component.key();
         }
 
-        String[] args = new String[component.args().size()];
-
-        for (int i = 0; i < component.args().size(); i++) {
-            args[i] = plainSerializer.serialize(component.args().get(i));
-        }
-
+        var args = component.args().stream()
+                .map(plainSerializer::serialize)
+                .toArray(String[]::new);
         return String.format(translation, (Object[]) args);
     }
 }

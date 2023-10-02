@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.data;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,24 +30,24 @@ public class BlockStateLoader {
     private static final Map<String, List<BlockShapeType>> BLOCK_SHAPES = new HashMap<>();
 
     static {
-        try (InputStream inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockstates.txt")) {
+        try (var inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockstates.txt")) {
             if (inputStream == null) {
                 throw new IllegalStateException("blockstates.txt not found!");
             }
 
             new String(inputStream.readAllBytes(), StandardCharsets.UTF_8).lines().forEach(line -> {
-                String[] parts = line.split("\\|");
-                String name = parts[0];
+                var parts = line.split("\\|");
+                var name = parts[0];
 
                 List<BlockShapeType> blockShapeTypes = new ArrayList<>();
                 if (parts.length > 1) {
-                    String part = parts[1];
+                    var part = parts[1];
 
-                    String[] subParts = part.split(",");
-                    for (String subPart : subParts) {
+                    var subParts = part.split(",");
+                    for (var subPart : subParts) {
                         Integer id = Integer.parseInt(subPart);
 
-                        BlockShapeType blockShapeType = BlockShapeType.getById(id);
+                        var blockShapeType = BlockShapeType.getById(id);
                         blockShapeTypes.add(blockShapeType);
                     }
                 }

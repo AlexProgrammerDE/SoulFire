@@ -40,20 +40,20 @@ public class CardsContainer extends JPanel {
         setLayout(new CardLayout());
 
         panels.add(injector.getSingleton(SettingsPanel.class));
-        AddonPanel addonPanel = injector.getSingleton(AddonPanel.class);
+        var addonPanel = injector.getSingleton(AddonPanel.class);
         panels.add(addonPanel);
         panels.add(injector.getSingleton(AccountPanel.class));
         panels.add(injector.getSingleton(ProxyPanel.class));
         panels.add(injector.getSingleton(DeveloperPanel.class));
 
-        NavigationPanel navigationPanel = injector.getSingleton(NavigationPanel.class);
+        var navigationPanel = injector.getSingleton(NavigationPanel.class);
         add(navigationPanel, NAVIGATION_MENU);
 
-        for (NavigationItem item : panels) {
+        for (var item : panels) {
             add(NavigationWrapper.createBackWrapper(this, NAVIGATION_MENU, item), item.getNavigationId());
         }
 
-        for (NavigationItem item : addonPanel.getNavigationItems()) {
+        for (var item : addonPanel.getNavigationItems()) {
             add(NavigationWrapper.createBackWrapper(this, addonPanel.getNavigationId(), item), item.getNavigationId());
         }
 

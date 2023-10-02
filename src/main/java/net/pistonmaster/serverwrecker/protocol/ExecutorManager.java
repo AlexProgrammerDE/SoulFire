@@ -42,7 +42,7 @@ public class ExecutorManager {
             throw new IllegalStateException("Cannot create new executor after shutdown!");
         }
 
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(getThreadFactory(threadName));
+        var executor = Executors.newSingleThreadScheduledExecutor(getThreadFactory(threadName));
 
         executors.add(executor);
 
@@ -54,7 +54,7 @@ public class ExecutorManager {
             throw new IllegalStateException("Cannot create new executor after shutdown!");
         }
 
-        ExecutorService executor = Executors.newSingleThreadExecutor(getThreadFactory(threadName));
+        var executor = Executors.newSingleThreadExecutor(getThreadFactory(threadName));
 
         executors.add(executor);
 
@@ -63,8 +63,8 @@ public class ExecutorManager {
 
     private ThreadFactory getThreadFactory(String threadName) {
         return runnable -> {
-            Thread thread = new Thread(runnable);
-            String usedThreadName = threadName;
+            var thread = new Thread(runnable);
+            var usedThreadName = threadName;
             if (runnable instanceof NamedRunnable named) {
                 usedThreadName = named.name();
             }

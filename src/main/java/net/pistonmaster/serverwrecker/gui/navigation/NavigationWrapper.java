@@ -27,14 +27,14 @@ public class NavigationWrapper {
     }
 
     public static JPanel createBackWrapper(CardsContainer container, String target, NavigationItem item) {
-        JPanel panel = new JPanel();
+        var panel = new JPanel();
         panel.setLayout(new BorderLayout());
 
-        JPanel topBar = new JPanel();
+        var topBar = new JPanel();
         topBar.setLayout(new BorderLayout());
 
-        JButton back = new JButton("Back");
-        CardLayout cardLayout = (CardLayout) container.getLayout();
+        var back = new JButton("Back");
+        var cardLayout = (CardLayout) container.getLayout();
         back.addActionListener(action -> cardLayout.show(container, target));
 
         topBar.add(back, BorderLayout.PAGE_END);

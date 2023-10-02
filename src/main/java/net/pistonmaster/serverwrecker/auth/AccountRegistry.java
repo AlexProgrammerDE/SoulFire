@@ -76,7 +76,7 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
 
     private boolean isSupportedJson(String file) {
         try {
-            JsonElement element = GSON.fromJson(file, JsonElement.class);
+            var element = GSON.fromJson(file, JsonElement.class);
             return element.isJsonArray() || element.isJsonObject();
         } catch (JsonSyntaxException ex) {
             return false;
@@ -98,7 +98,7 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
             throw new IllegalArgumentException("Account cannot be empty!");
         }
 
-        String[] split = account.split(":");
+        var split = account.split(":");
 
         try {
             return switch (authType) {
@@ -114,8 +114,8 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
                         throw new IllegalArgumentException("Invalid account!");
                     }
 
-                    String email = expectEmail(split[0].trim());
-                    String password = split[1].trim();
+                    var email = expectEmail(split[0].trim());
+                    var password = split[1].trim();
                     if (authType == AuthType.MICROSOFT_JAVA) {
                         yield new SWJavaMicrosoftAuthService().login(email, password, null);
                     } else {
@@ -157,11 +157,11 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
     private MinecraftAccount fromJsonType(AccountJsonType type, AuthType authType) {
         Objects.requireNonNull(type, "Account type cannot be null");
 
-        String authToken = type.authToken == null ? null : type.authToken.trim();
+        var authToken = type.authToken == null ? null : type.authToken.trim();
         if (authToken != null) {
-            String username = Objects.requireNonNull(type.username, "Username not found").trim();
-            UUID profileId = type.profileId == null ? null : UUID.fromString(type.profileId.trim());
-            long tokenExpireAt = authType == AuthType.OFFLINE ? -1 : type.tokenExpireAt;
+            var username = Objects.requireNonNull(type.username, "Username not found").trim();
+            var profileId = type.profileId == null ? null : UUID.fromString(type.profileId.trim());
+            var tokenExpireAt = authType == AuthType.OFFLINE ? -1 : type.tokenExpireAt;
 
             return new MinecraftAccount(authType, username, new JavaData(profileId, authToken, tokenExpireAt), true);
         }

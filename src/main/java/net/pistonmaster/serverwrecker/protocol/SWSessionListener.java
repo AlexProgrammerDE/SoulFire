@@ -45,16 +45,16 @@ public class SWSessionListener extends SessionAdapter {
 
     @Override
     public void packetReceived(Session session, Packet packet) {
-        SWPacketReceiveEvent event1 = new SWPacketReceiveEvent(botConnection, (MinecraftPacket) packet);
-        botConnection.eventBus().post(event1);
-        if (event1.cancelled()) {
+        var event = new SWPacketReceiveEvent(botConnection, (MinecraftPacket) packet);
+        botConnection.eventBus().post(event);
+        if (event.cancelled()) {
             return;
         }
 
         botConnection.logger().debug("Received packet: {}", packet.getClass().getSimpleName());
 
         try {
-            busInvoker.handlePacket(event1.getPacket());
+            busInvoker.handlePacket(event.getPacket());
         } catch (Throwable t) {
             botConnection.logger().error("Error while handling packet!", t);
         }
@@ -62,7 +62,7 @@ public class SWSessionListener extends SessionAdapter {
 
     @Override
     public void packetSending(PacketSendingEvent event) {
-        SWPacketSendingEvent event1 = new SWPacketSendingEvent(botConnection, event.getPacket());
+        var event1 = new SWPacketSendingEvent(botConnection, event.getPacket());
         botConnection.eventBus().post(event1);
         event.setPacket(event1.getPacket());
         event.setCancelled(event1.cancelled());
@@ -76,7 +76,7 @@ public class SWSessionListener extends SessionAdapter {
 
     @Override
     public void packetSent(Session session, Packet packet) {
-        SWPacketSentEvent event = new SWPacketSentEvent(botConnection, (MinecraftPacket) packet);
+        var event = new SWPacketSentEvent(botConnection, (MinecraftPacket) packet);
         botConnection.eventBus().post(event);
 
         botConnection.logger().trace("Sent packet: {}", packet.getClass().getSimpleName());

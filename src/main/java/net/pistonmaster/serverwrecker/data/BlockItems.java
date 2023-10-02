@@ -26,9 +26,9 @@ public class BlockItems {
     public static final List<ItemType> VALUES = new ArrayList<>();
 
     static {
-        for (ItemType itemType : ItemType.VALUES) {
-            for (BlockType blockType : BlockType.VALUES) {
-                List<BlockShapeType> blockShapeTypes = blockType.blockShapeTypes();
+        for (var itemType : ItemType.VALUES) {
+            for (var blockType : BlockType.VALUES) {
+                var blockShapeTypes = blockType.blockShapeTypes();
 
                 if (blockType.diggable()
                         && !blockShapeTypes.isEmpty()

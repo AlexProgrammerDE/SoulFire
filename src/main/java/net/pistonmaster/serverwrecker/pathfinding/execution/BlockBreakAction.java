@@ -48,7 +48,7 @@ public class BlockBreakAction implements WorldAction {
 
     @Override
     public boolean isCompleted(BotConnection connection) {
-        LevelState levelState = connection.sessionDataManager().getCurrentLevel();
+        var levelState = connection.sessionDataManager().getCurrentLevel();
         if (levelState == null) {
             return false;
         }
@@ -58,13 +58,13 @@ public class BlockBreakAction implements WorldAction {
 
     @Override
     public void tick(BotConnection connection) {
-        BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
+        var movementManager = connection.sessionDataManager().getBotMovementManager();
         movementManager.getControlState().resetAll();
 
         if (!didLook) {
             didLook = true;
-            float previousYaw = movementManager.getYaw();
-            float previousPitch = movementManager.getPitch();
+            var previousYaw = movementManager.getYaw();
+            var previousPitch = movementManager.getPitch();
             movementManager.lookAt(RotationOrigin.EYES, VectorHelper.middleOfBlockNormalize(blockPosition.toDouble()));
             if (previousPitch != movementManager.getPitch() || previousYaw != movementManager.getYaw()) {
                 movementManager.sendRot();
@@ -72,23 +72,23 @@ public class BlockBreakAction implements WorldAction {
         }
 
         if (!putOnHotbar && toolType != null) {
-            InventoryManager inventoryManager = connection.sessionDataManager().getInventoryManager();
-            PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
-            ContainerSlot heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
+            var inventoryManager = connection.sessionDataManager().getInventoryManager();
+            var playerInventory = inventoryManager.getPlayerInventory();
+            var heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
             if (heldSlot.item() != null) {
-                SWItemStack item = heldSlot.item();
+                var item = heldSlot.item();
                 if (item.getType() == toolType) {
                     putOnHotbar = true;
                     return;
                 }
             }
 
-            for (ContainerSlot hotbarSlot : playerInventory.getHotbar()) {
+            for (var hotbarSlot : playerInventory.getHotbar()) {
                 if (hotbarSlot.item() == null) {
                     continue;
                 }
 
-                SWItemStack item = hotbarSlot.item();
+                var item = hotbarSlot.item();
                 if (item.getType() == toolType) {
                     inventoryManager.setHeldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
                     inventoryManager.sendHeldItemChange();
@@ -97,12 +97,12 @@ public class BlockBreakAction implements WorldAction {
                 }
             }
 
-            for (ContainerSlot slot : playerInventory.getMainInventory()) {
+            for (var slot : playerInventory.getMainInventory()) {
                 if (slot.item() == null) {
                     continue;
                 }
 
-                SWItemStack item = slot.item();
+                var item = slot.item();
                 if (item.getType() == toolType) {
                     if (!inventoryManager.tryInventoryControl()) {
                         return;

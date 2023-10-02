@@ -49,9 +49,9 @@ public class GUIFrame extends JFrame {
         pack();
 
         // Calculate 16:9 width from height
-        int height = getHeight();
-        double aspectRatio = 16.0 / 9.0;
-        int width = (int) (height * aspectRatio);
+        var height = getHeight();
+        var aspectRatio = 16.0 / 9.0;
+        var width = (int) (height * aspectRatio);
 
         setSize(width, height);
         setMinimumSize(new Dimension(width, height));

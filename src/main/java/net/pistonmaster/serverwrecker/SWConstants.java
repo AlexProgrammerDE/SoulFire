@@ -34,14 +34,14 @@ public class SWConstants {
     }
 
     public static List<ProtocolVersion> getVersionsSorted() {
-        List<ProtocolVersion> normalVersions = new ArrayList<>();
-        List<ProtocolVersion> legacyVersions = new ArrayList<>();
-        for (ProtocolVersion version : ProtocolVersion.getProtocols()) {
+        var normalVersions = new ArrayList<ProtocolVersion>();
+        var legacyVersions = new ArrayList<ProtocolVersion>();
+        for (var version : ProtocolVersion.getProtocols()) {
             if (version == ProtocolVersion.unknown) {
                 continue; // Exclude unknown versions
             }
 
-            int versionId = version.getVersion();
+            var versionId = version.getVersion();
             if (versionId > CURRENT_PROTOCOL_VERSION.getVersion()) {
                 continue; // Exclude in-development versions
             }
@@ -61,14 +61,14 @@ public class SWConstants {
         normalVersions.sort(Comparator.comparingInt(ProtocolVersion::getVersion));
 
         legacyVersions.sort((o1, o2) -> {
-            int index1 = LegacyProtocolVersion.PROTOCOLS.indexOf(o1);
-            int index2 = LegacyProtocolVersion.PROTOCOLS.indexOf(o2);
+            var index1 = LegacyProtocolVersion.PROTOCOLS.indexOf(o1);
+            var index2 = LegacyProtocolVersion.PROTOCOLS.indexOf(o2);
 
             return Integer.compare(index1, index2);
         });
 
         // Sort special case
-        int index = legacyVersions.indexOf(LegacyProtocolVersion.c0_28toc0_30);
+        var index = legacyVersions.indexOf(LegacyProtocolVersion.c0_28toc0_30);
         legacyVersions.remove(LegacyProtocolVersion.c0_30cpe);
         legacyVersions.add(index + 1, LegacyProtocolVersion.c0_30cpe);
 
@@ -77,9 +77,9 @@ public class SWConstants {
 
     @SafeVarargs
     private static <T> List<T> mergeLists(List<T>... versions) {
-        List<T> result = new ArrayList<>();
+        var result = new ArrayList<T>();
 
-        for (List<T> version : versions) {
+        for (var version : versions) {
             result.addAll(version);
         }
 

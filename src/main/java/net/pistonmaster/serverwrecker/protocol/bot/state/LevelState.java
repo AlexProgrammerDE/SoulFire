@@ -136,8 +136,8 @@ public class LevelState {
     }
 
     public void setBlockId(Vector3i block, int state) {
-        ChunkKey chunkKey = new ChunkKey(block);
-        ChunkData chunkData = chunks.get(chunkKey);
+        var chunkKey = new ChunkKey(block);
+        var chunkData = chunks.get(chunkKey);
 
         // TODO: Maybe load chunk if not found?
         Objects.requireNonNull(chunkData, "Chunk not found");
@@ -146,7 +146,7 @@ public class LevelState {
     }
 
     public OptionalInt getBlockStateIdAt(Vector3i block) {
-        ChunkData chunkData = chunks.get(new ChunkKey(block));
+        var chunkData = chunks.get(new ChunkKey(block));
 
         if (chunkData == null) {
             return OptionalInt.empty();
@@ -156,12 +156,12 @@ public class LevelState {
     }
 
     public boolean isChunkLoaded(Vector3i block) {
-        ChunkKey chunkKey = new ChunkKey(block);
+        var chunkKey = new ChunkKey(block);
         return chunks.containsKey(chunkKey);
     }
 
     public Optional<BlockStateMeta> getBlockStateAt(Vector3i block) {
-        OptionalInt stateId = getBlockStateIdAt(block);
+        var stateId = getBlockStateIdAt(block);
 
         if (stateId.isEmpty()) {
             return Optional.empty();
@@ -181,40 +181,40 @@ public class LevelState {
     public List<BoundingBox> getCollisionBoxes(BoundingBox aabb) {
         List<BoundingBox> boundingBoxList = new ArrayList<>();
 
-        int minX = MathHelper.floorDouble(aabb.minX);
-        int maxX = MathHelper.floorDouble(aabb.maxX + 1.0);
-        int minY = MathHelper.floorDouble(aabb.minY);
-        int maxY = MathHelper.floorDouble(aabb.maxY + 1.0);
-        int minZ = MathHelper.floorDouble(aabb.minZ);
-        int maxZ = MathHelper.floorDouble(aabb.maxZ + 1.0);
+        var minX = MathHelper.floorDouble(aabb.minX);
+        var maxX = MathHelper.floorDouble(aabb.maxX + 1.0);
+        var minY = MathHelper.floorDouble(aabb.minY);
+        var maxY = MathHelper.floorDouble(aabb.maxY + 1.0);
+        var minZ = MathHelper.floorDouble(aabb.minZ);
+        var maxZ = MathHelper.floorDouble(aabb.maxZ + 1.0);
 
-        for (int x = minX; x < maxX; x++) {
-            for (int y = minY; y < maxY; y++) {
-                for (int z = minZ; z < maxZ; z++) {
-                    Vector3i block = Vector3i.from(x, y, z);
+        for (var x = minX; x < maxX; x++) {
+            for (var y = minY; y < maxY; y++) {
+                for (var z = minZ; z < maxZ; z++) {
+                    var block = Vector3i.from(x, y, z);
                     if (isOutOfWorld(block)) {
                         continue;
                     }
 
-                    Optional<BlockStateMeta> blockState = getBlockStateAt(block);
+                    var blockState = getBlockStateAt(block);
                     if (blockState.isEmpty()) {
                         continue;
                     }
 
-                    BlockShapeType blockShapeType = blockState.get().blockShapeType();
+                    var blockShapeType = blockState.get().blockShapeType();
                     if (blockShapeType.hasNoCollisions()) {
                         continue;
                     }
 
-                    for (BlockShape shape : blockShapeType.blockShapes()) {
-                        double bbMinX = x + shape.minX();
-                        double bbMinY = y + shape.minY();
-                        double bbMinZ = z + shape.minZ();
-                        double bbMaxX = x + shape.maxX();
-                        double bbMaxY = y + shape.maxY();
-                        double bbMaxZ = z + shape.maxZ();
+                    for (var shape : blockShapeType.blockShapes()) {
+                        var bbMinX = x + shape.minX();
+                        var bbMinY = y + shape.minY();
+                        var bbMinZ = z + shape.minZ();
+                        var bbMaxX = x + shape.maxX();
+                        var bbMaxY = y + shape.maxY();
+                        var bbMaxZ = z + shape.maxZ();
 
-                        BoundingBox blockBoundingBox = new BoundingBox(bbMinX, bbMinY, bbMinZ, bbMaxX, bbMaxY, bbMaxZ);
+                        var blockBoundingBox = new BoundingBox(bbMinX, bbMinY, bbMinZ, bbMaxX, bbMaxY, bbMaxZ);
                         if (blockBoundingBox.intersects(aabb)) {
                             boundingBoxList.add(blockBoundingBox);
                         }

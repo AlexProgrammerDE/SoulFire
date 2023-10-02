@@ -61,13 +61,13 @@ public class ThemeUtil {
      * You need to invoke SwingUtilities.updateComponentTreeUI(frame); after this method.
      */
     public static void setLookAndFeel() {
-        ThemeSettings themeSettings = THEME_MANAGER.collectSettings().get(ThemeSettings.class);
+        var themeSettings = THEME_MANAGER.collectSettings().get(ThemeSettings.class);
         if (themeSettings.themeClass().equals(UIManager.getLookAndFeel().getClass().getName())) {
             return;
         }
 
         try {
-            BasicLookAndFeel theme = Class.forName(themeSettings.themeClass())
+            var theme = Class.forName(themeSettings.themeClass())
                     .asSubclass(BasicLookAndFeel.class).getDeclaredConstructor().newInstance();
 
             FlatAnimatedLafChange.showSnapshot();

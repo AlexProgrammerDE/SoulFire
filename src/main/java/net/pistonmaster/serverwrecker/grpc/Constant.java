@@ -32,6 +32,5 @@ public class Constant {
     static final Context.Key<String> CLIENT_ID_CONTEXT_KEY = Context.key("clientId");
 
     private Constant() {
-        throw new AssertionError();
     }
 }

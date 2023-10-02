@@ -31,10 +31,6 @@ import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEven
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
-import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
-import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
@@ -42,7 +38,6 @@ import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class AutoJump implements InternalAddon {
     @Override
@@ -52,21 +47,21 @@ public class AutoJump implements InternalAddon {
     }
 
     public void onJoined(BotJoinedEvent event) {
-        BotConnection connection = event.connection();
+        var connection = event.connection();
         if (!connection.settingsHolder().has(AutoJumpSettings.class)) {
             return;
         }
 
-        AutoJumpSettings settings = connection.settingsHolder().get(AutoJumpSettings.class);
+        var settings = connection.settingsHolder().get(AutoJumpSettings.class);
         if (!settings.autoJump()) {
             return;
         }
 
-        ScheduledExecutorService executor = connection.executorManager().newScheduledExecutorService("AutoJump");
+        var executor = connection.executorManager().newScheduledExecutorService("AutoJump");
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
-            SessionDataManager sessionDataManager = connection.sessionDataManager();
-            LevelState level = sessionDataManager.getCurrentLevel();
-            BotMovementManager movementManager = sessionDataManager.getBotMovementManager();
+            var sessionDataManager = connection.sessionDataManager();
+            var level = sessionDataManager.getCurrentLevel();
+            var movementManager = sessionDataManager.getBotMovementManager();
             if (level != null && movementManager != null
                     && level.isChunkLoaded(movementManager.getBlockPos())
                     && movementManager.isOnGround()) {

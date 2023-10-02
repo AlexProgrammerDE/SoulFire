@@ -93,9 +93,9 @@ public class LimitLinesDocumentListener implements DocumentListener {
         // of line in the Document.
 
         try {
-            Document document = e.getDocument();
-            Element root = document.getDefaultRootElement();
-            int excess = root.getElementCount() - maximumLines;
+            var document = e.getDocument();
+            var root = document.getDefaultRootElement();
+            var excess = root.getElementCount() - maximumLines;
 
             if (excess > 0) {
                 if (isRemoveFromStart) {
@@ -110,8 +110,8 @@ public class LimitLinesDocumentListener implements DocumentListener {
     }
 
     private void removeFromStart(Document document, Element root, int excess) {
-        Element line = root.getElement(excess - 1);
-        int end = line.getEndOffset();
+        var line = root.getElement(excess - 1);
+        var end = line.getEndOffset();
 
         try {
             document.remove(0, end);
@@ -124,9 +124,9 @@ public class LimitLinesDocumentListener implements DocumentListener {
         // We use start minus 1 to make sure we remove the newline
         // character of the previous line
 
-        Element line = root.getElement(maximumLines);
-        int start = line.getStartOffset();
-        int end = root.getEndOffset();
+        var line = root.getElement(maximumLines);
+        var start = line.getStartOffset();
+        var end = root.getEndOffset();
 
         try {
             document.remove(start - 1, end - start);

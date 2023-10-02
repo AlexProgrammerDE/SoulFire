@@ -23,7 +23,6 @@ import net.kyori.event.EventSubscriber;
 import net.kyori.event.EventSubscription;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.protocol.bot.BotMovementManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
@@ -47,7 +46,7 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
 
     @Override
     public void on(@NonNull BotPreTickEvent event) {
-        BotConnection connection = event.connection();
+        var connection = event.connection();
         if (connection != this.connection) {
             return;
         }
@@ -57,7 +56,7 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
             return;
         }
 
-        WorldAction worldAction = worldActions.peek();
+        var worldAction = worldActions.peek();
         if (worldAction == null) {
             unregister();
             return;
@@ -87,7 +86,7 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
             // If there are no more goals, stop
             if (worldAction == null) {
                 connection.logger().info("Finished all goals!");
-                BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
+                var movementManager = connection.sessionDataManager().getBotMovementManager();
                 movementManager.getControlState().resetAll();
                 unregister();
                 return;
@@ -111,8 +110,8 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
     private void recalculatePath() {
         this.unregister();
 
-        List<WorldAction> newActions = findPath.get();
-        PathExecutor newExecutor = new PathExecutor(connection, newActions, findPath);
+        var newActions = findPath.get();
+        var newExecutor = new PathExecutor(connection, newActions, findPath);
         newExecutor.register();
     }
 }

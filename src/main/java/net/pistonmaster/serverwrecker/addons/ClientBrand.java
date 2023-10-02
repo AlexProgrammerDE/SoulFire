@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.addons;
 
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
 import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import net.pistonmaster.serverwrecker.ServerWrecker;
@@ -55,13 +54,13 @@ public class ClientBrand implements InternalAddon {
                 return;
             }
 
-            ClientBrandSettings clientBrandSettings = event.connection().settingsHolder().get(ClientBrandSettings.class);
+            var clientBrandSettings = event.connection().settingsHolder().get(ClientBrandSettings.class);
 
             if (!clientBrandSettings.sendClientBrand()) {
                 return;
             }
 
-            ByteBuf buf = Unpooled.buffer();
+            var buf = Unpooled.buffer();
             event.connection().session().getCodecHelper()
                     .writeString(buf, clientBrandSettings.clientBrand());
 

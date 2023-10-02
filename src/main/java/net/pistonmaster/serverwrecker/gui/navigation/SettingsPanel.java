@@ -101,7 +101,7 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
 
     public void registerVersions() {
         versionBox.removeAllItems();
-        List<ProtocolVersion> versions = new ArrayList<>(SWConstants.getVersionsSorted());
+        var versions = new ArrayList<>(SWConstants.getVersionsSorted());
         Collections.reverse(versions);
         versions.forEach(versionBox::addItem);
         versionBox.setSelectedItem(BotSettings.DEFAULT_PROTOCOL_VERSION);

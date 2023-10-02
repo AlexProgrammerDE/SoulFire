@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.data;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,21 +29,21 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
     public static final List<BlockShapeType> VALUES = new ArrayList<>();
 
     static {
-        try (InputStream inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockshapes.txt")) {
+        try (var inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockshapes.txt")) {
             if (inputStream == null) {
                 throw new IllegalStateException("blockshapes.txt not found!");
             }
 
             new String(inputStream.readAllBytes(), StandardCharsets.UTF_8).lines().forEach(line -> {
-                String[] parts = line.split("\\|");
+                var parts = line.split("\\|");
 
-                int id = Integer.parseInt(parts[0]);
+                var id = Integer.parseInt(parts[0]);
                 List<BlockShape> blockShapes = new ArrayList<>();
 
                 if (parts.length > 1) {
-                    for (int i = 1; i < parts.length; i++) {
-                        String part = parts[i];
-                        String[] subParts = part.split(",");
+                    for (var i = 1; i < parts.length; i++) {
+                        var part = parts[i];
+                        var subParts = part.split(",");
                         blockShapes.add(new BlockShape(
                                 Double.parseDouble(subParts[0]),
                                 Double.parseDouble(subParts[1]),
@@ -69,7 +68,7 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
     }
 
     public static BlockShapeType getById(int id) {
-        for (BlockShapeType blockShapeType : VALUES) {
+        for (var blockShapeType : VALUES) {
             if (blockShapeType.id() == id) {
                 return blockShapeType;
             }

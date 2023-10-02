@@ -38,7 +38,7 @@ public class LogFormatter {
             .build();
 
     public String format(LogEvent event) {
-        StringBuilder builder = new StringBuilder();
+        var builder = new StringBuilder();
 
         if (event.getLoggerName().startsWith("net.pistonmaster.serverwrecker")) {
             builtInFormatter.toSerializable(event, builder);

@@ -19,9 +19,14 @@
  */
 package net.pistonmaster.serverwrecker.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
 
 public class VersionComparator {
+    private static final Logger logger = LoggerFactory.getLogger(VersionComparator.class);
+
     private VersionComparator() {
     }
 
@@ -30,13 +35,13 @@ public class VersionComparator {
         checkVersion = checkVersion.replace("-SNAPSHOT", "");
 
         try {
-            int[] currentVersionData = Arrays.stream(currentVersion.split("\\."))
+            var currentVersionData = Arrays.stream(currentVersion.split("\\."))
                     .mapToInt(Integer::parseInt).toArray();
-            int[] checkVersionData = Arrays.stream(checkVersion.split("\\."))
+            var checkVersionData = Arrays.stream(checkVersion.split("\\."))
                     .mapToInt(Integer::parseInt).toArray();
 
-            int i = 0;
-            for (int version : checkVersionData) {
+            var i = 0;
+            for (var version : checkVersionData) {
                 if (i == currentVersionData.length) {
                     return true;
                 }
@@ -50,7 +55,7 @@ public class VersionComparator {
                 i++;
             }
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            logger.error("Error while parsing version!", e);
         }
         return false;
     }

@@ -55,7 +55,7 @@ public class GUIManager {
         new JFXPanel();
 
         // Inject and open the GUI
-        GUIFrame guiFrame = new GUIFrame();
+        var guiFrame = new GUIFrame();
 
         guiFrame.initComponents(injector);
 
@@ -66,12 +66,12 @@ public class GUIManager {
 
     public void setAppTitle() {
         try {
-            Toolkit xToolkit = Toolkit.getDefaultToolkit();
+            var xToolkit = Toolkit.getDefaultToolkit();
             if (!xToolkit.getClass().getName().equals("sun.awt.X11.XToolkit")) {
                 return;
             }
 
-            VarHandle CLASS_NAME_VARIABLE = MethodHandles
+            var CLASS_NAME_VARIABLE = MethodHandles
                     .privateLookupIn(xToolkit.getClass(), MethodHandles.lookup())
                     .findStaticVarHandle(xToolkit.getClass(), "awtAppClassName", String.class);
 

@@ -152,19 +152,19 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onRegistry(ClientboundRegistryDataPacket packet) {
-        CompoundTag registry = packet.getRegistry();
+        var registry = packet.getRegistry();
         CompoundTag dimensionRegistry = registry.get("minecraft:dimension_type");
-        for (Tag type : dimensionRegistry.<ListTag>get("value").getValue()) {
-            CompoundTag dimension = (CompoundTag) type;
-            String name = dimension.<StringTag>get("name").getValue();
+        for (var type : dimensionRegistry.<ListTag>get("value").getValue()) {
+            var dimension = (CompoundTag) type;
+            var name = dimension.<StringTag>get("name").getValue();
             int id = dimension.<IntTag>get("id").getValue();
 
             levels.put(name, new LevelState(this, name, id, dimension.get("element")));
         }
         CompoundTag biomeRegistry = registry.get("minecraft:worldgen/biome");
-        for (Tag type : biomeRegistry.<ListTag>get("value").getValue()) {
-            CompoundTag biome = (CompoundTag) type;
-            BiomeData biomeData = new BiomeData(biome);
+        for (var type : biomeRegistry.<ListTag>get("value").getValue()) {
+            var biome = (CompoundTag) type;
+            var biomeData = new BiomeData(biome);
 
             biomes.put(biomeData.id(), biomeData);
         }
@@ -204,24 +204,24 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onPosition(ClientboundPlayerPositionPacket packet) {
-        boolean isInitial = botMovementManager == null;
-        double currentX = isInitial ? 0 : botMovementManager.getX();
-        double currentY = isInitial ? 0 : botMovementManager.getY();
-        double currentZ = isInitial ? 0 : botMovementManager.getZ();
-        float currentYaw = isInitial ? 0 : botMovementManager.getYaw();
-        float currentPitch = isInitial ? 0 : botMovementManager.getPitch();
+        var isInitial = botMovementManager == null;
+        var currentX = isInitial ? 0 : botMovementManager.getX();
+        var currentY = isInitial ? 0 : botMovementManager.getY();
+        var currentZ = isInitial ? 0 : botMovementManager.getZ();
+        var currentYaw = isInitial ? 0 : botMovementManager.getYaw();
+        var currentPitch = isInitial ? 0 : botMovementManager.getPitch();
 
-        boolean xRelative = packet.getRelative().contains(PositionElement.X);
-        boolean yRelative = packet.getRelative().contains(PositionElement.Y);
-        boolean zRelative = packet.getRelative().contains(PositionElement.Z);
-        boolean yawRelative = packet.getRelative().contains(PositionElement.YAW);
-        boolean pitchRelative = packet.getRelative().contains(PositionElement.PITCH);
+        var xRelative = packet.getRelative().contains(PositionElement.X);
+        var yRelative = packet.getRelative().contains(PositionElement.Y);
+        var zRelative = packet.getRelative().contains(PositionElement.Z);
+        var yawRelative = packet.getRelative().contains(PositionElement.YAW);
+        var pitchRelative = packet.getRelative().contains(PositionElement.PITCH);
 
-        double x = xRelative ? currentX + packet.getX() : packet.getX();
-        double y = yRelative ? currentY + packet.getY() : packet.getY();
-        double z = zRelative ? currentZ + packet.getZ() : packet.getZ();
-        float yaw = yawRelative ? currentYaw + packet.getYaw() : packet.getYaw();
-        float pitch = pitchRelative ? currentPitch + packet.getPitch() : packet.getPitch();
+        var x = xRelative ? currentX + packet.getX() : packet.getX();
+        var y = yRelative ? currentY + packet.getY() : packet.getY();
+        var z = zRelative ? currentZ + packet.getZ() : packet.getZ();
+        var yaw = yawRelative ? currentYaw + packet.getYaw() : packet.getYaw();
+        var pitch = pitchRelative ? currentPitch + packet.getPitch() : packet.getPitch();
 
         if (isInitial) {
             botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch, abilitiesData);
@@ -282,7 +282,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onPlayerChat(ClientboundPlayerChatPacket packet) {
-        Component message = packet.getUnsignedContent();
+        var message = packet.getUnsignedContent();
         if (message != null) {
             onChat(message);
             return;
@@ -316,9 +316,9 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onPlayerListUpdate(ClientboundPlayerInfoUpdatePacket packet) {
-        for (PlayerListEntry update : packet.getEntries()) {
-            PlayerListEntry entry = playerListState.getEntries().computeIfAbsent(update.getProfileId(), k -> update);
-            for (PlayerListEntryAction action : packet.getActions()) {
+        for (var update : packet.getEntries()) {
+            var entry = playerListState.getEntries().computeIfAbsent(update.getProfileId(), k -> update);
+            for (var action : packet.getActions()) {
                 switch (action) {
                     case ADD_PLAYER -> entry.setProfile(update.getProfile());
                     case INITIALIZE_CHAT -> {
@@ -338,7 +338,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onPlayerListRemove(ClientboundPlayerInfoRemovePacket packet) {
-        for (UUID profileId : packet.getProfileIds()) {
+        for (var profileId : packet.getProfileIds()) {
             playerListState.getEntries().remove(profileId);
         }
     }
@@ -406,14 +406,14 @@ public final class SessionDataManager {
     @BusHandler
     public void onSetContainerContent(ClientboundContainerSetContentPacket packet) {
         inventoryManager.setLastStateId(packet.getStateId());
-        Container container = inventoryManager.getContainer(packet.getContainerId());
+        var container = inventoryManager.getContainer(packet.getContainerId());
 
         if (container == null) {
             log.warn("Received container content update for unknown container {}", packet.getContainerId());
             return;
         }
 
-        for (int i = 0; i < packet.getItems().length; i++) {
+        for (var i = 0; i < packet.getItems().length; i++) {
             container.setSlot(i, SWItemStack.from(packet.getItems()[i]));
         }
     }
@@ -426,7 +426,7 @@ public final class SessionDataManager {
             return;
         }
 
-        Container container = inventoryManager.getContainer(packet.getContainerId());
+        var container = inventoryManager.getContainer(packet.getContainerId());
 
         if (container == null) {
             log.warn("Received container slot update for unknown container {}", packet.getContainerId());
@@ -438,7 +438,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onSetContainerData(ClientboundContainerSetDataPacket packet) {
-        Container container = inventoryManager.getContainer(packet.getContainerId());
+        var container = inventoryManager.getContainer(packet.getContainerId());
 
         if (container == null) {
             log.warn("Received container data update for unknown container {}", packet.getContainerId());
@@ -455,7 +455,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onOpenScreen(ClientboundOpenScreenPacket packet) {
-        WindowContainer container = new WindowContainer(packet.getType(), packet.getTitle(), packet.getContainerId());
+        var container = new WindowContainer(packet.getType(), packet.getTitle(), packet.getContainerId());
         inventoryManager.setContainer(packet.getContainerId(), container);
         inventoryManager.setOpenContainer(container);
     }
@@ -524,22 +524,22 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onChunkData(ClientboundLevelChunkWithLightPacket packet) {
-        MinecraftCodecHelper helper = session.getCodecHelper();
-        LevelState level = getCurrentLevel();
+        var helper = session.getCodecHelper();
+        var level = getCurrentLevel();
 
         if (level == null) {
             log.warn("Received section update while not in a level");
             return;
         }
 
-        ChunkKey key = new ChunkKey(packet.getX(), packet.getZ());
-        byte[] data = packet.getChunkData();
-        ByteBuf buf = Unpooled.wrappedBuffer(data);
+        var key = new ChunkKey(packet.getX(), packet.getZ());
+        var data = packet.getChunkData();
+        var buf = Unpooled.wrappedBuffer(data);
 
-        ChunkData chunkData = level.getChunks().computeIfAbsent(key, k -> new ChunkData(level));
+        var chunkData = level.getChunks().computeIfAbsent(key, k -> new ChunkData(level));
 
         try {
-            for (int i = 0; i < chunkData.getSectionCount(); i++) {
+            for (var i = 0; i < chunkData.getSectionCount(); i++) {
                 chunkData.setSection(i, readChunkSection(buf, helper));
             }
         } catch (IOException e) {
@@ -549,29 +549,29 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onChunkData(ClientboundChunksBiomesPacket packet) {
-        LevelState level = getCurrentLevel();
+        var level = getCurrentLevel();
 
         if (level == null) {
             log.warn("Received section update while not in a level");
             return;
         }
 
-        MinecraftCodecHelper codec = session.getCodecHelper();
+        var codec = session.getCodecHelper();
 
-        for (ChunkBiomeData biomeData : packet.getChunkBiomeData()) {
-            ChunkKey key = new ChunkKey(biomeData.getX(), biomeData.getZ());
-            ChunkData chunkData = level.getChunks().get(key);
+        for (var biomeData : packet.getChunkBiomeData()) {
+            var key = new ChunkKey(biomeData.getX(), biomeData.getZ());
+            var chunkData = level.getChunks().get(key);
 
             if (chunkData == null) {
                 log.warn("Received biome update for unknown chunk: {}", key);
                 return;
             }
 
-            ByteBuf buf = Unpooled.wrappedBuffer(biomeData.getBuffer());
+            var buf = Unpooled.wrappedBuffer(biomeData.getBuffer());
             try {
-                for (int i = 0; chunkData.getSectionCount() > i; i++) {
-                    ChunkSection section = chunkData.getSection(i);
-                    DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, biomesEntryBitsSize);
+                for (var i = 0; chunkData.getSectionCount() > i; i++) {
+                    var section = chunkData.getSection(i);
+                    var biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, biomesEntryBitsSize);
                     chunkData.setSection(i, new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette));
                 }
             } catch (IOException e) {
@@ -582,7 +582,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onChunkForget(ClientboundForgetLevelChunkPacket packet) {
-        LevelState level = getCurrentLevel();
+        var level = getCurrentLevel();
 
         if (level == null) {
             log.warn("Received section update while not in a level");
@@ -598,24 +598,24 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onSectionBlockUpdate(ClientboundSectionBlocksUpdatePacket packet) {
-        ChunkKey key = new ChunkKey(packet.getChunkX(), packet.getChunkZ());
-        LevelState level = getCurrentLevel();
+        var key = new ChunkKey(packet.getChunkX(), packet.getChunkZ());
+        var level = getCurrentLevel();
 
         if (level == null) {
             log.warn("Received section update while not in a level");
             return;
         }
 
-        ChunkData chunkData = level.getChunks().get(key);
+        var chunkData = level.getChunks().get(key);
 
         if (chunkData == null) {
             log.warn("Received section update for unknown chunk: {}", key);
             return;
         }
 
-        for (BlockChangeEntry entry : packet.getEntries()) {
-            Vector3i vector3i = entry.getPosition();
-            int newId = entry.getBlock();
+        for (var entry : packet.getEntries()) {
+            var vector3i = entry.getPosition();
+            var newId = entry.getBlock();
 
             log.debug("Updating block at {} to {}", vector3i, newId);
             level.setBlockId(vector3i, newId);
@@ -624,17 +624,17 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onBlockUpdate(ClientboundBlockUpdatePacket packet) {
-        LevelState level = getCurrentLevel();
+        var level = getCurrentLevel();
 
         if (level == null) {
             log.warn("Received section update while not in a level");
             return;
         }
 
-        BlockChangeEntry entry = packet.getEntry();
+        var entry = packet.getEntry();
 
-        Vector3i vector3i = entry.getPosition();
-        int newId = entry.getBlock();
+        var vector3i = entry.getPosition();
+        var newId = entry.getBlock();
 
         level.setBlockId(vector3i, newId);
 
@@ -648,7 +648,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onLevelTime(ClientboundSetTimePacket packet) {
-        LevelState level = getCurrentLevel();
+        var level = getCurrentLevel();
 
         if (level == null) {
             log.warn("Received time update while not in a level");
@@ -704,7 +704,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onEntitySpawn(ClientboundAddEntityPacket packet) {
-        EntityState entityState = new EntityState(packet.getEntityId(), packet.getUuid(), packet.getType(), packet.getData());
+        var entityState = new EntityState(packet.getEntityId(), packet.getUuid(), packet.getType(), packet.getData());
 
         entityState.setPosition(packet.getX(), packet.getY(), packet.getZ());
         entityState.setRotation(packet.getYaw(), packet.getPitch());
@@ -716,7 +716,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onExperienceOrbSpawn(ClientboundAddExperienceOrbPacket packet) {
-        ExperienceOrbState experienceOrbState = new ExperienceOrbState(packet.getEntityId(), packet.getExp());
+        var experienceOrbState = new ExperienceOrbState(packet.getEntityId(), packet.getExp());
 
         experienceOrbState.setPosition(packet.getX(), packet.getY(), packet.getZ());
 
@@ -725,14 +725,14 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onEntityRemove(ClientboundRemoveEntitiesPacket packet) {
-        for (int entityId : packet.getEntityIds()) {
+        for (var entityId : packet.getEntityIds()) {
             entityTrackerState.removeEntity(entityId);
         }
     }
 
     @BusHandler
     public void onEntityMetadata(ClientboundSetEntityDataPacket packet) {
-        EntityMetadataState state = packet.getEntityId() == loginData.entityId() ?
+        var state = packet.getEntityId() == loginData.entityId() ?
                 selfMetadata : entityTrackerState.getEntity(packet.getEntityId()).getMetadataState();
 
         for (var entry : packet.getMetadata()) {
@@ -742,7 +742,7 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onEntityAttributes(ClientboundUpdateAttributesPacket packet) {
-        EntityAttributesState state = packet.getEntityId() == loginData.entityId() ?
+        var state = packet.getEntityId() == loginData.entityId() ?
                 selfAttributeState : entityTrackerState.getEntity(packet.getEntityId()).getAttributesState();
 
         for (var entry : packet.getAttributes()) {
@@ -757,7 +757,7 @@ public final class SessionDataManager {
             return;
         }
 
-        EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.handleEntityEvent(packet.getEvent());
     }
@@ -765,13 +765,13 @@ public final class SessionDataManager {
     @BusHandler
     public void onEntityMotion(ClientboundSetEntityMotionPacket packet) {
         if (loginData.entityId() == packet.getEntityId()) {
-            double motionX = packet.getMotionX();
-            double motionY = packet.getMotionY();
-            double motionZ = packet.getMotionZ();
+            var motionX = packet.getMotionX();
+            var motionY = packet.getMotionY();
+            var motionZ = packet.getMotionZ();
             botMovementManager.setMotion(motionX, motionY, motionZ);
             log.debug("Bot forced to motion: {} {} {}", motionX, motionY, motionZ);
         } else {
-            EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+            var state = entityTrackerState.getEntity(packet.getEntityId());
 
             state.setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
         }
@@ -784,7 +784,7 @@ public final class SessionDataManager {
             return;
         }
 
-        EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.addPosition(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
         state.setOnGround(packet.isOnGround());
@@ -797,7 +797,7 @@ public final class SessionDataManager {
             return;
         }
 
-        EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.setRotation(packet.getYaw(), packet.getPitch());
         state.setOnGround(packet.isOnGround());
@@ -810,7 +810,7 @@ public final class SessionDataManager {
             return;
         }
 
-        EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.setHeadRotation(packet.getHeadYaw());
     }
@@ -822,7 +822,7 @@ public final class SessionDataManager {
             return;
         }
 
-        EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.addPosition(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
         state.setRotation(packet.getYaw(), packet.getPitch());
@@ -836,7 +836,7 @@ public final class SessionDataManager {
             return;
         }
 
-        EntityLikeState state = entityTrackerState.getEntity(packet.getEntityId());
+        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.setPosition(packet.getX(), packet.getY(), packet.getZ());
         state.setRotation(packet.getYaw(), packet.getPitch());
@@ -860,8 +860,8 @@ public final class SessionDataManager {
     }
 
     public void onDisconnectEvent(DisconnectedEvent event) {
-        String reason = toPlainText(event.getReason());
-        Throwable cause = event.getCause();
+        var reason = toPlainText(event.getReason());
+        var cause = event.getCause();
         if (cause == null) { // Packet wise disconnects have no cause
             return;
         }
@@ -888,9 +888,9 @@ public final class SessionDataManager {
 
         int blockCount = buf.readShort();
 
-        DataPalette chunkPalette = codec.readDataPalette(buf, PaletteType.CHUNK,
+        var chunkPalette = codec.readDataPalette(buf, PaletteType.CHUNK,
                 ResourceData.GLOBAL_BLOCK_PALETTE.getBlockBitsPerEntry());
-        DataPalette biomePalette = codec.readDataPalette(buf, PaletteType.BIOME,
+        var biomePalette = codec.readDataPalette(buf, PaletteType.BIOME,
                 biomesEntryBitsSize);
         return new ChunkSection(blockCount, chunkPalette, biomePalette);
     }
@@ -910,7 +910,7 @@ public final class SessionDataManager {
             borderState.tick();
         }
 
-        LevelState level = getCurrentLevel();
+        var level = getCurrentLevel();
         if (level != null && botMovementManager != null
                 && level.isChunkLoaded(botMovementManager.getBlockPos())) {
             botMovementManager.tick();

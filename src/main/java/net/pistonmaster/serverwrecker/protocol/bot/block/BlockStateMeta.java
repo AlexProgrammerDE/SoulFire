@@ -36,7 +36,7 @@ public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType)
     }
 
     private static BlockShapeType getBlockShapeType(BlockType blockType, int stateIndex) {
-        int size = blockType.blockShapeTypes().size();
+        var size = blockType.blockShapeTypes().size();
         if (size == 0) {
             // This block has no shape stored, this is for example for air or grass
             return EMPTY_SHAPE;

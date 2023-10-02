@@ -48,12 +48,12 @@ public class BotControlAPI {
     private int sequenceNumber = 0;
 
     public boolean toggleFlight() {
-        AbilitiesData abilitiesData = sessionDataManager.getAbilitiesData();
+        var abilitiesData = sessionDataManager.getAbilitiesData();
         if (abilitiesData != null && !abilitiesData.allowFlying()) {
             throw new IllegalStateException("You can't fly! (Server said so)");
         }
 
-        boolean newFly = !botMovementManager.getControlState().isFlying();
+        var newFly = !botMovementManager.getControlState().isFlying();
         botMovementManager.getControlState().setFlying(newFly);
 
         // Let the server know we are flying
@@ -63,7 +63,7 @@ public class BotControlAPI {
     }
 
     public boolean toggleSprint() {
-        boolean newSprint = !botMovementManager.getControlState().isSprinting();
+        var newSprint = !botMovementManager.getControlState().isSprinting();
         botMovementManager.getControlState().setSprinting(newSprint);
 
         // Let the server know we are sprinting
@@ -76,7 +76,7 @@ public class BotControlAPI {
     }
 
     public boolean toggleSneak() {
-        boolean newSneak = !botMovementManager.getControlState().isSneaking();
+        var newSneak = !botMovementManager.getControlState().isSneaking();
         botMovementManager.setSneaking(newSneak);
 
         // Let the server know we are sneaking
@@ -89,9 +89,9 @@ public class BotControlAPI {
     }
 
     public void sendMessage(String message) {
-        Instant now = Instant.now();
+        var now = Instant.now();
         if (message.startsWith("/")) {
-            String command = message.substring(1);
+            var command = message.substring(1);
             // We only sign chat at the moment because commands require the entire command tree to be handled
             // Command signing is signing every string parameter in the command because of reporting /msg
             sessionDataManager.getSession().send(new ServerboundChatCommandPacket(
@@ -103,7 +103,7 @@ public class BotControlAPI {
                     new BitSet()
             ));
         } else {
-            long salt = secureRandom.nextLong();
+            var salt = secureRandom.nextLong();
             sessionDataManager.getSession().send(new ServerboundChatPacket(
                     message,
                     now.toEpochMilli(),

@@ -40,7 +40,10 @@ import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -52,7 +55,7 @@ public class ChatMessageLogger implements InternalAddon {
     }
 
     public void onConnectionInit(BotConnectionInitEvent event) {
-        ChatMessageSettings chatMessageSettings = event.connection().settingsHolder().get(ChatMessageSettings.class);
+        var chatMessageSettings = event.connection().settingsHolder().get(ChatMessageSettings.class);
         if (!chatMessageSettings.logChat()) {
             return;
         }
@@ -78,9 +81,9 @@ public class ChatMessageLogger implements InternalAddon {
             implements EventSubscriber<ChatMessageReceiveEvent> {
         public BotChatListener {
             executor.scheduleWithFixedDelay(() -> {
-                Iterator<String> iter = messageQueue.iterator();
+                var iter = messageQueue.iterator();
                 while (!messageQueue.isEmpty()) {
-                    String message = iter.next();
+                    var message = iter.next();
                     iter.remove();
                     if (!Objects.nonNull(message)) {
                         continue;

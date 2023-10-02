@@ -50,7 +50,7 @@ public class MainPanel extends JPanel {
         logPanel.setPreferredSize(new Dimension(600,
                 logPanel.getPreferredSize().height));
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, cardsContainer, logPanel);
+        var splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, cardsContainer, logPanel);
 
         splitPane.setOneTouchExpandable(true);
         splitPane.setResizeWeight(0.5d);

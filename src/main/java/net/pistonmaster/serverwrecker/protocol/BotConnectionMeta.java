@@ -49,7 +49,7 @@ public class BotConnectionMeta {
 
     public void joinServerId(String serverId, ViaClientSession session) {
         try {
-            JavaData javaData = (JavaData) minecraftAccount.accountData();
+            var javaData = (JavaData) minecraftAccount.accountData();
             sessionService.joinServer(javaData.profileId(), javaData.authToken(), serverId);
             session.getLogger().info("Successfully sent mojang join request!");
         } catch (ServiceUnavailableException e) {

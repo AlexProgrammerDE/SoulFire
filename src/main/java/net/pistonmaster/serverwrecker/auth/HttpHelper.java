@@ -41,29 +41,29 @@ public class HttpHelper {
     }
 
     public static CloseableHttpClient createMCAuthHttpClient(SWProxy proxyData) {
-        List<Header> headers = MicrosoftConstants.getDefaultHeaders();
+        var headers = MicrosoftConstants.getDefaultHeaders();
         headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "ServerWrecker/" + BuildData.VERSION));
 
         return HttpHelper.createHttpClient(headers, proxyData);
     }
 
     public static CloseableHttpClient createHttpClient(List<Header> headers, SWProxy proxyData) {
-        HttpClientBuilder httpBuilder = HttpClientBuilder.create()
+        var httpBuilder = HttpClientBuilder.create()
                 .setDefaultHeaders(headers);
 
-        int timeout = 5;
-        RequestConfig.Builder requestBuilder = RequestConfig.custom()
+        var timeout = 5;
+        var requestBuilder = RequestConfig.custom()
                 .setConnectTimeout(timeout * 1000)
                 .setConnectionRequestTimeout(timeout * 1000)
                 .setSocketTimeout(timeout * 1000);
 
         if (proxyData != null) {
-            HttpHost proxy = new HttpHost(proxyData.host(), proxyData.port());
+            var proxy = new HttpHost(proxyData.host(), proxyData.port());
 
             if (proxyData.hasCredentials()) {
-                UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(proxyData.username(), proxyData.password());
+                var credentials = new UsernamePasswordCredentials(proxyData.username(), proxyData.password());
 
-                AuthScope authScope = new AuthScope(proxy);
+                var authScope = new AuthScope(proxy);
 
                 CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
                 credentialsProvider.setCredentials(authScope, credentials);

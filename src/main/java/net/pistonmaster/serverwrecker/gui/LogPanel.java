@@ -44,7 +44,7 @@ public class LogPanel extends JPanel {
     public LogPanel(GUIManager guiManager) {
         this.guiManager = guiManager;
 
-        LogRequest request = LogRequest.newBuilder().setPrevious(300).build();
+        var request = LogRequest.newBuilder().setPrevious(300).build();
         guiManager.getRpcClient().getLogStub().subscribe(request, new StreamObserver<>() {
             @Override
             public void onNext(LogResponse value) {
@@ -61,11 +61,11 @@ public class LogPanel extends JPanel {
             }
         });
 
-        JTextField commands = new JTextField();
+        var commands = new JTextField();
 
         // commands.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
 
-        CommandShellAction commandShellAction = new CommandShellAction();
+        var commandShellAction = new CommandShellAction();
         commandShellAction.initHistory();
 
         commands.addActionListener(commandShellAction);
@@ -87,7 +87,7 @@ public class LogPanel extends JPanel {
         private int pointer = -1;
 
         public void initHistory() {
-            CommandHistoryResponse response = guiManager.getRpcClient().getCommandStubBlocking().getCommandHistory(CommandHistoryRequest.newBuilder().build());
+            var response = guiManager.getRpcClient().getCommandStubBlocking().getCommandHistory(CommandHistoryRequest.newBuilder().build());
             commandHistory.addAll(response.getCommandList());
         }
 
@@ -95,7 +95,7 @@ public class LogPanel extends JPanel {
         public void actionPerformed(ActionEvent e) {
             pointer = -1;
 
-            String command = e.getActionCommand();
+            var command = e.getActionCommand();
 
             if (command.isEmpty()) {
                 return;
@@ -133,7 +133,7 @@ public class LogPanel extends JPanel {
                 cachedText = commands.getText();
             }
 
-            int pointer = commandShellAction.getPointer();
+            var pointer = commandShellAction.getPointer();
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_UP -> {
                     if (pointer < commandShellAction.getCommandHistory().size() - 1) {

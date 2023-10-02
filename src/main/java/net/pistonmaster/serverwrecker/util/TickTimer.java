@@ -71,8 +71,8 @@ public class TickTimer {
      * Call this function in the main render loop of the game
      */
     public void advanceTime() {
-        long now = System.nanoTime();
-        long passedNs = now - this.lastTime;
+        var now = System.nanoTime();
+        var passedNs = now - this.lastTime;
 
         // Store nano time of this update
         this.lastTime = now;

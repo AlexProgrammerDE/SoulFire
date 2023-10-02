@@ -55,12 +55,12 @@ public class BoundingBox implements Cloneable {
      * @return The expanded bounding box
      */
     public BoundingBox expand(double x, double y, double z) {
-        double minX = this.minX;
-        double minY = this.minY;
-        double minZ = this.minZ;
-        double maxX = this.maxX;
-        double maxY = this.maxY;
-        double maxZ = this.maxZ;
+        var minX = this.minX;
+        var minY = this.minY;
+        var minZ = this.minZ;
+        var maxX = this.maxX;
+        var maxY = this.maxY;
+        var maxZ = this.maxZ;
 
         // Handle expanding of min/max x
         if (x < 0.0F) {
@@ -122,7 +122,7 @@ public class BoundingBox implements Cloneable {
 
         // Check for collision if the X axis of the current box is bigger
         if (x > 0.0F && otherBoundingBox.maxX <= this.minX) {
-            double max = this.minX - otherBoundingBox.maxX - epsilon;
+            var max = this.minX - otherBoundingBox.maxX - epsilon;
             if (max < x) {
                 x = max;
             }
@@ -130,7 +130,7 @@ public class BoundingBox implements Cloneable {
 
         // Check for collision if the X axis of the current box is smaller
         if (x < 0.0F && otherBoundingBox.minX >= this.maxX) {
-            double max = this.maxX - otherBoundingBox.minX + epsilon;
+            var max = this.maxX - otherBoundingBox.minX + epsilon;
             if (max > x) {
                 x = max;
             }
@@ -159,7 +159,7 @@ public class BoundingBox implements Cloneable {
 
         // Check for collision if the Y axis of the current box is bigger
         if (y > 0.0F && otherBoundingBox.maxY <= this.minY) {
-            double max = this.minY - otherBoundingBox.maxY - epsilon;
+            var max = this.minY - otherBoundingBox.maxY - epsilon;
             if (max < y) {
                 y = max;
             }
@@ -167,7 +167,7 @@ public class BoundingBox implements Cloneable {
 
         // Check for collision if the Y axis of the current box is bigger
         if (y < 0.0F && otherBoundingBox.minY >= this.maxY) {
-            double max = this.maxY - otherBoundingBox.minY + epsilon;
+            var max = this.maxY - otherBoundingBox.minY + epsilon;
             if (max > y) {
                 y = max;
             }
@@ -196,7 +196,7 @@ public class BoundingBox implements Cloneable {
 
         // Check for collision if the Z axis of the current box is bigger
         if (z > 0.0F && otherBoundingBox.maxZ <= this.minZ) {
-            double max = this.minZ - otherBoundingBox.maxZ - epsilon;
+            var max = this.minZ - otherBoundingBox.maxZ - epsilon;
             if (max < z) {
                 z = max;
             }
@@ -204,7 +204,7 @@ public class BoundingBox implements Cloneable {
 
         // Check for collision if the Z axis of the current box is bigger
         if (z < 0.0F && otherBoundingBox.minZ >= this.maxZ) {
-            double max = this.maxZ - otherBoundingBox.minZ + epsilon;
+            var max = this.maxZ - otherBoundingBox.minZ + epsilon;
             if (max > z) {
                 z = max;
             }
@@ -263,29 +263,29 @@ public class BoundingBox implements Cloneable {
     }
 
     public Optional<Vector3d> getIntersection(Vector3d origin, Vector3d direction) {
-        double x1 = origin.getX();
-        double y1 = origin.getY();
-        double z1 = origin.getZ();
-        double x2 = direction.getX();
-        double y2 = direction.getY();
-        double z2 = direction.getZ();
+        var x1 = origin.getX();
+        var y1 = origin.getY();
+        var z1 = origin.getZ();
+        var x2 = direction.getX();
+        var y2 = direction.getY();
+        var z2 = direction.getZ();
 
-        double xMin = this.minX;
-        double yMin = this.minY;
-        double zMin = this.minZ;
-        double xMax = this.maxX;
-        double yMax = this.maxY;
-        double zMax = this.maxZ;
+        var xMin = this.minX;
+        var yMin = this.minY;
+        var zMin = this.minZ;
+        var xMax = this.maxX;
+        var yMax = this.maxY;
+        var zMax = this.maxZ;
 
-        double txMin = (xMin - x1) / x2;
-        double txMax = (xMax - x1) / x2;
-        double tyMin = (yMin - y1) / y2;
-        double tyMax = (yMax - y1) / y2;
-        double tzMin = (zMin - z1) / z2;
-        double tzMax = (zMax - z1) / z2;
+        var txMin = (xMin - x1) / x2;
+        var txMax = (xMax - x1) / x2;
+        var tyMin = (yMin - y1) / y2;
+        var tyMax = (yMax - y1) / y2;
+        var tzMin = (zMin - z1) / z2;
+        var tzMax = (zMax - z1) / z2;
 
-        double tMin = Math.max(Math.max(Math.min(txMin, txMax), Math.min(tyMin, tyMax)), Math.min(tzMin, tzMax));
-        double tMax = Math.min(Math.min(Math.max(txMin, txMax), Math.max(tyMin, tyMax)), Math.max(tzMin, tzMax));
+        var tMin = Math.max(Math.max(Math.min(txMin, txMax), Math.min(tyMin, tyMax)), Math.min(tzMin, tzMax));
+        var tMax = Math.min(Math.min(Math.max(txMin, txMax), Math.max(tyMin, tyMax)), Math.max(tzMin, tzMax));
 
         if (tMax < 0 || tMin > tMax) {
             return Optional.empty();

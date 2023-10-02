@@ -26,7 +26,7 @@ public class UUIDHelper {
     }
 
     public static UUID convertToDashed(String noDashes) {
-        StringBuilder idBuff = new StringBuilder(noDashes);
+        var idBuff = new StringBuilder(noDashes);
         idBuff.insert(20, '-');
         idBuff.insert(16, '-');
         idBuff.insert(12, '-');

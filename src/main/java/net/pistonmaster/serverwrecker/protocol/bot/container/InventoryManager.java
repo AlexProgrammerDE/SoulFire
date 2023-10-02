@@ -112,7 +112,7 @@ public class InventoryManager {
 
         SWItemStack slotItem;
         {
-            ContainerSlot containerSlot = openContainer.getSlot(slot);
+            var containerSlot = openContainer.getSlot(slot);
             if (containerSlot.item() == null) {
                 // The target slot is empty, and we don't have an item in our cursor
                 if (cursorItem == null) {

@@ -78,12 +78,12 @@ public class SettingsManager {
     }
 
     public SettingsHolder collectSettings() {
-        SettingsHolder settingsHolder = new SettingsHolder(providers.stream()
+        var settingsHolder = new SettingsHolder(providers.stream()
                 .map(ProviderRegistration::provider)
                 .map(SettingsProvider::collectSettings)
                 .toList());
 
-        for (Class<? extends SettingsObject> clazz : registeredSettings) {
+        for (var clazz : registeredSettings) {
             if (!settingsHolder.has(clazz)) {
                 throw new IllegalArgumentException("No settings found for " + clazz.getSimpleName());
             }
@@ -94,7 +94,7 @@ public class SettingsManager {
 
     public void onSettingsLoad(SettingsHolder settings) {
         for (SettingsObject setting : settings.settings()) {
-            for (ListenerRegistration<?> listener : listeners) {
+            for (var listener : listeners) {
                 loadSetting(setting, listener);
             }
         }
@@ -102,7 +102,7 @@ public class SettingsManager {
 
     private <T extends SettingsObject> void loadSetting(SettingsObject setting, ListenerRegistration<T> registration) {
         if (registration.clazz.isInstance(setting)) {
-            T castedSetting = registration.clazz.cast(setting);
+            var castedSetting = registration.clazz.cast(setting);
             registration.listener.onSettingsChange(castedSetting);
         }
     }
@@ -117,9 +117,9 @@ public class SettingsManager {
 
     public SettingsHolder createSettingsHolder(String json) {
         try {
-            JsonArray settingsHolder = dumpGson.fromJson(json, JsonArray.class);
+            var settingsHolder = dumpGson.fromJson(json, JsonArray.class);
             List<SettingsObject> settingsObjects = new ArrayList<>();
-            for (JsonElement jsonElement : settingsHolder) {
+            for (var jsonElement : settingsHolder) {
                 settingsObjects.add(settingsTypeGson.fromJson(jsonElement, SettingsObject.class));
             }
 
@@ -169,18 +169,18 @@ public class SettingsManager {
     private record ClassObjectAdapter(Gson gson) implements JsonSerializer<Object>, JsonDeserializer<Object> {
         @Override
         public JsonElement serialize(Object src, Type typeOfSrc, JsonSerializationContext context) {
-            JsonElement serialized = gson.toJsonTree(src);
-            JsonObject jsonObject = serialized.getAsJsonObject();
+            var serialized = gson.toJsonTree(src);
+            var jsonObject = serialized.getAsJsonObject();
             jsonObject.addProperty("class", src.getClass().getName());
             return jsonObject;
         }
 
         @Override
         public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            JsonObject jsonObject = json.getAsJsonObject();
-            String className = jsonObject.get("class").getAsString();
+            var jsonObject = json.getAsJsonObject();
+            var className = jsonObject.get("class").getAsString();
             try {
-                Class<?> clazz = Class.forName(className);
+                var clazz = Class.forName(className);
                 return gson.fromJson(jsonObject, clazz);
             } catch (ClassNotFoundException e) {
                 return null; // Some extension might not be loaded, so we just ignore it
@@ -191,11 +191,11 @@ public class SettingsManager {
     private static class ECPublicKeyAdapter implements JsonSerializer<ECPublicKey>, JsonDeserializer<ECPublicKey> {
         @Override
         public ECPublicKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            String base64 = json.getAsString();
-            byte[] bytes = Base64.getDecoder().decode(base64);
+            var base64 = json.getAsString();
+            var bytes = Base64.getDecoder().decode(base64);
 
             try {
-                KeyFactory keyFactory = KeyFactory.getInstance("EC");
+                var keyFactory = KeyFactory.getInstance("EC");
                 return (ECPublicKey) keyFactory.generatePublic(new X509EncodedKeySpec(bytes));
             } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
                 throw new JsonParseException(e);
@@ -211,11 +211,11 @@ public class SettingsManager {
     private static class ECPrivateKeyAdapter implements JsonSerializer<ECPrivateKey>, JsonDeserializer<ECPrivateKey> {
         @Override
         public ECPrivateKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            String base64 = json.getAsString();
-            byte[] bytes = Base64.getDecoder().decode(base64);
+            var base64 = json.getAsString();
+            var bytes = Base64.getDecoder().decode(base64);
 
             try {
-                KeyFactory keyFactory = KeyFactory.getInstance("EC");
+                var keyFactory = KeyFactory.getInstance("EC");
                 return (ECPrivateKey) keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
             } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
                 throw new JsonParseException(e);

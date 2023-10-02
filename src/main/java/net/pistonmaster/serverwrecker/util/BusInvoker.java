@@ -23,7 +23,6 @@ import com.github.steveice10.packetlib.packet.Packet;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,9 +32,9 @@ public class BusInvoker {
 
     public BusInvoker(Object bus) {
         this.bus = bus;
-        MethodHandles.Lookup publicLookup = MethodHandles.publicLookup();
+        var publicLookup = MethodHandles.publicLookup();
 
-        for (Method declaredMethod : bus.getClass().getDeclaredMethods()) {
+        for (var declaredMethod : bus.getClass().getDeclaredMethods()) {
             if (!declaredMethod.isAnnotationPresent(BusHandler.class)) {
                 continue;
             }
@@ -44,7 +43,7 @@ public class BusInvoker {
                 throw new IllegalStateException("BusHandler methods must have exactly one parameter!");
             }
 
-            Class<?> parameter = declaredMethod.getParameterTypes()[0];
+            var parameter = declaredMethod.getParameterTypes()[0];
 
             try {
                 handlers.put(parameter, publicLookup.unreflect(declaredMethod));
@@ -55,7 +54,7 @@ public class BusInvoker {
     }
 
     public void handlePacket(Packet packet) throws Throwable {
-        MethodHandle method = handlers.get(packet.getClass());
+        var method = handlers.get(packet.getClass());
 
         if (method == null) {
             return;

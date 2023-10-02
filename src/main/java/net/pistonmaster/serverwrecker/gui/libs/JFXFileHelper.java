@@ -31,9 +31,9 @@ public class JFXFileHelper {
     }
 
     public static Path showOpenDialog(FileChooser fileChooser) {
-        CompletableFuture<Path> future = new CompletableFuture<>();
+        var future = new CompletableFuture<Path>();
         Platform.runLater(() -> {
-            File file = fileChooser.showOpenDialog(null);
+            var file = fileChooser.showOpenDialog(null);
             if (file != null) {
                 future.complete(file.toPath());
             } else {
@@ -44,9 +44,9 @@ public class JFXFileHelper {
     }
 
     public static Path showSaveDialog(FileChooser fileChooser) {
-        CompletableFuture<Path> future = new CompletableFuture<>();
+        var future = new CompletableFuture<Path>();
         Platform.runLater(() -> {
-            File file = fileChooser.showSaveDialog(null);
+            var file = fileChooser.showSaveDialog(null);
             if (file != null) {
                 future.complete(file.toPath());
             } else {

@@ -132,9 +132,9 @@ public class SWCommandDefinition implements Callable<Integer> {
                     return;
                 }
 
-                String name = Arrays.stream(option.names()).map(s -> String.format("`%s`", s)).collect(Collectors.joining(", "));
-                String defaultValue = option.defaultValueString() == null ? "" : String.format("`%s`", option.defaultValueString());
-                String description = option.description() == null ? "" : String.join(", ", option.description());
+                var name = Arrays.stream(option.names()).map(s -> String.format("`%s`", s)).collect(Collectors.joining(", "));
+                var defaultValue = option.defaultValueString() == null ? "" : String.format("`%s`", option.defaultValueString());
+                var description = option.description() == null ? "" : String.join(", ", option.description());
                 System.out.printf("| %s | %s | %s |%n", name, defaultValue, description);
             });
             serverWrecker.shutdown(true);

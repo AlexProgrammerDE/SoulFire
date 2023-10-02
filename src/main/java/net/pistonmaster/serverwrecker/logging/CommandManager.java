@@ -75,7 +75,7 @@ public class CommandManager {
     @PostConstruct
     public void postConstruct() {
         dispatcher.register(literal("online").executes(c -> {
-            AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+            var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
             if (attackManager == null) {
                 return 1;
@@ -91,7 +91,7 @@ public class CommandManager {
             return 1;
         }));
         dispatcher.register(literal("clear").executes(c -> {
-            LogPanel logPanel = serverWrecker.getInjector().getIfAvailable(LogPanel.class);
+            var logPanel = serverWrecker.getInjector().getIfAvailable(LogPanel.class);
             if (logPanel != null) {
                 logPanel.getMessageLogPanel().clear();
             }
@@ -100,13 +100,13 @@ public class CommandManager {
         dispatcher.register(literal("say")
                 .then(argument("message", StringArgumentType.greedyString())
                         .executes(c -> {
-                            AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+                            var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                             if (attackManager == null) {
                                 return 1;
                             }
 
-                            String message = StringArgumentType.getString(c, "message");
+                            var message = StringArgumentType.getString(c, "message");
                             LOGGER.info("Sending message by all bots: '{}'", message);
 
                             attackManager.getBotConnections().forEach(client -> {
@@ -117,7 +117,7 @@ public class CommandManager {
                             return 1;
                         })));
         dispatcher.register(literal("stats").executes(c -> {
-            AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+            var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
             if (attackManager == null) {
                 return 1;
@@ -131,8 +131,8 @@ public class CommandManager {
             LOGGER.info("Total bots: {}", attackManager.getBotConnections().size());
             long readTraffic = 0;
             long writeTraffic = 0;
-            for (BotConnection bot : attackManager.getBotConnections()) {
-                GlobalTrafficShapingHandler trafficShapingHandler = bot.getTrafficHandler();
+            for (var bot : attackManager.getBotConnections()) {
+                var trafficShapingHandler = bot.getTrafficHandler();
 
                 if (trafficShapingHandler == null) {
                     continue;
@@ -147,8 +147,8 @@ public class CommandManager {
 
             long currentReadTraffic = 0;
             long currentWriteTraffic = 0;
-            for (BotConnection bot : attackManager.getBotConnections()) {
-                GlobalTrafficShapingHandler trafficShapingHandler = bot.getTrafficHandler();
+            for (var bot : attackManager.getBotConnections()) {
+                var trafficShapingHandler = bot.getTrafficHandler();
 
                 if (trafficShapingHandler == null) {
                     continue;
@@ -166,7 +166,7 @@ public class CommandManager {
         dispatcher.register(literal("help")
                 .executes(c -> {
                     c.getSource().sendMessage("Available commands:");
-                    for (String command : dispatcher.getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
+                    for (var command : dispatcher.getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
                         c.getSource().sendMessage(command);
                     }
                     return 1;
@@ -176,9 +176,9 @@ public class CommandManager {
                         .then(argument("y", DoubleArgumentType.doubleArg())
                                 .then(argument("z", DoubleArgumentType.doubleArg())
                                         .executes(c -> {
-                                            double x = DoubleArgumentType.getDouble(c, "x");
-                                            double y = DoubleArgumentType.getDouble(c, "y");
-                                            double z = DoubleArgumentType.getDouble(c, "z");
+                                            var x = DoubleArgumentType.getDouble(c, "x");
+                                            var y = DoubleArgumentType.getDouble(c, "y");
+                                            var z = DoubleArgumentType.getDouble(c, "z");
 
                                             executePathfinding(new PosGoal(x, y, z));
                                             return 1;
@@ -187,8 +187,8 @@ public class CommandManager {
                 .then(argument("x", DoubleArgumentType.doubleArg())
                         .then(argument("z", DoubleArgumentType.doubleArg())
                                 .executes(c -> {
-                                    double x = DoubleArgumentType.getDouble(c, "x");
-                                    double z = DoubleArgumentType.getDouble(c, "z");
+                                    var x = DoubleArgumentType.getDouble(c, "x");
+                                    var z = DoubleArgumentType.getDouble(c, "z");
 
                                     executePathfinding(new XZGoal(x, z));
                                     return 1;
@@ -196,7 +196,7 @@ public class CommandManager {
         dispatcher.register(literal("walky")
                 .then(argument("y", DoubleArgumentType.doubleArg())
                         .executes(c -> {
-                            double y = DoubleArgumentType.getDouble(c, "y");
+                            var y = DoubleArgumentType.getDouble(c, "y");
                             executePathfinding(new YGoal(y));
                             return 1;
                         })));
@@ -205,19 +205,19 @@ public class CommandManager {
                         .then(argument("y", DoubleArgumentType.doubleArg())
                                 .then(argument("z", DoubleArgumentType.doubleArg())
                                         .executes(c -> {
-                                            AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+                                            var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                                             if (attackManager == null) {
                                                 return 1;
                                             }
 
-                                            double x = DoubleArgumentType.getDouble(c, "x");
-                                            double y = DoubleArgumentType.getDouble(c, "y");
-                                            double z = DoubleArgumentType.getDouble(c, "z");
+                                            var x = DoubleArgumentType.getDouble(c, "x");
+                                            var y = DoubleArgumentType.getDouble(c, "y");
+                                            var z = DoubleArgumentType.getDouble(c, "z");
 
-                                            for (BotConnection bot : attackManager.getBotConnections()) {
-                                                SessionDataManager sessionDataManager = bot.sessionDataManager();
-                                                BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
+                                            for (var bot : attackManager.getBotConnections()) {
+                                                var sessionDataManager = bot.sessionDataManager();
+                                                var botMovementManager = sessionDataManager.getBotMovementManager();
 
                                                 botMovementManager.lookAt(RotationOrigin.FEET, Vector3d.from(x, y, z));
                                             }
@@ -225,15 +225,15 @@ public class CommandManager {
                                         })))));
         dispatcher.register(literal("forward")
                 .executes(c -> {
-                    AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+                    var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                     if (attackManager == null) {
                         return 1;
                     }
 
-                    for (BotConnection bot : attackManager.getBotConnections()) {
-                        SessionDataManager sessionDataManager = bot.sessionDataManager();
-                        BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
+                    for (var bot : attackManager.getBotConnections()) {
+                        var sessionDataManager = bot.sessionDataManager();
+                        var botMovementManager = sessionDataManager.getBotMovementManager();
 
                         botMovementManager.getControlState().setForward(true);
                     }
@@ -241,15 +241,15 @@ public class CommandManager {
                 }));
         dispatcher.register(literal("stop")
                 .executes(c -> {
-                    AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+                    var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                     if (attackManager == null) {
                         return 1;
                     }
 
-                    for (BotConnection bot : attackManager.getBotConnections()) {
-                        SessionDataManager sessionDataManager = bot.sessionDataManager();
-                        BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
+                    for (var bot : attackManager.getBotConnections()) {
+                        var sessionDataManager = bot.sessionDataManager();
+                        var botMovementManager = sessionDataManager.getBotMovementManager();
 
                         botMovementManager.getControlState().resetAll();
                     }
@@ -260,32 +260,32 @@ public class CommandManager {
     }
 
     private void executePathfinding(GoalScorer goalScorer) {
-        AttackManager attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+        var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
         if (attackManager == null) {
             return;
         }
 
-        for (BotConnection bot : attackManager.getBotConnections()) {
-            Logger logger = bot.logger();
+        for (var bot : attackManager.getBotConnections()) {
+            var logger = bot.logger();
             bot.executorManager().newExecutorService("Pathfinding").execute(() -> {
-                SessionDataManager sessionDataManager = bot.sessionDataManager();
-                BotMovementManager botMovementManager = sessionDataManager.getBotMovementManager();
-                RouteFinder routeFinder = new RouteFinder(new MinecraftGraph(), goalScorer);
+                var sessionDataManager = bot.sessionDataManager();
+                var botMovementManager = sessionDataManager.getBotMovementManager();
+                var routeFinder = new RouteFinder(new MinecraftGraph(), goalScorer);
 
                 Supplier<List<WorldAction>> findPath = () -> {
-                    BotEntityState start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
+                    var start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
                             sessionDataManager.getCurrentLevel()
                     ), new ProjectedInventory(
                             sessionDataManager.getInventoryManager().getPlayerInventory()
                     ));
                     logger.info("Start: {}", start);
-                    List<WorldAction> actions = routeFinder.findRoute(start);
+                    var actions = routeFinder.findRoute(start);
                     logger.info("Calculated path with {} actions: {}", actions.size(), actions);
                     return actions;
                 };
 
-                PathExecutor pathExecutor = new PathExecutor(bot, findPath.get(), findPath);
+                var pathExecutor = new PathExecutor(bot, findPath.get(), findPath);
                 pathExecutor.register();
             });
         }

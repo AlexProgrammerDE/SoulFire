@@ -42,7 +42,7 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     }
 
     private static void publishLine(String line, StreamObserver<LogResponse> responseObserver) {
-        LogResponse response = LogResponse.newBuilder()
+        var response = LogResponse.newBuilder()
                 .setMessage(line)
                 .build();
 
@@ -56,7 +56,7 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     }
 
     private void sendPreviousLogs(int requestPrevious, StreamObserver<LogResponse> responseObserver) {
-        for (String log : logs.getNewest(requestPrevious)) {
+        for (var log : logs.getNewest(requestPrevious)) {
             publishLine(log, responseObserver);
         }
     }
@@ -92,8 +92,8 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
             }
 
             List<E> list = new ArrayList<>(queue);
-            int size = list.size();
-            int start = size - amount;
+            var size = list.size();
+            var start = size - amount;
 
             if (start < 0) {
                 start = 0;

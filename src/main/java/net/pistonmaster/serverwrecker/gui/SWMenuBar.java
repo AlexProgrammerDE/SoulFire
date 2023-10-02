@@ -61,14 +61,14 @@ public class SWMenuBar extends JMenuBar {
 
     @Inject
     public SWMenuBar(ServerWrecker serverWrecker) {
-        JMenu fileMenu = new JMenu("File");
-        JMenuItem loadProfile = new JMenuItem("Load Profile");
+        var fileMenu = new JMenu("File");
+        var loadProfile = new JMenuItem("Load Profile");
         loadProfile.addActionListener(e -> {
-            FileChooser chooser = new FileChooser();
+            var chooser = new FileChooser();
             chooser.setInitialDirectory(serverWrecker.getProfilesFolder().toFile());
             chooser.setTitle("Load Profile");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ServerWrecker profile", "*.json"));
-            Path selectedFile = JFXFileHelper.showOpenDialog(chooser);
+            var selectedFile = JFXFileHelper.showOpenDialog(chooser);
 
             if (selectedFile != null) {
                 try {
@@ -81,17 +81,17 @@ public class SWMenuBar extends JMenuBar {
         });
 
         fileMenu.add(loadProfile);
-        JMenuItem saveProfile = new JMenuItem("Save Profile");
+        var saveProfile = new JMenuItem("Save Profile");
         saveProfile.addActionListener(e -> {
-            FileChooser chooser = new FileChooser();
+            var chooser = new FileChooser();
             chooser.setInitialDirectory(serverWrecker.getProfilesFolder().toFile());
             chooser.setTitle("Save Profile");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ServerWrecker profile", "*.json"));
-            Path selectedFile = JFXFileHelper.showSaveDialog(chooser);
+            var selectedFile = JFXFileHelper.showSaveDialog(chooser);
 
             if (selectedFile != null) {
                 // Add .json if not present
-                String path = selectedFile.toString();
+                var path = selectedFile.toString();
                 if (!path.endsWith(".json")) {
                     path += ".json";
                 }
@@ -109,15 +109,15 @@ public class SWMenuBar extends JMenuBar {
 
         fileMenu.addSeparator();
 
-        JMenuItem exit = new JMenuItem("Exit");
+        var exit = new JMenuItem("Exit");
         exit.addActionListener(e -> serverWrecker.shutdown(true));
         fileMenu.add(exit);
         add(fileMenu);
 
-        JMenu window = new JMenu("Options");
-        JMenu themeSelector = new JMenu("Theme");
-        for (Class<? extends BasicLookAndFeel> theme : THEMES) {
-            JMenuItem themeItem = new JMenuItem(theme.getSimpleName());
+        var window = new JMenu("Options");
+        var themeSelector = new JMenu("Theme");
+        for (var theme : THEMES) {
+            var themeItem = new JMenuItem(theme.getSimpleName());
             themeItem.addActionListener(e -> {
                 ThemeUtil.THEME_PROVIDER.setThemeClass(theme);
                 SwingUtilities.invokeLater(ThemeUtil::setLookAndFeel);
@@ -127,24 +127,24 @@ public class SWMenuBar extends JMenuBar {
         window.add(themeSelector);
         add(window);
 
-        JMenu helpMenu = new JMenu("Help");
-        JMenuItem about = new JMenuItem("About");
+        var helpMenu = new JMenu("Help");
+        var about = new JMenuItem("About");
         about.addActionListener(e -> {
             showAboutDialog();
         });
         helpMenu.add(about);
         add(helpMenu);
 
-        Desktop desktop = Desktop.getDesktop();
+        var desktop = Desktop.getDesktop();
         if (desktop.isSupported(Desktop.Action.APP_ABOUT)) {
             desktop.setAboutHandler(e -> showAboutDialog());
         }
 
         if (desktop.isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
             desktop.setQuitHandler((e, response) -> {
-                WindowCloseEvent event = new WindowCloseEvent();
+                var event = new WindowCloseEvent();
                 ServerWreckerAPI.postEvent(event);
-                boolean canQuit = !event.cancelled();
+                var canQuit = !event.cancelled();
                 if (canQuit) {
                     response.performQuit();
                 } else {

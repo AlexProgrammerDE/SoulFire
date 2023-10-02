@@ -33,7 +33,7 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
 
     @Override
     public void executeCommand(CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
-        int code = commandManager.execute(request.getCommand());
+        var code = commandManager.execute(request.getCommand());
 
         responseObserver.onNext(CommandResponse.newBuilder().setCodeValue(code).build());
         responseObserver.onCompleted();
@@ -41,7 +41,7 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
 
     @Override
     public void tabCompleteCommand(CommandCompletionRequest request, StreamObserver<CommandCompletionResponse> responseObserver) {
-        List<String> suggestions = commandManager.getCompletionSuggestions(request.getCommand());
+        var suggestions = commandManager.getCompletionSuggestions(request.getCommand());
 
         responseObserver.onNext(CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());
         responseObserver.onCompleted();
@@ -49,7 +49,7 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
 
     @Override
     public void getCommandHistory(CommandHistoryRequest request, StreamObserver<CommandHistoryResponse> responseObserver) {
-        List<String> history = commandManager.getCommandHistory();
+        var history = commandManager.getCommandHistory();
 
         responseObserver.onNext(CommandHistoryResponse.newBuilder().addAllCommand(history).build());
         responseObserver.onCompleted();

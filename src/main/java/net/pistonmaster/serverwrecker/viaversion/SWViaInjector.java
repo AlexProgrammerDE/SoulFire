@@ -37,7 +37,7 @@ public class SWViaInjector implements ViaInjector {
 
     @Override
     public IntSortedSet getServerProtocolVersions() {
-        // On client-side we can connect to any server version
+        // On the client-side we can connect to any server version
         IntSortedSet versions = new IntLinkedOpenHashSet();
         versions.add(ProtocolVersion.v1_7_1.getOriginalVersion());
         versions.add(SWConstants.CURRENT_PROTOCOL_VERSION.getOriginalVersion());

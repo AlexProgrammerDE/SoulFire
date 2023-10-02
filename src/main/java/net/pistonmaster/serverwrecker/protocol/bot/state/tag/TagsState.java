@@ -38,8 +38,8 @@ public class TagsState {
     }
 
     public void handleTagData(Map<String, Map<String, int[]>> tags) {
-        for (Map.Entry<String, Map<String, int[]>> registry : tags.entrySet()) {
-            String registryKey = stripMinecraft(registry.getKey());
+        for (var registry : tags.entrySet()) {
+            var registryKey = stripMinecraft(registry.getKey());
 
             switch (registryKey) {
                 case "block" -> handleBlocks(registry.getValue());
@@ -51,33 +51,33 @@ public class TagsState {
     }
 
     private void handleBlocks(Map<String, int[]> blocks) {
-        for (Map.Entry<String, int[]> block : blocks.entrySet()) {
-            String blockKey = stripMinecraft(block.getKey());
-            Set<BlockType> blockSet = blockTags.computeIfAbsent(blockKey, k -> new HashSet<>(block.getValue().length));
+        for (var block : blocks.entrySet()) {
+            var blockKey = stripMinecraft(block.getKey());
+            var blockSet = blockTags.computeIfAbsent(blockKey, k -> new HashSet<>(block.getValue().length));
 
-            for (int i : block.getValue()) {
+            for (var i : block.getValue()) {
                 blockSet.add(BlockType.getById(i));
             }
         }
     }
 
     private void handleItems(Map<String, int[]> items) {
-        for (Map.Entry<String, int[]> item : items.entrySet()) {
-            String itemKey = stripMinecraft(item.getKey());
-            Set<ItemType> itemSet = itemTags.computeIfAbsent(itemKey, k -> new HashSet<>(item.getValue().length));
+        for (var item : items.entrySet()) {
+            var itemKey = stripMinecraft(item.getKey());
+            var itemSet = itemTags.computeIfAbsent(itemKey, k -> new HashSet<>(item.getValue().length));
 
-            for (int i : item.getValue()) {
+            for (var i : item.getValue()) {
                 itemSet.add(ItemType.getById(i));
             }
         }
     }
 
     private void handleEntities(Map<String, int[]> entities) {
-        for (Map.Entry<String, int[]> entity : entities.entrySet()) {
-            String entityKey = stripMinecraft(entity.getKey());
-            Set<EntityType> entitySet = entityTags.computeIfAbsent(entityKey, k -> new HashSet<>(entity.getValue().length));
+        for (var entity : entities.entrySet()) {
+            var entityKey = stripMinecraft(entity.getKey());
+            var entitySet = entityTags.computeIfAbsent(entityKey, k -> new HashSet<>(entity.getValue().length));
 
-            for (int i : entity.getValue()) {
+            for (var i : entity.getValue()) {
                 entitySet.add(EntityType.getById(i));
             }
         }

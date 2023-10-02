@@ -60,21 +60,21 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
         add(coreDebug);
 
         add(new JLabel("Save Log:"));
-        JButton saveLog = new JButton("Save Log");
+        var saveLog = new JButton("Save Log");
         add(saveLog);
 
         saveLog.addActionListener(listener -> {
-            FileChooser chooser = new FileChooser();
+            var chooser = new FileChooser();
             chooser.setInitialDirectory(ServerWrecker.DATA_FOLDER.toFile());
             chooser.setTitle("Save Log");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log Files", "*.log"));
-            Path selectedFile = JFXFileHelper.showSaveDialog(chooser);
+            var selectedFile = JFXFileHelper.showSaveDialog(chooser);
             if (selectedFile == null) {
                 return;
             }
 
             guiManager.getThreadPool().submit(() -> {
-                try (BufferedWriter writer = Files.newBufferedWriter(selectedFile)) {
+                try (var writer = Files.newBufferedWriter(selectedFile)) {
                     writer.write(logPanel.getMessageLogPanel().getLogs());
                 } catch (IOException e) {
                     e.printStackTrace();

@@ -35,13 +35,13 @@ public record XZGoal(Vector2d goal) implements GoalScorer {
 
     @Override
     public double computeScore(BotEntityState worldState) {
-        Vector3d position = worldState.position();
+        var position = worldState.position();
         return Vector2d.from(position.getX(), position.getZ()).distance(goal);
     }
 
     @Override
     public boolean isFinished(BotEntityState worldState) {
-        Vector3d position = worldState.position();
+        var position = worldState.position();
         return Vector2d.from(position.getX(), position.getZ()).equals(goal);
     }
 }

@@ -32,7 +32,7 @@ public class SwingTextUtils {
     }
 
     public static JTextPane createPane(@Language("html") String text) {
-        JTextPane pane = new JTextPane();
+        var pane = new JTextPane();
         pane.setContentType("text/html");
         pane.setText(text);
         pane.setEditable(false);

@@ -63,7 +63,7 @@ public record BotConnection(UUID connectionId, BotConnectionFactory factory, Att
 
     public void tick(long ticks, float partialTicks) {
         session.tick(); // Ensure all packets are handled before ticking
-        for (int i = 0; i < ticks; i++) {
+        for (var i = 0; i < ticks; i++) {
             try {
                 sessionDataManager().tick();
             } catch (Throwable t) {

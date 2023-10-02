@@ -66,7 +66,7 @@ public class SWSessionService extends Service {
      */
     public String getServerId(String base, PublicKey publicKey, SecretKey secretKey) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            var digest = MessageDigest.getInstance("SHA-1");
             digest.update(base.getBytes(StandardCharsets.ISO_8859_1));
             digest.update(secretKey.getEncoded());
             digest.update(publicKey.getEncoded());
@@ -85,7 +85,7 @@ public class SWSessionService extends Service {
      * @throws RequestException If an error occurs while making the request.
      */
     public void joinServer(UUID profileId, String authenticationToken, String serverId) throws RequestException {
-        SWSessionService.JoinServerRequest request = new SWSessionService.JoinServerRequest(
+        var request = new SWSessionService.JoinServerRequest(
                 authenticationToken,
                 profileId.toString().replace("-", ""), // Remove dashes from UUID
                 serverId

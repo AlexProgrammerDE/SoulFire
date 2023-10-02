@@ -76,7 +76,7 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
                         List<String> offers = rpcClient.getCommandStubBlocking().tabCompleteCommand(
                                 CommandCompletionRequest.newBuilder().setCommand(parsedLine.line()).build()
                         ).getSuggestionsList(); // Console doesn't get harmed much by this...
-                        for (String offer : offers) {
+                        for (var offer : offers) {
                             list.add(new Candidate(offer));
                         }
                     } catch (Exception e) {

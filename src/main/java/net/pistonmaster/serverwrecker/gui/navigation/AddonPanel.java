@@ -30,8 +30,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class AddonPanel extends NavigationItem {
-    @Getter
     private final List<NavigationItem> navigationItems = new ArrayList<>();
 
     @Inject
@@ -39,10 +39,10 @@ public class AddonPanel extends NavigationItem {
         ServerWreckerAPI.postEvent(new AddonPanelInitEvent(navigationItems));
 
         setLayout(new GridLayout(3, 3, 10, 10));
-        CardLayout cardLayout = (CardLayout) container.getLayout();
+        var cardLayout = (CardLayout) container.getLayout();
 
-        for (NavigationItem item : navigationItems) {
-            JButton button = new JButton(SwingTextUtils.htmlCenterText(item.getNavigationName()));
+        for (var item : navigationItems) {
+            var button = new JButton(SwingTextUtils.htmlCenterText(item.getNavigationName()));
 
             button.addActionListener(action -> cardLayout.show(container, item.getNavigationId()));
             button.setSize(new Dimension(50, 50));

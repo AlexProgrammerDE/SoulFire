@@ -102,8 +102,8 @@ public final class BotMovementManager {
     }
 
     public void updateBoundingBox() {
-        float w = getBoundingBoxWidth() / 2;
-        float h = getBoundingBoxHeight() / 2;
+        var w = getBoundingBoxWidth() / 2;
+        var h = getBoundingBoxHeight() / 2;
         this.boundingBox = new BoundingBox(x - w, y, z - w, x + w, y + h, z + w);
     }
 
@@ -137,26 +137,26 @@ public final class BotMovementManager {
      * @param block  The block or location to look at.
      */
     public void lookAt(RotationOrigin origin, Vector3d block) {
-        boolean eyes = origin == RotationOrigin.EYES;
+        var eyes = origin == RotationOrigin.EYES;
 
-        double dx = block.getX() - this.x;
-        double dy = block.getY() - (eyes ? this.y + getEyeHeight() : this.y);
-        double dz = block.getZ() - this.z;
+        var dx = block.getX() - this.x;
+        var dy = block.getY() - (eyes ? this.y + getEyeHeight() : this.y);
+        var dz = block.getZ() - this.z;
 
-        double r = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        double yaw = -Math.atan2(dx, dz) / Math.PI * 180;
+        var r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        var yaw = -Math.atan2(dx, dz) / Math.PI * 180;
         if (yaw < 0) {
             yaw = 360 + yaw;
         }
 
-        double pitch = -Math.asin(dy / r) / Math.PI * 180;
+        var pitch = -Math.asin(dy / r) / Math.PI * 180;
 
         this.yaw = (float) yaw;
         this.pitch = (float) pitch;
     }
 
     private float updateRotation(float angle, float targetAngle, float maxIncrease) {
-        float f = MathHelper.wrapDegrees(targetAngle - angle);
+        var f = MathHelper.wrapDegrees(targetAngle - angle);
         if (f > maxIncrease) {
             f = maxIncrease;
         }
@@ -169,11 +169,11 @@ public final class BotMovementManager {
     }
 
     public void tick() {
-        double startX = this.x;
-        double startY = this.y;
-        double startZ = this.z;
+        var startX = this.x;
+        var startY = this.y;
+        var startZ = this.z;
 
-        boolean startOnGround = this.onGround;
+        var startOnGround = this.onGround;
 
         this.updateMovementStateInput();
 
@@ -230,9 +230,9 @@ public final class BotMovementManager {
         }
 
         // Detect whether positions changed
-        boolean positionChanged = startX != this.x || startY != this.y || startZ != this.z;
-        boolean rotationChanged = yaw != this.lastSentYaw || pitch != this.lastSentPitch;
-        boolean onGroundChanged = startOnGround != this.onGround;
+        var positionChanged = startX != this.x || startY != this.y || startZ != this.z;
+        var rotationChanged = yaw != this.lastSentYaw || pitch != this.lastSentPitch;
+        var onGroundChanged = startOnGround != this.onGround;
 
         // Send position packets if changed
         if (positionChanged && rotationChanged) {
@@ -255,8 +255,8 @@ public final class BotMovementManager {
     }
 
     private void updateMovementStateInput() {
-        float moveForward = 0.0F;
-        float moveStrafe = 0.0F;
+        var moveForward = 0.0F;
+        var moveStrafe = 0.0F;
 
         if (controlState.isForward()) {
             moveForward++;
@@ -310,13 +310,13 @@ public final class BotMovementManager {
     }
 
     public boolean isInFluid() {
-        Vector3i blockPos = this.getBlockPos();
-        LevelState level = getLevelSafe();
+        var blockPos = this.getBlockPos();
+        var level = getLevelSafe();
         if (level.isOutOfWorld(blockPos)) {
             return false;
         }
 
-        Optional<BlockType> blockType = level.getBlockTypeAt(blockPos);
+        var blockType = level.getBlockTypeAt(blockPos);
         return blockType.map(BlockType::isFluid).orElse(false);
     }
 
@@ -324,14 +324,14 @@ public final class BotMovementManager {
         this.motionY = 0.42D;
 
         if (this.controlState.isSprinting()) {
-            float radiansYaw = (float) Math.toRadians(this.yaw);
+            var radiansYaw = (float) Math.toRadians(this.yaw);
             this.motionX -= Math.sin(radiansYaw) * 0.2F;
             this.motionZ += Math.cos(radiansYaw) * 0.2F;
         }
     }
 
     private void travelFlying(float forward, float vertical, float strafe) {
-        float flySpeed = getFlySpeed();
+        var flySpeed = getFlySpeed();
         // Fly move up and down
         if (this.controlState.isSneaking()) {
             this.moveStrafing = strafe / 0.3F;
@@ -343,8 +343,8 @@ public final class BotMovementManager {
             this.motionY += flySpeed * 3.0F;
         }
 
-        double prevMotionY = this.motionY;
-        float prevJumpMovementFactor = this.jumpMovementFactor;
+        var prevMotionY = this.motionY;
+        var prevJumpMovementFactor = this.jumpMovementFactor;
         this.jumpMovementFactor = flySpeed * (this.controlState.isSprinting() ? 2 : 1);
 
         this.travel(forward, vertical, strafe);
@@ -358,8 +358,8 @@ public final class BotMovementManager {
     }
 
     private void travelInWater(float forward, float vertical, float strafe) {
-        float slipperiness = 0.8F;
-        float friction = 0.02F;
+        var slipperiness = 0.8F;
+        var friction = 0.02F;
 
         this.moveRelative(forward, vertical, strafe, friction);
         this.horizontalCollision = this.moveCollide(-this.motionX, this.motionY, -this.motionZ);
@@ -371,9 +371,9 @@ public final class BotMovementManager {
     }
 
     public void travel(float forward, float vertical, float strafe) {
-        float prevSlipperiness = this.getBlockSlipperiness() * 0.91F;
+        var prevSlipperiness = this.getBlockSlipperiness() * 0.91F;
 
-        float value = 0.16277136F / (prevSlipperiness * prevSlipperiness * prevSlipperiness);
+        var value = 0.16277136F / (prevSlipperiness * prevSlipperiness * prevSlipperiness);
 
         float friction;
         if (this.onGround) {
@@ -385,7 +385,7 @@ public final class BotMovementManager {
         this.moveRelative(forward, vertical, strafe, friction);
 
         // Get new speed
-        float slipperiness = this.getBlockSlipperiness() * 0.91F;
+        var slipperiness = this.getBlockSlipperiness() * 0.91F;
 
         // Move
         this.horizontalCollision = this.moveCollide(this.motionX, this.motionY, this.motionZ);
@@ -406,18 +406,18 @@ public final class BotMovementManager {
             return 1.0F;
         }
 
-        Vector3i blockPos = this.getPlayerPos().add(0, -0.5, 0).toInt();
-        LevelState level = getLevelSafe();
+        var blockPos = this.getPlayerPos().add(0, -0.5, 0).toInt();
+        var level = getLevelSafe();
         if (level.isOutOfWorld(blockPos)) {
             return 1.0F;
         }
 
-        Optional<BlockType> optionalBlockType = level.getBlockTypeAt(blockPos);
+        var optionalBlockType = level.getBlockTypeAt(blockPos);
         if (optionalBlockType.isEmpty()) {
             return 1.0F;
         }
 
-        BlockType blockType = optionalBlockType.get();
+        var blockType = optionalBlockType.get();
 
         if (blockType == BlockType.SLIME_BLOCK) {
             return 0.8F;
@@ -435,7 +435,7 @@ public final class BotMovementManager {
     }
 
     public void moveRelative(double forward, double up, double strafe, double friction) {
-        double distance = strafe * strafe + up * up + forward * forward;
+        var distance = strafe * strafe + up * up + forward * forward;
 
         if (distance < 1.0E-4F) {
             return;
@@ -452,9 +452,9 @@ public final class BotMovementManager {
         up = up * distance;
         forward = forward * distance;
 
-        double yawRadians = Math.toRadians(this.yaw);
-        double sin = Math.sin(yawRadians);
-        double cos = Math.cos(yawRadians);
+        var yawRadians = Math.toRadians(this.yaw);
+        var sin = Math.sin(yawRadians);
+        var cos = Math.cos(yawRadians);
 
         this.motionX += strafe * cos - forward * sin;
         this.motionY += up;
@@ -462,12 +462,12 @@ public final class BotMovementManager {
     }
 
     public boolean moveCollide(double dx, double dy, double dz) {
-        LevelState level = getLevelSafe();
+        var level = getLevelSafe();
 
         // Store initial values
-        double originalDx = dx;
-        double originalDy = dy;
-        double originalDz = dz;
+        var originalDx = dx;
+        var originalDy = dy;
+        var originalDz = dz;
 
         // Do not walking off edges when sneaking
         if (this.onGround && this.controlState.isSneaking()) {
@@ -522,24 +522,24 @@ public final class BotMovementManager {
         }
 
         // Check for collisions and calculate collisions based on that
-        List<BoundingBox> collisionBoxes = level.getCollisionBoxes(this.boundingBox.expand(dx, dy, dz));
-        BestXZMoveData bestXZMoveData = getBestMove(collisionBoxes, this.boundingBox, dx, dz);
+        var collisionBoxes = level.getCollisionBoxes(this.boundingBox.expand(dx, dy, dz));
+        var bestXZMoveData = getBestMove(collisionBoxes, this.boundingBox, dx, dz);
 
         // Check if walking up solves the collisions, and thus we'll be able to walk upstairs
         if (this.onGround && !collisionBoxes.isEmpty()) {
             double highestCollision = collisionBoxes.stream().map(b -> b.maxY).max(Comparator.naturalOrder()).orElse(0.0D);
-            double highestDeltaY = highestCollision - this.boundingBox.minY;
-            double stepHeight = STEP_HEIGHT;
+            var highestDeltaY = highestCollision - this.boundingBox.minY;
+            var stepHeight = STEP_HEIGHT;
             if (highestDeltaY > 0.0D && highestDeltaY < stepHeight) {
                 stepHeight = highestDeltaY;
             }
 
-            BoundingBox stepBoundingBox = this.boundingBox.offset(0.0D, stepHeight, 0.0D);
-            List<BoundingBox> stepCollisionBoxes = level.getCollisionBoxes(stepBoundingBox.expand(dx, 0, dz));
+            var stepBoundingBox = this.boundingBox.offset(0.0D, stepHeight, 0.0D);
+            var stepCollisionBoxes = level.getCollisionBoxes(stepBoundingBox.expand(dx, 0, dz));
 
-            boolean canWalkUp = true;
-            for (BoundingBox aABB : stepCollisionBoxes) {
-                double dyCollision = aABB.clipYCollide(stepBoundingBox, dy);
+            var canWalkUp = true;
+            for (var aABB : stepCollisionBoxes) {
+                var dyCollision = aABB.clipYCollide(stepBoundingBox, dy);
                 if (dyCollision != dy) {
                     canWalkUp = false;
                     break;
@@ -547,7 +547,7 @@ public final class BotMovementManager {
             }
 
             if (canWalkUp) {
-                BestXZMoveData bestStepXZMoveData = getBestMove(stepCollisionBoxes, stepBoundingBox, dx, dz);
+                var bestStepXZMoveData = getBestMove(stepCollisionBoxes, stepBoundingBox, dx, dz);
                 if (bestStepXZMoveData.totalMotion > bestXZMoveData.totalMotion) {
                     bestXZMoveData = bestStepXZMoveData;
                     collisionBoxes = stepCollisionBoxes;
@@ -561,7 +561,7 @@ public final class BotMovementManager {
 
         this.boundingBox.move(dx, 0.0F, dz);
 
-        for (BoundingBox aABB : collisionBoxes) {
+        for (var aABB : collisionBoxes) {
             dy = aABB.clipYCollide(this.boundingBox, dy);
         }
         this.boundingBox.move(0.0F, dy, 0.0F);
@@ -578,37 +578,37 @@ public final class BotMovementManager {
     }
 
     private BestXZMoveData getBestMove(List<BoundingBox> collisionBoxes, BoundingBox boundingBox, double dx, double dz) {
-        BoundingBox cornerCheck = boundingBox.clone();
-        double targetXCollision = dx;
-        double targetZCollision = dz;
+        var cornerCheck = boundingBox.clone();
+        var targetXCollision = dx;
+        var targetZCollision = dz;
 
-        for (BoundingBox aABB : collisionBoxes) {
+        for (var aABB : collisionBoxes) {
             targetXCollision = aABB.clipXCollide(cornerCheck, targetXCollision);
         }
         cornerCheck.move(targetXCollision, 0.0F, 0.0F);
 
-        for (BoundingBox aABB : collisionBoxes) {
+        for (var aABB : collisionBoxes) {
             targetZCollision = aABB.clipZCollide(cornerCheck, targetZCollision);
         }
 
-        BoundingBox cornerCheck2 = boundingBox.clone();
-        double targetZCollision2 = dz;
-        double targetXCollision2 = dx;
+        var cornerCheck2 = boundingBox.clone();
+        var targetZCollision2 = dz;
+        var targetXCollision2 = dx;
 
-        for (BoundingBox aABB : collisionBoxes) {
+        for (var aABB : collisionBoxes) {
             targetZCollision2 = aABB.clipZCollide(cornerCheck2, targetZCollision2);
         }
 
         cornerCheck2.move(0.0F, 0.0F, targetZCollision2);
 
-        for (BoundingBox aABB : collisionBoxes) {
+        for (var aABB : collisionBoxes) {
             targetXCollision2 = aABB.clipXCollide(cornerCheck2, targetXCollision2);
         }
 
         // We did this to check if you can get further with moving first "X and then Z" or first "Z and then X"
         // We do this to allow walking around corners
-        double totalCollision = Math.abs(targetXCollision) + Math.abs(targetZCollision);
-        double totalCollision2 = Math.abs(targetXCollision2) + Math.abs(targetZCollision2);
+        var totalCollision = Math.abs(targetXCollision) + Math.abs(targetZCollision);
+        var totalCollision2 = Math.abs(targetXCollision2) + Math.abs(targetZCollision2);
 
         if (totalCollision >= totalCollision2) {
             return new BestXZMoveData(totalCollision, targetXCollision, targetZCollision);
@@ -655,7 +655,7 @@ public final class BotMovementManager {
 
     private LevelState getLevelSafe() {
         // SessionDataManager ensures that the current level is never null
-        LevelState level = dataManager.getCurrentLevel();
+        var level = dataManager.getCurrentLevel();
         assert level != null;
         return level;
     }
@@ -665,11 +665,11 @@ public final class BotMovementManager {
     }
 
     public Vector3d getRotationVector() {
-        float yawRadians = (float) Math.toRadians(this.yaw);
-        float pitchRadians = (float) Math.toRadians(this.pitch);
-        double x = -Math.sin(yawRadians) * Math.cos(pitchRadians);
-        double y = -Math.sin(pitchRadians);
-        double z = Math.cos(yawRadians) * Math.cos(pitchRadians);
+        var yawRadians = (float) Math.toRadians(this.yaw);
+        var pitchRadians = (float) Math.toRadians(this.pitch);
+        var x = -Math.sin(yawRadians) * Math.cos(pitchRadians);
+        var y = -Math.sin(pitchRadians);
+        var z = Math.cos(yawRadians) * Math.cos(pitchRadians);
         return Vector3d.from(x, y, z);
     }
 

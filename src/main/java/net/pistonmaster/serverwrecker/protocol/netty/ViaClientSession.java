@@ -29,7 +29,6 @@ import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpPacketCodec;
 import com.github.steveice10.packetlib.tcp.TcpSession;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.exception.CancelCodecException;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
@@ -111,11 +110,11 @@ public class ViaClientSession extends TcpSession {
         }
 
         try {
-            BotSettings botSettings = settingsHolder.get(BotSettings.class);
-            ProtocolVersion version = botSettings.protocolVersion();
-            boolean isLegacy = SWConstants.isLegacy(version);
-            boolean isBedrock = SWConstants.isBedrock(version);
-            Bootstrap bootstrap = new Bootstrap();
+            var botSettings = settingsHolder.get(BotSettings.class);
+            var version = botSettings.protocolVersion();
+            var isLegacy = SWConstants.isLegacy(version);
+            var isBedrock = SWConstants.isBedrock(version);
+            var bootstrap = new Bootstrap();
 
             bootstrap.group(eventLoopGroup);
             if (isBedrock) {
@@ -146,14 +145,14 @@ public class ViaClientSession extends TcpSession {
             bootstrap.handler(new ChannelInitializer<>() {
                 @Override
                 public void initChannel(Channel channel) {
-                    PacketProtocol protocol = getPacketProtocol();
+                    var protocol = getPacketProtocol();
                     protocol.newClientSession(ViaClientSession.this);
 
                     if (!isBedrock) {
                         channel.config().setOption(ChannelOption.TCP_FASTOPEN_CONNECT, true);
                     }
 
-                    ChannelPipeline pipeline = channel.pipeline();
+                    var pipeline = channel.pipeline();
 
                     refreshReadTimeoutHandler(channel);
                     refreshWriteTimeoutHandler(channel);
@@ -163,17 +162,17 @@ public class ViaClientSession extends TcpSession {
                     }
 
                     // This monitors the traffic
-                    GlobalTrafficShapingHandler trafficHandler = new GlobalTrafficShapingHandler(eventLoopGroup.next(), 0, 0, 1000);
+                    var trafficHandler = new GlobalTrafficShapingHandler(eventLoopGroup.next(), 0, 0, 1000);
                     pipeline.addLast("traffic", trafficHandler);
                     setFlag(SWProtocolConstants.TRAFFIC_HANDLER, trafficHandler);
 
                     // This does the extra magic
-                    UserConnectionImpl userConnection = new UserConnectionImpl(channel, true);
+                    var userConnection = new UserConnectionImpl(channel, true);
                     userConnection.put(new StorableSettingsHolder(settingsHolder));
                     userConnection.put(new StorableSession(ViaClientSession.this));
 
                     if (isBedrock && meta.getMinecraftAccount().isPremiumBedrock()) {
-                        BedrockData bedrockData = (BedrockData) meta.getMinecraftAccount().accountData();
+                        var bedrockData = (BedrockData) meta.getMinecraftAccount().accountData();
                         userConnection.put(new AuthChainData(
                                 userConnection,
                                 bedrockData.mojangJwt(),
@@ -187,7 +186,7 @@ public class ViaClientSession extends TcpSession {
 
                     setFlag(SWProtocolConstants.VIA_USER_CONNECTION, userConnection);
 
-                    ProtocolPipelineImpl protocolPipeline = new ProtocolPipelineImpl(userConnection);
+                    var protocolPipeline = new ProtocolPipelineImpl(userConnection);
 
                     if (isLegacy) {
                         protocolPipeline.add(PreNettyBaseProtocol.INSTANCE);
@@ -218,7 +217,7 @@ public class ViaClientSession extends TcpSession {
             bootstrap.remoteAddress(targetAddress);
             bootstrap.localAddress(bindAddress, bindPort);
 
-            ChannelFuture future = bootstrap.connect();
+            var future = bootstrap.connect();
             if (wait) {
                 future.sync();
             }
@@ -241,13 +240,13 @@ public class ViaClientSession extends TcpSession {
     public void setCompressionThreshold(int threshold) {
         logger.debug("Enabling compression with threshold {}", threshold);
 
-        Channel channel = getChannel();
+        var channel = getChannel();
         if (channel == null) {
             throw new IllegalStateException("Channel is not initialized.");
         }
 
         if (threshold >= 0) {
-            ChannelHandler handler = channel.pipeline().get(COMPRESSION_NAME);
+            var handler = channel.pipeline().get(COMPRESSION_NAME);
             if (handler == null) {
                 channel.pipeline().addBefore("via-codec", COMPRESSION_NAME, new CompressionCodec(threshold));
             } else {
@@ -279,8 +278,8 @@ public class ViaClientSession extends TcpSession {
             pipeline.addFirst("proxy-protocol-packet-sender", new ChannelInboundHandlerAdapter() {
                 @Override
                 public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                    HAProxyProxiedProtocol proxiedProtocol = clientAddress.getAddress() instanceof Inet4Address ? HAProxyProxiedProtocol.TCP4 : HAProxyProxiedProtocol.TCP6;
-                    InetSocketAddress remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+                    var proxiedProtocol = clientAddress.getAddress() instanceof Inet4Address ? HAProxyProxiedProtocol.TCP4 : HAProxyProxiedProtocol.TCP6;
+                    var remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
                     ctx.channel().writeAndFlush(new HAProxyMessage(
                             HAProxyProtocolVersion.V2, HAProxyCommand.PROXY, proxiedProtocol,
                             clientAddress.getAddress().getHostAddress(), remoteAddress.getAddress().getHostAddress(),
@@ -335,12 +334,12 @@ public class ViaClientSession extends TcpSession {
 
     @Override
     public void send(Packet packet) {
-        Channel channel = getChannel();
+        var channel = getChannel();
         if (channel == null || !channel.isActive() || eventLoopGroup.isShutdown()) {
             return;
         }
 
-        PacketSendingEvent sendingEvent = new PacketSendingEvent(this, packet);
+        var sendingEvent = new PacketSendingEvent(this, packet);
         this.callEvent(sendingEvent);
 
         if (sendingEvent.isCancelled()) {
@@ -348,7 +347,7 @@ public class ViaClientSession extends TcpSession {
             return;
         }
 
-        final Packet toSend = sendingEvent.getPacket();
+        final var toSend = sendingEvent.getPacket();
         channel.writeAndFlush(toSend).addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
                 callPacketSent(toSend);
@@ -375,8 +374,8 @@ public class ViaClientSession extends TcpSession {
     }
 
     public void enableJavaEncryption(SecretKey key) {
-        CryptoCodec codec = new CryptoCodec(key, key);
-        ChannelPipeline pipeline = getChannel().pipeline();
+        var codec = new CryptoCodec(key, key);
+        var pipeline = getChannel().pipeline();
 
         if (pipeline.get("vl-prenetty") != null) {
             logger.debug("Enabling legacy decryption");

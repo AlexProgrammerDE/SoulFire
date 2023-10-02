@@ -51,7 +51,6 @@ import com.viaversion.viaversion.api.connection.UserConnection;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.SWConstants;
-import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.auth.service.JavaData;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
@@ -74,20 +73,20 @@ public class SWBaseListener extends SessionAdapter {
             throw new IllegalStateException("Session is not a ViaSession!");
         }
 
-        MinecraftProtocol protocol = (MinecraftProtocol) session.getPacketProtocol();
+        var protocol = (MinecraftProtocol) session.getPacketProtocol();
         if (protocol.getState() == ProtocolState.LOGIN) {
             if (packet instanceof ClientboundHelloPacket helloPacket) {
-                BotSettings botSettings = botConnection.settingsHolder().get(BotSettings.class);
-                MinecraftAccount minecraftAccount = botConnection.meta().getMinecraftAccount();
+                var botSettings = botConnection.settingsHolder().get(BotSettings.class);
+                var minecraftAccount = botConnection.meta().getMinecraftAccount();
                 UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
 
-                boolean authSupport = minecraftAccount.isPremiumJava();
+                var authSupport = minecraftAccount.isPremiumJava();
                 if (!authSupport) {
                     botConnection.logger().info("Server sent a encryption request, but we're offline mode. Not authenticating with mojang.");
                 }
 
-                boolean auth = authSupport;
-                boolean isLegacy = SWConstants.isLegacy(botSettings.protocolVersion());
+                var auth = authSupport;
+                var isLegacy = SWConstants.isLegacy(botSettings.protocolVersion());
                 if (auth && isLegacy) {
                     auth = Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
                 }
@@ -96,7 +95,7 @@ public class SWBaseListener extends SessionAdapter {
 
                 SecretKey key;
                 try {
-                    KeyGenerator gen = KeyGenerator.getInstance("AES");
+                    var gen = KeyGenerator.getInstance("AES");
                     gen.init(128);
                     key = gen.generateKey();
                 } catch (NoSuchAlgorithmException e) {
@@ -104,7 +103,7 @@ public class SWBaseListener extends SessionAdapter {
                 }
 
                 if (auth) {
-                    String serverId = botConnection.meta().getSessionService()
+                    var serverId = botConnection.meta().getSessionService()
                             .getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
                     botConnection.meta().joinServerId(serverId, viaSession);
                 }
@@ -149,13 +148,13 @@ public class SWBaseListener extends SessionAdapter {
 
     @Override
     public void packetSent(Session session, Packet packet) {
-        MinecraftProtocol protocol = (MinecraftProtocol) session.getPacketProtocol();
+        var protocol = (MinecraftProtocol) session.getPacketProtocol();
         if (packet instanceof ClientIntentionPacket) {
             // Once the HandshakePacket has been sent, switch to the next protocol mode.
             protocol.setState(this.targetState);
 
             if (this.targetState == ProtocolState.LOGIN) {
-                MinecraftAccount minecraftAccount = botConnection.meta().getMinecraftAccount();
+                var minecraftAccount = botConnection.meta().getMinecraftAccount();
 
                 UUID uuid;
                 if (minecraftAccount.accountData() instanceof JavaData javaData) {
@@ -179,10 +178,10 @@ public class SWBaseListener extends SessionAdapter {
 
     @Override
     public void connected(ConnectedEvent event) {
-        MinecraftProtocol protocol = (MinecraftProtocol) event.getSession().getPacketProtocol();
-        BotSettings botSettings = botConnection.settingsHolder().get(BotSettings.class);
-        String host = botSettings.host();
-        int port = botSettings.port();
+        var protocol = (MinecraftProtocol) event.getSession().getPacketProtocol();
+        var botSettings = botConnection.settingsHolder().get(BotSettings.class);
+        var host = botSettings.host();
+        var port = botSettings.port();
 
         event.getSession().send(new ClientIntentionPacket(
                 protocol.getCodec().getProtocolVersion(),

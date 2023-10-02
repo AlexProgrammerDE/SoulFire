@@ -68,34 +68,34 @@ public class BotActionManager {
 
     public void placeBlock(Hand hand, Vector3i againstBlock, Direction againstFace) {
         incrementSequenceNumber();
-        BotMovementManager movementManager = dataManager.getBotMovementManager();
-        LevelState levelState = dataManager.getCurrentLevel();
+        var movementManager = dataManager.getBotMovementManager();
+        var levelState = dataManager.getCurrentLevel();
         if (levelState == null) {
             return;
         }
 
-        Vector3d eyePosition = movementManager.getEyePosition();
-        boolean insideBlock = !levelState.getCollisionBoxes(new BoundingBox(eyePosition, eyePosition)).isEmpty();
+        var eyePosition = movementManager.getEyePosition();
+        var insideBlock = !levelState.getCollisionBoxes(new BoundingBox(eyePosition, eyePosition)).isEmpty();
 
-        Vector3d againstPlacePosition = getMiddleBlockFace(againstBlock, againstFace);
-        float previousYaw = movementManager.getYaw();
-        float previousPitch = movementManager.getPitch();
+        var againstPlacePosition = getMiddleBlockFace(againstBlock, againstFace);
+        var previousYaw = movementManager.getYaw();
+        var previousPitch = movementManager.getPitch();
         movementManager.lookAt(RotationOrigin.EYES, againstPlacePosition);
         if (previousPitch != movementManager.getPitch() || previousYaw != movementManager.getYaw()) {
             movementManager.sendRot();
         }
 
-        Optional<BlockStateMeta> blockState = levelState.getBlockStateAt(againstBlock);
+        var blockState = levelState.getBlockStateAt(againstBlock);
         if (blockState.isEmpty()) {
             return;
         }
 
-        Optional<Vector3f> rayCast = rayCastToBlock(blockState.get().blockShapeType(), eyePosition, movementManager.getRotationVector(), againstPlacePosition);
+        var rayCast = rayCastToBlock(blockState.get().blockShapeType(), eyePosition, movementManager.getRotationVector(), againstPlacePosition);
         if (rayCast.isEmpty()) {
             return;
         }
 
-        Vector3f rayCastPosition = rayCast.get().min(againstBlock.toFloat());
+        var rayCastPosition = rayCast.get().min(againstBlock.toFloat());
 
         dataManager.getSession().send(new ServerboundUseItemOnPacket(
                 againstBlock,
@@ -112,8 +112,8 @@ public class BotActionManager {
     private Optional<Vector3f> rayCastToBlock(BlockShapeType shapeType, Vector3d eyePosition, Vector3d headRotation, Vector3d targetPosition) {
         List<Vector3f> intersections = new ArrayList<>();
 
-        for (BlockShape shape : shapeType.blockShapes()) {
-            BoundingBox boundingBox = new BoundingBox(shape.minX(), shape.minY(), shape.minZ(), shape.maxX(), shape.maxY(), shape.maxZ());
+        for (var shape : shapeType.blockShapes()) {
+            var boundingBox = new BoundingBox(shape.minX(), shape.minY(), shape.minZ(), shape.maxX(), shape.maxY(), shape.maxZ());
             boundingBox.move(targetPosition.getX(), targetPosition.getY(), targetPosition.getZ());
             boundingBox.getIntersection(eyePosition, headRotation).map(Vector3d::toFloat).ifPresent(intersections::add);
         }
@@ -123,9 +123,9 @@ public class BotActionManager {
         }
 
         Vector3f closestIntersection = null;
-        double closestDistance = Double.MAX_VALUE;
+        var closestDistance = Double.MAX_VALUE;
 
-        for (Vector3f intersection : intersections) {
+        for (var intersection : intersections) {
             double distance = intersection.distance(eyePosition.getX(), eyePosition.getY(), eyePosition.getZ());
 
             if (distance < closestDistance) {
@@ -139,7 +139,7 @@ public class BotActionManager {
     }
 
     public Vector3d getMiddleBlockFace(Vector3i blockPos, Direction blockFace) {
-        Vector3d blockPosDouble = blockPos.toDouble();
+        var blockPosDouble = blockPos.toDouble();
         return switch (blockFace) {
             case DOWN -> blockPosDouble.add(0.5, 0, 0.5);
             case UP -> blockPosDouble.add(0.5, 1, 0.5);
@@ -151,13 +151,13 @@ public class BotActionManager {
     }
 
     public Optional<BlockPlaceData> findBlockToPlaceAgainst(Vector3i targetPos, List<Vector3i> ignoreBlocks) {
-        LevelState levelState = dataManager.getCurrentLevel();
+        var levelState = dataManager.getCurrentLevel();
         if (levelState == null) {
             return Optional.empty();
         }
 
-        for (Direction direction : Direction.values()) {
-            Vector3i blockPos = targetPos.add(switch (direction) {
+        for (var direction : Direction.values()) {
+            var blockPos = targetPos.add(switch (direction) {
                 case DOWN -> Vector3i.from(0, -1, 0);
                 case UP -> Vector3i.from(0, 1, 0);
                 case NORTH -> Vector3i.from(0, 0, -1);
@@ -170,7 +170,7 @@ public class BotActionManager {
                 continue;
             }
 
-            Optional<BlockStateMeta> blockState = levelState.getBlockStateAt(blockPos);
+            var blockState = levelState.getBlockStateAt(blockPos);
             if (blockState.isEmpty() || !blockState.get().blockShapeType().isFullBlock()) {
                 continue;
             }
@@ -184,7 +184,7 @@ public class BotActionManager {
     public CompletableFuture<Void> breakBlock(Vector3i blockPos) {
         return CompletableFuture.runAsync(() -> {
             incrementSequenceNumber();
-            Direction blockFace = getBlockFaceLookedAt(blockPos);
+            var blockFace = getBlockFaceLookedAt(blockPos);
             dataManager.getSession().send(new ServerboundPlayerActionPacket(
                     PlayerAction.START_DIGGING,
                     blockPos,
@@ -195,18 +195,18 @@ public class BotActionManager {
     }
 
     public Direction getBlockFaceLookedAt(Vector3i blockPos) {
-        Vector3d eyePosition = dataManager.getBotMovementManager().getEyePosition();
-        Vector3d headRotation = dataManager.getBotMovementManager().getRotationVector();
-        Vector3d blockPosDouble = blockPos.toDouble();
-        BoundingBox blockBoundingBox = new BoundingBox(blockPosDouble, blockPosDouble.add(1, 1, 1));
-        Optional<Vector3f> intersection = blockBoundingBox.getIntersection(eyePosition, headRotation).map(Vector3d::toFloat);
+        var eyePosition = dataManager.getBotMovementManager().getEyePosition();
+        var headRotation = dataManager.getBotMovementManager().getRotationVector();
+        var blockPosDouble = blockPos.toDouble();
+        var blockBoundingBox = new BoundingBox(blockPosDouble, blockPosDouble.add(1, 1, 1));
+        var intersection = blockBoundingBox.getIntersection(eyePosition, headRotation).map(Vector3d::toFloat);
         if (intersection.isEmpty()) {
             return null;
         }
 
-        Vector3f intersectionFloat = intersection.get();
-        Vector3f blockPosFloat = blockPos.toFloat();
-        Vector3f relativeIntersection = intersectionFloat.sub(blockPosFloat);
+        var intersectionFloat = intersection.get();
+        var blockPosFloat = blockPos.toFloat();
+        var relativeIntersection = intersectionFloat.sub(blockPosFloat);
 
         // Check side the intersection is the closest to
         if (relativeIntersection.getX() > relativeIntersection.getY() && relativeIntersection.getX() > relativeIntersection.getZ()) {

@@ -51,7 +51,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,17 +73,17 @@ public class AttackManager {
             throw new IllegalStateException("Attack is already running");
         }
 
-        AccountList accountListSettings = settingsHolder.get(AccountList.class);
-        List<MinecraftAccount> accounts = new ArrayList<>(accountListSettings.accounts()
+        var accountListSettings = settingsHolder.get(AccountList.class);
+        var accounts = new ArrayList<>(accountListSettings.accounts()
                 .stream().filter(MinecraftAccount::enabled).toList());
 
-        ProxyList proxyListSettings = settingsHolder.get(ProxyList.class);
-        List<SWProxy> proxies = new ArrayList<>(proxyListSettings.proxies()
+        var proxyListSettings = settingsHolder.get(ProxyList.class);
+        var proxies = new ArrayList<>(proxyListSettings.proxies()
                 .stream().filter(SWProxy::enabled).toList());
 
-        BotSettings botSettings = settingsHolder.get(BotSettings.class);
-        AccountSettings accountSettings = settingsHolder.get(AccountSettings.class);
-        ProxySettings proxySettings = settingsHolder.get(ProxySettings.class);
+        var botSettings = settingsHolder.get(BotSettings.class);
+        var accountSettings = settingsHolder.get(AccountSettings.class);
+        var proxySettings = settingsHolder.get(ProxySettings.class);
 
         serverWrecker.setupLogging(settingsHolder.get(DevSettings.class));
 
@@ -92,10 +91,10 @@ public class AttackManager {
 
         logger.info("Preparing bot attack at {}", botSettings.host());
 
-        int botAmount = botSettings.amount(); // How many bots to connect
-        int botsPerProxy = proxySettings.botsPerProxy(); // How many bots per proxy are allowed
-        int availableProxiesCount = proxies.size(); // How many proxies are available?
-        int maxBots = botsPerProxy > 0 ? botsPerProxy * availableProxiesCount : botAmount; // How many bots can be used at max
+        var botAmount = botSettings.amount(); // How many bots to connect
+        var botsPerProxy = proxySettings.botsPerProxy(); // How many bots per proxy are allowed
+        var availableProxiesCount = proxies.size(); // How many proxies are available?
+        var maxBots = botsPerProxy > 0 ? botsPerProxy * availableProxiesCount : botAmount; // How many bots can be used at max
 
         if (botAmount > maxBots) {
             logger.warn("You have specified {} bots, but only {} are available.", botAmount, maxBots);
@@ -104,7 +103,7 @@ public class AttackManager {
             botAmount = maxBots;
         }
 
-        int availableAccounts = accounts.size();
+        var availableAccounts = accounts.size();
 
         if (availableAccounts > 0 && botAmount > availableAccounts) {
             logger.warn("You have specified {} bots, but only {} accounts are available.", botAmount, availableAccounts);
@@ -116,27 +115,27 @@ public class AttackManager {
             Collections.shuffle(accounts);
         }
 
-        Object2IntMap<SWProxy> proxyUseMap = new Object2IntOpenHashMap<>();
-        for (SWProxy proxy : proxies) {
+        var proxyUseMap = new Object2IntOpenHashMap<SWProxy>();
+        for (var proxy : proxies) {
             proxyUseMap.put(proxy, 0);
         }
 
         // Prepare an event loop group with enough threads for the attack
-        int threads = botAmount;
+        var threads = botAmount;
         threads *= 2; // We need a monitor thread for each bot
 
-        EventLoopGroup attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(threads, String.format("Attack-%d", id));
+        var attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(threads, String.format("Attack-%d", id));
 
-        boolean isBedrock = SWConstants.isBedrock(botSettings.protocolVersion());
-        InetSocketAddress targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder, attackEventLoopGroup);
+        var isBedrock = SWConstants.isBedrock(botSettings.protocolVersion());
+        var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder, attackEventLoopGroup);
 
-        Queue<BotConnectionFactory> factories = new ArrayBlockingQueue<>(botAmount);
-        for (int botId = 1; botId <= botAmount; botId++) {
-            SWProxy proxyData = getProxy(botsPerProxy, proxyUseMap).orElse(null);
-            MinecraftAccount minecraftAccount = getAccount(accountSettings, accounts, botId);
+        var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
+        for (var botId = 1; botId <= botAmount; botId++) {
+            var proxyData = getProxy(botsPerProxy, proxyUseMap).orElse(null);
+            var minecraftAccount = getAccount(accountSettings, accounts, botId);
 
             // AuthData will be used internally instead of the MCProtocol data
-            MinecraftProtocol protocol = new MinecraftProtocol(EMPTY_GAME_PROFILE, null);
+            var protocol = new MinecraftProtocol(EMPTY_GAME_PROFILE, null);
 
             // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
             protocol.setUseDefaultListeners(false);
@@ -162,11 +161,11 @@ public class AttackManager {
         eventBus.post(new AttackStartEvent(this));
 
         // Used for concurrent bot connecting
-        ExecutorService connectService = Executors.newFixedThreadPool(botSettings.concurrentConnects());
+        var connectService = Executors.newFixedThreadPool(botSettings.concurrentConnects());
 
         return CompletableFuture.runAsync(() -> {
             while (!factories.isEmpty()) {
-                BotConnectionFactory factory = factories.poll();
+                var factory = factories.poll();
                 if (factory == null) {
                     break;
                 }
@@ -180,7 +179,7 @@ public class AttackManager {
                     TimeUtil.waitCondition(attackState::isPaused);
 
                     logger.debug("Connecting bot {}", factory.minecraftAccount().username());
-                    BotConnection botConnection = factory.prepareConnection();
+                    var botConnection = factory.prepareConnection();
                     botConnections.add(botConnection);
 
                     try {
@@ -233,16 +232,16 @@ public class AttackManager {
     private void stopInternal() {
         logger.info("Disconnecting bots");
         do {
-            Set<EventLoopGroup> eventLoopGroups = new HashSet<>();
+            var eventLoopGroups = new HashSet<EventLoopGroup>();
             var disconnectFuture = new ArrayList<CompletableFuture<Void>>();
-            for (BotConnection botConnection : List.copyOf(botConnections)) {
+            for (var botConnection : List.copyOf(botConnections)) {
                 disconnectFuture.add(botConnection.gracefulDisconnect());
                 eventLoopGroups.add(botConnection.session().getEventLoopGroup());
                 botConnections.remove(botConnection);
             }
 
             logger.info("Waiting for all bots to fully disconnect");
-            for (CompletableFuture<Void> future : disconnectFuture) {
+            for (var future : disconnectFuture) {
                 try {
                     future.get();
                 } catch (InterruptedException | ExecutionException e) {
@@ -251,7 +250,7 @@ public class AttackManager {
             }
 
             logger.info("Shutting down attack event loop groups");
-            for (EventLoopGroup eventLoopGroup : eventLoopGroups) {
+            for (var eventLoopGroup : eventLoopGroups) {
                 try {
                     eventLoopGroup.shutdownGracefully().get();
                 } catch (InterruptedException | ExecutionException e) {

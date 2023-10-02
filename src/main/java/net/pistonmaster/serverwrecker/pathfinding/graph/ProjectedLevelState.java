@@ -63,9 +63,9 @@ public class ProjectedLevelState {
     }
 
     public Optional<BlockStateMeta> getBlockStateAt(Vector3i position) {
-        AtomicBoolean checkShrink = new AtomicBoolean(false);
-        Optional<BlockStateMetaValue> meta = Optional.ofNullable(blockStateCache.computeIfAbsent(position, k -> {
-            BlockStateMetaValue toInsert = levelState.getBlockStateAt(k)
+        var checkShrink = new AtomicBoolean(false);
+        var meta = Optional.ofNullable(blockStateCache.computeIfAbsent(position, k -> {
+            var toInsert = levelState.getBlockStateAt(k)
                     .map(v -> new BlockStateMetaValue(v, false)).orElse(null);
 
             if (toInsert != null) {
@@ -77,10 +77,10 @@ public class ProjectedLevelState {
 
         // Reduce the cache size if it gets too big
         if (checkShrink.get()) {
-            int drainSize = 200 + blockChanges.size();
+            var drainSize = 200 + blockChanges.size();
             if (blockStateCache.size() > drainSize) {
                 // Remove the 100 eldest elements that are not changes (To prevent re-fetching)
-                AtomicInteger limitCounter = new AtomicInteger(0);
+                var limitCounter = new AtomicInteger(0);
                 blockStateCache.values().removeIf(value -> {
                     if (value.isChange()) {
                         return false;
@@ -98,7 +98,7 @@ public class ProjectedLevelState {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ProjectedLevelState that = (ProjectedLevelState) o;
+        var that = (ProjectedLevelState) o;
         return blockChangesHash == that.blockChangesHash;
     }
 

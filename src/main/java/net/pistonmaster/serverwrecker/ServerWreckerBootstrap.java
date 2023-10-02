@@ -46,8 +46,8 @@ public class ServerWreckerBootstrap {
     public static void main(String[] args) {
         ServerWreckerLoader.injectJvm();
 
-        int port = ServerWreckerLoader.getAvailablePort();
-        boolean isHeadless = GraphicsEnvironment.isHeadless() || args.length > 0;
+        var port = ServerWreckerLoader.getAvailablePort();
+        var isHeadless = GraphicsEnvironment.isHeadless() || args.length > 0;
         if (isHeadless) {
             ServerWreckerLoader.loadInternalAddons();
             ServerWreckerLoader.runHeadless(port, args);

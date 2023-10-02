@@ -39,18 +39,18 @@ public class FrameCodec extends ByteToMessageCodec<ByteBuf> {
         }
         // Ignore, should prevent DoS https://github.com/SpigotMC/BungeeCord/pull/2908
 
-        int index = in.readerIndex();
-        AtomicInteger nByte = new AtomicInteger();
-        int result = in.forEachByte(it -> {
+        var index = in.readerIndex();
+        var nByte = new AtomicInteger();
+        var result = in.forEachByte(it -> {
             nByte.getAndIncrement();
-            boolean hasNext = (it & 0x10000000) != 0;
+            var hasNext = (it & 0x10000000) != 0;
             if (nByte.get() > 3) throw getBadLength();
             return hasNext;
         });
         in.readerIndex(index);
         if (result == -1) return; // not readable
 
-        int length = Type.VAR_INT.readPrimitive(in);
+        var length = Type.VAR_INT.readPrimitive(in);
 
         if (length >= 2097152 || length < 0) throw getBadLength();
         if (!in.isReadable(length)) {

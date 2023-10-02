@@ -29,10 +29,10 @@ import java.util.List;
 public class MinecraftGraph {
     public List<GraphAction> getActions(BotEntityState node) {
         List<GraphAction> targetSet = new ArrayList<>();
-        for (MovementDirection direction : MovementDirection.values()) {
-            for (MovementModifier modifier : MovementModifier.values()) {
+        for (var direction : MovementDirection.values()) {
+            for (var modifier : MovementModifier.values()) {
                 if (direction.isDiagonal()) {
-                    for (MovementSide side : MovementSide.values()) {
+                    for (var side : MovementSide.values()) {
                         targetSet.add(new PlayerMovement(node, direction, modifier, side));
                     }
                 } else {

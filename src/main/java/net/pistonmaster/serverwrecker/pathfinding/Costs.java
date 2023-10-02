@@ -19,11 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding;
 
-import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
-import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -43,7 +41,7 @@ public class Costs {
     }
 
     public static Optional<BlockMiningCosts> calculateBlockBreakCost(ProjectedInventory inventory, BlockStateMeta blockStateMeta) {
-        BlockType blockType = blockStateMeta.blockType();
+        var blockType = blockStateMeta.blockType();
 
         // Don't try to find a way to dig bedrock
         if (!blockType.diggable()) {
@@ -59,7 +57,7 @@ public class Costs {
             return Optional.of(new BlockMiningCosts(DIG_BLOCK_WITHOUT_TOOL, null));
         }
 
-        for (ContainerSlot slot : inventory.getStorage()) {
+        for (var slot : inventory.getStorage()) {
             if (slot.item() == null) {
                 continue;
             }

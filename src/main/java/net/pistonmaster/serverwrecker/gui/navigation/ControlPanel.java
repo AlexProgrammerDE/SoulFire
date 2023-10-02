@@ -32,11 +32,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ControlPanel extends JPanel {
     @Inject
     public ControlPanel(ServerWrecker serverWrecker, GUIManager guiManager) {
-        AtomicInteger attackId = new AtomicInteger();
+        var attackId = new AtomicInteger();
 
-        JButton startButton = new JButton("Start");
-        JButton pauseButton = new JButton("Pause");
-        JButton stopButton = new JButton("Stop");
+        var startButton = new JButton("Start");
+        var pauseButton = new JButton("Pause");
+        var stopButton = new JButton("Stop");
 
         startButton.setSelected(true);
         pauseButton.setEnabled(false);
@@ -75,7 +75,7 @@ public class ControlPanel extends JPanel {
         });
 
         pauseButton.addActionListener(action -> {
-            boolean pauseText = pauseButton.getText().equals("Pause");
+            var pauseText = pauseButton.getText().equals("Pause");
 
             if (pauseText) {
                 guiManager.getLogger().info("Paused bot attack");

@@ -31,8 +31,6 @@ import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEven
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
@@ -52,17 +50,17 @@ public class ServerListBypass implements InternalAddon {
     }
 
     public void onPreConnect(PreBotConnectEvent event) {
-        BotConnection connection = event.connection();
+        var connection = event.connection();
         if (connection.meta().getTargetState() == ProtocolState.STATUS) {
             return;
         }
 
-        BotConnectionFactory factory = connection.factory();
+        var factory = connection.factory();
         if (!connection.settingsHolder().has(ServerListBypassSettings.class)) {
             return;
         }
 
-        ServerListBypassSettings settings = connection.settingsHolder().get(ServerListBypassSettings.class);
+        var settings = connection.settingsHolder().get(ServerListBypassSettings.class);
         if (!settings.serverListBypass()) {
             return;
         }

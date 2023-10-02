@@ -30,7 +30,7 @@ public class MathHelper {
      * @return The greatest integer less than or equal to the double argument
      */
     public static int floorDouble(double value) {
-        int i = (int) value;
+        var i = (int) value;
         return value < (double) i ? i - 1 : i;
     }
 

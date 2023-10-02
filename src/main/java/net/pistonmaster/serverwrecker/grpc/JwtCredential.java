@@ -35,7 +35,7 @@ public class JwtCredential extends CallCredentials {
                                      final MetadataApplier metadataApplier) {
         executor.execute(() -> {
             try {
-                Metadata headers = new Metadata();
+                var headers = new Metadata();
                 headers.put(Constant.AUTHORIZATION_METADATA_KEY,
                         String.format("%s %s", Constant.BEARER_TYPE, jwt));
                 metadataApplier.apply(headers);

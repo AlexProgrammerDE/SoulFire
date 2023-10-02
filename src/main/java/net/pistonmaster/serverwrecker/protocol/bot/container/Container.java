@@ -34,7 +34,7 @@ public class Container {
 
     public Container(int slots, int id) {
         this.slots = new ContainerSlot[slots];
-        for (int i = 0; i < slots; i++) {
+        for (var i = 0; i < slots; i++) {
             this.slots[i] = new ContainerSlot(i, null);
         }
         this.id = id;
@@ -49,7 +49,7 @@ public class Container {
     }
 
     public ContainerSlot[] getSlots(int start, int end) {
-        ContainerSlot[] items = new ContainerSlot[end - start + 1];
+        var items = new ContainerSlot[end - start + 1];
 
         if (end + 1 - start >= 0) {
             System.arraycopy(slots, start, items, 0, end + 1 - start);

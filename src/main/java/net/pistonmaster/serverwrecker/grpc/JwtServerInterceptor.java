@@ -34,9 +34,9 @@ public class JwtServerInterceptor implements ServerInterceptor {
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall,
                                                                  Metadata metadata, ServerCallHandler<ReqT, RespT> serverCallHandler) {
-        String value = metadata.get(Constant.AUTHORIZATION_METADATA_KEY);
+        var value = metadata.get(Constant.AUTHORIZATION_METADATA_KEY);
 
-        Status status = Status.OK;
+        var status = Status.OK;
         if (value == null) {
             status = Status.UNAUTHENTICATED.withDescription("Authorization token is missing");
         } else if (!value.startsWith(Constant.BEARER_TYPE)) {
@@ -44,7 +44,7 @@ public class JwtServerInterceptor implements ServerInterceptor {
         } else {
             Jws<Claims> claims = null;
             // remove authorization type prefix
-            String token = value.substring(Constant.BEARER_TYPE.length()).trim();
+            var token = value.substring(Constant.BEARER_TYPE.length()).trim();
             try {
                 // verify token signature and parse claims
                 claims = parser.parseClaimsJws(token);
@@ -53,7 +53,7 @@ public class JwtServerInterceptor implements ServerInterceptor {
             }
             if (claims != null) {
                 // set client id into current context
-                Context ctx = Context.current()
+                var ctx = Context.current()
                         .withValue(Constant.CLIENT_ID_CONTEXT_KEY, claims.getBody().getSubject());
                 return Contexts.interceptCall(ctx, serverCall, metadata, serverCallHandler);
             }

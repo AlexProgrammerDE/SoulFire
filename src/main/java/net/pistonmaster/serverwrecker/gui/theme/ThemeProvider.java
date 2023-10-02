@@ -26,10 +26,10 @@ import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.swing.plaf.basic.BasicLookAndFeel;
 
+@Getter
+@Setter
 @AllArgsConstructor
 public class ThemeProvider implements SettingsDuplex<ThemeSettings> {
-    @Setter
-    @Getter
     private Class<? extends BasicLookAndFeel> themeClass;
 
     @Override

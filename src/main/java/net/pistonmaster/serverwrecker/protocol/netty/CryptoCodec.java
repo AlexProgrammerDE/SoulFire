@@ -50,7 +50,7 @@ public class CryptoCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) {
-        ByteBuf compatible = MoreByteBufUtils.ensureCompatible(ctx.alloc(), encoder, msg);
+        var compatible = MoreByteBufUtils.ensureCompatible(ctx.alloc(), encoder, msg);
         try {
             encoder.process(compatible);
             out.add(compatible.retain());
@@ -65,7 +65,7 @@ public class CryptoCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
             return;
         }
 
-        ByteBuf compatible = MoreByteBufUtils.ensureCompatible(ctx.alloc(), decoder, msg);
+        var compatible = MoreByteBufUtils.ensureCompatible(ctx.alloc(), decoder, msg);
         try {
             decoder.process(compatible);
             out.add(compatible.retain());

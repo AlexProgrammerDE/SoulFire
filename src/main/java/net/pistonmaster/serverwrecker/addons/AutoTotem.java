@@ -32,12 +32,6 @@ import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
-import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
-import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
-import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
-import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
@@ -46,7 +40,6 @@ import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class AutoTotem implements InternalAddon {
@@ -57,34 +50,34 @@ public class AutoTotem implements InternalAddon {
     }
 
     public void onJoined(BotJoinedEvent event) {
-        BotConnection connection = event.connection();
+        var connection = event.connection();
         if (!connection.settingsHolder().has(AutoTotemSettings.class)) {
             return;
         }
 
-        AutoTotemSettings settings = connection.settingsHolder().get(AutoTotemSettings.class);
+        var settings = connection.settingsHolder().get(AutoTotemSettings.class);
         if (!settings.autoTotem()) {
             return;
         }
 
-        ScheduledExecutorService executor = connection.executorManager().newScheduledExecutorService("AutoTotem");
+        var executor = connection.executorManager().newScheduledExecutorService("AutoTotem");
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
-            SessionDataManager sessionDataManager = connection.sessionDataManager();
-            InventoryManager inventoryManager = sessionDataManager.getInventoryManager();
-            PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
-            ContainerSlot offhandSlot = playerInventory.getOffhand();
+            var sessionDataManager = connection.sessionDataManager();
+            var inventoryManager = sessionDataManager.getInventoryManager();
+            var playerInventory = inventoryManager.getPlayerInventory();
+            var offhandSlot = playerInventory.getOffhand();
 
             // We only want to use totems if there are no items in the offhand
             if (offhandSlot.item() != null) {
                 return;
             }
 
-            for (ContainerSlot slot : playerInventory.getStorage()) {
+            for (var slot : playerInventory.getStorage()) {
                 if (slot.item() == null) {
                     continue;
                 }
 
-                SWItemStack item = slot.item();
+                var item = slot.item();
                 if (item.getType() == ItemType.TOTEM_OF_UNDYING) {
                     if (!inventoryManager.tryInventoryControl()) {
                         return;

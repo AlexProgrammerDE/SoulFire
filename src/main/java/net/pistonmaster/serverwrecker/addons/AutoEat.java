@@ -31,16 +31,9 @@ import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.data.DangerFood;
 import net.pistonmaster.serverwrecker.data.FoodType;
-import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
-import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
-import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
-import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
-import net.pistonmaster.serverwrecker.protocol.bot.model.HealthData;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
@@ -49,7 +42,6 @@ import picocli.CommandLine;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class AutoEat implements InternalAddon {
@@ -60,38 +52,38 @@ public class AutoEat implements InternalAddon {
     }
 
     public void onJoined(BotJoinedEvent event) {
-        BotConnection connection = event.connection();
+        var connection = event.connection();
         if (!connection.settingsHolder().has(AutoEatSettings.class)) {
             return;
         }
 
-        AutoEatSettings settings = connection.settingsHolder().get(AutoEatSettings.class);
+        var settings = connection.settingsHolder().get(AutoEatSettings.class);
         if (!settings.autoEat()) {
             return;
         }
 
-        ScheduledExecutorService executor = connection.executorManager().newScheduledExecutorService("AutoEat");
+        var executor = connection.executorManager().newScheduledExecutorService("AutoEat");
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
-            SessionDataManager sessionDataManager = connection.sessionDataManager();
+            var sessionDataManager = connection.sessionDataManager();
 
-            HealthData healthData = sessionDataManager.getHealthData();
+            var healthData = sessionDataManager.getHealthData();
             if (healthData == null || healthData.food() >= 20) {
                 return;
             }
 
-            InventoryManager inventoryManager = sessionDataManager.getInventoryManager();
-            PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
+            var inventoryManager = sessionDataManager.getInventoryManager();
+            var playerInventory = inventoryManager.getPlayerInventory();
 
-            int i = 0;
-            for (ContainerSlot slot : playerInventory.getHotbar()) {
-                int hotbarSlot = i++;
+            var i = 0;
+            for (var slot : playerInventory.getHotbar()) {
+                var hotbarSlot = i++;
 
                 if (slot.item() == null) {
                     continue;
                 }
 
-                ItemType itemType = slot.item().getType();
-                FoodType foodType = FoodType.VALUES.stream()
+                var itemType = slot.item().getType();
+                var foodType = FoodType.VALUES.stream()
                         .filter(type -> type.itemType() == itemType)
                         .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
                         .orElse(null);
@@ -117,13 +109,13 @@ public class AutoEat implements InternalAddon {
                 }
             }
 
-            for (ContainerSlot slot : playerInventory.getMainInventory()) {
+            for (var slot : playerInventory.getMainInventory()) {
                 if (slot.item() == null) {
                     continue;
                 }
 
-                ItemType itemType = slot.item().getType();
-                FoodType foodType = FoodType.VALUES.stream()
+                var itemType = slot.item().getType();
+                var foodType = FoodType.VALUES.stream()
                         .filter(type -> type.itemType() == itemType)
                         .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
                         .orElse(null);

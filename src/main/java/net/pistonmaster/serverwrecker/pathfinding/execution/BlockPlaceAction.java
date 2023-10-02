@@ -43,7 +43,7 @@ public class BlockPlaceAction implements WorldAction {
 
     @Override
     public boolean isCompleted(BotConnection connection) {
-        LevelState levelState = connection.sessionDataManager().getCurrentLevel();
+        var levelState = connection.sessionDataManager().getCurrentLevel();
         if (levelState == null) {
             return false;
         }
@@ -53,27 +53,27 @@ public class BlockPlaceAction implements WorldAction {
 
     @Override
     public void tick(BotConnection connection) {
-        BotMovementManager movementManager = connection.sessionDataManager().getBotMovementManager();
+        var movementManager = connection.sessionDataManager().getBotMovementManager();
         movementManager.getControlState().resetAll();
 
         if (!putOnHotbar) {
-            InventoryManager inventoryManager = connection.sessionDataManager().getInventoryManager();
-            PlayerInventoryContainer playerInventory = inventoryManager.getPlayerInventory();
-            ContainerSlot heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
+            var inventoryManager = connection.sessionDataManager().getInventoryManager();
+            var playerInventory = inventoryManager.getPlayerInventory();
+            var heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
             if (heldSlot.item() != null) {
-                SWItemStack item = heldSlot.item();
+                var item = heldSlot.item();
                 if (item.getType() == blockType) {
                     putOnHotbar = true;
                     return;
                 }
             }
 
-            for (ContainerSlot hotbarSlot : playerInventory.getHotbar()) {
+            for (var hotbarSlot : playerInventory.getHotbar()) {
                 if (hotbarSlot.item() == null) {
                     continue;
                 }
 
-                SWItemStack item = hotbarSlot.item();
+                var item = hotbarSlot.item();
                 if (item.getType() == blockType) {
                     inventoryManager.setHeldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
                     inventoryManager.sendHeldItemChange();
@@ -82,12 +82,12 @@ public class BlockPlaceAction implements WorldAction {
                 }
             }
 
-            for (ContainerSlot slot : playerInventory.getMainInventory()) {
+            for (var slot : playerInventory.getMainInventory()) {
                 if (slot.item() == null) {
                     continue;
                 }
 
-                SWItemStack item = slot.item();
+                var item = slot.item();
                 if (item.getType() == blockType) {
                     if (!inventoryManager.tryInventoryControl()) {
                         return;

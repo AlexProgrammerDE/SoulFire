@@ -59,7 +59,7 @@ public class ServerWreckerLoader {
     }
 
     public static void loadInternalAddons() {
-        List<InternalAddon> addons = List.of(
+        var addons = List.of(
                 new BotTicker(), new ClientBrand(), new ClientSettings(),
                 new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
                 new AutoTotem(), new AutoJump(), new AutoArmor(), new AutoEat(),
@@ -69,9 +69,9 @@ public class ServerWreckerLoader {
     }
 
     public static void runHeadless(int port, String[] args) {
-        ServerWrecker serverWrecker = new ServerWrecker(OperationMode.CLI, "localhost", port);
-        SWCommandDefinition serverWreckerCommand = new SWCommandDefinition(serverWrecker);
-        CommandLine commandLine = new CommandLine(serverWreckerCommand);
+        var serverWrecker = new ServerWrecker(OperationMode.CLI, "localhost", port);
+        var serverWreckerCommand = new SWCommandDefinition(serverWrecker);
+        var commandLine = new CommandLine(serverWreckerCommand);
         serverWreckerCommand.setCommandLine(commandLine);
         commandLine.setCaseInsensitiveEnumValuesAllowed(true);
         commandLine.setUsageHelpAutoWidth(true);
@@ -86,19 +86,19 @@ public class ServerWreckerLoader {
     }
 
     public static void runGUI(int port) {
-        ServerWrecker serverWrecker = new ServerWrecker(OperationMode.GUI, "localhost", port);
+        var serverWrecker = new ServerWrecker(OperationMode.GUI, "localhost", port);
         serverWrecker.initConsole();
 
-        GUIManager guiManager = new GUIManager(serverWrecker, serverWrecker.getInjector().getSingleton(RPCClient.class));
+        var guiManager = new GUIManager(serverWrecker, serverWrecker.getInjector().getSingleton(RPCClient.class));
         guiManager.initGUI();
     }
 
     public static int getAvailablePort() {
-        int initialPort = 38765;
+        var initialPort = 38765;
 
         while (true) {
             try {
-                ServerSocket serverSocket = new ServerSocket(initialPort);
+                var serverSocket = new ServerSocket(initialPort);
                 serverSocket.close();
                 break; // Port is available, exit the loop
             } catch (IOException e) {

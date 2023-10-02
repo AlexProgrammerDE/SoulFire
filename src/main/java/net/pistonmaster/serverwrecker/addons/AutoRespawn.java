@@ -56,12 +56,12 @@ public class AutoRespawn implements InternalAddon {
                 return;
             }
 
-            AutoRespawnSettings autoRespawnSettings = event.connection().settingsHolder().get(AutoRespawnSettings.class);
+            var autoRespawnSettings = event.connection().settingsHolder().get(AutoRespawnSettings.class);
             if (!autoRespawnSettings.autoRespawn()) {
                 return;
             }
 
-            String message = ServerWrecker.PLAIN_MESSAGE_SERIALIZER.serialize(combatKillPacket.getMessage());
+            var message = ServerWrecker.PLAIN_MESSAGE_SERIALIZER.serialize(combatKillPacket.getMessage());
             event.connection().logger().info("[AutoRespawn] Died with killer: {} and message: '{}'",
                     combatKillPacket.getPlayerId(), message);
 

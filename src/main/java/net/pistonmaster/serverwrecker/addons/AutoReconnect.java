@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
-import io.netty.channel.EventLoopGroup;
 import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
@@ -31,7 +30,6 @@ import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEven
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
@@ -54,24 +52,24 @@ public class AutoReconnect implements InternalAddon {
     }
 
     public void onDisconnect(BotDisconnectedEvent event) {
-        BotConnection connection = event.connection();
+        var connection = event.connection();
         if (!connection.settingsHolder().has(AutoReconnectSettings.class)) {
             return;
         }
 
-        AutoReconnectSettings autoReconnectSettings = connection.settingsHolder().get(AutoReconnectSettings.class);
+        var autoReconnectSettings = connection.settingsHolder().get(AutoReconnectSettings.class);
         if (!autoReconnectSettings.autoReconnect() || connection.attackManager().getAttackState().isInactive()) {
             return;
         }
 
         scheduler.schedule(() -> {
-            EventLoopGroup eventLoopGroup = connection.session().getEventLoopGroup();
+            var eventLoopGroup = connection.session().getEventLoopGroup();
             if (eventLoopGroup.isShuttingDown() || eventLoopGroup.isShutdown() || eventLoopGroup.isTerminated()) {
                 return;
             }
 
             connection.gracefulDisconnect().join();
-            BotConnection newConnection = connection.factory().prepareConnection();
+            var newConnection = connection.factory().prepareConnection();
 
             connection.attackManager().getBotConnections()
                     .replaceAll(connectionEntry -> connectionEntry == connection ? newConnection : connectionEntry);

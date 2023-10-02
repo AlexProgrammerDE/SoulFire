@@ -53,10 +53,10 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
 
         setLayout(new GridLayout(2, 1, 10, 10));
 
-        JPanel proxyOptionsPanel = new JPanel();
+        var proxyOptionsPanel = new JPanel();
         proxyOptionsPanel.setLayout(new GridLayout(2, 1, 10, 10));
 
-        JPanel addProxyPanel = new JPanel();
+        var addProxyPanel = new JPanel();
         addProxyPanel.setLayout(new GridLayout(1, 3, 10, 10));
 
         addProxyPanel.add(createProxyLoadButton(serverWrecker, parent, ProxyType.HTTP));
@@ -65,7 +65,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
 
         proxyOptionsPanel.add(addProxyPanel);
 
-        JPanel proxySettingsPanel = new JPanel();
+        var proxySettingsPanel = new JPanel();
         proxySettingsPanel.setLayout(new GridLayout(0, 2));
 
         proxySettingsPanel.add(new JLabel("Accounts per proxy: "));
@@ -76,11 +76,11 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
 
         add(proxyOptionsPanel);
 
-        JPanel proxyListPanel = new JPanel();
+        var proxyListPanel = new JPanel();
         proxyListPanel.setLayout(new GridLayout(1, 1));
 
-        String[] columnNames = {"IP", "Port", "Username", "Password", "Type", "Enabled"};
-        DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+        var columnNames = new String[]{"IP", "Port", "Username", "Password", "Type", "Enabled"};
+        var model = new DefaultTableModel(columnNames, 0) {
             final Class<?>[] columnTypes = new Class<?>[]{
                     Object.class, Integer.class, Object.class, Object.class, ProxyType.class, Boolean.class
             };
@@ -91,16 +91,16 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
             }
         };
 
-        JTable proxyList = new JTable(model);
+        var proxyList = new JTable(model);
 
         serverWrecker.getProxyRegistry().addLoadHook(() -> {
             model.getDataVector().removeAllElements();
 
-            ProxyRegistry registry = serverWrecker.getProxyRegistry();
-            int registrySize = registry.getProxies().size();
-            Object[][] dataVector = new Object[registrySize][];
-            for (int i = 0; i < registrySize; i++) {
-                SWProxy proxy = registry.getProxies().get(i);
+            var registry = serverWrecker.getProxyRegistry();
+            var registrySize = registry.getProxies().size();
+            var dataVector = new Object[registrySize][];
+            for (var i = 0; i < registrySize; i++) {
+                var proxy = registry.getProxies().get(i);
 
                 dataVector[i] = new Object[]{
                         proxy.host(),
@@ -124,18 +124,18 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
             if ("tableCellEditor".equals(evt.getPropertyName()) && !proxyList.isEditing()) {
                 List<SWProxy> proxies = new ArrayList<>();
 
-                for (int i = 0; i < proxyList.getRowCount(); i++) {
-                    Object[] row = new Object[proxyList.getColumnCount()];
-                    for (int j = 0; j < proxyList.getColumnCount(); j++) {
+                for (var i = 0; i < proxyList.getRowCount(); i++) {
+                    var row = new Object[proxyList.getColumnCount()];
+                    for (var j = 0; j < proxyList.getColumnCount(); j++) {
                         row[j] = proxyList.getValueAt(i, j);
                     }
 
-                    String host = (String) row[0];
-                    int port = (int) row[1];
-                    String username = (String) row[2];
-                    String password = (String) row[3];
-                    ProxyType type = (ProxyType) row[4];
-                    boolean enabled = (boolean) row[5];
+                    var host = (String) row[0];
+                    var port = (int) row[1];
+                    var username = (String) row[2];
+                    var password = (String) row[3];
+                    var type = (ProxyType) row[4];
+                    var enabled = (boolean) row[5];
 
                     proxies.add(new SWProxy(type, host, port, username, password, enabled));
                 }
@@ -144,7 +144,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
             }
         });
 
-        JScrollPane scrollPane = new JScrollPane(proxyList);
+        var scrollPane = new JScrollPane(proxyList);
 
         proxyListPanel.add(scrollPane);
 
@@ -152,11 +152,11 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
     }
 
     private JButton createProxyLoadButton(ServerWrecker serverWrecker, GUIFrame parent, ProxyType type) {
-        String loadText = SwingTextUtils.htmlCenterText(String.format("Load %s proxies", type.name()));
-        String typeText = String.format("%s list file", type.name());
-        JButton button = new JButton(loadText);
+        var loadText = SwingTextUtils.htmlCenterText(String.format("Load %s proxies", type.name()));
+        var typeText = String.format("%s list file", type.name());
+        var button = new JButton(loadText);
 
-        FileChooser chooser = new FileChooser();
+        var chooser = new FileChooser();
         chooser.setInitialDirectory(Path.of(System.getProperty("user.dir")).toFile());
         chooser.setTitle(loadText);
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(typeText, "*.txt"));
@@ -191,7 +191,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
                                        FileChooser chooser, ProxyType proxyType) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            Path proxyFile = JFXFileHelper.showOpenDialog(chooser);
+            var proxyFile = JFXFileHelper.showOpenDialog(chooser);
             if (proxyFile == null) {
                 return;
             }

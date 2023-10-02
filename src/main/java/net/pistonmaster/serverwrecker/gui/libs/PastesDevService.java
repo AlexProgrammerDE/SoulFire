@@ -52,15 +52,15 @@ public class PastesDevService {
     }
 
     public static String upload(String text) throws IOException {
-        try (CloseableHttpClient httpClient = createHttpClient()) {
-            HttpPost httpPost = new HttpPost("https://api.pastes.dev/post");
+        try (var httpClient = createHttpClient()) {
+            var httpPost = new HttpPost("https://api.pastes.dev/post");
             httpPost.setEntity(new StringEntity(text, ContentType.APPLICATION_JSON));
-            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+            try (var response = httpClient.execute(httpPost)) {
                 if (response.getStatusLine().getStatusCode() != 201) {
                     throw new IOException("Failed to upload paste: " + response.getStatusLine().getStatusCode());
                 }
 
-                String responseText = EntityUtils.toString(response.getEntity());
+                var responseText = EntityUtils.toString(response.getEntity());
 
                 return gson.fromJson(responseText, BytebinResponse.class).key();
             }

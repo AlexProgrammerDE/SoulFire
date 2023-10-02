@@ -28,11 +28,11 @@ public class AddonCLIHelper {
     }
 
     public static <T extends SettingsObject> void registerCommands(CommandLine commandLine, Class<T> clazz, SettingsProvider<T> command) {
-        CommandLine.Model.CommandSpec sourceCommandSpec = CommandLine.Model.CommandSpec.forAnnotatedObject(command);
-        CommandLine.Model.CommandSpec targetCommandSpec = commandLine.getCommandSpec();
+        var sourceCommandSpec = CommandLine.Model.CommandSpec.forAnnotatedObject(command);
+        var targetCommandSpec = commandLine.getCommandSpec();
 
         // Inject the command spec into the main command spec
-        for (CommandLine.Model.OptionSpec optionSpec : sourceCommandSpec.options()) {
+        for (var optionSpec : sourceCommandSpec.options()) {
             targetCommandSpec.addOption(optionSpec);
         }
 

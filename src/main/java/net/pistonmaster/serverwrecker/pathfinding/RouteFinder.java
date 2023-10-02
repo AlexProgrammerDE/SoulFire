@@ -41,7 +41,7 @@ import java.util.Map;
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     private static List<WorldAction> getActions(MinecraftRouteNode current) {
         List<WorldAction> actions = new ArrayList<>();
-        MinecraftRouteNode previousElement = current;
+        var previousElement = current;
         do {
             List<WorldAction> previousActions = new ArrayList<>(previousElement.getPreviousActions());
 
@@ -58,7 +58,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     }
 
     public List<WorldAction> findRoute(BotEntityState from) {
-        Stopwatch stopwatch = Stopwatch.createStarted();
+        var stopwatch = Stopwatch.createStarted();
 
         // Store block positions and the best route to them
         Map<BotEntityState, MinecraftRouteNode> routeIndex = new Object2ObjectOpenHashMap<>();
@@ -66,17 +66,17 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         // Store block positions that we need to look at
         PriorityQueue<MinecraftRouteNode> openSet = new ObjectHeapPriorityQueue<>();
 
-        double startScore = scorer.computeScore(from);
+        var startScore = scorer.computeScore(from);
         log.info("Start score (Usually distance): {}", startScore);
 
-        MinecraftRouteNode start = new MinecraftRouteNode(from, null, List.of(new MovementAction(from.position(), 0)), 0d, startScore);
+        var start = new MinecraftRouteNode(from, null, List.of(new MovementAction(from.position(), 0)), 0d, startScore);
         routeIndex.put(from, start);
         openSet.enqueue(start);
 
         MinecraftRouteNode element;
         while ((element = openSet.dequeue()) != null) {
             // To have a local field to use in lambdas
-            MinecraftRouteNode current = element;
+            var current = element;
             log.debug("Looking at node: {}", current.getEntityState().position());
 
             // If we found our destination, we can stop looking
@@ -98,7 +98,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
                     // This is the best node we found so far
                     // We will add a recalculating action and return the best route
-                    MinecraftRouteNode recalculatingNode = new MinecraftRouteNode(
+                    var recalculatingNode = new MinecraftRouteNode(
                             current.getEntityState(),
                             current,
                             List.of(new RecalculatePathAction()),
@@ -111,15 +111,15 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                     continue;
                 }
 
-                double actionCost = instructions.actionCost();
-                BotEntityState actionTargetState = instructions.targetState();
-                List<WorldAction> worldActions = instructions.actions();
+                var actionCost = instructions.actionCost();
+                var actionTargetState = instructions.targetState();
+                var worldActions = instructions.actions();
                 routeIndex.compute(actionTargetState, (k, v) -> {
                     // Calculate new distance from start to this connection,
                     // Get distance from the current element
                     // and add the distance from the current element to the next element
-                    double newSourceCost = current.getSourceCost() + actionCost;
-                    double newTotalRouteScore = newSourceCost + scorer.computeScore(actionTargetState);
+                    var newSourceCost = current.getSourceCost() + actionCost;
+                    var newTotalRouteScore = newSourceCost + scorer.computeScore(actionTargetState);
 
                     // The first time we see this node
                     if (v == null) {
