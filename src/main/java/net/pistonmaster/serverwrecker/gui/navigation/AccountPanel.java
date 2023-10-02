@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.ServerWrecker;
-import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
@@ -46,7 +45,7 @@ import java.util.List;
 
 public class AccountPanel extends NavigationItem implements SettingsDuplex<AccountSettings> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountPanel.class);
-    private final JTextField nameFormat;
+    private final JTextField nameFormat = new JTextField(AccountSettings.DEFAULT_NAME_FORMAT);
     private final JCheckBox shuffleAccounts = new PresetJCheckBox(AccountSettings.DEFAULT_SHUFFLE_ACCOUNTS);
 
     @Inject
@@ -76,7 +75,6 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         accountSettingsPanel.add(shuffleAccounts);
 
         accountSettingsPanel.add(new JLabel("Name Format: "));
-        nameFormat = new JTextField(AccountSettings.DEFAULT_NAME_FORMAT);
         accountSettingsPanel.add(nameFormat);
 
         accountOptionsPanel.add(accountSettingsPanel);

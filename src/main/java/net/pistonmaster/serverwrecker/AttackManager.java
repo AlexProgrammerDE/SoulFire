@@ -85,7 +85,7 @@ public class AttackManager {
         var accountSettings = settingsHolder.get(AccountSettings.class);
         var proxySettings = settingsHolder.get(ProxySettings.class);
 
-        serverWrecker.setupLogging(settingsHolder.get(DevSettings.class));
+        serverWrecker.setupLoggingAndVia(settingsHolder.get(DevSettings.class));
 
         this.attackState = AttackState.RUNNING;
 

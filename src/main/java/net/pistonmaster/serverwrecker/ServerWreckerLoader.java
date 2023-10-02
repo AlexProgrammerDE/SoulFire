@@ -27,6 +27,7 @@ import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
+import net.pistonmaster.serverwrecker.settings.DevSettings;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,14 +44,14 @@ public class ServerWreckerLoader {
     }
 
     public static void injectJvm() {
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) ->
+                LOGGER.error("Exception in thread {}", thread.getName(), throwable));
+
         if (System.console() != null) {
             AnsiConsole.systemInstall();
         }
 
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            LOGGER.error("Exception in thread {}", thread.getName(), throwable);
-            throwable.printStackTrace();
-        });
+        ServerWrecker.setupLogging(DevSettings.DEFAULT);
     }
 
     public static void injectTheme() {

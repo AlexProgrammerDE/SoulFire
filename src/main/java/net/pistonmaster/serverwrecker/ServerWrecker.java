@@ -292,9 +292,12 @@ public class ServerWrecker {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public void setupLogging(DevSettings devSettings) {
+    public void setupLoggingAndVia(DevSettings devSettings) {
         Via.getManager().debugHandler().setEnabled(devSettings.viaDebug());
+        setupLogging(devSettings);
+    }
 
+    public static void setupLogging(DevSettings devSettings) {
         var level = devSettings.coreDebug() ? Level.DEBUG : Level.INFO;
         var nettyLevel = devSettings.nettyDebug() ? Level.DEBUG : Level.INFO;
         var grpcLevel = devSettings.grpcDebug() ? Level.DEBUG : Level.INFO;

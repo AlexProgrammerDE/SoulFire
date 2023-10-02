@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -77,7 +76,7 @@ public class GUIManager {
 
             CLASS_NAME_VARIABLE.set("ServerWrecker");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to set app title!", e);
         }
     }
 }

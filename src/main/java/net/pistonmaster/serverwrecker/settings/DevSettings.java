@@ -27,4 +27,5 @@ public record DevSettings(boolean viaDebug, boolean nettyDebug, boolean grpcDebu
     public static final boolean DEFAULT_NETTY_DEBUG = false;
     public static final boolean DEFAULT_GRPC_DEBUG = false;
     public static final boolean DEFAULT_CORE_DEBUG = false;
+    public static DevSettings DEFAULT = new DevSettings(DEFAULT_VIA_DEBUG, DEFAULT_NETTY_DEBUG, DEFAULT_GRPC_DEBUG, DEFAULT_CORE_DEBUG);
 }
