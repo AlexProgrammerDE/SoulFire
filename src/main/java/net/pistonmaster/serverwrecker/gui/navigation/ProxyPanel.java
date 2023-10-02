@@ -117,7 +117,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
 
         proxyList.addPropertyChangeListener(evt -> {
             if ("tableCellEditor".equals(evt.getPropertyName()) && !proxyList.isEditing()) {
-                var = new ArrayList<SWProxy>();
+                var proxies = new ArrayList<SWProxy>();
 
                 for (var i = 0; i < proxyList.getRowCount(); i++) {
                     var row = new Object[proxyList.getColumnCount()];
