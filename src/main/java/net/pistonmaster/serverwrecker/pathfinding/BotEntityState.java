@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.pathfinding;
 
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
-import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 
@@ -29,14 +28,12 @@ import org.cloudburstmc.math.vector.Vector3d;
  * Represents the state of the bot in the level.
  * This means the positions and in the future also inventory.
  *
- * @param tagsState  The tags state of the bot.
  * @param position   The position of the bot.
  *                   This is always the middle of the block.
  * @param levelState The level state of the world the bot is in.
  * @param inventory  The inventory state of the bot.
  */
-public record BotEntityState(TagsState tagsState, Vector3d position, ProjectedLevelState levelState,
-                             ProjectedInventory inventory) {
+public record BotEntityState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory) {
     public BotEntityState {
         position = VectorHelper.middleOfBlockNormalize(position);
     }

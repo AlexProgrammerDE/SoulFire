@@ -26,6 +26,7 @@ import net.pistonmaster.serverwrecker.pathfinding.execution.BlockBreakAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -35,7 +36,8 @@ import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("CollectionAddAllCanBeReplacedWithConstructor")
-public record PlayerMovement(BotEntityState previousEntityState, MovementDirection direction, MovementModifier modifier,
+public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityState, MovementDirection direction,
+                             MovementModifier modifier,
                              MovementSide side) implements GraphAction {
     // Optional.of() takes a few milliseconds, so we'll just cache it
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -208,7 +210,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             return Optional.empty();
         }
 
-        var blockMiningCosts = Costs.calculateBlockBreakCost(previousEntityState().tagsState(), inventory, blockStateMeta);
+        var blockMiningCosts = Costs.calculateBlockBreakCost(tagsState, inventory, blockStateMeta);
 
         // No way to break block
         if (blockMiningCosts.isEmpty()) {
@@ -320,7 +322,6 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         }
 
         return new GraphInstructions(new BotEntityState(
-                previousEntityState.tagsState(),
                 targetPosition,
                 projectedLevelState,
                 projectedInventory

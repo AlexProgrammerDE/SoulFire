@@ -32,6 +32,6 @@ public record GraphInstructions(BotEntityState targetState, double actionCost, L
     }
 
     public boolean isImpossible() {
-        return actionCost == Double.POSITIVE_INFINITY;
+        return this == IMPOSSIBLE;
     }
 }

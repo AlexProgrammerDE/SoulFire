@@ -266,11 +266,10 @@ public class CommandManager {
             bot.executorManager().newExecutorService("Pathfinding").execute(() -> {
                 var sessionDataManager = bot.sessionDataManager();
                 var botMovementManager = sessionDataManager.getBotMovementManager();
-                var routeFinder = new RouteFinder(new MinecraftGraph(), goalScorer);
+                var routeFinder = new RouteFinder(new MinecraftGraph(sessionDataManager.getTagsState()), goalScorer);
 
                 Supplier<List<WorldAction>> findPath = () -> {
                     var start = new BotEntityState(
-                            sessionDataManager.getTagsState(),
                             botMovementManager.getPlayerPos(),
                             new ProjectedLevelState(
                                     sessionDataManager.getCurrentLevel()

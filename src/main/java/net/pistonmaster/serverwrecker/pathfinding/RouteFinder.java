@@ -73,10 +73,8 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         routeIndex.put(from, start);
         openSet.enqueue(start);
 
-        MinecraftRouteNode element;
-        while ((element = openSet.dequeue()) != null) {
-            // To have a local field to use in lambdas
-            var current = element;
+        while (!openSet.isEmpty()) {
+            var current = openSet.dequeue();
             log.debug("Looking at node: {}", current.getEntityState().position());
 
             // If we found our destination, we can stop looking

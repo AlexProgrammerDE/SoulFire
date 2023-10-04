@@ -21,22 +21,23 @@ package net.pistonmaster.serverwrecker.pathfinding.graph;
 
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
+import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class MinecraftGraph {
+public record MinecraftGraph(TagsState tagsState) {
     public List<GraphAction> getActions(BotEntityState node) {
         List<GraphAction> targetSet = new ArrayList<>();
         for (var direction : MovementDirection.values()) {
             for (var modifier : MovementModifier.values()) {
                 if (direction.isDiagonal()) {
                     for (var side : MovementSide.values()) {
-                        targetSet.add(new PlayerMovement(node, direction, modifier, side));
+                        targetSet.add(new PlayerMovement(tagsState, node, direction, modifier, side));
                     }
                 } else {
-                    targetSet.add(new PlayerMovement(node, direction, modifier, null));
+                    targetSet.add(new PlayerMovement(tagsState, node, direction, modifier, null));
                 }
             }
         }
