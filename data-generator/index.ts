@@ -89,18 +89,7 @@ if (mcData == null) {
     let result = fs.readFileSync("templates/BlockType.java", "utf-8");
     let enumValues: string[] = []
     for (const block of mcData.blocksArray) {
-      let harvestData: string | null = "List.of("
-      if (block.harvestTools) {
-        const harvestTools = block.harvestTools;
-        const toolList: string[] = []
-        for (const tool of Object.keys(harvestTools)) {
-          toolList.push(`ItemType.${getNameOfItemId(Number(tool))}`)
-        }
-        harvestData += toolList.join(", ")
-      }
-      harvestData += ")"
-
-      enumValues.push(`public static final BlockType ${block.name.toUpperCase()} = register(new BlockType(${block.id}, "${block.name}", "${block.displayName}", ${block.hardness ?? -1}, ${block.stackSize}, ${block.diggable}, ${harvestData}, BlockStateLoader.getBlockShapes("${block.name}")));`)
+      enumValues.push(`public static final BlockType ${block.name.toUpperCase()} = register(new BlockType(${block.id}, "${block.name}", "${block.displayName}", ${block.hardness ?? -1}F, ${block.stackSize}, ${block.diggable}, ${!!block.harvestTools}, BlockStateLoader.getBlockShapes("${block.name}")));`)
     }
 
     result = result.replace(enumReplace, enumValues.join("\n    "))

@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.protocol.bot.state.entity;
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import lombok.Data;
 import net.pistonmaster.serverwrecker.protocol.bot.state.EntityAttributesState;
+import net.pistonmaster.serverwrecker.protocol.bot.state.EntityEffectState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.EntityMetadataState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ public abstract class EntityLikeState {
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityLikeState.class);
     private final EntityMetadataState metadataState = new EntityMetadataState();
     private final EntityAttributesState attributesState = new EntityAttributesState();
+    private final EntityEffectState effectState = new EntityEffectState();
     private final int entityId;
     private double x;
     private double y;
@@ -71,6 +73,7 @@ public abstract class EntityLikeState {
     }
 
     public void tick() {
+        effectState.tick();
     }
 
     public void handleEntityEvent(EntityEvent event) {

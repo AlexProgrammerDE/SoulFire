@@ -220,7 +220,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             return Optional.empty();
         }
 
-        var blockMiningCosts = Costs.calculateBlockBreakCost(inventory, blockStateMeta);
+        var blockMiningCosts = Costs.calculateBlockBreakCost(previousEntityState().tagsState(), inventory, blockStateMeta);
 
         // No way to break block
         if (blockMiningCosts.isEmpty()) {
@@ -332,6 +332,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         }
 
         return new GraphInstructions(new BotEntityState(
+                previousEntityState.tagsState(),
                 targetPosition,
                 projectedLevelState,
                 projectedInventory

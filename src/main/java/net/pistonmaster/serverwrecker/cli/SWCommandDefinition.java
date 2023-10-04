@@ -37,6 +37,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
@@ -180,7 +181,7 @@ public class SWCommandDefinition implements Callable<Integer> {
 
         if (accountFile != null && authType != null) {
             try {
-                serverWrecker.getAccountRegistry().loadFromFile(accountFile, authType);
+                serverWrecker.getAccountRegistry().loadFromString(Files.readString(accountFile), authType);
             } catch (IOException e) {
                 LOGGER.error("Failed to load accounts!", e);
                 return 1;
@@ -189,7 +190,7 @@ public class SWCommandDefinition implements Callable<Integer> {
 
         if (proxyFile != null && proxyType != null) {
             try {
-                serverWrecker.getProxyRegistry().loadFromFile(proxyFile, proxyType);
+                serverWrecker.getProxyRegistry().loadFromString(Files.readString(proxyFile), proxyType);
             } catch (IOException e) {
                 LOGGER.error("Failed to load proxies!", e);
                 return 1;
@@ -200,7 +201,7 @@ public class SWCommandDefinition implements Callable<Integer> {
             try {
                 serverWrecker.getSettingsManager().loadProfile(profileFile);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Failed to load profile!", e);
                 return 1;
             }
         }

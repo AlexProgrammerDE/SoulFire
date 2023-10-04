@@ -16,7 +16,7 @@ public record EntityType(int id, int internalId, String name, String displayName
     }
 
     public static EntityType getById(int id) {
-        for (EntityType entityId : VALUES) {
+        for (var entityId : VALUES) {
             if (entityId.id() == id) {
                 return entityId;
             }

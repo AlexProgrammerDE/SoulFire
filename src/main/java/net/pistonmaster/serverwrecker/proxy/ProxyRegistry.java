@@ -24,9 +24,6 @@ import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,10 +34,6 @@ public class ProxyRegistry implements SettingsDuplex<ProxyList> {
     private final List<SWProxy> proxies = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
 
-    public void loadFromFile(Path file, ProxyType proxyType) throws IOException {
-        loadFromString(Files.readString(file), proxyType);
-    }
-
     public void loadFromString(String file, ProxyType proxyType) {
         var newProxies = new ArrayList<SWProxy>();
 
@@ -49,6 +42,11 @@ public class ProxyRegistry implements SettingsDuplex<ProxyList> {
                 .distinct()
                 .map(line -> fromString(line, proxyType))
                 .forEach(newProxies::add);
+
+        if (newProxies.isEmpty()) {
+            LOGGER.warn("No accounts found in the provided file!");
+            return;
+        }
 
         this.proxies.addAll(newProxies);
         LOGGER.info("Loaded {} proxies!", newProxies.size());

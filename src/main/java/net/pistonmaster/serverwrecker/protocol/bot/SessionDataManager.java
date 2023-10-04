@@ -106,6 +106,7 @@ public final class SessionDataManager {
     private final EntityTrackerState entityTrackerState = new EntityTrackerState();
     private final EntityMetadataState selfMetadata = new EntityMetadataState();
     private final EntityAttributesState selfAttributeState = new EntityAttributesState();
+    private final EntityEffectState selfEffectState = new EntityEffectState();
     private final PlayerMetaState playerMetaState = new PlayerMetaState();
     private final InventoryManager inventoryManager = new InventoryManager(this);
     private final BotActionManager botActionManager = new BotActionManager(this);
@@ -358,7 +359,14 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onAbilities(ClientboundPlayerAbilitiesPacket packet) {
-        abilitiesData = new AbilitiesData(packet.isInvincible(), packet.isFlying(), packet.isCanFly(), packet.isCreative(), packet.getFlySpeed(), packet.getWalkSpeed());
+        abilitiesData = new AbilitiesData(
+                packet.isInvincible(),
+                packet.isFlying(),
+                packet.isCanFly(),
+                packet.isCreative(),
+                packet.getFlySpeed(),
+                packet.getWalkSpeed()
+        );
 
         if (botMovementManager != null) {
             botMovementManager.getControlState().setFlying(abilitiesData.flying());
@@ -537,7 +545,7 @@ public final class SessionDataManager {
                 chunkData.setSection(i, readChunkSection(buf, helper));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to read chunk section", e);
         }
     }
 
@@ -569,7 +577,7 @@ public final class SessionDataManager {
                     chunkData.setSection(i, new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette));
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Failed to read chunk section", e);
             }
         }
     }
@@ -757,6 +765,22 @@ public final class SessionDataManager {
     }
 
     @BusHandler
+    public void onUpdateEffect(ClientboundUpdateMobEffectPacket packet) {
+        var state = packet.getEntityId() == loginData.entityId() ?
+                selfEffectState : entityTrackerState.getEntity(packet.getEntityId()).getEffectState();
+
+        state.updateEffect(packet.getEffect(), packet.getAmplifier(), packet.getDuration(), packet.isAmbient(), packet.isShowParticles());
+    }
+
+    @BusHandler
+    public void onRemoveEffect(ClientboundRemoveMobEffectPacket packet) {
+        var state = packet.getEntityId() == loginData.entityId() ?
+                selfEffectState : entityTrackerState.getEntity(packet.getEntityId()).getEffectState();
+
+        state.removeEffect(packet.getEffect());
+    }
+
+    @BusHandler
     public void onEntityMotion(ClientboundSetEntityMotionPacket packet) {
         if (loginData.entityId() == packet.getEntityId()) {
             var motionX = packet.getMotionX();
@@ -903,6 +927,9 @@ public final class SessionDataManager {
         if (borderState != null) {
             borderState.tick();
         }
+
+        selfEffectState.tick();
+        entityTrackerState.tick();
 
         var level = getCurrentLevel();
         if (level != null && botMovementManager != null

@@ -1289,7 +1289,7 @@ public record ItemType(int id, String name, String displayName, int stackSize, L
     }
 
     public static ItemType getById(int id) {
-        for (ItemType itemType : VALUES) {
+        for (var itemType : VALUES) {
             if (itemType.id() == id) {
                 return itemType;
             }

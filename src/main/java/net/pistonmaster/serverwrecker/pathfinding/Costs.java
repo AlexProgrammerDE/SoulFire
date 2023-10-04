@@ -19,12 +19,20 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding;
 
+import com.github.steveice10.mc.protocol.data.game.entity.Effect;
+import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.data.ItemType;
+import net.pistonmaster.serverwrecker.data.ToolSpeedType;
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
+import net.pistonmaster.serverwrecker.protocol.bot.state.EntityEffectState;
+import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
+import net.pistonmaster.serverwrecker.util.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 
 public class Costs {
     public static final double STRAIGHT = 1;
@@ -40,7 +48,7 @@ public class Costs {
     private Costs() {
     }
 
-    public static Optional<BlockMiningCosts> calculateBlockBreakCost(ProjectedInventory inventory, BlockStateMeta blockStateMeta) {
+    public static Optional<BlockMiningCosts> calculateBlockBreakCost(TagsState tagsState, ProjectedInventory inventory, BlockStateMeta blockStateMeta) {
         var blockType = blockStateMeta.blockType();
 
         // Don't try to find a way to dig bedrock
@@ -53,21 +61,114 @@ public class Costs {
             return Optional.empty();
         }
 
-        if (blockType.tools().isEmpty()) {
-            return Optional.of(new BlockMiningCosts(DIG_BLOCK_WITHOUT_TOOL, null));
-        }
-
+        var bestMiningSpeed = Integer.MAX_VALUE;
         for (var slot : inventory.getStorage()) {
             if (slot.item() == null) {
                 continue;
             }
 
-            if (blockType.tools().contains(slot.item().getType())) {
-                return Optional.of(new BlockMiningCosts(DIG_BLOCK_WITH_TOOL, slot.item().getType()));
+            var miningSpeed = getMiningSpeed(tagsState, null, true, slot.item(), blockType);
+
+            if (miningSpeed < bestMiningSpeed) {
+                bestMiningSpeed = miningSpeed;
             }
         }
 
+        if (bestMiningSpeed != Integer.MAX_VALUE) {
+            return Optional.of(new BlockMiningCosts(DIG_BLOCK_WITH_TOOL / bestMiningSpeed, null));
+        }
+
         return Optional.of(new BlockMiningCosts(DIG_BLOCK_WITHOUT_TOOL, null));
+    }
+
+    // Time in ticks
+    private static int getMiningSpeed(TagsState tagsState,
+                                      @Nullable EntityEffectState effectState,
+                                      boolean onGround,
+                                      @Nullable SWItemStack itemStack,
+                                      BlockType blockType) {
+        float speedMultiplier;
+        if (itemStack == null) {
+            speedMultiplier = 1;
+        } else {
+            speedMultiplier = ToolSpeedType.getBlockToolSpeed(tagsState, itemStack.getType(), blockType);
+        }
+
+        if (itemStack != null && speedMultiplier > 1) {
+            var efficiency = itemStack.getEnchantments().getOrDefault("minecraft:efficiency", (short) 0);
+
+            if (efficiency > 0) {
+                // Efficiency is capped at 255
+                efficiency = MathHelper.clamp(efficiency, (short) 0, (short) 255);
+                speedMultiplier += (float) (efficiency * efficiency + 1);
+            }
+        }
+
+        if (effectState != null) {
+            var digSpeedAmplifier = getDigSpeedAmplifier(effectState);
+            if (digSpeedAmplifier.isPresent()) {
+                speedMultiplier *= 1.0F + (float) (digSpeedAmplifier.getAsInt() + 1) * 0.2F;
+            }
+
+            var digSlowdownAmplifier = getDigSlowdownAmplifier(effectState);
+            if (digSlowdownAmplifier.isPresent()) {
+                speedMultiplier *= switch (digSlowdownAmplifier.getAsInt()) {
+                    case 0 -> 0.3F;
+                    case 1 -> 0.09F;
+                    case 2 -> 0.0027F;
+                    default -> 8.1E-4F;
+                };
+            }
+        }
+
+        // TODO: Add support for digging underwater without aqua affinity
+
+        if (!onGround) {
+            speedMultiplier /= 5.0F;
+        }
+
+        var damage = speedMultiplier / blockType.hardness();
+
+        damage /= isCorrectToolUsed(tagsState, itemStack == null ? null : itemStack.getType(), blockType) ? 30 : 100;
+
+        // Insta mine
+        if (damage > 1) {
+            return 0;
+        }
+
+        return (int) Math.ceil(1 / damage);
+    }
+
+    private static boolean isCorrectToolUsed(TagsState tagsState, ItemType itemType, BlockType blockType) {
+        if (!blockType.requiresCorrectTool()) {
+            return true;
+        }
+
+        if (itemType == null) {
+            return false;
+        }
+
+        return ToolSpeedType.isRightToolFor(tagsState, itemType, blockType);
+    }
+
+    private static OptionalInt getDigSpeedAmplifier(EntityEffectState effectState) {
+        var hasteEffect = effectState.getEffect(Effect.HASTE);
+        var conduitPowerEffect = effectState.getEffect(Effect.CONDUIT_POWER);
+
+        if (hasteEffect.isPresent() && conduitPowerEffect.isPresent()) {
+            return OptionalInt.of(Math.max(hasteEffect.get().amplifier(), conduitPowerEffect.get().amplifier()));
+        } else {
+            return hasteEffect.map(effectData -> OptionalInt.of(effectData.amplifier()))
+                    .orElseGet(() -> conduitPowerEffect.map(effectData -> OptionalInt.of(effectData.amplifier()))
+                            .orElseGet(OptionalInt::empty));
+        }
+    }
+
+    private static OptionalInt getDigSlowdownAmplifier(EntityEffectState effectState) {
+        var miningFatigueEffect = effectState.getEffect(Effect.MINING_FATIGUE);
+
+        return miningFatigueEffect.map(effectData -> OptionalInt.of(effectData.amplifier()))
+                .orElseGet(OptionalInt::empty);
     }
 
     public record BlockMiningCosts(double miningCost, @Nullable ItemType toolType) {

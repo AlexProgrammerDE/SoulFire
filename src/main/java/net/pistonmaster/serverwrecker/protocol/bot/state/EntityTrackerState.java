@@ -40,4 +40,8 @@ public class EntityTrackerState {
     public EntityLikeState getEntity(int entityId) {
         return entities.get(entityId);
     }
+
+    public void tick() {
+        entities.values().forEach(EntityLikeState::tick);
+    }
 }

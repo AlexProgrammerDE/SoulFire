@@ -33,8 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -43,10 +41,6 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final List<MinecraftAccount> accounts = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
-
-    public void loadFromFile(Path file, AuthType authType) throws IOException {
-        loadFromString(Files.readString(file), authType);
-    }
 
     public void loadFromString(String file, AuthType authType) {
         var newAccounts = new ArrayList<MinecraftAccount>();
@@ -67,6 +61,11 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
                     .distinct()
                     .map(account -> fromString(account, authType))
                     .forEach(newAccounts::add);
+        }
+
+        if (newAccounts.isEmpty()) {
+            LOGGER.warn("No accounts found in the provided file!");
+            return;
         }
 
         this.accounts.addAll(newAccounts);

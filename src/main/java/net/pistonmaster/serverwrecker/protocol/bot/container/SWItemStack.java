@@ -20,16 +20,44 @@
 package net.pistonmaster.serverwrecker.protocol.bot.container;
 
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
+import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
+import com.github.steveice10.opennbt.tag.builtin.ListTag;
+import com.github.steveice10.opennbt.tag.builtin.ShortTag;
+import com.github.steveice10.opennbt.tag.builtin.StringTag;
+import it.unimi.dsi.fastutil.objects.Object2ShortArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ShortMap;
+import it.unimi.dsi.fastutil.objects.Object2ShortMaps;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.data.ItemType;
 
 @Getter
 public class SWItemStack extends ItemStack {
     private final ItemType type;
+    private final Object2ShortMap<String> enchantments;
 
     private SWItemStack(ItemStack itemStack) {
         super(itemStack.getId(), itemStack.getAmount(), itemStack.getNbt());
         this.type = ItemType.getById(itemStack.getId());
+        var compound = itemStack.getNbt();
+        if (compound == null) {
+            this.enchantments = Object2ShortMaps.emptyMap();
+        } else {
+            var enchantmentsList = compound.<ListTag>get("Enchantments");
+            if (enchantmentsList != null) {
+                this.enchantments = new Object2ShortArrayMap<>(enchantmentsList.size());
+                for (var enchantment : enchantmentsList) {
+                    var enchantmentCompound = (CompoundTag) enchantment;
+
+                    this.enchantments.put(
+                            enchantmentCompound.<StringTag>get("id").getValue(),
+                            enchantmentCompound.<ShortTag>get("lvl").getValue().shortValue()
+                    );
+                }
+            } else {
+                this.enchantments = Object2ShortMaps.emptyMap();
+            }
+        }
+        System.out.println(this.enchantments);
     }
 
     public static SWItemStack from(ItemStack itemStack) {

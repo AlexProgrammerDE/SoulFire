@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record BlockType(int id, String name, String displayName, double hardness, int stackSize,
-                        boolean diggable, List<ItemType> tools, List<BlockShapeType> blockShapeTypes) {
+public record BlockType(int id, String name, String displayName, float hardness, int stackSize,
+                        boolean diggable, boolean requiresCorrectTool, List<BlockShapeType> blockShapeTypes) {
     public static final List<BlockType> VALUES = new ArrayList<>();
 
     // VALUES REPLACE
@@ -16,7 +16,7 @@ public record BlockType(int id, String name, String displayName, double hardness
     }
 
     public static BlockType getById(int id) {
-        for (BlockType blockType : VALUES) {
+        for (var blockType : VALUES) {
             if (blockType.id() == id) {
                 return blockType;
             }
@@ -26,7 +26,7 @@ public record BlockType(int id, String name, String displayName, double hardness
     }
 
     public static BlockType getByMcName(String mcName) {
-        for (BlockType blockType : VALUES) {
+        for (var blockType : VALUES) {
             if (("minecraft:" + blockType.name()).equals(mcName)) {
                 return blockType;
             }

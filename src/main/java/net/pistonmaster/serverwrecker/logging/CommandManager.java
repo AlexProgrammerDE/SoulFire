@@ -269,11 +269,16 @@ public class CommandManager {
                 var routeFinder = new RouteFinder(new MinecraftGraph(), goalScorer);
 
                 Supplier<List<WorldAction>> findPath = () -> {
-                    var start = new BotEntityState(botMovementManager.getPlayerPos(), new ProjectedLevelState(
-                            sessionDataManager.getCurrentLevel()
-                    ), new ProjectedInventory(
-                            sessionDataManager.getInventoryManager().getPlayerInventory()
-                    ));
+                    var start = new BotEntityState(
+                            sessionDataManager.getTagsState(),
+                            botMovementManager.getPlayerPos(),
+                            new ProjectedLevelState(
+                                    sessionDataManager.getCurrentLevel()
+                            ),
+                            new ProjectedInventory(
+                                    sessionDataManager.getInventoryManager().getPlayerInventory()
+                            )
+                    );
                     logger.info("Start: {}", start);
                     var actions = routeFinder.findRoute(start);
                     logger.info("Calculated path with {} actions: {}", actions.size(), actions);

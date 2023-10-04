@@ -82,4 +82,16 @@ public class TagsState {
             }
         }
     }
+
+    public boolean isBlockInTag(BlockType blockType, String tagName) {
+        return blockTags.getOrDefault(tagName, Set.of()).contains(blockType);
+    }
+
+    public boolean isItemInTag(ItemType itemType, String tagName) {
+        return itemTags.getOrDefault(tagName, Set.of()).contains(itemType);
+    }
+
+    public boolean isEntityInTag(EntityType entityType, String tagName) {
+        return entityTags.getOrDefault(tagName, Set.of()).contains(entityType);
+    }
 }

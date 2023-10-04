@@ -17,20 +17,9 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.util;
+package net.pistonmaster.serverwrecker.protocol.bot.model;
 
-import net.pistonmaster.serverwrecker.data.BlockType;
-import net.pistonmaster.serverwrecker.data.ItemType;
+import com.github.steveice10.mc.protocol.data.game.entity.Effect;
 
-public class ItemUtils {
-    private ItemUtils() {
-    }
-
-    public static boolean isToolFor(ItemType itemType, BlockType blockType) {
-        if (!blockType.diggable()) {
-            return false;
-        }
-
-        return blockType.tools().contains(itemType);
-    }
+public record EffectData(Effect effect, int amplifier, int duration, boolean ambient, boolean showParticles) {
 }
