@@ -64,23 +64,23 @@ public class Costs {
             return Optional.empty();
         }
 
-        var bestMiningSpeed = Integer.MAX_VALUE;
+        var lowestMiningTicks = Integer.MAX_VALUE;
         ItemType bestToolType = null;
         for (var slot : inventory.getStorage()) {
-            var miningSpeed = getRequiredMiningTicks(tagsState, null, true, slot.item(), blockType);
-            if (miningSpeed < bestMiningSpeed) {
-                bestMiningSpeed = miningSpeed;
+            var miningTicks = getRequiredMiningTicks(tagsState, null, true, slot.item(), blockType);
+            if (miningTicks < lowestMiningTicks) {
+                lowestMiningTicks = miningTicks;
                 bestToolType = slot.item() == null ? null : slot.item().getType();
             }
         }
 
-        if (bestMiningSpeed == Integer.MAX_VALUE) {
+        if (lowestMiningTicks == Integer.MAX_VALUE) {
             // We would expect there is at least a cost to break a block without a tool
             throw new IllegalStateException("No way found to break block!");
         }
 
         return Optional.of(new BlockMiningCosts(
-                bestMiningSpeed * TICKS_PER_BLOCK + BREAK_BLOCK_ADDITION,
+                (lowestMiningTicks / TICKS_PER_BLOCK) + BREAK_BLOCK_ADDITION,
                 bestToolType
         ));
     }
