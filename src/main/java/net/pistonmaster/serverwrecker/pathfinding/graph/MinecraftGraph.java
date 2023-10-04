@@ -28,21 +28,23 @@ import java.util.List;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {
-    public List<GraphAction> getActions(BotEntityState node) {
-        List<GraphAction> targetSet = new ArrayList<>();
+    public List<GraphInstructions> getActions(BotEntityState node) {
+        List<GraphInstructions> targetSet = new ArrayList<>();
         for (var direction : MovementDirection.values()) {
             for (var modifier : MovementModifier.values()) {
                 if (direction.isDiagonal()) {
                     for (var side : MovementSide.values()) {
-                        targetSet.add(new PlayerMovement(tagsState, node, direction, modifier, side));
+                        targetSet.add(new PlayerMovement(tagsState, node, direction, modifier, side).getInstructions());
                     }
                 } else {
-                    targetSet.add(new PlayerMovement(tagsState, node, direction, modifier, null));
+                    targetSet.add(new PlayerMovement(tagsState, node, direction, modifier, null).getInstructions());
                 }
             }
         }
 
-        log.debug("Found {} possible actions for {}", targetSet.size(), node.position());
+        log.debug("Found {} possible actions for {}", targetSet.stream()
+                .filter(a -> !a.isImpossible())
+                .count(), node.position());
 
         return targetSet;
     }

@@ -82,11 +82,7 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
     }
 
     public boolean isFullBlock() {
-        if (blockShapes.isEmpty()) {
-            return false;
-        }
-
-        if (blockShapes.size() > 1) {
+        if (blockShapes.size() != 1) {
             return false;
         }
 

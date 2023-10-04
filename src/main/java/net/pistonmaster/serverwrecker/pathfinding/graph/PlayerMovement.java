@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
 import com.google.common.util.concurrent.AtomicDouble;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.execution.BlockBreakAction;
@@ -31,17 +32,16 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @SuppressWarnings("CollectionAddAllCanBeReplacedWithConstructor")
 public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityState, MovementDirection direction,
-                             MovementModifier modifier,
-                             MovementSide side) implements GraphAction {
+                             MovementModifier modifier, MovementSide side) implements GraphAction {
     // Optional.of() takes a few milliseconds, so we'll just cache it
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static final Optional<ActionCosts> NO_COST_RESULT = Optional.of(new ActionCosts(0, Collections.emptyList()));
+    private static final Optional<ActionCosts> NO_COST_RESULT = Optional.of(new ActionCosts(0, List.of()));
     private static final boolean ALLOW_BLOCK_ACTIONS = false;
 
     private static Vector3i applyDirection(Vector3i pos, MovementDirection direction) {
@@ -190,6 +190,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
     private boolean requireFreeHelper(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory, List<WorldAction> actions, AtomicDouble cost) {
         var blockActions = requireFreeBlock(block, level, inventory);
         if (blockActions.isEmpty()) {
+            log.debug("Block at {} is not free", block);
             return true;
         } else {
             actions.addAll(blockActions.get().actions());
@@ -240,6 +241,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
     private boolean requireSolidHelper(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory, List<WorldAction> actions, AtomicDouble cost) {
         var blockActions = requireSolidBlock(block, level, inventory);
         if (blockActions.isEmpty()) {
+            log.debug("Block at {} is not solid", block);
             return true;
         } else {
             actions.addAll(blockActions.get().actions());
@@ -253,20 +255,22 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
 
         // Block with a current state that has no collision (Like air, grass, open fence)
         if (blockShapeType.hasNoCollisions()) {
+            log.debug("Block at {} has no collision", block);
             if (!ALLOW_BLOCK_ACTIONS) {
                 return Optional.empty();
             }
 
-            // Could destroy and place block here, but that's too much work
             return Optional.empty();
         }
 
         // Prevent walking over cake, slabs, fences, etc.
         if (!blockShapeType.isFullBlock()) {
+            log.debug("Block at {} is not a full block", block);
             // Could destroy and place block here, but that's too much work
             return Optional.empty();
         }
 
+        // There already is a full block there
         return NO_COST_RESULT;
     }
 
@@ -277,6 +281,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
 
     @Override
     public GraphInstructions getInstructions() {
+        log.debug("Calculating instructions for {}", this);
         var cost = switch (direction) {
             case NORTH, SOUTH, EAST, WEST -> Costs.STRAIGHT;
             case NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST -> Costs.DIAGONAL;
@@ -326,6 +331,16 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
                 projectedLevelState,
                 projectedInventory
         ), cost, actions);
+    }
+
+    @Override
+    public String toString() {
+        return "PlayerMovement{" +
+                "previousPosition=" + previousEntityState.position() +
+                ", direction=" + direction +
+                ", modifier=" + modifier +
+                ", side=" + side +
+                '}';
     }
 
     private record ActionCosts(double cost, List<WorldAction> actions) {

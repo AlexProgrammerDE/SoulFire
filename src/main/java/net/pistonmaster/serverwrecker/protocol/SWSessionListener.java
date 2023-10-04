@@ -51,7 +51,7 @@ public class SWSessionListener extends SessionAdapter {
             return;
         }
 
-        botConnection.logger().debug("Received packet: {}", packet.getClass().getSimpleName());
+        botConnection.logger().trace("Received packet: {}", packet.getClass().getSimpleName());
 
         try {
             busInvoker.handlePacket(event.getPacket());
@@ -71,7 +71,7 @@ public class SWSessionListener extends SessionAdapter {
             return;
         }
 
-        botConnection.logger().debug("Sending packet: {}", event.getPacket().getClass().getSimpleName());
+        botConnection.logger().trace("Sending packet: {}", event.getPacket().getClass().getSimpleName());
     }
 
     @Override

@@ -85,26 +85,26 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 return getActions(current);
             }
 
-            for (var action : graph.getActions(current.getEntityState())) {
-                GraphInstructions instructions;
-                try {
-                    instructions = action.getInstructions();
-                } catch (OutOfLevelException e) {
-                    log.debug("Found a node out of the level: {}", current.getEntityState().position());
-                    stopwatch.stop();
-                    log.info("Took {}ms to find route to this point", stopwatch.elapsed().toMillis());
+            List<GraphInstructions> instructionsList;
+            try {
+                instructionsList = graph.getActions(current.getEntityState());
+            } catch (OutOfLevelException e) {
+                log.debug("Found a node out of the level: {}", current.getEntityState().position());
+                stopwatch.stop();
+                log.info("Took {}ms to find route to this point", stopwatch.elapsed().toMillis());
 
-                    // This is the best node we found so far
-                    // We will add a recalculating action and return the best route
-                    var recalculatingNode = new MinecraftRouteNode(
-                            current.getEntityState(),
-                            current,
-                            List.of(new RecalculatePathAction()),
-                            current.getSourceCost(), current.getTotalRouteScore()
-                    );
-                    return getActions(recalculatingNode);
-                }
+                // This is the best node we found so far
+                // We will add a recalculating action and return the best route
+                var recalculatingNode = new MinecraftRouteNode(
+                        current.getEntityState(),
+                        current,
+                        List.of(new RecalculatePathAction()),
+                        current.getSourceCost(), current.getTotalRouteScore()
+                );
+                return getActions(recalculatingNode);
+            }
 
+            for (var instructions : instructionsList) {
                 if (instructions.isImpossible()) {
                     continue;
                 }
