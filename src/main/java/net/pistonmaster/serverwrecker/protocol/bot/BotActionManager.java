@@ -38,7 +38,6 @@ import org.cloudburstmc.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Manages mostly block and interaction related stuff that requires to keep track of sequence numbers.
@@ -178,17 +177,26 @@ public class BotActionManager {
         return Optional.empty();
     }
 
-    public CompletableFuture<Void> breakBlock(Vector3i blockPos) {
-        return CompletableFuture.runAsync(() -> {
-            incrementSequenceNumber();
-            var blockFace = getBlockFaceLookedAt(blockPos);
-            dataManager.getSession().send(new ServerboundPlayerActionPacket(
-                    PlayerAction.START_DIGGING,
-                    blockPos,
-                    blockFace,
-                    sequenceNumber
-            ));
-        });
+    public void sendStartBreakBlock(Vector3i blockPos) {
+        incrementSequenceNumber();
+        var blockFace = getBlockFaceLookedAt(blockPos);
+        dataManager.getSession().send(new ServerboundPlayerActionPacket(
+                PlayerAction.START_DIGGING,
+                blockPos,
+                blockFace,
+                sequenceNumber
+        ));
+    }
+
+    public void sendEndBreakBlock(Vector3i blockPos) {
+        incrementSequenceNumber();
+        var blockFace = getBlockFaceLookedAt(blockPos);
+        dataManager.getSession().send(new ServerboundPlayerActionPacket(
+                PlayerAction.FINISH_DIGGING,
+                blockPos,
+                blockFace,
+                sequenceNumber
+        ));
     }
 
     public Direction getBlockFaceLookedAt(Vector3i blockPos) {

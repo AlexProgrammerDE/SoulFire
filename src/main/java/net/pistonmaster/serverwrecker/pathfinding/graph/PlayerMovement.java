@@ -39,7 +39,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
                              MovementSide side) implements GraphAction {
     // Optional.of() takes a few milliseconds, so we'll just cache it
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static final Optional<ActionCosts> EMPTY_COST = Optional.of(new ActionCosts(0, Collections.emptyList()));
+    private static final Optional<ActionCosts> NO_COST_RESULT = Optional.of(new ActionCosts(0, Collections.emptyList()));
     private static final boolean ALLOW_BLOCK_ACTIONS = false;
 
     private static Vector3i applyDirection(Vector3i pos, MovementDirection direction) {
@@ -115,36 +115,25 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
 
         // Add the blocks that are required to be free for diagonal movement
         if (direction.isDiagonal()) {
-            Vector3i corner = null;
-            switch (direction) {
-                case NORTH_EAST -> {
-                    switch (side) {
-                        case LEFT -> corner = applyDirection(fromPosInt, MovementDirection.NORTH);
-                        case RIGHT -> corner = applyDirection(fromPosInt, MovementDirection.EAST);
-                    }
-                }
-                case NORTH_WEST -> {
-                    switch (side) {
-                        case LEFT -> corner = applyDirection(fromPosInt, MovementDirection.NORTH);
-                        case RIGHT -> corner = applyDirection(fromPosInt, MovementDirection.WEST);
-                    }
-                }
-                case SOUTH_EAST -> {
-                    switch (side) {
-                        case LEFT -> corner = applyDirection(fromPosInt, MovementDirection.SOUTH);
-                        case RIGHT -> corner = applyDirection(fromPosInt, MovementDirection.EAST);
-                    }
-                }
-                case SOUTH_WEST -> {
-                    switch (side) {
-                        case LEFT -> corner = applyDirection(fromPosInt, MovementDirection.SOUTH);
-                        case RIGHT -> corner = applyDirection(fromPosInt, MovementDirection.WEST);
-                    }
-                }
-            }
-
-            // This should never happen
-            assert corner != null;
+            var corner = switch (direction) {
+                case NORTH_EAST -> switch (side) {
+                    case LEFT -> applyDirection(fromPosInt, MovementDirection.NORTH);
+                    case RIGHT -> applyDirection(fromPosInt, MovementDirection.EAST);
+                };
+                case NORTH_WEST -> switch (side) {
+                    case LEFT -> applyDirection(fromPosInt, MovementDirection.NORTH);
+                    case RIGHT -> applyDirection(fromPosInt, MovementDirection.WEST);
+                };
+                case SOUTH_EAST -> switch (side) {
+                    case LEFT -> applyDirection(fromPosInt, MovementDirection.SOUTH);
+                    case RIGHT -> applyDirection(fromPosInt, MovementDirection.EAST);
+                };
+                case SOUTH_WEST -> switch (side) {
+                    case LEFT -> applyDirection(fromPosInt, MovementDirection.SOUTH);
+                    case RIGHT -> applyDirection(fromPosInt, MovementDirection.WEST);
+                };
+                default -> throw new IllegalStateException("Unexpected value: " + direction);
+            };
 
             for (var bodyOffset : BodyPart.BODY_PARTS) {
                 // Apply jump shift to target edge and offset for body part
@@ -155,7 +144,6 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
         }
 
         var targetEdge = applyDirection(fromPosInt, direction);
-
         for (var bodyOffset : BodyPart.BODY_PARTS) {
             // Apply jump shift to target diagonal and offset for body part
             if (requireFreeHelper(applyJumpShift(targetEdge, modifier).add(bodyOffset), level, inventory, actions, cost)) {
@@ -213,7 +201,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
 
         // No need to break blocks like air or grass
         if (blockStateMeta.blockShapeType().hasNoCollisions()) {
-            return EMPTY_COST;
+            return NO_COST_RESULT;
         }
 
         if (!ALLOW_BLOCK_ACTIONS) {
@@ -277,7 +265,7 @@ public record PlayerMovement(BotEntityState previousEntityState, MovementDirecti
             return Optional.empty();
         }
 
-        return EMPTY_COST;
+        return NO_COST_RESULT;
     }
 
     private BlockStateMeta getBlockShapeType(ProjectedLevelState level, Vector3i block) {

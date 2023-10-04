@@ -96,8 +96,9 @@ public class LogPanel extends JPanel {
             pointer = -1;
 
             var command = e.getActionCommand();
+            command = command.strip();
 
-            if (command.isEmpty()) {
+            if (command.isBlank()) {
                 return;
             }
 

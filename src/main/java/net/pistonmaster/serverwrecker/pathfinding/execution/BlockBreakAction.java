@@ -23,12 +23,12 @@ import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.data.ItemType;
+import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @ToString
@@ -38,7 +38,8 @@ public class BlockBreakAction implements WorldAction {
     private final ItemType toolType;
     private boolean didLook = false;
     private boolean putOnHotbar = false;
-    private CompletableFuture<Void> breakFuture;
+    private int remainingTicks = -1;
+    boolean finishedDigging = false;
 
     @Override
     public boolean isCompleted(BotConnection connection) {
@@ -52,7 +53,14 @@ public class BlockBreakAction implements WorldAction {
 
     @Override
     public void tick(BotConnection connection) {
-        var movementManager = connection.sessionDataManager().getBotMovementManager();
+        var sessionDataManager = connection.sessionDataManager();
+        var movementManager = sessionDataManager.getBotMovementManager();
+        var levelState = sessionDataManager.getCurrentLevel();
+
+        if (levelState == null) {
+            return;
+        }
+
         movementManager.getControlState().resetAll();
 
         if (!didLook) {
@@ -122,14 +130,30 @@ public class BlockBreakAction implements WorldAction {
             }
         }
 
-        if (breakFuture == null || breakFuture.isCancelled() || breakFuture.isCompletedExceptionally()) {
-            breakFuture = connection.sessionDataManager().getBotActionManager().breakBlock(blockPosition);
+        if (finishedDigging) {
+            return;
+        }
+
+        if (remainingTicks == -1) {
+            remainingTicks = Costs.getRequiredMiningTicks(
+                    sessionDataManager.getTagsState(),
+                    sessionDataManager.getSelfEffectState(),
+                    sessionDataManager.getBotMovementManager().isOnGround(),
+                    sessionDataManager.getInventoryManager().getPlayerInventory()
+                            .getHotbarSlot(sessionDataManager.getInventoryManager().getHeldItemSlot())
+                            .item(),
+                    levelState.getBlockTypeAt(blockPosition).orElseThrow()
+            );
+            sessionDataManager.getBotActionManager().sendStartBreakBlock(blockPosition);
+        } else if (--remainingTicks == 0) {
+            sessionDataManager.getBotActionManager().sendEndBreakBlock(blockPosition);
+            finishedDigging = true;
         }
     }
 
     @Override
     public int getAllowedTicks() {
-        // 30-seconds max to break a block
-        return 30 * 20;
+        // 20-seconds max to break a block
+        return 20 * 20;
     }
 }

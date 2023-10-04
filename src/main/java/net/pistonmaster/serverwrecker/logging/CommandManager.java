@@ -298,6 +298,8 @@ public class CommandManager {
     }
 
     public int execute(String command) {
+        command = command.strip();
+
         try {
             commandHistory.add(command);
             return dispatcher.execute(command, consoleSubject);

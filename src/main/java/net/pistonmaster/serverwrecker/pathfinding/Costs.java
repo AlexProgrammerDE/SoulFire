@@ -41,8 +41,11 @@ public class Costs {
     public static final double FALL_1 = 0.1;
     public static final double FALL_2 = 0.2;
     public static final double FALL_3 = 0.3;
-    public static final double DIG_BLOCK_WITHOUT_TOOL = 10;
-    public static final double DIG_BLOCK_WITH_TOOL = 5;
+    // 4.317 blocks per second converted to rough estimation of ticks per block
+    // Multiply calculated ticks using this number to get a good relative heuristic
+    public static final double TICKS_PER_BLOCK = 5;
+    // We don't want a bot that tries to break blocks instead of walking around them
+    public static final double BREAK_BLOCK_ADDITION = 3;
     public static final double PLACE_BLOCK = 10;
 
     private Costs() {
@@ -62,31 +65,32 @@ public class Costs {
         }
 
         var bestMiningSpeed = Integer.MAX_VALUE;
+        ItemType bestToolType = null;
         for (var slot : inventory.getStorage()) {
-            if (slot.item() == null) {
-                continue;
-            }
-
-            var miningSpeed = getMiningSpeed(tagsState, null, true, slot.item(), blockType);
-
+            var miningSpeed = getRequiredMiningTicks(tagsState, null, true, slot.item(), blockType);
             if (miningSpeed < bestMiningSpeed) {
                 bestMiningSpeed = miningSpeed;
+                bestToolType = slot.item() == null ? null : slot.item().getType();
             }
         }
 
-        if (bestMiningSpeed != Integer.MAX_VALUE) {
-            return Optional.of(new BlockMiningCosts(DIG_BLOCK_WITH_TOOL / bestMiningSpeed, null));
+        if (bestMiningSpeed == Integer.MAX_VALUE) {
+            // We would expect there is at least a cost to break a block without a tool
+            throw new IllegalStateException("No way found to break block!");
         }
 
-        return Optional.of(new BlockMiningCosts(DIG_BLOCK_WITHOUT_TOOL, null));
+        return Optional.of(new BlockMiningCosts(
+                bestMiningSpeed * TICKS_PER_BLOCK + BREAK_BLOCK_ADDITION,
+                bestToolType
+        ));
     }
 
     // Time in ticks
-    private static int getMiningSpeed(TagsState tagsState,
-                                      @Nullable EntityEffectState effectState,
-                                      boolean onGround,
-                                      @Nullable SWItemStack itemStack,
-                                      BlockType blockType) {
+    public static int getRequiredMiningTicks(TagsState tagsState,
+                                             @Nullable EntityEffectState effectState,
+                                             boolean onGround,
+                                             @Nullable SWItemStack itemStack,
+                                             BlockType blockType) {
         float speedMultiplier;
         if (itemStack == null) {
             speedMultiplier = 1;

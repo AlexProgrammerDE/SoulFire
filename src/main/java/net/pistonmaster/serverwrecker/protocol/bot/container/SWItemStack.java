@@ -57,7 +57,6 @@ public class SWItemStack extends ItemStack {
                 this.enchantments = Object2ShortMaps.emptyMap();
             }
         }
-        System.out.println(this.enchantments);
     }
 
     public static SWItemStack from(ItemStack itemStack) {
