@@ -44,8 +44,11 @@ public class ServerWreckerLoader {
     }
 
     public static void injectJvm() {
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) ->
-                LOGGER.error("Exception in thread {}", thread.getName(), throwable));
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            LOGGER.error("Exception in thread {}", thread.getName());
+            //noinspection CallToPrintStackTrace
+            throwable.printStackTrace();
+        });
 
         if (System.console() != null) {
             AnsiConsole.systemInstall();

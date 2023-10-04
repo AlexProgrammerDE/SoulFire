@@ -42,7 +42,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
     // Optional.of() takes a few milliseconds, so we'll just cache it
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static final Optional<ActionCosts> NO_COST_RESULT = Optional.of(new ActionCosts(0, List.of()));
-    private static final boolean ALLOW_BLOCK_ACTIONS = false;
+    private static final boolean ALLOW_BLOCK_ACTIONS = true;
 
     private static Vector3i applyDirection(Vector3i pos, MovementDirection direction) {
         return switch (direction) {
