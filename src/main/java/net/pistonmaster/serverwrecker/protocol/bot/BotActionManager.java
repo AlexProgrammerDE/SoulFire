@@ -30,6 +30,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
+import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
@@ -146,12 +147,7 @@ public class BotActionManager {
         };
     }
 
-    public Optional<BlockPlaceData> findBlockToPlaceAgainst(Vector3i targetPos, List<Vector3i> ignoreBlocks) {
-        var levelState = dataManager.getCurrentLevel();
-        if (levelState == null) {
-            return Optional.empty();
-        }
-
+    public static Optional<BlockPlaceData> findBlockToPlaceAgainst(ProjectedLevelState levelState, Vector3i targetPos, List<Vector3i> ignoreBlocks) {
         for (var direction : Direction.values()) {
             var blockPos = targetPos.add(switch (direction) {
                 case DOWN -> Vector3i.from(0, -1, 0);

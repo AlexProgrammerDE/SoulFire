@@ -19,11 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.data;
 
-import java.util.ArrayList;
-import java.util.List;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import java.util.Map;
+import java.util.Optional;
 
 public class BlockItems {
-    public static final List<ItemType> VALUES = new ArrayList<>();
+    public static final Map<ItemType, BlockType> VALUES = new Object2ObjectArrayMap<>();
 
     static {
         for (var itemType : ItemType.VALUES) {
@@ -31,16 +33,16 @@ public class BlockItems {
                 var blockShapeTypes = blockType.blockShapeTypes();
 
                 if (blockType.diggable()
-                        && !blockShapeTypes.isEmpty()
+                        && blockShapeTypes.size() == 1
                         && itemType.name().equals(blockType.name())
                         && blockShapeTypes.get(0).isFullBlock()) {
-                    VALUES.add(itemType);
+                    VALUES.put(itemType, blockType);
                 }
             }
         }
     }
 
-    public static boolean isBlockItem(ItemType itemType) {
-        return VALUES.contains(itemType);
+    public static Optional<BlockType> isBlockItem(ItemType itemType) {
+        return Optional.ofNullable(VALUES.get(itemType));
     }
 }

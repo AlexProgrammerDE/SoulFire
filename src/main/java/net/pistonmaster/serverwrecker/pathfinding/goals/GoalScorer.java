@@ -30,7 +30,8 @@ public interface GoalScorer {
      * Calculates the estimated score for a given block position to the goal.
      * Usually this means the distance from achieving the goal.
      *
-     * @param entityState the world state to calculate the score for
+     * @param graph       the graph to calculate the score for
+     * @param entityState the entity state to calculate the score for
      * @return the score for the given world state
      */
     double computeScore(MinecraftGraph graph, BotEntityState entityState);
@@ -38,7 +39,7 @@ public interface GoalScorer {
     /**
      * Checks if the given world state indicates that the goal is reached.
      *
-     * @param entityState the current world state
+     * @param entityState the current entity state
      * @return true if the goal is reached, false otherwise
      */
     boolean isFinished(BotEntityState entityState);

@@ -21,13 +21,17 @@ package net.pistonmaster.serverwrecker.pathfinding.graph;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.serverwrecker.data.BlockItems;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.execution.BlockBreakAction;
+import net.pistonmaster.serverwrecker.pathfinding.execution.BlockPlaceAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
+import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
+import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -42,7 +46,6 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
     // Optional.of() takes a few milliseconds, so we'll just cache it
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static final Optional<ActionCosts> NO_COST_RESULT = Optional.of(new ActionCosts(0, List.of()));
-    private static final boolean ALLOW_BLOCK_ACTIONS = true;
 
     private static Vector3i applyDirection(Vector3i pos, MovementDirection direction) {
         return switch (direction) {
@@ -200,15 +203,11 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
     }
 
     private Optional<ActionCosts> requireFreeBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
-        var blockStateMeta = getBlockShapeType(level, block);
+        var blockStateMeta = getBlockStateMeta(level, block);
 
         // No need to break blocks like air or grass
         if (blockStateMeta.blockShapeType().hasNoCollisions()) {
             return NO_COST_RESULT;
-        }
-
-        if (!ALLOW_BLOCK_ACTIONS) {
-            return Optional.empty();
         }
 
         var blockMiningCosts = Costs.calculateBlockBreakCost(tagsState, inventory, blockStateMeta);
@@ -251,21 +250,47 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
     }
 
     private Optional<ActionCosts> requireSolidBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
-        var blockShapeType = getBlockShapeType(level, block).blockShapeType();
+        var blockStateMeta = getBlockStateMeta(level, block);
 
-        // Block with a current state that has no collision (Like air, grass, open fence)
-        if (blockShapeType.hasNoCollisions()) {
-            log.debug("Block at {} has no collision", block);
-            if (!ALLOW_BLOCK_ACTIONS) {
+        // We have found a replaceable block, so we can try to replace it
+        if (BlockTypeHelper.isReplaceable(blockStateMeta.blockType())) {
+            var blockPlaceInfo = BotActionManager.findBlockToPlaceAgainst(level, block, List.of(previousEntityState.position().toInt()));
+
+            // No way to place a block against a block, fail
+            if (blockPlaceInfo.isEmpty()) {
                 return Optional.empty();
             }
 
+            for (var slot : inventory.getStorage()) {
+                if (slot.item() == null) {
+                    continue;
+                }
+
+                var itemType = slot.item().getType();
+                var blockItem = BlockItems.isBlockItem(itemType);
+
+                // We found an item we can place, so it's a valid action
+                if (blockItem.isPresent()) {
+                    return Optional.of(new ActionCosts(
+                            Costs.PLACE_BLOCK,
+                            List.of(new BlockPlaceAction(block, blockItem.get(), itemType, blockPlaceInfo.get()))
+                    ));
+                }
+            }
+
+            // Found no item to place, fail
+            return Optional.empty();
+        }
+
+        var blockShapeType = blockStateMeta.blockShapeType();
+
+        // Block with a current state that has no collision (Like grass, open fence)
+        if (blockShapeType.hasNoCollisions()) {
             return Optional.empty();
         }
 
         // Prevent walking over cake, slabs, fences, etc.
         if (!blockShapeType.isFullBlock()) {
-            log.debug("Block at {} is not a full block", block);
             // Could destroy and place block here, but that's too much work
             return Optional.empty();
         }
@@ -274,7 +299,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
         return NO_COST_RESULT;
     }
 
-    private BlockStateMeta getBlockShapeType(ProjectedLevelState level, Vector3i block) {
+    private BlockStateMeta getBlockStateMeta(ProjectedLevelState level, Vector3i block) {
         // If out of level, we can't go there, so we'll recalculate once we get there
         return level.getBlockStateAt(block).orElseThrow(OutOfLevelException::new);
     }

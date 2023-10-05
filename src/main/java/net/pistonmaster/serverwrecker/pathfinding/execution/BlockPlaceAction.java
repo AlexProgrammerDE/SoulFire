@@ -19,10 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.execution;
 
+import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
+import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -32,7 +35,9 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class BlockPlaceAction implements WorldAction {
     private final Vector3i blockPosition;
-    private final ItemType blockType;
+    private final BlockType blockType;
+    private final ItemType itemType;
+    private final BotActionManager.BlockPlaceData blockPlaceData;
     private boolean putOnHotbar = false;
 
     @Override
@@ -42,7 +47,9 @@ public class BlockPlaceAction implements WorldAction {
             return false;
         }
 
-        return levelState.getBlockTypeAt(blockPosition).map(type -> type.name().equals(blockType.name())).orElse(false);
+        return levelState.getBlockTypeAt(blockPosition)
+                .map(type -> type == blockType)
+                .orElse(false);
     }
 
     @Override
@@ -56,7 +63,7 @@ public class BlockPlaceAction implements WorldAction {
             var heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
             if (heldSlot.item() != null) {
                 var item = heldSlot.item();
-                if (item.getType() == blockType) {
+                if (item.getType() == itemType) {
                     putOnHotbar = true;
                     return;
                 }
@@ -68,7 +75,7 @@ public class BlockPlaceAction implements WorldAction {
                 }
 
                 var item = hotbarSlot.item();
-                if (item.getType() == blockType) {
+                if (item.getType() == itemType) {
                     inventoryManager.setHeldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
                     inventoryManager.sendHeldItemChange();
                     putOnHotbar = true;
@@ -82,7 +89,7 @@ public class BlockPlaceAction implements WorldAction {
                 }
 
                 var item = slot.item();
-                if (item.getType() == blockType) {
+                if (item.getType() == itemType) {
                     if (!inventoryManager.tryInventoryControl()) {
                         return;
                     }
@@ -107,7 +114,7 @@ public class BlockPlaceAction implements WorldAction {
             }
         }
 
-        // TODO: Place block
+        connection.sessionDataManager().getBotActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceData);
     }
 
     @Override
