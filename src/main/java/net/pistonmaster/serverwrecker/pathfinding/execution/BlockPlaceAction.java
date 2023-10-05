@@ -54,11 +54,12 @@ public class BlockPlaceAction implements WorldAction {
 
     @Override
     public void tick(BotConnection connection) {
-        var movementManager = connection.sessionDataManager().getBotMovementManager();
+        var sessionDataManager = connection.sessionDataManager();
+        var movementManager = sessionDataManager.getBotMovementManager();
         movementManager.getControlState().resetAll();
 
         if (!putOnHotbar) {
-            var inventoryManager = connection.sessionDataManager().getInventoryManager();
+            var inventoryManager = sessionDataManager.getInventoryManager();
             var playerInventory = inventoryManager.getPlayerInventory();
             var heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
             if (heldSlot.item() != null) {
@@ -119,7 +120,7 @@ public class BlockPlaceAction implements WorldAction {
 
     @Override
     public int getAllowedTicks() {
-        // 3-seconds max to break a block
+        // 3-seconds max to place a block
         return 3 * 20;
     }
 }

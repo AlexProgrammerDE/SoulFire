@@ -205,16 +205,9 @@ public class LevelState {
                     }
 
                     for (var shape : blockShapeType.blockShapes()) {
-                        var bbMinX = x + shape.minX();
-                        var bbMinY = y + shape.minY();
-                        var bbMinZ = z + shape.minZ();
-                        var bbMaxX = x + shape.maxX();
-                        var bbMaxY = y + shape.maxY();
-                        var bbMaxZ = z + shape.maxZ();
-
-                        var blockBoundingBox = new BoundingBox(bbMinX, bbMinY, bbMinZ, bbMaxX, bbMaxY, bbMaxZ);
-                        if (blockBoundingBox.intersects(aabb)) {
-                            boundingBoxList.add(blockBoundingBox);
+                        var boundingBox = shape.createBoundingBoxAt(x, y, z);
+                        if (boundingBox.intersects(aabb)) {
+                            boundingBoxList.add(boundingBox);
                         }
                     }
                 }

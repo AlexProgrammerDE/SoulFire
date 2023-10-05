@@ -74,7 +74,7 @@ public class BlockBreakAction implements WorldAction {
         }
 
         if (!putOnHotbar && toolType != null) {
-            var inventoryManager = connection.sessionDataManager().getInventoryManager();
+            var inventoryManager = sessionDataManager.getInventoryManager();
             var playerInventory = inventoryManager.getPlayerInventory();
             var heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
             if (heldSlot.item() != null) {

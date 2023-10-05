@@ -19,8 +19,14 @@
  */
 package net.pistonmaster.serverwrecker.data;
 
+import net.pistonmaster.serverwrecker.util.BoundingBox;
+
 public record BlockShape(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
     public boolean isFullBlock() {
         return minX == 0 && minY == 0 && minZ == 0 && maxX == 1 && maxY == 1 && maxZ == 1;
+    }
+
+    public BoundingBox createBoundingBoxAt(double x, double y, double z) {
+        return new BoundingBox(x + minX, y + minY, z + minZ, x + maxX, y + maxY, z + maxZ);
     }
 }

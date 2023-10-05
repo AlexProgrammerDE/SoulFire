@@ -87,12 +87,12 @@ public class BotActionManager {
             return;
         }
 
-        var rayCast = rayCastToBlock(blockState.get().blockShapeType(), eyePosition, movementManager.getRotationVector(), againstPlacePosition);
+        var rayCast = rayCastToBlock(blockState.get().blockShapeType(), eyePosition, movementManager.getRotationVector(), againstBlock);
         if (rayCast.isEmpty()) {
             return;
         }
 
-        var rayCastPosition = rayCast.get().min(againstBlock.toFloat());
+        var rayCastPosition = rayCast.get().sub(againstBlock.toFloat());
 
         dataManager.getSession().send(new ServerboundUseItemOnPacket(
                 againstBlock,
@@ -106,13 +106,14 @@ public class BotActionManager {
         ));
     }
 
-    private Optional<Vector3f> rayCastToBlock(BlockShapeType shapeType, Vector3d eyePosition, Vector3d headRotation, Vector3d targetPosition) {
+    private Optional<Vector3f> rayCastToBlock(BlockShapeType shapeType, Vector3d eyePosition, Vector3d headRotation, Vector3i targetBlock) {
         var intersections = new ArrayList<Vector3f>();
 
         for (var shape : shapeType.blockShapes()) {
-            var boundingBox = new BoundingBox(shape.minX(), shape.minY(), shape.minZ(), shape.maxX(), shape.maxY(), shape.maxZ());
-            boundingBox.move(targetPosition.getX(), targetPosition.getY(), targetPosition.getZ());
-            boundingBox.getIntersection(eyePosition, headRotation).map(Vector3d::toFloat).ifPresent(intersections::add);
+            var boundingBox = shape.createBoundingBoxAt(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ());
+            boundingBox.getIntersection(eyePosition, headRotation)
+                    .map(Vector3d::toFloat)
+                    .ifPresent(intersections::add);
         }
 
         if (intersections.isEmpty()) {
@@ -150,12 +151,12 @@ public class BotActionManager {
     public static Optional<BlockPlaceData> findBlockToPlaceAgainst(ProjectedLevelState levelState, Vector3i targetPos, List<Vector3i> ignoreBlocks) {
         for (var direction : Direction.values()) {
             var blockPos = targetPos.add(switch (direction) {
-                case DOWN -> Vector3i.from(0, -1, 0);
-                case UP -> Vector3i.from(0, 1, 0);
-                case NORTH -> Vector3i.from(0, 0, -1);
-                case SOUTH -> Vector3i.from(0, 0, 1);
-                case WEST -> Vector3i.from(-1, 0, 0);
-                case EAST -> Vector3i.from(1, 0, 0);
+                case DOWN -> Vector3i.from(0, 1, 0);
+                case UP -> Vector3i.from(0, -1, 0);
+                case NORTH -> Vector3i.from(0, 0, 1);
+                case SOUTH -> Vector3i.from(0, 0, -1);
+                case WEST -> Vector3i.from(1, 0, 0);
+                case EAST -> Vector3i.from(-1, 0, 0);
             });
 
             if (ignoreBlocks.contains(blockPos)) {
