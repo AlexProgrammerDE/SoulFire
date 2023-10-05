@@ -19,21 +19,26 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
 
-@Getter
+import java.util.function.Function;
+
 @RequiredArgsConstructor
 public enum BodyPart {
-    FEET(Vector3i.from(0, 0, 0)),
-    HEAD(Vector3i.from(0, 1, 0));
+    FEET(v -> v),
+    HEAD(v -> v.add(0, 1, 0));
 
     // Iterating over BodyPart.values() is slower than iteration over a static array
-    public static final Vector3i[] BODY_PARTS = new Vector3i[]{
-            BodyPart.FEET.getOffset(),
-            BodyPart.HEAD.getOffset()
+    // Reversed because we normally want to see the head block mined before the feet
+    public static final BodyPart[] BODY_PARTS_REVERSE = new BodyPart[]{
+            BodyPart.HEAD,
+            BodyPart.FEET
     };
 
-    private final Vector3i offset;
+    private final Function<Vector3i, Vector3i> offset;
+
+    public Vector3i offset(Vector3i position) {
+        return offset.apply(position);
+    }
 }

@@ -137,18 +137,18 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
                 default -> throw new IllegalStateException("Unexpected value: " + direction);
             };
 
-            for (var bodyOffset : BodyPart.BODY_PARTS) {
+            for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
                 // Apply jump shift to target edge and offset for body part
-                if (requireFreeHelper(applyJumpShift(corner, modifier).add(bodyOffset), level, inventory, actions, cost)) {
+                if (requireFreeHelper(bodyOffset.offset(applyJumpShift(corner, modifier)), level, inventory, actions, cost)) {
                     return Optional.empty();
                 }
             }
         }
 
         var targetEdge = applyDirection(fromPosInt, direction);
-        for (var bodyOffset : BodyPart.BODY_PARTS) {
+        for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
             // Apply jump shift to target diagonal and offset for body part
-            if (requireFreeHelper(applyJumpShift(targetEdge, modifier).add(bodyOffset), level, inventory, actions, cost)) {
+            if (requireFreeHelper(bodyOffset.offset(applyJumpShift(targetEdge, modifier)), level, inventory, actions, cost)) {
                 return Optional.empty();
             }
         }
