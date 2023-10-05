@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.pathfinding.graph;
 import com.google.common.util.concurrent.AtomicDouble;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.data.BlockItems;
+import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.execution.BlockBreakAction;
@@ -38,6 +39,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @SuppressWarnings("CollectionAddAllCanBeReplacedWithConstructor")
@@ -101,7 +103,8 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
         };
     }
 
-    private Optional<ActionCosts> requireFreeBlocks(ProjectedLevelState level, ProjectedInventory inventory) {
+    private Optional<ActionCosts> requireFreeBlocks(AtomicReference<ProjectedLevelState> level,
+                                                    AtomicReference<ProjectedInventory> inventory) {
         List<WorldAction> actions = new ArrayList<>();
         var cost = new AtomicDouble();
         var fromPosInt = previousEntityState.position().toInt();
@@ -190,7 +193,8 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
         return Optional.of(new ActionCosts(cost.get(), actions));
     }
 
-    private boolean requireFreeHelper(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory, List<WorldAction> actions, AtomicDouble cost) {
+    private boolean requireFreeHelper(Vector3i block, AtomicReference<ProjectedLevelState> level,
+                                      AtomicReference<ProjectedInventory> inventory, List<WorldAction> actions, AtomicDouble cost) {
         var blockActions = requireFreeBlock(block, level, inventory);
         if (blockActions.isEmpty()) {
             log.debug("Block at {} is not free", block);
@@ -202,15 +206,18 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
         }
     }
 
-    private Optional<ActionCosts> requireFreeBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
-        var blockStateMeta = getBlockStateMeta(level, block);
+    private Optional<ActionCosts> requireFreeBlock(Vector3i block, AtomicReference<ProjectedLevelState> level,
+                                                   AtomicReference<ProjectedInventory> inventory) {
+        var resolvedLevel = level.get();
+        var resolvedInventory = inventory.get();
+        var blockStateMeta = getBlockStateMeta(resolvedLevel, block);
 
         // No need to break blocks like air or grass
         if (blockStateMeta.blockShapeType().hasNoCollisions()) {
             return NO_COST_RESULT;
         }
 
-        var blockMiningCosts = Costs.calculateBlockBreakCost(tagsState, inventory, blockStateMeta);
+        var blockMiningCosts = Costs.calculateBlockBreakCost(tagsState, resolvedInventory, blockStateMeta);
 
         // No way to break block
         if (blockMiningCosts.isEmpty()) {
@@ -219,11 +226,19 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
 
         var costs = blockMiningCosts.get();
 
+        level.set(resolvedLevel.withChange(block, new BlockStateMeta(BlockType.AIR)));
+
+        if (costs.willDrop()) {
+            var itemDrop = BlockItems.getItemType(blockStateMeta.blockType());
+            itemDrop.ifPresent(itemType -> inventory.set(resolvedInventory.withItemPickup(itemType)));
+        }
+
         // Add cost of breaking block
-        return Optional.of(new ActionCosts(costs.miningCost(), List.of(new BlockBreakAction(block, costs.toolType()))));
+        return Optional.of(new ActionCosts(costs.miningCost(), List.of(new BlockBreakAction(block, costs.itemStack()))));
     }
 
-    private Optional<ActionCosts> requireSolidBlocks(ProjectedLevelState level, ProjectedInventory inventory) {
+    private Optional<ActionCosts> requireSolidBlocks(AtomicReference<ProjectedLevelState> level,
+                                                     AtomicReference<ProjectedInventory> inventory) {
         var actions = new ArrayList<WorldAction>();
         var cost = new AtomicDouble();
         var fromPosInt = previousEntityState.position().toInt();
@@ -237,7 +252,8 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
         return Optional.of(new ActionCosts(cost.get(), actions));
     }
 
-    private boolean requireSolidHelper(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory, List<WorldAction> actions, AtomicDouble cost) {
+    private boolean requireSolidHelper(Vector3i block, AtomicReference<ProjectedLevelState> level,
+                                       AtomicReference<ProjectedInventory> inventory, List<WorldAction> actions, AtomicDouble cost) {
         var blockActions = requireSolidBlock(block, level, inventory);
         if (blockActions.isEmpty()) {
             log.debug("Block at {} is not solid", block);
@@ -249,19 +265,22 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
         }
     }
 
-    private Optional<ActionCosts> requireSolidBlock(Vector3i block, ProjectedLevelState level, ProjectedInventory inventory) {
-        var blockStateMeta = getBlockStateMeta(level, block);
+    private Optional<ActionCosts> requireSolidBlock(Vector3i block, AtomicReference<ProjectedLevelState> level,
+                                                    AtomicReference<ProjectedInventory> inventory) {
+        var resolvedLevel = level.get();
+        var resolvedInventory = inventory.get();
+        var blockStateMeta = getBlockStateMeta(resolvedLevel, block);
 
         // We have found a replaceable block, so we can try to replace it
         if (BlockTypeHelper.isReplaceable(blockStateMeta.blockType())) {
-            var blockPlaceInfo = BotActionManager.findBlockToPlaceAgainst(level, block, List.of(previousEntityState.position().toInt()));
+            var blockPlaceInfo = BotActionManager.findBlockToPlaceAgainst(resolvedLevel, block, List.of(previousEntityState.position().toInt()));
 
             // No way to place a block against a block, fail
             if (blockPlaceInfo.isEmpty()) {
                 return Optional.empty();
             }
 
-            for (var slot : inventory.getStorage()) {
+            for (var slot : resolvedInventory.getStorage()) {
                 if (slot.item() == null) {
                     continue;
                 }
@@ -271,6 +290,14 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
 
                 // We found an item we can place, so it's a valid action
                 if (blockItem.isPresent()) {
+                    level.set(resolvedLevel.withChange(block, new BlockStateMeta(blockItem.get())));
+
+                    if (slot.item().getAmount() > 1) {
+                        inventory.set(resolvedInventory.withChange(slot.slot(), slot.item().withAmount(slot.item().getAmount() - 1)));
+                    } else {
+                        inventory.set(resolvedInventory.withChange(slot.slot(), null));
+                    }
+
                     return Optional.of(new ActionCosts(
                             Costs.PLACE_BLOCK,
                             List.of(new BlockPlaceAction(block, blockItem.get(), itemType, blockPlaceInfo.get()))
@@ -312,8 +339,8 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
             case NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST -> Costs.DIAGONAL;
         };
         List<WorldAction> actions = new ArrayList<>();
-        var projectedLevelState = previousEntityState.levelState();
-        var projectedInventory = previousEntityState.inventory();
+        var projectedLevelState = new AtomicReference<>(previousEntityState.levelState());
+        var projectedInventory = new AtomicReference<>(previousEntityState.inventory());
 
         var freeActions = requireFreeBlocks(projectedLevelState, projectedInventory);
         if (freeActions.isEmpty()) {
@@ -353,8 +380,8 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
 
         return new GraphInstructions(new BotEntityState(
                 targetPosition,
-                projectedLevelState,
-                projectedInventory
+                projectedLevelState.get(),
+                projectedInventory.get()
         ), cost, actions);
     }
 

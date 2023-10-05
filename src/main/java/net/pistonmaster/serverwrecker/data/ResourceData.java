@@ -21,6 +21,8 @@ package net.pistonmaster.serverwrecker.data;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 
@@ -64,7 +66,7 @@ public class ResourceData {
         }
 
         // Load global palette
-        Map<Integer, BlockStateMeta> stateMap = new HashMap<>();
+        Int2ObjectMap<BlockStateMeta> stateMap = new Int2ObjectOpenHashMap<>();
         for (var blockEntry : blocks.entrySet()) {
             var i = 0;
             for (var state : blockEntry.getValue().getAsJsonObject().get("states").getAsJsonArray()) {
@@ -73,9 +75,19 @@ public class ResourceData {
             }
         }
 
-        GLOBAL_BLOCK_PALETTE = new GlobalBlockPalette(stateMap.size());
-        for (var entry : stateMap.entrySet()) {
-            GLOBAL_BLOCK_PALETTE.add(entry.getKey(), entry.getValue());
-        }
+        GLOBAL_BLOCK_PALETTE = new GlobalBlockPalette(stateMap);
+
+        // Initialize all classes
+        doNothing(BlockItems.VALUES);
+        doNothing(BlockShapeType.VALUES);
+        doNothing(BlockStateLoader.BLOCK_SHAPES);
+        doNothing(BlockType.VALUES);
+        doNothing(EntityType.VALUES);
+        doNothing(ItemType.VALUES);
+    }
+
+    @SuppressWarnings("unused")
+    private static void doNothing(Object param) {
+        // Do nothing
     }
 }

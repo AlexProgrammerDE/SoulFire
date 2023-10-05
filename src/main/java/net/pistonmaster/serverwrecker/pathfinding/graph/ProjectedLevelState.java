@@ -20,17 +20,14 @@
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * An immutable representation of the world state.
@@ -40,58 +37,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor
 public class ProjectedLevelState {
     private final LevelState levelState;
-    private final Map<Vector3i, BlockStateMeta> blockChanges;
+    private final Object2ObjectMap<Vector3i, BlockStateMeta> blockChanges;
     private final int blockChangesHash;
-    private final Map<Vector3i, BlockStateMetaValue> blockStateCache;
 
     public ProjectedLevelState(LevelState levelState) {
         this.levelState = levelState;
-        this.blockChanges = Collections.emptyMap();
+        this.blockChanges = Object2ObjectMaps.emptyMap();
         this.blockChangesHash = blockChanges.hashCode();
-        this.blockStateCache = new Object2ObjectLinkedOpenHashMap<>();
     }
 
     public ProjectedLevelState withChange(Vector3i position, BlockStateMeta blockStateMeta) {
-        Map<Vector3i, BlockStateMeta> blockChanges = new Object2ObjectArrayMap<>(this.blockChanges.size() + 1);
-        blockChanges.putAll(this.blockChanges);
+        var blockChanges = new Object2ObjectArrayMap<>(this.blockChanges);
         blockChanges.put(position, blockStateMeta);
 
-        Map<Vector3i, BlockStateMetaValue> blockStateCache = new Object2ObjectLinkedOpenHashMap<>(this.blockStateCache);
-        blockStateCache.put(position, new BlockStateMetaValue(blockStateMeta, true));
-
-        return new ProjectedLevelState(levelState, blockChanges, blockChanges.hashCode(), blockStateCache);
+        return new ProjectedLevelState(levelState, blockChanges, blockChanges.hashCode());
     }
 
     public Optional<BlockStateMeta> getBlockStateAt(Vector3i position) {
-        var checkShrink = new AtomicBoolean(false);
-        var meta = Optional.ofNullable(blockStateCache.computeIfAbsent(position, k -> {
-            var toInsert = levelState.getBlockStateAt(k)
-                    .map(v -> new BlockStateMetaValue(v, false)).orElse(null);
-
-            if (toInsert != null) {
-                checkShrink.set(true);
-            }
-
-            return toInsert;
-        }));
-
-        // Reduce the cache size if it gets too big
-        if (checkShrink.get()) {
-            var drainSize = 200 + blockChanges.size();
-            if (blockStateCache.size() > drainSize) {
-                // Remove the 100 eldest elements that are not changes (To prevent re-fetching)
-                var limitCounter = new AtomicInteger(0);
-                blockStateCache.values().removeIf(value -> {
-                    if (value.isChange()) {
-                        return false;
-                    }
-
-                    return limitCounter.getAndIncrement() < 100;
-                });
-            }
+        var blockChange = blockChanges.get(position);
+        if (blockChange != null) {
+            return Optional.of(blockChange);
         }
 
-        return meta.map(BlockStateMetaValue::meta);
+        return levelState.getCachedBlockStateAt(position);
     }
 
     @Override
@@ -105,8 +73,5 @@ public class ProjectedLevelState {
     @Override
     public int hashCode() {
         return blockChangesHash;
-    }
-
-    private record BlockStateMetaValue(BlockStateMeta meta, boolean isChange) {
     }
 }

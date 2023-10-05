@@ -43,11 +43,12 @@ public enum TierType {
 
     public static OptionalInt getTier(ItemType itemType) {
         for (var tierType : TierType.values()) {
-            if (!tierType.tools.contains(itemType)) {
-                continue;
+            // Loop instead of contains because we only need to do a == check
+            for (var tool : tierType.tools) {
+                if (tool == itemType) {
+                    return OptionalInt.of(tierType.level);
+                }
             }
-
-            return OptionalInt.of(tierType.level);
         }
 
         return OptionalInt.empty();

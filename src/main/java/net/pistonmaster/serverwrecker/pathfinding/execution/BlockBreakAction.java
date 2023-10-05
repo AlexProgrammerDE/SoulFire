@@ -22,9 +22,9 @@ package net.pistonmaster.serverwrecker.pathfinding.execution;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
+import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class BlockBreakAction implements WorldAction {
     private final Vector3i blockPosition;
-    private final ItemType toolType;
+    private final SWItemStack itemStack;
     private boolean didLook = false;
     private boolean putOnHotbar = false;
     private int remainingTicks = -1;
@@ -73,13 +73,13 @@ public class BlockBreakAction implements WorldAction {
             }
         }
 
-        if (!putOnHotbar && toolType != null) {
+        if (!putOnHotbar && itemStack != null) {
             var inventoryManager = sessionDataManager.getInventoryManager();
             var playerInventory = inventoryManager.getPlayerInventory();
             var heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
             if (heldSlot.item() != null) {
                 var item = heldSlot.item();
-                if (item.getType() == toolType) {
+                if (item.equalsShape(itemStack)) {
                     putOnHotbar = true;
                     return;
                 }
@@ -91,7 +91,7 @@ public class BlockBreakAction implements WorldAction {
                 }
 
                 var item = hotbarSlot.item();
-                if (item.getType() == toolType) {
+                if (item.equalsShape(itemStack)) {
                     inventoryManager.setHeldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
                     inventoryManager.sendHeldItemChange();
                     putOnHotbar = true;
@@ -105,7 +105,7 @@ public class BlockBreakAction implements WorldAction {
                 }
 
                 var item = slot.item();
-                if (item.getType() == toolType) {
+                if (item.equalsShape(itemStack)) {
                     if (!inventoryManager.tryInventoryControl()) {
                         return;
                     }
@@ -143,7 +143,7 @@ public class BlockBreakAction implements WorldAction {
                             .getHotbarSlot(sessionDataManager.getInventoryManager().getHeldItemSlot())
                             .item(),
                     levelState.getBlockTypeAt(blockPosition).orElseThrow()
-            );
+            ).ticks();
             sessionDataManager.getBotActionManager().sendStartBreakBlock(blockPosition);
         } else if (--remainingTicks == 0) {
             sessionDataManager.getBotActionManager().sendEndBreakBlock(blockPosition);

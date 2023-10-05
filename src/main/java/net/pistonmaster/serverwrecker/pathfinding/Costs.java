@@ -31,6 +31,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.util.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -65,12 +66,32 @@ public class Costs {
         }
 
         var lowestMiningTicks = Integer.MAX_VALUE;
-        ItemType bestToolType = null;
+        SWItemStack bestItem = null;
+        var correctToolUsed = false;
+        var seenNull = false;
+        var seenStacks = new HashSet<SWItemStack>();
         for (var slot : inventory.getStorage()) {
+            // Only check one time for null
+            if (slot.item() == null) {
+                if (seenNull) {
+                    continue;
+                }
+
+                seenNull = true;
+            }
+
+            // Only check a stack one time
+            if (seenStacks.contains(slot.item())) {
+                continue;
+            }
+
+            seenStacks.add(slot.item());
+
             var miningTicks = getRequiredMiningTicks(tagsState, null, true, slot.item(), blockType);
-            if (miningTicks < lowestMiningTicks) {
-                lowestMiningTicks = miningTicks;
-                bestToolType = slot.item() == null ? null : slot.item().getType();
+            if (miningTicks.ticks() < lowestMiningTicks) {
+                lowestMiningTicks = miningTicks.ticks();
+                bestItem = slot.item();
+                correctToolUsed = miningTicks.willDrop();
             }
         }
 
@@ -81,12 +102,13 @@ public class Costs {
 
         return Optional.of(new BlockMiningCosts(
                 (lowestMiningTicks / TICKS_PER_BLOCK) + BREAK_BLOCK_ADDITION,
-                bestToolType
+                bestItem,
+                correctToolUsed
         ));
     }
 
     // Time in ticks
-    public static int getRequiredMiningTicks(TagsState tagsState,
+    public static TickResult getRequiredMiningTicks(TagsState tagsState,
                                              @Nullable EntityEffectState effectState,
                                              boolean onGround,
                                              @Nullable SWItemStack itemStack,
@@ -133,14 +155,15 @@ public class Costs {
 
         var damage = speedMultiplier / blockType.hardness();
 
-        damage /= isCorrectToolUsed(tagsState, itemStack == null ? null : itemStack.getType(), blockType) ? 30 : 100;
+        var correctToolUsed = isCorrectToolUsed(tagsState, itemStack == null ? null : itemStack.getType(), blockType);
+        damage /= correctToolUsed ? 30 : 100;
 
         // Insta mine
         if (damage > 1) {
-            return 0;
+            return new TickResult(0, correctToolUsed);
         }
 
-        return (int) Math.ceil(1 / damage);
+        return new TickResult((int) Math.ceil(1 / damage), correctToolUsed);
     }
 
     private static boolean isCorrectToolUsed(TagsState tagsState, ItemType itemType, BlockType blockType) {
@@ -175,6 +198,9 @@ public class Costs {
                 .orElseGet(OptionalInt::empty);
     }
 
-    public record BlockMiningCosts(double miningCost, @Nullable ItemType toolType) {
+    public record BlockMiningCosts(double miningCost, @Nullable SWItemStack itemStack, boolean willDrop) {
+    }
+
+    public record TickResult(int ticks, boolean willDrop) {
     }
 }

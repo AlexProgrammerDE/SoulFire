@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.block;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import lombok.Getter;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkData;
@@ -29,19 +30,18 @@ public class GlobalBlockPalette {
     private final int maxStates;
     @Getter
     private final int blockBitsPerEntry;
-    private final BlockStateMeta[] stateIdToBlockName;
+    private final BlockStateMeta[] stateIdToBlockState;
 
-    public GlobalBlockPalette(int maxStates) {
-        this.maxStates = maxStates;
+    public GlobalBlockPalette(Int2ObjectMap<BlockStateMeta> states) {
+        this.maxStates = states.size();
         this.blockBitsPerEntry = ChunkData.log2RoundUp(maxStates);
-        this.stateIdToBlockName = new BlockStateMeta[maxStates];
-    }
-
-    public void add(int id, BlockStateMeta name) {
-        this.stateIdToBlockName[id] = name;
+        this.stateIdToBlockState = new BlockStateMeta[maxStates];
+        for (var entry : states.int2ObjectEntrySet()) {
+            this.stateIdToBlockState[entry.getIntKey()] = entry.getValue();
+        }
     }
 
     public BlockStateMeta getBlockStateForStateId(int id) {
-        return stateIdToBlockName[id];
+        return stateIdToBlockState[id];
     }
 }

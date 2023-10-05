@@ -38,4 +38,16 @@ public record BlockType(int id, String name, String displayName, float hardness,
     public boolean isFluid() {
         return this == WATER || this == LAVA;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BlockType blockType)) return false;
+        return id == blockType.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
 }

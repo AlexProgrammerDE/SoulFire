@@ -19,31 +19,29 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.container;
 
+import lombok.Getter;
+
+@Getter
 public class PlayerInventoryContainer extends Container {
+    private final ContainerSlot[] mainInventory = getSlots(9, 35);
+    private final ContainerSlot[] hotbar = getSlots(36, 44);
+    /**
+     * -- GETTER --
+     * Retrieves the storage slots of the container.
+     * This includes the main inventory and the hotbar.
+     */
+    private final ContainerSlot[] storage = getSlots(9, 44);
+    @Getter
+    private final ContainerSlot[] armor = getSlots(5, 8);
+    @Getter
+    private final ContainerSlot[] craftingGrid = getSlots(1, 4);
+
     public PlayerInventoryContainer() {
         super(46, 0);
     }
 
-    public ContainerSlot[] getMainInventory() {
-        return getSlots(9, 35);
-    }
-
-    public ContainerSlot[] getHotbar() {
-        return getSlots(36, 44);
-    }
-
     public ContainerSlot getHotbarSlot(int slot) {
         return getSlot(36 + slot);
-    }
-
-    /**
-     * Retrieves the storage slots of the container.
-     * This includes the main inventory and the hotbar.
-     *
-     * @return an array of ContainerSlot objects representing the storage slots of the container.
-     */
-    public ContainerSlot[] getStorage() {
-        return getSlots(9, 44);
     }
 
     public ContainerSlot getOffhand() {
@@ -68,14 +66,6 @@ public class PlayerInventoryContainer extends Container {
 
     public ContainerSlot getCraftingResult() {
         return getSlot(0);
-    }
-
-    public ContainerSlot[] getCraftingGrid() {
-        return getSlots(1, 4);
-    }
-
-    public ContainerSlot[] getArmor() {
-        return getSlots(5, 8);
     }
 
     public boolean isHotbar(ContainerSlot slot) {

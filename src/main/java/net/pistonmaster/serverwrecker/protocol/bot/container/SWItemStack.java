@@ -30,10 +30,19 @@ import it.unimi.dsi.fastutil.objects.Object2ShortMaps;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.data.ItemType;
 
+import java.util.Objects;
+
 @Getter
 public class SWItemStack extends ItemStack {
     private final ItemType type;
     private final Object2ShortMap<String> enchantments;
+    private final int precalculatedHash = precalculateHash();
+
+    private SWItemStack(SWItemStack clone, int amount) {
+        super(clone.getId(), amount, clone.getNbt());
+        this.type = clone.type;
+        this.enchantments = clone.enchantments;
+    }
 
     private SWItemStack(ItemStack itemStack) {
         super(itemStack.getId(), itemStack.getAmount(), itemStack.getNbt());
@@ -59,11 +68,55 @@ public class SWItemStack extends ItemStack {
         }
     }
 
+    private SWItemStack(ItemType itemType, int amount) {
+        super(itemType.id(), amount, null);
+        this.type = itemType;
+        this.enchantments = Object2ShortMaps.emptyMap();
+    }
+
+    private int precalculateHash() {
+        return Objects.hash(this.type, this.enchantments);
+    }
+
     public static SWItemStack from(ItemStack itemStack) {
         if (itemStack == null) {
             return null;
         }
 
         return new SWItemStack(itemStack);
+    }
+
+    public static SWItemStack forType(ItemType itemType) {
+        return new SWItemStack(itemType, 1);
+    }
+
+    public SWItemStack withAmount(int amount) {
+        return new SWItemStack(this, amount);
+    }
+
+    public boolean equalsShape(SWItemStack other) {
+        if (other == null) {
+            return false;
+        }
+
+        return this.type == other.type && this.enchantments.equals(other.enchantments);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof SWItemStack other) {
+            return this.precalculatedHash == other.precalculatedHash;
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.precalculatedHash;
     }
 }

@@ -24,8 +24,12 @@ import net.pistonmaster.serverwrecker.data.BlockType;
 
 import java.util.Objects;
 
-public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType) {
+public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType, int precalculatedHash) {
     private static final BlockShapeType EMPTY_SHAPE = BlockShapeType.getById(0);
+
+    public BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType) {
+        this(blockType, blockShapeType, Objects.hash(blockType, blockShapeType));
+    }
 
     public BlockStateMeta(String blockName, int stateIndex) {
         this(Objects.requireNonNull(BlockType.getByMcName(blockName), "BlockType was null!"), stateIndex);
@@ -33,6 +37,10 @@ public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType)
 
     private BlockStateMeta(BlockType blockType, int stateIndex) {
         this(blockType, getBlockShapeType(blockType, stateIndex));
+    }
+
+    public BlockStateMeta(BlockType blockType) {
+        this(blockType, 0);
     }
 
     private static BlockShapeType getBlockShapeType(BlockType blockType, int stateIndex) {
@@ -45,5 +53,17 @@ public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType)
         } else {
             return blockType.blockShapeTypes().get(stateIndex);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BlockStateMeta blockStateMeta)) return false;
+        return precalculatedHash == blockStateMeta.precalculatedHash;
+    }
+
+    @Override
+    public int hashCode() {
+        return precalculatedHash;
     }
 }

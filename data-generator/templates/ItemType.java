@@ -24,4 +24,16 @@ public record ItemType(int id, String name, String displayName, int stackSize, L
 
         return null;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ItemType itemType)) return false;
+        return id == itemType.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
 }

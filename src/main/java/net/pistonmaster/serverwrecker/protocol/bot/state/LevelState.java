@@ -19,6 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Scheduler;
 import com.github.steveice10.opennbt.tag.builtin.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
@@ -36,6 +39,7 @@ import net.pistonmaster.serverwrecker.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.*;
 
 @Getter
@@ -67,6 +71,11 @@ public class LevelState {
     private long worldAge;
     @Setter
     private long time;
+    private final LoadingCache<Vector3i, Optional<BlockStateMeta>> blockStateCache = Caffeine.newBuilder()
+            .maximumSize(100)
+            .scheduler(Scheduler.systemScheduler())
+            .expireAfterWrite(Duration.ofSeconds(30))
+            .build(this::getBlockStateAt);
 
     public LevelState(SessionDataManager sessionDataManager, String dimensionName, int dimensionId, CompoundTag levelRegistry) {
         this.sessionDataManager = sessionDataManager;
@@ -146,6 +155,7 @@ public class LevelState {
     public OptionalInt getBlockStateIdAt(Vector3i block) {
         var chunkData = chunks.get(new ChunkKey(block));
 
+        // Out of world
         if (chunkData == null) {
             return OptionalInt.empty();
         }
@@ -161,11 +171,16 @@ public class LevelState {
     public Optional<BlockStateMeta> getBlockStateAt(Vector3i block) {
         var stateId = getBlockStateIdAt(block);
 
+        // Out of world
         if (stateId.isEmpty()) {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(ResourceData.GLOBAL_BLOCK_PALETTE.getBlockStateForStateId(stateId.getAsInt()));
+        return Optional.of(ResourceData.GLOBAL_BLOCK_PALETTE.getBlockStateForStateId(stateId.getAsInt()));
+    }
+
+    public Optional<BlockStateMeta> getCachedBlockStateAt(Vector3i block) {
+        return blockStateCache.get(block);
     }
 
     public Optional<BlockType> getBlockTypeAt(Vector3i block) {

@@ -19,9 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
@@ -40,15 +42,44 @@ public class ProjectedInventory {
     private final int slotChangesHash;
 
     public ProjectedInventory(PlayerInventoryContainer playerInventory) {
-        Int2ObjectMap<ContainerSlot> slotChanges = new Int2ObjectOpenHashMap<>();
         this.playerInventory = playerInventory;
-        this.slotChanges = slotChanges;
+        this.slotChanges = Int2ObjectMaps.emptyMap();
         this.slotChangesHash = slotChanges.hashCode();
     }
 
     public ProjectedInventory withChange(int slot, SWItemStack itemStack) {
-        var slotChanges = new Int2ObjectOpenHashMap<ContainerSlot>(this.slotChanges);
+        var slotChanges = new Int2ObjectArrayMap<>(this.slotChanges);
         slotChanges.put(slot, new ContainerSlot(slot, itemStack));
+
+        return new ProjectedInventory(playerInventory, slotChanges, slotChanges.hashCode());
+    }
+
+    public ProjectedInventory withItemPickup(ItemType itemType) {
+        var slotChanges = new Int2ObjectArrayMap<>(this.slotChanges);
+
+        var found = false;
+        ContainerSlot firstEmpty = null;
+        for (var slot : getStorage()) {
+            var item = slot.item();
+            if (item == null) {
+                if (firstEmpty == null) {
+                    firstEmpty = slot;
+                }
+
+                continue;
+            }
+
+            var amount = item.getAmount() + 1;
+            if (item.getType() == itemType && amount <= item.getType().stackSize()) {
+                slotChanges.put(slot.slot(), new ContainerSlot(slot.slot(), item.withAmount(amount)));
+                found = true;
+                break;
+            }
+        }
+
+        if (!found && firstEmpty != null) {
+            slotChanges.put(firstEmpty.slot(), new ContainerSlot(firstEmpty.slot(), SWItemStack.forType(itemType)));
+        }
 
         return new ProjectedInventory(playerInventory, slotChanges, slotChanges.hashCode());
     }

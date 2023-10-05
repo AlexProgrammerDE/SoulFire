@@ -126,6 +126,7 @@ dependencies {
         isTransitive = false
     }
     implementation(libs.fastutil)
+    implementation(libs.caffeine)
 
     // For microsoft account authentication
     implementation(libs.minecraftauth) {

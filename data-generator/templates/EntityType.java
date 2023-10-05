@@ -24,4 +24,16 @@ public record EntityType(int id, int internalId, String name, String displayName
 
         return null;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EntityType entityType)) return false;
+        return id == entityType.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
 }

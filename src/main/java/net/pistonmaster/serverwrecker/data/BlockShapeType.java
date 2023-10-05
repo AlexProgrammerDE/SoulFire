@@ -92,4 +92,16 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
     public boolean hasNoCollisions() {
         return blockShapes.isEmpty();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BlockShapeType blockShapeType)) return false;
+        return id == blockShapeType.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
 }

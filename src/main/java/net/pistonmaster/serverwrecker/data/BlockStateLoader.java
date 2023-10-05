@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BlockStateLoader {
-    private static final Map<String, List<BlockShapeType>> BLOCK_SHAPES = new HashMap<>();
+    public static final Map<String, List<BlockShapeType>> BLOCK_SHAPES = new HashMap<>();
 
     static {
         try (var inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockstates.txt")) {
