@@ -20,21 +20,50 @@
 package net.pistonmaster.serverwrecker.pathfinding.goals;
 
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
+import net.pistonmaster.serverwrecker.pathfinding.Costs;
+import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
 
-public record BreakBlockGoal(Vector3d goal) implements GoalScorer {
-    public BreakBlockGoal(double x, double y, double z) {
-        this(Vector3d.from(x, y, z));
+public record BreakBlockGoal(Vector3i goal, Vector3d goal3d) implements GoalScorer {
+    public BreakBlockGoal(int x, int y, int z) {
+        this(Vector3i.from(x, y, z));
     }
 
-    // TODO: When inventory is implemented, check if the block is in the inventory and apply higher score if it is.
-    @Override
-    public double computeScore(BotEntityState worldState) {
-        return worldState.position().distance(goal);
+    public BreakBlockGoal(Vector3i goal) {
+        this(goal, goal.toDouble());
     }
 
     @Override
-    public boolean isFinished(BotEntityState worldState) {
-        return worldState.position().equals(goal);
+    public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
+        var distance = entityState.position().distance(goal3d);
+        var levelState = entityState.levelState();
+        var blockStateMeta = levelState.getBlockStateAt(goal);
+
+        // Instead of failing when the block is not in render distance, we just return the distance.
+        if (blockStateMeta.isEmpty()) {
+            return distance;
+        }
+
+        var breakCost = Costs.calculateBlockBreakCost(
+                        graph.tagsState(),
+                        entityState.inventory(),
+                        blockStateMeta.get()
+                )
+                .map(Costs.BlockMiningCosts::miningCost)
+                .orElseThrow(() -> new IllegalStateException("Block is not breakable!"));
+
+        return distance + breakCost;
+    }
+
+    @Override
+    public boolean isFinished(BotEntityState entityState) {
+        return entityState.levelState()
+                .getBlockStateAt(goal)
+                .map(BlockStateMeta::blockType)
+                .map(BlockTypeHelper::isAir)
+                .orElse(false);
     }
 }

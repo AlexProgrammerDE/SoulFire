@@ -275,7 +275,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
     }
 
     private BlockStateMeta getBlockShapeType(ProjectedLevelState level, Vector3i block) {
-        // If out of level, we can't go there, so we'll recalculate
+        // If out of level, we can't go there, so we'll recalculate once we get there
         return level.getBlockStateAt(block).orElseThrow(OutOfLevelException::new);
     }
 

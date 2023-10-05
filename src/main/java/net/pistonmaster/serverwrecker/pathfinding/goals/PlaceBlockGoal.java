@@ -19,22 +19,35 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.goals;
 
+import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
+import net.pistonmaster.serverwrecker.pathfinding.Costs;
+import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
 
-public record PlaceBlockGoal(Vector3d goalBlock) implements GoalScorer {
-    public PlaceBlockGoal(double x, double y, double z) {
-        this(Vector3d.from(x, y, z));
+public record PlaceBlockGoal(Vector3i goal, Vector3d goal3d, BlockType blockType) implements GoalScorer {
+    public PlaceBlockGoal(int x, int y, int z, BlockType blockType) {
+        this(Vector3d.from(x, y, z), blockType);
     }
 
-    // TODO: Implement higher score if block is in placed.
-    @Override
-    public double computeScore(BotEntityState worldState) {
-        return worldState.position().distance(goalBlock);
+    public PlaceBlockGoal(Vector3d goalBlock, BlockType blockType) {
+        this(goalBlock.toInt(), goalBlock, blockType);
     }
 
     @Override
-    public boolean isFinished(BotEntityState worldState) {
-        return worldState.position().equals(goalBlock);
+    public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
+        // We normally stand right next to the block, not inside, so we need to subtract 1.
+        return entityState.position().distance(goal3d) - 1 + Costs.PLACE_BLOCK;
+    }
+
+    @Override
+    public boolean isFinished(BotEntityState entityState) {
+        return entityState.levelState()
+                .getBlockStateAt(goal)
+                .map(BlockStateMeta::blockType)
+                .map(b -> b == blockType)
+                .orElse(false);
     }
 }

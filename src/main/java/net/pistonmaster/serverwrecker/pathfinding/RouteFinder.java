@@ -66,7 +66,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         // Store block positions that we need to look at
         PriorityQueue<MinecraftRouteNode> openSet = new ObjectHeapPriorityQueue<>();
 
-        var startScore = scorer.computeScore(from);
+        var startScore = scorer.computeScore(graph, from);
         log.info("Start score (Usually distance): {}", startScore);
 
         var start = new MinecraftRouteNode(from, null, List.of(new MovementAction(from.position(), 0)), 0d, startScore);
@@ -117,7 +117,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                     // Get distance from the current element
                     // and add the distance from the current element to the next element
                     var newSourceCost = current.getSourceCost() + actionCost;
-                    var newTotalRouteScore = newSourceCost + scorer.computeScore(actionTargetState);
+                    var newTotalRouteScore = newSourceCost + scorer.computeScore(graph, actionTargetState);
 
                     // The first time we see this node
                     if (v == null) {
