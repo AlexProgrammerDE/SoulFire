@@ -49,7 +49,6 @@ Take the ID, log2 it and then round up. That's your `bitsPerEntry`.
 
 Replace `assets/minecraft/en_us.json` with a newer version from:
 https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.20/assets/minecraft/lang/en_us.json
-and
 
 ### Update code
 
