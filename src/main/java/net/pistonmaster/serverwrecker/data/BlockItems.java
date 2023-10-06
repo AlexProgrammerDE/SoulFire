@@ -41,7 +41,7 @@ public class BlockItems {
         }
     }
 
-    public static Optional<BlockType> isBlockItem(ItemType itemType) {
+    public static Optional<BlockType> getBlockType(ItemType itemType) {
         return Optional.ofNullable(VALUES[itemType.id()]);
     }
 

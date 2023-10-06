@@ -30,8 +30,10 @@ import org.cloudburstmc.math.vector.Vector3d;
 @RequiredArgsConstructor
 public class MovementAction implements WorldAction {
     private final Vector3d position;
-    private final int yawOffset;
+    // Corner jumps normally require you to stand closer to the block to jump
+    private final boolean walkFewTicksNoJump;
     private boolean didLook = false;
+    private int noJumpTicks = 0;
 
     @Override
     public boolean isCompleted(BotConnection connection) {
@@ -66,7 +68,6 @@ public class MovementAction implements WorldAction {
         var previousYaw = movementManager.getYaw();
         movementManager.lookAt(RotationOrigin.EYES, position);
         movementManager.setPitch(0);
-        movementManager.setYaw(movementManager.getYaw() + yawOffset);
         var newYaw = movementManager.getYaw();
 
         var yawDifference = Math.abs(previousYaw - newYaw);
@@ -82,8 +83,22 @@ public class MovementAction implements WorldAction {
         movementManager.getControlState().resetAll();
         movementManager.getControlState().setForward(true);
 
-        if (position.getY() > botPosition.getY()) {
+        if (position.getY() > botPosition.getY() && shouldJump()) {
             movementManager.getControlState().setJumping(true);
+        }
+    }
+
+    private boolean shouldJump() {
+        if (!walkFewTicksNoJump) {
+            return true;
+        }
+
+        if (noJumpTicks < 2) {
+            noJumpTicks++;
+            return false;
+        } else {
+            noJumpTicks = 0;
+            return true;
         }
     }
 

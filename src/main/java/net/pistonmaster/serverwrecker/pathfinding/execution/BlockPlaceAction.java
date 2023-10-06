@@ -22,11 +22,10 @@ package net.pistonmaster.serverwrecker.pathfinding.execution;
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import net.pistonmaster.serverwrecker.data.BlockType;
-import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
+import net.pistonmaster.serverwrecker.util.ItemTypeHelper;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -36,8 +35,6 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class BlockPlaceAction implements WorldAction {
     private final Vector3i blockPosition;
-    private final BlockType blockType;
-    private final ItemType itemType;
     private final BotActionManager.BlockPlaceData blockPlaceData;
     private boolean putOnHotbar = false;
 
@@ -65,7 +62,7 @@ public class BlockPlaceAction implements WorldAction {
             var heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
             if (heldSlot.item() != null) {
                 var item = heldSlot.item();
-                if (item.getType() == itemType) {
+                if (ItemTypeHelper.isFullBlockItem(item.getType())) {
                     putOnHotbar = true;
                     return;
                 }
@@ -77,12 +74,14 @@ public class BlockPlaceAction implements WorldAction {
                 }
 
                 var item = hotbarSlot.item();
-                if (item.getType() == itemType) {
-                    inventoryManager.setHeldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
-                    inventoryManager.sendHeldItemChange();
-                    putOnHotbar = true;
-                    return;
+                if (!ItemTypeHelper.isFullBlockItem(item.getType())) {
+                    continue;
                 }
+
+                inventoryManager.setHeldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
+                inventoryManager.sendHeldItemChange();
+                putOnHotbar = true;
+                return;
             }
 
             for (var slot : playerInventory.getMainInventory()) {
@@ -91,28 +90,30 @@ public class BlockPlaceAction implements WorldAction {
                 }
 
                 var item = slot.item();
-                if (item.getType() == itemType) {
-                    if (!inventoryManager.tryInventoryControl()) {
-                        return;
-                    }
+                if (!ItemTypeHelper.isFullBlockItem(item.getType())) {
+                    continue;
+                }
 
-                    try {
-                        inventoryManager.leftClickSlot(slot.slot());
-                        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-                        inventoryManager.leftClickSlot(playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot()).slot());
-                        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-
-                        if (inventoryManager.getCursorItem() != null) {
-                            inventoryManager.leftClickSlot(slot.slot());
-                            TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-                        }
-                    } finally {
-                        inventoryManager.unlockInventoryControl();
-                    }
-
-                    putOnHotbar = true;
+                if (!inventoryManager.tryInventoryControl()) {
                     return;
                 }
+
+                try {
+                    inventoryManager.leftClickSlot(slot.slot());
+                    TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+                    inventoryManager.leftClickSlot(playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot()).slot());
+                    TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+
+                    if (inventoryManager.getCursorItem() != null) {
+                        inventoryManager.leftClickSlot(slot.slot());
+                        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+                    }
+                } finally {
+                    inventoryManager.unlockInventoryControl();
+                }
+
+                putOnHotbar = true;
+                return;
             }
         }
 

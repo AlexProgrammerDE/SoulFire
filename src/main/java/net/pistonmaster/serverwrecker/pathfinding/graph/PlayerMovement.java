@@ -50,6 +50,8 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
     // Optional.of() takes a few milliseconds, so we'll just cache it
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static final Optional<ActionCosts> NO_COST_RESULT = Optional.of(new ActionCosts(0, ObjectLists.emptyList()));
+    private static final boolean BREAK_BLOCKS = false;
+    private static final boolean PLACE_BLOCKS = false;
 
     private Optional<ActionCosts> requireFreeBlocks(ReferenceObject<ProjectedLevelState> level,
                                                     ReferenceObject<ProjectedInventory> inventory) {
@@ -166,6 +168,10 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
             return NO_COST_RESULT;
         }
 
+        if (!BREAK_BLOCKS) {
+            return Optional.empty();
+        }
+
         var blockMiningCosts = Costs.calculateBlockBreakCost(tagsState, resolvedInventory, blockStateMeta);
 
         // No way to break block
@@ -221,7 +227,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
         var blockStateMeta = getBlockStateMeta(resolvedLevel, block);
 
         // We have found a replaceable block, so we can try to replace it
-        if (BlockTypeHelper.isReplaceable(blockStateMeta.blockType())) {
+        if (PLACE_BLOCKS && BlockTypeHelper.isReplaceable(blockStateMeta.blockType())) {
             var blockPlaceInfo = BotActionManager.findBlockToPlaceAgainst(blockCache,
                     resolvedLevel, block, List.of(previousEntityState.position().toInt()));
 
@@ -236,7 +242,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
                 }
 
                 var itemType = slot.item().getType();
-                var blockItem = BlockItems.isBlockItem(itemType);
+                var blockItem = BlockItems.getBlockType(itemType);
 
                 // We found an item we can place, so it's a valid action
                 if (blockItem.isPresent()) {
@@ -250,7 +256,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
 
                     return Optional.of(new ActionCosts(
                             Costs.PLACE_BLOCK,
-                            ObjectLists.singleton(new BlockPlaceAction(block, blockItem.get(), itemType, blockPlaceInfo.get()))
+                            ObjectLists.singleton(new BlockPlaceAction(block, blockPlaceInfo.get()))
                     ));
                 }
             }
@@ -310,15 +316,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
 
         var targetPosition = modifier.offset(direction.offset(previousEntityState.position()));
 
-        var yawOffset = 0;
-        if (side != null) {
-            yawOffset = switch (side) {
-                case LEFT -> 10;
-                case RIGHT -> -10;
-            };
-        }
-
-        actions.add(new MovementAction(targetPosition, yawOffset));
+        actions.add(new MovementAction(targetPosition, side != null));
 
         // Add additional "discouraged" costs to prevent the bot from doing too much parkour when it's not needed
         switch (modifier) {

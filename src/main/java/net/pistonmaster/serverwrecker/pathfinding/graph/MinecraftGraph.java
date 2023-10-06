@@ -32,29 +32,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {
-    private static final int INSTRUCTION_COUNT;
-
-    static {
-        var count = 0;
-        for (var direction : MovementDirection.VALUES) {
-            for (var ignored : MovementModifier.VALUES) {
-                if (direction.isDiagonal()) {
-                    for (var ignored2 : MovementSide.VALUES) {
-                        count++;
-                    }
-                } else {
-                    count++;
-                }
-            }
-        }
-        INSTRUCTION_COUNT = count;
-    }
-
     public List<GraphInstructions> getActions(BotEntityState node) {
         // Just cache lookups of our checks. Here it is best because they are super close to each other.
         var blockCache = new ConcurrentHashMap<Vector3i, Optional<BlockStateMeta>>();
 
-        var targetSet = new ObjectArrayList<PlayerMovement>(INSTRUCTION_COUNT);
+        var targetSet = new ObjectArrayList<GraphAction>();
         for (var direction : MovementDirection.VALUES) {
             for (var modifier : MovementModifier.VALUES) {
                 if (direction.isDiagonal()) {
@@ -67,9 +49,8 @@ public record MinecraftGraph(TagsState tagsState) {
             }
         }
 
-        var targetResults = targetSet.stream()
-                .parallel()
-                .map(PlayerMovement::getInstructions)
+        var targetResults = targetSet.parallelStream()
+                .map(GraphAction::getInstructions)
                 .toList();
 
         log.debug("Found {} possible actions for {} and cached {} blocks", targetResults.stream()

@@ -69,7 +69,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         var startScore = scorer.computeScore(graph, from);
         log.info("Start score (Usually distance): {}", startScore);
 
-        var start = new MinecraftRouteNode(from, null, List.of(new MovementAction(from.position(), 0)), 0d, startScore);
+        var start = new MinecraftRouteNode(from, null, List.of(new MovementAction(from.position(), false)), 0d, startScore);
         routeIndex.put(from, start);
         openSet.enqueue(start);
 
