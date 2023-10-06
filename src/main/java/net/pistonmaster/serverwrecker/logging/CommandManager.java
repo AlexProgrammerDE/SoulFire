@@ -50,6 +50,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,14 +71,25 @@ public class CommandManager {
     private final ServerWrecker serverWrecker;
     private final ConsoleSubject consoleSubject;
     private final List<String> commandHistory = Collections.synchronizedList(new ArrayList<>());
+    private final Path targetFile = ServerWrecker.DATA_FOLDER.resolve(".command_history");
 
     @PostConstruct
     public void postConstruct() {
+        loadCommandHistory();
+        dispatcher.register(literal("reload-history").executes(c -> {
+            loadCommandHistory();
+            return 1;
+        }));
+        dispatcher.register(literal("clear-history").executes(c -> {
+            clearCommandHistory();
+            return 1;
+        }));
         dispatcher.register(literal("online").executes(c -> {
             var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
             if (attackManager == null) {
-                return 1;
+                LOGGER.warn("No attack found!");
+                return 2;
             }
 
             var online = new ArrayList<String>();
@@ -85,7 +101,7 @@ public class CommandManager {
             c.getSource().sendMessage(online.size() + " bots online: " + String.join(", ", online));
             return 1;
         }));
-        dispatcher.register(literal("clear").executes(c -> {
+        dispatcher.register(literal("clear-console").executes(c -> {
             var logPanel = serverWrecker.getInjector().getIfAvailable(LogPanel.class);
             if (logPanel != null) {
                 logPanel.getMessageLogPanel().clear();
@@ -98,7 +114,13 @@ public class CommandManager {
                             var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                             if (attackManager == null) {
-                                return 1;
+                                LOGGER.warn("No attack found!");
+                                return 2;
+                            }
+
+                            if (attackManager.getBotConnections().isEmpty()) {
+                                LOGGER.info("No bots connected!");
+                                return 3;
                             }
 
                             var message = StringArgumentType.getString(c, "message");
@@ -115,12 +137,13 @@ public class CommandManager {
             var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
             if (attackManager == null) {
-                return 1;
+                LOGGER.warn("No attack found!");
+                return 2;
             }
 
             if (attackManager.getBotConnections().isEmpty()) {
                 LOGGER.info("No bots connected!");
-                return 1;
+                return 3;
             }
 
             LOGGER.info("Total bots: {}", attackManager.getBotConnections().size());
@@ -175,8 +198,7 @@ public class CommandManager {
                                             var y = DoubleArgumentType.getDouble(c, "y");
                                             var z = DoubleArgumentType.getDouble(c, "z");
 
-                                            executePathfinding(new PosGoal(x, y, z));
-                                            return 1;
+                                            return executePathfinding(new PosGoal(x, y, z));
                                         })))));
         dispatcher.register(literal("walkxz")
                 .then(argument("x", DoubleArgumentType.doubleArg())
@@ -185,15 +207,13 @@ public class CommandManager {
                                     var x = DoubleArgumentType.getDouble(c, "x");
                                     var z = DoubleArgumentType.getDouble(c, "z");
 
-                                    executePathfinding(new XZGoal(x, z));
-                                    return 1;
+                                    return executePathfinding(new XZGoal(x, z));
                                 }))));
         dispatcher.register(literal("walky")
                 .then(argument("y", DoubleArgumentType.doubleArg())
                         .executes(c -> {
                             var y = DoubleArgumentType.getDouble(c, "y");
-                            executePathfinding(new YGoal(y));
-                            return 1;
+                            return executePathfinding(new YGoal(y));
                         })));
         dispatcher.register(literal("lookat")
                 .then(argument("x", DoubleArgumentType.doubleArg())
@@ -203,7 +223,13 @@ public class CommandManager {
                                             var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                                             if (attackManager == null) {
-                                                return 1;
+                                                LOGGER.warn("No attack found!");
+                                                return 2;
+                                            }
+
+                                            if (attackManager.getBotConnections().isEmpty()) {
+                                                LOGGER.info("No bots connected!");
+                                                return 3;
                                             }
 
                                             var x = DoubleArgumentType.getDouble(c, "x");
@@ -223,7 +249,13 @@ public class CommandManager {
                     var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                     if (attackManager == null) {
-                        return 1;
+                        LOGGER.warn("No attack found!");
+                        return 2;
+                    }
+
+                    if (attackManager.getBotConnections().isEmpty()) {
+                        LOGGER.info("No bots connected!");
+                        return 3;
                     }
 
                     for (var bot : attackManager.getBotConnections()) {
@@ -239,7 +271,13 @@ public class CommandManager {
                     var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                     if (attackManager == null) {
-                        return 1;
+                        LOGGER.warn("No attack found!");
+                        return 2;
+                    }
+
+                    if (attackManager.getBotConnections().isEmpty()) {
+                        LOGGER.info("No bots connected!");
+                        return 3;
                     }
 
                     for (var bot : attackManager.getBotConnections()) {
@@ -253,7 +291,13 @@ public class CommandManager {
                     var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                     if (attackManager == null) {
-                        return 1;
+                        LOGGER.warn("No attack found!");
+                        return 2;
+                    }
+
+                    if (attackManager.getBotConnections().isEmpty()) {
+                        LOGGER.info("No bots connected!");
+                        return 3;
                     }
 
                     for (var bot : attackManager.getBotConnections()) {
@@ -268,11 +312,17 @@ public class CommandManager {
         ServerWreckerAPI.postEvent(new DispatcherInitEvent(dispatcher));
     }
 
-    private void executePathfinding(GoalScorer goalScorer) {
+    private int executePathfinding(GoalScorer goalScorer) {
         var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
         if (attackManager == null) {
-            return;
+            LOGGER.warn("No attack found!");
+            return 2;
+        }
+
+        if (attackManager.getBotConnections().isEmpty()) {
+            LOGGER.info("No bots connected!");
+            return 3;
         }
 
         for (var bot : attackManager.getBotConnections()) {
@@ -303,6 +353,8 @@ public class CommandManager {
                 pathExecutor.register();
             });
         }
+
+        return 1;
     }
 
     public List<String> getCommandHistory() {
@@ -315,11 +367,61 @@ public class CommandManager {
         command = command.strip();
 
         try {
-            commandHistory.add(command);
-            return dispatcher.execute(command, consoleSubject);
+            var result = dispatcher.execute(command, consoleSubject);
+            if (result == 1) {
+                newCommandHistoryEntry(command);
+            }
+
+            return result;
         } catch (CommandSyntaxException e) {
             LOGGER.warn(e.getMessage());
             return 1;
+        }
+    }
+
+    private void loadCommandHistory() {
+        synchronized (commandHistory) {
+            commandHistory.clear();
+            try {
+                if (!Files.exists(targetFile)) {
+                    return;
+                }
+
+                var lines = Files.readAllLines(targetFile);
+                for (var line : lines) {
+                    var firstColon = line.indexOf(':');
+                    if (firstColon == -1) {
+                        continue;
+                    }
+
+                    commandHistory.add(line.substring(firstColon + 1));
+                }
+            } catch (IOException e) {
+                LOGGER.error("Failed to create command history file!", e);
+            }
+        }
+    }
+
+    private void newCommandHistoryEntry(String command) {
+        synchronized (commandHistory) {
+            commandHistory.add(command);
+            try {
+                Files.createDirectories(targetFile.getParent());
+                var newLine = Instant.now().getEpochSecond() + ":" + command + System.lineSeparator();
+                Files.writeString(targetFile, newLine, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            } catch (IOException e) {
+                LOGGER.error("Failed to create command history file!", e);
+            }
+        }
+    }
+
+    private void clearCommandHistory() {
+        synchronized (commandHistory) {
+            try {
+                Files.deleteIfExists(targetFile);
+            } catch (IOException e) {
+                LOGGER.error("Failed to delete command history file!", e);
+            }
         }
     }
 
