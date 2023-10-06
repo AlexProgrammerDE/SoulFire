@@ -28,20 +28,24 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
 public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
     private final Queue<WorldAction> worldActions;
     private final BotConnection connection;
     private final Supplier<List<WorldAction>> findPath;
+    private final ExecutorService executorService;
     private EventSubscription subscription;
     private int ticks = 0;
 
-    public PathExecutor(BotConnection connection, List<WorldAction> worldActions, Supplier<List<WorldAction>> findPath) {
+    public PathExecutor(BotConnection connection, List<WorldAction> worldActions, Supplier<List<WorldAction>> findPath,
+                        ExecutorService executorService) {
         this.worldActions = new ArrayBlockingQueue<>(worldActions.size());
         this.worldActions.addAll(worldActions);
         this.connection = connection;
         this.findPath = findPath;
+        this.executorService = executorService;
     }
 
     @Override
@@ -109,9 +113,17 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
 
     private void recalculatePath() {
         this.unregister();
+        connection.sessionDataManager().getBotMovementManager().getControlState().resetAll();
 
-        var newActions = findPath.get();
-        var newExecutor = new PathExecutor(connection, newActions, findPath);
-        newExecutor.register();
+        executorService.submit(() -> {
+            try {
+                var newActions = findPath.get();
+                connection.logger().info("Found new path with {} actions!", newActions.size());
+                var newExecutor = new PathExecutor(connection, newActions, findPath, executorService);
+                newExecutor.register();
+            } catch (Throwable t) {
+                connection.logger().error("Failed to recalculate path!", t);
+            }
+        });
     }
 }

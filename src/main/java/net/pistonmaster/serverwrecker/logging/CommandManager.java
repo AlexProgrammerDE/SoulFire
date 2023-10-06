@@ -234,7 +234,21 @@ public class CommandManager {
                     }
                     return 1;
                 }));
-        dispatcher.register(literal("stop")
+        dispatcher.register(literal("stop-path")
+                .executes(c -> {
+                    var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+
+                    if (attackManager == null) {
+                        return 1;
+                    }
+
+                    for (var bot : attackManager.getBotConnections()) {
+                        bot.eventBus().unsubscribeIf(PathExecutor.class::isInstance);
+                        bot.sessionDataManager().getBotMovementManager().getControlState().resetAll();
+                    }
+                    return 1;
+                }));
+        dispatcher.register(literal("stop-attack")
                 .executes(c -> {
                     var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
@@ -263,7 +277,8 @@ public class CommandManager {
 
         for (var bot : attackManager.getBotConnections()) {
             var logger = bot.logger();
-            bot.executorManager().newExecutorService("Pathfinding").execute(() -> {
+            var executorService = bot.executorManager().newExecutorService("Pathfinding");
+            executorService.execute(() -> {
                 var sessionDataManager = bot.sessionDataManager();
                 var botMovementManager = sessionDataManager.getBotMovementManager();
                 var routeFinder = new RouteFinder(new MinecraftGraph(sessionDataManager.getTagsState()), goalScorer);
@@ -284,7 +299,7 @@ public class CommandManager {
                     return actions;
                 };
 
-                var pathExecutor = new PathExecutor(bot, findPath.get(), findPath);
+                var pathExecutor = new PathExecutor(bot, findPath.get(), findPath, executorService);
                 pathExecutor.register();
             });
         }
