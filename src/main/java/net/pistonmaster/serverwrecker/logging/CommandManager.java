@@ -368,6 +368,9 @@ public class CommandManager {
 
         try {
             var result = dispatcher.execute(command, consoleSubject);
+            commandHistory.add(command);
+
+            // Only save successful commands
             if (result == 1) {
                 newCommandHistoryEntry(command);
             }
@@ -404,7 +407,6 @@ public class CommandManager {
 
     private void newCommandHistoryEntry(String command) {
         synchronized (commandHistory) {
-            commandHistory.add(command);
             try {
                 Files.createDirectories(targetFile.getParent());
                 var newLine = Instant.now().getEpochSecond() + ":" + command + System.lineSeparator();
