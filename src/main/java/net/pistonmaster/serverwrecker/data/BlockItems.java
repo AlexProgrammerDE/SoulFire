@@ -19,14 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.data;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-
 import java.util.Optional;
 
 public class BlockItems {
-    public static final Int2ObjectMap<BlockType> VALUES = new Int2ObjectArrayMap<>();
-    public static final Int2ObjectMap<ItemType> VALUES_REVERSE = new Int2ObjectArrayMap<>();
+    public static final BlockType[] VALUES = new BlockType[ItemType.VALUES.size()];
+    public static final ItemType[] VALUES_REVERSE = new ItemType[BlockType.VALUES.size()];
 
     static {
         for (var itemType : ItemType.VALUES) {
@@ -37,18 +34,18 @@ public class BlockItems {
                         && blockShapeTypes.size() == 1
                         && itemType.name().equals(blockType.name())
                         && blockShapeTypes.get(0).isFullBlock()) {
-                    VALUES.put(itemType.id(), blockType);
-                    VALUES_REVERSE.put(blockType.id(), itemType);
+                    VALUES[itemType.id()] = blockType;
+                    VALUES_REVERSE[blockType.id()] = itemType;
                 }
             }
         }
     }
 
     public static Optional<BlockType> isBlockItem(ItemType itemType) {
-        return Optional.ofNullable(VALUES.get(itemType.id()));
+        return Optional.ofNullable(VALUES[itemType.id()]);
     }
 
     public static Optional<ItemType> getItemType(BlockType blockType) {
-        return Optional.ofNullable(VALUES_REVERSE.get(blockType.id()));
+        return Optional.ofNullable(VALUES_REVERSE[blockType.id()]);
     }
 }

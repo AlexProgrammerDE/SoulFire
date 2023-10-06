@@ -28,11 +28,11 @@ import java.util.function.Function;
 
 @RequiredArgsConstructor
 public enum SWDirection {
-    DOWN(Direction.DOWN, pos -> pos.sub(Vector3i.from(0, 1, 0))),
+    DOWN(Direction.DOWN, pos -> pos.add(Vector3i.from(0, 1, 0))),
     UP(Direction.UP, pos -> pos.add(Vector3i.from(0, -1, 0))),
-    NORTH(Direction.NORTH, pos -> pos.sub(Vector3i.from(0, 0, 1))),
+    NORTH(Direction.NORTH, pos -> pos.add(Vector3i.from(0, 0, 1))),
     SOUTH(Direction.SOUTH, pos -> pos.add(Vector3i.from(0, 0, -1))),
-    WEST(Direction.WEST, pos -> pos.sub(Vector3i.from(1, 0, 0))),
+    WEST(Direction.WEST, pos -> pos.add(Vector3i.from(1, 0, 0))),
     EAST(Direction.EAST, pos -> pos.add(Vector3i.from(-1, 0, 0)));
 
     public static final SWDirection[] VALUES = values();

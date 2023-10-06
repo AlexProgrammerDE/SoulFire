@@ -31,6 +31,8 @@ public enum ArmorType {
     LEGGINGS(ItemType.LEATHER_LEGGINGS, ItemType.CHAINMAIL_LEGGINGS, ItemType.IRON_LEGGINGS, ItemType.GOLDEN_LEGGINGS, ItemType.DIAMOND_LEGGINGS, ItemType.NETHERITE_LEGGINGS),
     BOOTS(ItemType.LEATHER_BOOTS, ItemType.CHAINMAIL_BOOTS, ItemType.IRON_BOOTS, ItemType.GOLDEN_BOOTS, ItemType.DIAMOND_BOOTS, ItemType.NETHERITE_BOOTS);
 
+    public static final ArmorType[] VALUES = values();
+
     private final List<ItemType> itemTypes;
 
     ArmorType(ItemType... itemTypes) {

@@ -42,7 +42,12 @@ public class ChunkData {
     }
 
     public int getBlock(Vector3i block) {
-        return getSection(block).getBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF);
+        return getSection(block)
+                .getBlock(
+                        block.getX() & 0xF,
+                        block.getY() & 0xF,
+                        block.getZ() & 0xF
+                );
     }
 
     private ChunkSection getSection(Vector3i block) {
@@ -51,7 +56,7 @@ public class ChunkData {
 
     public ChunkSection getSection(int sectionIndex) {
         var section = sections[sectionIndex];
-        Objects.requireNonNull(section, () -> "Section " + sectionIndex + " is null!");
+        Objects.requireNonNull(section, () -> String.format("Section %d is null!", sectionIndex));
 
         return section;
     }

@@ -19,15 +19,16 @@
  */
 package net.pistonmaster.serverwrecker.data;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class BlockStateLoader {
-    public static final Map<String, List<BlockShapeType>> BLOCK_SHAPES = new HashMap<>();
+    public static final Map<String, List<BlockShapeType>> BLOCK_SHAPES = new Object2ObjectArrayMap<>();
 
     static {
         try (var inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockstates.txt")) {
@@ -39,14 +40,13 @@ public class BlockStateLoader {
                 var parts = line.split("\\|");
                 var name = parts[0];
 
-                List<BlockShapeType> blockShapeTypes = new ArrayList<>();
+                var blockShapeTypes = new ObjectArrayList<BlockShapeType>();
                 if (parts.length > 1) {
                     var part = parts[1];
 
                     var subParts = part.split(",");
                     for (var subPart : subParts) {
-                        Integer id = Integer.parseInt(subPart);
-
+                        var id = Integer.parseInt(subPart);
                         var blockShapeType = BlockShapeType.getById(id);
                         blockShapeTypes.add(blockShapeType);
                     }

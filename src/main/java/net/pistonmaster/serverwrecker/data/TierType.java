@@ -37,12 +37,14 @@ public enum TierType {
     GOLD(0, 12, Set.of(GOLDEN_PICKAXE, GOLDEN_SHOVEL, GOLDEN_AXE, GOLDEN_HOE, GOLDEN_SWORD)),
     NETHERITE(4, 9, Set.of(NETHERITE_PICKAXE, NETHERITE_SHOVEL, NETHERITE_AXE, NETHERITE_HOE, NETHERITE_SWORD));
 
+    public static final TierType[] VALUES = values();
+
     private final int level;
     private final float miningSpeed;
     private final Set<ItemType> tools;
 
     public static OptionalInt getTier(ItemType itemType) {
-        for (var tierType : TierType.values()) {
+        for (var tierType : VALUES) {
             // Loop instead of contains because we only need to do a == check
             for (var tool : tierType.tools) {
                 if (tool == itemType) {

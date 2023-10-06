@@ -19,14 +19,15 @@
  */
 package net.pistonmaster.serverwrecker.data;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
 public record BlockShapeType(int id, List<BlockShape> blockShapes) {
-    public static final List<BlockShapeType> VALUES = new ArrayList<>();
+    public static final List<BlockShapeType> VALUES = new ObjectArrayList<>();
 
     static {
         try (var inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockshapes.txt")) {
@@ -38,7 +39,7 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes) {
                 var parts = line.split("\\|");
 
                 var id = Integer.parseInt(parts[0]);
-                var blockShapes = new ArrayList<BlockShape>();
+                var blockShapes = new ObjectArrayList<BlockShape>();
 
                 if (parts.length > 1) {
                     for (var i = 1; i < parts.length; i++) {
