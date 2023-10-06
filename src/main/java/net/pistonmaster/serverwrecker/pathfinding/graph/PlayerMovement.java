@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
@@ -42,12 +41,13 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
 public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityState, MovementDirection direction,
                              MovementModifier modifier, MovementSide side,
-                             LoadingCache<Vector3i, Optional<BlockStateMeta>> blockCache) implements GraphAction {
+                             Map<Vector3i, Optional<BlockStateMeta>> blockCache) implements GraphAction {
     // Optional.of() takes a few milliseconds, so we'll just cache it
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static final Optional<ActionCosts> NO_COST_RESULT = Optional.of(new ActionCosts(0, ObjectLists.emptyList()));

@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
@@ -40,6 +39,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -52,7 +52,7 @@ public class BotActionManager {
     private final SessionDataManager dataManager;
     private int sequenceNumber = 0;
 
-    public static Optional<BlockPlaceData> findBlockToPlaceAgainst(LoadingCache<Vector3i, Optional<BlockStateMeta>> blockCache,
+    public static Optional<BlockPlaceData> findBlockToPlaceAgainst(Map<Vector3i, Optional<BlockStateMeta>> blockCache,
                                                                    ProjectedLevelState levelState, Vector3i targetPos,
                                                                    List<Vector3i> ignoreBlocks) {
         for (var direction : Direction.values()) {

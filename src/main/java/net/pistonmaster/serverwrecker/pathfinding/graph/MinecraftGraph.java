@@ -19,8 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
@@ -30,6 +28,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {
@@ -37,10 +36,10 @@ public record MinecraftGraph(TagsState tagsState) {
 
     static {
         var count = 0;
-        for (var direction : MovementDirection.values()) {
-            for (var ignored : MovementModifier.values()) {
+        for (var direction : MovementDirection.VALUES) {
+            for (var ignored : MovementModifier.VALUES) {
                 if (direction.isDiagonal()) {
-                    for (var ignored2 : MovementSide.values()) {
+                    for (var ignored2 : MovementSide.VALUES) {
                         count++;
                     }
                 } else {
@@ -53,14 +52,13 @@ public record MinecraftGraph(TagsState tagsState) {
 
     public List<GraphInstructions> getActions(BotEntityState node) {
         // Just cache lookups of our checks. Here it is best because they are super close to each other.
-        LoadingCache<Vector3i, Optional<BlockStateMeta>> blockCache = Caffeine.newBuilder().build(k ->
-                node.levelState().getBlockStateAt(k));
+        var blockCache = new ConcurrentHashMap<Vector3i, Optional<BlockStateMeta>>();
 
         var targetSet = new ObjectArrayList<PlayerMovement>(INSTRUCTION_COUNT);
-        for (var direction : MovementDirection.values()) {
-            for (var modifier : MovementModifier.values()) {
+        for (var direction : MovementDirection.VALUES) {
+            for (var modifier : MovementModifier.VALUES) {
                 if (direction.isDiagonal()) {
-                    for (var side : MovementSide.values()) {
+                    for (var side : MovementSide.VALUES) {
                         targetSet.add(new PlayerMovement(tagsState, node, direction, modifier, side, blockCache));
                     }
                 } else {
@@ -76,7 +74,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
         log.debug("Found {} possible actions for {} and cached {} blocks", targetResults.stream()
                 .filter(a -> !a.isImpossible())
-                .count(), node.position(), blockCache.estimatedSize());
+                .count(), node.position(), blockCache.size());
 
         return targetResults;
     }

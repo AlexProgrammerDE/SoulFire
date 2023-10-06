@@ -24,5 +24,7 @@ public enum MovementModifier {
     FALL_1,
     FALL_2,
     FALL_3,
-    JUMP
+    JUMP;
+
+    public static final MovementModifier[] VALUES = values();
 }

@@ -24,5 +24,7 @@ package net.pistonmaster.serverwrecker.pathfinding.graph;
  */
 public enum MovementSide {
     LEFT,
-    RIGHT
+    RIGHT;
+
+    public static final MovementSide[] VALUES = values();
 }

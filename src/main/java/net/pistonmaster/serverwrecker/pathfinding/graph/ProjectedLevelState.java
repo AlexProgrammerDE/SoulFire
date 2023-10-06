@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
@@ -28,6 +27,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import org.cloudburstmc.math.vector.Vector3i;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -63,13 +63,23 @@ public class ProjectedLevelState {
         return levelState.getBlockStateAt(position);
     }
 
-    public Optional<BlockStateMeta> getCachedBlockStateAt(LoadingCache<Vector3i, Optional<BlockStateMeta>> blockCache, Vector3i position) {
+    public Optional<BlockStateMeta> getCachedBlockStateAt(Map<Vector3i, Optional<BlockStateMeta>> blockCache, Vector3i position) {
         var blockChange = blockChanges.get(position);
         if (blockChange != null) {
             return Optional.of(blockChange);
         }
 
-        return blockCache.get(position);
+        // Testing shows that computeIfAbsent is slower with ConcurrentHashMap
+        var cachedValue = blockCache.get(position);
+        if (cachedValue != null) {
+            return cachedValue;
+        }
+
+        var value = levelState.getBlockStateAt(position);
+
+        blockCache.put(position, value);
+
+        return value;
     }
 
     @Override
