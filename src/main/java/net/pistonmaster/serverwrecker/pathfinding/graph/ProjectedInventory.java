@@ -28,8 +28,6 @@ import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 
-import java.util.Optional;
-
 /**
  * An immutable representation of a player inventory.
  * This takes an inventory and projects changes onto it.
@@ -87,23 +85,9 @@ public class ProjectedInventory {
     public ContainerSlot[] getStorage() {
         var storage = playerInventory.getStorage();
 
-        for (var i = 0; i < storage.length; i++) {
-            var cachedSlot = populateCache(storage[i]);
-            if (cachedSlot.isPresent()) {
-                storage[i] = cachedSlot.get();
-            }
-        }
+        slotChanges.forEach((slot, item) -> storage[slot] = item);
 
         return storage;
-    }
-
-    private Optional<ContainerSlot> populateCache(ContainerSlot slot) {
-        var cachedSlot = slotChanges.get(slot.slot());
-        if (cachedSlot != null) {
-            return Optional.of(cachedSlot);
-        }
-
-        return Optional.empty();
     }
 
     @Override

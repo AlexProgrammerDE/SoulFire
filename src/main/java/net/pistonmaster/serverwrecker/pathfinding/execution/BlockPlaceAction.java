@@ -26,6 +26,7 @@ import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
+import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -47,8 +48,8 @@ public class BlockPlaceAction implements WorldAction {
             return false;
         }
 
-        return levelState.getBlockTypeAt(blockPosition)
-                .map(type -> type == blockType)
+        return levelState.getBlockStateAt(blockPosition)
+                .map(BlockTypeHelper::isFullBlock)
                 .orElse(false);
     }
 

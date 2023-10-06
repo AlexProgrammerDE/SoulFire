@@ -50,6 +50,32 @@ public class BotActionManager {
     private final SessionDataManager dataManager;
     private int sequenceNumber = 0;
 
+    public static Optional<BlockPlaceData> findBlockToPlaceAgainst(ProjectedLevelState levelState, Vector3i targetPos, List<Vector3i> ignoreBlocks) {
+        for (var direction : Direction.values()) {
+            var blockPos = targetPos.add(switch (direction) {
+                case DOWN -> Vector3i.from(0, 1, 0);
+                case UP -> Vector3i.from(0, -1, 0);
+                case NORTH -> Vector3i.from(0, 0, 1);
+                case SOUTH -> Vector3i.from(0, 0, -1);
+                case WEST -> Vector3i.from(1, 0, 0);
+                case EAST -> Vector3i.from(-1, 0, 0);
+            });
+
+            if (ignoreBlocks.contains(blockPos)) {
+                continue;
+            }
+
+            var blockState = levelState.getBlockStateAt(blockPos);
+            if (blockState.isEmpty() || !blockState.get().blockShapeType().isFullBlock()) {
+                continue;
+            }
+
+            return Optional.of(new BlockPlaceData(blockPos, direction));
+        }
+
+        return Optional.empty();
+    }
+
     public void incrementSequenceNumber() {
         sequenceNumber++;
     }
@@ -146,32 +172,6 @@ public class BotActionManager {
             case WEST -> blockPosDouble.add(0, 0.5, 0.5);
             case EAST -> blockPosDouble.add(1, 0.5, 0.5);
         };
-    }
-
-    public static Optional<BlockPlaceData> findBlockToPlaceAgainst(ProjectedLevelState levelState, Vector3i targetPos, List<Vector3i> ignoreBlocks) {
-        for (var direction : Direction.values()) {
-            var blockPos = targetPos.add(switch (direction) {
-                case DOWN -> Vector3i.from(0, 1, 0);
-                case UP -> Vector3i.from(0, -1, 0);
-                case NORTH -> Vector3i.from(0, 0, 1);
-                case SOUTH -> Vector3i.from(0, 0, -1);
-                case WEST -> Vector3i.from(1, 0, 0);
-                case EAST -> Vector3i.from(-1, 0, 0);
-            });
-
-            if (ignoreBlocks.contains(blockPos)) {
-                continue;
-            }
-
-            var blockState = levelState.getBlockStateAt(blockPos);
-            if (blockState.isEmpty() || !blockState.get().blockShapeType().isFullBlock()) {
-                continue;
-            }
-
-            return Optional.of(new BlockPlaceData(blockPos, direction));
-        }
-
-        return Optional.empty();
     }
 
     public void sendStartBreakBlock(Vector3i blockPos) {

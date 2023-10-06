@@ -36,10 +36,10 @@ import java.util.concurrent.TimeUnit;
 public class BlockBreakAction implements WorldAction {
     private final Vector3i blockPosition;
     private final SWItemStack itemStack;
+    boolean finishedDigging = false;
     private boolean didLook = false;
     private boolean putOnHotbar = false;
     private int remainingTicks = -1;
-    boolean finishedDigging = false;
 
     @Override
     public boolean isCompleted(BotConnection connection) {

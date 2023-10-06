@@ -534,11 +534,10 @@ public final class SessionDataManager {
             return;
         }
 
-        var key = new ChunkKey(packet.getX(), packet.getZ());
         var data = packet.getChunkData();
         var buf = Unpooled.wrappedBuffer(data);
 
-        var chunkData = level.getChunks().computeIfAbsent(key, k -> new ChunkData(level));
+        var chunkData = level.getChunks().getOrCreateChunk(packet.getX(), packet.getZ());
 
         try {
             for (var i = 0; i < chunkData.getSectionCount(); i++) {
@@ -561,11 +560,10 @@ public final class SessionDataManager {
         var codec = session.getCodecHelper();
 
         for (var biomeData : packet.getChunkBiomeData()) {
-            var key = new ChunkKey(biomeData.getX(), biomeData.getZ());
-            var chunkData = level.getChunks().get(key);
+            var chunkData = level.getChunks().getChunk(biomeData.getX(), biomeData.getZ());
 
             if (chunkData == null) {
-                log.warn("Received biome update for unknown chunk: {}", key);
+                log.warn("Received biome update for unknown chunk: {} {}", biomeData.getX(), biomeData.getZ());
                 return;
             }
 
@@ -591,7 +589,7 @@ public final class SessionDataManager {
             return;
         }
 
-        level.getChunks().remove(new ChunkKey(packet.getX(), packet.getZ()));
+        level.getChunks().removeChunk(packet.getX(), packet.getZ());
     }
 
     //
@@ -600,7 +598,6 @@ public final class SessionDataManager {
 
     @BusHandler
     public void onSectionBlockUpdate(ClientboundSectionBlocksUpdatePacket packet) {
-        var key = new ChunkKey(packet.getChunkX(), packet.getChunkZ());
         var level = getCurrentLevel();
 
         if (level == null) {
@@ -608,10 +605,10 @@ public final class SessionDataManager {
             return;
         }
 
-        var chunkData = level.getChunks().get(key);
+        var chunkData = level.getChunks().getChunk(packet.getChunkX(), packet.getChunkZ());
 
         if (chunkData == null) {
-            log.warn("Received section update for unknown chunk: {}", key);
+            log.warn("Received section update for unknown chunk: {} {}", packet.getChunkX(), packet.getChunkZ());
             return;
         }
 

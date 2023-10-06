@@ -109,10 +109,10 @@ public class Costs {
 
     // Time in ticks
     public static TickResult getRequiredMiningTicks(TagsState tagsState,
-                                             @Nullable EntityEffectState effectState,
-                                             boolean onGround,
-                                             @Nullable SWItemStack itemStack,
-                                             BlockType blockType) {
+                                                    @Nullable EntityEffectState effectState,
+                                                    boolean onGround,
+                                                    @Nullable SWItemStack itemStack,
+                                                    BlockType blockType) {
         float speedMultiplier;
         if (itemStack == null) {
             speedMultiplier = 1;

@@ -19,18 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.github.benmanes.caffeine.cache.Scheduler;
 import com.github.steveice10.opennbt.tag.builtin.*;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
-import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.MCUniform;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.UniformOrInt;
 import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
@@ -39,13 +34,12 @@ import net.pistonmaster.serverwrecker.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.Duration;
 import java.util.*;
 
 @Getter
 public class LevelState {
     private final SessionDataManager sessionDataManager;
-    private final Map<ChunkKey, ChunkData> chunks = Collections.synchronizedMap(new Object2ObjectOpenHashMap<>());
+    private final ChunkHolder chunks = new ChunkHolder(this);
     private final String dimensionName;
     private final int dimensionId;
     private final UniformOrInt monsterSpawnLightLevel;
@@ -71,11 +65,6 @@ public class LevelState {
     private long worldAge;
     @Setter
     private long time;
-    private final LoadingCache<Vector3i, Optional<BlockStateMeta>> blockStateCache = Caffeine.newBuilder()
-            .maximumSize(100)
-            .scheduler(Scheduler.systemScheduler())
-            .expireAfterWrite(Duration.ofSeconds(30))
-            .build(this::getBlockStateAt);
 
     public LevelState(SessionDataManager sessionDataManager, String dimensionName, int dimensionId, CompoundTag levelRegistry) {
         this.sessionDataManager = sessionDataManager;
@@ -143,8 +132,7 @@ public class LevelState {
     }
 
     public void setBlockId(Vector3i block, int state) {
-        var chunkKey = new ChunkKey(block);
-        var chunkData = chunks.get(chunkKey);
+        var chunkData = chunks.getChunk(block);
 
         // TODO: Maybe load chunk if not found?
         Objects.requireNonNull(chunkData, "Chunk not found");
@@ -153,7 +141,7 @@ public class LevelState {
     }
 
     public OptionalInt getBlockStateIdAt(Vector3i block) {
-        var chunkData = chunks.get(new ChunkKey(block));
+        var chunkData = chunks.getChunk(block);
 
         // Out of world
         if (chunkData == null) {
@@ -164,8 +152,7 @@ public class LevelState {
     }
 
     public boolean isChunkLoaded(Vector3i block) {
-        var chunkKey = new ChunkKey(block);
-        return chunks.containsKey(chunkKey);
+        return chunks.isChunkLoaded(block);
     }
 
     public Optional<BlockStateMeta> getBlockStateAt(Vector3i block) {
@@ -177,10 +164,6 @@ public class LevelState {
         }
 
         return Optional.of(ResourceData.GLOBAL_BLOCK_PALETTE.getBlockStateForStateId(stateId.getAsInt()));
-    }
-
-    public Optional<BlockStateMeta> getCachedBlockStateAt(Vector3i block) {
-        return blockStateCache.get(block);
     }
 
     public Optional<BlockType> getBlockTypeAt(Vector3i block) {

@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.util.concurrent.AtomicDouble;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.data.BlockItems;
@@ -44,7 +45,8 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 @SuppressWarnings("CollectionAddAllCanBeReplacedWithConstructor")
 public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityState, MovementDirection direction,
-                             MovementModifier modifier, MovementSide side) implements GraphAction {
+                             MovementModifier modifier, MovementSide side,
+                             LoadingCache<Vector3i, Optional<BlockStateMeta>> blockCache) implements GraphAction {
     // Optional.of() takes a few milliseconds, so we'll just cache it
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static final Optional<ActionCosts> NO_COST_RESULT = Optional.of(new ActionCosts(0, List.of()));
@@ -328,7 +330,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
 
     private BlockStateMeta getBlockStateMeta(ProjectedLevelState level, Vector3i block) {
         // If out of level, we can't go there, so we'll recalculate once we get there
-        return level.getBlockStateAt(block).orElseThrow(OutOfLevelException::new);
+        return level.getCachedBlockStateAt(blockCache, block).orElseThrow(OutOfLevelException::new);
     }
 
     @Override

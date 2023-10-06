@@ -44,6 +44,11 @@ tasks {
     }
 }
 
+// So the run task doesn't get marked as up-to-date, ever.
+tasks.run.get().apply {
+    outputs.upToDateWhen { false }
+}
+
 dependencies {
     implementation(projects.buildData)
 

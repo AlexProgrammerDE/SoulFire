@@ -74,10 +74,6 @@ public class SWItemStack extends ItemStack {
         this.enchantments = Object2ShortMaps.emptyMap();
     }
 
-    private int precalculateHash() {
-        return Objects.hash(this.type, this.enchantments);
-    }
-
     public static SWItemStack from(ItemStack itemStack) {
         if (itemStack == null) {
             return null;
@@ -88,6 +84,10 @@ public class SWItemStack extends ItemStack {
 
     public static SWItemStack forType(ItemType itemType) {
         return new SWItemStack(itemType, 1);
+    }
+
+    private int precalculateHash() {
+        return Objects.hash(this.type, this.enchantments);
     }
 
     public SWItemStack withAmount(int amount) {

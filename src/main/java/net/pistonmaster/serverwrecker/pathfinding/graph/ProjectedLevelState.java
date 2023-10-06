@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
@@ -59,7 +60,16 @@ public class ProjectedLevelState {
             return Optional.of(blockChange);
         }
 
-        return levelState.getCachedBlockStateAt(position);
+        return levelState.getBlockStateAt(position);
+    }
+
+    public Optional<BlockStateMeta> getCachedBlockStateAt(LoadingCache<Vector3i, Optional<BlockStateMeta>> blockCache, Vector3i position) {
+        var blockChange = blockChanges.get(position);
+        if (blockChange != null) {
+            return Optional.of(blockChange);
+        }
+
+        return blockCache.get(position);
     }
 
     @Override

@@ -23,12 +23,12 @@ import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public record ChunkKey(int chunkX, int chunkZ, int calculatedHash) {
-    public ChunkKey(Vector3i block) {
-        this(SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
-    }
-
     public ChunkKey(int chunkX, int chunkZ) {
         this(chunkX, chunkZ, calculateHash(chunkX, chunkZ));
+    }
+
+    public static int calculateHash(Vector3i block) {
+        return calculateHash(SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
     }
 
     public static int calculateHash(int chunkX, int chunkZ) {

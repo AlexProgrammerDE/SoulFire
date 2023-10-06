@@ -24,4 +24,11 @@ package net.pistonmaster.serverwrecker.pathfinding.graph;
  * The RouteFinder is supposed to catch this exception and insert a path recalculation action and return the best path.
  */
 public class OutOfLevelException extends RuntimeException {
+    public OutOfLevelException() {
+        super();
+    }
+
+    public OutOfLevelException(Exception e) {
+        super(e);
+    }
 }

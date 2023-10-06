@@ -89,6 +89,24 @@ public class ImportTextDialog extends JDialog {
         setVisible(true);
     }
 
+    private static Optional<String> getClipboard() {
+        var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+
+        var contents = clipboard.getContents(null);
+
+        if (contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            try {
+                return ((String) contents.getTransferData(DataFlavor.stringFlavor)).describeConstable();
+            } catch (UnsupportedFlavorException | IOException e) {
+                LOGGER.error("Failed to get clipboard!", e);
+                return Optional.empty();
+            }
+        } else {
+            LOGGER.error("Clipboard does not contain text!");
+            return Optional.empty();
+        }
+    }
+
     private record ImportFileListener(ServerWrecker serverWrecker, GUIFrame frame,
                                       FileChooser chooser, Consumer<String> consumer,
                                       ImportTextDialog dialog) implements ActionListener {
@@ -148,24 +166,6 @@ public class ImportTextDialog extends JDialog {
                     LOGGER.error("Failed to import text!", e);
                 }
             });
-        }
-    }
-
-    private static Optional<String> getClipboard() {
-        var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-
-        var contents = clipboard.getContents(null);
-
-        if (contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-            try {
-                return ((String) contents.getTransferData(DataFlavor.stringFlavor)).describeConstable();
-            } catch (UnsupportedFlavorException | IOException e) {
-                LOGGER.error("Failed to get clipboard!", e);
-                return Optional.empty();
-            }
-        } else {
-            LOGGER.error("Clipboard does not contain text!");
-            return Optional.empty();
         }
     }
 }

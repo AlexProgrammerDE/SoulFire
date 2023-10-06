@@ -68,8 +68,8 @@ public class EntityEffectState {
     @AllArgsConstructor
     private static class InternalEffectState {
         private final int amplifier;
-        private int duration;
         private final boolean ambient;
         private final boolean showParticles;
+        private int duration;
     }
 }
