@@ -22,6 +22,8 @@ package net.pistonmaster.serverwrecker.util.reference;
 /**
  * We don't want to use AtomicDouble because it is slower.
  * This implementation doesn't care about thread safety.
+ *
+ * @param <T> The type of the object.
  */
 public class ReferenceObject<T> {
     private T value;

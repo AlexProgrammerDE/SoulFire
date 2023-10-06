@@ -34,6 +34,7 @@ import java.util.Objects;
  *                   This is always the middle of the block.
  * @param levelState The level state of the world the bot is in.
  * @param inventory  The inventory state of the bot.
+ * @param precalculatedHash The precalculated hash of the object.
  */
 public record BotEntityState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory,
                              int precalculatedHash) {
