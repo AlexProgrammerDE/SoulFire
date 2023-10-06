@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
+import net.pistonmaster.serverwrecker.pathfinding.graph.SWDirection;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -55,15 +56,8 @@ public class BotActionManager {
     public static Optional<BlockPlaceData> findBlockToPlaceAgainst(Map<Vector3i, Optional<BlockStateMeta>> blockCache,
                                                                    ProjectedLevelState levelState, Vector3i targetPos,
                                                                    List<Vector3i> ignoreBlocks) {
-        for (var direction : Direction.values()) {
-            var blockPos = targetPos.add(switch (direction) {
-                case DOWN -> Vector3i.from(0, 1, 0);
-                case UP -> Vector3i.from(0, -1, 0);
-                case NORTH -> Vector3i.from(0, 0, 1);
-                case SOUTH -> Vector3i.from(0, 0, -1);
-                case WEST -> Vector3i.from(1, 0, 0);
-                case EAST -> Vector3i.from(-1, 0, 0);
-            });
+        for (var direction : SWDirection.VALUES) {
+            var blockPos = direction.offset(targetPos);
 
             if (ignoreBlocks.contains(blockPos)) {
                 continue;
@@ -74,7 +68,7 @@ public class BotActionManager {
                 continue;
             }
 
-            return Optional.of(new BlockPlaceData(blockPos, direction));
+            return Optional.of(new BlockPlaceData(blockPos, direction.getDirection()));
         }
 
         return Optional.empty();

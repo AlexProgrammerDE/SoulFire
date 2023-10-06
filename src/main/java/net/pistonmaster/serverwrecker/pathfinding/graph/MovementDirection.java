@@ -19,17 +19,34 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
+import lombok.RequiredArgsConstructor;
+import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
+
+import java.util.function.Function;
+
+@RequiredArgsConstructor
 public enum MovementDirection {
-    NORTH,
-    SOUTH,
-    EAST,
-    WEST,
-    NORTH_EAST,
-    NORTH_WEST,
-    SOUTH_EAST,
-    SOUTH_WEST;
+    NORTH(vector -> vector.add(0, 0, -1), vector -> vector.add(0, 0, -1)),
+    SOUTH(vector -> vector.add(0, 0, 1), vector -> vector.add(0, 0, 1)),
+    EAST(vector -> vector.add(1, 0, 0), vector -> vector.add(1, 0, 0)),
+    WEST(vector -> vector.add(-1, 0, 0), vector -> vector.add(-1, 0, 0)),
+    NORTH_EAST(vector -> vector.add(1, 0, -1), vector -> vector.add(1, 0, -1)),
+    NORTH_WEST(vector -> vector.add(-1, 0, -1), vector -> vector.add(-1, 0, -1)),
+    SOUTH_EAST(vector -> vector.add(1, 0, 1), vector -> vector.add(1, 0, 1)),
+    SOUTH_WEST(vector -> vector.add(-1, 0, 1), vector -> vector.add(-1, 0, 1));
 
     public static final MovementDirection[] VALUES = values();
+    private final Function<Vector3i, Vector3i> offsetInteger;
+    private final Function<Vector3d, Vector3d> offsetDouble;
+
+    public Vector3i offset(Vector3i vector) {
+        return offsetInteger.apply(vector);
+    }
+
+    public Vector3d offset(Vector3d vector) {
+        return offsetDouble.apply(vector);
+    }
 
     public boolean isDiagonal() {
         return this == NORTH_EAST || this == NORTH_WEST || this == SOUTH_EAST || this == SOUTH_WEST;
