@@ -35,7 +35,7 @@ public class EntityEffectState {
     private final Map<Effect, InternalEffectState> effects = new EnumMap<>(Effect.class);
 
     public void updateEffect(Effect effect, int amplifier, int duration, boolean ambient, boolean showParticles) {
-        effects.put(effect, new InternalEffectState(amplifier, duration, ambient, showParticles));
+        effects.put(effect, new InternalEffectState(amplifier, ambient, showParticles, duration));
     }
 
     public void removeEffect(Effect effect) {

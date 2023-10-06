@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot;
 
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
@@ -31,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
@@ -50,7 +52,9 @@ public class BotActionManager {
     private final SessionDataManager dataManager;
     private int sequenceNumber = 0;
 
-    public static Optional<BlockPlaceData> findBlockToPlaceAgainst(ProjectedLevelState levelState, Vector3i targetPos, List<Vector3i> ignoreBlocks) {
+    public static Optional<BlockPlaceData> findBlockToPlaceAgainst(LoadingCache<Vector3i, Optional<BlockStateMeta>> blockCache,
+                                                                   ProjectedLevelState levelState, Vector3i targetPos,
+                                                                   List<Vector3i> ignoreBlocks) {
         for (var direction : Direction.values()) {
             var blockPos = targetPos.add(switch (direction) {
                 case DOWN -> Vector3i.from(0, 1, 0);
@@ -65,7 +69,7 @@ public class BotActionManager {
                 continue;
             }
 
-            var blockState = levelState.getBlockStateAt(blockPos);
+            var blockState = levelState.getCachedBlockStateAt(blockCache, blockPos);
             if (blockState.isEmpty() || !blockState.get().blockShapeType().isFullBlock()) {
                 continue;
             }

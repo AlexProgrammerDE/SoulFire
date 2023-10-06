@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.pathfinding;
 import com.google.common.base.Stopwatch;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
@@ -32,7 +33,6 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.pathfinding.graph.OutOfLevelException;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -40,10 +40,10 @@ import java.util.Map;
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     private static List<WorldAction> getActions(MinecraftRouteNode current) {
-        List<WorldAction> actions = new ArrayList<>();
+        var actions = new ObjectArrayList<WorldAction>();
         var previousElement = current;
         do {
-            List<WorldAction> previousActions = new ArrayList<>(previousElement.getPreviousActions());
+            var previousActions = new ObjectArrayList<>(previousElement.getPreviousActions());
 
             // So they get executed in the right order
             Collections.reverse(previousActions);

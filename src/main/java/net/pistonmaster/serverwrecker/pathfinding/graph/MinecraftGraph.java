@@ -21,13 +21,13 @@ package net.pistonmaster.serverwrecker.pathfinding.graph;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,7 +56,7 @@ public record MinecraftGraph(TagsState tagsState) {
         LoadingCache<Vector3i, Optional<BlockStateMeta>> blockCache = Caffeine.newBuilder().build(k ->
                 node.levelState().getBlockStateAt(k));
 
-        var targetSet = new ArrayList<PlayerMovement>(INSTRUCTION_COUNT);
+        var targetSet = new ObjectArrayList<PlayerMovement>(INSTRUCTION_COUNT);
         for (var direction : MovementDirection.values()) {
             for (var modifier : MovementModifier.values()) {
                 if (direction.isDiagonal()) {
@@ -74,9 +74,9 @@ public record MinecraftGraph(TagsState tagsState) {
                 .map(PlayerMovement::getInstructions)
                 .toList();
 
-        log.debug("Found {} possible actions for {}", targetResults.stream()
+        log.debug("Found {} possible actions for {} and cached {} blocks", targetResults.stream()
                 .filter(a -> !a.isImpossible())
-                .count(), node.position());
+                .count(), node.position(), blockCache.estimatedSize());
 
         return targetResults;
     }
