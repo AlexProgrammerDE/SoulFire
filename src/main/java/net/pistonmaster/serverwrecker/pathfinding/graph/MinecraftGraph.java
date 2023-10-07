@@ -53,9 +53,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 .map(GraphAction::getInstructions)
                 .toList();
 
-        log.debug("Found {} possible actions for {} and cached {} blocks", targetResults.stream()
-                .filter(a -> !a.isImpossible())
-                .count(), node.position(), blockCache.size());
+        log.debug("Found possible actions for {} and cached {} blocks", node.position(), blockCache.size());
 
         return targetResults;
     }

@@ -21,7 +21,8 @@ package net.pistonmaster.serverwrecker.pathfinding;
 
 import com.google.common.base.Stopwatch;
 import it.unimi.dsi.fastutil.PriorityQueue;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,6 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.OutOfLevelException;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
@@ -61,7 +61,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         var stopwatch = Stopwatch.createStarted();
 
         // Store block positions and the best route to them
-        Map<BotEntityState, MinecraftRouteNode> routeIndex = new Object2ObjectOpenHashMap<>();
+        Int2ObjectMap<MinecraftRouteNode> routeIndex = new Int2ObjectOpenHashMap<>();
 
         // Store block positions that we need to look at
         PriorityQueue<MinecraftRouteNode> openSet = new ObjectHeapPriorityQueue<>();
@@ -70,7 +70,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         log.info("Start score (Usually distance): {}", startScore);
 
         var start = new MinecraftRouteNode(from, null, List.of(new MovementAction(from.position(), false)), 0d, startScore);
-        routeIndex.put(from, start);
+        routeIndex.put(from.precalculatedHash(), start);
         openSet.enqueue(start);
 
         while (!openSet.isEmpty()) {
@@ -112,7 +112,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 var actionCost = instructions.actionCost();
                 var actionTargetState = instructions.targetState();
                 var worldActions = instructions.actions();
-                routeIndex.compute(actionTargetState, (k, v) -> {
+                routeIndex.compute(actionTargetState.precalculatedHash(), (k, v) -> {
                     // Calculate new distance from start to this connection,
                     // Get distance from the current element
                     // and add the distance from the current element to the next element

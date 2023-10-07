@@ -23,29 +23,45 @@ import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.function.Function;
-
 @RequiredArgsConstructor
 public enum MovementDirection {
-    NORTH(vector -> vector.add(0, 0, -1), vector -> vector.add(0, 0, -1)),
-    SOUTH(vector -> vector.add(0, 0, 1), vector -> vector.add(0, 0, 1)),
-    EAST(vector -> vector.add(1, 0, 0), vector -> vector.add(1, 0, 0)),
-    WEST(vector -> vector.add(-1, 0, 0), vector -> vector.add(-1, 0, 0)),
-    NORTH_EAST(vector -> vector.add(1, 0, -1), vector -> vector.add(1, 0, -1)),
-    NORTH_WEST(vector -> vector.add(-1, 0, -1), vector -> vector.add(-1, 0, -1)),
-    SOUTH_EAST(vector -> vector.add(1, 0, 1), vector -> vector.add(1, 0, 1)),
-    SOUTH_WEST(vector -> vector.add(-1, 0, 1), vector -> vector.add(-1, 0, 1));
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST,
+    NORTH_EAST,
+    NORTH_WEST,
+    SOUTH_EAST,
+    SOUTH_WEST;
 
     public static final MovementDirection[] VALUES = values();
-    private final Function<Vector3i, Vector3i> offsetInteger;
-    private final Function<Vector3d, Vector3d> offsetDouble;
 
+    @SuppressWarnings("DuplicatedCode")
     public Vector3i offset(Vector3i vector) {
-        return offsetInteger.apply(vector);
+        return switch (this) {
+            case NORTH -> vector.add(0, 0, -1);
+            case SOUTH -> vector.add(0, 0, 1);
+            case EAST -> vector.add(1, 0, 0);
+            case WEST -> vector.add(-1, 0, 0);
+            case NORTH_EAST -> vector.add(1, 0, -1);
+            case NORTH_WEST -> vector.add(-1, 0, -1);
+            case SOUTH_EAST -> vector.add(1, 0, 1);
+            case SOUTH_WEST -> vector.add(-1, 0, 1);
+        };
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public Vector3d offset(Vector3d vector) {
-        return offsetDouble.apply(vector);
+        return switch (this) {
+            case NORTH -> vector.add(0, 0, -1);
+            case SOUTH -> vector.add(0, 0, 1);
+            case EAST -> vector.add(1, 0, 0);
+            case WEST -> vector.add(-1, 0, 0);
+            case NORTH_EAST -> vector.add(1, 0, -1);
+            case NORTH_WEST -> vector.add(-1, 0, -1);
+            case SOUTH_EAST -> vector.add(1, 0, 1);
+            case SOUTH_WEST -> vector.add(-1, 0, 1);
+        };
     }
 
     public boolean isDiagonal() {
