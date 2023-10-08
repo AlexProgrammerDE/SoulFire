@@ -185,7 +185,7 @@ idea {
     }
 }
 
-tasks.withType<Checkstyle>() {
+tasks.withType<Checkstyle> {
     exclude("**/net/pistonmaster/serverwrecker/data**")
     exclude("**/net/pistonmaster/serverwrecker/grpc/generated**")
 }

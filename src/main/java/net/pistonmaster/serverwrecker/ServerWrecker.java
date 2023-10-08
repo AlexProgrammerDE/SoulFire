@@ -31,7 +31,6 @@ import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import lombok.Getter;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -166,8 +165,8 @@ public class ServerWrecker {
         LOGGER.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
         var jwt = Jwts.builder()
-                .setSubject("admin")
-                .signWith(jwtKey, SignatureAlgorithm.HS256)
+                .subject("admin")
+                .signWith(jwtKey, Jwts.SIG.HS256)
                 .compact();
 
         var rpcClient = new RPCClient(host, port, jwt);

@@ -22,13 +22,13 @@ package net.pistonmaster.serverwrecker.grpc;
 import io.grpc.*;
 import io.jsonwebtoken.*;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 
 public class JwtServerInterceptor implements ServerInterceptor {
     private final JwtParser parser;
 
-    public JwtServerInterceptor(Key jwtKey) {
-        parser = Jwts.parserBuilder().setSigningKey(jwtKey).build();
+    public JwtServerInterceptor(SecretKey jwtKey) {
+        parser = Jwts.parser().verifyWith(jwtKey).build();
     }
 
     @Override

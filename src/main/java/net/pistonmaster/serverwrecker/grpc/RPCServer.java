@@ -24,8 +24,8 @@ import io.grpc.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.security.Key;
 import java.util.concurrent.TimeUnit;
 
 public class RPCServer {
@@ -34,11 +34,11 @@ public class RPCServer {
     private final int port;
     private final Server server;
 
-    public RPCServer(int port, Injector injector, Key jwtKey) {
+    public RPCServer(int port, Injector injector, SecretKey jwtKey) {
         this(jwtKey, Grpc.newServerBuilderForPort(port, InsecureServerCredentials.create()), port, injector);
     }
 
-    public RPCServer(Key jwtKey, ServerBuilder<?> serverBuilder, int port, Injector injector) {
+    public RPCServer(SecretKey jwtKey, ServerBuilder<?> serverBuilder, int port, Injector injector) {
         this.port = port;
         server = serverBuilder
                 .intercept(new ServerInterceptor() {
