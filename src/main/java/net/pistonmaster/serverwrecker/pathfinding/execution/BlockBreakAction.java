@@ -35,10 +35,11 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class BlockBreakAction implements WorldAction {
     private final Vector3i blockPosition;
-    private final SWItemStack itemStack;
     boolean finishedDigging = false;
     private boolean didLook = false;
     private boolean putOnHotbar = false;
+    private boolean calculatedBestItemStack = false;
+    private SWItemStack bestItemStack = null;
     private int remainingTicks = -1;
 
     @Override
@@ -48,7 +49,9 @@ public class BlockBreakAction implements WorldAction {
             return false;
         }
 
-        return levelState.getBlockTypeAt(blockPosition).map(blockType -> blockType.blockShapeTypes().isEmpty()).orElse(false);
+        return levelState.getBlockTypeAt(blockPosition)
+                .map(blockType -> blockType.blockShapeTypes().isEmpty())
+                .orElse(false);
     }
 
     @Override
@@ -56,6 +59,8 @@ public class BlockBreakAction implements WorldAction {
         var sessionDataManager = connection.sessionDataManager();
         var movementManager = sessionDataManager.getBotMovementManager();
         var levelState = sessionDataManager.getCurrentLevel();
+        var inventoryManager = sessionDataManager.getInventoryManager();
+        var playerInventory = inventoryManager.getPlayerInventory();
 
         if (levelState == null) {
             return;
@@ -73,13 +78,43 @@ public class BlockBreakAction implements WorldAction {
             }
         }
 
-        if (!putOnHotbar && itemStack != null) {
-            var inventoryManager = sessionDataManager.getInventoryManager();
-            var playerInventory = inventoryManager.getPlayerInventory();
+        if (!calculatedBestItemStack) {
+            SWItemStack itemStack = null;
+            var bestCost = Integer.MAX_VALUE;
+            var sawEmpty = false;
+            for (var slot : playerInventory.getStorage()) {
+                var item = slot.item();
+                if (item == null) {
+                    if (sawEmpty) {
+                        break;
+                    }
+
+                    sawEmpty = true;
+                }
+
+                var cost = Costs.getRequiredMiningTicks(
+                        sessionDataManager.getTagsState(),
+                        sessionDataManager.getSelfEffectState(),
+                        sessionDataManager.getBotMovementManager().isOnGround(),
+                        item,
+                        levelState.getBlockTypeAt(blockPosition).orElseThrow()
+                ).ticks();
+
+                if (cost < bestCost) {
+                    bestCost = cost;
+                    itemStack = item;
+                }
+            }
+
+            bestItemStack = itemStack;
+            calculatedBestItemStack = true;
+        }
+
+        if (!putOnHotbar && bestItemStack != null) {
             var heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
             if (heldSlot.item() != null) {
                 var item = heldSlot.item();
-                if (item.equalsShape(itemStack)) {
+                if (item.equalsShape(bestItemStack)) {
                     putOnHotbar = true;
                     return;
                 }
@@ -91,7 +126,7 @@ public class BlockBreakAction implements WorldAction {
                 }
 
                 var item = hotbarSlot.item();
-                if (!item.equalsShape(itemStack)) {
+                if (!item.equalsShape(bestItemStack)) {
                     continue;
                 }
 
@@ -107,7 +142,7 @@ public class BlockBreakAction implements WorldAction {
                 }
 
                 var item = slot.item();
-                if (!item.equalsShape(itemStack)) {
+                if (!item.equalsShape(bestItemStack)) {
                     continue;
                 }
 

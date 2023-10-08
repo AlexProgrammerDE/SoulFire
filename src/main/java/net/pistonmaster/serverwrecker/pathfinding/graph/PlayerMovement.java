@@ -189,7 +189,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
         }
 
         // Add cost of breaking block
-        return Optional.of(new ActionCosts(costs.miningCost(), ObjectLists.singleton(new BlockBreakAction(block, costs.itemStack()))));
+        return Optional.of(new ActionCosts(costs.miningCost(), ObjectLists.singleton(new BlockBreakAction(block))));
     }
 
     private Optional<ActionCosts> requireSolidBlocks(ReferenceObject<ProjectedLevelState> level,
