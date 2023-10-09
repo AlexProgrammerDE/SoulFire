@@ -26,7 +26,6 @@ public class PlayerInventoryContainer extends Container {
     private final ContainerSlot[] mainInventory = getSlots(9, 35);
     private final ContainerSlot[] hotbar = getSlots(36, 44);
     /**
-     * -- GETTER --
      * Retrieves the storage slots of the container.
      * This includes the main inventory and the hotbar.
      */

@@ -38,14 +38,9 @@ public record MinecraftGraph(TagsState tagsState) {
 
         var targetSet = new ObjectArrayList<GraphAction>();
         for (var direction : MovementDirection.VALUES) {
+            var diagonal = direction.isDiagonal();
             for (var modifier : MovementModifier.VALUES) {
-                if (direction.isDiagonal()) {
-                    for (var side : MovementSide.VALUES) {
-                        targetSet.add(new PlayerMovement(tagsState, node, direction, modifier, side, blockCache));
-                    }
-                } else {
-                    targetSet.add(new PlayerMovement(tagsState, node, direction, modifier, null, blockCache));
-                }
+                targetSet.add(new PlayerMovement(tagsState, node, direction, diagonal, modifier, blockCache));
             }
         }
 

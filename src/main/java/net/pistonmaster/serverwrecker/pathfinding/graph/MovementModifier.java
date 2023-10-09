@@ -23,27 +23,34 @@ import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.function.Function;
-
 @RequiredArgsConstructor
 public enum MovementModifier {
-    NORMAL(vector -> vector, vector -> vector),
-    FALL_1(vector -> vector.add(0, -1, 0), vector -> vector.add(0, -1, 0)),
-    FALL_2(vector -> vector.add(0, -2, 0), vector -> vector.add(0, -2, 0)),
-    FALL_3(vector -> vector.add(0, -3, 0), vector -> vector.add(0, -3, 0)),
-    JUMP(vector -> vector.add(0, 1, 0), vector -> vector.add(0, 1, 0));
+    NORMAL,
+    FALL_1,
+    FALL_2,
+    FALL_3,
+    JUMP;
 
     public static final MovementModifier[] VALUES = values();
 
-    private final Function<Vector3i, Vector3i> offsetInteger;
-    private final Function<Vector3d, Vector3d> offsetDouble;
-
     public Vector3i offset(Vector3i vector) {
-        return offsetInteger.apply(vector);
+        return switch (this) {
+            case NORMAL -> vector;
+            case FALL_1 -> vector.add(0, -1, 0);
+            case FALL_2 -> vector.add(0, -2, 0);
+            case FALL_3 -> vector.add(0, -3, 0);
+            case JUMP -> vector.add(0, 1, 0);
+        };
     }
 
     public Vector3d offset(Vector3d vector) {
-        return offsetDouble.apply(vector);
+        return switch (this) {
+            case NORMAL -> vector;
+            case FALL_1 -> vector.add(0, -1, 0);
+            case FALL_2 -> vector.add(0, -2, 0);
+            case FALL_3 -> vector.add(0, -3, 0);
+            case JUMP -> vector.add(0, 1, 0);
+        };
     }
 
     public Vector3i offsetIfJump(Vector3i vector) {

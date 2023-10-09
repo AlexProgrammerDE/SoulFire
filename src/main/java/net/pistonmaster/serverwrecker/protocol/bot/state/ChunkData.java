@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
+import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Map;
@@ -29,11 +30,11 @@ import java.util.WeakHashMap;
 
 public class ChunkData {
     private static final Map<Integer, ChunkSection> SECTION_CACHE = new WeakHashMap<>();
-    private final LevelState level;
+    private final int minSection;
     private final ChunkSection[] sections;
 
     public ChunkData(LevelState level) {
-        this.level = level;
+        this.minSection = level.getMinSection();
         this.sections = new ChunkSection[level.getSectionsCount()];
     }
 
@@ -51,7 +52,7 @@ public class ChunkData {
     }
 
     private ChunkSection getSection(Vector3i block) {
-        return getSection(level.getSectionIndex(block.getY()));
+        return getSection(getSectionIndex(block.getY()));
     }
 
     public ChunkSection getSection(int sectionIndex) {
@@ -66,7 +67,7 @@ public class ChunkData {
     }
 
     private void setSection(Vector3i block, ChunkSection section) {
-        setSection(level.getSectionIndex(block.getY()), section);
+        setSection(getSectionIndex(block.getY()), section);
     }
 
     public void setSection(int sectionIndex, ChunkSection section) {
@@ -88,5 +89,9 @@ public class ChunkData {
         clone.setBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF, state);
 
         setSection(block, clone);
+    }
+
+    private int getSectionIndex(int blockY) {
+        return SectionUtils.blockToSection(blockY) - this.minSection;
     }
 }

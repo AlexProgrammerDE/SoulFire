@@ -19,13 +19,46 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.container;
 
-import javax.annotation.Nullable;
+import lombok.AllArgsConstructor;
 
-/**
- * Represents a slot in a container.
- *
- * @param slot The slot number in the container.
- * @param item The item in the slot, or null if the slot is empty.
- */
-public record ContainerSlot(int slot, @Nullable SWItemStack item) {
+import javax.annotation.Nullable;
+import java.util.Objects;
+
+@AllArgsConstructor
+public final class ContainerSlot {
+    private final int slot;
+    private SWItemStack item;
+
+    public int slot() {
+        return slot;
+    }
+
+    public SWItemStack item() {
+        return item;
+    }
+
+    void setItem(@Nullable SWItemStack item) {
+        this.item = item;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (ContainerSlot) obj;
+        return this.slot == that.slot &&
+                Objects.equals(this.item, that.item);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(slot, item);
+    }
+
+    @Override
+    public String toString() {
+        return "ContainerSlot[" +
+                "slot=" + slot + ", " +
+                "item=" + item + ']';
+    }
 }

@@ -44,13 +44,13 @@ import java.util.Optional;
 
 @Slf4j
 public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityState, MovementDirection direction,
-                             MovementModifier modifier, MovementSide side,
+                             boolean directionDiagonal, MovementModifier modifier,
                              Map<Vector3i, Optional<BlockStateMeta>> blockCache) implements GraphAction {
     // Optional.of() takes a few milliseconds, so we'll just cache it
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static final Optional<ActionCosts> NO_COST_RESULT = Optional.of(new ActionCosts(0, ObjectLists.emptyList()));
-    private static final boolean BREAK_BLOCKS = false;
-    private static final boolean PLACE_BLOCKS = false;
+    private static final boolean BREAK_BLOCKS = true;
+    private static final boolean PLACE_BLOCKS = true;
 
     private Optional<ActionCosts> requireFreeBlocks(ReferenceObject<ProjectedLevelState> level,
                                                     ReferenceObject<ProjectedInventory> inventory) {
@@ -71,32 +71,41 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
         }
 
         // Add the blocks that are required to be free for diagonal movement
-        if (direction.isDiagonal()) {
-            var cornerDirection = switch (direction) {
-                case NORTH_EAST -> switch (side) {
-                    case LEFT -> MovementDirection.NORTH;
-                    case RIGHT -> MovementDirection.EAST;
+        if (directionDiagonal) {
+            var failedLeftSide = false;
+            sideLoop:
+            for (var side : MovementSide.VALUES) {
+                var cornerDirection = switch (direction) {
+                    case NORTH_EAST -> switch (side) {
+                        case LEFT -> MovementDirection.NORTH;
+                        case RIGHT -> MovementDirection.EAST;
+                    };
+                    case NORTH_WEST -> switch (side) {
+                        case LEFT -> MovementDirection.NORTH;
+                        case RIGHT -> MovementDirection.WEST;
+                    };
+                    case SOUTH_EAST -> switch (side) {
+                        case LEFT -> MovementDirection.SOUTH;
+                        case RIGHT -> MovementDirection.EAST;
+                    };
+                    case SOUTH_WEST -> switch (side) {
+                        case LEFT -> MovementDirection.SOUTH;
+                        case RIGHT -> MovementDirection.WEST;
+                    };
+                    default -> throw new IllegalStateException("Unexpected value: " + direction);
                 };
-                case NORTH_WEST -> switch (side) {
-                    case LEFT -> MovementDirection.NORTH;
-                    case RIGHT -> MovementDirection.WEST;
-                };
-                case SOUTH_EAST -> switch (side) {
-                    case LEFT -> MovementDirection.SOUTH;
-                    case RIGHT -> MovementDirection.EAST;
-                };
-                case SOUTH_WEST -> switch (side) {
-                    case LEFT -> MovementDirection.SOUTH;
-                    case RIGHT -> MovementDirection.WEST;
-                };
-                default -> throw new IllegalStateException("Unexpected value: " + direction);
-            };
-            var corner = cornerDirection.offset(fromPosInt);
+                var corner = cornerDirection.offset(fromPosInt);
 
-            for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
-                // Apply jump shift to target edge and offset for body part
-                if (requireFreeHelper(bodyOffset.offset(modifier.offsetIfJump(corner)), level, inventory, actions, cost)) {
-                    return Optional.empty();
+                for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
+                    // Apply jump shift to target edge and offset for body part
+                    if (requireFreeHelper(bodyOffset.offset(modifier.offsetIfJump(corner)), level, inventory, actions, cost)) {
+                        if (failedLeftSide) {
+                            return Optional.empty();
+                        }
+
+                        failedLeftSide = true;
+                        continue sideLoop;
+                    }
                 }
             }
         }
@@ -171,7 +180,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
             return Optional.empty();
         }
 
-        var blockMiningCosts = Costs.calculateBlockBreakCost(tagsState, resolvedInventory, blockStateMeta);
+        var blockMiningCosts = resolvedInventory.getMiningCosts(tagsState, blockStateMeta);
 
         // No way to break block
         if (blockMiningCosts.isEmpty()) {
@@ -300,7 +309,7 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
 
         var targetPosition = modifier.offset(direction.offset(previousEntityState.position()));
 
-        actions.add(new MovementAction(targetPosition, side != null));
+        actions.add(new MovementAction(targetPosition, directionDiagonal));
 
         // Add additional "discouraged" costs to prevent the bot from doing too much parkour when it's not needed
         switch (modifier) {
@@ -323,7 +332,6 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
                 "previousPosition=" + previousEntityState.position() +
                 ", direction=" + direction +
                 ", modifier=" + modifier +
-                ", side=" + side +
                 '}';
     }
 

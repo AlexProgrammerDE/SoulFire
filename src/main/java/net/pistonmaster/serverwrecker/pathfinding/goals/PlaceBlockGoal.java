@@ -23,7 +23,6 @@ import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
-import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -45,10 +44,6 @@ public record PlaceBlockGoal(Vector3i goal, Vector3d goal3d, BlockType blockType
 
     @Override
     public boolean isFinished(BotEntityState entityState) {
-        return entityState.levelState()
-                .getBlockStateAt(goal)
-                .map(BlockStateMeta::blockType)
-                .map(b -> b == blockType)
-                .orElse(false);
+        return entityState.levelState().isChanged(goal);
     }
 }

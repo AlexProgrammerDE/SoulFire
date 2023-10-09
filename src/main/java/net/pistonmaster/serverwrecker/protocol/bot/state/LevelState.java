@@ -23,7 +23,6 @@ import com.github.steveice10.opennbt.tag.builtin.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.data.BlockType;
-import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.MCUniform;
@@ -34,7 +33,10 @@ import net.pistonmaster.serverwrecker.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Getter
 public class LevelState {
@@ -61,6 +63,11 @@ public class LevelState {
     private final int monsterSpawnBlockLightLimit;
     private final byte hasRaids;
     private final byte respawnAnchorWorks;
+
+    // Some precalculated chunk values based on level data
+    private final int minSection;
+    private final int maxSection;
+    private final int sectionsCount;
     @Setter
     private long worldAge;
     @Setter
@@ -97,6 +104,11 @@ public class LevelState {
         this.monsterSpawnBlockLightLimit = levelRegistry.<IntTag>get("monster_spawn_block_light_limit").getValue();
         this.hasRaids = levelRegistry.<ByteTag>get("has_raids").getValue();
         this.respawnAnchorWorks = levelRegistry.<ByteTag>get("respawn_anchor_works").getValue();
+
+        // Precalculate min section
+        this.minSection = SectionUtils.blockToSection(this.getMinBuildHeight());
+        this.maxSection = SectionUtils.blockToSection(this.getMaxBuildHeight() - 1) + 1;
+        this.sectionsCount = this.maxSection - this.minSection;
     }
 
     public int getMinBuildHeight() {
@@ -104,31 +116,7 @@ public class LevelState {
     }
 
     public int getMaxBuildHeight() {
-        return this.getMinBuildHeight() + this.getHeight();
-    }
-
-    public int getSectionsCount() {
-        return this.getMaxSection() - this.getMinSection();
-    }
-
-    public int getMinSection() {
-        return SectionUtils.blockToSection(this.getMinBuildHeight());
-    }
-
-    public int getMaxSection() {
-        return SectionUtils.blockToSection(this.getMaxBuildHeight() - 1) + 1;
-    }
-
-    public int getSectionIndex(int blockY) {
-        return this.getSectionIndexFromSectionY(SectionUtils.blockToSection(blockY));
-    }
-
-    public int getSectionIndexFromSectionY(int sectionY) {
-        return sectionY - this.getMinSection();
-    }
-
-    public int getSectionYFromSectionIndex(int index) {
-        return index + this.getMinSection();
+        return this.getMinBuildHeight() + this.height;
     }
 
     public void setBlockId(Vector3i block, int state) {
@@ -140,34 +128,16 @@ public class LevelState {
         chunkData.setBlock(block, state);
     }
 
-    public OptionalInt getBlockStateIdAt(Vector3i block) {
-        var chunkData = chunks.getChunk(block);
-
-        // Out of world
-        if (chunkData == null) {
-            return OptionalInt.empty();
-        }
-
-        return OptionalInt.of(chunkData.getBlock(block));
-    }
-
     public boolean isChunkLoaded(Vector3i block) {
         return chunks.isChunkLoaded(block);
     }
 
     public Optional<BlockStateMeta> getBlockStateAt(Vector3i block) {
-        var stateId = getBlockStateIdAt(block);
-
-        // Out of world
-        if (stateId.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(ResourceData.GLOBAL_BLOCK_PALETTE.getBlockStateForStateId(stateId.getAsInt()));
+        return chunks.getBlockStateAt(block);
     }
 
     public Optional<BlockType> getBlockTypeAt(Vector3i block) {
-        return getBlockStateAt(block).map(BlockStateMeta::blockType);
+        return chunks.getBlockTypeAt(block);
     }
 
     public boolean isOutOfWorld(Vector3i block) {

@@ -25,6 +25,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkHolder;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -38,12 +39,12 @@ import java.util.Optional;
  */
 @RequiredArgsConstructor
 public class ProjectedLevelState {
-    private final LevelState levelState;
+    private final ChunkHolder chunkHolder;
     private final Object2ObjectMap<Vector3i, BlockStateMeta> blockChanges;
     private final int blockChangesHash;
 
     public ProjectedLevelState(LevelState levelState) {
-        this.levelState = levelState;
+        this.chunkHolder = levelState.getChunks().immutableCopy();
         this.blockChanges = Object2ObjectMaps.emptyMap();
         this.blockChangesHash = blockChanges.hashCode();
     }
@@ -52,14 +53,14 @@ public class ProjectedLevelState {
         var blockChanges = new Object2ObjectArrayMap<>(this.blockChanges);
         blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
 
-        return new ProjectedLevelState(levelState, blockChanges, blockChanges.hashCode());
+        return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode());
     }
 
     public ProjectedLevelState withChangeToAir(Vector3i position) {
         var blockChanges = new Object2ObjectArrayMap<>(this.blockChanges);
         blockChanges.put(position, BlockStateMeta.AIR_BLOCK_STATE);
 
-        return new ProjectedLevelState(levelState, blockChanges, blockChanges.hashCode());
+        return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode());
     }
 
     public Optional<BlockStateMeta> getBlockStateAt(Vector3i position) {
@@ -68,7 +69,7 @@ public class ProjectedLevelState {
             return Optional.of(blockChange);
         }
 
-        return levelState.getBlockStateAt(position);
+        return chunkHolder.getBlockStateAt(position);
     }
 
     public Optional<BlockStateMeta> getCachedBlockStateAt(Map<Vector3i, Optional<BlockStateMeta>> blockCache, Vector3i position) {
@@ -77,17 +78,20 @@ public class ProjectedLevelState {
             return Optional.of(blockChange);
         }
 
-        // Testing shows that computeIfAbsent is slower with ConcurrentHashMap
-        var cachedValue = blockCache.get(position);
-        if (cachedValue != null) {
-            return cachedValue;
+        var cache = blockCache.get(position);
+        if (cache != null) {
+            return cache;
         }
 
-        var value = levelState.getBlockStateAt(position);
+        var blockState = chunkHolder.getBlockStateAt(position);
 
-        blockCache.put(position, value);
+        blockCache.put(position, blockState);
 
-        return value;
+        return blockState;
+    }
+
+    public boolean isChanged(Vector3i position) {
+        return blockChanges.containsKey(position);
     }
 
     @Override

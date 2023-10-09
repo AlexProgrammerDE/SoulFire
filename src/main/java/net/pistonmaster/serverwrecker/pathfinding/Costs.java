@@ -31,7 +31,6 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.util.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
 import java.util.OptionalInt;
 
 public class Costs {
@@ -58,19 +57,7 @@ public class Costs {
     private Costs() {
     }
 
-    public static Optional<BlockMiningCosts> calculateBlockBreakCost(TagsState tagsState, ProjectedInventory inventory, BlockStateMeta blockStateMeta) {
-        var blockType = blockStateMeta.blockType();
-
-        // Don't try to find a way to dig bedrock
-        if (!blockType.diggable()) {
-            return Optional.empty();
-        }
-
-        // We only want to dig full blocks (not slabs, stairs, etc.), removes a lot of edge cases
-        if (!blockStateMeta.blockShapeType().isFullBlock()) {
-            return Optional.empty();
-        }
-
+    public static BlockMiningCosts calculateBlockBreakCost(TagsState tagsState, ProjectedInventory inventory, BlockType blockType) {
         var lowestMiningTicks = Integer.MAX_VALUE;
         SWItemStack bestItem = null;
         var correctToolUsed = false;
@@ -98,11 +85,11 @@ public class Costs {
             throw new IllegalStateException("No way found to break block!");
         }
 
-        return Optional.of(new BlockMiningCosts(
+        return new BlockMiningCosts(
                 (lowestMiningTicks / TICKS_PER_BLOCK) + BREAK_BLOCK_ADDITION,
                 bestItem,
                 correctToolUsed
-        ));
+        );
     }
 
     // Time in ticks
@@ -196,7 +183,7 @@ public class Costs {
                 .orElseGet(OptionalInt::empty);
     }
 
-    public record BlockMiningCosts(double miningCost, @Nullable SWItemStack itemStack, boolean willDrop) {
+    public record BlockMiningCosts(double miningCost, @Nullable SWItemStack usedTool, boolean willDrop) {
     }
 
     public record TickResult(int ticks, boolean willDrop) {

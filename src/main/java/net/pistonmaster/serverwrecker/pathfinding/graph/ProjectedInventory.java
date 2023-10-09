@@ -20,13 +20,16 @@
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.pathfinding.Costs;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
+import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.util.ItemTypeHelper;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An immutable representation of a player inventory.
@@ -37,6 +40,7 @@ import java.util.Set;
 public class ProjectedInventory {
     private final int usableBlockItems;
     private final Set<SWItemStack> usableTools;
+    private final Map<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
     private final int changeHash;
 
     public ProjectedInventory(PlayerInventoryContainer playerInventory) {
@@ -62,6 +66,7 @@ public class ProjectedInventory {
         }
 
         this.changeHash = Objects.hash(usableBlockItems, usableTools);
+        this.sharedMiningCosts = new ConcurrentHashMap<>();
     }
 
     public boolean hasBlockToPlace() {
@@ -69,11 +74,11 @@ public class ProjectedInventory {
     }
 
     public ProjectedInventory withOneLessBlock() {
-        return new ProjectedInventory(usableBlockItems - 1, usableTools, changeHash);
+        return new ProjectedInventory(usableBlockItems - 1, usableTools, sharedMiningCosts, changeHash);
     }
 
     public ProjectedInventory withOneMoreBlock() {
-        return new ProjectedInventory(usableBlockItems + 1, usableTools, changeHash);
+        return new ProjectedInventory(usableBlockItems + 1, usableTools, sharedMiningCosts, changeHash);
     }
 
     public SWItemStack[] getToolAndNull() {
@@ -88,6 +93,23 @@ public class ProjectedInventory {
         array[i] = null;
 
         return array;
+    }
+
+    public Optional<Costs.BlockMiningCosts> getMiningCosts(TagsState tagsState, BlockStateMeta blockStateMeta) {
+        var blockType = blockStateMeta.blockType();
+
+        // Don't try to find a way to dig bedrock
+        if (!blockType.diggable()) {
+            return Optional.empty();
+        }
+
+        // We only want to dig full blocks (not slabs, stairs, etc.), removes a lot of edge cases
+        if (!blockStateMeta.blockShapeType().isFullBlock()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(sharedMiningCosts.computeIfAbsent(blockType, type ->
+                Costs.calculateBlockBreakCost(tagsState, this, type)));
     }
 
     @Override

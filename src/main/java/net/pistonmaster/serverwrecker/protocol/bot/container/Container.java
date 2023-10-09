@@ -24,6 +24,7 @@ import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import lombok.Getter;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Container {
     @Getter
@@ -40,8 +41,8 @@ public class Container {
         this.id = id;
     }
 
-    public void setSlot(int slot, SWItemStack item) {
-        slots[slot] = new ContainerSlot(slot, item);
+    public void setSlot(int slot, @Nullable SWItemStack item) {
+        slots[slot].setItem(item);
     }
 
     public @Nonnull ContainerSlot getSlot(int slot) {
