@@ -23,6 +23,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -47,9 +48,16 @@ public class ProjectedLevelState {
         this.blockChangesHash = blockChanges.hashCode();
     }
 
-    public ProjectedLevelState withChange(Vector3i position, BlockStateMeta blockStateMeta) {
+    public ProjectedLevelState withChangeToSolidBlock(Vector3i position) {
         var blockChanges = new Object2ObjectArrayMap<>(this.blockChanges);
-        blockChanges.put(position, blockStateMeta);
+        blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
+
+        return new ProjectedLevelState(levelState, blockChanges, blockChanges.hashCode());
+    }
+
+    public ProjectedLevelState withChangeToAir(Vector3i position) {
+        var blockChanges = new Object2ObjectArrayMap<>(this.blockChanges);
+        blockChanges.put(position, BlockStateMeta.AIR_BLOCK_STATE);
 
         return new ProjectedLevelState(levelState, blockChanges, blockChanges.hashCode());
     }

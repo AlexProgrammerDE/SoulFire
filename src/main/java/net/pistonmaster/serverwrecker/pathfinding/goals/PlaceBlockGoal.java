@@ -27,6 +27,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
+// TODO: Extract into having more fine behaviour control
 public record PlaceBlockGoal(Vector3i goal, Vector3d goal3d, BlockType blockType) implements GoalScorer {
     public PlaceBlockGoal(int x, int y, int z, BlockType blockType) {
         this(Vector3d.from(x, y, z), blockType);

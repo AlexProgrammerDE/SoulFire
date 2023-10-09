@@ -31,7 +31,6 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.util.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -48,6 +47,13 @@ public class Costs {
     // We don't want a bot that tries to break blocks instead of walking around them
     public static final double BREAK_BLOCK_ADDITION = 10;
     public static final double PLACE_BLOCK = 10;
+    /**
+     * For performance reasons, we do not want to calculate new costs for every possible block placed.
+     * This is the state every placed block on the graph has.
+     * This allows the inventory to just store the number of blocks and tools instead of the actual items.
+     * Although this decreases the result "quality" a bit, it is a good tradeoff for performance.
+     */
+    public static final BlockStateMeta SOLID_PLACED_BLOCK_STATE = BlockStateMeta.forDefaultBlockType(BlockType.STONE);
 
     private Costs() {
     }
@@ -69,10 +75,9 @@ public class Costs {
         SWItemStack bestItem = null;
         var correctToolUsed = false;
         var seenNull = false;
-        var seenStacks = new HashSet<SWItemStack>();
-        for (var slot : inventory.getStorage()) {
+        for (var slot : inventory.getToolAndNull()) {
             // Only check one time for null
-            if (slot.item() == null) {
+            if (slot == null) {
                 if (seenNull) {
                     continue;
                 }
@@ -80,17 +85,10 @@ public class Costs {
                 seenNull = true;
             }
 
-            // Only check a stack one time
-            if (seenStacks.contains(slot.item())) {
-                continue;
-            }
-
-            seenStacks.add(slot.item());
-
-            var miningTicks = getRequiredMiningTicks(tagsState, null, true, slot.item(), blockType);
+            var miningTicks = getRequiredMiningTicks(tagsState, null, true, slot, blockType);
             if (miningTicks.ticks() < lowestMiningTicks) {
                 lowestMiningTicks = miningTicks.ticks();
-                bestItem = slot.item();
+                bestItem = slot;
                 correctToolUsed = miningTicks.willDrop();
             }
         }

@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.util;
 
 import net.pistonmaster.serverwrecker.data.BlockItems;
 import net.pistonmaster.serverwrecker.data.ItemType;
+import net.pistonmaster.serverwrecker.data.TierType;
 
 public class ItemTypeHelper {
     private ItemTypeHelper() {
@@ -28,5 +29,9 @@ public class ItemTypeHelper {
 
     public static boolean isFullBlockItem(ItemType type) {
         return BlockItems.getBlockType(type).isPresent();
+    }
+
+    public static boolean isTool(ItemType type) {
+        return TierType.getTier(type).isPresent() || type == ItemType.SHEARS;
     }
 }

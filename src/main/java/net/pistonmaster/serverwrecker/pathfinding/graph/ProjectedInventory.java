@@ -19,14 +19,14 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.data.ItemType;
-import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
+import net.pistonmaster.serverwrecker.util.ItemTypeHelper;
+
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * An immutable representation of a player inventory.
@@ -35,59 +35,59 @@ import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
  */
 @RequiredArgsConstructor
 public class ProjectedInventory {
-    private final PlayerInventoryContainer playerInventory;
-    private final Int2ObjectMap<ContainerSlot> slotChanges;
-    private final int slotChangesHash;
+    private final int usableBlockItems;
+    private final Set<SWItemStack> usableTools;
+    private final int changeHash;
 
     public ProjectedInventory(PlayerInventoryContainer playerInventory) {
-        this.playerInventory = playerInventory;
-        this.slotChanges = Int2ObjectMaps.emptyMap();
-        this.slotChangesHash = slotChanges.hashCode();
-    }
-
-    public ProjectedInventory withChange(int slot, SWItemStack itemStack) {
-        var slotChanges = new Int2ObjectArrayMap<>(this.slotChanges);
-        slotChanges.put(slot, new ContainerSlot(slot, itemStack));
-
-        return new ProjectedInventory(playerInventory, slotChanges, slotChanges.hashCode());
-    }
-
-    public ProjectedInventory withItemPickup(ItemType itemType) {
-        var slotChanges = new Int2ObjectArrayMap<>(this.slotChanges);
-
-        var found = false;
-        ContainerSlot firstEmpty = null;
-        for (var slot : getStorage()) {
-            var item = slot.item();
-            if (item == null) {
-                if (firstEmpty == null) {
-                    firstEmpty = slot;
-                }
-
+        var blockItems = 0;
+        var usableTools = new HashSet<SWItemStack>();
+        for (var slot : playerInventory.getStorage()) {
+            if (slot.item() == null) {
                 continue;
             }
 
-            var amount = item.getAmount() + 1;
-            if (item.getType() == itemType && amount <= item.getType().stackSize()) {
-                slotChanges.put(slot.slot(), new ContainerSlot(slot.slot(), item.withAmount(amount)));
-                found = true;
-                break;
+            if (ItemTypeHelper.isFullBlockItem(slot.item().getType())) {
+                blockItems += slot.item().getAmount();
+            } else if (ItemTypeHelper.isTool(slot.item().getType())) {
+                usableTools.add(slot.item());
             }
         }
 
-        if (!found && firstEmpty != null) {
-            slotChanges.put(firstEmpty.slot(), new ContainerSlot(firstEmpty.slot(), SWItemStack.forType(itemType)));
+        this.usableBlockItems = blockItems;
+        if (usableTools.isEmpty()) {
+            this.usableTools = Set.of();
+        } else {
+            this.usableTools = usableTools;
         }
 
-        return new ProjectedInventory(playerInventory, slotChanges, slotChanges.hashCode());
+        this.changeHash = Objects.hash(usableBlockItems, usableTools);
     }
 
-    public ContainerSlot[] getStorage() {
-        var storage = playerInventory.getStorage();
+    public boolean hasBlockToPlace() {
+        return usableBlockItems > 0;
+    }
 
-        slotChanges.forEach((slot, item) -> storage[slot] = item);
+    public ProjectedInventory withOneLessBlock() {
+        return new ProjectedInventory(usableBlockItems - 1, usableTools, changeHash);
+    }
 
-        return storage;
+    public ProjectedInventory withOneMoreBlock() {
+        return new ProjectedInventory(usableBlockItems + 1, usableTools, changeHash);
+    }
+
+    public SWItemStack[] getToolAndNull() {
+        var array = new SWItemStack[usableTools.size() + 1];
+
+        var i = 0;
+        for (var tool : usableTools) {
+            array[i] = tool;
+            i++;
+        }
+
+        array[i] = null;
+
+        return array;
     }
 
     @Override
@@ -95,11 +95,11 @@ public class ProjectedInventory {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         var that = (ProjectedInventory) o;
-        return slotChangesHash == that.slotChangesHash;
+        return changeHash == that.changeHash;
     }
 
     @Override
     public int hashCode() {
-        return slotChangesHash;
+        return changeHash;
     }
 }

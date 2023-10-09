@@ -24,7 +24,6 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.data.BlockItems;
-import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.execution.BlockBreakAction;
@@ -181,11 +180,11 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
 
         var costs = blockMiningCosts.get();
 
-        level.set(resolvedLevel.withChange(block, new BlockStateMeta(BlockType.AIR)));
+        level.set(resolvedLevel.withChangeToAir(block));
 
         if (costs.willDrop()) {
-            var itemDrop = BlockItems.getItemType(blockStateMeta.blockType());
-            itemDrop.ifPresent(itemType -> inventory.set(resolvedInventory.withItemPickup(itemType)));
+            BlockItems.getItemType(blockStateMeta.blockType())
+                    .ifPresent(itemType -> inventory.set(resolvedInventory.withOneMoreBlock()));
         }
 
         // Add cost of breaking block
@@ -236,29 +235,14 @@ public record PlayerMovement(TagsState tagsState, BotEntityState previousEntityS
                 return Optional.empty();
             }
 
-            for (var slot : resolvedInventory.getStorage()) {
-                if (slot.item() == null) {
-                    continue;
-                }
+            if (resolvedInventory.hasBlockToPlace()) {
+                level.set(resolvedLevel.withChangeToSolidBlock(block));
+                inventory.set(resolvedInventory.withOneLessBlock());
 
-                var itemType = slot.item().getType();
-                var blockItem = BlockItems.getBlockType(itemType);
-
-                // We found an item we can place, so it's a valid action
-                if (blockItem.isPresent()) {
-                    level.set(resolvedLevel.withChange(block, new BlockStateMeta(blockItem.get())));
-
-                    if (slot.item().getAmount() > 1) {
-                        inventory.set(resolvedInventory.withChange(slot.slot(), slot.item().withAmount(slot.item().getAmount() - 1)));
-                    } else {
-                        inventory.set(resolvedInventory.withChange(slot.slot(), null));
-                    }
-
-                    return Optional.of(new ActionCosts(
-                            Costs.PLACE_BLOCK,
-                            ObjectLists.singleton(new BlockPlaceAction(block, blockPlaceInfo.get()))
-                    ));
-                }
+                return Optional.of(new ActionCosts(
+                        Costs.PLACE_BLOCK,
+                        ObjectLists.singleton(new BlockPlaceAction(block, blockPlaceInfo.get()))
+                ));
             }
 
             // Found no item to place, fail

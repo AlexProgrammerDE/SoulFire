@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -64,14 +63,17 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
 
     public void init() {
         config = new AbstractViaConfig(dataFolder.resolve("config.yml").toFile()) {
-            // Based on Sponge ViaVersion
-            private static final List<String> UNSUPPORTED = Arrays.asList("anti-xray-patch", "bungee-ping-interval",
-                    "bungee-ping-save", "bungee-servers", "quick-move-action-fix", "nms-player-ticking",
+            private final List<String> UNSUPPORTED = List.of(
+                    "checkforupdates", "bungee-ping-interval", "bungee-ping-save", "bungee-servers",
                     "velocity-ping-interval", "velocity-ping-save", "velocity-servers",
-                    "blockconnection-method", "change-1_9-hitbox", "change-1_14-hitbox");
+                    "block-protocols", "block-disconnect-msg", "reload-disconnect-msg", "max-pps",
+                    "max-pps-kick-msg", "tracking-period", "tracking-warning-pps", "tracking-max-warnings", "tracking-max-kick-msg",
+                    "blockconnection-method", "quick-move-action-fix", "item-cache", "change-1_9-hitbox", "change-1_14-hitbox",
+                    "use-new-deathmessages", "nms-player-ticking"
+            );
 
             {
-                reloadConfig();
+                this.reload();
             }
 
             @Override
@@ -81,6 +83,26 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
             @Override
             public List<String> getUnsupportedOptions() {
                 return UNSUPPORTED;
+            }
+
+            @Override
+            public boolean isCheckForUpdates() {
+                return false;
+            }
+
+            @Override
+            public boolean isItemCache() {
+                return false;
+            }
+
+            @Override
+            public boolean isShowNewDeathMessages() {
+                return false;
+            }
+
+            @Override
+            public boolean isNMSPlayerTicking() {
+                return false;
             }
         };
     }

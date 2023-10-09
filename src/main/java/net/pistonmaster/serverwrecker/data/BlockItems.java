@@ -30,6 +30,7 @@ public class BlockItems {
             for (var blockType : BlockType.VALUES) {
                 var blockShapeTypes = blockType.blockShapeTypes();
 
+                // Let's not use bedrock as a building block
                 if (blockType.diggable()
                         && blockShapeTypes.size() == 1
                         && itemType.name().equals(blockType.name())

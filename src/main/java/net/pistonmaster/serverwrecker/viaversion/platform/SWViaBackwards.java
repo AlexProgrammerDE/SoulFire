@@ -39,7 +39,7 @@ public class SWViaBackwards implements ViaBackwardsPlatform {
     }
 
     public void init() {
-        init(getDataFolder());
+        init(dataFolder.resolve("config.yml").toFile());
     }
 
     @Override

@@ -22,8 +22,10 @@ package net.pistonmaster.serverwrecker.pathfinding.execution;
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import net.pistonmaster.serverwrecker.data.BlockItems;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
+import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import net.pistonmaster.serverwrecker.util.ItemTypeHelper;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
@@ -59,6 +61,26 @@ public class BlockPlaceAction implements WorldAction {
         if (!putOnHotbar) {
             var inventoryManager = sessionDataManager.getInventoryManager();
             var playerInventory = inventoryManager.getPlayerInventory();
+
+            SWItemStack leastHardItem = null;
+            var leastHardness = 0F;
+            for (var slot : playerInventory.getStorage()) {
+                if (slot.item() == null) {
+                    continue;
+                }
+
+                var item = slot.item();
+                var blockType = BlockItems.getBlockType(item.getType());
+                if (blockType.isEmpty()) {
+                    continue;
+                }
+
+                if (leastHardItem == null || blockType.get().hardness() < leastHardness) {
+                    leastHardItem = item;
+                    leastHardness = blockType.get().hardness();
+                }
+            }
+
             var heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
             if (heldSlot.item() != null) {
                 var item = heldSlot.item();
