@@ -40,6 +40,7 @@ public final class PlayerMovement implements GraphAction {
     private final MovementModifier modifier;
     private final AtomicDouble cost;
     private final Vector3i targetBlock;
+    private final boolean diagonal;
     @Setter
     @Getter
     private boolean isImpossible = false;
@@ -49,35 +50,39 @@ public final class PlayerMovement implements GraphAction {
         this.direction = direction;
         this.side = side;
         this.modifier = modifier;
+        this.diagonal = direction.isDiagonal();
 
-        this.cost = new AtomicDouble(switch (direction) {
-            case NORTH, SOUTH, EAST, WEST -> Costs.STRAIGHT;
-            case NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST -> Costs.DIAGONAL;
-        } + switch (modifier) { // Add additional "discouraged" costs to prevent the bot from doing too much parkour
-            case NORMAL -> 0;
-            case FALL_1 -> Costs.FALL_1;
-            case FALL_2 -> Costs.FALL_2;
-            case FALL_3 -> Costs.FALL_3;
-            case JUMP -> Costs.JUMP;
-        });
+        this.cost = new AtomicDouble((diagonal ? Costs.DIAGONAL : Costs.STRAIGHT) +
+                switch (modifier) { // Add additional "discouraged" costs to prevent the bot from doing too much parkour
+                    case NORMAL -> 0;
+                    case FALL_1 -> Costs.FALL_1;
+                    case FALL_2 -> Costs.FALL_2;
+                    case FALL_3 -> Costs.FALL_3;
+                    case JUMP -> Costs.JUMP;
+                });
 
         this.targetBlock = modifier.offset(direction.offset(previousEntityState.positionBlock()));
     }
 
     public List<Vector3i> listRequiredFreeBlocks() {
-        List<Vector3i> requiredFreeBlocks = new ObjectArrayList<>();
+        List<Vector3i> requiredFreeBlocks = new ObjectArrayList<>(2 +
+                (diagonal ? 2 : 0) +
+                switch (modifier) {
+                    case NORMAL -> 0;
+                    case FALL_1 -> 1;
+                    case FALL_2, JUMP -> 2;
+                    case FALL_3 -> 3;
+                });
         var fromPosInt = previousEntityState.positionBlock();
 
-        if (modifier == MovementModifier.JUMP) {
-            // Make head block free (maybe head block is a slab)
-            requiredFreeBlocks.add(fromPosInt.add(0, 1, 0));
-
-            // Make block above head block free
-            requiredFreeBlocks.add(fromPosInt.add(0, 2, 0));
+        var targetEdge = direction.offset(fromPosInt);
+        for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
+            // Apply jump shift to target diagonal and offset for body part
+            requiredFreeBlocks.add(bodyOffset.offset(modifier.offsetIfJump(targetEdge)));
         }
 
         // Add the blocks that are required to be free for diagonal movement
-        if (direction.isDiagonal()) {
+        if (diagonal) {
             var corner = getCorner(fromPosInt);
 
             for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
@@ -86,14 +91,15 @@ public final class PlayerMovement implements GraphAction {
             }
         }
 
-        var targetEdge = direction.offset(fromPosInt);
-        for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
-            // Apply jump shift to target diagonal and offset for body part
-            requiredFreeBlocks.add(bodyOffset.offset(modifier.offsetIfJump(targetEdge)));
-        }
-
         // Require free blocks to fall into the target position
         switch (modifier) {
+            case JUMP -> {
+                // Make head block free (maybe head block is a slab)
+                requiredFreeBlocks.add(fromPosInt.add(0, 1, 0));
+
+                // Make block above head block free
+                requiredFreeBlocks.add(fromPosInt.add(0, 2, 0));
+            }
             case FALL_1 -> {
                 requiredFreeBlocks.add(MovementModifier.FALL_1.offset(targetEdge));
             }

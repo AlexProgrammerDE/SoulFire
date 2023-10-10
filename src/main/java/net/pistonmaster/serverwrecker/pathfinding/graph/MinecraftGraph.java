@@ -19,13 +19,15 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.*;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
+import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.List;
@@ -40,7 +42,7 @@ public record MinecraftGraph(TagsState tagsState) {
         var levelState = node.levelState();
 
         var movements = new ObjectArrayList<PlayerMovement>(MAX_MOVEMENTS);
-        var blockSubscribers = new Object2ObjectOpenHashMap<Vector3i, List<BlockSubscription>>(MAX_BLOCKS);
+        var blockSubscribers = new Int2ObjectArrayMap<List<BlockSubscription>>(MAX_BLOCKS);
         for (var direction : MovementDirection.VALUES) {
             var diagonal = direction.isDiagonal();
             for (var modifier : MovementModifier.VALUES) {
@@ -54,15 +56,8 @@ public record MinecraftGraph(TagsState tagsState) {
             }
         }
 
-        blockSubscribers.object2ObjectEntrySet().forEach(entry -> {
-            var subscribers = entry.getValue();
-            var nonePossible = subscribers.stream().allMatch(s -> s.movement().isImpossible());
-            if (nonePossible) {
-                return;
-            }
-
-            var blockState = levelState.getBlockStateAt(entry.getKey())
-                    .orElseThrow(OutOfLevelException::new);
+        blockSubscribers.values().forEach(subscribers -> {
+            BlockStateMeta blockState = null;
 
             // We cache only this, but not solid because solid will only occur a single time
             var calculatedFree = false;
@@ -73,11 +68,17 @@ public record MinecraftGraph(TagsState tagsState) {
                     continue;
                 }
 
+                if (blockState == null) {
+                    blockState = levelState.getBlockStateAt(subscriber.block())
+                            .orElseThrow(OutOfLevelException::new);
+                }
+
                 switch (subscriber.type) {
                     case FREE -> {
                         if (!calculatedFree) {
                             // We can walk through blocks like air or grass
-                            isFree = blockState.blockShapeType().hasNoCollisions();
+                            isFree = blockState.blockShapeType().hasNoCollisions()
+                                    && !BlockTypeHelper.isFluid(blockState.blockType());
                             calculatedFree = true;
                         }
 
@@ -110,18 +111,19 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     private void registerMovement(ObjectArrayList<PlayerMovement> movements,
-                                  Object2ObjectMap<Vector3i, List<BlockSubscription>> blockSubscribers,
+                                  Int2ObjectMap<List<BlockSubscription>> blockSubscribers,
                                   PlayerMovement movement) {
         movements.add(movement);
 
-        var freeSubscription = new BlockSubscription(movement, SubscriptionType.FREE);
         for (var block : movement.listRequiredFreeBlocks()) {
-            blockSubscribers.computeIfAbsent(block, k -> new ObjectArrayList<>(MAX_SUBSCRIBERS))
+            var freeSubscription = new BlockSubscription(block, movement, SubscriptionType.FREE);
+            blockSubscribers.computeIfAbsent(block.hashCode(), k -> new ObjectArrayList<>(MAX_SUBSCRIBERS))
                     .add(freeSubscription);
         }
 
-        var solidSubscription = new BlockSubscription(movement, SubscriptionType.SOLID);
-        blockSubscribers.computeIfAbsent(movement.requiredSolidBlock(), k -> new ObjectArrayList<>(MAX_SUBSCRIBERS))
+        var target = movement.requiredSolidBlock();
+        var solidSubscription = new BlockSubscription(target, movement, SubscriptionType.SOLID);
+        blockSubscribers.computeIfAbsent(target.hashCode(), k -> new ObjectArrayList<>(MAX_SUBSCRIBERS))
                 .add(solidSubscription);
     }
 
@@ -130,6 +132,6 @@ public record MinecraftGraph(TagsState tagsState) {
         SOLID
     }
 
-    record BlockSubscription(PlayerMovement movement, SubscriptionType type) {
+    record BlockSubscription(Vector3i block, PlayerMovement movement, SubscriptionType type) {
     }
 }
