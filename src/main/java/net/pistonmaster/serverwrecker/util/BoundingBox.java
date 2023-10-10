@@ -32,7 +32,7 @@ import java.util.Optional;
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor
-public class BoundingBox implements Cloneable {
+public class BoundingBox {
     private static final double epsilon = 0.0F;
 
     public double minX;
@@ -85,21 +85,6 @@ public class BoundingBox implements Cloneable {
 
         // Create new bounding box
         return new BoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
-    }
-
-    /**
-     * Expand the bounding box on both sides.
-     * The center is always fixed when using grow.
-     *
-     * @param x Amount to expand the minX and maxX
-     * @param y Amount to expand the minY and maxY
-     * @param z Amount to expand the minZ and maxZ
-     * @return The expanded bounding box
-     */
-    public BoundingBox grow(double x, double y, double z) {
-        return new BoundingBox(this.minX - x, this.minY - y,
-                this.minZ - z, this.maxX + x,
-                this.maxY + y, this.maxZ + z);
     }
 
     /**
@@ -294,12 +279,7 @@ public class BoundingBox implements Cloneable {
         return Optional.of(origin.add(direction.mul(tMin)));
     }
 
-    @Override
-    public BoundingBox clone() {
-        try {
-            return (BoundingBox) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
+    public BoundingBox copy() {
+        return new BoundingBox(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
     }
 }

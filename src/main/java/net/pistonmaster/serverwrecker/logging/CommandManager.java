@@ -267,6 +267,50 @@ public class CommandManager {
                     }
                     return 1;
                 }));
+        dispatcher.register(literal("jump")
+                .executes(c -> {
+                    var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+
+                    if (attackManager == null) {
+                        LOGGER.warn("No attack found!");
+                        return 2;
+                    }
+
+                    if (attackManager.getBotConnections().isEmpty()) {
+                        LOGGER.info("No bots connected!");
+                        return 3;
+                    }
+
+                    for (var bot : attackManager.getBotConnections()) {
+                        var sessionDataManager = bot.sessionDataManager();
+                        var botMovementManager = sessionDataManager.getBotMovementManager();
+
+                        botMovementManager.getControlState().setJumping(true);
+                    }
+                    return 1;
+                }));
+        dispatcher.register(literal("reset")
+                .executes(c -> {
+                    var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+
+                    if (attackManager == null) {
+                        LOGGER.warn("No attack found!");
+                        return 2;
+                    }
+
+                    if (attackManager.getBotConnections().isEmpty()) {
+                        LOGGER.info("No bots connected!");
+                        return 3;
+                    }
+
+                    for (var bot : attackManager.getBotConnections()) {
+                        var sessionDataManager = bot.sessionDataManager();
+                        var botMovementManager = sessionDataManager.getBotMovementManager();
+
+                        botMovementManager.getControlState().resetAll();
+                    }
+                    return 1;
+                }));
         dispatcher.register(literal("stop-path")
                 .executes(c -> {
                     var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);

@@ -152,6 +152,6 @@ public final class PlayerMovement implements GraphAction {
                 targetBlock,
                 previousEntityState.levelState(),
                 previousEntityState.inventory()
-        ), cost.get(), List.of(new MovementAction(targetDoublePosition, side != null)));
+        ), cost.get(), List.of(new MovementAction(targetDoublePosition, diagonal)));
     }
 }

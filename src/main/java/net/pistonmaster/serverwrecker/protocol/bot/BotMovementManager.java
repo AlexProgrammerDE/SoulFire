@@ -36,7 +36,6 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -102,7 +101,7 @@ public final class BotMovementManager {
 
     public void updateBoundingBox() {
         var w = getBoundingBoxWidth() / 2;
-        var h = getBoundingBoxHeight() / 2;
+        var h = getBoundingBoxHeight();
         this.boundingBox = new BoundingBox(x - w, y, z - w, x + w, y + h, z + w);
     }
 
@@ -526,8 +525,11 @@ public final class BotMovementManager {
 
         // Check if walking up solves the collisions, and thus we'll be able to walk upstairs
         if (this.onGround && !collisionBoxes.isEmpty()) {
-            double highestCollision = collisionBoxes.stream().map(b -> b.maxY).max(Comparator.naturalOrder()).orElse(0.0D);
-            var highestDeltaY = highestCollision - this.boundingBox.minY;
+            var highestCollision = collisionBoxes.stream()
+                    .mapToDouble(b -> b.maxY)
+                    .max();
+
+            var highestDeltaY = highestCollision.getAsDouble() - this.boundingBox.minY;
             var stepHeight = STEP_HEIGHT;
             if (highestDeltaY > 0.0D && highestDeltaY < stepHeight) {
                 stepHeight = highestDeltaY;
@@ -577,31 +579,34 @@ public final class BotMovementManager {
     }
 
     private BestXZMoveData getBestMove(List<BoundingBox> collisionBoxes, BoundingBox boundingBox, double dx, double dz) {
-        var cornerCheck = boundingBox.clone();
         var targetXCollision = dx;
         var targetZCollision = dz;
+        {
+            var cornerCheck = boundingBox.copy();
 
-        for (var aABB : collisionBoxes) {
-            targetXCollision = aABB.clipXCollide(cornerCheck, targetXCollision);
+            for (var aABB : collisionBoxes) {
+                targetXCollision = aABB.clipXCollide(cornerCheck, targetXCollision);
+            }
+            cornerCheck.move(targetXCollision, 0.0F, 0.0F);
+
+            for (var aABB : collisionBoxes) {
+                targetZCollision = aABB.clipZCollide(cornerCheck, targetZCollision);
+            }
         }
-        cornerCheck.move(targetXCollision, 0.0F, 0.0F);
 
-        for (var aABB : collisionBoxes) {
-            targetZCollision = aABB.clipZCollide(cornerCheck, targetZCollision);
-        }
-
-        var cornerCheck2 = boundingBox.clone();
         var targetZCollision2 = dz;
         var targetXCollision2 = dx;
+        {
+            var cornerCheck2 = boundingBox.copy();
+            for (var aABB : collisionBoxes) {
+                targetZCollision2 = aABB.clipZCollide(cornerCheck2, targetZCollision2);
+            }
 
-        for (var aABB : collisionBoxes) {
-            targetZCollision2 = aABB.clipZCollide(cornerCheck2, targetZCollision2);
-        }
+            cornerCheck2.move(0.0F, 0.0F, targetZCollision2);
 
-        cornerCheck2.move(0.0F, 0.0F, targetZCollision2);
-
-        for (var aABB : collisionBoxes) {
-            targetXCollision2 = aABB.clipXCollide(cornerCheck2, targetXCollision2);
+            for (var aABB : collisionBoxes) {
+                targetXCollision2 = aABB.clipXCollide(cornerCheck2, targetXCollision2);
+            }
         }
 
         // We did this to check if you can get further with moving first "X and then Z" or first "Z and then X"

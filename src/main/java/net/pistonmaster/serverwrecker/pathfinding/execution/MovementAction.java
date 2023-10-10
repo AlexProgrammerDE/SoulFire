@@ -97,7 +97,6 @@ public class MovementAction implements WorldAction {
             noJumpTicks++;
             return false;
         } else {
-            noJumpTicks = 0;
             return true;
         }
     }
