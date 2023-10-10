@@ -19,7 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import com.google.common.collect.MultimapBuilder;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.*;
@@ -30,88 +32,97 @@ import java.util.List;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {
-    public List<GraphInstructions> getActions(BotEntityState node) {
+    private static final int MAX_MOVEMENTS = 60;
+    private static final int MAX_BLOCKS = 58;
+    private static final int MAX_SUBSCRIBERS = 15;
+
+    public Iterable<GraphInstructions> getActions(BotEntityState node) {
         var levelState = node.levelState();
 
-        var blockSubscribers = MultimapBuilder.hashKeys().arrayListValues().<Vector3i, BlockSubscription>build();
+        var movements = new ObjectArrayList<PlayerMovement>(MAX_MOVEMENTS);
+        var blockSubscribers = new Object2ObjectOpenHashMap<Vector3i, List<BlockSubscription>>(MAX_BLOCKS);
         for (var direction : MovementDirection.VALUES) {
             var diagonal = direction.isDiagonal();
             for (var modifier : MovementModifier.VALUES) {
                 if (diagonal) {
                     for (var side : MovementSide.VALUES) {
-                        var movement = new PlayerMovement(node, direction, side, modifier);
-                        var freeSubscription = new BlockSubscription(movement, SubscriptionType.FREE);
-                        for (var block : movement.listRequiredFreeBlocks()) {
-                            blockSubscribers.put(block, freeSubscription);
-                        }
-
-                        blockSubscribers.put(movement.requiredSolidBlock(), new BlockSubscription(movement, SubscriptionType.SOLID));
+                        registerMovement(movements, blockSubscribers, new PlayerMovement(node, direction, side, modifier));
                     }
                 } else {
-                    var movement = new PlayerMovement(node, direction, null, modifier);
-                    var freeSubscription = new BlockSubscription(movement, SubscriptionType.FREE);
-                    for (var block : movement.listRequiredFreeBlocks()) {
-                        blockSubscribers.put(block, freeSubscription);
-                    }
-
-                    blockSubscribers.put(movement.requiredSolidBlock(), new BlockSubscription(movement, SubscriptionType.SOLID));
+                    registerMovement(movements, blockSubscribers, new PlayerMovement(node, direction, null, modifier));
                 }
             }
         }
 
-        blockSubscribers.asMap().entrySet().parallelStream()
-                .forEach(entry -> {
-                    var blockState = levelState.getBlockStateAt(entry.getKey())
-                            .orElseThrow(OutOfLevelException::new);
+        blockSubscribers.object2ObjectEntrySet().forEach(entry -> {
+            var subscribers = entry.getValue();
+            var nonePossible = subscribers.stream().allMatch(s -> s.movement().isImpossible());
+            if (nonePossible) {
+                return;
+            }
 
-                    // We cache only this, but not solid because solid will only occur a single time
-                    var calculatedFree = false;
-                    var isFree = false;
-                    for (var subscriber : entry.getValue()) {
-                        var movement = subscriber.movement();
-                        if (movement.isImpossible()) {
+            var blockState = levelState.getBlockStateAt(entry.getKey())
+                    .orElseThrow(OutOfLevelException::new);
+
+            // We cache only this, but not solid because solid will only occur a single time
+            var calculatedFree = false;
+            var isFree = false;
+            for (var subscriber : subscribers) {
+                var movement = subscriber.movement();
+                if (movement.isImpossible()) {
+                    continue;
+                }
+
+                switch (subscriber.type) {
+                    case FREE -> {
+                        if (!calculatedFree) {
+                            // We can walk through blocks like air or grass
+                            isFree = blockState.blockShapeType().hasNoCollisions();
+                            calculatedFree = true;
+                        }
+
+                        if (!isFree) {
+                            movement.setImpossible(true);
+                        }
+                    }
+                    case SOLID -> {
+                        var blockShapeType = blockState.blockShapeType();
+
+                        // Block with a current state that has no collision (Like grass, open fence)
+                        if (blockShapeType.hasNoCollisions()) {
+                            movement.setImpossible(true);
                             continue;
                         }
 
-                        switch (subscriber.type) {
-                            case FREE -> {
-                                if (!calculatedFree) {
-                                    // We can walk through blocks like air or grass
-                                    isFree = blockState.blockShapeType().hasNoCollisions();
-                                    calculatedFree = true;
-                                }
-
-                                if (!isFree) {
-                                    movement.setImpossible(true);
-                                }
-                            }
-                            case SOLID -> {
-                                var blockShapeType = blockState.blockShapeType();
-
-                                // Block with a current state that has no collision (Like grass, open fence)
-                                if (blockShapeType.hasNoCollisions()) {
-                                    movement.setImpossible(true);
-                                    continue;
-                                }
-
-                                // Prevent walking over cake, slabs, fences, etc.
-                                if (!blockShapeType.isFullBlock()) {
-                                    // Could destroy and place block here, but that's too much work
-                                    movement.setImpossible(true);
-                                }
-                            }
+                        // Prevent walking over cake, slabs, fences, etc.
+                        if (!blockShapeType.isFullBlock()) {
+                            // Could destroy and place block here, but that's too much work
+                            movement.setImpossible(true);
                         }
                     }
-                });
+                }
+            }
+        });
 
-        var targetResults = blockSubscribers.values().stream()
-                .map(BlockSubscription::movement)
-                .map(PlayerMovement::getInstructions)
-                .toList();
+        return movements.stream()
+                .filter(m -> !m.isImpossible())
+                .map(PlayerMovement::getInstructions)::iterator;
+    }
 
-        log.debug("Found possible actions for {}", node.position());
+    private void registerMovement(ObjectArrayList<PlayerMovement> movements,
+                                  Object2ObjectMap<Vector3i, List<BlockSubscription>> blockSubscribers,
+                                  PlayerMovement movement) {
+        movements.add(movement);
 
-        return targetResults;
+        var freeSubscription = new BlockSubscription(movement, SubscriptionType.FREE);
+        for (var block : movement.listRequiredFreeBlocks()) {
+            blockSubscribers.computeIfAbsent(block, k -> new ObjectArrayList<>(MAX_SUBSCRIBERS))
+                    .add(freeSubscription);
+        }
+
+        var solidSubscription = new BlockSubscription(movement, SubscriptionType.SOLID);
+        blockSubscribers.computeIfAbsent(movement.requiredSolidBlock(), k -> new ObjectArrayList<>(MAX_SUBSCRIBERS))
+                .add(solidSubscription);
     }
 
     enum SubscriptionType {

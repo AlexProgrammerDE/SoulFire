@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
+import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.List;
@@ -38,6 +39,7 @@ public final class PlayerMovement implements GraphAction {
     private final MovementSide side;
     private final MovementModifier modifier;
     private final AtomicDouble cost;
+    private final Vector3i targetBlock;
     @Setter
     @Getter
     private boolean isImpossible = false;
@@ -58,6 +60,8 @@ public final class PlayerMovement implements GraphAction {
             case FALL_3 -> Costs.FALL_3;
             case JUMP -> Costs.JUMP;
         });
+
+        this.targetBlock = modifier.offset(direction.offset(previousEntityState.positionBlock()));
     }
 
     public List<Vector3i> listRequiredFreeBlocks() {
@@ -130,19 +134,16 @@ public final class PlayerMovement implements GraphAction {
     }
 
     public Vector3i requiredSolidBlock() {
-        return modifier.offset(direction.offset(previousEntityState.positionBlock()));
+        // Floor block
+        return targetBlock.sub(0, 1, 0);
     }
 
     @Override
     public GraphInstructions getInstructions() {
-        if (isImpossible) {
-            return GraphInstructions.IMPOSSIBLE;
-        }
-
-        // With double
-        var targetDoublePosition = modifier.offset(direction.offset(previousEntityState.position()));
+        var targetDoublePosition = VectorHelper.middleOfBlockNormalize(targetBlock.toDouble());
         return new GraphInstructions(new BotEntityState(
                 targetDoublePosition,
+                targetBlock,
                 previousEntityState.levelState(),
                 previousEntityState.inventory()
         ), cost.get(), List.of(new MovementAction(targetDoublePosition, side != null)));

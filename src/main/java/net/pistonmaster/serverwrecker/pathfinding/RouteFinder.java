@@ -85,7 +85,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 return getActions(current);
             }
 
-            List<GraphInstructions> instructionsList;
+            Iterable<GraphInstructions> instructionsList;
             try {
                 instructionsList = graph.getActions(current.getEntityState());
             } catch (OutOfLevelException e) {
@@ -105,10 +105,6 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             }
 
             for (var instructions : instructionsList) {
-                if (instructions.isImpossible()) {
-                    continue;
-                }
-
                 var actionCost = instructions.actionCost();
                 var actionTargetState = instructions.targetState();
                 var worldActions = instructions.actions();

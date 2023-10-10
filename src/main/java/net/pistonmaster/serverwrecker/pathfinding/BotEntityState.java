@@ -33,6 +33,7 @@ import java.util.Objects;
  *
  * @param position   The position of the bot.
  *                   This is always the middle of the block.
+ * @param positionBlock The position of the bot in block coordinates.
  * @param levelState The level state of the world the bot is in.
  * @param inventory  The inventory state of the bot.
  * @param precalculatedHash The precalculated hash of the object.
@@ -40,12 +41,16 @@ import java.util.Objects;
 public record BotEntityState(Vector3d position, Vector3i positionBlock, ProjectedLevelState levelState,
                              ProjectedInventory inventory,
                              int precalculatedHash) {
-    public BotEntityState {
-        position = VectorHelper.middleOfBlockNormalize(position);
+    public BotEntityState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory) {
+        this(position, position.toInt(), levelState, inventory);
     }
 
-    public BotEntityState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory) {
-        this(position, position.toInt(), levelState, inventory, Objects.hash(position, levelState, inventory));
+    public BotEntityState(Vector3d position, Vector3i positionBlock, ProjectedLevelState levelState, ProjectedInventory inventory) {
+        this(position, positionBlock, levelState, inventory, Objects.hash(position, levelState, inventory));
+    }
+
+    public static BotEntityState initialState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory) {
+        return new BotEntityState(VectorHelper.middleOfBlockNormalize(position), levelState, inventory);
     }
 
     @Override

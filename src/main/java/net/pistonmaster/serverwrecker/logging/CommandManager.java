@@ -58,6 +58,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static net.pistonmaster.serverwrecker.logging.BrigadierHelper.argument;
@@ -334,10 +335,10 @@ public class CommandManager {
                 var routeFinder = new RouteFinder(new MinecraftGraph(sessionDataManager.getTagsState()), goalScorer);
 
                 Supplier<List<WorldAction>> findPath = () -> {
-                    var start = new BotEntityState(
+                    var start = BotEntityState.initialState(
                             botMovementManager.getPlayerPos(),
                             new ProjectedLevelState(
-                                    sessionDataManager.getCurrentLevel()
+                                    Objects.requireNonNull(sessionDataManager.getCurrentLevel(), "Level is null!")
                             ),
                             new ProjectedInventory(
                                     sessionDataManager.getInventoryManager().getPlayerInventory()

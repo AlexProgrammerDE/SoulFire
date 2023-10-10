@@ -25,13 +25,7 @@ import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 import java.util.List;
 
 public record GraphInstructions(BotEntityState targetState, double actionCost, List<WorldAction> actions) {
-    public static final GraphInstructions IMPOSSIBLE = new GraphInstructions();
-
     private GraphInstructions() {
         this(null, Double.POSITIVE_INFINITY, null);
-    }
-
-    public boolean isImpossible() {
-        return this == IMPOSSIBLE;
     }
 }
