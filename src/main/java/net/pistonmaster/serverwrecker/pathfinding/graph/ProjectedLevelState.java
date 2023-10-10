@@ -19,9 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
@@ -29,7 +29,6 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkHolder;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -40,31 +39,33 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ProjectedLevelState {
     private final ChunkHolder chunkHolder;
-    private final Object2ObjectMap<Vector3i, BlockStateMeta> blockChanges;
+    private final Int2ObjectMap<BlockStateMeta> blockChanges;
     private final int blockChangesHash;
 
     public ProjectedLevelState(LevelState levelState) {
         this.chunkHolder = levelState.getChunks().immutableCopy();
-        this.blockChanges = Object2ObjectMaps.emptyMap();
+        this.blockChanges = Int2ObjectMaps.emptyMap();
         this.blockChangesHash = blockChanges.hashCode();
     }
 
     public ProjectedLevelState withChangeToSolidBlock(Vector3i position) {
-        var blockChanges = new Object2ObjectArrayMap<>(this.blockChanges);
-        blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
+        var blockChanges = new Int2ObjectArrayMap<BlockStateMeta>(this.blockChanges.size() + 1);
+        blockChanges.putAll(this.blockChanges);
+        blockChanges.put(position.hashCode(), Costs.SOLID_PLACED_BLOCK_STATE);
 
         return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode());
     }
 
     public ProjectedLevelState withChangeToAir(Vector3i position) {
-        var blockChanges = new Object2ObjectArrayMap<>(this.blockChanges);
-        blockChanges.put(position, BlockStateMeta.AIR_BLOCK_STATE);
+        var blockChanges = new Int2ObjectArrayMap<BlockStateMeta>(this.blockChanges.size() + 1);
+        blockChanges.putAll(this.blockChanges);
+        blockChanges.put(position.hashCode(), BlockStateMeta.AIR_BLOCK_STATE);
 
         return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode());
     }
 
     public Optional<BlockStateMeta> getBlockStateAt(Vector3i position) {
-        var blockChange = blockChanges.get(position);
+        var blockChange = blockChanges.get(position.hashCode());
         if (blockChange != null) {
             return Optional.of(blockChange);
         }
@@ -72,26 +73,8 @@ public class ProjectedLevelState {
         return chunkHolder.getBlockStateAt(position);
     }
 
-    public Optional<BlockStateMeta> getCachedBlockStateAt(Map<Vector3i, Optional<BlockStateMeta>> blockCache, Vector3i position) {
-        var blockChange = blockChanges.get(position);
-        if (blockChange != null) {
-            return Optional.of(blockChange);
-        }
-
-        var cache = blockCache.get(position);
-        if (cache != null) {
-            return cache;
-        }
-
-        var blockState = chunkHolder.getBlockStateAt(position);
-
-        blockCache.put(position, blockState);
-
-        return blockState;
-    }
-
     public boolean isChanged(Vector3i position) {
-        return blockChanges.containsKey(position);
+        return blockChanges.containsKey(position.hashCode());
     }
 
     @Override

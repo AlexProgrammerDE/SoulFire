@@ -17,28 +17,21 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.graph;
+package net.pistonmaster.serverwrecker.pathfinding.graph.actions;
 
-import lombok.RequiredArgsConstructor;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
+import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 
-import java.util.function.Function;
+import java.util.List;
 
-@RequiredArgsConstructor
-public enum BodyPart {
-    FEET(v -> v),
-    HEAD(v -> v.add(0, 1, 0));
+public record GraphInstructions(BotEntityState targetState, double actionCost, List<WorldAction> actions) {
+    public static final GraphInstructions IMPOSSIBLE = new GraphInstructions();
 
-    // Iterating over BodyPart.values() is slower than iteration over a static array
-    // Reversed because we normally want to see the head block mined before the feet
-    public static final BodyPart[] BODY_PARTS_REVERSE = new BodyPart[]{
-            BodyPart.HEAD,
-            BodyPart.FEET
-    };
+    private GraphInstructions() {
+        this(null, Double.POSITIVE_INFINITY, null);
+    }
 
-    private final Function<Vector3i, Vector3i> offset;
-
-    public Vector3i offset(Vector3i position) {
-        return offset.apply(position);
+    public boolean isImpossible() {
+        return this == IMPOSSIBLE;
     }
 }

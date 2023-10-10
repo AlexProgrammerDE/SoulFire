@@ -23,6 +23,7 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Objects;
 
@@ -36,14 +37,15 @@ import java.util.Objects;
  * @param inventory  The inventory state of the bot.
  * @param precalculatedHash The precalculated hash of the object.
  */
-public record BotEntityState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory,
+public record BotEntityState(Vector3d position, Vector3i positionBlock, ProjectedLevelState levelState,
+                             ProjectedInventory inventory,
                              int precalculatedHash) {
     public BotEntityState {
         position = VectorHelper.middleOfBlockNormalize(position);
     }
 
     public BotEntityState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory) {
-        this(position, levelState, inventory, Objects.hash(position, levelState, inventory));
+        this(position, position.toInt(), levelState, inventory, Objects.hash(position, levelState, inventory));
     }
 
     @Override

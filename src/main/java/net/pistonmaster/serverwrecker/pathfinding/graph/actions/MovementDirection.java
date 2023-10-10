@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.graph;
+package net.pistonmaster.serverwrecker.pathfinding.graph.actions;
 
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3d;

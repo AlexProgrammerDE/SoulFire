@@ -17,21 +17,14 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.graph;
+package net.pistonmaster.serverwrecker.pathfinding.graph.actions;
 
-import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
-import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
+/**
+ * When we run around a wall, what side do we run on?
+ */
+public enum MovementSide {
+    LEFT,
+    RIGHT;
 
-import java.util.List;
-
-public record GraphInstructions(BotEntityState targetState, double actionCost, List<WorldAction> actions) {
-    public static final GraphInstructions IMPOSSIBLE = new GraphInstructions();
-
-    private GraphInstructions() {
-        this(null, Double.POSITIVE_INFINITY, null);
-    }
-
-    public boolean isImpossible() {
-        return this == IMPOSSIBLE;
-    }
+    public static final MovementSide[] VALUES = values();
 }

@@ -30,9 +30,9 @@ import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.RecalculatePathAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 import net.pistonmaster.serverwrecker.pathfinding.goals.GoalScorer;
-import net.pistonmaster.serverwrecker.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.pathfinding.graph.OutOfLevelException;
+import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
 
 import java.util.Collections;
 import java.util.List;

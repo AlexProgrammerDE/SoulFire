@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
-import net.pistonmaster.serverwrecker.pathfinding.graph.SWDirection;
+import net.pistonmaster.serverwrecker.pathfinding.graph.actions.SWDirection;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -63,7 +63,7 @@ public class BotActionManager {
                 continue;
             }
 
-            var blockState = levelState.getCachedBlockStateAt(blockCache, blockPos);
+            var blockState = levelState.getBlockStateAt(blockPos);
             if (blockState.isEmpty() || !blockState.get().blockShapeType().isFullBlock()) {
                 continue;
             }

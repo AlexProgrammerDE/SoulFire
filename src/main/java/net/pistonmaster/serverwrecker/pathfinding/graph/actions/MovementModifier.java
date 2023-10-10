@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.graph;
+package net.pistonmaster.serverwrecker.pathfinding.graph.actions;
 
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -33,6 +33,7 @@ public enum MovementModifier {
 
     public static final MovementModifier[] VALUES = values();
 
+    @SuppressWarnings("DuplicatedCode")
     public Vector3i offset(Vector3i vector) {
         return switch (this) {
             case NORMAL -> vector;
@@ -43,6 +44,7 @@ public enum MovementModifier {
         };
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public Vector3d offset(Vector3d vector) {
         return switch (this) {
             case NORMAL -> vector;
