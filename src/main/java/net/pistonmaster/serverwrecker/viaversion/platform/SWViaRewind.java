@@ -32,12 +32,12 @@ public class SWViaRewind implements ViaRewindPlatform {
     private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaRewind"));
     private final Path dataFolder;
 
+    public void init() {
+        init(dataFolder.resolve("config.yml").toFile());
+    }
+
     @Override
     public Logger getLogger() {
         return logger;
-    }
-
-    public void init() {
-        init(dataFolder.resolve("config.yml").toFile());
     }
 }

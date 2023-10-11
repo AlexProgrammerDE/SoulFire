@@ -33,6 +33,10 @@ public class SWViaBedrock implements ViaBedrockPlatform {
     private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaBedrock"));
     private final Path dataFolder;
 
+    public void init() {
+        init(dataFolder.resolve("config.yml").toFile());
+    }
+
     @Override
     public Logger getLogger() {
         return logger;
@@ -41,9 +45,5 @@ public class SWViaBedrock implements ViaBedrockPlatform {
     @Override
     public File getDataFolder() {
         return dataFolder.toFile();
-    }
-
-    public void init() {
-        init(getDataFolder());
     }
 }
