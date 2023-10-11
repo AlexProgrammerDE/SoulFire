@@ -56,7 +56,7 @@ public class MovementAction implements WorldAction {
             return false;
         } else {
             var distance = botPosition.distance(position);
-            return distance < 0.3;
+            return distance <= 0.3;
         }
     }
 

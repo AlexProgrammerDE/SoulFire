@@ -19,8 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
@@ -30,19 +28,17 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.List;
-
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {
     private static final int MAX_MOVEMENTS = 60;
-    private static final int MAX_BLOCKS = 58;
+    private static final int EXPECTED_BLOCKS = 58;
     private static final int MAX_SUBSCRIBERS = 15;
 
     public Iterable<GraphInstructions> getActions(BotEntityState node) {
         var levelState = node.levelState();
 
         var movements = new ObjectArrayList<PlayerMovement>(MAX_MOVEMENTS);
-        var blockSubscribers = new Int2ObjectArrayMap<List<BlockSubscription>>(MAX_BLOCKS);
+        var blockSubscribers = new QuickVectorSubscriberMap();
         for (var direction : MovementDirection.VALUES) {
             var diagonal = direction.isDiagonal();
             for (var modifier : MovementModifier.VALUES) {
@@ -56,20 +52,24 @@ public record MinecraftGraph(TagsState tagsState) {
             }
         }
 
-        blockSubscribers.values().forEach(subscribers -> {
+        blockSubscribers.forEach((k, v) -> {
             BlockStateMeta blockState = null;
 
             // We cache only this, but not solid because solid will only occur a single time
             var calculatedFree = false;
             var isFree = false;
-            for (var subscriber : subscribers) {
+            for (var subscriber : v) {
+                if (subscriber == null) {
+                    break;
+                }
+
                 var movement = subscriber.movement();
                 if (movement.isImpossible()) {
                     continue;
                 }
 
                 if (blockState == null) {
-                    blockState = levelState.getBlockStateAt(subscriber.block())
+                    blockState = levelState.getBlockStateAt(k)
                             .orElseThrow(OutOfLevelException::new);
                 }
 
@@ -105,26 +105,30 @@ public record MinecraftGraph(TagsState tagsState) {
             }
         });
 
-        return movements.stream()
-                .filter(m -> !m.isImpossible())
-                .map(PlayerMovement::getInstructions)::iterator;
+        var results = new ObjectArrayList<GraphInstructions>(MAX_MOVEMENTS);
+        for (var movement : movements) {
+            if (movement.isImpossible()) {
+                continue;
+            }
+
+            results.add(movement.getInstructions());
+        }
+
+        return results;
     }
 
     private void registerMovement(ObjectArrayList<PlayerMovement> movements,
-                                  Int2ObjectMap<List<BlockSubscription>> blockSubscribers,
+                                  QuickVectorSubscriberMap blockSubscribers,
                                   PlayerMovement movement) {
         movements.add(movement);
 
-        for (var block : movement.listRequiredFreeBlocks()) {
-            var freeSubscription = new BlockSubscription(block, movement, SubscriptionType.FREE);
-            blockSubscribers.computeIfAbsent(block.hashCode(), k -> new ObjectArrayList<>(MAX_SUBSCRIBERS))
-                    .add(freeSubscription);
+        var freeSubscription = new BlockSubscription(movement, SubscriptionType.FREE);
+        for (var freeBlock : movement.listRequiredFreeBlocks()) {
+            blockSubscribers.add(freeBlock, freeSubscription);
         }
 
-        var target = movement.requiredSolidBlock();
-        var solidSubscription = new BlockSubscription(target, movement, SubscriptionType.SOLID);
-        blockSubscribers.computeIfAbsent(target.hashCode(), k -> new ObjectArrayList<>(MAX_SUBSCRIBERS))
-                .add(solidSubscription);
+        var solidSubscription = new BlockSubscription(movement, SubscriptionType.SOLID);
+        blockSubscribers.add(movement.requiredSolidBlock(), solidSubscription);
     }
 
     enum SubscriptionType {
@@ -132,6 +136,43 @@ public record MinecraftGraph(TagsState tagsState) {
         SOLID
     }
 
-    record BlockSubscription(Vector3i block, PlayerMovement movement, SubscriptionType type) {
+    record BlockSubscription(PlayerMovement movement, SubscriptionType type) {
+    }
+
+    private static class QuickVectorSubscriberMap {
+        private final Vector3i[] keys = new Vector3i[EXPECTED_BLOCKS];
+        private final BlockSubscription[][] values = new BlockSubscription[EXPECTED_BLOCKS][MAX_SUBSCRIBERS];
+
+        public void add(Vector3i key, BlockSubscription value) {
+            for (var i = 0; i < EXPECTED_BLOCKS; i++) {
+                var currentKey = keys[i];
+                var isNull = currentKey == null;
+                if (isNull) {
+                    keys[i] = key;
+                }
+
+                if (isNull || currentKey.equals(key)) {
+                    var valueArray = values[i];
+                    for (var j = 0; j < MAX_SUBSCRIBERS; j++) {
+                        if (valueArray[j] == null) {
+                            valueArray[j] = value;
+                            return;
+                        }
+                    }
+
+                    throw new IllegalStateException("Too many subscribers for a single block!");
+                }
+            }
+        }
+
+        public void forEach(SubscriptionEntryConsumer consumer) {
+            for (var i = 0; i < EXPECTED_BLOCKS; i++) {
+                consumer.accept(keys[i], values[i]);
+            }
+        }
+    }
+
+    private interface SubscriptionEntryConsumer {
+        void accept(Vector3i key, BlockSubscription[] value);
     }
 }

@@ -633,20 +633,8 @@ public final class BotMovementManager {
         return this.controlState.isSneaking() ? 1.5F : 1.8F;
     }
 
-    public int getBlockPosX() {
-        return (int) this.x - (this.x < 0 ? 1 : 0);
-    }
-
-    public int getBlockPosY() {
-        return (int) this.y - (this.y < 0 ? 1 : 0);
-    }
-
-    public int getBlockPosZ() {
-        return (int) this.z - (this.z < 0 ? 1 : 0);
-    }
-
     public Vector3i getBlockPos() {
-        return Vector3i.from(getBlockPosX(), getBlockPosY(), getBlockPosZ());
+        return Vector3i.from(this.x, this.y, this.z);
     }
 
     public Vector3d getPlayerPos() {
