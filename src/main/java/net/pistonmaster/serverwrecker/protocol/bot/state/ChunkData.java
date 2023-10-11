@@ -25,11 +25,11 @@ import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.WeakHashMap;
+import java.util.function.Function;
 
 public class ChunkData {
-    private static final Map<Integer, ChunkSection> SECTION_CACHE = new WeakHashMap<>();
+    private static final Map<ChunkSection, ChunkSection> SECTION_CACHE = new WeakHashMap<>();
     private final int minSection;
     private final ChunkSection[] sections;
 
@@ -57,7 +57,9 @@ public class ChunkData {
 
     public ChunkSection getSection(int sectionIndex) {
         var section = sections[sectionIndex];
-        Objects.requireNonNull(section, () -> String.format("Section %d is null!", sectionIndex));
+        if (section == null) {
+            throw new NullPointerException(String.format("Section %d is null!", sectionIndex));
+        }
 
         return section;
     }
@@ -71,10 +73,8 @@ public class ChunkData {
     }
 
     public void setSection(int sectionIndex, ChunkSection section) {
-        var sectionHash = section.hashCode();
         synchronized (SECTION_CACHE) {
-            SECTION_CACHE.compute(sectionHash, (hash, cachedSection) ->
-                    sections[sectionIndex] = cachedSection == null ? section : cachedSection);
+            sections[sectionIndex] = SECTION_CACHE.computeIfAbsent(section, Function.identity());
         }
     }
 

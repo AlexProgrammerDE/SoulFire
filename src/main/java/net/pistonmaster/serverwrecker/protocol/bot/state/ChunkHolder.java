@@ -29,7 +29,6 @@ import net.pistonmaster.serverwrecker.util.NoopLock;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -109,26 +108,16 @@ public class ChunkHolder {
         }
     }
 
-    public OptionalInt getBlockStateIdAt(Vector3i block) {
+    public Optional<BlockStateMeta> getBlockStateAt(Vector3i block) {
         var chunkData = getChunk(block);
 
         // Out of world
         if (chunkData == null) {
-            return OptionalInt.empty();
-        }
-
-        return OptionalInt.of(chunkData.getBlock(block));
-    }
-
-    public Optional<BlockStateMeta> getBlockStateAt(Vector3i block) {
-        var stateId = getBlockStateIdAt(block);
-
-        // Out of world
-        if (stateId.isEmpty()) {
             return Optional.empty();
         }
 
-        return Optional.of(ResourceData.GLOBAL_BLOCK_PALETTE.getBlockStateForStateId(stateId.getAsInt()));
+        return Optional.of(ResourceData.GLOBAL_BLOCK_PALETTE
+                .getBlockStateForStateId(chunkData.getBlock(block)));
     }
 
     public Optional<BlockType> getBlockTypeAt(Vector3i block) {

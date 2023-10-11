@@ -19,7 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.Hash;
+import it.unimi.dsi.fastutil.objects.*;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.*;
@@ -28,107 +29,138 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 
+import java.util.function.Consumer;
+
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {
     private static final int MAX_MOVEMENTS = 60;
     private static final int EXPECTED_BLOCKS = 58;
     private static final int MAX_SUBSCRIBERS = 15;
-
-    public Iterable<GraphInstructions> getActions(BotEntityState node) {
-        var levelState = node.levelState();
-
-        var movements = new ObjectArrayList<PlayerMovement>(MAX_MOVEMENTS);
-        var blockSubscribers = new QuickVectorSubscriberMap();
-        for (var direction : MovementDirection.VALUES) {
-            var diagonal = direction.isDiagonal();
-            for (var modifier : MovementModifier.VALUES) {
-                if (diagonal) {
-                    for (var side : MovementSide.VALUES) {
-                        registerMovement(movements, blockSubscribers, new PlayerMovement(node, direction, side, modifier));
-                    }
-                } else {
-                    registerMovement(movements, blockSubscribers, new PlayerMovement(node, direction, null, modifier));
-                }
-            }
+    private static final Hash.Strategy<Vector3i> HASH_STRATEGY = new Hash.Strategy<>() {
+        @Override
+        public int hashCode(Vector3i o) {
+            var hash = 17;
+            hash = 31 * hash + o.getX();
+            hash = 31 * hash + o.getY();
+            hash = 31 * hash + o.getZ();
+            return hash;
         }
 
-        blockSubscribers.forEach((k, v) -> {
-            BlockStateMeta blockState = null;
-
-            // We cache only this, but not solid because solid will only occur a single time
-            var calculatedFree = false;
-            var isFree = false;
-            for (var subscriber : v) {
-                if (subscriber == null) {
-                    break;
-                }
-
-                var movement = subscriber.movement();
-                if (movement.isImpossible()) {
-                    continue;
-                }
-
-                if (blockState == null) {
-                    blockState = levelState.getBlockStateAt(k)
-                            .orElseThrow(OutOfLevelException::new);
-                }
-
-                switch (subscriber.type) {
-                    case FREE -> {
-                        if (!calculatedFree) {
-                            // We can walk through blocks like air or grass
-                            isFree = blockState.blockShapeType().hasNoCollisions()
-                                    && !BlockTypeHelper.isFluid(blockState.blockType());
-                            calculatedFree = true;
-                        }
-
-                        if (!isFree) {
-                            movement.setImpossible(true);
-                        }
-                    }
-                    case SOLID -> {
-                        var blockShapeType = blockState.blockShapeType();
-
-                        // Block with a current state that has no collision (Like grass, open fence)
-                        if (blockShapeType.hasNoCollisions()) {
-                            movement.setImpossible(true);
-                            continue;
-                        }
-
-                        // Prevent walking over cake, slabs, fences, etc.
-                        if (!blockShapeType.isFullBlock()) {
-                            // Could destroy and place block here, but that's too much work
-                            movement.setImpossible(true);
-                        }
-                    }
-                }
+        @Override
+        public boolean equals(Vector3i a, Vector3i b) {
+            if (a == null || b == null) {
+                return false;
             }
-        });
 
-        var results = new ObjectArrayList<GraphInstructions>(MAX_MOVEMENTS);
-        for (var movement : movements) {
+            return a.getX() == b.getX()
+                    && a.getY() == b.getY()
+                    && a.getZ() == b.getZ();
+        }
+    };
+    private static final Object2ObjectFunction<? super Vector3i, ? extends ObjectList<BlockSubscription>> CREATE_MISSING_FUNCTION =
+            k -> new ObjectArrayList<>(MAX_SUBSCRIBERS);
+    private static final Consumer<? super Object2ObjectMap.Entry<Vector3i, ObjectList<BlockSubscription>>> SUBSCRIPTION_CONSUMER = e -> {
+        BlockStateMeta blockState = null;
+
+        // We cache only this, but not solid because solid will only occur a single time
+        var calculatedFree = false;
+        var isFree = false;
+        for (var subscriber : e.getValue()) {
+            if (subscriber == null) {
+                break;
+            }
+
+            var movement = subscriber.movement();
             if (movement.isImpossible()) {
                 continue;
             }
 
-            results.add(movement.getInstructions());
+            if (blockState == null) {
+                blockState = subscriber.movement.getPreviousEntityState().levelState().getBlockStateAt(e.getKey())
+                        .orElseThrow(OutOfLevelException::new);
+            }
+
+            switch (subscriber.type) {
+                case FREE -> {
+                    if (!calculatedFree) {
+                        // We can walk through blocks like air or grass
+                        isFree = blockState.blockShapeType().hasNoCollisions()
+                                && !BlockTypeHelper.isFluid(blockState.blockType());
+                        calculatedFree = true;
+                    }
+
+                    if (!isFree) {
+                        movement.setImpossible(true);
+                    }
+                }
+                case SOLID -> {
+                    var blockShapeType = blockState.blockShapeType();
+
+                    // Block with a current state that has no collision (Like grass, open fence)
+                    if (blockShapeType.hasNoCollisions()) {
+                        movement.setImpossible(true);
+                        continue;
+                    }
+
+                    // Prevent walking over cake, slabs, fences, etc.
+                    if (!blockShapeType.isFullBlock()) {
+                        // Could destroy and place block here, but that's too much work
+                        movement.setImpossible(true);
+                    }
+                }
+            }
+        }
+    };
+
+    public GraphInstructions[] getActions(BotEntityState node) {
+        var movements = new PlayerMovement[MAX_MOVEMENTS];
+
+        {
+            var blockSubscribers = new Object2ObjectOpenCustomHashMap<Vector3i, ObjectList<BlockSubscription>>(EXPECTED_BLOCKS, HASH_STRATEGY);
+
+            var i = 0;
+            for (var direction : MovementDirection.VALUES) {
+                var diagonal = direction.isDiagonal();
+                for (var modifier : MovementModifier.VALUES) {
+                    if (diagonal) {
+                        for (var side : MovementSide.VALUES) {
+                            registerMovement(blockSubscribers, movements[i++] = new PlayerMovement(node, direction, side, modifier));
+                        }
+                    } else {
+                        registerMovement(blockSubscribers, movements[i++] = new PlayerMovement(node, direction, null, modifier));
+                    }
+                }
+            }
+
+            blockSubscribers.object2ObjectEntrySet().fastForEach(SUBSCRIPTION_CONSUMER);
+        }
+
+        var size = 0;
+        var results = new GraphInstructions[MAX_MOVEMENTS];
+        for (var j = 0; j < MAX_MOVEMENTS; j++) {
+            var movement = movements[j];
+            if (movement.isImpossible()) {
+                continue;
+            }
+
+            results[size++] = movement.getInstructions();
         }
 
         return results;
     }
 
-    private void registerMovement(ObjectArrayList<PlayerMovement> movements,
-                                  QuickVectorSubscriberMap blockSubscribers,
+    private void registerMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
                                   PlayerMovement movement) {
-        movements.add(movement);
-
         var freeSubscription = new BlockSubscription(movement, SubscriptionType.FREE);
         for (var freeBlock : movement.listRequiredFreeBlocks()) {
-            blockSubscribers.add(freeBlock, freeSubscription);
+            blockSubscribers.computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
+                    .add(freeSubscription);
         }
 
         var solidSubscription = new BlockSubscription(movement, SubscriptionType.SOLID);
-        blockSubscribers.add(movement.requiredSolidBlock(), solidSubscription);
+        var solidBlock = movement.requiredSolidBlock();
+        blockSubscribers.computeIfAbsent(solidBlock, CREATE_MISSING_FUNCTION)
+                .add(solidSubscription);
     }
 
     enum SubscriptionType {
@@ -137,42 +169,5 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     record BlockSubscription(PlayerMovement movement, SubscriptionType type) {
-    }
-
-    private static class QuickVectorSubscriberMap {
-        private final Vector3i[] keys = new Vector3i[EXPECTED_BLOCKS];
-        private final BlockSubscription[][] values = new BlockSubscription[EXPECTED_BLOCKS][MAX_SUBSCRIBERS];
-
-        public void add(Vector3i key, BlockSubscription value) {
-            for (var i = 0; i < EXPECTED_BLOCKS; i++) {
-                var currentKey = keys[i];
-                var isNull = currentKey == null;
-                if (isNull) {
-                    keys[i] = key;
-                }
-
-                if (isNull || currentKey.equals(key)) {
-                    var valueArray = values[i];
-                    for (var j = 0; j < MAX_SUBSCRIBERS; j++) {
-                        if (valueArray[j] == null) {
-                            valueArray[j] = value;
-                            return;
-                        }
-                    }
-
-                    throw new IllegalStateException("Too many subscribers for a single block!");
-                }
-            }
-        }
-
-        public void forEach(SubscriptionEntryConsumer consumer) {
-            for (var i = 0; i < EXPECTED_BLOCKS; i++) {
-                consumer.accept(keys[i], values[i]);
-            }
-        }
-    }
-
-    private interface SubscriptionEntryConsumer {
-        void accept(Vector3i key, BlockSubscription[] value);
     }
 }
