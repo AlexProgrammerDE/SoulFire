@@ -24,7 +24,6 @@ import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
@@ -94,17 +93,15 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 stopwatch.stop();
                 log.info("Took {}ms to find route to this point", stopwatch.elapsed().toMillis());
 
-                // The current node is not always the best node. We need to find the best node.
-                var bestNode = findBestNode(routeIndex.values());
-
                 // This is the best node we found so far
                 // We will add a recalculating action and return the best route
-                return getActions(new MinecraftRouteNode(
-                        bestNode.getEntityState(),
-                        bestNode,
+                var recalculatingNode = new MinecraftRouteNode(
+                        current.getEntityState(),
+                        current,
                         List.of(new RecalculatePathAction()),
-                        bestNode.getSourceCost(), bestNode.getTotalRouteScore()
-                ));
+                        current.getSourceCost(), current.getTotalRouteScore()
+                );
+                return getActions(recalculatingNode);
             }
 
             for (var instructions : instructionsList) {
@@ -150,20 +147,5 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         stopwatch.stop();
         log.info("Failed to find route after {}ms", stopwatch.elapsed().toMillis());
         throw new IllegalStateException("No route found");
-    }
-
-    private MinecraftRouteNode findBestNode(ObjectCollection<MinecraftRouteNode> values) {
-        MinecraftRouteNode bestNode = null;
-        var bestScore = Double.MAX_VALUE;
-
-        for (var node : values) {
-            var totalRouteScore = node.getTotalRouteScore();
-            if (totalRouteScore < bestScore) {
-                bestNode = node;
-                bestScore = totalRouteScore;
-            }
-        }
-
-        return bestNode;
     }
 }
