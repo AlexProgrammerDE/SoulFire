@@ -25,8 +25,6 @@ import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.Objects;
-
 /**
  * Represents the state of the bot in the level.
  * This means the positions and in the future also inventory.
@@ -36,34 +34,14 @@ import java.util.Objects;
  * @param positionBlock The position of the bot in block coordinates.
  * @param levelState The level state of the world the bot is in.
  * @param inventory  The inventory state of the bot.
- * @param precalculatedHash The precalculated hash of the object.
  */
 public record BotEntityState(Vector3d position, Vector3i positionBlock, ProjectedLevelState levelState,
-                             ProjectedInventory inventory,
-                             int precalculatedHash) {
+                             ProjectedInventory inventory) {
     public BotEntityState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory) {
         this(position, position.toInt(), levelState, inventory);
     }
 
-    public BotEntityState(Vector3d position, Vector3i positionBlock, ProjectedLevelState levelState, ProjectedInventory inventory) {
-        this(position, positionBlock, levelState, inventory, Objects.hash(position, levelState, inventory));
-    }
-
     public static BotEntityState initialState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory) {
         return new BotEntityState(VectorHelper.middleOfBlockNormalize(position), levelState, inventory);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof BotEntityState other)) {
-            return false;
-        }
-
-        return other.precalculatedHash == precalculatedHash;
-    }
-
-    @Override
-    public int hashCode() {
-        return precalculatedHash;
     }
 }

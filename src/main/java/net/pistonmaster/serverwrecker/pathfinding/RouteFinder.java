@@ -20,9 +20,7 @@
 package net.pistonmaster.serverwrecker.pathfinding;
 
 import com.google.common.base.Stopwatch;
-import it.unimi.dsi.fastutil.PriorityQueue;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
@@ -34,6 +32,7 @@ import net.pistonmaster.serverwrecker.pathfinding.goals.GoalScorer;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.pathfinding.graph.OutOfLevelException;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
+import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Collections;
 import java.util.List;
@@ -62,16 +61,16 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         var stopwatch = Stopwatch.createStarted();
 
         // Store block positions and the best route to them
-        Int2ObjectMap<MinecraftRouteNode> routeIndex = new Int2ObjectOpenHashMap<>();
+        var routeIndex = new Object2ObjectOpenHashMap<Vector3i, MinecraftRouteNode>();
 
         // Store block positions that we need to look at
-        PriorityQueue<MinecraftRouteNode> openSet = new ObjectHeapPriorityQueue<>();
+        var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>();
 
         var startScore = scorer.computeScore(graph, from);
         log.info("Start score (Usually distance): {}", startScore);
 
         var start = new MinecraftRouteNode(from, null, List.of(new MovementAction(from.position(), false)), 0d, startScore);
-        routeIndex.put(from.precalculatedHash(), start);
+        routeIndex.put(from.positionBlock(), start);
         openSet.enqueue(start);
 
         while (!openSet.isEmpty()) {
@@ -115,7 +114,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 var actionCost = instructions.actionCost();
                 var actionTargetState = instructions.targetState();
                 var worldActions = instructions.actions();
-                routeIndex.compute(actionTargetState.precalculatedHash(), (k, v) -> {
+                routeIndex.compute(actionTargetState.positionBlock(), (k, v) -> {
                     // Calculate new distance from start to this connection,
                     // Get distance from the current element
                     // and add the distance from the current element to the next element
