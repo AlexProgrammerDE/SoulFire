@@ -23,12 +23,14 @@ import net.kyori.event.EventSubscriber;
 import net.kyori.event.EventSubscription;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
+import net.pistonmaster.serverwrecker.util.TimeUtil;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
@@ -122,6 +124,12 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
 
         executorService.submit(() -> {
             try {
+                if (cancelled) {
+                    return;
+                }
+
+                connection.logger().info("Waiting for one second for bot to finish falling...");
+                TimeUtil.waitTime(1, TimeUnit.SECONDS);
                 if (cancelled) {
                     return;
                 }

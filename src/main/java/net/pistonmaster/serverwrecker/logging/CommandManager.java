@@ -396,7 +396,7 @@ public class CommandManager {
                                     sessionDataManager.getInventoryManager().getPlayerInventory()
                             )
                     );
-                    logger.info("Start: {}", start);
+                    logger.info("Starting calculations at: {}", start);
                     var actions = routeFinder.findRoute(start);
                     logger.info("Calculated path with {} actions: {}", actions.size(), actions);
                     return actions;
