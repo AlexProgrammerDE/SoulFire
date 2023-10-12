@@ -154,13 +154,14 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
     private MinecraftRouteNode findBestNode(ObjectCollection<MinecraftRouteNode> values) {
         MinecraftRouteNode bestNode = null;
-        var bestScore = Double.MAX_VALUE;
+        var smallestScore = Double.MAX_VALUE;
 
         for (var node : values) {
-            var totalRouteScore = node.getTotalRouteScore();
-            if (totalRouteScore < bestScore) {
+            var score = scorer.computeScore(graph, node.getEntityState());
+
+            if (score < smallestScore) {
+                smallestScore = score;
                 bestNode = node;
-                bestScore = totalRouteScore;
             }
         }
 
