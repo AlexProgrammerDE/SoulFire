@@ -326,7 +326,15 @@ public class CommandManager {
                     }
 
                     for (var bot : attackManager.getBotConnections()) {
-                        bot.eventBus().unsubscribeIf(PathExecutor.class::isInstance);
+                        bot.eventBus().unsubscribeIf(p -> {
+                            if (PathExecutor.class.isInstance(p)) {
+                                PathExecutor.class.cast(p).cancel();
+
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        });
                         bot.sessionDataManager().getBotMovementManager().getControlState().resetAll();
                     }
                     return 1;

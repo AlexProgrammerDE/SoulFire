@@ -38,6 +38,7 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
     private final ExecutorService executorService;
     private EventSubscription subscription;
     private int ticks = 0;
+    private boolean cancelled = false;
 
     public PathExecutor(BotConnection connection, List<WorldAction> worldActions, Supplier<List<WorldAction>> findPath,
                         ExecutorService executorService) {
@@ -111,13 +112,25 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
         subscription.unsubscribe();
     }
 
+    public void cancel() {
+        cancelled = true;
+    }
+
     private void recalculatePath() {
         this.unregister();
         connection.sessionDataManager().getBotMovementManager().getControlState().resetAll();
 
         executorService.submit(() -> {
             try {
+                if (cancelled) {
+                    return;
+                }
+
                 var newActions = findPath.get();
+                if (cancelled) {
+                    return;
+                }
+
                 connection.logger().info("Found new path with {} actions!", newActions.size());
                 var newExecutor = new PathExecutor(connection, newActions, findPath, executorService);
                 newExecutor.register();
