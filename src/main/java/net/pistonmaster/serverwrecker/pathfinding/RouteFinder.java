@@ -157,10 +157,12 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         var smallestScore = Double.MAX_VALUE;
 
         for (var node : values) {
-            var score = scorer.computeScore(graph, node.getEntityState());
+            // Our implementation calculates the score from this node to the start,
+            // so we need to get it by subtracting the source cost
+            var targetScore = node.getTotalRouteScore() - node.getSourceCost();
 
-            if (score < smallestScore) {
-                smallestScore = score;
+            if (targetScore < smallestScore) {
+                smallestScore = targetScore;
                 bestNode = node;
             }
         }
