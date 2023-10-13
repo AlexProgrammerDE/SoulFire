@@ -86,6 +86,11 @@ public record MinecraftGraph(TagsState tagsState) {
                     }
                 }
                 case ADD_CORNER_COST_IF_SOLID -> {
+                    // No need to apply the cost multiple times.
+                    if (movement.isAppliedCornerCost()) {
+                        continue;
+                    }
+
                     if (!calculatedSolid) {
                         // Only count full blocks like stone or dirt as solid
                         isSolid = blockState.blockShapeType().isFullBlock();

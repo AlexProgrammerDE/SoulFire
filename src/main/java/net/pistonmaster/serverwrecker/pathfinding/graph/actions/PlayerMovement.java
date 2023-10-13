@@ -42,6 +42,7 @@ public final class PlayerMovement implements GraphAction {
     private final AtomicDouble cost;
     private final Vector3i targetBlock;
     private final boolean diagonal;
+    @Getter
     private boolean appliedCornerCost = false;
     @Setter
     @Getter
@@ -165,10 +166,8 @@ public final class PlayerMovement implements GraphAction {
     }
 
     public void addCornerCost() {
-        if (!appliedCornerCost) {
-            cost.addAndGet(Costs.CORNER_SLIDE);
-            appliedCornerCost = true;
-        }
+        cost.addAndGet(Costs.CORNER_SLIDE);
+        appliedCornerCost = true;
     }
 
     @Override
