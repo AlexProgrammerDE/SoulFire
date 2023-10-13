@@ -41,6 +41,7 @@ public final class PlayerMovement implements GraphAction {
     private final MovementModifier modifier;
     private final AtomicDouble cost;
     private final Vector3i targetBlock;
+    @Getter
     private final boolean diagonal;
     @Getter
     private boolean appliedCornerCost = false;
@@ -143,21 +144,17 @@ public final class PlayerMovement implements GraphAction {
     }
 
     public List<Vector3i> listAddCostIfSolidBlocks() {
-        if (diagonal) {
-            var fromPosInt = previousEntityState.positionBlock();
-            var list = new ObjectArrayList<Vector3i>(2);
+        var fromPosInt = previousEntityState.positionBlock();
+        var list = new ObjectArrayList<Vector3i>(2);
 
-            // If these blocks are solid, the bot moves slower because the bot is running around a corner
-            var corner = getCorner(fromPosInt, side.opposite());
-            for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
-                // Apply jump shift to target edge and offset for body part
-                list.add(bodyOffset.offset(modifier.offsetIfJump(corner)));
-            }
-
-            return list;
-        } else {
-            return List.of();
+        // If these blocks are solid, the bot moves slower because the bot is running around a corner
+        var corner = getCorner(fromPosInt, side.opposite());
+        for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
+            // Apply jump shift to target edge and offset for body part
+            list.add(bodyOffset.offset(modifier.offsetIfJump(corner)));
         }
+
+        return list;
     }
 
     public Vector3i requiredSolidBlock() {

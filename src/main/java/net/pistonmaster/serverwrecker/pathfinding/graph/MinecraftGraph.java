@@ -152,10 +152,9 @@ public record MinecraftGraph(TagsState tagsState) {
                     .add(freeSubscription);
         }
 
-        var addCostIfSolidList = movement.listAddCostIfSolidBlocks();
-        if (!addCostIfSolidList.isEmpty()) {
+        if (movement.isDiagonal()) {
             var addCostIfSolidSubscription = new BlockSubscription(movement, SubscriptionType.ADD_CORNER_COST_IF_SOLID);
-            for (var addCostIfSolidBlock : addCostIfSolidList) {
+            for (var addCostIfSolidBlock : movement.listAddCostIfSolidBlocks()) {
                 blockSubscribers.computeIfAbsent(addCostIfSolidBlock, CREATE_MISSING_FUNCTION)
                         .add(addCostIfSolidSubscription);
             }
