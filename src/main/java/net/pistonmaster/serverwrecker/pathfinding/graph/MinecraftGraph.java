@@ -125,7 +125,9 @@ public record MinecraftGraph(TagsState tagsState) {
                 }
             }
 
-            blockSubscribers.object2ObjectEntrySet().fastForEach(SUBSCRIPTION_CONSUMER);
+            blockSubscribers.object2ObjectEntrySet().stream()
+                    .sorted((f1, f2) -> Integer.compare(f2.getValue().size(), f1.getValue().size()))
+                    .forEach(SUBSCRIPTION_CONSUMER);
         }
 
         var results = new GraphInstructions[MAX_MOVEMENTS];

@@ -38,8 +38,10 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
     private final BotConnection connection;
     private final Supplier<List<WorldAction>> findPath;
     private final ExecutorService executorService;
+    private final int totalMovements;
     private EventSubscription subscription;
     private int ticks = 0;
+    private int movementNumber;
     private boolean cancelled = false;
 
     public PathExecutor(BotConnection connection, List<WorldAction> worldActions, Supplier<List<WorldAction>> findPath,
@@ -49,6 +51,8 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
         this.connection = connection;
         this.findPath = findPath;
         this.executorService = executorService;
+        this.totalMovements = worldActions.size();
+        this.movementNumber = 1;
     }
 
     @Override
@@ -84,7 +88,8 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
 
         if (worldAction.isCompleted(connection)) {
             worldActions.remove();
-            connection.logger().info("Reached goal in {} ticks!", ticks);
+            connection.logger().info("Reached goal {}/{} in {} ticks!", movementNumber, totalMovements, ticks);
+            movementNumber++;
             ticks = 0;
 
             // Directly use tick to execute next goal
