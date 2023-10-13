@@ -22,7 +22,6 @@ package net.pistonmaster.serverwrecker.viaversion.platform;
 import com.viaversion.viaversion.ViaAPIBase;
 import com.viaversion.viaversion.api.ViaAPI;
 import com.viaversion.viaversion.api.command.ViaCommandSender;
-import com.viaversion.viaversion.api.configuration.ConfigurationProvider;
 import com.viaversion.viaversion.api.configuration.ViaVersionConfig;
 import com.viaversion.viaversion.api.platform.ViaInjector;
 import com.viaversion.viaversion.api.platform.ViaPlatform;
@@ -208,11 +207,6 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
     }
 
     @Override
-    public ConfigurationProvider getConfigurationProvider() {
-        return null;
-    }
-
-    @Override
     public File getDataFolder() {
         return dataFolder.toFile();
     }
@@ -224,11 +218,6 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
     @Override
     public JsonObject getDump() {
         return injector.getDump();
-    }
-
-    @Override
-    public boolean isOldClientsAllowed() {
-        return true;
     }
 
     @Override

@@ -47,14 +47,14 @@ public class JwtServerInterceptor implements ServerInterceptor {
             var token = value.substring(Constant.BEARER_TYPE.length()).trim();
             try {
                 // verify token signature and parse claims
-                claims = parser.parseClaimsJws(token);
+                claims = parser.parseSignedClaims(token);
             } catch (JwtException e) {
                 status = Status.UNAUTHENTICATED.withDescription(e.getMessage()).withCause(e);
             }
             if (claims != null) {
                 // set client id into current context
                 var ctx = Context.current()
-                        .withValue(Constant.CLIENT_ID_CONTEXT_KEY, claims.getBody().getSubject());
+                        .withValue(Constant.CLIENT_ID_CONTEXT_KEY, claims.getPayload().getSubject());
                 return Contexts.interceptCall(ctx, serverCall, metadata, serverCallHandler);
             }
         }

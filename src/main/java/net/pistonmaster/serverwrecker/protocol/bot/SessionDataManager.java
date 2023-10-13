@@ -220,7 +220,8 @@ public final class SessionDataManager {
 
         if (isInitial) {
             botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch, abilitiesData);
-            log.info("Joined server at position: X {} Y {} Z {}", Math.floor(x), Math.floor(y), Math.floor(z));
+            var position = botMovementManager.getBlockPos();
+            log.info("Joined server at position: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
 
             connection.eventBus().post(new BotJoinedEvent(connection));
         } else {
