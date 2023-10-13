@@ -48,10 +48,10 @@ public class ProjectedInventory {
 
     public ProjectedInventory(PlayerInventoryContainer playerInventory) {
         var blockItems = 0;
-        var usableTools = new HashSet<SWItemStack>();
+        var usableToolsAndNull = new HashSet<SWItemStack>();
 
         // Empty slot
-        usableTools.add(null);
+        usableToolsAndNull.add(null);
 
         for (var slot : playerInventory.getStorage()) {
             if (slot.item() == null) {
@@ -61,12 +61,12 @@ public class ProjectedInventory {
             if (ItemTypeHelper.isFullBlockItem(slot.item().getType())) {
                 blockItems += slot.item().getAmount();
             } else if (ItemTypeHelper.isTool(slot.item().getType())) {
-                usableTools.add(slot.item());
+                usableToolsAndNull.add(slot.item());
             }
         }
 
         this.usableBlockItems = blockItems;
-        this.usableToolsAndNull = usableTools.toArray(new SWItemStack[0]);
+        this.usableToolsAndNull = usableToolsAndNull.toArray(new SWItemStack[0]);
 
         this.sharedMiningCosts = new ConcurrentHashMap<>();
     }

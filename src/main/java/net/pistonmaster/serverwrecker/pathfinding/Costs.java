@@ -46,6 +46,7 @@ public class Costs {
     // We don't want a bot that tries to break blocks instead of walking around them
     public static final double BREAK_BLOCK_ADDITION = 10;
     public static final double PLACE_BLOCK = 10;
+    public static final double CORNER_SLIDE = 1;
     /**
      * For performance reasons, we do not want to calculate new costs for every possible block placed.
      * This is the state every placed block on the graph has.

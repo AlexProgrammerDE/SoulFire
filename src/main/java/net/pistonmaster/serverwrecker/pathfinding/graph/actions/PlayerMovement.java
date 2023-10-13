@@ -42,6 +42,7 @@ public final class PlayerMovement implements GraphAction {
     private final AtomicDouble cost;
     private final Vector3i targetBlock;
     private final boolean diagonal;
+    private boolean appliedCornerCost = false;
     @Setter
     @Getter
     private boolean isImpossible = false;
@@ -84,7 +85,7 @@ public final class PlayerMovement implements GraphAction {
 
         // Add the blocks that are required to be free for diagonal movement
         if (diagonal) {
-            var corner = getCorner(fromPosInt);
+            var corner = getCorner(fromPosInt, side);
 
             for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
                 // Apply jump shift to target edge and offset for body part
@@ -118,7 +119,7 @@ public final class PlayerMovement implements GraphAction {
         return requiredFreeBlocks;
     }
 
-    private Vector3i getCorner(Vector3i fromPosInt) {
+    private Vector3i getCorner(Vector3i fromPosInt, MovementSide side) {
         return (switch (direction) {
             case NORTH_EAST -> switch (side) {
                 case LEFT -> MovementDirection.NORTH;
@@ -140,9 +141,34 @@ public final class PlayerMovement implements GraphAction {
         }).offset(fromPosInt);
     }
 
+    public List<Vector3i> listAddCostIfSolidBlocks() {
+        if (diagonal) {
+            var fromPosInt = previousEntityState.positionBlock();
+            var list = new ObjectArrayList<Vector3i>(2);
+
+            // If these blocks are solid, the bot moves slower because the bot is running around a corner
+            var corner = getCorner(fromPosInt, side.opposite());
+            for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
+                // Apply jump shift to target edge and offset for body part
+                list.add(bodyOffset.offset(modifier.offsetIfJump(corner)));
+            }
+
+            return list;
+        } else {
+            return List.of();
+        }
+    }
+
     public Vector3i requiredSolidBlock() {
         // Floor block
         return targetBlock.sub(0, 1, 0);
+    }
+
+    public void addCornerCost() {
+        if (!appliedCornerCost) {
+            cost.addAndGet(Costs.CORNER_SLIDE);
+            appliedCornerCost = true;
+        }
     }
 
     @Override

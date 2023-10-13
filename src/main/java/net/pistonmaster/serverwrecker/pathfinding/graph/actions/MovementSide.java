@@ -27,4 +27,11 @@ public enum MovementSide {
     RIGHT;
 
     public static final MovementSide[] VALUES = values();
+
+    public MovementSide opposite() {
+        return switch (this) {
+            case LEFT -> RIGHT;
+            case RIGHT -> LEFT;
+        };
+    }
 }

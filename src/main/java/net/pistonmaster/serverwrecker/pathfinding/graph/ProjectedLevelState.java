@@ -83,7 +83,7 @@ public class ProjectedLevelState {
     @Override
     public boolean equals(Object o) {
         if (o instanceof ProjectedLevelState that) {
-            return blockChangesHash == that.blockChangesHash;
+            return blockChanges.equals(that.blockChanges);
         } else {
             return false;
         }

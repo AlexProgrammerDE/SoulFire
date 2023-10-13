@@ -44,6 +44,8 @@ public record MinecraftGraph(TagsState tagsState) {
         // We cache only this, but not solid because solid will only occur a single time
         var calculatedFree = false;
         var isFree = false;
+        var calculatedSolid = false;
+        var isSolid = false;
         for (var subscriber : e.getValue()) {
             if (subscriber == null) {
                 break;
@@ -73,18 +75,25 @@ public record MinecraftGraph(TagsState tagsState) {
                     }
                 }
                 case SOLID -> {
-                    var blockShapeType = blockState.blockShapeType();
-
-                    // Block with a current state that has no collision (Like grass, open fence)
-                    if (blockShapeType.hasNoCollisions()) {
-                        movement.setImpossible(true);
-                        continue;
+                    if (!calculatedSolid) {
+                        // Only count full blocks like stone or dirt as solid
+                        isSolid = blockState.blockShapeType().isFullBlock();
+                        calculatedSolid = true;
                     }
 
-                    // Prevent walking over cake, slabs, fences, etc.
-                    if (!blockShapeType.isFullBlock()) {
-                        // Could destroy and place block here, but that's too much work
+                    if (!isSolid) {
                         movement.setImpossible(true);
+                    }
+                }
+                case ADD_CORNER_COST_IF_SOLID -> {
+                    if (!calculatedSolid) {
+                        // Only count full blocks like stone or dirt as solid
+                        isSolid = blockState.blockShapeType().isFullBlock();
+                        calculatedSolid = true;
+                    }
+
+                    if (isSolid) {
+                        movement.addCornerCost();
                     }
                 }
             }
@@ -97,16 +106,16 @@ public record MinecraftGraph(TagsState tagsState) {
         {
             var blockSubscribers = new Object2ObjectOpenCustomHashMap<Vector3i, ObjectList<BlockSubscription>>(EXPECTED_BLOCKS, VectorHelper.VECTOR3I_HASH_STRATEGY);
 
-            var i = 0;
+            var size = 0;
             for (var direction : MovementDirection.VALUES) {
                 var diagonal = direction.isDiagonal();
                 for (var modifier : MovementModifier.VALUES) {
                     if (diagonal) {
                         for (var side : MovementSide.VALUES) {
-                            registerMovement(blockSubscribers, movements[i++] = new PlayerMovement(node, direction, side, modifier));
+                            registerMovement(blockSubscribers, movements[size++] = new PlayerMovement(node, direction, side, modifier));
                         }
                     } else {
-                        registerMovement(blockSubscribers, movements[i++] = new PlayerMovement(node, direction, null, modifier));
+                        registerMovement(blockSubscribers, movements[size++] = new PlayerMovement(node, direction, null, modifier));
                     }
                 }
             }
@@ -114,15 +123,17 @@ public record MinecraftGraph(TagsState tagsState) {
             blockSubscribers.object2ObjectEntrySet().fastForEach(SUBSCRIPTION_CONSUMER);
         }
 
-        var size = 0;
         var results = new GraphInstructions[MAX_MOVEMENTS];
-        for (var j = 0; j < MAX_MOVEMENTS; j++) {
-            var movement = movements[j];
-            if (movement.isImpossible()) {
-                continue;
-            }
+        {
+            var size = 0;
+            for (var j = 0; j < MAX_MOVEMENTS; j++) {
+                var movement = movements[j];
+                if (movement.isImpossible()) {
+                    continue;
+                }
 
-            results[size++] = movement.getInstructions();
+                results[size++] = movement.getInstructions();
+            }
         }
 
         return results;
@@ -136,6 +147,15 @@ public record MinecraftGraph(TagsState tagsState) {
                     .add(freeSubscription);
         }
 
+        var addCostIfSolidList = movement.listAddCostIfSolidBlocks();
+        if (!addCostIfSolidList.isEmpty()) {
+            var addCostIfSolidSubscription = new BlockSubscription(movement, SubscriptionType.ADD_CORNER_COST_IF_SOLID);
+            for (var addCostIfSolidBlock : addCostIfSolidList) {
+                blockSubscribers.computeIfAbsent(addCostIfSolidBlock, CREATE_MISSING_FUNCTION)
+                        .add(addCostIfSolidSubscription);
+            }
+        }
+
         var solidSubscription = new BlockSubscription(movement, SubscriptionType.SOLID);
         var solidBlock = movement.requiredSolidBlock();
         blockSubscribers.computeIfAbsent(solidBlock, CREATE_MISSING_FUNCTION)
@@ -144,7 +164,8 @@ public record MinecraftGraph(TagsState tagsState) {
 
     enum SubscriptionType {
         FREE,
-        SOLID
+        SOLID,
+        ADD_CORNER_COST_IF_SOLID
     }
 
     record BlockSubscription(PlayerMovement movement, SubscriptionType type) {
