@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.objects.*;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
@@ -27,6 +26,7 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.actions.*;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
+import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.function.Consumer;
@@ -36,27 +36,6 @@ public record MinecraftGraph(TagsState tagsState) {
     private static final int MAX_MOVEMENTS = 60;
     private static final int EXPECTED_BLOCKS = 58;
     private static final int MAX_SUBSCRIBERS = 15;
-    private static final Hash.Strategy<Vector3i> HASH_STRATEGY = new Hash.Strategy<>() {
-        @Override
-        public int hashCode(Vector3i o) {
-            var hash = 17;
-            hash = 31 * hash + o.getX();
-            hash = 31 * hash + o.getY();
-            hash = 31 * hash + o.getZ();
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Vector3i a, Vector3i b) {
-            if (a == null || b == null) {
-                return false;
-            }
-
-            return a.getX() == b.getX()
-                    && a.getY() == b.getY()
-                    && a.getZ() == b.getZ();
-        }
-    };
     private static final Object2ObjectFunction<? super Vector3i, ? extends ObjectList<BlockSubscription>> CREATE_MISSING_FUNCTION =
             k -> new ObjectArrayList<>(MAX_SUBSCRIBERS);
     private static final Consumer<? super Object2ObjectMap.Entry<Vector3i, ObjectList<BlockSubscription>>> SUBSCRIPTION_CONSUMER = e -> {
@@ -116,7 +95,7 @@ public record MinecraftGraph(TagsState tagsState) {
         var movements = new PlayerMovement[MAX_MOVEMENTS];
 
         {
-            var blockSubscribers = new Object2ObjectOpenCustomHashMap<Vector3i, ObjectList<BlockSubscription>>(EXPECTED_BLOCKS, HASH_STRATEGY);
+            var blockSubscribers = new Object2ObjectOpenCustomHashMap<Vector3i, ObjectList<BlockSubscription>>(EXPECTED_BLOCKS, VectorHelper.VECTOR3I_HASH_STRATEGY);
 
             var i = 0;
             for (var direction : MovementDirection.VALUES) {

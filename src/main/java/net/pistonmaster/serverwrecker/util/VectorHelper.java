@@ -19,10 +19,34 @@
  */
 package net.pistonmaster.serverwrecker.util;
 
+import it.unimi.dsi.fastutil.Hash;
 import org.cloudburstmc.math.vector.Vector2d;
 import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
 
 public class VectorHelper {
+    public static final Hash.Strategy<Vector3i> VECTOR3I_HASH_STRATEGY = new Hash.Strategy<>() {
+        @Override
+        public int hashCode(Vector3i o) {
+            var hash = 17;
+            hash = 31 * hash + o.getX();
+            hash = 31 * hash + o.getY();
+            hash = 31 * hash + o.getZ();
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Vector3i a, Vector3i b) {
+            if (a == null || b == null) {
+                return false;
+            }
+
+            return a.getX() == b.getX()
+                    && a.getY() == b.getY()
+                    && a.getZ() == b.getZ();
+        }
+    };
+
     private VectorHelper() {
     }
 

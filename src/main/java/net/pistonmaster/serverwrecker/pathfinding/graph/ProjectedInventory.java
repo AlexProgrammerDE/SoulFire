@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
@@ -28,7 +29,9 @@ import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.util.ItemTypeHelper;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -39,13 +42,17 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class ProjectedInventory {
     private final int usableBlockItems;
-    private final Set<SWItemStack> usableTools;
+    @Getter
+    private final SWItemStack[] usableToolsAndNull;
     private final Map<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
-    private final int changeHash;
 
     public ProjectedInventory(PlayerInventoryContainer playerInventory) {
         var blockItems = 0;
         var usableTools = new HashSet<SWItemStack>();
+
+        // Empty slot
+        usableTools.add(null);
+
         for (var slot : playerInventory.getStorage()) {
             if (slot.item() == null) {
                 continue;
@@ -59,13 +66,8 @@ public class ProjectedInventory {
         }
 
         this.usableBlockItems = blockItems;
-        if (usableTools.isEmpty()) {
-            this.usableTools = Set.of();
-        } else {
-            this.usableTools = usableTools;
-        }
+        this.usableToolsAndNull = usableTools.toArray(new SWItemStack[0]);
 
-        this.changeHash = Objects.hash(usableBlockItems, usableTools);
         this.sharedMiningCosts = new ConcurrentHashMap<>();
     }
 
@@ -74,25 +76,11 @@ public class ProjectedInventory {
     }
 
     public ProjectedInventory withOneLessBlock() {
-        return new ProjectedInventory(usableBlockItems - 1, usableTools, sharedMiningCosts, changeHash);
+        return new ProjectedInventory(usableBlockItems - 1, usableToolsAndNull, sharedMiningCosts);
     }
 
     public ProjectedInventory withOneMoreBlock() {
-        return new ProjectedInventory(usableBlockItems + 1, usableTools, sharedMiningCosts, changeHash);
-    }
-
-    public SWItemStack[] getToolAndNull() {
-        var array = new SWItemStack[usableTools.size() + 1];
-
-        var i = 0;
-        for (var tool : usableTools) {
-            array[i] = tool;
-            i++;
-        }
-
-        array[i] = null;
-
-        return array;
+        return new ProjectedInventory(usableBlockItems + 1, usableToolsAndNull, sharedMiningCosts);
     }
 
     public Optional<Costs.BlockMiningCosts> getMiningCosts(TagsState tagsState, BlockStateMeta blockStateMeta) {
@@ -114,14 +102,15 @@ public class ProjectedInventory {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        var that = (ProjectedInventory) o;
-        return changeHash == that.changeHash;
+        if (o instanceof ProjectedInventory that) {
+            return usableBlockItems == that.usableBlockItems;
+        } else {
+            return false;
+        }
     }
 
     @Override
     public int hashCode() {
-        return changeHash;
+        return usableBlockItems;
     }
 }

@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.pathfinding;
 
 import com.google.common.base.Stopwatch;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
@@ -32,6 +32,7 @@ import net.pistonmaster.serverwrecker.pathfinding.goals.GoalScorer;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.pathfinding.graph.OutOfLevelException;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
+import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Collections;
@@ -61,7 +62,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         var stopwatch = Stopwatch.createStarted();
 
         // Store block positions and the best route to them
-        var routeIndex = new Object2ObjectOpenHashMap<Vector3i, MinecraftRouteNode>();
+        var routeIndex = new Object2ObjectOpenCustomHashMap<Vector3i, MinecraftRouteNode>(VectorHelper.VECTOR3I_HASH_STRATEGY);
 
         // Store block positions that we need to look at
         var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>();
@@ -111,10 +112,11 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                     break;
                 }
 
-                var actionCost = instructions.actionCost();
                 var actionTargetState = instructions.targetState();
-                var worldActions = instructions.actions();
                 routeIndex.compute(actionTargetState.positionBlock(), (k, v) -> {
+                    var actionCost = instructions.actionCost();
+                    var worldActions = instructions.actions();
+
                     // Calculate new distance from start to this connection,
                     // Get distance from the current element
                     // and add the distance from the current element to the next element

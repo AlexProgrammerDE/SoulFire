@@ -61,17 +61,7 @@ public class Costs {
         var lowestMiningTicks = Integer.MAX_VALUE;
         SWItemStack bestItem = null;
         var correctToolUsed = false;
-        var seenNull = false;
-        for (var slot : inventory.getToolAndNull()) {
-            // Only check one time for null
-            if (slot == null) {
-                if (seenNull) {
-                    continue;
-                }
-
-                seenNull = true;
-            }
-
+        for (var slot : inventory.getUsableToolsAndNull()) {
             var miningTicks = getRequiredMiningTicks(tagsState, null, true, slot, blockType);
             if (miningTicks.ticks() < lowestMiningTicks) {
                 lowestMiningTicks = miningTicks.ticks();
