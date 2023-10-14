@@ -57,8 +57,8 @@ public record BreakBlockGoal(Vector3i goal, Vector3d goal3d) implements GoalScor
         }
 
         var breakCost = entityState.inventory().getMiningCosts(
-                        graph.tagsState(),
-                        blockStateMeta.get()
+                graph.tagsState(),
+                blockStateMeta.get()
         ).miningCost();
 
         return distance + breakCost;

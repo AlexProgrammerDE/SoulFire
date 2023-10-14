@@ -29,11 +29,11 @@ import org.cloudburstmc.math.vector.Vector3i;
  * Represents the state of the bot in the level.
  * This means the positions and in the future also inventory.
  *
- * @param position   The position of the bot.
- *                   This is always the middle of the block.
+ * @param position      The position of the bot.
+ *                      This is always the middle of the block.
  * @param positionBlock The position of the bot in block coordinates.
- * @param levelState The level state of the world the bot is in.
- * @param inventory  The inventory state of the bot.
+ * @param levelState    The level state of the world the bot is in.
+ * @param inventory     The inventory state of the bot.
  */
 public record BotEntityState(Vector3d position, Vector3i positionBlock, ProjectedLevelState levelState,
                              ProjectedInventory inventory) {

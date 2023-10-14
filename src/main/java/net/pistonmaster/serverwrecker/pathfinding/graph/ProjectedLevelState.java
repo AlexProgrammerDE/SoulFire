@@ -94,7 +94,7 @@ public class ProjectedLevelState {
     }
 
     public boolean equals(ProjectedLevelState that) {
-            return blockChanges.equals(that.blockChanges);
+        return blockChanges.equals(that.blockChanges);
     }
 
     @Override
