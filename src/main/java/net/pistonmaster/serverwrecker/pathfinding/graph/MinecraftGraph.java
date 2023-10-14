@@ -45,8 +45,8 @@ import java.util.function.Consumer;
 public record MinecraftGraph(TagsState tagsState,
                              Consumer<? super Object2ObjectMap.Entry<Vector3i, ObjectList<BlockSubscription>>> subscriptionConsumer) {
     private static final int MAX_ACTIONS = 84;
-    private static final int EXPECTED_BLOCKS = 58;
-    private static final int MAX_SUBSCRIBERS = 15;
+    private static final int EXPECTED_BLOCKS = 70;
+    private static final int MAX_SUBSCRIBERS = 27;
     private static final Object2ObjectFunction<? super Vector3i, ? extends ObjectList<BlockSubscription>> CREATE_MISSING_FUNCTION =
             k -> new ObjectArrayList<>(MAX_SUBSCRIBERS);
 

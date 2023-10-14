@@ -30,8 +30,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
-import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
-import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.SWDirection;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
@@ -49,21 +47,6 @@ public class BotActionManager {
     @ToString.Exclude
     private final SessionDataManager dataManager;
     private int sequenceNumber = 0;
-
-    public static Optional<BlockPlaceData> findBlockToPlaceAgainst(ProjectedLevelState levelState, Vector3i targetPos) {
-        for (var direction : SWDirection.VALUES) {
-            var blockPos = direction.offset(targetPos);
-
-            var blockState = levelState.getBlockStateAt(blockPos);
-            if (blockState.isEmpty() || !blockState.get().blockShapeType().isFullBlock()) {
-                continue;
-            }
-
-            return Optional.of(new BlockPlaceData(blockPos, direction.getDirection()));
-        }
-
-        return Optional.empty();
-    }
 
     public void incrementSequenceNumber() {
         sequenceNumber++;

@@ -31,7 +31,6 @@ import net.pistonmaster.serverwrecker.util.ItemTypeHelper;
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
