@@ -87,13 +87,8 @@ public class ProjectedInventory {
                 Costs.calculateBlockBreakCost(tagsState, this, type));
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof ProjectedInventory that) {
-            return usableBlockItems == that.usableBlockItems;
-        } else {
-            return false;
-        }
+    public boolean equals(ProjectedInventory that) {
+        return usableBlockItems == that.usableBlockItems;
     }
 
     @Override

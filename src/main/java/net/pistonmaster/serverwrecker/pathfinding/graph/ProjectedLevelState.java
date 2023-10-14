@@ -93,13 +93,8 @@ public class ProjectedLevelState {
         return blockChanges.containsKey(position);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof ProjectedLevelState that) {
+    public boolean equals(ProjectedLevelState that) {
             return blockChanges.equals(that.blockChanges);
-        } else {
-            return false;
-        }
     }
 
     @Override
