@@ -61,11 +61,17 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             var vector1 = a.positionBlock();
             var vector2 = b.positionBlock();
 
-            return vector1.getX() == vector2.getX() &&
-                    vector1.getY() == vector2.getY() &&
-                    vector1.getZ() == vector2.getZ() &&
-                    a.levelState().equals(b.levelState()) &&
-                    a.inventory().equals(b.inventory());
+            if (vector1.getX() != vector2.getX() ||
+                    vector1.getY() != vector2.getY() ||
+                    vector1.getZ() != vector2.getZ()) {
+                return false;
+            }
+
+            if (!a.levelState().equals(b.levelState())) {
+                return false;
+            }
+
+            return a.inventory().equals(b.inventory());
         }
     };
 

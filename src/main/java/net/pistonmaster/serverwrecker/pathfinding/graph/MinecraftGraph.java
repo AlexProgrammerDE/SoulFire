@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.pathfinding.graph;
 
 import it.unimi.dsi.fastutil.objects.*;
 import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.serverwrecker.data.BlockItems;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
@@ -162,12 +163,14 @@ public record MinecraftGraph(TagsState tagsState,
                             calculatedSolid = true;
                         }
 
-                        var blockBreak = (BlockBreakGraphAction) action;
-                        if (!isSolid || !blockState.blockType().diggable()) {
-                            blockBreak.setImpossible(true);
-                        } else {
+                        if (isSolid &&
+                                blockState.blockType().diggable() &&
+                                BlockItems.hasItemType(blockState.blockType())) {
+                            var blockBreak = (BlockBreakGraphAction) action;
                             blockBreak.setCosts(blockBreak.getPreviousEntityState().inventory()
                                     .getMiningCosts(tagsState, blockState));
+                        } else {
+                            ((BlockBreakGraphAction) action).setImpossible(true);
                         }
                     }
                     case BLOCK_BREAK_FREE -> {
@@ -266,6 +269,10 @@ public record MinecraftGraph(TagsState tagsState,
 
     private BlockPlaceGraphAction registerBlockPlace(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
                                                      BlockPlaceGraphAction blockPlace) {
+        if (blockPlace.isImpossible()) {
+            return blockPlace;
+        }
+
         {
             var replaceableSubscription = new BlockSubscription(blockPlace, SubscriptionType.BLOCK_PLACE_REPLACEABLE);
             var replaceableBlock = blockPlace.requiredReplaceableBlock();

@@ -49,4 +49,8 @@ public class BlockItems {
     public static Optional<ItemType> getItemType(BlockType blockType) {
         return Optional.ofNullable(VALUES_REVERSE[blockType.id()]);
     }
+
+    public static boolean hasItemType(BlockType blockType) {
+        return VALUES_REVERSE[blockType.id()] != null;
+    }
 }

@@ -54,8 +54,8 @@ public class BlockPlaceGraphAction implements GraphAction {
 
         // No block to place means instant failure
         this.isImpossible = !previousEntityState.inventory().hasBlockToPlace();
-        this.targetWithoutModifier = direction.offset(previousEntityState.positionBlock());
-        this.targetBlock = modifier.offset(targetWithoutModifier);
+        this.targetWithoutModifier = isImpossible ? null : direction.offset(previousEntityState.positionBlock());
+        this.targetBlock = isImpossible ? null : modifier.offset(targetWithoutModifier);
     }
 
     public Vector3i requiredReplaceableBlock() {
