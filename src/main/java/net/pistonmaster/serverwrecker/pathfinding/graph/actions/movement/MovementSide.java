@@ -17,21 +17,21 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.graph.actions;
-
-import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
+package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 
 /**
- * A calculated action that the bot can take on a graph world representation.
+ * When we run around a wall, what side do we run on?
  */
-public interface GraphAction {
-    GraphInstructions getInstructions();
+public enum MovementSide {
+    LEFT,
+    RIGHT;
 
-    boolean isImpossible();
+    public static final MovementSide[] VALUES = values();
 
-    // A step further than isImpossible, for block placing this also considers no block
-    // to place against found.
-    boolean isImpossibleToComplete();
-
-    BotEntityState getPreviousEntityState();
+    public MovementSide opposite() {
+        return switch (this) {
+            case LEFT -> RIGHT;
+            case RIGHT -> LEFT;
+        };
+    }
 }

@@ -17,31 +17,27 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.graph.actions;
+package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 
-import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.function.Function;
-
 @RequiredArgsConstructor
-public enum SWDirection {
-    DOWN(Direction.DOWN, pos -> pos.add(0, 1, 0)),
-    UP(Direction.UP, pos -> pos.add(0, -1, 0)),
-    NORTH(Direction.NORTH, pos -> pos.add(0, 0, 1)),
-    SOUTH(Direction.SOUTH, pos -> pos.add(0, 0, -1)),
-    WEST(Direction.WEST, pos -> pos.add(1, 0, 0)),
-    EAST(Direction.EAST, pos -> pos.add(-1, 0, 0));
+public enum BodyPart {
+    FEET,
+    HEAD;
 
-    public static final SWDirection[] VALUES = values();
+    // Iterating over BodyPart.values() is slower than iteration over a static array
+    // Reversed because we normally want to see the head block mined before the feet
+    public static final BodyPart[] BODY_PARTS_REVERSE = new BodyPart[]{
+            BodyPart.HEAD,
+            BodyPart.FEET
+    };
 
-    @Getter
-    private final Direction direction;
-    private final Function<Vector3i, Vector3i> offsetFunction;
-
-    public Vector3i offset(Vector3i pos) {
-        return offsetFunction.apply(pos);
+    public Vector3i offset(Vector3i position) {
+        return switch (this) {
+            case FEET -> position;
+            case HEAD -> position.add(0, 1, 0);
+        };
     }
 }

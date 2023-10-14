@@ -17,21 +17,23 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.graph.actions;
+package net.pistonmaster.serverwrecker.pathfinding.graph.actions.block;
 
-/**
- * When we run around a wall, what side do we run on?
- */
-public enum MovementSide {
-    LEFT,
-    RIGHT;
+import org.cloudburstmc.math.vector.Vector3i;
 
-    public static final MovementSide[] VALUES = values();
+public enum BlockModifier {
+    HEAD,
+    FEET,
+    FLOOR;
 
-    public MovementSide opposite() {
+    public static final BlockModifier[] VALUES = values();
+
+    @SuppressWarnings("DuplicatedCode")
+    public Vector3i offset(Vector3i vector) {
         return switch (this) {
-            case LEFT -> RIGHT;
-            case RIGHT -> LEFT;
+            case HEAD -> vector.add(0, 1, 0);
+            case FEET -> vector;
+            case FLOOR -> vector.add(0, -1, 0);
         };
     }
 }

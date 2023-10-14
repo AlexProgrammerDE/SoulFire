@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.pathfinding.goals;
 
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
-import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
@@ -47,12 +46,20 @@ public record BreakBlockGoal(Vector3i goal, Vector3d goal3d) implements GoalScor
             return distance;
         }
 
+        // Don't try to find a way to dig bedrock
+        if (!blockStateMeta.get().blockType().diggable()) {
+            throw new IllegalStateException("Block is not diggable!");
+        }
+
+        // We only want to dig full blocks (not slabs, stairs, etc.), removes a lot of edge cases
+        if (!blockStateMeta.get().blockShapeType().isFullBlock()) {
+            throw new IllegalStateException("Block is not a full block!");
+        }
+
         var breakCost = entityState.inventory().getMiningCosts(
                         graph.tagsState(),
                         blockStateMeta.get()
-                )
-                .map(Costs.BlockMiningCosts::miningCost)
-                .orElseThrow(() -> new IllegalStateException("Block is not breakable!"));
+        ).miningCost();
 
         return distance + breakCost;
     }

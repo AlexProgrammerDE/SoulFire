@@ -31,16 +31,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
-import net.pistonmaster.serverwrecker.pathfinding.graph.actions.SWDirection;
-import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.SWDirection;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -53,15 +50,9 @@ public class BotActionManager {
     private final SessionDataManager dataManager;
     private int sequenceNumber = 0;
 
-    public static Optional<BlockPlaceData> findBlockToPlaceAgainst(Map<Vector3i, Optional<BlockStateMeta>> blockCache,
-                                                                   ProjectedLevelState levelState, Vector3i targetPos,
-                                                                   List<Vector3i> ignoreBlocks) {
+    public static Optional<BlockPlaceData> findBlockToPlaceAgainst(ProjectedLevelState levelState, Vector3i targetPos) {
         for (var direction : SWDirection.VALUES) {
             var blockPos = direction.offset(targetPos);
-
-            if (ignoreBlocks.contains(blockPos)) {
-                continue;
-            }
 
             var blockState = levelState.getBlockStateAt(blockPos);
             if (blockState.isEmpty() || !blockState.get().blockShapeType().isFullBlock()) {

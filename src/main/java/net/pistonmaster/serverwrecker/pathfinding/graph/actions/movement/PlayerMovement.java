@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.graph.actions;
+package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -27,6 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
+import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphAction;
+import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -176,5 +178,10 @@ public final class PlayerMovement implements GraphAction {
                 previousEntityState.levelState(),
                 previousEntityState.inventory()
         ), cost.get(), List.of(new MovementAction(targetDoublePosition, diagonal)));
+    }
+
+    @Override
+    public boolean isImpossibleToComplete() {
+        return isImpossible;
     }
 }

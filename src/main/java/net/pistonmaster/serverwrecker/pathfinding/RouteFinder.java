@@ -40,7 +40,7 @@ import java.util.List;
 
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
-    private static List<WorldAction> getActions(MinecraftRouteNode current) {
+    private static List<WorldAction> getActionsTrace(MinecraftRouteNode current) {
         var actions = new ObjectArrayList<WorldAction>();
         var previousElement = current;
         do {
@@ -83,7 +83,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 stopwatch.stop();
                 log.info("Success! Took {}ms to find route", stopwatch.elapsed().toMillis());
 
-                return getActions(current);
+                return getActionsTrace(current);
             }
 
             GraphInstructions[] instructionsList;
@@ -99,7 +99,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
                 // This is the best node we found so far
                 // We will add a recalculating action and return the best route
-                return getActions(new MinecraftRouteNode(
+                return getActionsTrace(new MinecraftRouteNode(
                         bestNode.getEntityState(),
                         bestNode,
                         List.of(new RecalculatePathAction()),

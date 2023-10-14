@@ -83,21 +83,9 @@ public class ProjectedInventory {
         return new ProjectedInventory(usableBlockItems + 1, usableToolsAndNull, sharedMiningCosts);
     }
 
-    public Optional<Costs.BlockMiningCosts> getMiningCosts(TagsState tagsState, BlockStateMeta blockStateMeta) {
-        var blockType = blockStateMeta.blockType();
-
-        // Don't try to find a way to dig bedrock
-        if (!blockType.diggable()) {
-            return Optional.empty();
-        }
-
-        // We only want to dig full blocks (not slabs, stairs, etc.), removes a lot of edge cases
-        if (!blockStateMeta.blockShapeType().isFullBlock()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(sharedMiningCosts.computeIfAbsent(blockType, type ->
-                Costs.calculateBlockBreakCost(tagsState, this, type)));
+    public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockStateMeta blockStateMeta) {
+        return sharedMiningCosts.computeIfAbsent(blockStateMeta.blockType(), type ->
+                Costs.calculateBlockBreakCost(tagsState, this, type));
     }
 
     @Override
