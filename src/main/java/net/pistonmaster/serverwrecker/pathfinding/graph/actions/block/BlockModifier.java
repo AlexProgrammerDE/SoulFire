@@ -33,7 +33,7 @@ public enum BlockModifier {
         return switch (this) {
             case HEAD -> vector.add(0, 1, 0);
             case FEET -> vector;
-            case FLOOR -> vector.add(0, -1, 0);
+            case FLOOR -> vector.sub(0, 1, 0);
         };
     }
 }

@@ -42,11 +42,15 @@ public class ProjectedLevelState {
     private final ChunkHolder chunkHolder;
     private final Object2ObjectMap<Vector3i, BlockStateMeta> blockChanges;
     private final int blockChangesHash;
+    private final int minBuildHeight;
+    private final int maxBuildHeight;
 
     public ProjectedLevelState(LevelState levelState) {
         this.chunkHolder = levelState.getChunks().immutableCopy();
         this.blockChanges = Object2ObjectMaps.emptyMap();
         this.blockChangesHash = blockChanges.hashCode();
+        this.minBuildHeight = levelState.getMinBuildHeight();
+        this.maxBuildHeight = levelState.getMaxBuildHeight();
     }
 
     public ProjectedLevelState withChangeToSolidBlock(Vector3i position) {
@@ -55,7 +59,7 @@ public class ProjectedLevelState {
         blockChanges.putAll(this.blockChanges);
         blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
 
-        return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode());
+        return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode(), minBuildHeight, maxBuildHeight);
     }
 
     public ProjectedLevelState withChangeToAir(Vector3i position) {
@@ -64,10 +68,19 @@ public class ProjectedLevelState {
         blockChanges.putAll(this.blockChanges);
         blockChanges.put(position, BlockStateMeta.AIR_BLOCK_STATE);
 
-        return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode());
+        return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode(), minBuildHeight, maxBuildHeight);
     }
 
     public Optional<BlockStateMeta> getBlockStateAt(Vector3i position) {
+        // So that we don't throw OutOfLevelException when we are in the void,
+        // OutOfLevelException should be only thrown when we are outside the render distance
+        var y = position.getY();
+        if (y < minBuildHeight) {
+            return Optional.of(BlockStateMeta.AIR_BLOCK_STATE);
+        } else if (y >= maxBuildHeight) {
+            return Optional.of(BlockStateMeta.AIR_BLOCK_STATE);
+        }
+
         var blockChange = blockChanges.get(position);
         if (blockChange != null) {
             return Optional.of(blockChange);

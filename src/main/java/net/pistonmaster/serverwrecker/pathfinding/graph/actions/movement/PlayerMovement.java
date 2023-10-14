@@ -170,6 +170,11 @@ public final class PlayerMovement implements GraphAction {
     }
 
     @Override
+    public boolean isImpossibleToComplete() {
+        return isImpossible;
+    }
+
+    @Override
     public GraphInstructions getInstructions() {
         var targetDoublePosition = VectorHelper.middleOfBlockNormalize(targetBlock.toDouble());
         return new GraphInstructions(new BotEntityState(
@@ -178,10 +183,5 @@ public final class PlayerMovement implements GraphAction {
                 previousEntityState.levelState(),
                 previousEntityState.inventory()
         ), cost.get(), List.of(new MovementAction(targetDoublePosition, diagonal)));
-    }
-
-    @Override
-    public boolean isImpossibleToComplete() {
-        return isImpossible;
     }
 }

@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.pathfinding;
 
 import com.google.common.base.Stopwatch;
+import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectCollection;
@@ -32,14 +33,42 @@ import net.pistonmaster.serverwrecker.pathfinding.goals.GoalScorer;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.pathfinding.graph.OutOfLevelException;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
-import net.pistonmaster.serverwrecker.util.VectorHelper;
-import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Collections;
 import java.util.List;
 
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
+    private static final Hash.Strategy<BotEntityState> BOT_ENTITY_STATE_HASH_STRATEGY = new Hash.Strategy<>() {
+        @Override
+        public int hashCode(BotEntityState o) {
+            var vector = o.positionBlock();
+            var hash = 17;
+            hash = 31 * hash + vector.getX();
+            hash = 31 * hash + vector.getY();
+            hash = 31 * hash + vector.getZ();
+            hash = 31 * hash + o.levelState().hashCode();
+            hash = 31 * hash + o.inventory().hashCode();
+            return hash;
+        }
+
+        @Override
+        public boolean equals(BotEntityState a, BotEntityState b) {
+            if (a == null || b == null) {
+                return false;
+            }
+
+            var vector1 = a.positionBlock();
+            var vector2 = b.positionBlock();
+
+            return vector1.getX() == vector2.getX() &&
+                    vector1.getY() == vector2.getY() &&
+                    vector1.getZ() == vector2.getZ() &&
+                    a.levelState().equals(b.levelState()) &&
+                    a.inventory().equals(b.inventory());
+        }
+    };
+
     private static List<WorldAction> getActionsTrace(MinecraftRouteNode current) {
         var actions = new ObjectArrayList<WorldAction>();
         var previousElement = current;
@@ -62,7 +91,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         var stopwatch = Stopwatch.createStarted();
 
         // Store block positions and the best route to them
-        var routeIndex = new Object2ObjectOpenCustomHashMap<Vector3i, MinecraftRouteNode>(VectorHelper.VECTOR3I_HASH_STRATEGY);
+        var routeIndex = new Object2ObjectOpenCustomHashMap<BotEntityState, MinecraftRouteNode>(BOT_ENTITY_STATE_HASH_STRATEGY);
 
         // Store block positions that we need to look at
         var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>();
@@ -71,7 +100,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         log.info("Start score (Usually distance): {}", startScore);
 
         var start = new MinecraftRouteNode(from, null, List.of(new MovementAction(from.position(), false)), 0d, startScore);
-        routeIndex.put(from.positionBlock(), start);
+        routeIndex.put(from, start);
         openSet.enqueue(start);
 
         while (!openSet.isEmpty()) {
@@ -113,7 +142,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 }
 
                 var actionTargetState = instructions.targetState();
-                routeIndex.compute(actionTargetState.positionBlock(), (k, v) -> {
+                routeIndex.compute(actionTargetState, (k, v) -> {
                     var actionCost = instructions.actionCost();
                     var worldActions = instructions.actions();
 

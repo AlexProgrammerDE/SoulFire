@@ -63,6 +63,11 @@ public class BlockBreakGraphAction implements GraphAction {
     }
 
     @Override
+    public boolean isImpossibleToComplete() {
+        return isImpossible;
+    }
+
+    @Override
     public GraphInstructions getInstructions() {
         var inventory = previousEntityState.inventory();
 
@@ -76,10 +81,5 @@ public class BlockBreakGraphAction implements GraphAction {
                 previousEntityState.levelState().withChangeToAir(targetBlock),
                 inventory
         ), costs.miningCost(), List.of(new BlockBreakAction(targetBlock)));
-    }
-
-    @Override
-    public boolean isImpossibleToComplete() {
-        return isImpossible;
     }
 }

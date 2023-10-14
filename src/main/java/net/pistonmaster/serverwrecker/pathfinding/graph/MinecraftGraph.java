@@ -118,10 +118,22 @@ public record MinecraftGraph(TagsState tagsState,
                         }
                     }
                     case BLOCK_PLACE_REPLACEABLE -> {
-                        var blockPlace = (BlockPlaceGraphAction) action;
-
                         if (!BlockTypeHelper.isReplaceable(blockState.blockType())) {
-                            blockPlace.setImpossible(true);
+                            // Target block cannot be replaced with another block
+                            ((BlockPlaceGraphAction) action).setImpossible(true);
+                        }
+                    }
+                    case BLOCK_PLACE_FREE -> {
+                        if (!calculatedFree) {
+                            // We can walk through blocks like air or grass
+                            isFree = blockState.blockShapeType().hasNoCollisions()
+                                    && !BlockTypeHelper.isFluid(blockState.blockType());
+                            calculatedFree = true;
+                        }
+
+                        if (!isFree) {
+                            // This required block to place the target block is not free
+                            ((BlockPlaceGraphAction) action).setImpossible(true);
                         }
                     }
                     case BLOCK_PLACE_AGAINST_SOLID -> {
@@ -144,14 +156,13 @@ public record MinecraftGraph(TagsState tagsState,
                         }
                     }
                     case BLOCK_BREAK_SOLID_AND_ADD_COST -> {
-                        var blockBreak = (BlockBreakGraphAction) action;
-
                         if (!calculatedSolid) {
                             // Only count full blocks like stone or dirt as solid
                             isSolid = blockState.blockShapeType().isFullBlock();
                             calculatedSolid = true;
                         }
 
+                        var blockBreak = (BlockBreakGraphAction) action;
                         if (!isSolid || !blockState.blockType().diggable()) {
                             blockBreak.setImpossible(true);
                         } else {
@@ -160,8 +171,6 @@ public record MinecraftGraph(TagsState tagsState,
                         }
                     }
                     case BLOCK_BREAK_FREE -> {
-                        var blockBreak = (BlockBreakGraphAction) action;
-
                         if (!calculatedFree) {
                             // We can walk through blocks like air or grass
                             isFree = blockState.blockShapeType().hasNoCollisions()
@@ -170,7 +179,7 @@ public record MinecraftGraph(TagsState tagsState,
                         }
 
                         if (!isFree) {
-                            blockBreak.setImpossible(true);
+                            ((BlockBreakGraphAction) action).setImpossible(true);
                         }
                     }
                 }
@@ -204,6 +213,9 @@ public record MinecraftGraph(TagsState tagsState,
                     actions[size++] = registerBlockBreak(blockSubscribers, new BlockBreakGraphAction(node, direction, modifier));
                 }
             }
+
+            // log.debug("Block subscribers: {}", blockSubscribers.size());
+            // log.debug("Block subscribers values: {}", blockSubscribers.values().stream().mapToInt(ObjectList::size).max());
 
             blockSubscribers.object2ObjectEntrySet().fastForEach(subscriptionConsumer);
         }
@@ -262,10 +274,19 @@ public record MinecraftGraph(TagsState tagsState,
         }
 
         {
+            var freeBlock = blockPlace.requiredFreeBlock();
+            if (freeBlock.isPresent()) {
+                var freeSubscription = new BlockSubscription(blockPlace, SubscriptionType.BLOCK_PLACE_FREE);
+                blockSubscribers.computeIfAbsent(freeBlock.get(), CREATE_MISSING_FUNCTION)
+                        .add(freeSubscription);
+            }
+        }
+
+        {
             for (var block : blockPlace.possibleBlocksToPlaceAgainst()) {
-                var replaceableSubscription = new BlockSubscription(blockPlace, SubscriptionType.BLOCK_PLACE_AGAINST_SOLID, block);
+                var againstSubscription = new BlockSubscription(blockPlace, SubscriptionType.BLOCK_PLACE_AGAINST_SOLID, block);
                 blockSubscribers.computeIfAbsent(block.againstPos(), CREATE_MISSING_FUNCTION)
-                        .add(replaceableSubscription);
+                        .add(againstSubscription);
             }
         }
 
@@ -298,6 +319,7 @@ public record MinecraftGraph(TagsState tagsState,
         MOVEMENT_SOLID,
         MOVEMENT_ADD_CORNER_COST_IF_SOLID,
         BLOCK_PLACE_REPLACEABLE,
+        BLOCK_PLACE_FREE,
         BLOCK_PLACE_AGAINST_SOLID,
         BLOCK_BREAK_SOLID_AND_ADD_COST,
         BLOCK_BREAK_FREE

@@ -25,7 +25,7 @@ import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
  * A calculated action that the bot can take on a graph world representation.
  */
 public interface GraphAction {
-    GraphInstructions getInstructions();
+    BotEntityState getPreviousEntityState();
 
     boolean isImpossible();
 
@@ -33,5 +33,5 @@ public interface GraphAction {
     // to place against found.
     boolean isImpossibleToComplete();
 
-    BotEntityState getPreviousEntityState();
+    GraphInstructions getInstructions();
 }
