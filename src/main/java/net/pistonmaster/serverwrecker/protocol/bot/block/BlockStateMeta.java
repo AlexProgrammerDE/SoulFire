@@ -27,6 +27,7 @@ import java.util.Objects;
 public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType, int precalculatedHash) {
     private static final BlockShapeType EMPTY_SHAPE = BlockShapeType.getById(0);
     public static final BlockStateMeta AIR_BLOCK_STATE = new BlockStateMeta(BlockType.AIR, EMPTY_SHAPE);
+    public static final BlockStateMeta VOID_AIR_BLOCK_STATE = new BlockStateMeta(BlockType.VOID_AIR, EMPTY_SHAPE);
 
     public BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType) {
         this(blockType, blockShapeType, Objects.hash(blockType, blockShapeType));
@@ -41,11 +42,7 @@ public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType,
     }
 
     public static BlockStateMeta forDefaultBlockType(BlockType blockType) {
-        if (blockType == BlockType.AIR) {
-            return AIR_BLOCK_STATE;
-        } else {
-            return new BlockStateMeta(blockType, 0);
-        }
+        return new BlockStateMeta(blockType, 0);
     }
 
     private static BlockShapeType getBlockShapeType(BlockType blockType, int stateIndex) {

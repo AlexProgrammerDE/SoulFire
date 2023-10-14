@@ -76,9 +76,9 @@ public class ProjectedLevelState {
         // OutOfLevelException should be only thrown when we are outside the render distance
         var y = position.getY();
         if (y < minBuildHeight) {
-            return Optional.of(BlockStateMeta.AIR_BLOCK_STATE);
+            return Optional.of(BlockStateMeta.VOID_AIR_BLOCK_STATE);
         } else if (y >= maxBuildHeight) {
-            return Optional.of(BlockStateMeta.AIR_BLOCK_STATE);
+            return Optional.of(BlockStateMeta.VOID_AIR_BLOCK_STATE);
         }
 
         var blockChange = blockChanges.get(position);

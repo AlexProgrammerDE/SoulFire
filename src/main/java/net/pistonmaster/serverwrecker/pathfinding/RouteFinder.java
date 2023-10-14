@@ -42,13 +42,9 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     private static final Hash.Strategy<BotEntityState> BOT_ENTITY_STATE_HASH_STRATEGY = new Hash.Strategy<>() {
         @Override
         public int hashCode(BotEntityState o) {
-            var vector = o.positionBlock();
-            var hash = 17;
-            hash = 31 * hash + vector.getX();
-            hash = 31 * hash + vector.getY();
-            hash = 31 * hash + vector.getZ();
-            hash = 31 * hash + o.levelState().hashCode();
+            var hash = o.positionBlock().hashCode();
             hash = 31 * hash + o.inventory().hashCode();
+            hash = 31 * hash + o.levelState().hashCode();
             return hash;
         }
 
@@ -67,11 +63,11 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 return false;
             }
 
-            if (!a.levelState().equals(b.levelState())) {
+            if (!a.inventory().equals(b.inventory())) {
                 return false;
             }
 
-            return a.inventory().equals(b.inventory());
+            return a.levelState().equals(b.levelState());
         }
     };
 

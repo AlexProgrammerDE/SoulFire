@@ -65,6 +65,7 @@ public class ProjectedInventory {
         }
 
         this.usableBlockItems = blockItems;
+
         this.usableToolsAndNull = usableToolsAndNull.toArray(new SWItemStack[0]);
 
         this.sharedMiningCosts = new ConcurrentHashMap<>();

@@ -228,6 +228,10 @@ public record MinecraftGraph(TagsState tagsState,
             var size = 0;
             for (var j = 0; j < MAX_ACTIONS; j++) {
                 var movement = actions[j];
+                if (movement == null) {
+                    break;
+                }
+
                 if (movement.isImpossibleToComplete()) {
                     continue;
                 }
