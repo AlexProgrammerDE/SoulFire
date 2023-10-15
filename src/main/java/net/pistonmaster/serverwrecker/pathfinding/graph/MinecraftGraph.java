@@ -174,6 +174,9 @@ public record MinecraftGraph(TagsState tagsState) {
 
                             if (isSolid) {
                                 movement.addCornerCost();
+                            } else if (BlockTypeHelper.isHurtOnTouch(blockState.blockType())) {
+                                // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
+                                movement.setImpossible(true);
                             }
                         }
                         case BLOCK_PLACE_REPLACEABLE -> {

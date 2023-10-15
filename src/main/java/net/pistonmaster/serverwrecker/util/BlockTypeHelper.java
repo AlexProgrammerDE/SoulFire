@@ -57,6 +57,9 @@ public class BlockTypeHelper {
     }
 
     public static boolean isHurtOnTouch(BlockType type) {
-        return type == BlockType.CACTUS || type == BlockType.SWEET_BERRY_BUSH;
+        return type == BlockType.CACTUS
+                || type == BlockType.SWEET_BERRY_BUSH
+                || type == BlockType.WITHER_ROSE
+                || type == BlockType.FIRE;
     }
 }
