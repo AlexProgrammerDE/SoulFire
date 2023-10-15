@@ -26,16 +26,26 @@ public class BlockTypeHelper {
     private BlockTypeHelper() {
     }
 
-    public static boolean isCarpet(BlockType type) {
-        if (type.blockShapeTypes().isEmpty()) {
-            return false;
-        }
-
-        return type.blockShapeTypes().get(0).collisionHeight() <= 0.1;
-    }
-
     public static boolean isReplaceable(BlockType type) {
-        return isAir(type) || isFluid(type);
+        return isAir(type) || isFluid(type)
+                || type == BlockType.DEAD_BUSH
+                || type == BlockType.FERN
+                || type == BlockType.LARGE_FERN
+                || type == BlockType.FIRE
+                || type == BlockType.SOUL_FIRE
+                || type == BlockType.GLOW_LICHEN
+                || type == BlockType.GRASS
+                || type == BlockType.TALL_GRASS
+                || type == BlockType.HANGING_ROOTS
+                || type == BlockType.LIGHT
+                || type == BlockType.NETHER_SPROUTS
+                || type == BlockType.CRIMSON_ROOTS
+                || type == BlockType.WARPED_ROOTS
+                || type == BlockType.SEAGRASS
+                || type == BlockType.TALL_SEAGRASS
+                || type == BlockType.SNOW
+                || type == BlockType.STRUCTURE_VOID
+                || type == BlockType.VINE;
     }
 
     public static boolean isAir(BlockType type) {
@@ -45,7 +55,9 @@ public class BlockTypeHelper {
     }
 
     public static boolean isFluid(BlockType type) {
-        return type == BlockType.WATER || type == BlockType.LAVA;
+        return type == BlockType.WATER
+                || type == BlockType.LAVA
+                || type == BlockType.BUBBLE_COLUMN;
     }
 
     public static boolean isEmpty(BlockStateMeta meta) {
@@ -60,6 +72,8 @@ public class BlockTypeHelper {
         return type == BlockType.CACTUS
                 || type == BlockType.SWEET_BERRY_BUSH
                 || type == BlockType.WITHER_ROSE
-                || type == BlockType.FIRE;
+                || type == BlockType.FIRE
+                || type == BlockType.SOUL_FIRE
+                || type == BlockType.LAVA;
     }
 }
