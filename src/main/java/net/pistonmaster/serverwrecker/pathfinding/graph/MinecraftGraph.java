@@ -89,8 +89,17 @@ public record MinecraftGraph(TagsState tagsState) {
         }
 
         ACTIONS_TEMPLATE = actions.toArray(new GraphAction[0]);
-        SUBSCRIPTION_KEYS = blockSubscribers.keySet().toArray(new Vector3i[0]);
-        SUBSCRIPTION_VALUES = blockSubscribers.values().stream().map(l -> l.toArray(new BlockSubscription[0])).toArray(BlockSubscription[][]::new);
+        SUBSCRIPTION_KEYS = new Vector3i[blockSubscribers.size()];
+        SUBSCRIPTION_VALUES = new BlockSubscription[blockSubscribers.size()][];
+
+        var entrySetDescending = blockSubscribers.object2ObjectEntrySet().stream()
+                .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
+                .toList();
+        for (var i = 0; i < entrySetDescending.size(); i++) {
+            var entry = entrySetDescending.get(i);
+            SUBSCRIPTION_KEYS[i] = entry.getKey();
+            SUBSCRIPTION_VALUES[i] = entry.getValue().toArray(new BlockSubscription[0]);
+        }
     }
 
     public GraphInstructions[] getActions(BotEntityState node) {
