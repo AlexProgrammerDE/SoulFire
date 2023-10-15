@@ -35,7 +35,6 @@ import java.util.List;
 
 @Slf4j
 public final class PlayerMovement implements GraphAction {
-    @Getter
     private final Vector3i positionBlock;
     private final MovementDirection direction;
     private final MovementSide side;

@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class BlockBreakGraphAction implements GraphAction {
-    @Getter
     private final Vector3i positionBlock;
     private final BlockModifier modifier;
     private final Vector3i targetWithoutModifier;

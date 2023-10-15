@@ -98,18 +98,20 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         // Store block positions that we need to look at
         var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>();
 
-        var startScore = scorer.computeScore(graph, from);
-        log.info("Start score (Usually distance): {}", startScore);
+        {
+            var startScore = scorer.computeScore(graph, from);
+            log.info("Start score (Usually distance): {}", startScore);
 
-        var start = new MinecraftRouteNode(
-                from,
-                null,
-                requiresRepositioning ? List.of(new MovementAction(from.position(), false)) : List.of(),
-                0,
-                startScore
-        );
-        routeIndex.put(from, start);
-        openSet.enqueue(start);
+            var start = new MinecraftRouteNode(
+                    from,
+                    null,
+                    requiresRepositioning ? List.of(new MovementAction(from.position(), false)) : List.of(),
+                    0,
+                    startScore
+            );
+            routeIndex.put(from, start);
+            openSet.enqueue(start);
+        }
 
         while (!openSet.isEmpty()) {
             var current = openSet.dequeue();
@@ -129,7 +131,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             } catch (OutOfLevelException e) {
                 log.debug("Found a node out of the level: {}", current.getEntityState().position());
                 stopwatch.stop();
-                log.info("Took {}ms to find route to this point", stopwatch.elapsed().toMillis());
+                log.info("Took {}ms to find route to reach the edge of view distance", stopwatch.elapsed().toMillis());
 
                 // The current node is not always the best node. We need to find the best node.
                 var bestNode = findBestNode(routeIndex.values());
@@ -169,7 +171,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                     // The first time we see this node
                     if (v == null) {
                         var node = new MinecraftRouteNode(actionTargetState, current, worldActions, newSourceCost, newTotalRouteScore);
-                        log.debug("Found a new node: {}", actionTargetState.position());
+                        log.debug("Found a new node: {}", actionTargetState.positionBlock());
                         openSet.enqueue(node);
 
                         return node;
@@ -182,7 +184,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                         v.setSourceCost(newSourceCost);
                         v.setTotalRouteScore(newTotalRouteScore);
 
-                        log.debug("Found a better route to node: {}", actionTargetState.position());
+                        log.debug("Found a better route to node: {}", actionTargetState.positionBlock());
                         openSet.enqueue(v);
                     }
 

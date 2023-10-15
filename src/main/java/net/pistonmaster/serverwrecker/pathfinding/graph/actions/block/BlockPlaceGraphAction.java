@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class BlockPlaceGraphAction implements GraphAction {
-    @Getter
     private final Vector3i positionBlock;
     private final BlockDirection direction;
     private final BlockModifier modifier;
