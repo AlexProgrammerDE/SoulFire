@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 
-import com.google.common.util.concurrent.AtomicDouble;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,37 +36,49 @@ import java.util.List;
 @Slf4j
 public final class PlayerMovement implements GraphAction {
     @Getter
-    private final BotEntityState previousEntityState;
+    private final Vector3i positionBlock;
     private final MovementDirection direction;
     private final MovementSide side;
     private final MovementModifier modifier;
-    private final AtomicDouble cost;
     private final Vector3i targetBlock;
     @Getter
     private final boolean diagonal;
+    private double cost;
     @Getter
     private boolean appliedCornerCost = false;
     @Setter
     @Getter
     private boolean isImpossible = false;
 
-    public PlayerMovement(BotEntityState previousEntityState, MovementDirection direction, MovementSide side, MovementModifier modifier) {
-        this.previousEntityState = previousEntityState;
+    public PlayerMovement(Vector3i positionBlock, MovementDirection direction, MovementSide side, MovementModifier modifier) {
+        this.positionBlock = positionBlock;
         this.direction = direction;
         this.side = side;
         this.modifier = modifier;
         this.diagonal = direction.isDiagonal();
 
-        this.cost = new AtomicDouble((diagonal ? Costs.DIAGONAL : Costs.STRAIGHT) +
+        this.cost = (diagonal ? Costs.DIAGONAL : Costs.STRAIGHT) +
                 switch (modifier) { // Add additional "discouraged" costs to prevent the bot from doing too much parkour
                     case NORMAL -> 0;
                     case FALL_1 -> Costs.FALL_1;
                     case FALL_2 -> Costs.FALL_2;
                     case FALL_3 -> Costs.FALL_3;
                     case JUMP -> Costs.JUMP;
-                });
+                };
 
-        this.targetBlock = modifier.offset(direction.offset(previousEntityState.positionBlock()));
+        this.targetBlock = modifier.offset(direction.offset(positionBlock));
+    }
+
+    private PlayerMovement(PlayerMovement other) {
+        this.positionBlock = other.positionBlock;
+        this.direction = other.direction;
+        this.side = other.side;
+        this.modifier = other.modifier;
+        this.targetBlock = other.targetBlock;
+        this.diagonal = other.diagonal;
+        this.cost = other.cost;
+        this.appliedCornerCost = other.appliedCornerCost;
+        this.isImpossible = other.isImpossible;
     }
 
     public List<Vector3i> listRequiredFreeBlocks() {
@@ -79,7 +90,7 @@ public final class PlayerMovement implements GraphAction {
                     case FALL_2, JUMP -> 2;
                     case FALL_3 -> 3;
                 });
-        var fromPosInt = previousEntityState.positionBlock();
+        var fromPosInt = positionBlock;
 
         var targetEdge = direction.offset(fromPosInt);
         for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
@@ -146,11 +157,10 @@ public final class PlayerMovement implements GraphAction {
     }
 
     public List<Vector3i> listAddCostIfSolidBlocks() {
-        var fromPosInt = previousEntityState.positionBlock();
         var list = new ObjectArrayList<Vector3i>(2);
 
         // If these blocks are solid, the bot moves slower because the bot is running around a corner
-        var corner = getCorner(fromPosInt, side.opposite());
+        var corner = getCorner(positionBlock, side.opposite());
         for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
             // Apply jump shift to target edge and offset for body part
             list.add(bodyOffset.offset(modifier.offsetIfJump(corner)));
@@ -165,7 +175,7 @@ public final class PlayerMovement implements GraphAction {
     }
 
     public void addCornerCost() {
-        cost.addAndGet(Costs.CORNER_SLIDE);
+        cost += Costs.CORNER_SLIDE;
         appliedCornerCost = true;
     }
 
@@ -175,13 +185,18 @@ public final class PlayerMovement implements GraphAction {
     }
 
     @Override
-    public GraphInstructions getInstructions() {
+    public GraphInstructions getInstructions(BotEntityState previousEntityState) {
         var targetDoublePosition = VectorHelper.middleOfBlockNormalize(targetBlock.toDouble());
         return new GraphInstructions(new BotEntityState(
                 targetDoublePosition,
                 targetBlock,
                 previousEntityState.levelState(),
                 previousEntityState.inventory()
-        ), cost.get(), List.of(new MovementAction(targetDoublePosition, diagonal)));
+        ), cost, List.of(new MovementAction(targetDoublePosition, diagonal)));
+    }
+
+    @Override
+    public GraphAction copy(BotEntityState previousEntityState) {
+        return new PlayerMovement(this);
     }
 }

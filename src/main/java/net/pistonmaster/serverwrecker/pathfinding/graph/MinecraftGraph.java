@@ -37,216 +37,227 @@ import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
-import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.function.Consumer;
-
 @Slf4j
-public record MinecraftGraph(TagsState tagsState,
-                             Consumer<? super Object2ObjectMap.Entry<Vector3i, ObjectList<BlockSubscription>>> subscriptionConsumer) {
-    private static final int MAX_ACTIONS = 84;
-    private static final int EXPECTED_BLOCKS = 70;
-    private static final int MAX_SUBSCRIBERS = 27;
+public record MinecraftGraph(TagsState tagsState) {
     private static final Object2ObjectFunction<? super Vector3i, ? extends ObjectList<BlockSubscription>> CREATE_MISSING_FUNCTION =
-            k -> new ObjectArrayList<>(MAX_SUBSCRIBERS);
+            k -> new ObjectArrayList<>();
+    private static final GraphAction[] ACTIONS_TEMPLATE;
+    private static final Vector3i[] SUBSCRIPTION_KEYS;
+    private static final BlockSubscription[][] SUBSCRIPTION_VALUES;
 
-    public MinecraftGraph(TagsState tagsState) {
-        this(tagsState, e -> {
-            BlockStateMeta blockState = null;
+    static {
+        var blockSubscribers = new Object2ObjectArrayMap<Vector3i, ObjectList<BlockSubscription>>();
 
-            // We cache only this, but not solid because solid will only occur a single time
-            var calculatedFree = false;
-            var isFree = false;
-            var calculatedSolid = false;
-            var isSolid = false;
-            for (var subscriber : e.getValue()) {
-                if (subscriber == null) {
-                    break;
-                }
-
-                var action = subscriber.action();
-                if (action.isImpossible()) {
-                    continue;
-                }
-
-                if (blockState == null) {
-                    blockState = action.getPreviousEntityState().levelState()
-                            .getBlockStateAt(e.getKey())
-                            .orElseThrow(OutOfLevelException::new);
-                }
-
-                switch (subscriber.type) {
-                    case MOVEMENT_FREE -> {
-                        if (!calculatedFree) {
-                            // We can walk through blocks like air or grass
-                            isFree = blockState.blockShapeType().hasNoCollisions()
-                                    && !BlockTypeHelper.isFluid(blockState.blockType());
-                            calculatedFree = true;
-                        }
-
-                        if (!isFree) {
-                            ((PlayerMovement) action).setImpossible(true);
-                        }
+        var actions = new ObjectArrayList<GraphAction>();
+        var baseVector = Vector3i.ZERO;
+        for (var direction : MovementDirection.VALUES) {
+            var diagonal = direction.isDiagonal();
+            for (var modifier : MovementModifier.VALUES) {
+                if (diagonal) {
+                    for (var side : MovementSide.VALUES) {
+                        actions.add(registerMovement(
+                                blockSubscribers,
+                                new PlayerMovement(baseVector, direction, side, modifier),
+                                actions.size()
+                        ));
                     }
-                    case MOVEMENT_SOLID -> {
-                        if (!calculatedSolid) {
-                            // Only count full blocks like stone or dirt as solid
-                            isSolid = blockState.blockShapeType().isFullBlock();
-                            calculatedSolid = true;
-                        }
-
-                        if (!isSolid) {
-                            ((PlayerMovement) action).setImpossible(true);
-                        }
-                    }
-                    case MOVEMENT_ADD_CORNER_COST_IF_SOLID -> {
-                        var movement = (PlayerMovement) action;
-
-                        // No need to apply the cost multiple times.
-                        if (movement.isAppliedCornerCost()) {
-                            continue;
-                        }
-
-                        if (!calculatedSolid) {
-                            // Only count full blocks like stone or dirt as solid
-                            isSolid = blockState.blockShapeType().isFullBlock();
-                            calculatedSolid = true;
-                        }
-
-                        if (isSolid) {
-                            movement.addCornerCost();
-                        }
-                    }
-                    case BLOCK_PLACE_REPLACEABLE -> {
-                        if (!BlockTypeHelper.isReplaceable(blockState.blockType())) {
-                            // Target block cannot be replaced with another block
-                            ((BlockPlaceGraphAction) action).setImpossible(true);
-                        }
-                    }
-                    case BLOCK_PLACE_FREE -> {
-                        if (!calculatedFree) {
-                            // We can walk through blocks like air or grass
-                            isFree = blockState.blockShapeType().hasNoCollisions()
-                                    && !BlockTypeHelper.isFluid(blockState.blockType());
-                            calculatedFree = true;
-                        }
-
-                        if (!isFree) {
-                            // This required block to place the target block is not free
-                            ((BlockPlaceGraphAction) action).setImpossible(true);
-                        }
-                    }
-                    case BLOCK_PLACE_AGAINST_SOLID -> {
-                        var blockPlace = (BlockPlaceGraphAction) action;
-
-                        // We already found one, no need to check for more
-                        if (blockPlace.getBlockToPlaceAgainst() != null) {
-                            continue;
-                        }
-
-                        if (!calculatedSolid) {
-                            // Only count full blocks like stone or dirt as solid
-                            isSolid = blockState.blockShapeType().isFullBlock();
-                            calculatedSolid = true;
-                        }
-
-                        // We found a valid block to place against
-                        if (isSolid) {
-                            blockPlace.setBlockToPlaceAgainst((BotActionManager.BlockPlaceData) subscriber.extraData());
-                        }
-                    }
-                    case BLOCK_BREAK_SOLID_AND_ADD_COST -> {
-                        if (!calculatedSolid) {
-                            // Only count full blocks like stone or dirt as solid
-                            isSolid = blockState.blockShapeType().isFullBlock();
-                            calculatedSolid = true;
-                        }
-
-                        if (isSolid &&
-                                blockState.blockType().diggable() &&
-                                BlockItems.hasItemType(blockState.blockType())) {
-                            var blockBreak = (BlockBreakGraphAction) action;
-                            blockBreak.setCosts(blockBreak.getPreviousEntityState().inventory()
-                                    .getMiningCosts(tagsState, blockState));
-                        } else {
-                            ((BlockBreakGraphAction) action).setImpossible(true);
-                        }
-                    }
-                    case BLOCK_BREAK_FREE -> {
-                        if (!calculatedFree) {
-                            // We can walk through blocks like air or grass
-                            isFree = blockState.blockShapeType().hasNoCollisions()
-                                    && !BlockTypeHelper.isFluid(blockState.blockType());
-                            calculatedFree = true;
-                        }
-
-                        if (!isFree) {
-                            ((BlockBreakGraphAction) action).setImpossible(true);
-                        }
-                    }
+                } else {
+                    actions.add(registerMovement(
+                            blockSubscribers,
+                            new PlayerMovement(baseVector, direction, null, modifier),
+                            actions.size()
+                    ));
                 }
             }
-        });
+        }
+
+        for (var direction : BlockDirection.VALUES) {
+            for (var modifier : BlockModifier.VALUES) {
+                actions.add(registerBlockPlace(
+                        blockSubscribers,
+                        new BlockPlaceGraphAction(baseVector, direction, modifier),
+                        actions.size()
+                ));
+                actions.add(registerBlockBreak(
+                        blockSubscribers,
+                        new BlockBreakGraphAction(baseVector, direction, modifier),
+                        actions.size()
+                ));
+            }
+        }
+
+        ACTIONS_TEMPLATE = actions.toArray(new GraphAction[0]);
+        SUBSCRIPTION_KEYS = blockSubscribers.keySet().toArray(new Vector3i[0]);
+        SUBSCRIPTION_VALUES = blockSubscribers.values().stream().map(l -> l.toArray(new BlockSubscription[0])).toArray(BlockSubscription[][]::new);
     }
 
     public GraphInstructions[] getActions(BotEntityState node) {
-        var actions = new GraphAction[MAX_ACTIONS];
+        var actions = new GraphAction[ACTIONS_TEMPLATE.length];
 
         {
-            var blockSubscribers = new Object2ObjectOpenCustomHashMap<Vector3i, ObjectList<BlockSubscription>>(EXPECTED_BLOCKS, VectorHelper.VECTOR3I_HASH_STRATEGY);
+            for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
+                actions[i] = ACTIONS_TEMPLATE[i].copy(node);
+            }
 
-            var size = 0;
-            for (var direction : MovementDirection.VALUES) {
-                var diagonal = direction.isDiagonal();
-                for (var modifier : MovementModifier.VALUES) {
-                    if (diagonal) {
-                        for (var side : MovementSide.VALUES) {
-                            actions[size++] = registerMovement(blockSubscribers, new PlayerMovement(node, direction, side, modifier));
+            for (var i = 0; i < SUBSCRIPTION_KEYS.length; i++) {
+                var key = SUBSCRIPTION_KEYS[i];
+                var value = SUBSCRIPTION_VALUES[i];
+
+                BlockStateMeta blockState = null;
+
+                // We cache only this, but not solid because solid will only occur a single time
+                var calculatedFree = false;
+                var isFree = false;
+                var calculatedSolid = false;
+                var isSolid = false;
+                for (var subscriber : value) {
+                    var action = actions[subscriber.index];
+                    if (action.isImpossible()) {
+                        continue;
+                    }
+
+                    if (blockState == null) {
+                        blockState = node.levelState()
+                                .getBlockStateAt(node.positionBlock().add(key))
+                                .orElseThrow(OutOfLevelException::new);
+                    }
+
+                    switch (subscriber.type) {
+                        case MOVEMENT_FREE -> {
+                            if (!calculatedFree) {
+                                // We can walk through blocks like air or grass
+                                isFree = blockState.blockShapeType().hasNoCollisions()
+                                        && !BlockTypeHelper.isFluid(blockState.blockType());
+                                calculatedFree = true;
+                            }
+
+                            if (!isFree) {
+                                ((PlayerMovement) action).setImpossible(true);
+                            }
                         }
-                    } else {
-                        actions[size++] = registerMovement(blockSubscribers, new PlayerMovement(node, direction, null, modifier));
+                        case MOVEMENT_SOLID -> {
+                            if (!calculatedSolid) {
+                                // Only count full blocks like stone or dirt as solid
+                                isSolid = blockState.blockShapeType().isFullBlock();
+                                calculatedSolid = true;
+                            }
+
+                            if (!isSolid) {
+                                ((PlayerMovement) action).setImpossible(true);
+                            }
+                        }
+                        case MOVEMENT_ADD_CORNER_COST_IF_SOLID -> {
+                            var movement = (PlayerMovement) action;
+
+                            // No need to apply the cost multiple times.
+                            if (movement.isAppliedCornerCost()) {
+                                continue;
+                            }
+
+                            if (!calculatedSolid) {
+                                // Only count full blocks like stone or dirt as solid
+                                isSolid = blockState.blockShapeType().isFullBlock();
+                                calculatedSolid = true;
+                            }
+
+                            if (isSolid) {
+                                movement.addCornerCost();
+                            }
+                        }
+                        case BLOCK_PLACE_REPLACEABLE -> {
+                            if (!BlockTypeHelper.isReplaceable(blockState.blockType())) {
+                                // Target block cannot be replaced with another block
+                                ((BlockPlaceGraphAction) action).setImpossible(true);
+                            }
+                        }
+                        case BLOCK_PLACE_FREE -> {
+                            if (!calculatedFree) {
+                                // We can walk through blocks like air or grass
+                                isFree = blockState.blockShapeType().hasNoCollisions()
+                                        && !BlockTypeHelper.isFluid(blockState.blockType());
+                                calculatedFree = true;
+                            }
+
+                            if (!isFree) {
+                                // This required block to place the target block is not free
+                                ((BlockPlaceGraphAction) action).setImpossible(true);
+                            }
+                        }
+                        case BLOCK_PLACE_AGAINST_SOLID -> {
+                            var blockPlace = (BlockPlaceGraphAction) action;
+
+                            // We already found one, no need to check for more
+                            if (blockPlace.getBlockToPlaceAgainst() != null) {
+                                continue;
+                            }
+
+                            if (!calculatedSolid) {
+                                // Only count full blocks like stone or dirt as solid
+                                isSolid = blockState.blockShapeType().isFullBlock();
+                                calculatedSolid = true;
+                            }
+
+                            // We found a valid block to place against
+                            if (isSolid) {
+                                blockPlace.setBlockToPlaceAgainst((BotActionManager.BlockPlaceData) subscriber.extraData());
+                            }
+                        }
+                        case BLOCK_BREAK_SOLID_AND_ADD_COST -> {
+                            if (!calculatedSolid) {
+                                // Only count full blocks like stone or dirt as solid
+                                isSolid = blockState.blockShapeType().isFullBlock();
+                                calculatedSolid = true;
+                            }
+
+                            if (isSolid &&
+                                    blockState.blockType().diggable() &&
+                                    BlockItems.hasItemType(blockState.blockType())) {
+                                var blockBreak = (BlockBreakGraphAction) action;
+                                blockBreak.setCosts(node.inventory()
+                                        .getMiningCosts(tagsState, blockState));
+                            } else {
+                                ((BlockBreakGraphAction) action).setImpossible(true);
+                            }
+                        }
+                        case BLOCK_BREAK_FREE -> {
+                            if (!calculatedFree) {
+                                // We can walk through blocks like air or grass
+                                isFree = blockState.blockShapeType().hasNoCollisions()
+                                        && !BlockTypeHelper.isFluid(blockState.blockType());
+                                calculatedFree = true;
+                            }
+
+                            if (!isFree) {
+                                ((BlockBreakGraphAction) action).setImpossible(true);
+                            }
+                        }
                     }
                 }
             }
-
-            for (var direction : BlockDirection.VALUES) {
-                for (var modifier : BlockModifier.VALUES) {
-                    actions[size++] = registerBlockPlace(blockSubscribers, new BlockPlaceGraphAction(node, direction, modifier));
-                    actions[size++] = registerBlockBreak(blockSubscribers, new BlockBreakGraphAction(node, direction, modifier));
-                }
-            }
-
-            // log.debug("Block subscribers: {}", blockSubscribers.size());
-            // log.debug("Block subscribers values: {}", blockSubscribers.values().stream().mapToInt(ObjectList::size).max());
-
-            blockSubscribers.object2ObjectEntrySet().fastForEach(subscriptionConsumer);
         }
 
-        var results = new GraphInstructions[MAX_ACTIONS];
+        var results = new GraphInstructions[ACTIONS_TEMPLATE.length];
         {
             var size = 0;
-            for (var j = 0; j < MAX_ACTIONS; j++) {
-                var movement = actions[j];
-                if (movement == null) {
-                    break;
-                }
-
+            for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
+                var movement = actions[i];
                 if (movement.isImpossibleToComplete()) {
                     continue;
                 }
 
-                results[size++] = movement.getInstructions();
+                results[size++] = movement.getInstructions(node);
             }
         }
 
         return results;
     }
 
-    private PlayerMovement registerMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
-                                            PlayerMovement movement) {
+    private static PlayerMovement registerMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
+                                                   PlayerMovement movement, int index) {
         {
-            var freeSubscription = new BlockSubscription(movement, SubscriptionType.MOVEMENT_FREE);
+            var freeSubscription = new BlockSubscription(index, SubscriptionType.MOVEMENT_FREE);
             for (var freeBlock : movement.listRequiredFreeBlocks()) {
                 blockSubscribers.computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
                         .add(freeSubscription);
@@ -254,7 +265,7 @@ public record MinecraftGraph(TagsState tagsState,
         }
 
         if (movement.isDiagonal()) {
-            var addCostIfSolidSubscription = new BlockSubscription(movement, SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID);
+            var addCostIfSolidSubscription = new BlockSubscription(index, SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID);
             for (var addCostIfSolidBlock : movement.listAddCostIfSolidBlocks()) {
                 blockSubscribers.computeIfAbsent(addCostIfSolidBlock, CREATE_MISSING_FUNCTION)
                         .add(addCostIfSolidSubscription);
@@ -262,7 +273,7 @@ public record MinecraftGraph(TagsState tagsState,
         }
 
         {
-            var solidSubscription = new BlockSubscription(movement, SubscriptionType.MOVEMENT_SOLID);
+            var solidSubscription = new BlockSubscription(index, SubscriptionType.MOVEMENT_SOLID);
             var solidBlock = movement.requiredSolidBlock();
             blockSubscribers.computeIfAbsent(solidBlock, CREATE_MISSING_FUNCTION)
                     .add(solidSubscription);
@@ -271,14 +282,14 @@ public record MinecraftGraph(TagsState tagsState,
         return movement;
     }
 
-    private BlockPlaceGraphAction registerBlockPlace(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
-                                                     BlockPlaceGraphAction blockPlace) {
+    private static BlockPlaceGraphAction registerBlockPlace(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
+                                                            BlockPlaceGraphAction blockPlace, int index) {
         if (blockPlace.isImpossible()) {
             return blockPlace;
         }
 
         {
-            var replaceableSubscription = new BlockSubscription(blockPlace, SubscriptionType.BLOCK_PLACE_REPLACEABLE);
+            var replaceableSubscription = new BlockSubscription(index, SubscriptionType.BLOCK_PLACE_REPLACEABLE);
             var replaceableBlock = blockPlace.requiredReplaceableBlock();
             blockSubscribers.computeIfAbsent(replaceableBlock, CREATE_MISSING_FUNCTION)
                     .add(replaceableSubscription);
@@ -287,7 +298,7 @@ public record MinecraftGraph(TagsState tagsState,
         {
             var freeBlock = blockPlace.requiredFreeBlock();
             if (freeBlock.isPresent()) {
-                var freeSubscription = new BlockSubscription(blockPlace, SubscriptionType.BLOCK_PLACE_FREE);
+                var freeSubscription = new BlockSubscription(index, SubscriptionType.BLOCK_PLACE_FREE);
                 blockSubscribers.computeIfAbsent(freeBlock.get(), CREATE_MISSING_FUNCTION)
                         .add(freeSubscription);
             }
@@ -295,7 +306,7 @@ public record MinecraftGraph(TagsState tagsState,
 
         {
             for (var block : blockPlace.possibleBlocksToPlaceAgainst()) {
-                var againstSubscription = new BlockSubscription(blockPlace, SubscriptionType.BLOCK_PLACE_AGAINST_SOLID, block);
+                var againstSubscription = new BlockSubscription(index, SubscriptionType.BLOCK_PLACE_AGAINST_SOLID, block);
                 blockSubscribers.computeIfAbsent(block.againstPos(), CREATE_MISSING_FUNCTION)
                         .add(againstSubscription);
             }
@@ -304,10 +315,10 @@ public record MinecraftGraph(TagsState tagsState,
         return blockPlace;
     }
 
-    private BlockBreakGraphAction registerBlockBreak(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
-                                                     BlockBreakGraphAction blockBreak) {
+    private static BlockBreakGraphAction registerBlockBreak(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
+                                                            BlockBreakGraphAction blockBreak, int index) {
         {
-            var solidSubscription = new BlockSubscription(blockBreak, SubscriptionType.BLOCK_BREAK_SOLID_AND_ADD_COST);
+            var solidSubscription = new BlockSubscription(index, SubscriptionType.BLOCK_BREAK_SOLID_AND_ADD_COST);
             var solidBlock = blockBreak.requiredSolidBlock();
             blockSubscribers.computeIfAbsent(solidBlock, CREATE_MISSING_FUNCTION)
                     .add(solidSubscription);
@@ -316,7 +327,7 @@ public record MinecraftGraph(TagsState tagsState,
         {
             var freeBlock = blockBreak.requiredFreeBlock();
             if (freeBlock.isPresent()) {
-                var freeSubscription = new BlockSubscription(blockBreak, SubscriptionType.BLOCK_BREAK_FREE);
+                var freeSubscription = new BlockSubscription(index, SubscriptionType.BLOCK_BREAK_FREE);
                 blockSubscribers.computeIfAbsent(freeBlock.get(), CREATE_MISSING_FUNCTION)
                         .add(freeSubscription);
             }
@@ -336,9 +347,9 @@ public record MinecraftGraph(TagsState tagsState,
         BLOCK_BREAK_FREE
     }
 
-    record BlockSubscription(GraphAction action, SubscriptionType type, Object extraData) {
-        BlockSubscription(GraphAction action, SubscriptionType type) {
-            this(action, type, null);
+    static record BlockSubscription(int index, SubscriptionType type, Object extraData) {
+        BlockSubscription(int index, SubscriptionType type) {
+            this(index, type, null);
         }
     }
 }

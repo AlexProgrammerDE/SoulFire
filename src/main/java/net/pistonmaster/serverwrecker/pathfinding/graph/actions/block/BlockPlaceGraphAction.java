@@ -35,7 +35,7 @@ import java.util.Optional;
 
 public class BlockPlaceGraphAction implements GraphAction {
     @Getter
-    private final BotEntityState previousEntityState;
+    private final Vector3i positionBlock;
     private final BlockDirection direction;
     private final BlockModifier modifier;
     private final Vector3i targetWithoutModifier;
@@ -47,15 +47,24 @@ public class BlockPlaceGraphAction implements GraphAction {
     @Getter
     private boolean isImpossible;
 
-    public BlockPlaceGraphAction(BotEntityState previousEntityState, BlockDirection direction, BlockModifier modifier) {
-        this.previousEntityState = previousEntityState;
+    public BlockPlaceGraphAction(Vector3i positionBlock, BlockDirection direction, BlockModifier modifier) {
+        this.positionBlock = positionBlock;
         this.direction = direction;
         this.modifier = modifier;
 
         // No block to place means instant failure
+        this.targetWithoutModifier = direction.offset(positionBlock);
+        this.targetBlock = modifier.offset(targetWithoutModifier);
+    }
+
+    private BlockPlaceGraphAction(BlockPlaceGraphAction base, BotEntityState previousEntityState) {
+        this.positionBlock = base.positionBlock;
+        this.direction = base.direction;
+        this.modifier = base.modifier;
+        this.targetWithoutModifier = base.targetWithoutModifier;
+        this.targetBlock = base.targetBlock;
+        this.blockToPlaceAgainst = base.blockToPlaceAgainst;
         this.isImpossible = !previousEntityState.inventory().hasBlockToPlace();
-        this.targetWithoutModifier = isImpossible ? null : direction.offset(previousEntityState.positionBlock());
-        this.targetBlock = isImpossible ? null : modifier.offset(targetWithoutModifier);
     }
 
     public Vector3i requiredReplaceableBlock() {
@@ -100,12 +109,17 @@ public class BlockPlaceGraphAction implements GraphAction {
     }
 
     @Override
-    public GraphInstructions getInstructions() {
+    public GraphInstructions getInstructions(BotEntityState previousEntityState) {
         return new GraphInstructions(new BotEntityState(
                 previousEntityState.position(),
                 previousEntityState.positionBlock(),
                 previousEntityState.levelState().withChangeToSolidBlock(targetBlock),
                 previousEntityState.inventory().withOneLessBlock()
         ), Costs.PLACE_BLOCK, List.of(new BlockPlaceAction(targetBlock, blockToPlaceAgainst)));
+    }
+
+    @Override
+    public GraphAction copy(BotEntityState previousEntityState) {
+        return new BlockPlaceGraphAction(this, previousEntityState);
     }
 }

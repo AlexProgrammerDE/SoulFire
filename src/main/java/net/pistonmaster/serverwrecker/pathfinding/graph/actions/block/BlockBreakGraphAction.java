@@ -33,7 +33,7 @@ import java.util.Optional;
 
 public class BlockBreakGraphAction implements GraphAction {
     @Getter
-    private final BotEntityState previousEntityState;
+    private final Vector3i positionBlock;
     private final BlockModifier modifier;
     private final Vector3i targetWithoutModifier;
     private final Vector3i targetBlock;
@@ -43,11 +43,20 @@ public class BlockBreakGraphAction implements GraphAction {
     @Getter
     private boolean isImpossible = false;
 
-    public BlockBreakGraphAction(BotEntityState previousEntityState, BlockDirection direction, BlockModifier modifier) {
-        this.previousEntityState = previousEntityState;
+    public BlockBreakGraphAction(Vector3i positionBlock, BlockDirection direction, BlockModifier modifier) {
+        this.positionBlock = positionBlock;
         this.modifier = modifier;
-        this.targetWithoutModifier = direction.offset(previousEntityState.positionBlock());
+        this.targetWithoutModifier = direction.offset(positionBlock);
         this.targetBlock = modifier.offset(targetWithoutModifier);
+    }
+
+    private BlockBreakGraphAction(BlockBreakGraphAction base) {
+        this.positionBlock = base.positionBlock;
+        this.modifier = base.modifier;
+        this.targetWithoutModifier = base.targetWithoutModifier;
+        this.targetBlock = base.targetBlock;
+        this.costs = base.costs;
+        this.isImpossible = base.isImpossible;
     }
 
     public Vector3i requiredSolidBlock() {
@@ -68,7 +77,7 @@ public class BlockBreakGraphAction implements GraphAction {
     }
 
     @Override
-    public GraphInstructions getInstructions() {
+    public GraphInstructions getInstructions(BotEntityState previousEntityState) {
         var inventory = previousEntityState.inventory();
 
         if (costs.willDrop()) {
@@ -81,5 +90,10 @@ public class BlockBreakGraphAction implements GraphAction {
                 previousEntityState.levelState().withChangeToAir(targetBlock),
                 inventory
         ), costs.miningCost(), List.of(new BlockBreakAction(targetBlock)));
+    }
+
+    @Override
+    public GraphAction copy(BotEntityState previousEntityState) {
+        return new BlockBreakGraphAction(this);
     }
 }
