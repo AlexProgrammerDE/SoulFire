@@ -130,12 +130,18 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
                 // This is the best node we found so far
                 // We will add a recalculating action and return the best route
-                return getActionsTrace(new MinecraftRouteNode(
+                var recalculateTrace = getActionsTrace(new MinecraftRouteNode(
                         bestNode.getEntityState(),
                         bestNode,
                         List.of(new RecalculatePathAction()),
                         bestNode.getSourceCost(), bestNode.getTotalRouteScore()
                 ));
+
+                if (recalculateTrace.size() <= 2) {
+                    throw new IllegalStateException("Could not find a path and this is already the closest we can get to the goal.");
+                }
+
+                return recalculateTrace;
             }
 
             for (var instructions : instructionsList) {

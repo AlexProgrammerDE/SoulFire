@@ -26,8 +26,6 @@ import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.block.BlockBreakGraphAction;
-import net.pistonmaster.serverwrecker.pathfinding.graph.actions.block.BlockDirection;
-import net.pistonmaster.serverwrecker.pathfinding.graph.actions.block.BlockModifier;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.block.BlockPlaceGraphAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.MovementDirection;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.MovementModifier;
@@ -73,6 +71,7 @@ public record MinecraftGraph(TagsState tagsState) {
             }
         }
 
+        /*
         for (var direction : BlockDirection.VALUES) {
             for (var modifier : BlockModifier.VALUES) {
                 actions.add(registerBlockPlace(
@@ -87,6 +86,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 ));
             }
         }
+        */
 
         ACTIONS_TEMPLATE = actions.toArray(new GraphAction[0]);
         SUBSCRIPTION_KEYS = new Vector3i[blockSubscribers.size()];
@@ -127,9 +127,10 @@ public record MinecraftGraph(TagsState tagsState) {
                         continue;
                     }
 
+                    var positionBlock = node.positionBlock();
                     if (blockState == null) {
                         blockState = node.levelState()
-                                .getBlockStateAt(node.positionBlock().add(key))
+                                .getBlockStateAt(positionBlock.add(key))
                                 .orElseThrow(OutOfLevelException::new);
                     }
 
@@ -210,7 +211,11 @@ public record MinecraftGraph(TagsState tagsState) {
 
                             // We found a valid block to place against
                             if (isSolid) {
-                                blockPlace.setBlockToPlaceAgainst((BotActionManager.BlockPlaceData) subscriber.extraData());
+                                var blockPlaceAgainst = (BotActionManager.BlockPlaceData) subscriber.extraData();
+                                blockPlace.setBlockToPlaceAgainst(new BotActionManager.BlockPlaceData(
+                                        positionBlock.add(blockPlaceAgainst.againstPos()),
+                                        blockPlaceAgainst.blockFace()
+                                ));
                             }
                         }
                         case BLOCK_BREAK_SOLID_AND_ADD_COST -> {

@@ -55,4 +55,8 @@ public class BlockTypeHelper {
     public static boolean isFullBlock(BlockStateMeta meta) {
         return meta.blockShapeType().isFullBlock();
     }
+
+    public static boolean isHurtOnTouch(BlockType type) {
+        return type == BlockType.CACTUS || type == BlockType.SWEET_BERRY_BUSH;
+    }
 }
