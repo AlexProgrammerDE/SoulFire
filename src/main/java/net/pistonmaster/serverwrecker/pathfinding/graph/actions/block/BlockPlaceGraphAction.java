@@ -110,12 +110,14 @@ public class BlockPlaceGraphAction implements GraphAction {
 
     @Override
     public GraphInstructions getInstructions(BotEntityState previousEntityState) {
+        var realTarget = previousEntityState.positionBlock().add(targetBlock);
+
         return new GraphInstructions(new BotEntityState(
                 previousEntityState.position(),
                 previousEntityState.positionBlock(),
-                previousEntityState.levelState().withChangeToSolidBlock(targetBlock),
+                previousEntityState.levelState().withChangeToSolidBlock(realTarget),
                 previousEntityState.inventory().withOneLessBlock()
-        ), Costs.PLACE_BLOCK, List.of(new BlockPlaceAction(targetBlock, blockToPlaceAgainst)));
+        ), Costs.PLACE_BLOCK, List.of(new BlockPlaceAction(realTarget, blockToPlaceAgainst)));
     }
 
     @Override

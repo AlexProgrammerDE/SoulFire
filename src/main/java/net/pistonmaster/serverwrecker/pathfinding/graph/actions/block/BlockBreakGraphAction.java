@@ -78,6 +78,7 @@ public class BlockBreakGraphAction implements GraphAction {
 
     @Override
     public GraphInstructions getInstructions(BotEntityState previousEntityState) {
+        var realTarget = previousEntityState.positionBlock().add(targetBlock);
         var inventory = previousEntityState.inventory();
 
         if (costs.willDrop()) {
@@ -87,9 +88,9 @@ public class BlockBreakGraphAction implements GraphAction {
         return new GraphInstructions(new BotEntityState(
                 previousEntityState.position(),
                 previousEntityState.positionBlock(),
-                previousEntityState.levelState().withChangeToAir(targetBlock),
+                previousEntityState.levelState().withChangeToAir(realTarget),
                 inventory
-        ), costs.miningCost(), List.of(new BlockBreakAction(targetBlock)));
+        ), costs.miningCost(), List.of(new BlockBreakAction(realTarget)));
     }
 
     @Override

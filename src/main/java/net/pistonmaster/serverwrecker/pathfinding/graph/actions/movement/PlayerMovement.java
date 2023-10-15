@@ -186,10 +186,11 @@ public final class PlayerMovement implements GraphAction {
 
     @Override
     public GraphInstructions getInstructions(BotEntityState previousEntityState) {
-        var targetDoublePosition = VectorHelper.middleOfBlockNormalize(targetBlock.toDouble());
+        var realTarget = previousEntityState.positionBlock().add(targetBlock);
+        var targetDoublePosition = VectorHelper.middleOfBlockNormalize(realTarget.toDouble());
         return new GraphInstructions(new BotEntityState(
                 targetDoublePosition,
-                targetBlock,
+                realTarget,
                 previousEntityState.levelState(),
                 previousEntityState.inventory()
         ), cost, List.of(new MovementAction(targetDoublePosition, diagonal)));
