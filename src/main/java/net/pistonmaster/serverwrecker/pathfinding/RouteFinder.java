@@ -89,7 +89,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         return actions;
     }
 
-    public List<WorldAction> findRoute(BotEntityState from) {
+    public List<WorldAction> findRoute(BotEntityState from, boolean requiresRepositioning) {
         var stopwatch = Stopwatch.createStarted();
 
         // Store block positions and the best route to them
@@ -101,7 +101,13 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         var startScore = scorer.computeScore(graph, from);
         log.info("Start score (Usually distance): {}", startScore);
 
-        var start = new MinecraftRouteNode(from, null, List.of(new MovementAction(from.position(), false)), 0d, startScore);
+        var start = new MinecraftRouteNode(
+                from,
+                null,
+                requiresRepositioning ? List.of(new MovementAction(from.position(), false)) : List.of(),
+                0,
+                startScore
+        );
         routeIndex.put(from, start);
         openSet.enqueue(start);
 

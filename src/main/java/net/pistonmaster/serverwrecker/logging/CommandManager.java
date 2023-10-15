@@ -25,6 +25,7 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
+import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWrecker;
@@ -59,7 +60,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 import static net.pistonmaster.serverwrecker.logging.BrigadierHelper.argument;
 import static net.pistonmaster.serverwrecker.logging.BrigadierHelper.literal;
@@ -386,7 +386,7 @@ public class CommandManager {
                 var botMovementManager = sessionDataManager.getBotMovementManager();
                 var routeFinder = new RouteFinder(new MinecraftGraph(sessionDataManager.getTagsState()), goalScorer);
 
-                Supplier<List<WorldAction>> findPath = () -> {
+                Boolean2ObjectFunction<List<WorldAction>> findPath = requiresRepositioning -> {
                     var start = BotEntityState.initialState(
                             botMovementManager.getPlayerPos(),
                             new ProjectedLevelState(
@@ -397,12 +397,12 @@ public class CommandManager {
                             )
                     );
                     logger.info("Starting calculations at: {}", start);
-                    var actions = routeFinder.findRoute(start);
+                    var actions = routeFinder.findRoute(start, requiresRepositioning);
                     logger.info("Calculated path with {} actions: {}", actions.size(), actions);
                     return actions;
                 };
 
-                var pathExecutor = new PathExecutor(bot, findPath.get(), findPath, executorService);
+                var pathExecutor = new PathExecutor(bot, findPath.get(true), findPath, executorService);
                 pathExecutor.register();
             });
         }

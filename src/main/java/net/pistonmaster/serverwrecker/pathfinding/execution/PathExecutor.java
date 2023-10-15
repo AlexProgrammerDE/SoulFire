@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.execution;
 
+import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import net.kyori.event.EventSubscriber;
 import net.kyori.event.EventSubscription;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
@@ -31,12 +32,11 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
     private final Queue<WorldAction> worldActions;
     private final BotConnection connection;
-    private final Supplier<List<WorldAction>> findPath;
+    private final Boolean2ObjectFunction<List<WorldAction>> findPath;
     private final ExecutorService executorService;
     private final int totalMovements;
     private EventSubscription subscription;
@@ -44,7 +44,7 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
     private int movementNumber;
     private boolean cancelled = false;
 
-    public PathExecutor(BotConnection connection, List<WorldAction> worldActions, Supplier<List<WorldAction>> findPath,
+    public PathExecutor(BotConnection connection, List<WorldAction> worldActions, Boolean2ObjectFunction<List<WorldAction>> findPath,
                         ExecutorService executorService) {
         this.worldActions = new ArrayBlockingQueue<>(worldActions.size());
         this.worldActions.addAll(worldActions);
@@ -139,7 +139,7 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
                     return;
                 }
 
-                var newActions = findPath.get();
+                var newActions = findPath.get(false);
                 if (cancelled) {
                     return;
                 }
