@@ -129,7 +129,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             try {
                 instructionsList = graph.getActions(current.getEntityState());
             } catch (OutOfLevelException e) {
-                log.debug("Found a node out of the level: {}", current.getEntityState().position());
+                log.debug("Found a node out of the level: {}", current.getEntityState().positionBlock());
                 stopwatch.stop();
                 log.info("Took {}ms to find route to reach the edge of view distance", stopwatch.elapsed().toMillis());
 
