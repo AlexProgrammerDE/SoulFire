@@ -26,6 +26,8 @@ import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.block.BlockBreakGraphAction;
+import net.pistonmaster.serverwrecker.pathfinding.graph.actions.block.BlockDirection;
+import net.pistonmaster.serverwrecker.pathfinding.graph.actions.block.BlockModifier;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.block.BlockPlaceGraphAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.MovementDirection;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.MovementModifier;
@@ -71,7 +73,6 @@ public record MinecraftGraph(TagsState tagsState) {
             }
         }
 
-        /*
         for (var direction : BlockDirection.VALUES) {
             for (var modifier : BlockModifier.VALUES) {
                 actions.add(registerBlockPlace(
@@ -86,7 +87,6 @@ public record MinecraftGraph(TagsState tagsState) {
                 ));
             }
         }
-        */
 
         ACTIONS_TEMPLATE = actions.toArray(new GraphAction[0]);
         SUBSCRIPTION_KEYS = new Vector3i[blockSubscribers.size()];

@@ -130,29 +130,24 @@ public class LogPanel extends JPanel {
 
         @Override
         public void keyPressed(KeyEvent e) {
+            // Cache the written text so we can restore it later
             if (commandShellAction.getPointer() == -1) {
                 cachedText = commands.getText();
             }
 
+            var commandHistory = commandShellAction.getCommandHistory();
             var pointer = commandShellAction.getPointer();
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_UP -> {
-                    if (pointer < commandShellAction.getCommandHistory().size() - 1) {
+                    if (pointer < commandHistory.size() - 1) {
                         commandShellAction.setPointer(pointer + 1);
-                        commands.setText(commandShellAction.getCommandHistory().get(commandShellAction.getPointer()));
+                        commands.setText(getTextAtPointer());
                     }
                 }
                 case KeyEvent.VK_DOWN -> {
                     if (pointer > -1) {
                         commandShellAction.setPointer(pointer - 1);
-
-                        if (commandShellAction.getPointer() == -1) {
-                            commands.setText(cachedText);
-                        } else {
-                            commands.setText(commandShellAction.getCommandHistory().get(commandShellAction.getPointer()));
-                        }
-                    } else {
-                        commands.setText(cachedText);
+                        commands.setText(getTextAtPointer());
                     }
                 }
                 case KeyEvent.VK_ENTER -> cachedText = null;
@@ -165,6 +160,16 @@ public class LogPanel extends JPanel {
                         System.out.println(results.getContext().findSuggestionContext(commands.getCaretPosition()).parent.getName());
                         break;
                 */
+            }
+        }
+
+        private String getTextAtPointer() {
+            var commandHistory = commandShellAction.getCommandHistory();
+            var pointer = commandShellAction.getPointer();
+            if (pointer == -1) {
+                return cachedText;
+            } else {
+                return commandHistory.get(commandHistory.size() - 1 - pointer);
             }
         }
     }

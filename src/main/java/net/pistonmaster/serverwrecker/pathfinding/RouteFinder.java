@@ -71,7 +71,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         }
     };
 
-    private static List<WorldAction> getActionsTrace(MinecraftRouteNode current) {
+    private static List<WorldAction> getActionTrace(MinecraftRouteNode current) {
         var actions = new ObjectArrayList<WorldAction>();
         var previousElement = current;
         do {
@@ -120,7 +120,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 stopwatch.stop();
                 log.info("Success! Took {}ms to find route", stopwatch.elapsed().toMillis());
 
-                return getActionsTrace(current);
+                return getActionTrace(current);
             }
 
             GraphInstructions[] instructionsList;
@@ -136,7 +136,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
                 // This is the best node we found so far
                 // We will add a recalculating action and return the best route
-                var recalculateTrace = getActionsTrace(new MinecraftRouteNode(
+                var recalculateTrace = getActionTrace(new MinecraftRouteNode(
                         bestNode.getEntityState(),
                         bestNode,
                         List.of(new RecalculatePathAction()),
