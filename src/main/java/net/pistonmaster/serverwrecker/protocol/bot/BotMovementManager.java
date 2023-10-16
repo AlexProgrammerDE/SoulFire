@@ -360,7 +360,7 @@ public final class BotMovementManager {
         var friction = 0.02F;
 
         this.moveRelative(forward, vertical, strafe, friction);
-        this.horizontalCollision = this.moveCollide(-this.motionX, this.motionY, -this.motionZ);
+        this.horizontalCollision = this.moveCollide(this.motionX, this.motionY, this.motionZ);
 
         this.motionX *= slipperiness;
         this.motionY *= 0.800000011920929D;
