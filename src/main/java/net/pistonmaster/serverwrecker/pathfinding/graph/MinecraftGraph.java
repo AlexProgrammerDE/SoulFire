@@ -97,7 +97,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 var calculatedFree = false;
                 var isFree = false;
                 for (var subscriber : value) {
-                    var action = actions[subscriber.movementInstanceIndex];
+                    var action = actions[subscriber.movementIndex];
                     if (action.isImpossible()) {
                         continue;
                     }
@@ -210,31 +210,31 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     private static PlayerMovement registerMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
-                                                   PlayerMovement movement, int movementInstanceIndex) {
+                                                   PlayerMovement movement, int movementIndex) {
         {
             var blockId = 0;
             for (var freeBlock : movement.listRequiredFreeBlocks()) {
                 blockSubscribers.computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
-                        .add(new BlockSubscription(movementInstanceIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
+                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
             }
         }
 
         {
             blockSubscribers.computeIfAbsent(movement.requiredSolidBlock(), CREATE_MISSING_FUNCTION)
-                    .add(new BlockSubscription(movementInstanceIndex, SubscriptionType.MOVEMENT_SOLID));
+                    .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_SOLID));
         }
 
         {
             for (var addCostIfSolidBlock : movement.listAddCostIfSolidBlocks()) {
                 blockSubscribers.computeIfAbsent(addCostIfSolidBlock, CREATE_MISSING_FUNCTION)
-                        .add(new BlockSubscription(movementInstanceIndex, SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID));
+                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID));
             }
         }
 
         {
             for (var againstBlock : movement.possibleBlocksToPlaceAgainst()) {
                 blockSubscribers.computeIfAbsent(againstBlock.againstPos(), CREATE_MISSING_FUNCTION)
-                        .add(new BlockSubscription(movementInstanceIndex, SubscriptionType.MOVEMENT_AGAINST_PLACE_SOLID, againstBlock));
+                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_AGAINST_PLACE_SOLID, againstBlock));
             }
         }
 
@@ -248,18 +248,18 @@ public record MinecraftGraph(TagsState tagsState) {
         MOVEMENT_AGAINST_PLACE_SOLID
     }
 
-    record BlockSubscription(int movementInstanceIndex, SubscriptionType type, int blockArrayIndex,
+    record BlockSubscription(int movementIndex, SubscriptionType type, int blockArrayIndex,
                              BotActionManager.BlockPlaceData blockToPlaceAgainst) {
-        BlockSubscription(int movementInstanceIndex, SubscriptionType type) {
-            this(movementInstanceIndex, type, -1, null);
+        BlockSubscription(int movementIndex, SubscriptionType type) {
+            this(movementIndex, type, -1, null);
         }
 
-        BlockSubscription(int movementInstanceIndex, SubscriptionType type, int blockArrayIndex) {
-            this(movementInstanceIndex, type, blockArrayIndex, null);
+        BlockSubscription(int movementIndex, SubscriptionType type, int blockArrayIndex) {
+            this(movementIndex, type, blockArrayIndex, null);
         }
 
-        BlockSubscription(int movementInstanceIndex, SubscriptionType type, BotActionManager.BlockPlaceData blockToPlaceAgainst) {
-            this(movementInstanceIndex, type, -1, blockToPlaceAgainst);
+        BlockSubscription(int movementIndex, SubscriptionType type, BotActionManager.BlockPlaceData blockToPlaceAgainst) {
+            this(movementIndex, type, -1, blockToPlaceAgainst);
         }
     }
 }

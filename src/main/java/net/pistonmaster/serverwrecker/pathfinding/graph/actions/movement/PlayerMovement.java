@@ -284,22 +284,22 @@ public final class PlayerMovement implements GraphAction {
             }
         }
 
-        var realTarget = previousEntityState.positionBlock().add(targetFeetBlock);
+        var absoluteTargetFeetBlock = previousEntityState.positionBlock().add(targetFeetBlock);
 
-        if (blockPlaceData != null) {
-            var floorBlock = realTarget.sub(0, 1, 0);
+        if (requiresAgainstBlock) {
+            var floorBlock = absoluteTargetFeetBlock.sub(0, 1, 0);
             cost += Costs.PLACE_BLOCK;
             actions.add(new BlockPlaceAction(floorBlock, blockPlaceData));
             inventory = inventory.withOneLessBlock();
             levelState = levelState.withChangeToSolidBlock(floorBlock);
         }
 
-        var targetDoublePosition = VectorHelper.middleOfBlockNormalize(realTarget.toDouble());
+        var targetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toDouble());
         actions.add(new MovementAction(targetDoublePosition, diagonal));
 
         return new GraphInstructions(new BotEntityState(
                 targetDoublePosition,
-                realTarget,
+                absoluteTargetFeetBlock,
                 levelState,
                 inventory
         ), cost, actions);
