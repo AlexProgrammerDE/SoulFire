@@ -121,32 +121,39 @@ public record MinecraftGraph(TagsState tagsState) {
                                 calculatedFree = true;
                             }
 
-                            if (!isFree) {
-                                if (movement.isAllowsBlockActions()
-                                        && blockState.blockType().diggable()
-                                        && BlockItems.hasItemType(blockState.blockType())) {
-                                    var cacheableMiningCost = node.inventory()
-                                            .getMiningCosts(tagsState, blockState);
-                                    // We can mine this block, lets add costs and continue
-                                    movement.getBlockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
-                                            positionBlock,
-                                            cacheableMiningCost.miningCost(),
-                                            cacheableMiningCost.willDrop()
-                                    );
-                                } else {
-                                    movement.setImpossible(true);
-                                }
+                            if (isFree) {
+                                continue;
+                            }
+
+                            if (movement.isAllowsBlockActions()
+                                    && blockState.blockType().diggable()
+                                    && BlockItems.hasItemType(blockState.blockType())) {
+                                var cacheableMiningCost = node.inventory()
+                                        .getMiningCosts(tagsState, blockState);
+                                // We can mine this block, lets add costs and continue
+                                movement.getBlockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
+                                        positionBlock,
+                                        cacheableMiningCost.miningCost(),
+                                        cacheableMiningCost.willDrop()
+                                );
+                            } else {
+                                // No way to free this block
+                                movement.setImpossible(true);
                             }
                         }
                         case MOVEMENT_SOLID -> {
-                            if (!blockState.blockShapeType().isFullBlock()) {
-                                if (movement.isAllowsBlockActions()
-                                        && node.inventory().hasBlockToPlace()
-                                        && BlockTypeHelper.isReplaceable(blockState.blockType())) {
-                                    movement.setRequiresAgainstBlock(true);
-                                } else {
-                                    movement.setImpossible(true);
-                                }
+                            // Block is safe to walk on, no need to check for more
+                            if (blockState.blockShapeType().isFullBlock()) {
+                                continue;
+                            }
+
+                            if (movement.isAllowsBlockActions()
+                                    && node.inventory().hasBlockToPlace()
+                                    && BlockTypeHelper.isReplaceable(blockState.blockType())) {
+                                // We can place a block here, but we need to find a block to place against
+                                movement.setRequiresAgainstBlock(true);
+                            } else {
+                                movement.setImpossible(true);
                             }
                         }
                         case MOVEMENT_AGAINST_PLACE_SOLID -> {
@@ -155,14 +162,18 @@ public record MinecraftGraph(TagsState tagsState) {
                                 continue;
                             }
 
-                            // We found a valid block to place against
-                            if (blockState.blockShapeType().isFullBlock()) {
-                                var blockPlaceAgainst = subscriber.blockToPlaceAgainst();
-                                movement.setBlockPlaceData(new BotActionManager.BlockPlaceData(
-                                        basePosition.add(blockPlaceAgainst.againstPos()),
-                                        blockPlaceAgainst.blockFace()
-                                ));
+                            if (!blockState.blockShapeType().isFullBlock()) {
+                                continue;
                             }
+
+                            // We found a valid block to place against
+                            var blockPlaceAgainst = subscriber.blockToPlaceAgainst();
+
+                            // Fixup the position to be the block we are placing against instead of relative
+                            movement.setBlockPlaceData(new BotActionManager.BlockPlaceData(
+                                    basePosition.add(blockPlaceAgainst.againstPos()),
+                                    blockPlaceAgainst.blockFace()
+                            ));
                         }
                         case MOVEMENT_ADD_CORNER_COST_IF_SOLID -> {
                             // No need to apply the cost multiple times.
