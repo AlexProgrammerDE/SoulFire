@@ -223,16 +223,33 @@ public final class PlayerMovement implements GraphAction {
             default -> throw new IllegalStateException("Unexpected value: " + direction);
         };
 
-        var oppositeDirection = blockDirection.opposite().getDirection();
+        var oppositeDirection = blockDirection.opposite();
         var leftDirectionSide = blockDirection.leftSide();
         var rightDirectionSide = blockDirection.rightSide();
 
         return switch (modifier) {
-            case JUMP, NORMAL, FALL_1 -> // 4
+            case NORMAL -> // 5
                     List.of(
+                            // Below
                             new BotActionManager.BlockPlaceData(targetBlock.sub(0, 1, 0), Direction.UP),
-                            new BotActionManager.BlockPlaceData(blockDirection.offset(targetBlock), oppositeDirection),
+                            // In front
+                            new BotActionManager.BlockPlaceData(blockDirection.offset(targetBlock), oppositeDirection.getDirection()),
+                            // Scaffolding
+                            new BotActionManager.BlockPlaceData(oppositeDirection.offset(targetBlock), blockDirection.getDirection()),
+                            // Left side
                             new BotActionManager.BlockPlaceData(leftDirectionSide.offset(targetBlock), rightDirectionSide.getDirection()),
+                            // Right side
+                            new BotActionManager.BlockPlaceData(rightDirectionSide.offset(targetBlock), leftDirectionSide.getDirection())
+                    );
+            case JUMP, FALL_1 -> // 4 - no scaffolding
+                    List.of(
+                            // Below
+                            new BotActionManager.BlockPlaceData(targetBlock.sub(0, 1, 0), Direction.UP),
+                            // In front
+                            new BotActionManager.BlockPlaceData(blockDirection.offset(targetBlock), oppositeDirection.getDirection()),
+                            // Left side
+                            new BotActionManager.BlockPlaceData(leftDirectionSide.offset(targetBlock), rightDirectionSide.getDirection()),
+                            // Right side
                             new BotActionManager.BlockPlaceData(rightDirectionSide.offset(targetBlock), leftDirectionSide.getDirection())
                     );
             default -> throw new IllegalStateException("Unexpected value: " + modifier);
