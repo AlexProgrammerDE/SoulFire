@@ -77,7 +77,7 @@ public class BlockTypeHelper {
                 || type == BlockType.LAVA;
     }
 
-    public static boolean isUnsafe(BlockType type) {
+    public static boolean isFallingAroundMinedBlock(BlockType type) {
         return type == BlockType.SAND
                 || type == BlockType.GRAVEL
                 || type == BlockType.ANVIL

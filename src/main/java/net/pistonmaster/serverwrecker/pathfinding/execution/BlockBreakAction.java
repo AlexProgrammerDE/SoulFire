@@ -86,7 +86,7 @@ public class BlockBreakAction implements WorldAction {
                 var item = slot.item();
                 if (item == null) {
                     if (sawEmpty) {
-                        break;
+                        continue;
                     }
 
                     sawEmpty = true;

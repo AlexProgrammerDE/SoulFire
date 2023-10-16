@@ -51,6 +51,8 @@ public final class PlayerMovement implements GraphAction {
     private final boolean allowBlockActions;
     @Getter
     private final MovementMiningCost[] blockBreakCosts;
+    @Getter
+    private final boolean[] unsafeToBreak;
     @Setter
     @Getter
     private BotActionManager.BlockPlaceData blockPlaceData;
@@ -87,8 +89,10 @@ public final class PlayerMovement implements GraphAction {
 
         if (allowBlockActions) {
             blockBreakCosts = new MovementMiningCost[freeCapacity()];
+            unsafeToBreak = new boolean[freeCapacity()];
         } else {
             blockBreakCosts = null;
+            unsafeToBreak = null;
         }
     }
 
@@ -103,6 +107,7 @@ public final class PlayerMovement implements GraphAction {
         this.isImpossible = other.isImpossible;
         this.allowBlockActions = other.allowBlockActions;
         this.blockBreakCosts = other.blockBreakCosts == null ? null : new MovementMiningCost[other.blockBreakCosts.length];
+        this.unsafeToBreak = other.unsafeToBreak == null ? null : new boolean[other.unsafeToBreak.length];
         this.blockPlaceData = other.blockPlaceData;
         this.requiresAgainstBlock = other.requiresAgainstBlock;
     }
@@ -203,6 +208,71 @@ public final class PlayerMovement implements GraphAction {
     public Vector3i requiredSolidBlock() {
         // Floor block
         return targetFeetBlock.sub(0, 1, 0);
+    }
+
+    public BlockSafetyData[][] listCheckSafeMineBlocks() {
+        if (!allowBlockActions) {
+            return new BlockSafetyData[0][];
+        }
+
+        var requiredFreeBlocks = listRequiredFreeBlocks();
+        var results = new BlockSafetyData[requiredFreeBlocks.size()][];
+
+        var blockDirection = switch (direction) {
+            case NORTH -> BlockDirection.NORTH;
+            case SOUTH -> BlockDirection.SOUTH;
+            case EAST -> BlockDirection.EAST;
+            case WEST -> BlockDirection.WEST;
+            default -> throw new IllegalStateException("Unexpected value: " + direction);
+        };
+
+        var oppositeDirection = blockDirection.opposite();
+        var leftDirectionSide = blockDirection.leftSide();
+        var rightDirectionSide = blockDirection.rightSide();
+
+        if (modifier == MovementModifier.JUMP) {
+            var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
+            results[requiredFreeBlocks.indexOf(aboveHead)] = new BlockSafetyData[]{
+                    new BlockSafetyData(aboveHead.add(0, 1, 0), BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS),
+                    new BlockSafetyData(oppositeDirection.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS),
+                    new BlockSafetyData(leftDirectionSide.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS),
+                    new BlockSafetyData(rightDirectionSide.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS)
+            };
+        }
+
+        var targetEdge = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
+        for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
+            // Apply jump shift to target diagonal and offset for body part
+            var block = bodyOffset.offset(modifier.offsetIfJump(targetEdge));
+            var index = requiredFreeBlocks.indexOf(block);
+
+            if (bodyOffset == BodyPart.HEAD) {
+                results[index] = new BlockSafetyData[]{
+                        new BlockSafetyData(block.add(0, 1, 0), BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS),
+                        new BlockSafetyData(direction.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS),
+                        new BlockSafetyData(leftDirectionSide.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS),
+                        new BlockSafetyData(rightDirectionSide.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS)
+                };
+            } else {
+                results[index] = new BlockSafetyData[]{
+                        new BlockSafetyData(direction.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS),
+                        new BlockSafetyData(leftDirectionSide.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS),
+                        new BlockSafetyData(rightDirectionSide.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS)
+                };
+            }
+        }
+
+        // Require free blocks to fall into the target position
+        if (modifier == MovementModifier.FALL_1) {
+            var fallFree = MovementModifier.FALL_1.offset(targetEdge);
+            results[requiredFreeBlocks.indexOf(fallFree)] = new BlockSafetyData[]{
+                    new BlockSafetyData(direction.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS),
+                    new BlockSafetyData(leftDirectionSide.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS),
+                    new BlockSafetyData(rightDirectionSide.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS)
+            };
+        }
+
+        return results;
     }
 
     public List<BotActionManager.BlockPlaceData> possibleBlocksToPlaceAgainst() {

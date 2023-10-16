@@ -128,6 +128,8 @@ public record MinecraftGraph(TagsState tagsState) {
                             if (movement.isAllowBlockActions()
                                     // Narrow this down to blocks that can be broken
                                     && blockState.blockType().diggable()
+                                    // Check if we previously found out this block is unsafe to break
+                                    && !movement.getUnsafeToBreak()[subscriber.blockArrayIndex]
                                     // Narrows the list down to a reasonable size
                                     && BlockItems.hasItemType(blockState.blockType())) {
                                 var cacheableMiningCost = node.inventory()
@@ -141,6 +143,32 @@ public record MinecraftGraph(TagsState tagsState) {
                             } else {
                                 // No way to break this block
                                 movement.setImpossible(true);
+                            }
+                        }
+                        case MOVEMENT_BREAK_SAFETY_CHECK -> {
+                            // The block was already marked as unsafe
+                            if (movement.getUnsafeToBreak()[subscriber.blockArrayIndex]) {
+                                continue;
+                            }
+
+                            var unsafe = switch (subscriber.safetyType) {
+                                case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
+                                        || BlockTypeHelper.isFallingAroundMinedBlock(blockState.blockType());
+                                case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
+                            };
+
+                            if (unsafe) {
+                                var currentValue = movement.getBlockBreakCosts()[subscriber.blockArrayIndex];
+
+                                if (currentValue == null) {
+                                    // Store for a later time that this is unsafe,
+                                    // so if we check this block,
+                                    // we know it's unsafe
+                                    movement.getUnsafeToBreak()[subscriber.blockArrayIndex] = true;
+                                } else {
+                                    // We learned that this block needs to be broken, so we need to set it as impossible
+                                    movement.setImpossible(true);
+                                }
                             }
                         }
                         case MOVEMENT_SOLID -> {
@@ -220,6 +248,21 @@ public record MinecraftGraph(TagsState tagsState) {
         }
 
         {
+            var safeBlocks = movement.listCheckSafeMineBlocks();
+            for (var i = 0; i < safeBlocks.length; i++) {
+                var savedBlock = safeBlocks[i];
+                if (savedBlock == null) {
+                    continue;
+                }
+
+                for (var block : savedBlock) {
+                    blockSubscribers.computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION)
+                            .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK, i, block.type()));
+                }
+            }
+        }
+
+        {
             blockSubscribers.computeIfAbsent(movement.requiredSolidBlock(), CREATE_MISSING_FUNCTION)
                     .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_SOLID));
         }
@@ -243,23 +286,29 @@ public record MinecraftGraph(TagsState tagsState) {
 
     enum SubscriptionType {
         MOVEMENT_FREE,
+        MOVEMENT_BREAK_SAFETY_CHECK,
         MOVEMENT_SOLID,
         MOVEMENT_ADD_CORNER_COST_IF_SOLID,
         MOVEMENT_AGAINST_PLACE_SOLID
     }
 
     record BlockSubscription(int movementIndex, SubscriptionType type, int blockArrayIndex,
-                             BotActionManager.BlockPlaceData blockToPlaceAgainst) {
+                             BotActionManager.BlockPlaceData blockToPlaceAgainst,
+                             BlockSafetyData.BlockSafetyType safetyType) {
         BlockSubscription(int movementIndex, SubscriptionType type) {
-            this(movementIndex, type, -1, null);
+            this(movementIndex, type, -1, null, null);
         }
 
         BlockSubscription(int movementIndex, SubscriptionType type, int blockArrayIndex) {
-            this(movementIndex, type, blockArrayIndex, null);
+            this(movementIndex, type, blockArrayIndex, null, null);
         }
 
         BlockSubscription(int movementIndex, SubscriptionType type, BotActionManager.BlockPlaceData blockToPlaceAgainst) {
-            this(movementIndex, type, -1, blockToPlaceAgainst);
+            this(movementIndex, type, -1, blockToPlaceAgainst, null);
+        }
+
+        public BlockSubscription(int movementIndex, SubscriptionType subscriptionType, int i, BlockSafetyData.BlockSafetyType type) {
+            this(movementIndex, subscriptionType, i, null, type);
         }
     }
 }
