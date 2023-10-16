@@ -104,7 +104,7 @@ public record MinecraftGraph(TagsState tagsState) {
                     }
 
                     var basePosition = node.positionBlock();
-                    var positionBlock = node.positionBlock().add(key);
+                    var positionBlock = basePosition.add(key);
                     if (blockState == null) {
                         blockState = node.levelState()
                                 .getBlockStateAt(positionBlock)
@@ -162,6 +162,7 @@ public record MinecraftGraph(TagsState tagsState) {
                                 continue;
                             }
 
+                            // This block should not be placed against
                             if (!blockState.blockShapeType().isFullBlock()) {
                                 continue;
                             }
