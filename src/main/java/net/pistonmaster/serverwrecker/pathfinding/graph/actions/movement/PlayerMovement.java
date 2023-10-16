@@ -19,15 +19,20 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 
+import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
+import net.pistonmaster.serverwrecker.pathfinding.execution.BlockBreakAction;
+import net.pistonmaster.serverwrecker.pathfinding.execution.BlockPlaceAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
+import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
+import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -35,22 +40,31 @@ import java.util.List;
 
 @Slf4j
 public final class PlayerMovement implements GraphAction {
-    private final Vector3i positionBlock;
+    private final Vector3i previousPositionBlock;
     private final MovementDirection direction;
     private final MovementSide side;
     private final MovementModifier modifier;
     private final Vector3i targetBlock;
     @Getter
     private final boolean diagonal;
+    @Getter
+    private final boolean allowsBlockActions;
+    @Getter
+    private final MovementMiningCost[] blockBreakCosts;
+    @Setter
+    @Getter
+    private BotActionManager.BlockPlaceData blockPlaceData;
     private double cost;
     @Getter
     private boolean appliedCornerCost = false;
     @Setter
     @Getter
     private boolean isImpossible = false;
+    @Setter
+    private boolean requiresAgainstBlock = false;
 
-    public PlayerMovement(Vector3i positionBlock, MovementDirection direction, MovementSide side, MovementModifier modifier) {
-        this.positionBlock = positionBlock;
+    public PlayerMovement(Vector3i previousPositionBlock, MovementDirection direction, MovementSide side, MovementModifier modifier) {
+        this.previousPositionBlock = previousPositionBlock;
         this.direction = direction;
         this.side = side;
         this.modifier = modifier;
@@ -65,11 +79,22 @@ public final class PlayerMovement implements GraphAction {
                     case JUMP -> Costs.JUMP;
                 };
 
-        this.targetBlock = modifier.offset(direction.offset(positionBlock));
+        this.targetBlock = modifier.offset(direction.offset(previousPositionBlock));
+        this.allowsBlockActions = !diagonal && (
+                modifier == MovementModifier.JUMP
+                        || modifier == MovementModifier.NORMAL
+                        || modifier == MovementModifier.FALL_1
+        );
+
+        if (allowsBlockActions) {
+            blockBreakCosts = new MovementMiningCost[freeCapacity()];
+        } else {
+            blockBreakCosts = null;
+        }
     }
 
     private PlayerMovement(PlayerMovement other) {
-        this.positionBlock = other.positionBlock;
+        this.previousPositionBlock = other.previousPositionBlock;
         this.direction = other.direction;
         this.side = other.side;
         this.modifier = other.modifier;
@@ -78,23 +103,32 @@ public final class PlayerMovement implements GraphAction {
         this.cost = other.cost;
         this.appliedCornerCost = other.appliedCornerCost;
         this.isImpossible = other.isImpossible;
+        this.allowsBlockActions = other.allowsBlockActions;
+        this.blockBreakCosts = other.blockBreakCosts == null ? null : new MovementMiningCost[other.blockBreakCosts.length];
+        this.blockPlaceData = other.blockPlaceData;
+        this.requiresAgainstBlock = other.requiresAgainstBlock;
     }
 
-    public List<Vector3i> listRequiredFreeBlocks() {
-        List<Vector3i> requiredFreeBlocks = new ObjectArrayList<>(2 +
-                (diagonal ? 2 : 0) +
+    private int freeCapacity() {
+        return 2 + (diagonal ? 2 : 0) +
                 switch (modifier) {
                     case NORMAL -> 0;
                     case FALL_1 -> 1;
                     case FALL_2, JUMP -> 2;
                     case FALL_3 -> 3;
-                });
-        var fromPosInt = positionBlock;
+                };
+    }
 
-        var targetEdge = direction.offset(fromPosInt);
-        for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
-            // Apply jump shift to target diagonal and offset for body part
-            requiredFreeBlocks.add(bodyOffset.offset(modifier.offsetIfJump(targetEdge)));
+    public List<Vector3i> listRequiredFreeBlocks() {
+        List<Vector3i> requiredFreeBlocks = new ObjectArrayList<>();
+        var fromPosInt = previousPositionBlock;
+
+        if (modifier == MovementModifier.JUMP) {
+            // Make head block free (maybe head block is a slab)
+            requiredFreeBlocks.add(fromPosInt.add(0, 1, 0));
+
+            // Make block above head block free
+            requiredFreeBlocks.add(fromPosInt.add(0, 2, 0));
         }
 
         // Add the blocks that are required to be free for diagonal movement
@@ -107,15 +141,14 @@ public final class PlayerMovement implements GraphAction {
             }
         }
 
+        var targetEdge = direction.offset(fromPosInt);
+        for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
+            // Apply jump shift to target diagonal and offset for body part
+            requiredFreeBlocks.add(bodyOffset.offset(modifier.offsetIfJump(targetEdge)));
+        }
+
         // Require free blocks to fall into the target position
         switch (modifier) {
-            case JUMP -> {
-                // Make head block free (maybe head block is a slab)
-                requiredFreeBlocks.add(fromPosInt.add(0, 1, 0));
-
-                // Make block above head block free
-                requiredFreeBlocks.add(fromPosInt.add(0, 2, 0));
-            }
             case FALL_1 -> {
                 requiredFreeBlocks.add(MovementModifier.FALL_1.offset(targetEdge));
             }
@@ -156,10 +189,14 @@ public final class PlayerMovement implements GraphAction {
     }
 
     public List<Vector3i> listAddCostIfSolidBlocks() {
+        if (!diagonal) {
+            return List.of();
+        }
+
         var list = new ObjectArrayList<Vector3i>(2);
 
         // If these blocks are solid, the bot moves slower because the bot is running around a corner
-        var corner = getCorner(positionBlock, side.opposite());
+        var corner = getCorner(previousPositionBlock, side.opposite());
         for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
             // Apply jump shift to target edge and offset for body part
             list.add(bodyOffset.offset(modifier.offsetIfJump(corner)));
@@ -173,6 +210,35 @@ public final class PlayerMovement implements GraphAction {
         return targetBlock.sub(0, 1, 0);
     }
 
+    public List<BotActionManager.BlockPlaceData> possibleBlocksToPlaceAgainst() {
+        if (!allowsBlockActions) {
+            return List.of();
+        }
+
+        var blockDirection = switch (direction) {
+            case NORTH -> BlockDirection.NORTH;
+            case SOUTH -> BlockDirection.SOUTH;
+            case EAST -> BlockDirection.EAST;
+            case WEST -> BlockDirection.WEST;
+            default -> throw new IllegalStateException("Unexpected value: " + direction);
+        };
+
+        var oppositeDirection = blockDirection.opposite().getDirection();
+        var leftDirectionSide = blockDirection.leftSide();
+        var rightDirectionSide = blockDirection.rightSide();
+
+        return switch (modifier) {
+            case JUMP, NORMAL, FALL_1 -> // 4
+                    List.of(
+                            new BotActionManager.BlockPlaceData(targetBlock.sub(0, 1, 0), Direction.UP),
+                            new BotActionManager.BlockPlaceData(blockDirection.offset(targetBlock), oppositeDirection),
+                            new BotActionManager.BlockPlaceData(leftDirectionSide.offset(targetBlock), rightDirectionSide.getDirection()),
+                            new BotActionManager.BlockPlaceData(rightDirectionSide.offset(targetBlock), leftDirectionSide.getDirection())
+                    );
+            default -> throw new IllegalStateException("Unexpected value: " + modifier);
+        };
+    }
+
     public void addCornerCost() {
         cost += Costs.CORNER_SLIDE;
         appliedCornerCost = true;
@@ -180,19 +246,49 @@ public final class PlayerMovement implements GraphAction {
 
     @Override
     public boolean isImpossibleToComplete() {
-        return isImpossible;
+        return isImpossible || (requiresAgainstBlock && blockPlaceData == null);
     }
 
     @Override
     public GraphInstructions getInstructions(BotEntityState previousEntityState) {
+        var actions = new ObjectArrayList<WorldAction>();
+        var inventory = previousEntityState.inventory();
+        var levelState = previousEntityState.levelState();
+        var cost = this.cost;
+        if (blockBreakCosts != null) {
+            for (var breakCost : blockBreakCosts) {
+                if (breakCost == null) {
+                    continue;
+                }
+
+                cost += breakCost.miningCost();
+                actions.add(new BlockBreakAction(breakCost.block()));
+                if (breakCost.willDrop()) {
+                    inventory = inventory.withOneMoreBlock();
+                }
+
+                levelState = levelState.withChangeToAir(breakCost.block());
+            }
+        }
+
         var realTarget = previousEntityState.positionBlock().add(targetBlock);
+
+        if (blockPlaceData != null) {
+            cost += Costs.PLACE_BLOCK;
+            actions.add(new BlockPlaceAction(realTarget, blockPlaceData));
+            inventory = inventory.withOneLessBlock();
+            levelState = levelState.withChangeToSolidBlock(realTarget);
+        }
+
         var targetDoublePosition = VectorHelper.middleOfBlockNormalize(realTarget.toDouble());
+        actions.add(new MovementAction(targetDoublePosition, diagonal));
+
         return new GraphInstructions(new BotEntityState(
                 targetDoublePosition,
                 realTarget,
-                previousEntityState.levelState(),
-                previousEntityState.inventory()
-        ), cost, List.of(new MovementAction(targetDoublePosition, diagonal)));
+                levelState,
+                inventory
+        ), cost, actions);
     }
 
     @Override

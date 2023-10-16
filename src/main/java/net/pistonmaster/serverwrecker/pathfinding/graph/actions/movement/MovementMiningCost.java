@@ -17,23 +17,9 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.graph.actions.block;
+package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 
 import org.cloudburstmc.math.vector.Vector3i;
 
-public enum BlockModifier {
-    HEAD,
-    FEET,
-    FLOOR;
-
-    public static final BlockModifier[] VALUES = values();
-
-    @SuppressWarnings("DuplicatedCode")
-    public Vector3i offset(Vector3i vector) {
-        return switch (this) {
-            case HEAD -> vector.add(0, 1, 0);
-            case FEET -> vector;
-            case FLOOR -> vector.sub(0, 1, 0);
-        };
-    }
+public record MovementMiningCost(Vector3i block, double miningCost, boolean willDrop) {
 }

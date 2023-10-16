@@ -42,10 +42,8 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     private static final Hash.Strategy<BotEntityState> BOT_ENTITY_STATE_HASH_STRATEGY = new Hash.Strategy<>() {
         @Override
         public int hashCode(BotEntityState o) {
-            var hash = o.positionBlock().hashCode();
-            hash = 31 * hash + o.inventory().hashCode();
-            hash = 31 * hash + o.levelState().hashCode();
-            return hash;
+            var vector = o.positionBlock();
+            return (vector.getX() * 211 + vector.getY()) * 97 + vector.getZ();
         }
 
         @Override
@@ -56,18 +54,9 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
             var vector1 = a.positionBlock();
             var vector2 = b.positionBlock();
-
-            if (vector1.getX() != vector2.getX() ||
+            return vector1.getX() != vector2.getX() ||
                     vector1.getY() != vector2.getY() ||
-                    vector1.getZ() != vector2.getZ()) {
-                return false;
-            }
-
-            if (!a.inventory().equals(b.inventory())) {
-                return false;
-            }
-
-            return a.levelState().equals(b.levelState());
+                    vector1.getZ() != vector2.getZ();
         }
     };
 
@@ -96,7 +85,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         var routeIndex = new Object2ObjectOpenCustomHashMap<BotEntityState, MinecraftRouteNode>(BOT_ENTITY_STATE_HASH_STRATEGY);
 
         // Store block positions that we need to look at
-        var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>();
+        var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>(1);
 
         {
             var startScore = scorer.computeScore(graph, from);
