@@ -40,7 +40,7 @@ import java.util.List;
 
 @Slf4j
 public final class PlayerMovement implements GraphAction {
-    private static final Vector3i feetPositionRelativeBlock = Vector3i.ZERO;
+    private static final Vector3i FEET_POSITION_RELATIVE_BLOCK = Vector3i.ZERO;
     private final MovementDirection direction;
     private final MovementSide side;
     private final MovementModifier modifier;
@@ -48,7 +48,7 @@ public final class PlayerMovement implements GraphAction {
     @Getter
     private final boolean diagonal;
     @Getter
-    private final boolean allowsBlockActions;
+    private final boolean allowBlockActions;
     @Getter
     private final MovementMiningCost[] blockBreakCosts;
     @Setter
@@ -78,14 +78,14 @@ public final class PlayerMovement implements GraphAction {
                     case JUMP -> Costs.JUMP;
                 };
 
-        this.targetFeetBlock = modifier.offset(direction.offset(feetPositionRelativeBlock));
-        this.allowsBlockActions = !diagonal && (
+        this.targetFeetBlock = modifier.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
+        this.allowBlockActions = !diagonal && (
                 modifier == MovementModifier.JUMP
                         || modifier == MovementModifier.NORMAL
                         || modifier == MovementModifier.FALL_1
         );
 
-        if (allowsBlockActions) {
+        if (allowBlockActions) {
             blockBreakCosts = new MovementMiningCost[freeCapacity()];
         } else {
             blockBreakCosts = null;
@@ -101,7 +101,7 @@ public final class PlayerMovement implements GraphAction {
         this.cost = other.cost;
         this.appliedCornerCost = other.appliedCornerCost;
         this.isImpossible = other.isImpossible;
-        this.allowsBlockActions = other.allowsBlockActions;
+        this.allowBlockActions = other.allowBlockActions;
         this.blockBreakCosts = other.blockBreakCosts == null ? null : new MovementMiningCost[other.blockBreakCosts.length];
         this.blockPlaceData = other.blockPlaceData;
         this.requiresAgainstBlock = other.requiresAgainstBlock;
@@ -118,14 +118,14 @@ public final class PlayerMovement implements GraphAction {
     }
 
     public List<Vector3i> listRequiredFreeBlocks() {
-        List<Vector3i> requiredFreeBlocks = new ObjectArrayList<>();
+        List<Vector3i> requiredFreeBlocks = new ObjectArrayList<>(freeCapacity());
 
         if (modifier == MovementModifier.JUMP) {
             // Make head block free (maybe head block is a slab)
-            requiredFreeBlocks.add(feetPositionRelativeBlock.add(0, 1, 0));
+            requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0));
 
-            // Make block above head block free
-            requiredFreeBlocks.add(feetPositionRelativeBlock.add(0, 2, 0));
+            // Make block above the head block free for jump
+            requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0));
         }
 
         // Add the blocks that are required to be free for diagonal movement
@@ -138,7 +138,7 @@ public final class PlayerMovement implements GraphAction {
             }
         }
 
-        var targetEdge = direction.offset(feetPositionRelativeBlock);
+        var targetEdge = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
         for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
             // Apply jump shift to target diagonal and offset for body part
             requiredFreeBlocks.add(bodyOffset.offset(modifier.offsetIfJump(targetEdge)));
@@ -180,7 +180,7 @@ public final class PlayerMovement implements GraphAction {
                 case RIGHT -> MovementDirection.WEST;
             };
             default -> throw new IllegalStateException("Unexpected value: " + direction);
-        }).offset(feetPositionRelativeBlock);
+        }).offset(FEET_POSITION_RELATIVE_BLOCK);
     }
 
     public List<Vector3i> listAddCostIfSolidBlocks() {
@@ -206,7 +206,7 @@ public final class PlayerMovement implements GraphAction {
     }
 
     public List<BotActionManager.BlockPlaceData> possibleBlocksToPlaceAgainst() {
-        if (!allowsBlockActions) {
+        if (!allowBlockActions) {
             return List.of();
         }
 
@@ -294,11 +294,11 @@ public final class PlayerMovement implements GraphAction {
             levelState = levelState.withChangeToSolidBlock(floorBlock);
         }
 
-        var targetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toDouble());
-        actions.add(new MovementAction(targetDoublePosition, diagonal));
+        var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toDouble());
+        actions.add(new MovementAction(targetFeetDoublePosition, diagonal));
 
         return new GraphInstructions(new BotEntityState(
-                targetDoublePosition,
+                targetFeetDoublePosition,
                 absoluteTargetFeetBlock,
                 levelState,
                 inventory
@@ -306,7 +306,7 @@ public final class PlayerMovement implements GraphAction {
     }
 
     @Override
-    public GraphAction copy(BotEntityState previousEntityState) {
+    public PlayerMovement copy(BotEntityState previousEntityState) {
         return new PlayerMovement(this);
     }
 }

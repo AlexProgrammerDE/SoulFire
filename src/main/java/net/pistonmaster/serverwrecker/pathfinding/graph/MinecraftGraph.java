@@ -125,7 +125,7 @@ public record MinecraftGraph(TagsState tagsState) {
                             }
 
                             // Search for a way to break this block
-                            if (movement.isAllowsBlockActions()
+                            if (movement.isAllowBlockActions()
                                     // Narrow this down to blocks that can be broken
                                     && blockState.blockType().diggable()
                                     // Narrows the list down to a reasonable size
@@ -149,7 +149,7 @@ public record MinecraftGraph(TagsState tagsState) {
                                 continue;
                             }
 
-                            if (movement.isAllowsBlockActions()
+                            if (movement.isAllowBlockActions()
                                     && node.inventory().hasBlockToPlace()
                                     && BlockTypeHelper.isReplaceable(blockState.blockType())) {
                                 // We can place a block here, but we need to find a block to place against

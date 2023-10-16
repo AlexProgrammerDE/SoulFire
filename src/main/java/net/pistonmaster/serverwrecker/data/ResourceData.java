@@ -23,6 +23,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 
@@ -84,6 +85,7 @@ public class ResourceData {
         doNothing(BlockType.VALUES);
         doNothing(EntityType.VALUES);
         doNothing(ItemType.VALUES);
+        doNothing(new MinecraftGraph(null));
     }
 
     @SuppressWarnings("unused")
