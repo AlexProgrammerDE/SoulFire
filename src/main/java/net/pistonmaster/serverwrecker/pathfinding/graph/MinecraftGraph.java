@@ -147,8 +147,6 @@ public record MinecraftGraph(TagsState tagsState) {
                                 } else {
                                     movement.setImpossible(true);
                                 }
-                            } else {
-                                movement.setImpossible(true);
                             }
                         }
                         case MOVEMENT_AGAINST_PLACE_SOLID -> {
