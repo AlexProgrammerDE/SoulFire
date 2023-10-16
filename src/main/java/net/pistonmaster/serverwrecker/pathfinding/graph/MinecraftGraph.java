@@ -44,7 +44,6 @@ public record MinecraftGraph(TagsState tagsState) {
         var blockSubscribers = new Object2ObjectArrayMap<Vector3i, ObjectList<BlockSubscription>>();
 
         var actions = new ObjectArrayList<GraphAction>();
-        var baseVector = Vector3i.ZERO;
         for (var direction : MovementDirection.VALUES) {
             var diagonal = direction.isDiagonal();
             for (var modifier : MovementModifier.VALUES) {
@@ -52,14 +51,14 @@ public record MinecraftGraph(TagsState tagsState) {
                     for (var side : MovementSide.VALUES) {
                         actions.add(registerMovement(
                                 blockSubscribers,
-                                new PlayerMovement(baseVector, direction, side, modifier),
+                                new PlayerMovement(direction, side, modifier),
                                 actions.size()
                         ));
                     }
                 } else {
                     actions.add(registerMovement(
                             blockSubscribers,
-                            new PlayerMovement(baseVector, direction, null, modifier),
+                            new PlayerMovement(direction, null, modifier),
                             actions.size()
                     ));
                 }
@@ -98,16 +97,16 @@ public record MinecraftGraph(TagsState tagsState) {
                 var calculatedFree = false;
                 var isFree = false;
                 for (var subscriber : value) {
-                    var action = actions[subscriber.index];
+                    var action = actions[subscriber.movementInstanceIndex];
                     if (action.isImpossible()) {
                         continue;
                     }
 
-                    var basePosition = node.positionBlock();
-                    var positionBlock = basePosition.add(key);
+                    // Absolute position of where the feet of the player right now are
+                    var absolutePositionBlock = node.positionBlock().add(key);
                     if (blockState == null) {
                         blockState = node.levelState()
-                                .getBlockStateAt(positionBlock)
+                                .getBlockStateAt(absolutePositionBlock)
                                 .orElseThrow(OutOfLevelException::new);
                     }
 
@@ -125,19 +124,22 @@ public record MinecraftGraph(TagsState tagsState) {
                                 continue;
                             }
 
+                            // Search for a way to break this block
                             if (movement.isAllowsBlockActions()
+                                    // Narrow this down to blocks that can be broken
                                     && blockState.blockType().diggable()
+                                    // Narrows the list down to a reasonable size
                                     && BlockItems.hasItemType(blockState.blockType())) {
                                 var cacheableMiningCost = node.inventory()
                                         .getMiningCosts(tagsState, blockState);
                                 // We can mine this block, lets add costs and continue
                                 movement.getBlockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
-                                        positionBlock,
+                                        absolutePositionBlock,
                                         cacheableMiningCost.miningCost(),
                                         cacheableMiningCost.willDrop()
                                 );
                             } else {
-                                // No way to free this block
+                                // No way to break this block
                                 movement.setImpossible(true);
                             }
                         }
@@ -167,13 +169,10 @@ public record MinecraftGraph(TagsState tagsState) {
                                 continue;
                             }
 
-                            // We found a valid block to place against
-                            var blockPlaceAgainst = subscriber.blockToPlaceAgainst();
-
                             // Fixup the position to be the block we are placing against instead of relative
                             movement.setBlockPlaceData(new BotActionManager.BlockPlaceData(
-                                    basePosition.add(blockPlaceAgainst.againstPos()),
-                                    blockPlaceAgainst.blockFace()
+                                    absolutePositionBlock,
+                                    subscriber.blockToPlaceAgainst.blockFace()
                             ));
                         }
                         case MOVEMENT_ADD_CORNER_COST_IF_SOLID -> {
@@ -211,37 +210,31 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     private static PlayerMovement registerMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
-                                                   PlayerMovement movement, int index) {
+                                                   PlayerMovement movement, int movementInstanceIndex) {
         {
-            var i = 0;
+            var blockId = 0;
             for (var freeBlock : movement.listRequiredFreeBlocks()) {
-                var freeSubscription = new BlockSubscription(index, SubscriptionType.MOVEMENT_FREE, i);
                 blockSubscribers.computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
-                        .add(freeSubscription);
-                i++;
+                        .add(new BlockSubscription(movementInstanceIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
             }
         }
 
         {
-            var addCostIfSolidSubscription = new BlockSubscription(index, SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID);
+            blockSubscribers.computeIfAbsent(movement.requiredSolidBlock(), CREATE_MISSING_FUNCTION)
+                    .add(new BlockSubscription(movementInstanceIndex, SubscriptionType.MOVEMENT_SOLID));
+        }
+
+        {
             for (var addCostIfSolidBlock : movement.listAddCostIfSolidBlocks()) {
                 blockSubscribers.computeIfAbsent(addCostIfSolidBlock, CREATE_MISSING_FUNCTION)
-                        .add(addCostIfSolidSubscription);
+                        .add(new BlockSubscription(movementInstanceIndex, SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID));
             }
-        }
-
-        {
-            var solidSubscription = new BlockSubscription(index, SubscriptionType.MOVEMENT_SOLID);
-            var solidBlock = movement.requiredSolidBlock();
-            blockSubscribers.computeIfAbsent(solidBlock, CREATE_MISSING_FUNCTION)
-                    .add(solidSubscription);
         }
 
         {
             for (var againstBlock : movement.possibleBlocksToPlaceAgainst()) {
-                var againstSolidSubscription = new BlockSubscription(index, SubscriptionType.MOVEMENT_AGAINST_PLACE_SOLID, againstBlock);
                 blockSubscribers.computeIfAbsent(againstBlock.againstPos(), CREATE_MISSING_FUNCTION)
-                        .add(againstSolidSubscription);
+                        .add(new BlockSubscription(movementInstanceIndex, SubscriptionType.MOVEMENT_AGAINST_PLACE_SOLID, againstBlock));
             }
         }
 
@@ -255,18 +248,18 @@ public record MinecraftGraph(TagsState tagsState) {
         MOVEMENT_AGAINST_PLACE_SOLID
     }
 
-    record BlockSubscription(int index, SubscriptionType type, int blockArrayIndex,
+    record BlockSubscription(int movementInstanceIndex, SubscriptionType type, int blockArrayIndex,
                              BotActionManager.BlockPlaceData blockToPlaceAgainst) {
-        BlockSubscription(int index, SubscriptionType type) {
-            this(index, type, -1, null);
+        BlockSubscription(int movementInstanceIndex, SubscriptionType type) {
+            this(movementInstanceIndex, type, -1, null);
         }
 
-        BlockSubscription(int index, SubscriptionType type, int blockArrayIndex) {
-            this(index, type, blockArrayIndex, null);
+        BlockSubscription(int movementInstanceIndex, SubscriptionType type, int blockArrayIndex) {
+            this(movementInstanceIndex, type, blockArrayIndex, null);
         }
 
-        BlockSubscription(int index, SubscriptionType type, BotActionManager.BlockPlaceData blockToPlaceAgainst) {
-            this(index, type, -1, blockToPlaceAgainst);
+        BlockSubscription(int movementInstanceIndex, SubscriptionType type, BotActionManager.BlockPlaceData blockToPlaceAgainst) {
+            this(movementInstanceIndex, type, -1, blockToPlaceAgainst);
         }
     }
 }
