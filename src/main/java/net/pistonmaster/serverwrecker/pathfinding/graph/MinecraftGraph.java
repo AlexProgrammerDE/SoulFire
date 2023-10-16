@@ -307,7 +307,7 @@ public record MinecraftGraph(TagsState tagsState) {
             this(movementIndex, type, -1, blockToPlaceAgainst, null);
         }
 
-        public BlockSubscription(int movementIndex, SubscriptionType subscriptionType, int i, BlockSafetyData.BlockSafetyType type) {
+        BlockSubscription(int movementIndex, SubscriptionType subscriptionType, int i, BlockSafetyData.BlockSafetyType type) {
             this(movementIndex, subscriptionType, i, null, type);
         }
     }
