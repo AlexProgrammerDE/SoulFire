@@ -57,7 +57,7 @@ public class ProjectedInventory {
                 continue;
             }
 
-            if (ItemTypeHelper.isFullBlockItem(slot.item().getType())) {
+            if (ItemTypeHelper.isSafeFullBlockItem(slot.item().getType())) {
                 blockItems += slot.item().getAmount();
             } else if (ItemTypeHelper.isTool(slot.item().getType())) {
                 usableToolsAndNull.add(slot.item());

@@ -76,4 +76,12 @@ public class BlockTypeHelper {
                 || type == BlockType.SOUL_FIRE
                 || type == BlockType.LAVA;
     }
+
+    public static boolean isUnsafe(BlockType type) {
+        return type == BlockType.SAND
+                || type == BlockType.GRAVEL
+                || type == BlockType.ANVIL
+                || type == BlockType.CHIPPED_ANVIL
+                || type == BlockType.DAMAGED_ANVIL;
+    }
 }

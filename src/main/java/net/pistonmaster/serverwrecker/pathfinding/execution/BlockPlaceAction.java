@@ -84,7 +84,7 @@ public class BlockPlaceAction implements WorldAction {
             var heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
             if (heldSlot.item() != null) {
                 var item = heldSlot.item();
-                if (ItemTypeHelper.isFullBlockItem(item.getType())) {
+                if (ItemTypeHelper.isSafeFullBlockItem(item.getType())) {
                     putOnHotbar = true;
                     return;
                 }
@@ -96,7 +96,7 @@ public class BlockPlaceAction implements WorldAction {
                 }
 
                 var item = hotbarSlot.item();
-                if (!ItemTypeHelper.isFullBlockItem(item.getType())) {
+                if (!ItemTypeHelper.isSafeFullBlockItem(item.getType())) {
                     continue;
                 }
 
@@ -112,7 +112,7 @@ public class BlockPlaceAction implements WorldAction {
                 }
 
                 var item = slot.item();
-                if (!ItemTypeHelper.isFullBlockItem(item.getType())) {
+                if (!ItemTypeHelper.isSafeFullBlockItem(item.getType())) {
                     continue;
                 }
 

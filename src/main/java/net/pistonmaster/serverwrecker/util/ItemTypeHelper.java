@@ -27,11 +27,16 @@ public class ItemTypeHelper {
     private ItemTypeHelper() {
     }
 
-    public static boolean isFullBlockItem(ItemType type) {
-        return BlockItems.getBlockType(type).isPresent();
+    public static boolean isSafeFullBlockItem(ItemType type) {
+        return BlockItems.getBlockType(type).isPresent() && !isUnsafeToPlace(type);
     }
 
     public static boolean isTool(ItemType type) {
         return TierType.getTier(type).isPresent() || type == ItemType.SHEARS;
+    }
+
+    public static boolean isUnsafeToPlace(ItemType type) {
+        return type == ItemType.SAND
+                || type == ItemType.GRAVEL;
     }
 }
