@@ -68,7 +68,7 @@ public class BlockTypeHelper {
         return meta.blockShapeType().isFullBlock();
     }
 
-    public static boolean isHurtOnTouch(BlockType type) {
+    public static boolean isHurtOnTouchSide(BlockType type) {
         return type == BlockType.CACTUS
                 || type == BlockType.SWEET_BERRY_BUSH
                 || type == BlockType.WITHER_ROSE
@@ -83,5 +83,13 @@ public class BlockTypeHelper {
                 || type == BlockType.ANVIL
                 || type == BlockType.CHIPPED_ANVIL
                 || type == BlockType.DAMAGED_ANVIL;
+    }
+
+    public static boolean isHurtWhenStoodOn(BlockType type) {
+        return type == BlockType.MAGMA_BLOCK;
+    }
+
+    public static boolean isSafeBlockToStandOn(BlockStateMeta meta) {
+        return meta.blockShapeType().isFullBlock() && !isHurtWhenStoodOn(meta.blockType());
     }
 }

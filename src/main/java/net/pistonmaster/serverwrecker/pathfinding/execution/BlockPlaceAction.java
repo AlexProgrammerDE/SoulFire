@@ -137,6 +137,8 @@ public class BlockPlaceAction implements WorldAction {
                 putOnHotbar = true;
                 return;
             }
+
+            throw new IllegalStateException("Failed to find item stack");
         }
 
         connection.sessionDataManager().getBotActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceData);

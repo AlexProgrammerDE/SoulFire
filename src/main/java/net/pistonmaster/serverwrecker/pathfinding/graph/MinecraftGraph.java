@@ -25,10 +25,10 @@ import net.pistonmaster.serverwrecker.data.BlockItems;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
-import net.pistonmaster.serverwrecker.pathfinding.graph.actions.PlayerMovement;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.*;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.parkour.ParkourDirection;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.parkour.ParkourMovement;
+import net.pistonmaster.serverwrecker.pathfinding.graph.actions.updown.DownMovement;
 import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
@@ -75,6 +75,12 @@ public record MinecraftGraph(TagsState tagsState) {
                     actions.size()
             ));
         }
+
+        actions.add(registerDownMovement(
+                blockSubscribers,
+                new DownMovement(),
+                actions.size()
+        ));
 
         ACTIONS_TEMPLATE = actions.toArray(new GraphAction[0]);
         SUBSCRIPTION_KEYS = new Vector3i[blockSubscribers.size()];
@@ -232,7 +238,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
                                 if (blockState.blockShapeType().isFullBlock()) {
                                     movement.addCornerCost();
-                                } else if (BlockTypeHelper.isHurtOnTouch(blockState.blockType())) {
+                                } else if (BlockTypeHelper.isHurtOnTouchSide(blockState.blockType())) {
                                     // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
                                     movement.setImpossible(true);
                                 }
@@ -261,6 +267,39 @@ public record MinecraftGraph(TagsState tagsState) {
                                 }
 
                                 parkourMovement.setImpossible(true);
+                            }
+                        }
+                    } else if (action instanceof DownMovement downMovement) {
+                        switch (subscriber.type) {
+                            case MOVEMENT_FREE -> {
+                                if (blockState.blockType().diggable()
+                                        // Narrows the list down to a reasonable size
+                                        && BlockItems.hasItemType(blockState.blockType())) {
+                                    var cacheableMiningCost = node.inventory()
+                                            .getMiningCosts(tagsState, blockState);
+                                    // We can mine this block, lets add costs and continue
+                                    downMovement.setBlockBreakCosts(new MovementMiningCost(
+                                            absolutePositionBlock,
+                                            cacheableMiningCost.miningCost(),
+                                            cacheableMiningCost.willDrop()
+                                    ));
+                                } else {
+                                    // No way to break this block
+                                    downMovement.setImpossible(true);
+                                }
+                            }
+                            case DOWN_SAFETY_CHECK -> {
+                                var yLevel = key.getY();
+
+                                if (yLevel < downMovement.getClosestBlockToFallOn()) {
+                                    // We already found a block to fall on, above this one
+                                    continue;
+                                }
+
+                                if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
+                                    // We found a block to fall on
+                                    downMovement.setClosestBlockToFallOn(yLevel);
+                                }
                             }
                         }
                     }
@@ -349,12 +388,30 @@ public record MinecraftGraph(TagsState tagsState) {
         return movement;
     }
 
+    private static DownMovement registerDownMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
+                                                     DownMovement movement, int movementIndex) {
+        {
+            for (var safetyBlock : movement.listSafetyCheckBlocks()) {
+                blockSubscribers.computeIfAbsent(safetyBlock, CREATE_MISSING_FUNCTION)
+                        .add(new BlockSubscription(movementIndex, SubscriptionType.DOWN_SAFETY_CHECK));
+            }
+        }
+
+        {
+            blockSubscribers.computeIfAbsent(movement.blockToBreak(), CREATE_MISSING_FUNCTION)
+                    .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE));
+        }
+
+        return movement;
+    }
+
     enum SubscriptionType {
         MOVEMENT_FREE,
         MOVEMENT_BREAK_SAFETY_CHECK,
         MOVEMENT_SOLID,
         MOVEMENT_ADD_CORNER_COST_IF_SOLID,
-        MOVEMENT_AGAINST_PLACE_SOLID
+        MOVEMENT_AGAINST_PLACE_SOLID,
+        DOWN_SAFETY_CHECK
     }
 
     record BlockSubscription(int movementIndex, SubscriptionType type, int blockArrayIndex,

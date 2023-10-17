@@ -167,6 +167,8 @@ public class BlockBreakAction implements WorldAction {
                 putOnHotbar = true;
                 return;
             }
+
+            throw new IllegalStateException("Failed to find item stack");
         }
 
         if (finishedDigging) {
