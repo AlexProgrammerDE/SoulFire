@@ -100,7 +100,7 @@ public class BlockBreakAction implements WorldAction {
                         levelState.getBlockTypeAt(blockPosition).orElseThrow()
                 ).ticks();
 
-                if (cost < bestCost) {
+                if (cost < bestCost || (item == null && cost == bestCost)) {
                     bestCost = cost;
                     itemStack = item;
                 }

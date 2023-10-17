@@ -34,14 +34,13 @@ import lombok.ToString;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Data
 @RequiredArgsConstructor
 public class InventoryManager {
     private final Int2ObjectMap<Container> containerData = new Int2ObjectOpenHashMap<>();
-    private final Lock inventoryControlLock = new ReentrantLock();
+    private final ReentrantLock inventoryControlLock = new ReentrantLock();
     @ToString.Exclude
     private final SessionDataManager dataManager;
     private Container openContainer;
@@ -100,14 +99,12 @@ public class InventoryManager {
     }
 
     public void leftClickSlot(int slot) {
-        if (inventoryControlLock.tryLock()) {
-            inventoryControlLock.unlock();
+        if (!inventoryControlLock.isHeldByCurrentThread()) {
             throw new IllegalStateException("You need to lock the inventoryControlLock before calling this method!");
         }
 
         if (openContainer == null) {
             openPlayerInventory();
-            return;
         }
 
         SWItemStack slotItem;
