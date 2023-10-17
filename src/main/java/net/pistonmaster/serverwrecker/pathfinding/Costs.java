@@ -44,8 +44,8 @@ public class Costs {
     // Multiply calculated ticks using this number to get a good relative heuristic
     public static final double TICKS_PER_BLOCK = 5;
     // We don't want a bot that tries to break blocks instead of walking around them
-    public static final double BREAK_BLOCK_ADDITION = 10;
-    public static final double PLACE_BLOCK = 10;
+    public static final double BREAK_BLOCK_ADDITION = 2;
+    public static final double PLACE_BLOCK = 5;
     // Sliding around a corner is roughly like walking two blocks
     public static final double CORNER_SLIDE = 2 - DIAGONAL;
     /**

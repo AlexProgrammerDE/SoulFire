@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
@@ -118,10 +117,6 @@ public class ChunkHolder {
 
         return Optional.of(ResourceData.GLOBAL_BLOCK_PALETTE
                 .getBlockStateForStateId(chunkData.getBlock(block)));
-    }
-
-    public Optional<BlockType> getBlockTypeAt(Vector3i block) {
-        return getBlockStateAt(block).map(BlockStateMeta::blockType);
     }
 
     public ChunkHolder immutableCopy() {

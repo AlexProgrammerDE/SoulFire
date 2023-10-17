@@ -137,7 +137,7 @@ public class LevelState {
     }
 
     public Optional<BlockType> getBlockTypeAt(Vector3i block) {
-        return chunks.getBlockTypeAt(block);
+        return getBlockStateAt(block).map(BlockStateMeta::blockType);
     }
 
     public boolean isOutOfWorld(Vector3i block) {

@@ -92,6 +92,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 var value = SUBSCRIPTION_VALUES[i];
 
                 BlockStateMeta blockState = null;
+                Vector3i absolutePositionBlock = null;
 
                 // We cache only this, but not solid because solid will only occur a single time
                 var calculatedFree = false;
@@ -102,9 +103,9 @@ public record MinecraftGraph(TagsState tagsState) {
                         continue;
                     }
 
-                    // Absolute position of where the feet of the player right now are
-                    var absolutePositionBlock = node.positionBlock().add(key);
                     if (blockState == null) {
+                        // Lazy calculation to avoid unnecessary calls
+                        absolutePositionBlock = node.positionBlock().add(key);
                         blockState = node.levelState()
                                 .getBlockStateAt(absolutePositionBlock)
                                 .orElseThrow(OutOfLevelException::new);
@@ -121,6 +122,10 @@ public record MinecraftGraph(TagsState tagsState) {
                             }
 
                             if (isFree) {
+                                if (movement.isAllowBlockActions()) {
+                                    movement.getNoNeedToBreak()[subscriber.blockArrayIndex] = true;
+                                }
+
                                 continue;
                             }
 
@@ -146,6 +151,11 @@ public record MinecraftGraph(TagsState tagsState) {
                             }
                         }
                         case MOVEMENT_BREAK_SAFETY_CHECK -> {
+                            // There is no need to break this block, so there is no need for safety checks
+                            if (movement.getNoNeedToBreak()[subscriber.blockArrayIndex]) {
+                                continue;
+                            }
+
                             // The block was already marked as unsafe
                             if (movement.getUnsafeToBreak()[subscriber.blockArrayIndex]) {
                                 continue;

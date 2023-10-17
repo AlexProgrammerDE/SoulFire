@@ -314,8 +314,9 @@ public final class BotMovementManager {
             return false;
         }
 
-        var blockType = level.getBlockTypeAt(blockPos);
-        return blockType.map(BlockType::isFluid).orElse(false);
+        return level.getBlockTypeAt(blockPos)
+                .map(BlockType::isFluid)
+                .orElse(false);
     }
 
     public void jump() {

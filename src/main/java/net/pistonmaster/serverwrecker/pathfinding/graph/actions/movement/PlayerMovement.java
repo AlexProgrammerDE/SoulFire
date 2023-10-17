@@ -53,6 +53,8 @@ public final class PlayerMovement implements GraphAction {
     private final MovementMiningCost[] blockBreakCosts;
     @Getter
     private final boolean[] unsafeToBreak;
+    @Getter
+    private final boolean[] noNeedToBreak;
     @Setter
     @Getter
     private BotActionManager.BlockPlaceData blockPlaceData;
@@ -90,9 +92,11 @@ public final class PlayerMovement implements GraphAction {
         if (allowBlockActions) {
             blockBreakCosts = new MovementMiningCost[freeCapacity()];
             unsafeToBreak = new boolean[freeCapacity()];
+            noNeedToBreak = new boolean[freeCapacity()];
         } else {
             blockBreakCosts = null;
             unsafeToBreak = null;
+            noNeedToBreak = null;
         }
     }
 
@@ -108,6 +112,7 @@ public final class PlayerMovement implements GraphAction {
         this.allowBlockActions = other.allowBlockActions;
         this.blockBreakCosts = other.blockBreakCosts == null ? null : new MovementMiningCost[other.blockBreakCosts.length];
         this.unsafeToBreak = other.unsafeToBreak == null ? null : new boolean[other.unsafeToBreak.length];
+        this.noNeedToBreak = other.noNeedToBreak == null ? null : new boolean[other.noNeedToBreak.length];
         this.blockPlaceData = other.blockPlaceData;
         this.requiresAgainstBlock = other.requiresAgainstBlock;
     }

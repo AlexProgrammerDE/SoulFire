@@ -28,7 +28,7 @@ public class VectorHelper {
     public static final Hash.Strategy<Vector3i> VECTOR3I_HASH_STRATEGY = new Hash.Strategy<>() {
         @Override
         public int hashCode(Vector3i o) {
-            return (o.getX() * 211 + o.getY()) * 97 + o.getZ();
+            return o.hashCode();
         }
 
         @Override
