@@ -37,6 +37,7 @@ public class Costs {
     public static final double STRAIGHT = 1;
     public static final double DIAGONAL = 1.4142135623730951;
     public static final double JUMP = 0.3;
+    public static final double ONE_GAP_JUMP = STRAIGHT + JUMP;
     public static final double FALL_1 = 0.1;
     public static final double FALL_2 = 0.2;
     public static final double FALL_3 = 0.3;
