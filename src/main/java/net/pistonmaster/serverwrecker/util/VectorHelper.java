@@ -33,8 +33,12 @@ public class VectorHelper {
 
         @Override
         public boolean equals(Vector3i a, Vector3i b) {
-            if (a == null || b == null) {
+            if (b == null) {
                 return false;
+            }
+
+            if (a == b) {
+                return true;
             }
 
             return a.getX() == b.getX()
