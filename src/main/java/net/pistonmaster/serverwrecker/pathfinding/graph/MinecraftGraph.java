@@ -29,6 +29,7 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.*;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.parkour.ParkourDirection;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.parkour.ParkourMovement;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.updown.DownMovement;
+import net.pistonmaster.serverwrecker.pathfinding.graph.actions.updown.UpMovement;
 import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
@@ -79,6 +80,12 @@ public record MinecraftGraph(TagsState tagsState) {
         actions.add(registerDownMovement(
                 blockSubscribers,
                 new DownMovement(),
+                actions.size()
+        ));
+
+        actions.add(registerUpMovement(
+                blockSubscribers,
+                new UpMovement(),
                 actions.size()
         ));
 
@@ -310,6 +317,70 @@ public record MinecraftGraph(TagsState tagsState) {
                                 }
                             }
                         }
+                    } else if (action instanceof UpMovement upMovement) {
+                        switch (subscriber.type) {
+                            case MOVEMENT_FREE -> {
+                                if (!calculatedFree) {
+                                    // We can walk through blocks like air or grass
+                                    isFree = blockState.blockShapeType().hasNoCollisions()
+                                            && !BlockTypeHelper.isFluid(blockState.blockType());
+                                    calculatedFree = true;
+                                }
+
+                                if (isFree) {
+                                    upMovement.getNoNeedToBreak()[subscriber.blockArrayIndex] = true;
+                                    continue;
+                                }
+
+                                // Search for a way to break this block
+                                if (blockState.blockType().diggable()
+                                        && !upMovement.getUnsafeToBreak()[subscriber.blockArrayIndex]
+                                        && BlockItems.hasItemType(blockState.blockType())) {
+                                    var cacheableMiningCost = node.inventory()
+                                            .getMiningCosts(tagsState, blockState);
+                                    // We can mine this block, lets add costs and continue
+                                    upMovement.getBlockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
+                                            absolutePositionBlock,
+                                            cacheableMiningCost.miningCost(),
+                                            cacheableMiningCost.willDrop()
+                                    );
+                                } else {
+                                    // No way to break this block
+                                    upMovement.setImpossible(true);
+                                }
+                            }
+                            case MOVEMENT_BREAK_SAFETY_CHECK -> {
+                                // There is no need to break this block, so there is no need for safety checks
+                                if (upMovement.getNoNeedToBreak()[subscriber.blockArrayIndex]) {
+                                    continue;
+                                }
+
+                                // The block was already marked as unsafe
+                                if (upMovement.getUnsafeToBreak()[subscriber.blockArrayIndex]) {
+                                    continue;
+                                }
+
+                                var unsafe = switch (subscriber.safetyType) {
+                                    case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
+                                            || BlockTypeHelper.isFallingAroundMinedBlock(blockState.blockType());
+                                    case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
+                                };
+
+                                if (unsafe) {
+                                    var currentValue = upMovement.getBlockBreakCosts()[subscriber.blockArrayIndex];
+
+                                    if (currentValue == null) {
+                                        // Store for a later time that this is unsafe,
+                                        // so if we check this block,
+                                        // we know it's unsafe
+                                        upMovement.getUnsafeToBreak()[subscriber.blockArrayIndex] = true;
+                                    } else {
+                                        // We learned that this block needs to be broken, so we need to set it as impossible
+                                        upMovement.setImpossible(true);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -413,6 +484,34 @@ public record MinecraftGraph(TagsState tagsState) {
         {
             blockSubscribers.computeIfAbsent(movement.blockToBreak(), CREATE_MISSING_FUNCTION)
                     .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE));
+        }
+
+        return movement;
+    }
+
+    private static UpMovement registerUpMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
+                                                 UpMovement movement, int movementIndex) {
+        {
+            var blockId = 0;
+            for (var freeBlock : movement.listRequiredFreeBlocks()) {
+                blockSubscribers.computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
+                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
+            }
+        }
+
+        {
+            var safeBlocks = movement.listCheckSafeMineBlocks();
+            for (var i = 0; i < safeBlocks.length; i++) {
+                var savedBlock = safeBlocks[i];
+                if (savedBlock == null) {
+                    continue;
+                }
+
+                for (var block : savedBlock) {
+                    blockSubscribers.computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION)
+                            .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK, i, block.type()));
+                }
+            }
         }
 
         return movement;

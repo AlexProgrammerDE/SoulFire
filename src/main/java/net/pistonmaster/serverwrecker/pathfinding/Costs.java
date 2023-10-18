@@ -47,6 +47,7 @@ public class Costs {
     // We don't want a bot that tries to break blocks instead of walking around them
     public static final double BREAK_BLOCK_ADDITION = 2;
     public static final double PLACE_BLOCK = 5;
+    public static final double JUMP_UP_AND_PLACE_BELOW = JUMP + PLACE_BLOCK;
     // Sliding around a corner is roughly like walking two blocks
     public static final double CORNER_SLIDE = 2 - DIAGONAL;
     /**

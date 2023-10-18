@@ -32,7 +32,6 @@ public class GapJumpAction implements WorldAction {
     private final Vector3d position;
     private boolean didLook = false;
     private int noJumpTicks = 0;
-    private boolean didJump = false;
 
     @Override
     public boolean isCompleted(BotConnection connection) {

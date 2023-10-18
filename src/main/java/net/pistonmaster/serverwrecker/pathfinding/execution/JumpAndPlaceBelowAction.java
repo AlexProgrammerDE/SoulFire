@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 @ToString
 @RequiredArgsConstructor
-public class BlockPlaceAction implements WorldAction {
+public class JumpAndPlaceBelowAction implements WorldAction {
     private final Vector3i blockPosition;
     private final BotActionManager.BlockPlaceData blockPlaceData;
     private boolean putOnHotbar = false;
@@ -144,6 +144,14 @@ public class BlockPlaceAction implements WorldAction {
 
         if (finishedPlacing) {
             return;
+        }
+
+        if (movementManager.getY() <= blockPosition.getY() + 1) {
+            // Make sure we are so high that we can place the block
+            movementManager.getControlState().setJumping(true);
+            return;
+        } else {
+            movementManager.getControlState().setJumping(false);
         }
 
         connection.sessionDataManager().getBotActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceData);
