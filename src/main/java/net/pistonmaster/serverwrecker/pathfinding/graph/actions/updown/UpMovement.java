@@ -50,7 +50,6 @@ public final class UpMovement implements GraphAction {
     private final boolean[] unsafeToBreak;
     @Getter
     private final boolean[] noNeedToBreak;
-    private double cost;
     @Setter
     @Getter
     private boolean isImpossible = false;
@@ -58,8 +57,6 @@ public final class UpMovement implements GraphAction {
     private boolean requiresAgainstBlock = false;
 
     public UpMovement() {
-        this.cost = Costs.JUMP_UP_AND_PLACE_BELOW;
-
         this.targetFeetBlock = FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0);
 
         blockBreakCosts = new MovementMiningCost[freeCapacity()];
@@ -69,7 +66,6 @@ public final class UpMovement implements GraphAction {
 
     private UpMovement(UpMovement other) {
         this.targetFeetBlock = other.targetFeetBlock;
-        this.cost = other.cost;
         this.isImpossible = other.isImpossible;
         this.blockBreakCosts = new MovementMiningCost[other.blockBreakCosts.length];
         this.unsafeToBreak = new boolean[other.unsafeToBreak.length];
@@ -120,7 +116,8 @@ public final class UpMovement implements GraphAction {
         var actions = new ObjectArrayList<WorldAction>();
         var inventory = previousEntityState.inventory();
         var levelState = previousEntityState.levelState();
-        var cost = this.cost;
+        var cost = Costs.JUMP_UP_AND_PLACE_BELOW;
+
         for (var breakCost : blockBreakCosts) {
             if (breakCost == null) {
                 continue;
@@ -154,6 +151,8 @@ public final class UpMovement implements GraphAction {
 
     @Override
     public UpMovement copy(BotEntityState previousEntityState) {
-        return new UpMovement(this);
+        var upMovement = new UpMovement(this);
+        upMovement.isImpossible = !previousEntityState.inventory().hasBlockToPlace();
+        return upMovement;
     }
 }
