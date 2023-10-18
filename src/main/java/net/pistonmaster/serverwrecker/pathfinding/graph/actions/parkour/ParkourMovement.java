@@ -62,9 +62,6 @@ public class ParkourMovement implements GraphAction {
 
         var oneFurther = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
 
-        // The gap to jump over
-        requiredFreeBlocks.add(oneFurther.sub(0, 1, 0));
-
         // Room for jumping
         requiredFreeBlocks.add(oneFurther);
         requiredFreeBlocks.add(oneFurther.add(0, 1, 0));
@@ -78,6 +75,11 @@ public class ParkourMovement implements GraphAction {
         requiredFreeBlocks.add(twoFurther.add(0, 2, 0));
 
         return requiredFreeBlocks;
+    }
+
+    public Vector3i requiredUnsafeBlock() {
+        // The gap to jump over, needs to be unsafe for this movement to be possible
+        return direction.offset(FEET_POSITION_RELATIVE_BLOCK).sub(0, 1, 0);
     }
 
     public Vector3i requiredSolidBlock() {

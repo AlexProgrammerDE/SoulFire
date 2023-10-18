@@ -260,6 +260,14 @@ public record MinecraftGraph(TagsState tagsState) {
 
                                 parkourMovement.setImpossible(true);
                             }
+                            // We only want to jump over dangerous blocks/gaps
+                            // So either a non-full-block like water or lava or magma
+                            // since it hurts to stand on.
+                            case PARKOUR_UNSAFE_TO_STAND_ON -> {
+                                if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
+                                    parkourMovement.setImpossible(true);
+                                }
+                            }
                             case MOVEMENT_SOLID -> {
                                 // Block is safe to walk on, no need to check for more
                                 if (blockState.blockShapeType().isFullBlock()) {
@@ -381,6 +389,11 @@ public record MinecraftGraph(TagsState tagsState) {
         }
 
         {
+            blockSubscribers.computeIfAbsent(movement.requiredUnsafeBlock(), CREATE_MISSING_FUNCTION)
+                    .add(new BlockSubscription(movementIndex, SubscriptionType.PARKOUR_UNSAFE_TO_STAND_ON));
+        }
+
+        {
             blockSubscribers.computeIfAbsent(movement.requiredSolidBlock(), CREATE_MISSING_FUNCTION)
                     .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_SOLID));
         }
@@ -411,7 +424,8 @@ public record MinecraftGraph(TagsState tagsState) {
         MOVEMENT_SOLID,
         MOVEMENT_ADD_CORNER_COST_IF_SOLID,
         MOVEMENT_AGAINST_PLACE_SOLID,
-        DOWN_SAFETY_CHECK
+        DOWN_SAFETY_CHECK,
+        PARKOUR_UNSAFE_TO_STAND_ON
     }
 
     record BlockSubscription(int movementIndex, SubscriptionType type, int blockArrayIndex,
