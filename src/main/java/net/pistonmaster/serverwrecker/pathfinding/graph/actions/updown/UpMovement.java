@@ -132,6 +132,10 @@ public final class UpMovement implements GraphAction {
             levelState = levelState.withChangeToAir(breakCost.block());
         }
 
+        // Change values for block we're going to place and stand on
+        inventory = inventory.withOneLessBlock();
+        levelState = levelState.withChangeToSolidBlock(previousEntityState.positionBlock());
+
         var absoluteTargetFeetBlock = previousEntityState.positionBlock().add(targetFeetBlock);
         var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toDouble());
 

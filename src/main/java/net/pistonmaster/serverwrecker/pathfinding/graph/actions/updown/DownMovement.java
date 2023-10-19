@@ -39,7 +39,6 @@ public class DownMovement implements GraphAction {
     @Getter
     @Setter
     private MovementMiningCost blockBreakCosts;
-    private double cost;
     @Setter
     @Getter
     private boolean isImpossible = false;
@@ -53,7 +52,6 @@ public class DownMovement implements GraphAction {
 
     private DownMovement(DownMovement other) {
         this.targetToMineBlock = other.targetToMineBlock;
-        this.cost = other.cost;
         this.isImpossible = other.isImpossible;
         this.blockBreakCosts = other.blockBreakCosts;
         this.closestBlockToFallOn = other.closestBlockToFallOn;
@@ -85,9 +83,9 @@ public class DownMovement implements GraphAction {
 
     @Override
     public GraphInstructions getInstructions(BotEntityState previousEntityState) {
-        var absoluteMinedBlock = previousEntityState.positionBlock().add(targetToMineBlock);
-        var absoluteTargetFeetBlock = previousEntityState.positionBlock().add(0, closestBlockToFallOn + 1, 0);
-        var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toDouble());
+        var inventory = previousEntityState.inventory();
+        var levelState = previousEntityState.levelState();
+        var cost = 0D;
 
         cost += switch (closestBlockToFallOn) {
             case -2 -> Costs.FALL_1;
@@ -97,12 +95,21 @@ public class DownMovement implements GraphAction {
         };
 
         cost += blockBreakCosts.miningCost();
+        if (blockBreakCosts.willDrop()) {
+            inventory = inventory.withOneMoreBlock();
+        }
+
+        levelState = levelState.withChangeToAir(blockBreakCosts.block());
+
+        var absoluteMinedBlock = previousEntityState.positionBlock().add(targetToMineBlock);
+        var absoluteTargetFeetBlock = previousEntityState.positionBlock().add(0, closestBlockToFallOn + 1, 0);
+        var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toDouble());
 
         return new GraphInstructions(new BotEntityState(
                 targetFeetDoublePosition,
                 absoluteTargetFeetBlock,
-                previousEntityState.levelState(),
-                previousEntityState.inventory()
+                levelState,
+                inventory
         ), cost, List.of(new BlockBreakAction(absoluteMinedBlock)));
     }
 
