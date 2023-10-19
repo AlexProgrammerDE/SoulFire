@@ -79,6 +79,10 @@ public class ProjectedLevelState {
 
         if (air != null) {
             for (var position : air) {
+                if (position == null) {
+                    continue;
+                }
+
                 blockChanges.put(position, BlockStateMeta.AIR_BLOCK_STATE);
             }
         }
