@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.data;
 
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.pistonmaster.serverwrecker.ServerWrecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,19 +32,18 @@ import java.util.function.Function;
 public class TranslationMapper implements Function<TranslatableComponent, String> {
     private final Map<String, String> mojangTranslations;
     private final Logger logger = LoggerFactory.getLogger(TranslationMapper.class);
-    private final PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
 
     @Override
     public String apply(TranslatableComponent component) {
         var translation = mojangTranslations.get(component.key());
 
         if (translation == null) {
-            logger.warn("Missing translation for key: " + component.key());
+            logger.warn("Missing translation for key: {}", component.key());
             return component.key();
         }
 
         var args = component.args().stream()
-                .map(plainSerializer::serialize)
+                .map(ServerWrecker.PLAIN_MESSAGE_SERIALIZER::serialize)
                 .toArray(String[]::new);
         return String.format(translation, (Object[]) args);
     }

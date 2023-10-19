@@ -96,8 +96,10 @@ public class ServerWrecker {
     // Static, but the preloading happens in ResourceData since we don't wanna init any constructors
     static {
         PLAIN_MESSAGE_SERIALIZER = PlainTextComponentSerializer.builder().flattener(
-                ComponentFlattener.basic().toBuilder()
-                        .mapper(TranslatableComponent.class, new TranslationMapper(ResourceData.MOJANG_TRANSLATIONS)).build()
+                ComponentFlattener.basic()
+                        .toBuilder()
+                        .mapper(TranslatableComponent.class, new TranslationMapper(ResourceData.MOJANG_TRANSLATIONS))
+                        .build()
         ).build();
     }
 
