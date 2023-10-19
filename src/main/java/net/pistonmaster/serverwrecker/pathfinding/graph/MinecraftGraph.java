@@ -123,7 +123,14 @@ public record MinecraftGraph(TagsState tagsState) {
                 var isFree = false;
                 for (var subscriber : value) {
                     var action = actions[subscriber.movementIndex];
+                    if (action == null) {
+                        continue;
+                    }
+
                     if (action.isImpossible()) {
+                        // Calling isImpossible can waste seconds of execution time
+                        // Calling an interface method is expensive!
+                        actions[subscriber.movementIndex] = null;
                         continue;
                     }
 
@@ -391,6 +398,10 @@ public record MinecraftGraph(TagsState tagsState) {
             var size = 0;
             for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
                 var movement = actions[i];
+                if (movement == null) {
+                    continue;
+                }
+
                 if (movement.isImpossibleToComplete()) {
                     continue;
                 }

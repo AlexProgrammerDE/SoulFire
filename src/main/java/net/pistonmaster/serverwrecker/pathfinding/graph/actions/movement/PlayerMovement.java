@@ -339,12 +339,19 @@ public final class PlayerMovement implements GraphAction {
 
     @Override
     public GraphInstructions getInstructions(BotEntityState previousEntityState) {
-        var actions = new ObjectArrayList<WorldAction>();
         var inventory = previousEntityState.inventory();
         var levelState = previousEntityState.levelState();
         var cost = this.cost;
+
+        var blocksToBreak = blockBreakCosts == null ? 0 : blockBreakCosts.length;
+        var blockToBreakArray = blocksToBreak > 0 ? new Vector3i[blocksToBreak] : null;
+        var blockToPlace = requiresAgainstBlock ? 1 : 0;
+        Vector3i blockToPlacePosition = null;
+
+        var actions = new ObjectArrayList<WorldAction>(1 + blocksToBreak + blockToPlace);
         if (blockBreakCosts != null) {
-            for (var breakCost : blockBreakCosts) {
+            for (var i = 0; i < blockBreakCosts.length; i++) {
+                var breakCost = blockBreakCosts[i];
                 if (breakCost == null) {
                     continue;
                 }
@@ -355,7 +362,7 @@ public final class PlayerMovement implements GraphAction {
                     inventory = inventory.withOneMoreBlock();
                 }
 
-                levelState = levelState.withChangeToAir(breakCost.block());
+                blockToBreakArray[i] = breakCost.block();
             }
         }
 
@@ -366,7 +373,12 @@ public final class PlayerMovement implements GraphAction {
             cost += Costs.PLACE_BLOCK;
             actions.add(new BlockPlaceAction(floorBlock, blockPlaceData));
             inventory = inventory.withOneLessBlock();
-            levelState = levelState.withChangeToSolidBlock(floorBlock);
+
+            blockToPlacePosition = floorBlock;
+        }
+
+        if (blockToBreakArray != null || blockToPlacePosition != null) {
+            levelState = levelState.withChanges(blockToBreakArray, blockToPlacePosition);
         }
 
         var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toDouble());

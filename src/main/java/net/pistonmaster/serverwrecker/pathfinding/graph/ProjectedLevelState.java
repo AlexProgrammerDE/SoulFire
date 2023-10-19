@@ -71,6 +71,25 @@ public class ProjectedLevelState {
         return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode(), minBuildHeight, maxBuildHeight);
     }
 
+    public ProjectedLevelState withChanges(Vector3i[] air, Vector3i solid) {
+        var blockChanges = new Object2ObjectOpenCustomHashMap<Vector3i, BlockStateMeta>(
+                this.blockChanges.size() + (air != null ? air.length : 0)
+                        + (solid != null ? 1 : 0), VectorHelper.VECTOR3I_HASH_STRATEGY);
+        blockChanges.putAll(this.blockChanges);
+
+        if (air != null) {
+            for (var position : air) {
+                blockChanges.put(position, BlockStateMeta.AIR_BLOCK_STATE);
+            }
+        }
+
+        if (solid != null) {
+            blockChanges.put(solid, Costs.SOLID_PLACED_BLOCK_STATE);
+        }
+
+        return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode(), minBuildHeight, maxBuildHeight);
+    }
+
     public Optional<BlockStateMeta> getBlockStateAt(Vector3i position) {
         // So that we don't throw OutOfLevelException when we are in the void,
         // OutOfLevelException should be only thrown when we are outside the render distance

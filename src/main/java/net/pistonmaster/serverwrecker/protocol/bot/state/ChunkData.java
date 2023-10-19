@@ -43,16 +43,13 @@ public class ChunkData {
     }
 
     public int getBlock(Vector3i block) {
-        return getSection(block)
+        var y = block.getY();
+        return getSection(getSectionIndexByBlockY(y))
                 .getBlock(
                         block.getX() & 0xF,
-                        block.getY() & 0xF,
+                        y & 0xF,
                         block.getZ() & 0xF
                 );
-    }
-
-    private ChunkSection getSection(Vector3i block) {
-        return getSection(getSectionIndex(block.getY()));
     }
 
     public ChunkSection getSection(int sectionIndex) {
@@ -68,10 +65,6 @@ public class ChunkData {
         return sections.length;
     }
 
-    private void setSection(Vector3i block, ChunkSection section) {
-        setSection(getSectionIndex(block.getY()), section);
-    }
-
     public void setSection(int sectionIndex, ChunkSection section) {
         synchronized (SECTION_CACHE) {
             sections[sectionIndex] = SECTION_CACHE.computeIfAbsent(section, Function.identity());
@@ -79,19 +72,21 @@ public class ChunkData {
     }
 
     public void setBlock(Vector3i block, int state) {
-        var targetSection = getSection(block);
+        var y = block.getY();
+        var sectionIndex = getSectionIndexByBlockY(y);
+        var targetSection = getSection(sectionIndex);
         var clone = new ChunkSection(
                 targetSection.getBlockCount(),
                 // Clone chunk data palette only
                 new DataPalette(targetSection.getChunkData()),
                 targetSection.getBiomeData()
         );
-        clone.setBlock(block.getX() & 0xF, block.getY() & 0xF, block.getZ() & 0xF, state);
+        clone.setBlock(block.getX() & 0xF, y & 0xF, block.getZ() & 0xF, state);
 
-        setSection(block, clone);
+        setSection(sectionIndex, clone);
     }
 
-    private int getSectionIndex(int blockY) {
+    private int getSectionIndexByBlockY(int blockY) {
         return SectionUtils.blockToSection(blockY) - this.minSection;
     }
 }
