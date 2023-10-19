@@ -35,7 +35,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Getter
@@ -122,8 +121,10 @@ public class LevelState {
     public void setBlockId(Vector3i block, int state) {
         var chunkData = chunks.getChunk(block);
 
-        // TODO: Maybe load chunk if not found?
-        Objects.requireNonNull(chunkData, "Chunk not found");
+        // Ignore block updates for unloaded chunks; that's what vanilla does.
+        if (chunkData == null) {
+            return;
+        }
 
         chunkData.setBlock(block, state);
     }
