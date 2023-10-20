@@ -30,7 +30,7 @@ performance.
 * Use HTTP/SOCKS4/SOCKS5 proxies
 * Multiple modules like AutoRespawn and also AutoRegister for cracked servers
 * Console command support
-* WIP Astar Pathfinding
+* A* Pathfinding (Diagonal moves, parkour, mining blocks, placing blocks)
 
 ## ✨ Nightly builds
 
