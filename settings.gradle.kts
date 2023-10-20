@@ -12,7 +12,7 @@ pluginManagement {
         id("net.kyori.indra.git") version "3.1.3"
         id("net.kyori.indra.checkstyle") version "3.1.3"
         id("net.kyori.blossom") version "2.1.0"
-        id("org.graalvm.buildtools.native") version "0.9.27"
+        id("org.graalvm.buildtools.native") version "0.9.28"
         id("com.google.protobuf") version "0.9.4"
     }
 }
