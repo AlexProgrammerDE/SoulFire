@@ -73,7 +73,7 @@ public class GUIFrame extends JFrame {
         if (GUIClientProps.getBoolean("firstRun", true)) {
             var result = JOptionPane.showConfirmDialog(
                     this,
-                    "Is this your first time using ServerWrecker? If yes, we can help you get started with a few hints. :D",
+                    "Is this your first time using ServerWrecker? If yes, we can help you to get started with a few hints. :D",
                     "ServerWrecker First Run",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE
