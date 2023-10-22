@@ -76,7 +76,8 @@ public class GUIFrame extends JFrame {
                     "Is this your first time using ServerWrecker? If yes, we can help you get started with a few hints. :D",
                     "ServerWrecker First Run",
                     JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE);
+                    JOptionPane.QUESTION_MESSAGE
+            );
             if (result == JOptionPane.YES_OPTION) {
                 GUIClientProps.setBoolean("firstTimeUser", true);
 
