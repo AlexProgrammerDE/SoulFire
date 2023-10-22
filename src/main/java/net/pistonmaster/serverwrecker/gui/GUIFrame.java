@@ -24,9 +24,11 @@ import com.formdev.flatlaf.util.SystemInfo;
 import net.pistonmaster.serverwrecker.gui.libs.HintManager;
 import net.pistonmaster.serverwrecker.gui.navigation.CardsContainer;
 import net.pistonmaster.serverwrecker.gui.navigation.ControlPanel;
+import net.pistonmaster.serverwrecker.util.TimeUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.concurrent.TimeUnit;
 
 public class GUIFrame extends JFrame {
     public static final String MAIN_MENU = "MainMenu";
@@ -63,6 +65,11 @@ public class GUIFrame extends JFrame {
     public void open(Injector injector) {
         setVisible(true);
 
+        if (GUIClientProps.getBoolean("firstTimeUser", false)) {
+            SwingUtilities.invokeLater(() -> showHints(injector));
+            return;
+        }
+
         if (GUIClientProps.getBoolean("firstRun", true)) {
             var result = JOptionPane.showConfirmDialog(
                     this,
@@ -71,7 +78,11 @@ public class GUIFrame extends JFrame {
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE);
             if (result == JOptionPane.YES_OPTION) {
-                showHints(injector);
+                GUIClientProps.setBoolean("firstTimeUser", true);
+
+                // Give the window a bit of time to close
+                TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+                SwingUtilities.invokeLater(() -> showHints(injector));
             }
 
             GUIClientProps.setBoolean("firstRun", false);
@@ -117,6 +128,6 @@ public class GUIFrame extends JFrame {
                 logPanel,
                 SwingConstants.LEFT, "hint.logPanel", settingsHint);
 
-        SwingUtilities.invokeLater(() -> HintManager.showHint(logsHint));
+        HintManager.showHint(logsHint);
     }
 }

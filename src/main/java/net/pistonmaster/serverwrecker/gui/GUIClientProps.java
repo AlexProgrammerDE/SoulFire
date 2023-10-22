@@ -27,6 +27,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 
 public class GUIClientProps {
@@ -37,6 +38,10 @@ public class GUIClientProps {
     }
 
     public static void loadSettings() {
+        if (!Files.exists(SETTINGS_PATH)) {
+            return;
+        }
+
         try (var is = Files.newInputStream(SETTINGS_PATH)) {
             SETTINGS.load(new InputStreamReader(is, StandardCharsets.UTF_8));
         } catch (Exception e) {
@@ -45,7 +50,7 @@ public class GUIClientProps {
     }
 
     public static void saveSettings() {
-        try (var os = Files.newOutputStream(SETTINGS_PATH)) {
+        try (var os = Files.newOutputStream(SETTINGS_PATH, StandardOpenOption.CREATE)) {
             SETTINGS.store(new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8)), "ServerWrecker GUI Settings");
         } catch (Exception e) {
             e.printStackTrace();
