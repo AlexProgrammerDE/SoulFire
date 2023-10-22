@@ -125,7 +125,7 @@ public class GUIFrame extends JFrame {
                 SwingConstants.BOTTOM, "hint.settingsButton", accountsHint);
 
         var logsHint = new HintManager.Hint(
-                "In this panel, all logs are displayed. You can select text and right click it to upload it to pastes.dev",
+                "Here are all logs of the software displayed. You can select text and right click it to upload it to pastes.dev",
                 logPanel,
                 SwingConstants.LEFT, "hint.logPanel", settingsHint);
 
