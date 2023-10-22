@@ -62,6 +62,7 @@ public class LogPanel extends JPanel {
         });
 
         var commands = new JTextField();
+        putClientProperty("log-panel-command-input", commands);
 
         // commands.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
 

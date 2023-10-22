@@ -173,7 +173,6 @@ public class ViaClientSession extends TcpSession {
                     if (isBedrock && meta.getMinecraftAccount().isPremiumBedrock()) {
                         var bedrockData = (BedrockData) meta.getMinecraftAccount().accountData();
                         userConnection.put(new AuthChainData(
-                                userConnection,
                                 bedrockData.mojangJwt(),
                                 bedrockData.identityJwt(),
                                 bedrockData.publicKey(),

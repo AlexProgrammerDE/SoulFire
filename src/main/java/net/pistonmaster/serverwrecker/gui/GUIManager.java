@@ -60,7 +60,7 @@ public class GUIManager {
 
         logger.info("Opening GUI!");
 
-        SwingUtilities.invokeLater(() -> guiFrame.setVisible(true));
+        SwingUtilities.invokeLater(() -> guiFrame.open(injector));
     }
 
     public void setAppTitle() {

@@ -402,6 +402,19 @@ public final class SessionDataManager {
         experienceData = new ExperienceData(packet.getExperience(), packet.getLevel(), packet.getTotalExperience());
     }
 
+    @BusHandler
+    public void onLevelTime(ClientboundSetTimePacket packet) {
+        var level = getCurrentLevel();
+
+        if (level == null) {
+            log.warn("Received time update while not in a level");
+            return;
+        }
+
+        level.setWorldAge(packet.getWorldAge());
+        level.setTime(packet.getTime());
+    }
+
     //
     // Inventory packets
     //
@@ -609,7 +622,7 @@ public final class SessionDataManager {
         var chunkData = level.getChunks().getChunk(packet.getChunkX(), packet.getChunkZ());
 
         if (chunkData == null) {
-            log.warn("Received section update for unknown chunk: {} {}", packet.getChunkX(), packet.getChunkZ());
+            log.warn("Received section blocks update for unknown chunk: {} {}", packet.getChunkX(), packet.getChunkZ());
             return;
         }
 
@@ -638,25 +651,12 @@ public final class SessionDataManager {
 
         level.setBlockId(vector3i, newId);
 
-        log.debug("Updating block at {} to {}", vector3i, newId);
+        log.debug("Updated block at {} to {}", vector3i, newId);
     }
 
     @BusHandler
     public void onBlockChangedAck(ClientboundBlockChangedAckPacket packet) {
         // TODO: Implement block break
-    }
-
-    @BusHandler
-    public void onLevelTime(ClientboundSetTimePacket packet) {
-        var level = getCurrentLevel();
-
-        if (level == null) {
-            log.warn("Received time update while not in a level");
-            return;
-        }
-
-        level.setWorldAge(packet.getWorldAge());
-        level.setTime(packet.getTime());
     }
 
     //

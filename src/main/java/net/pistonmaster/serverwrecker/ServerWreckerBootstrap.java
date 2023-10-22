@@ -53,6 +53,7 @@ public class ServerWreckerBootstrap {
             ServerWreckerLoader.runHeadless(port, args);
         } else {
             ServerWreckerLoader.injectTheme();
+            ServerWreckerLoader.loadGUIProperties();
 
             ServerWreckerLoader.loadInternalAddons();
             ServerWreckerLoader.runGUI(port);

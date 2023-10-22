@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.flatlaf.intellij.themes)
     implementation(libs.flatlaf.extras)
     implementation(libs.xchart)
+    implementation(libs.miglayout.swing)
 
     // For JavaFX file editor in GUI
     val javaFXVersion = "20"

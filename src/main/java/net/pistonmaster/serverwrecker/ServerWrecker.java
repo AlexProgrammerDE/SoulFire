@@ -103,7 +103,7 @@ public class ServerWrecker {
         ).build();
     }
 
-    private final Gson gson = new Gson();
+    public static final Gson GENERAL_GSON = new Gson();
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
@@ -266,7 +266,7 @@ public class ServerWrecker {
 
             JsonObject response;
             try (var stream = connection.getInputStream()) {
-                response = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
+                response = GENERAL_GSON.fromJson(new InputStreamReader(stream), JsonObject.class);
             }
 
             var latestVersion = response.get("tag_name").getAsString();

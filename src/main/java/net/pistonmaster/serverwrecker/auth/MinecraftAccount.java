@@ -23,6 +23,8 @@ import net.pistonmaster.serverwrecker.auth.service.AccountData;
 import net.pistonmaster.serverwrecker.auth.service.BedrockData;
 import net.pistonmaster.serverwrecker.auth.service.JavaData;
 
+import java.util.UUID;
+
 public record MinecraftAccount(AuthType authType, String username, AccountData accountData, boolean enabled) {
     public MinecraftAccount {
         if (username == null) {
@@ -45,5 +47,13 @@ public record MinecraftAccount(AuthType authType, String username, AccountData a
 
     public boolean isPremiumBedrock() {
         return accountData != null && accountData instanceof BedrockData;
+    }
+
+    public UUID getUUID() {
+        if (accountData instanceof JavaData javaData) {
+            return javaData.profileId();
+        } else {
+            return UUID.randomUUID(); // We are using a bedrock account, the uuid doesn't matter.
+        }
     }
 }

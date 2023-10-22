@@ -38,6 +38,7 @@ public class NavigationPanel extends JPanel {
             var button = new JButton(SwingTextUtils.htmlCenterText(item.getNavigationName()));
 
             button.addActionListener(action -> cardLayout.show(container, item.getNavigationId()));
+            container.putClientProperty(item.getNavigationId() + "-button", button);
 
             add(button);
         }

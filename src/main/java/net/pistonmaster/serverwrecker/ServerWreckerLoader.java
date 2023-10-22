@@ -25,6 +25,7 @@ import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEven
 import net.pistonmaster.serverwrecker.cli.SWCommandDefinition;
 import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
+import net.pistonmaster.serverwrecker.gui.GUIClientProps;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
@@ -60,6 +61,10 @@ public class ServerWreckerLoader {
     public static void injectTheme() {
         ThemeUtil.initFlatLaf();
         ThemeUtil.setLookAndFeel();
+    }
+
+    public static void loadGUIProperties() {
+        GUIClientProps.loadSettings();
     }
 
     public static void loadInternalAddons() {
