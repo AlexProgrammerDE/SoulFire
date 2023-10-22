@@ -70,6 +70,7 @@ which include client-side translation externally.
 [Download & install ServerWrecker](https://youtu.be/X9hREa17yAo)
 
 ## ⌨ Commands
+
 For a list of all available commands, look at [COMMANDS.md](./COMMANDS.md)
 or run `help` in the GUI or CLI.
 
@@ -191,7 +192,9 @@ Feel free to join our Discord community server:
 
 [![Discord Banner](https://discord.com/api/guilds/739784741124833301/widget.png?style=banner2)](https://discord.gg/vHgRd6YZmH)
 
-This project is in active development, so if you have any feature requests or issues please submit them here on GitHub. PRs are welcome, too. :octocat:
+This project is in active development, so if you have any feature requests or issues, please submit them here on GitHub.
+PRs are welcome, too.
+:octocat:
 
 ## 🌟 Star History
 
