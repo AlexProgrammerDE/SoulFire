@@ -58,20 +58,18 @@ The latest Java Release and Bedrock Edition info may be out of sync with the lat
 ### How does this work?
 
 Thanks to a built-in implementation of [ViaVersion](https://github.com/ViaVersion/ViaVersion),
-[ViaLegacy](https://github.com/RaphiMC/ViaLegacy) and [ViaBedrock](https://github.com/RaphiMC/ViaBedrock),
+[ViaLegacy](https://github.com/RaphiMC/ViaLegacy), [ViaBedrock](https://github.com/RaphiMC/ViaBedrock) and many others,
 a ServerWrecker bot can connect to all these versions even without the server having ViaVersion installed.
 The packet translation happens "client/bot side".
 This feature takes inspiration from services like [ViAaaS](https://github.com/ViaVersion/VIAaaS)
 and [ViaProxy](https://github.com/RaphiMC/ViaProxy),
 which include client-side translation externally.
-ServerWrecker includes a similar implementation as these two proxies
-and is comparable functionality-wise to [ViaFabric](https://github.com/ViaVersion/ViaFabric).
 
 ## 🎬 Videos
 
 [Download & install ServerWrecker](https://youtu.be/X9hREa17yAo)
 
-### Commands
+## ⌨ Commands
 For a list of all available commands, look at [COMMANDS.md](./COMMANDS.md)
 or run `help` in the GUI or CLI.
 
@@ -170,12 +168,13 @@ ServerWrecker has a built-in GUI for easy usage.
 ## 💻 Command Line Usage
 
 To run ServerWrecker from the command line without a GUI, enter:
-`java -jar serverwrecker.jar <options>`
+`java -jar serverwrecker.jar <flags>`
 
 > **Note:** Some features are not available in CLI mode, we recommend using the GUI.
 
-### Options
-For a list of all available CLI options, look at [CLI_FLAGS.md](./CLI_FLAGS.md)
+### CLI Flags
+
+For a list of all available CLI flags, look at [CLI_FLAGS.md](./CLI_FLAGS.md)
 or run `java -jar serverwrecker.jar --help`.
 
 ## 🔧 Build from source
