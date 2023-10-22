@@ -88,6 +88,7 @@ public class HintManager {
         // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
         private JLabel hintLabel;
         private JButton gotItButton;
+        // JFormDesigner - End of variables declaration  //GEN-END:variables
 
         private HintPanel(Hint hint) {
             this.hint = hint;
@@ -235,7 +236,6 @@ public class HintManager {
             add(gotItButton, "cell 0 1,alignx right,growx 0");
             // JFormDesigner - End of component initialization  //GEN-END:initComponents
         }
-        // JFormDesigner - End of variables declaration  //GEN-END:variables
     }
 
     //---- class BalloonBorder ------------------------------------------------
