@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.logging;
+package net.pistonmaster.serverwrecker.command;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.mojang.brigadier.CommandDispatcher;
@@ -25,6 +25,7 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
+import com.mojang.brigadier.tree.CommandNode;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -61,8 +62,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static net.pistonmaster.serverwrecker.logging.BrigadierHelper.argument;
-import static net.pistonmaster.serverwrecker.logging.BrigadierHelper.literal;
+import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
+import static net.pistonmaster.serverwrecker.command.BrigadierHelper.*;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CommandManager {
@@ -77,15 +78,15 @@ public class CommandManager {
     @PostConstruct
     public void postConstruct() {
         loadCommandHistory();
-        dispatcher.register(literal("reload-history").executes(c -> {
+        dispatcher.register(literal("reload-history").executes(help("Refreshes the loaded command history from the data file", c -> {
             loadCommandHistory();
             return 1;
-        }));
-        dispatcher.register(literal("clear-history").executes(c -> {
+        })));
+        dispatcher.register(literal("clear-history").executes(help("Wipes the command history data", c -> {
             clearCommandHistory();
             return 1;
-        }));
-        dispatcher.register(literal("online").executes(c -> {
+        })));
+        dispatcher.register(literal("online").executes(help("Shows connected bots from all attacks", c -> {
             var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
             if (attackManager == null) {
@@ -101,17 +102,17 @@ public class CommandManager {
             });
             c.getSource().sendMessage(online.size() + " bots online: " + String.join(", ", online));
             return 1;
-        }));
-        dispatcher.register(literal("clear-console").executes(c -> {
+        })));
+        dispatcher.register(literal("clear-console").executes(help("Clears the GUIs log panel", c -> {
             var logPanel = serverWrecker.getInjector().getIfAvailable(LogPanel.class);
             if (logPanel != null) {
                 logPanel.getMessageLogPanel().clear();
             }
             return 1;
-        }));
+        })));
         dispatcher.register(literal("say")
                 .then(argument("message", StringArgumentType.greedyString())
-                        .executes(c -> {
+                        .executes(help("Makes all connected bots send a message in chat or execute a command", c -> {
                             var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                             if (attackManager == null) {
@@ -133,8 +134,8 @@ public class CommandManager {
                                 }
                             });
                             return 1;
-                        })));
-        dispatcher.register(literal("stats").executes(c -> {
+                        }))));
+        dispatcher.register(literal("stats").executes(help("Shows network stats", c -> {
             var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
             if (attackManager == null) {
@@ -181,46 +182,53 @@ public class CommandManager {
             LOGGER.info("Current write traffic: {}/s", FileUtils.byteCountToDisplaySize(currentWriteTraffic));
 
             return 1;
-        }));
+        })));
         dispatcher.register(literal("help")
-                .executes(c -> {
+                .executes(help("Prints a list of all available commands", c -> {
                     c.getSource().sendMessage("Available commands:");
-                    for (var command : dispatcher.getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
-                        c.getSource().sendMessage(command);
+                    for (var command : getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
+                        c.getSource().sendMessage(String.format("%s: %s", command.command(), command.help()));
                     }
                     return 1;
-                }));
+                })));
+        dispatcher.register(literal("help-markdown")
+                .executes(privateCommand(c -> {
+                    for (var command : getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
+                        c.getSource().sendMessage(String.format("| `%s` | %s |", command.command(), command.help()));
+                    }
+                    return 1;
+                })));
         dispatcher.register(literal("walkxyz")
                 .then(argument("x", DoubleArgumentType.doubleArg())
                         .then(argument("y", DoubleArgumentType.doubleArg())
                                 .then(argument("z", DoubleArgumentType.doubleArg())
-                                        .executes(c -> {
+                                        .executes(help("Makes all connected bots pathfind to the xyz coordinates", c -> {
                                             var x = DoubleArgumentType.getDouble(c, "x");
                                             var y = DoubleArgumentType.getDouble(c, "y");
                                             var z = DoubleArgumentType.getDouble(c, "z");
 
                                             return executePathfinding(new PosGoal(x, y, z));
-                                        })))));
+                                        }))))));
         dispatcher.register(literal("walkxz")
                 .then(argument("x", DoubleArgumentType.doubleArg())
                         .then(argument("z", DoubleArgumentType.doubleArg())
-                                .executes(c -> {
+                                .executes(help("Makes all connected bots pathfind to the xz coordinates", c -> {
                                     var x = DoubleArgumentType.getDouble(c, "x");
                                     var z = DoubleArgumentType.getDouble(c, "z");
 
                                     return executePathfinding(new XZGoal(x, z));
-                                }))));
+                                })))));
         dispatcher.register(literal("walky")
                 .then(argument("y", DoubleArgumentType.doubleArg())
-                        .executes(c -> {
+                        .executes(help("Makes all connected bots pathfind to the y coordinates", c -> {
                             var y = DoubleArgumentType.getDouble(c, "y");
                             return executePathfinding(new YGoal(y));
-                        })));
+                        }))));
         dispatcher.register(literal("lookat")
                 .then(argument("x", DoubleArgumentType.doubleArg())
                         .then(argument("y", DoubleArgumentType.doubleArg())
                                 .then(argument("z", DoubleArgumentType.doubleArg())
-                                        .executes(c -> {
+                                        .executes(help("Makes all connected bots look at the block at the xyz coordinates", c -> {
                                             var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                                             if (attackManager == null) {
@@ -244,9 +252,9 @@ public class CommandManager {
                                                 botMovementManager.lookAt(RotationOrigin.FEET, Vector3d.from(x, y, z));
                                             }
                                             return 1;
-                                        })))));
+                                        }))))));
         dispatcher.register(literal("forward")
-                .executes(c -> {
+                .executes(help("Makes all connected bots start walking forward", c -> {
                     var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                     if (attackManager == null) {
@@ -266,9 +274,9 @@ public class CommandManager {
                         botMovementManager.getControlState().setForward(true);
                     }
                     return 1;
-                }));
+                })));
         dispatcher.register(literal("jump")
-                .executes(c -> {
+                .executes(help("Makes all connected bots jump up repeatedly", c -> {
                     var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                     if (attackManager == null) {
@@ -288,9 +296,9 @@ public class CommandManager {
                         botMovementManager.getControlState().setJumping(true);
                     }
                     return 1;
-                }));
+                })));
         dispatcher.register(literal("reset")
-                .executes(c -> {
+                .executes(help("Resets the movement of all connected bots", c -> {
                     var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                     if (attackManager == null) {
@@ -310,9 +318,9 @@ public class CommandManager {
                         botMovementManager.getControlState().resetAll();
                     }
                     return 1;
-                }));
+                })));
         dispatcher.register(literal("stop-path")
-                .executes(c -> {
+                .executes(help("Makes all connected bots stop pathfinding", c -> {
                     var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                     if (attackManager == null) {
@@ -338,9 +346,9 @@ public class CommandManager {
                         bot.sessionDataManager().getBotMovementManager().getControlState().resetAll();
                     }
                     return 1;
-                }));
+                })));
         dispatcher.register(literal("stop-attack")
-                .executes(c -> {
+                .executes(help("Stops the ongoing attack", c -> {
                     var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
                     if (attackManager == null) {
@@ -360,7 +368,7 @@ public class CommandManager {
                         botMovementManager.getControlState().resetAll();
                     }
                     return 1;
-                }));
+                })));
 
         ServerWreckerAPI.postEvent(new DispatcherInitEvent(dispatcher));
     }
@@ -474,6 +482,7 @@ public class CommandManager {
         synchronized (commandHistory) {
             try {
                 Files.deleteIfExists(targetFile);
+                commandHistory.clear();
             } catch (IOException e) {
                 LOGGER.error("Failed to delete command history file!", e);
             }
@@ -483,5 +492,39 @@ public class CommandManager {
     public List<String> getCompletionSuggestions(String command) {
         return dispatcher.getCompletionSuggestions(dispatcher.parse(command, consoleSubject)).join().getList()
                 .stream().map(Suggestion::getText).toList();
+    }
+
+    public HelpData[] getAllUsage(final CommandNode<ConsoleSubject> node, final ConsoleSubject source, final boolean restricted) {
+        final var result = new ArrayList<HelpData>();
+        getAllUsage(node, source, result, "", restricted);
+        return result.toArray(new HelpData[0]);
+    }
+
+    private void getAllUsage(final CommandNode<ConsoleSubject> node, final ConsoleSubject source, final ArrayList<HelpData> result, final String prefix, final boolean restricted) {
+        if (restricted && !node.canUse(source)) {
+            return;
+        }
+
+        if (node.getCommand() != null) {
+            if (node.getCommand() instanceof CommandHelpWrapper helpWrapper) {
+                if (!helpWrapper.privateCommand()) {
+                    result.add(new HelpData(prefix, helpWrapper.help()));
+                }
+            } else {
+                result.add(new HelpData(prefix, "N/A"));
+            }
+        }
+
+        if (node.getRedirect() != null) {
+            final var redirect = node.getRedirect() == dispatcher.getRoot() ? "..." : "-> " + node.getRedirect().getUsageText();
+            result.add(new HelpData(prefix.isEmpty() ? node.getUsageText() + ARGUMENT_SEPARATOR + redirect : prefix + ARGUMENT_SEPARATOR + redirect, "N/A"));
+        } else if (!node.getChildren().isEmpty()) {
+            for (final var child : node.getChildren()) {
+                getAllUsage(child, source, result, prefix.isEmpty() ? child.getUsageText() : prefix + ARGUMENT_SEPARATOR + child.getUsageText(), restricted);
+            }
+        }
+    }
+
+    private record HelpData(String command, String help) {
     }
 }

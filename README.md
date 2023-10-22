@@ -71,6 +71,10 @@ and is comparable functionality-wise to [ViaFabric](https://github.com/ViaVersio
 
 [Download & install ServerWrecker](https://youtu.be/X9hREa17yAo)
 
+### Commands
+For a list of all available commands, look at [COMMANDS.md](./COMMANDS.md)
+or run `help` in the GUI or CLI.
+
 ## 📻 Built-in modules
 
 ### AutoRespawn
@@ -171,7 +175,7 @@ To run ServerWrecker from the command line without a GUI, enter:
 > **Note:** Some features are not available in CLI mode, we recommend using the GUI.
 
 ### Options
-For a list of all available options, look at [CLI_FLAGS.md](./CLI_FLAGS.md)
+For a list of all available CLI options, look at [CLI_FLAGS.md](./CLI_FLAGS.md)
 or run `java -jar serverwrecker.jar --help`.
 
 ## 🔧 Build from source

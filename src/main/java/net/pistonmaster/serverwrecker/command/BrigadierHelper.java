@@ -17,8 +17,9 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.logging;
+package net.pistonmaster.serverwrecker.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -34,5 +35,13 @@ public class BrigadierHelper {
 
     public static <T> RequiredArgumentBuilder<ConsoleSubject, T> argument(String name, ArgumentType<T> type) {
         return RequiredArgumentBuilder.argument(name, type);
+    }
+
+    public static Command<ConsoleSubject> help(String help, Command<ConsoleSubject> command) {
+        return new CommandHelpWrapper(command, help, false);
+    }
+
+    public static Command<ConsoleSubject> privateCommand(Command<ConsoleSubject> command) {
+        return new CommandHelpWrapper(command, null, true);
     }
 }
