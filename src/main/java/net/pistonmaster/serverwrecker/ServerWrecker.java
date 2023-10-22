@@ -92,6 +92,7 @@ public class ServerWrecker {
     public static final Logger LOGGER = LoggerFactory.getLogger(ServerWrecker.class);
     public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
     public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER;
+    public static final Gson GENERAL_GSON = new Gson();
 
     // Static, but the preloading happens in ResourceData since we don't wanna init any constructors
     static {
@@ -103,7 +104,6 @@ public class ServerWrecker {
         ).build();
     }
 
-    public static final Gson GENERAL_GSON = new Gson();
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();

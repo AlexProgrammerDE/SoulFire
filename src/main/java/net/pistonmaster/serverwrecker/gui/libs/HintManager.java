@@ -45,6 +45,9 @@ import java.util.List;
 public class HintManager {
     private static final List<HintPanel> hintPanels = new ArrayList<>();
 
+    private HintManager() {
+    }
+
     public static void showHint(Hint hint) {
         // check whether user already closed the hint
         if (GUIClientProps.getBoolean(hint.prefsKey, false)) {
@@ -82,6 +85,9 @@ public class HintManager {
         private final Hint hint;
 
         private JPanel popup;
+        // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+        private JLabel hintLabel;
+        private JButton gotItButton;
 
         private HintPanel(Hint hint) {
             this.hint = hint;
@@ -229,10 +235,6 @@ public class HintManager {
             add(gotItButton, "cell 0 1,alignx right,growx 0");
             // JFormDesigner - End of component initialization  //GEN-END:initComponents
         }
-
-        // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-        private JLabel hintLabel;
-        private JButton gotItButton;
         // JFormDesigner - End of variables declaration  //GEN-END:variables
     }
 

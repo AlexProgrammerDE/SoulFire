@@ -103,6 +103,121 @@ public record MinecraftGraph(TagsState tagsState) {
         }
     }
 
+    private static PlayerMovement registerMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
+                                                   PlayerMovement movement, int movementIndex) {
+        {
+            var blockId = 0;
+            for (var freeBlock : movement.listRequiredFreeBlocks()) {
+                blockSubscribers.computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
+                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
+            }
+        }
+
+        {
+            var safeBlocks = movement.listCheckSafeMineBlocks();
+            for (var i = 0; i < safeBlocks.length; i++) {
+                var savedBlock = safeBlocks[i];
+                if (savedBlock == null) {
+                    continue;
+                }
+
+                for (var block : savedBlock) {
+                    blockSubscribers.computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION)
+                            .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK, i, block.type()));
+                }
+            }
+        }
+
+        {
+            blockSubscribers.computeIfAbsent(movement.requiredSolidBlock(), CREATE_MISSING_FUNCTION)
+                    .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_SOLID));
+        }
+
+        {
+            for (var addCostIfSolidBlock : movement.listAddCostIfSolidBlocks()) {
+                blockSubscribers.computeIfAbsent(addCostIfSolidBlock, CREATE_MISSING_FUNCTION)
+                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID));
+            }
+        }
+
+        {
+            for (var againstBlock : movement.possibleBlocksToPlaceAgainst()) {
+                blockSubscribers.computeIfAbsent(againstBlock.againstPos(), CREATE_MISSING_FUNCTION)
+                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_AGAINST_PLACE_SOLID, againstBlock));
+            }
+        }
+
+        return movement;
+    }
+
+    private static ParkourMovement registerParkourMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
+                                                           ParkourMovement movement, int movementIndex) {
+        {
+            var blockId = 0;
+            for (var freeBlock : movement.listRequiredFreeBlocks()) {
+                blockSubscribers.computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
+                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
+            }
+        }
+
+        {
+            blockSubscribers.computeIfAbsent(movement.requiredUnsafeBlock(), CREATE_MISSING_FUNCTION)
+                    .add(new BlockSubscription(movementIndex, SubscriptionType.PARKOUR_UNSAFE_TO_STAND_ON));
+        }
+
+        {
+            blockSubscribers.computeIfAbsent(movement.requiredSolidBlock(), CREATE_MISSING_FUNCTION)
+                    .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_SOLID));
+        }
+
+        return movement;
+    }
+
+    private static DownMovement registerDownMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
+                                                     DownMovement movement, int movementIndex) {
+        {
+            for (var safetyBlock : movement.listSafetyCheckBlocks()) {
+                blockSubscribers.computeIfAbsent(safetyBlock, CREATE_MISSING_FUNCTION)
+                        .add(new BlockSubscription(movementIndex, SubscriptionType.DOWN_SAFETY_CHECK));
+            }
+        }
+
+        {
+            blockSubscribers.computeIfAbsent(movement.blockToBreak(), CREATE_MISSING_FUNCTION)
+                    .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE));
+        }
+
+        return movement;
+    }
+
+    private static UpMovement registerUpMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
+                                                 UpMovement movement, int movementIndex) {
+        {
+            var blockId = 0;
+            for (var freeBlock : movement.listRequiredFreeBlocks()) {
+                blockSubscribers.computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
+                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
+            }
+        }
+
+        {
+            var safeBlocks = movement.listCheckSafeMineBlocks();
+            for (var i = 0; i < safeBlocks.length; i++) {
+                var savedBlock = safeBlocks[i];
+                if (savedBlock == null) {
+                    continue;
+                }
+
+                for (var block : savedBlock) {
+                    blockSubscribers.computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION)
+                            .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK, i, block.type()));
+                }
+            }
+        }
+
+        return movement;
+    }
+
     public GraphInstructions[] getActions(BotEntityState node) {
         var actions = new GraphAction[ACTIONS_TEMPLATE.length];
 
@@ -411,121 +526,6 @@ public record MinecraftGraph(TagsState tagsState) {
         }
 
         return results;
-    }
-
-    private static PlayerMovement registerMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
-                                                   PlayerMovement movement, int movementIndex) {
-        {
-            var blockId = 0;
-            for (var freeBlock : movement.listRequiredFreeBlocks()) {
-                blockSubscribers.computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
-                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
-            }
-        }
-
-        {
-            var safeBlocks = movement.listCheckSafeMineBlocks();
-            for (var i = 0; i < safeBlocks.length; i++) {
-                var savedBlock = safeBlocks[i];
-                if (savedBlock == null) {
-                    continue;
-                }
-
-                for (var block : savedBlock) {
-                    blockSubscribers.computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION)
-                            .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK, i, block.type()));
-                }
-            }
-        }
-
-        {
-            blockSubscribers.computeIfAbsent(movement.requiredSolidBlock(), CREATE_MISSING_FUNCTION)
-                    .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_SOLID));
-        }
-
-        {
-            for (var addCostIfSolidBlock : movement.listAddCostIfSolidBlocks()) {
-                blockSubscribers.computeIfAbsent(addCostIfSolidBlock, CREATE_MISSING_FUNCTION)
-                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID));
-            }
-        }
-
-        {
-            for (var againstBlock : movement.possibleBlocksToPlaceAgainst()) {
-                blockSubscribers.computeIfAbsent(againstBlock.againstPos(), CREATE_MISSING_FUNCTION)
-                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_AGAINST_PLACE_SOLID, againstBlock));
-            }
-        }
-
-        return movement;
-    }
-
-    private static ParkourMovement registerParkourMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
-                                                           ParkourMovement movement, int movementIndex) {
-        {
-            var blockId = 0;
-            for (var freeBlock : movement.listRequiredFreeBlocks()) {
-                blockSubscribers.computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
-                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
-            }
-        }
-
-        {
-            blockSubscribers.computeIfAbsent(movement.requiredUnsafeBlock(), CREATE_MISSING_FUNCTION)
-                    .add(new BlockSubscription(movementIndex, SubscriptionType.PARKOUR_UNSAFE_TO_STAND_ON));
-        }
-
-        {
-            blockSubscribers.computeIfAbsent(movement.requiredSolidBlock(), CREATE_MISSING_FUNCTION)
-                    .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_SOLID));
-        }
-
-        return movement;
-    }
-
-    private static DownMovement registerDownMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
-                                                     DownMovement movement, int movementIndex) {
-        {
-            for (var safetyBlock : movement.listSafetyCheckBlocks()) {
-                blockSubscribers.computeIfAbsent(safetyBlock, CREATE_MISSING_FUNCTION)
-                        .add(new BlockSubscription(movementIndex, SubscriptionType.DOWN_SAFETY_CHECK));
-            }
-        }
-
-        {
-            blockSubscribers.computeIfAbsent(movement.blockToBreak(), CREATE_MISSING_FUNCTION)
-                    .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE));
-        }
-
-        return movement;
-    }
-
-    private static UpMovement registerUpMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
-                                                 UpMovement movement, int movementIndex) {
-        {
-            var blockId = 0;
-            for (var freeBlock : movement.listRequiredFreeBlocks()) {
-                blockSubscribers.computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
-                        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
-            }
-        }
-
-        {
-            var safeBlocks = movement.listCheckSafeMineBlocks();
-            for (var i = 0; i < safeBlocks.length; i++) {
-                var savedBlock = safeBlocks[i];
-                if (savedBlock == null) {
-                    continue;
-                }
-
-                for (var block : savedBlock) {
-                    blockSubscribers.computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION)
-                            .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK, i, block.type()));
-                }
-            }
-        }
-
-        return movement;
     }
 
     enum SubscriptionType {
