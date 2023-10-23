@@ -4,18 +4,22 @@
 
 | Flag                             | Default                           | Description                                                  |
 |----------------------------------|-----------------------------------|--------------------------------------------------------------|
+| `-s`, `--start`                  | `false`                           | Whether to start the attack automatically                    |
 | `--host`, `--target`             | `127.0.0.1`                       | Target url to connect to                                     |
 | `--port`                         | `25565`                           | Target port to connect to                                    |
 | `-a`, `--amount`                 | `1`                               | Amount of bots to connect to the server                      |
 | `--min-join-delay`               | `1000`                            | The minimum delay between bot connections, in milliseconds   |
 | `--max-join-delay`               | `3000`                            | The maximum delay between bot connections, in milliseconds   |
-| `-mc`, `--mc-version`            | `1.20/1.20.1`                     | Minecraft version of the server to connect to                |
+| `-mc`, `--mc-version`            | `1.20.2`                          | Minecraft version of the server to connect to                |
 | `--read-timeout`                 | `30`                              | Bot read timeout                                             |
 | `--write-timeout`                | `0`                               | Bot write timeout                                            |
 | `--connect-timeout`              | `30`                              | Bot connect timeout                                          |
 | `--try-srv`                      | `true`                            | Try to connect to the target using SRV records               |
 | `--concurrent-connects`          | `1`                               | Amount of bots that can try to connect at the same time      |
-| `--debug`                        | `false`                           | Log additional information useful for debugging the software |
+| `--via-debug`                    | `false`                           | Set Via* to debug mode                                       |
+| `--netty-debug`                  | `false`                           | Set Netty to debug mode                                      |
+| `--grpc-debug`                   | `false`                           | Set gRPC to debug mode                                       |
+| `--core-debug`                   | `false`                           | Set core loggers to debug mode                               |
 | `--bots-per-proxy`               | `-1`                              | Amount of bots that can be on a single proxy                 |
 | `--name-format`                  | `Bot_%d`                          | Format for bot names. allows integer placeholder '%d'        |
 | `--shuffle-accounts`             | `false`                           | Shuffle accounts before connecting                           |
@@ -60,9 +64,6 @@
 | `--auto-jump`                    | `false`                           | Do auto jump?                                                |
 | `--jump-min-delay`               | `2`                               | Minimum delay between jumps                                  |
 | `--jump-max-delay`               | `5`                               | Maximum delay between jumps                                  |
-| `--auto-armor`                   | `true`                            | Do auto armor?                                               |
-| `--armor-min-delay`              | `1`                               | Minimum delay between putting on armor                       |
-| `--armor-max-delay`              | `2`                               | Maximum delay between putting on armor                       |
 | `--auto-eat`                     | `true`                            | Do auto eat?                                                 |
 | `--eat-min-delay`                | `1`                               | Minimum delay between eating                                 |
 | `--eat-max-delay`                | `2`                               | Maximum delay between eating                                 |
