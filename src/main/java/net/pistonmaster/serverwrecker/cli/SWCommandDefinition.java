@@ -53,7 +53,7 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Setter
     private CommandLine commandLine;
 
-    @Option(names = {"--s", "--start"}, description = "Whether to start the attack automatically")
+    @Option(names = {"-s", "--start"}, description = "Whether to start the attack automatically")
     private boolean start;
 
     @Option(names = {"--host", "--target"}, description = "Target url to connect to")
