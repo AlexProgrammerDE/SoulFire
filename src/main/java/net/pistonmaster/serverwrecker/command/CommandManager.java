@@ -78,111 +78,8 @@ public class CommandManager {
     @PostConstruct
     public void postConstruct() {
         loadCommandHistory();
-        dispatcher.register(literal("reload-history").executes(help("Refreshes the loaded command history from the data file", c -> {
-            loadCommandHistory();
-            return 1;
-        })));
-        dispatcher.register(literal("clear-history").executes(help("Wipes the command history data", c -> {
-            clearCommandHistory();
-            return 1;
-        })));
-        dispatcher.register(literal("online").executes(help("Shows connected bots from all attacks", c -> {
-            var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
-            if (attackManager == null) {
-                LOGGER.warn("No attack found!");
-                return 2;
-            }
-
-            var online = new ArrayList<String>();
-            attackManager.getBotConnections().forEach(client -> {
-                if (client.isOnline()) {
-                    online.add(client.meta().getMinecraftAccount().username());
-                }
-            });
-            c.getSource().sendMessage(online.size() + " bots online: " + String.join(", ", online));
-            return 1;
-        })));
-        dispatcher.register(literal("clear-console").executes(help("Clears the GUIs log panel", c -> {
-            var logPanel = serverWrecker.getInjector().getIfAvailable(LogPanel.class);
-            if (logPanel != null) {
-                logPanel.getMessageLogPanel().clear();
-            }
-            return 1;
-        })));
-        dispatcher.register(literal("say")
-                .then(argument("message", StringArgumentType.greedyString())
-                        .executes(help("Makes all connected bots send a message in chat or execute a command", c -> {
-                            var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
-
-                            if (attackManager == null) {
-                                LOGGER.warn("No attack found!");
-                                return 2;
-                            }
-
-                            if (attackManager.getBotConnections().isEmpty()) {
-                                LOGGER.info("No bots connected!");
-                                return 3;
-                            }
-
-                            var message = StringArgumentType.getString(c, "message");
-                            LOGGER.info("Sending message by all bots: '{}'", message);
-
-                            attackManager.getBotConnections().forEach(client -> {
-                                if (client.isOnline()) {
-                                    client.botControl().sendMessage(message);
-                                }
-                            });
-                            return 1;
-                        }))));
-        dispatcher.register(literal("stats").executes(help("Shows network stats", c -> {
-            var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
-
-            if (attackManager == null) {
-                LOGGER.warn("No attack found!");
-                return 2;
-            }
-
-            if (attackManager.getBotConnections().isEmpty()) {
-                LOGGER.info("No bots connected!");
-                return 3;
-            }
-
-            LOGGER.info("Total bots: {}", attackManager.getBotConnections().size());
-            long readTraffic = 0;
-            long writeTraffic = 0;
-            for (var bot : attackManager.getBotConnections()) {
-                var trafficShapingHandler = bot.getTrafficHandler();
-
-                if (trafficShapingHandler == null) {
-                    continue;
-                }
-
-                readTraffic += trafficShapingHandler.trafficCounter().cumulativeReadBytes();
-                writeTraffic += trafficShapingHandler.trafficCounter().cumulativeWrittenBytes();
-            }
-
-            LOGGER.info("Total read traffic: {}", FileUtils.byteCountToDisplaySize(readTraffic));
-            LOGGER.info("Total write traffic: {}", FileUtils.byteCountToDisplaySize(writeTraffic));
-
-            long currentReadTraffic = 0;
-            long currentWriteTraffic = 0;
-            for (var bot : attackManager.getBotConnections()) {
-                var trafficShapingHandler = bot.getTrafficHandler();
-
-                if (trafficShapingHandler == null) {
-                    continue;
-                }
-
-                currentReadTraffic += trafficShapingHandler.trafficCounter().lastReadThroughput();
-                currentWriteTraffic += trafficShapingHandler.trafficCounter().lastWriteThroughput();
-            }
-
-            LOGGER.info("Current read traffic: {}/s", FileUtils.byteCountToDisplaySize(currentReadTraffic));
-            LOGGER.info("Current write traffic: {}/s", FileUtils.byteCountToDisplaySize(currentWriteTraffic));
-
-            return 1;
-        })));
+        // Help
         dispatcher.register(literal("help")
                 .executes(help("Prints a list of all available commands", c -> {
                     c.getSource().sendMessage("Available commands:");
@@ -198,6 +95,25 @@ public class CommandManager {
                     }
                     return 1;
                 })));
+
+        // GUI and CLI commands
+        dispatcher.register(literal("reload-history").executes(help("Refreshes the loaded command history from the data file", c -> {
+            loadCommandHistory();
+            return 1;
+        })));
+        dispatcher.register(literal("clear-history").executes(help("Wipes the command history data", c -> {
+            clearCommandHistory();
+            return 1;
+        })));
+        dispatcher.register(literal("clear-console").executes(help("Clears the GUIs log panel", c -> {
+            var logPanel = serverWrecker.getInjector().getIfAvailable(LogPanel.class);
+            if (logPanel != null) {
+                logPanel.getMessageLogPanel().clear();
+            }
+            return 1;
+        })));
+
+        // Pathfinding
         dispatcher.register(literal("walkxyz")
                 .then(argument("x", DoubleArgumentType.doubleArg())
                         .then(argument("y", DoubleArgumentType.doubleArg())
@@ -224,6 +140,36 @@ public class CommandManager {
                             var y = DoubleArgumentType.getDouble(c, "y");
                             return executePathfinding(new YGoal(y));
                         }))));
+        dispatcher.register(literal("stop-path")
+                .executes(help("Makes all connected bots stop pathfinding", c -> {
+                    var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+
+                    if (attackManager == null) {
+                        LOGGER.warn("No attack found!");
+                        return 2;
+                    }
+
+                    if (attackManager.getBotConnections().isEmpty()) {
+                        LOGGER.info("No bots connected!");
+                        return 3;
+                    }
+
+                    for (var bot : attackManager.getBotConnections()) {
+                        bot.eventBus().unsubscribeIf(p -> {
+                            if (PathExecutor.class.isInstance(p)) {
+                                PathExecutor.class.cast(p).cancel();
+
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        });
+                        bot.sessionDataManager().getBotMovementManager().getControlState().resetAll();
+                    }
+                    return 1;
+                })));
+
+        // Movement controls
         dispatcher.register(literal("lookat")
                 .then(argument("x", DoubleArgumentType.doubleArg())
                         .then(argument("y", DoubleArgumentType.doubleArg())
@@ -319,32 +265,12 @@ public class CommandManager {
                     }
                     return 1;
                 })));
-        dispatcher.register(literal("stop-path")
-                .executes(help("Makes all connected bots stop pathfinding", c -> {
-                    var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
 
-                    if (attackManager == null) {
-                        LOGGER.warn("No attack found!");
-                        return 2;
-                    }
-
-                    if (attackManager.getBotConnections().isEmpty()) {
-                        LOGGER.info("No bots connected!");
-                        return 3;
-                    }
-
-                    for (var bot : attackManager.getBotConnections()) {
-                        bot.eventBus().unsubscribeIf(p -> {
-                            if (PathExecutor.class.isInstance(p)) {
-                                PathExecutor.class.cast(p).cancel();
-
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        });
-                        bot.sessionDataManager().getBotMovementManager().getControlState().resetAll();
-                    }
+        // Attack controls
+        dispatcher.register(literal("start-attack")
+                .executes(help("Starts an attack using the current profile", c -> {
+                    var id = serverWrecker.startAttack();
+                    LOGGER.info("Started an attack with id {}", id);
                     return 1;
                 })));
         dispatcher.register(literal("stop-attack")
@@ -356,19 +282,101 @@ public class CommandManager {
                         return 2;
                     }
 
-                    if (attackManager.getBotConnections().isEmpty()) {
-                        LOGGER.info("No bots connected!");
-                        return 3;
-                    }
-
-                    for (var bot : attackManager.getBotConnections()) {
-                        var sessionDataManager = bot.sessionDataManager();
-                        var botMovementManager = sessionDataManager.getBotMovementManager();
-
-                        botMovementManager.getControlState().resetAll();
-                    }
+                    serverWrecker.stopAttack(attackManager.getId());
                     return 1;
                 })));
+
+        // Utility commands
+        dispatcher.register(literal("online").executes(help("Shows connected bots from all attacks", c -> {
+            var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+
+            if (attackManager == null) {
+                LOGGER.warn("No attack found!");
+                return 2;
+            }
+
+            var online = new ArrayList<String>();
+            attackManager.getBotConnections().forEach(client -> {
+                if (client.isOnline()) {
+                    online.add(client.meta().getMinecraftAccount().username());
+                }
+            });
+            c.getSource().sendMessage(online.size() + " bots online: " + String.join(", ", online));
+            return 1;
+        })));
+        dispatcher.register(literal("say")
+                .then(argument("message", StringArgumentType.greedyString())
+                        .executes(help("Makes all connected bots send a message in chat or execute a command", c -> {
+                            var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+
+                            if (attackManager == null) {
+                                LOGGER.warn("No attack found!");
+                                return 2;
+                            }
+
+                            if (attackManager.getBotConnections().isEmpty()) {
+                                LOGGER.info("No bots connected!");
+                                return 3;
+                            }
+
+                            var message = StringArgumentType.getString(c, "message");
+                            LOGGER.info("Sending message by all bots: '{}'", message);
+
+                            attackManager.getBotConnections().forEach(client -> {
+                                if (client.isOnline()) {
+                                    client.botControl().sendMessage(message);
+                                }
+                            });
+                            return 1;
+                        }))));
+        dispatcher.register(literal("stats").executes(help("Shows network stats", c -> {
+            var attackManager = serverWrecker.getAttacks().values().stream().findFirst().orElse(null);
+
+            if (attackManager == null) {
+                LOGGER.warn("No attack found!");
+                return 2;
+            }
+
+            if (attackManager.getBotConnections().isEmpty()) {
+                LOGGER.info("No bots connected!");
+                return 3;
+            }
+
+            LOGGER.info("Total bots: {}", attackManager.getBotConnections().size());
+            long readTraffic = 0;
+            long writeTraffic = 0;
+            for (var bot : attackManager.getBotConnections()) {
+                var trafficShapingHandler = bot.getTrafficHandler();
+
+                if (trafficShapingHandler == null) {
+                    continue;
+                }
+
+                readTraffic += trafficShapingHandler.trafficCounter().cumulativeReadBytes();
+                writeTraffic += trafficShapingHandler.trafficCounter().cumulativeWrittenBytes();
+            }
+
+            LOGGER.info("Total read traffic: {}", FileUtils.byteCountToDisplaySize(readTraffic));
+            LOGGER.info("Total write traffic: {}", FileUtils.byteCountToDisplaySize(writeTraffic));
+
+            long currentReadTraffic = 0;
+            long currentWriteTraffic = 0;
+            for (var bot : attackManager.getBotConnections()) {
+                var trafficShapingHandler = bot.getTrafficHandler();
+
+                if (trafficShapingHandler == null) {
+                    continue;
+                }
+
+                currentReadTraffic += trafficShapingHandler.trafficCounter().lastReadThroughput();
+                currentWriteTraffic += trafficShapingHandler.trafficCounter().lastWriteThroughput();
+            }
+
+            LOGGER.info("Current read traffic: {}/s", FileUtils.byteCountToDisplaySize(currentReadTraffic));
+            LOGGER.info("Current write traffic: {}/s", FileUtils.byteCountToDisplaySize(currentWriteTraffic));
+
+            return 1;
+        })));
 
         ServerWreckerAPI.postEvent(new DispatcherInitEvent(dispatcher));
     }

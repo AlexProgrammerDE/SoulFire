@@ -53,6 +53,9 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Setter
     private CommandLine commandLine;
 
+    @Option(names = {"--s", "--start"}, description = "Whether to start the attack automatically")
+    private boolean start;
+
     @Option(names = {"--host", "--target"}, description = "Target url to connect to")
     private String host = BotSettings.DEFAULT_HOST;
 
@@ -206,7 +209,12 @@ public class SWCommandDefinition implements Callable<Integer> {
             }
         }
 
-        serverWrecker.startAttack();
+        if (start) {
+            serverWrecker.startAttack();
+        } else {
+            LOGGER.info("ServerWrecker is ready to go! Type 'start-attack' to start the attack!");
+        }
+
         return 0;
     }
 }
