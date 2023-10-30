@@ -33,8 +33,6 @@ import java.util.Optional;
 @EqualsAndHashCode
 @AllArgsConstructor
 public class BoundingBox {
-    private static final double epsilon = 0.0F;
-
     public double minX;
     public double minY;
     public double minZ;
@@ -90,112 +88,55 @@ public class BoundingBox {
     /**
      * Check for collision on the X axis
      *
-     * @param otherBoundingBox The other bounding box that is colliding with this one.
-     * @param x                Position on the X axis that is colliding
-     * @return Returns the corrected x position that collided.
+     * @param other   The other bounding box that is colliding with this one.
+     * @param offsetX Position on the X axis that is colliding
+     * @return Returns the corrected X position that collided.
      */
-    public double clipXCollide(BoundingBox otherBoundingBox, double x) {
-        // Check if the boxes are colliding on the Y axis
-        if (otherBoundingBox.maxY <= this.minY || otherBoundingBox.minY >= this.maxY) {
-            return x;
-        }
-
-        // Check if the boxes are colliding on the Z axis
-        if (otherBoundingBox.maxZ <= this.minZ || otherBoundingBox.minZ >= this.maxZ) {
-            return x;
-        }
-
-        // Check for collision if the X axis of the current box is bigger
-        if (x > 0.0F && otherBoundingBox.maxX <= this.minX) {
-            var max = this.minX - otherBoundingBox.maxX - epsilon;
-            if (max < x) {
-                x = max;
+    public double computeOffsetX(BoundingBox other, double offsetX) {
+        if (other.maxY > this.minY && other.minY < this.maxY && other.maxZ > this.minZ && other.minZ < this.maxZ) {
+            if (offsetX > 0.0 && other.maxX <= this.minX) {
+                offsetX = Math.min(this.minX - other.maxX, offsetX);
+            } else if (offsetX < 0.0 && other.minX >= this.maxX) {
+                offsetX = Math.max(this.maxX - other.minX, offsetX);
             }
         }
-
-        // Check for collision if the X axis of the current box is smaller
-        if (x < 0.0F && otherBoundingBox.minX >= this.maxX) {
-            var max = this.maxX - otherBoundingBox.minX + epsilon;
-            if (max > x) {
-                x = max;
-            }
-        }
-
-        return x;
+        return offsetX;
     }
 
     /**
      * Check for collision on the Y axis
      *
-     * @param otherBoundingBox The other bounding box that is colliding with this one.
-     * @param y                Position on the Y axis that is colliding
-     * @return Returns the corrected y position that collided.
+     * @param other   The other bounding box that is colliding with this one.
+     * @param offsetY Position on the Y axis that is colliding
+     * @return Returns the corrected Y position that collided.
      */
-    public double clipYCollide(BoundingBox otherBoundingBox, double y) {
-        // Check if the boxes are colliding on the X axis
-        if (otherBoundingBox.maxX <= this.minX || otherBoundingBox.minX >= this.maxX) {
-            return y;
-        }
-
-        // Check if the boxes are colliding on the Z axis
-        if (otherBoundingBox.maxZ <= this.minZ || otherBoundingBox.minZ >= this.maxZ) {
-            return y;
-        }
-
-        // Check for collision if the Y axis of the current box is bigger
-        if (y > 0.0F && otherBoundingBox.maxY <= this.minY) {
-            var max = this.minY - otherBoundingBox.maxY - epsilon;
-            if (max < y) {
-                y = max;
+    public double computeOffsetY(BoundingBox other, double offsetY) {
+        if (other.maxX > this.minX && other.minX < this.maxX && other.maxZ > this.minZ && other.minZ < this.maxZ) {
+            if (offsetY > 0.0 && other.maxY <= this.minY) {
+                offsetY = Math.min(this.minY - other.maxY, offsetY);
+            } else if (offsetY < 0.0 && other.minY >= this.maxY) {
+                offsetY = Math.max(this.maxY - other.minY, offsetY);
             }
         }
-
-        // Check for collision if the Y axis of the current box is bigger
-        if (y < 0.0F && otherBoundingBox.minY >= this.maxY) {
-            var max = this.maxY - otherBoundingBox.minY + epsilon;
-            if (max > y) {
-                y = max;
-            }
-        }
-
-        return y;
+        return offsetY;
     }
 
     /**
      * Check for collision on the Z axis
      *
-     * @param otherBoundingBox The other bounding box that is colliding wit this one.
-     * @param z                Position on the X axis that is colliding
-     * @return Returns the corrected x position that collided.
+     * @param other   The other bounding box that is colliding wit this one.
+     * @param offsetZ Position on the Z axis that is colliding
+     * @return Returns the corrected Z position that collided.
      */
-    public double clipZCollide(BoundingBox otherBoundingBox, double z) {
-        // Check if the boxes are colliding on the X axis
-        if (otherBoundingBox.maxX <= this.minX || otherBoundingBox.minX >= this.maxX) {
-            return z;
-        }
-
-        // Check if the boxes are colliding on the Y axis
-        if (otherBoundingBox.maxY <= this.minY || otherBoundingBox.minY >= this.maxY) {
-            return z;
-        }
-
-        // Check for collision if the Z axis of the current box is bigger
-        if (z > 0.0F && otherBoundingBox.maxZ <= this.minZ) {
-            var max = this.minZ - otherBoundingBox.maxZ - epsilon;
-            if (max < z) {
-                z = max;
+    public double computeOffsetZ(BoundingBox other, double offsetZ) {
+        if (other.maxX > this.minX && other.minX < this.maxX && other.maxY > this.minY && other.minY < this.maxY) {
+            if (offsetZ > 0.0 && other.maxZ <= this.minZ) {
+                offsetZ = Math.min(this.minZ - other.maxZ, offsetZ);
+            } else if (offsetZ < 0.0 && other.minZ >= this.maxZ) {
+                offsetZ = Math.max(this.maxZ - other.minZ, offsetZ);
             }
         }
-
-        // Check for collision if the Z axis of the current box is bigger
-        if (z < 0.0F && otherBoundingBox.minZ >= this.maxZ) {
-            var max = this.maxZ - otherBoundingBox.minZ + epsilon;
-            if (max > z) {
-                z = max;
-            }
-        }
-
-        return z;
+        return offsetZ;
     }
 
     /**

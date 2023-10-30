@@ -541,7 +541,7 @@ public final class BotMovementManager {
 
             var canWalkUp = true;
             for (var aABB : stepCollisionBoxes) {
-                var dyCollision = aABB.clipYCollide(stepBoundingBox, dy);
+                var dyCollision = aABB.computeOffsetY(stepBoundingBox, dy);
                 if (dyCollision != dy) {
                     canWalkUp = false;
                     break;
@@ -564,7 +564,7 @@ public final class BotMovementManager {
         this.boundingBox.move(dx, 0.0F, dz);
 
         for (var aABB : collisionBoxes) {
-            dy = aABB.clipYCollide(this.boundingBox, dy);
+            dy = aABB.computeOffsetY(this.boundingBox, dy);
         }
         this.boundingBox.move(0.0F, dy, 0.0F);
 
@@ -586,12 +586,12 @@ public final class BotMovementManager {
             var cornerCheck = boundingBox.copy();
 
             for (var aABB : collisionBoxes) {
-                targetXCollision = aABB.clipXCollide(cornerCheck, targetXCollision);
+                targetXCollision = aABB.computeOffsetX(cornerCheck, targetXCollision);
             }
             cornerCheck.move(targetXCollision, 0.0F, 0.0F);
 
             for (var aABB : collisionBoxes) {
-                targetZCollision = aABB.clipZCollide(cornerCheck, targetZCollision);
+                targetZCollision = aABB.computeOffsetZ(cornerCheck, targetZCollision);
             }
         }
 
@@ -600,13 +600,13 @@ public final class BotMovementManager {
         {
             var cornerCheck2 = boundingBox.copy();
             for (var aABB : collisionBoxes) {
-                targetZCollision2 = aABB.clipZCollide(cornerCheck2, targetZCollision2);
+                targetZCollision2 = aABB.computeOffsetZ(cornerCheck2, targetZCollision2);
             }
 
             cornerCheck2.move(0.0F, 0.0F, targetZCollision2);
 
             for (var aABB : collisionBoxes) {
-                targetXCollision2 = aABB.clipXCollide(cornerCheck2, targetXCollision2);
+                targetXCollision2 = aABB.computeOffsetX(cornerCheck2, targetXCollision2);
             }
         }
 
