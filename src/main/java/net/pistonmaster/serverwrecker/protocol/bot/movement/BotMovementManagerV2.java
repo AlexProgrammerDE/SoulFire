@@ -1,14 +1,41 @@
+/*
+ * ServerWrecker
+ *
+ * Copyright (C) 2023 ServerWrecker
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
 package net.pistonmaster.serverwrecker.protocol.bot.movement;
 
+import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeModifier;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.ModifierOperation;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
 import it.unimi.dsi.fastutil.Pair;
+import lombok.Getter;
 import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.EntityAttributesState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
+import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,10 +46,15 @@ import java.util.List;
  * Java port of
  */
 public class BotMovementManagerV2 {
+    @Getter
     private final ControlState controlState = new ControlState();
     private final PhysicsData physics = new PhysicsData();
+    @Getter
+    private final PlayerMovementState entity;
+    private final SessionDataManager dataManager;
+    private int ticksWithoutPacket = 0;
 
-    public double clamp(double val, double min, double max) {
+    public static double clamp(double val, double min, double max) {
         return Math.max(min, Math.min(val, max));
     }
 
@@ -32,6 +64,17 @@ public class BotMovementManagerV2 {
             BlockType.WATER, BlockType.SEAGRASS, BlockType.TALL_SEAGRASS,
             BlockType.KELP, BlockType.KELP_PLANT, BlockType.BUBBLE_COLUMN
     );
+
+    public BotMovementManagerV2(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
+        this.entity = new PlayerMovementState(dataManager.getSelfAttributeState());
+        entity.pos.x = x;
+        entity.pos.y = y;
+        entity.pos.z = z;
+
+        entity.yaw = yaw;
+        entity.pitch = pitch;
+        this.dataManager = dataManager;
+    }
 
     public AABB getPlayerBB(MutableVector3d pos) {
         var w = physics.playerHalfWidth;
@@ -77,7 +120,7 @@ public class BotMovementManagerV2 {
         pos.y += dy;
     }
 
-    public void moveEntity(PlayerMovementState entity, LevelState world, double dx, double dy, double dz) {
+    public void moveEntity(LevelState world, double dx, double dy, double dz) {
         var vel = entity.vel;
         var pos = entity.pos;
 
@@ -330,6 +373,48 @@ public class BotMovementManagerV2 {
         );
     }
 
+    public void setMotion(double motionX, double motionY, double motionZ) {
+        entity.vel.x = motionX;
+        entity.vel.y = motionY;
+        entity.vel.z = motionZ;
+    }
+
+    public Vector3i getBlockPos() {
+        return entity.pos.toImmutableInt();
+    }
+
+    public void setPosition(double x, double y, double z) {
+        entity.pos.x = x;
+        entity.pos.y = y;
+        entity.pos.z = z;
+    }
+
+    public void setRotation(float yaw, float pitch) {
+        entity.yaw = yaw;
+        entity.pitch = pitch;
+    }
+
+    public Vector3d getPlayerPos() {
+        return entity.pos.toImmutable();
+    }
+
+    public float getYaw() {
+        return entity.yaw;
+    }
+
+    public float getPitch() {
+        return entity.pitch;
+    }
+
+    public Vector3d getRotationVector() {
+        var yawRadians = (float) Math.toRadians(entity.yaw);
+        var pitchRadians = (float) Math.toRadians(entity.pitch);
+        var x = -Math.sin(yawRadians) * Math.cos(pitchRadians);
+        var y = -Math.sin(pitchRadians);
+        var z = Math.cos(yawRadians) * Math.cos(pitchRadians);
+        return Vector3d.from(x, y, z);
+    }
+
     record LookingVectorData(
             float yaw,
             float pitch,
@@ -344,7 +429,7 @@ public class BotMovementManagerV2 {
     ) {
     }
 
-    public void applyHeading(PlayerMovementState entity, double strafe, double forward, double multiplier) {
+    public void applyHeading(double strafe, double forward, double multiplier) {
         var speed = Math.sqrt(strafe * strafe + forward * forward);
         if (speed < 0.01) return;
 
@@ -377,7 +462,7 @@ public class BotMovementManagerV2 {
         return getSurroundingBBs(world, pBB).stream().noneMatch(pBB::intersects) && getWaterInBB(world, pBB).isEmpty();
     }
 
-    public void moveEntityWithHeading(PlayerMovementState entity, LevelState world, double strafe, double forward) {
+    public void moveEntityWithHeading(LevelState world, double strafe, double forward) {
         var vel = entity.vel;
         var pos = entity.pos;
 
@@ -403,8 +488,8 @@ public class BotMovementManagerV2 {
                 if (entity.dolphinsGrace > 0) horizontalInertia = 0.96;
             }
 
-            applyHeading(entity, strafe, forward, acceleration);
-            moveEntity(entity, world, vel.x, vel.y, vel.z);
+            applyHeading(strafe, forward, acceleration);
+            moveEntity(world, vel.x, vel.y, vel.z);
             vel.y *= inertia;
             vel.y -= (entity.isInWater ? physics.waterGravity : physics.lavaGravity) * gravityMultiplier;
             vel.x *= horizontalInertia;
@@ -447,7 +532,7 @@ public class BotMovementManagerV2 {
             vel.x *= 0.99;
             vel.y *= 0.98;
             vel.z *= 0.99;
-            moveEntity(entity, world, vel.x, vel.y, vel.z);
+            moveEntity(world, vel.x, vel.y, vel.z);
 
             if (entity.onGround) {
                 entity.elytraFlying = false;
@@ -496,7 +581,7 @@ public class BotMovementManagerV2 {
                 }
             }
 
-            applyHeading(entity, strafe, forward, acceleration);
+            applyHeading(strafe, forward, acceleration);
 
             if (isOnLadder(world, pos.toImmutableInt())) {
                 vel.x = clamp(-physics.ladderMaxSpeed, vel.x, physics.ladderMaxSpeed);
@@ -504,7 +589,7 @@ public class BotMovementManagerV2 {
                 vel.y = Math.max(vel.y, controlState.isSneaking() ? 0 : -physics.ladderMaxSpeed);
             }
 
-            moveEntity(entity, world, vel.x, vel.y, vel.z);
+            moveEntity(world, vel.x, vel.y, vel.z);
 
             if (isOnLadder(world, pos.toImmutableInt()) && (entity.isCollidedHorizontally)) {
                 vel.y = physics.ladderClimbSpeed; // climb ladder
@@ -539,11 +624,11 @@ public class BotMovementManagerV2 {
         return false;
     }
 
-    public int getLiquidHeightPcent(@Nullable BlockStateMeta meta, Vector3i block) {
-        return (getRenderedDepth(meta, block) + 1) / 9;
+    public int getLiquidHeightPcent(@Nullable BlockStateMeta meta) {
+        return (getRenderedDepth(meta) + 1) / 9;
     }
 
-    public int getRenderedDepth(@Nullable BlockStateMeta meta, Vector3i block) {
+    public int getRenderedDepth(@Nullable BlockStateMeta meta) {
         if (meta == null) return -1;
 
         if (WATER_LIKE_TYPES.contains(meta.blockType())) return 0;
@@ -557,18 +642,18 @@ public class BotMovementManagerV2 {
     }
 
     public Vector3i getFlow(LevelState world, BlockStateMeta meta, Vector3i block) {
-        var curlevel = getRenderedDepth(meta, block);
+        var curlevel = getRenderedDepth(meta);
         var flow = new MutableVector3d(0, 0, 0);
         for (var combination : new int[][]{new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0}}) {
             var dx = combination[0];
             var dz = combination[1];
             var adjBlockVec = block.add(dx, 0, dz);
             var adjBlock = world.getBlockStateAt(adjBlockVec);
-            var adjLevel = getRenderedDepth(adjBlock.orElse(null), adjBlockVec);
+            var adjLevel = getRenderedDepth(adjBlock.orElse(null));
             if (adjLevel < 0) {
                 if (adjBlock.isPresent() && adjBlock.get().blockShapeType().isEmpty()) {
                     var adjLevel2Vec = block.add(dx, -1, dz);
-                    var adjLevel2 = getRenderedDepth(world.getBlockStateAt(adjLevel2Vec).orElse(null), adjLevel2Vec);
+                    var adjLevel2 = getRenderedDepth(world.getBlockStateAt(adjLevel2Vec).orElse(null));
                     if (adjLevel2 >= 0) {
                         var f = adjLevel2 - (curlevel - 8);
                         flow.x += dx * f;
@@ -609,7 +694,7 @@ public class BotMovementManagerV2 {
                     if (block.isPresent() && (WATER_TYPES.contains(block.get().blockType())
                             || WATER_LIKE_TYPES.contains(block.get().blockType())
                             || block.get().blockShapeType().properties().getBoolean("waterlogged"))) {
-                        var waterLevel = cursor.y + 1 - getLiquidHeightPcent(block.get(), cursorVec);
+                        var waterLevel = cursor.y + 1 - getLiquidHeightPcent(block.get());
                         if (Math.ceil(bb.maxY) >= waterLevel) {
                             waterBlocks.add(Pair.of(cursorVec, block.get()));
                         }
@@ -638,9 +723,18 @@ public class BotMovementManagerV2 {
         return isInWater;
     }
 
-    public void simulatePlayer(PlayerMovementState entity, LevelState world) {
+    public void simulatePlayer(LevelState world) {
         var vel = entity.vel;
         var pos = entity.pos;
+
+        var startX = entity.pos.x;
+        var startY = entity.pos.y;
+        var startZ = entity.pos.z;
+
+        var startYaw = entity.yaw;
+        var startPitch = entity.pitch;
+
+        var startOnGround = entity.onGround;
 
         var waterBB = getPlayerBB(pos).contract(0.001, 0.401, 0.001);
         var lavaBB = getPlayerBB(pos).contract(0.1, 0.4, 0.1);
@@ -703,7 +797,87 @@ public class BotMovementManagerV2 {
             }
         }
 
-        moveEntityWithHeading(entity, world, strafe, forward);
+        moveEntityWithHeading(world, strafe, forward);
+
+        // Detect whether positions changed
+        var positionChanged = startX != entity.pos.x || startY != entity.pos.y || startZ != entity.pos.z;
+        var rotationChanged = startYaw != entity.yaw || startPitch != entity.pitch;
+        var onGroundChanged = startOnGround != entity.onGround;
+
+        // Send position packets if changed
+        if (positionChanged && rotationChanged) {
+            ticksWithoutPacket = 0;
+            sendPosRot();
+        } else if (positionChanged) {
+            ticksWithoutPacket = 0;
+            sendPos();
+        } else if (rotationChanged) {
+            ticksWithoutPacket = 0;
+            sendRot();
+        } else if (onGroundChanged) {
+            ticksWithoutPacket = 0;
+            sendOnGround();
+        } else if (++ticksWithoutPacket > 20) {
+            // Vanilla sends a position packet every 20 ticks if nothing changed
+            ticksWithoutPacket = 0;
+            sendPos();
+        }
+    }
+
+    public void sendPosRot() {
+        var pos = entity.pos;
+        dataManager.getSession().send(new ServerboundMovePlayerPosRotPacket(entity.onGround, pos.x, pos.y, pos.z, entity.yaw, entity.pitch));
+    }
+
+    public void sendPos() {
+        var pos = entity.pos;
+        dataManager.getSession().send(new ServerboundMovePlayerPosPacket(entity.onGround, pos.x, pos.y, pos.z));
+    }
+
+    public void sendRot() {
+        dataManager.getSession().send(new ServerboundMovePlayerRotPacket(entity.onGround, entity.yaw, entity.pitch));
+    }
+
+    public void sendOnGround() {
+        dataManager.getSession().send(new ServerboundMovePlayerStatusOnlyPacket(entity.onGround));
+    }
+
+    public void jump() {
+        entity.jumpQueued = true;
+    }
+
+
+    /**
+     * Updates the rotation to look at a given block or location.
+     *
+     * @param origin The rotation origin, either EYES or FEET.
+     * @param block  The block or location to look at.
+     */
+    public void lookAt(RotationOrigin origin, Vector3d block) {
+        var eyes = origin == RotationOrigin.EYES;
+
+        var dx = block.getX() - entity.pos.x;
+        var dy = block.getY() - (eyes ? entity.pos.y + getEyeHeight() : entity.pos.y);
+        var dz = block.getZ() - entity.pos.z;
+
+        var r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        var yaw = -Math.atan2(dx, dz) / Math.PI * 180;
+        if (yaw < 0) {
+            yaw = 360 + yaw;
+        }
+
+        var pitch = -Math.asin(dy / r) / Math.PI * 180;
+
+        entity.yaw = (float) yaw;
+        entity.pitch = (float) pitch;
+    }
+
+    public Vector3d getEyePosition() {
+        return Vector3d.from(entity.pos.x, entity.pos.y + getEyeHeight(), entity.pos.z);
+    }
+
+    public float getEyeHeight() {
+        return this.controlState.isSneaking() ? 1.50F : 1.62F;
     }
 
     private double getBlockSlipperiness(BlockType blockType) {

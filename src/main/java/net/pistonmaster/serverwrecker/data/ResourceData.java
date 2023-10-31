@@ -75,26 +75,34 @@ public class ResourceData {
 
         var blockProperties = new Int2ObjectOpenHashMap<BlockProperties>();
         var blockStateDefaults = new IntArraySet();
+        for (var blockEntry : blocks.entrySet()) {
+            for (var state : blockEntry.getValue().getAsJsonObject().getAsJsonArray("states")) {
+                var stateObject = state.getAsJsonObject();
+                var stateId = stateObject.get("id").getAsInt();
+                if (stateObject.get("default") != null) {
+                    blockStateDefaults.add(stateId);
+                }
+
+                blockProperties.put(stateId, new BlockProperties(stateObject.getAsJsonObject("properties")));
+            }
+        }
+
+        BLOCK_PROPERTIES = blockProperties;
+        BLOCK_STATE_DEFAULTS = blockStateDefaults;
 
         // Load global palette
         Int2ObjectMap<BlockStateMeta> stateMap = new Int2ObjectOpenHashMap<>();
         for (var blockEntry : blocks.entrySet()) {
             var i = 0;
-            for (var state : blockEntry.getValue().getAsJsonObject().get("states").getAsJsonArray()) {
-                var stateId = state.getAsJsonObject().get("id").getAsInt();
-                if (state.getAsJsonObject().get("default").getAsBoolean()) {
-                    blockStateDefaults.add(stateId);
-                }
-
+            for (var state : blockEntry.getValue().getAsJsonObject().getAsJsonArray("states")) {
+                var stateObject = state.getAsJsonObject();
+                var stateId = stateObject.get("id").getAsInt();
                 stateMap.put(stateId, new BlockStateMeta(blockEntry.getKey(), i));
-                blockProperties.put(stateId, new BlockProperties(state.getAsJsonObject().get("properties").getAsJsonObject()));
                 i++;
             }
         }
 
         GLOBAL_BLOCK_PALETTE = new GlobalBlockPalette(stateMap);
-        BLOCK_PROPERTIES = blockProperties;
-        BLOCK_STATE_DEFAULTS = blockStateDefaults;
 
         // Initialize all classes
         doNothing(BlockItems.VALUES);

@@ -96,8 +96,6 @@ public final class BotMovementManager {
     }
 
     public void setSneaking(boolean sneaking) {
-        this.controlState.setSneaking(sneaking);
-        updateBoundingBox(); // New height, new bounding box
     }
 
     public void updateBoundingBox() {
@@ -652,10 +650,6 @@ public final class BotMovementManager {
         var level = dataManager.getCurrentLevel();
         assert level != null;
         return level;
-    }
-
-    public Vector3d getEyePosition() {
-        return Vector3d.from(this.x, this.y + getEyeHeight(), this.z);
     }
 
     public Vector3d getRotationVector() {

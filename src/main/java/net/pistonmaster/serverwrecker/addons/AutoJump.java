@@ -64,7 +64,7 @@ public class AutoJump implements InternalAddon {
             var movementManager = sessionDataManager.getBotMovementManager();
             if (level != null && movementManager != null
                     && level.isChunkLoaded(movementManager.getBlockPos())
-                    && movementManager.isOnGround()) {
+                    && movementManager.getEntity().isOnGround()) {
                 connection.logger().info("[AutoJump] Jumping!");
                 movementManager.jump();
             }

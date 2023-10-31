@@ -65,14 +65,14 @@ public class GapJumpAction implements WorldAction {
 
         var previousYaw = movementManager.getYaw();
         movementManager.lookAt(RotationOrigin.EYES, position);
-        movementManager.setPitch(0);
+        movementManager.getEntity().setPitch(0);
         var newYaw = movementManager.getYaw();
 
         var yawDifference = Math.abs(previousYaw - newYaw);
 
         // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
         if (didLook && yawDifference > 5) {
-            movementManager.setLastSentYaw(movementManager.getYaw());
+            movementManager.getEntity().setYaw(movementManager.getYaw());
         } else {
             didLook = true;
         }

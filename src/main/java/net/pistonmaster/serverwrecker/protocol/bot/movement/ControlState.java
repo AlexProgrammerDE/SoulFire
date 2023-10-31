@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.movement;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -39,7 +38,7 @@ public class ControlState {
     private boolean sprinting;
     @Setter
     private boolean jumping;
-    @Setter(AccessLevel.PROTECTED)
+    @Setter
     private boolean sneaking;
     @Setter
     private boolean flying;

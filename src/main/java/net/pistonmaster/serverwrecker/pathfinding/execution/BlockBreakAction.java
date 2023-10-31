@@ -95,7 +95,7 @@ public class BlockBreakAction implements WorldAction {
                 var cost = Costs.getRequiredMiningTicks(
                         sessionDataManager.getTagsState(),
                         sessionDataManager.getSelfEffectState(),
-                        sessionDataManager.getBotMovementManager().isOnGround(),
+                        sessionDataManager.getBotMovementManager().getEntity().isOnGround(),
                         item,
                         levelState.getBlockTypeAt(blockPosition).orElseThrow()
                 ).ticks();
@@ -179,7 +179,7 @@ public class BlockBreakAction implements WorldAction {
             remainingTicks = Costs.getRequiredMiningTicks(
                     sessionDataManager.getTagsState(),
                     sessionDataManager.getSelfEffectState(),
-                    sessionDataManager.getBotMovementManager().isOnGround(),
+                    sessionDataManager.getBotMovementManager().getEntity().isOnGround(),
                     sessionDataManager.getInventoryManager().getPlayerInventory()
                             .getHotbarSlot(sessionDataManager.getInventoryManager().getHeldItemSlot())
                             .item(),
