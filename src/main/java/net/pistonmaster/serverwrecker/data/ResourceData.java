@@ -23,7 +23,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockProperties;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 
@@ -36,6 +39,10 @@ import java.util.Objects;
 public class ResourceData {
     public static final GlobalBlockPalette GLOBAL_BLOCK_PALETTE;
     public static final Map<String, String> MOJANG_TRANSLATIONS;
+    // For loading by BlockShapeType
+    protected static final Int2ObjectMap<BlockProperties> BLOCK_PROPERTIES;
+    // For loading by BlockShapeType
+    protected static final IntSet BLOCK_STATE_DEFAULTS;
 
     // Static initialization allows us to preload this in a native image
     static {
@@ -66,17 +73,28 @@ public class ResourceData {
             throw new IllegalStateException(e);
         }
 
+        var blockProperties = new Int2ObjectOpenHashMap<BlockProperties>();
+        var blockStateDefaults = new IntArraySet();
+
         // Load global palette
         Int2ObjectMap<BlockStateMeta> stateMap = new Int2ObjectOpenHashMap<>();
         for (var blockEntry : blocks.entrySet()) {
             var i = 0;
             for (var state : blockEntry.getValue().getAsJsonObject().get("states").getAsJsonArray()) {
-                stateMap.put(state.getAsJsonObject().get("id").getAsInt(), new BlockStateMeta(blockEntry.getKey(), i));
+                var stateId = state.getAsJsonObject().get("id").getAsInt();
+                if (state.getAsJsonObject().get("default").getAsBoolean()) {
+                    blockStateDefaults.add(stateId);
+                }
+
+                stateMap.put(stateId, new BlockStateMeta(blockEntry.getKey(), i));
+                blockProperties.put(stateId, new BlockProperties(state.getAsJsonObject().get("properties").getAsJsonObject()));
                 i++;
             }
         }
 
         GLOBAL_BLOCK_PALETTE = new GlobalBlockPalette(stateMap);
+        BLOCK_PROPERTIES = blockProperties;
+        BLOCK_STATE_DEFAULTS = blockStateDefaults;
 
         // Initialize all classes
         doNothing(BlockItems.VALUES);

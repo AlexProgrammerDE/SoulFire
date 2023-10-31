@@ -23,6 +23,8 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.data.BlockShapeType;
+import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkHolder;
@@ -39,6 +41,9 @@ import java.util.Optional;
  */
 @RequiredArgsConstructor
 public class ProjectedLevelState {
+    private static final BlockStateMeta AIR_BLOCK_STATE = new BlockStateMeta(BlockType.AIR, BlockShapeType.getById(0));
+    private static final BlockStateMeta VOID_AIR_BLOCK_STATE = new BlockStateMeta(BlockType.VOID_AIR, BlockShapeType.getById(0));
+
     private final ChunkHolder chunkHolder;
     private final Object2ObjectMap<Vector3i, BlockStateMeta> blockChanges;
     private final int blockChangesHash;
@@ -66,7 +71,7 @@ public class ProjectedLevelState {
         var blockChanges = new Object2ObjectOpenCustomHashMap<Vector3i, BlockStateMeta>(
                 this.blockChanges.size() + 1, VectorHelper.VECTOR3I_HASH_STRATEGY);
         blockChanges.putAll(this.blockChanges);
-        blockChanges.put(position, BlockStateMeta.AIR_BLOCK_STATE);
+        blockChanges.put(position, AIR_BLOCK_STATE);
 
         return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode(), minBuildHeight, maxBuildHeight);
     }
@@ -83,7 +88,7 @@ public class ProjectedLevelState {
                     continue;
                 }
 
-                blockChanges.put(position, BlockStateMeta.AIR_BLOCK_STATE);
+                blockChanges.put(position, AIR_BLOCK_STATE);
             }
         }
 
@@ -99,9 +104,9 @@ public class ProjectedLevelState {
         // OutOfLevelException should be only thrown when we are outside the render distance
         var y = position.getY();
         if (y < minBuildHeight) {
-            return Optional.of(BlockStateMeta.VOID_AIR_BLOCK_STATE);
+            return Optional.of(VOID_AIR_BLOCK_STATE);
         } else if (y >= maxBuildHeight) {
-            return Optional.of(BlockStateMeta.VOID_AIR_BLOCK_STATE);
+            return Optional.of(VOID_AIR_BLOCK_STATE);
         }
 
         var blockChange = blockChanges.get(position);

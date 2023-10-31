@@ -369,6 +369,8 @@ public final class SessionDataManager {
                 packet.getWalkSpeed()
         );
 
+        selfAttributeState.setAbilities(abilitiesData);
+
         if (botMovementManager != null) {
             botMovementManager.getControlState().setFlying(abilitiesData.flying());
             botMovementManager.setAbilitiesFlySpeed(abilitiesData.flySpeed());

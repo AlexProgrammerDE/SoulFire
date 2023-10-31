@@ -23,6 +23,7 @@ import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Data;
+import net.pistonmaster.serverwrecker.protocol.bot.model.AbilitiesData;
 
 import java.util.Map;
 
@@ -30,7 +31,56 @@ import java.util.Map;
 public class EntityAttributesState {
     private final Map<AttributeType, Attribute> attributeStore = new Object2ObjectOpenHashMap<>();
 
+    public boolean hasAttribute(AttributeType type) {
+        return attributeStore.containsKey(type);
+    }
+
+    public Attribute getAttribute(AttributeType type) {
+        return attributeStore.get(type);
+    }
+
+    public static double getAttributeValue(Attribute attribute) {
+        var value = attribute.getValue();
+
+        for (var modifier : attribute.getModifiers()) {
+            switch (modifier.getOperation()) {
+                case ADD -> {
+                    value += modifier.getAmount();
+                }
+                case ADD_MULTIPLIED -> {
+                    value += modifier.getAmount() * value;
+                }
+                case MULTIPLY -> {
+                    value *= modifier.getAmount();
+                }
+            }
+        }
+
+        return value;
+    }
+
+    public double getAttributeValue(AttributeType type) {
+        var attribute = attributeStore.get(type);
+        if (attribute == null) {
+            throw new IllegalArgumentException("Attribute " + type + " not found!");
+        }
+
+        return getAttributeValue(attribute);
+    }
+
     public void setAttribute(Attribute attribute) {
         this.attributeStore.put(attribute.getType(), attribute);
+    }
+
+    public void setAbilities(AbilitiesData abilitiesData) {
+        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_MAX_HEALTH, abilitiesData.invulnerable() ? 1000 : 20));
+        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED, abilitiesData.walkSpeed()));
+        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_FLYING_SPEED, abilitiesData.flySpeed()));
+        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_ATTACK_DAMAGE, abilitiesData.creativeModeBreak() ? 1000 : 1));
+        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_ATTACK_SPEED, 4));
+        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_ARMOR, 0));
+        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_ARMOR_TOUGHNESS, 0));
+        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_LUCK, 0));
+        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_KNOCKBACK_RESISTANCE, 0));
     }
 }

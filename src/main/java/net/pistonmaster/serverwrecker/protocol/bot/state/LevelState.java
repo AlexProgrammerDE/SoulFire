@@ -30,6 +30,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.nbt.UniformOrInt;
 import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 import net.pistonmaster.serverwrecker.util.MathHelper;
+import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
@@ -131,6 +132,10 @@ public class LevelState {
 
     public boolean isChunkLoaded(Vector3i block) {
         return chunks.isChunkLoaded(block);
+    }
+
+    public Optional<BlockStateMeta> getBlockStateAt(Vector3d block) {
+        return getBlockStateAt(block.toInt());
     }
 
     public Optional<BlockStateMeta> getBlockStateAt(Vector3i block) {
