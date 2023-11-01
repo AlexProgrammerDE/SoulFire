@@ -12,7 +12,7 @@ log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "lo
 log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
 log4j-iostreams = { module = "org.apache.logging.log4j:log4j-iostreams", version.ref = "log4j" }
 log4j-jul = { module = "org.apache.logging.log4j:log4j-jul", version.ref = "log4j" }
-jline = "org.jline:jline-terminal-jansi:3.24.0"
+jline = "org.jline:jline-terminal-jansi:3.24.1"
 jansi = "org.fusesource.jansi:jansi:2.4.1"
 terminalconsoleappender = "net.minecrell:terminalconsoleappender:1.3.0"
 slf4j = "org.slf4j:slf4j-api:2.0.9"
