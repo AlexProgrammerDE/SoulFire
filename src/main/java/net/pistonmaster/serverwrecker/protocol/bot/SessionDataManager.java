@@ -934,7 +934,7 @@ public final class SessionDataManager {
         var level = getCurrentLevel();
         if (level != null && botMovementManager != null
                 && level.isChunkLoaded(botMovementManager.getBlockPos())) {
-            botMovementManager.simulatePlayer(level);
+            botMovementManager.tick();
         }
 
         connection.eventBus().post(new BotPostTickEvent(connection));

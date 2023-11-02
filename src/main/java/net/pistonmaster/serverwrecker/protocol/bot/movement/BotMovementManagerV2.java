@@ -67,9 +67,7 @@ public class BotMovementManagerV2 {
 
     public BotMovementManagerV2(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
         this.entity = new PlayerMovementState(dataManager.getSelfAttributeState());
-        entity.pos.x = x;
-        entity.pos.y = y;
-        entity.pos.z = z;
+        entity.pos = new MutableVector3d(x, y, z);
 
         entity.yaw = yaw;
         entity.pitch = pitch;
@@ -78,7 +76,7 @@ public class BotMovementManagerV2 {
 
     public AABB getPlayerBB(MutableVector3d pos) {
         var w = physics.playerHalfWidth;
-        return new AABB(-w, 0, -w, w, physics.playerHeight, w).offset(pos.x, pos.y, pos.z);
+        return new AABB(pos.x - w, pos.y, pos.z - w, pos.x + w, pos.y + getBoundingBoxHeight(), pos.z + w);
     }
 
     public void setPositionToBB(AABB bb, MutableVector3d pos) {
@@ -106,18 +104,6 @@ public class BotMovementManagerV2 {
             }
         }
         return surroundingBBs;
-    }
-
-    public void adjustPositionHeight(LevelState world, MutableVector3d pos) {
-        var playerBB = getPlayerBB(pos);
-        var queryBB = playerBB.copy().extend(0, -1, 0);
-        var surroundingBBs = getSurroundingBBs(world, queryBB);
-
-        var dy = -1D;
-        for (var blockBB : surroundingBBs) {
-            dy = blockBB.computeOffsetY(playerBB, dy);
-        }
-        pos.y += dy;
     }
 
     public void moveEntity(LevelState world, double dx, double dy, double dz) {
@@ -438,9 +424,9 @@ public class BotMovementManagerV2 {
         strafe *= speed;
         forward *= speed;
 
-        var yaw = Math.PI - entity.yaw;
-        var sin = Math.sin(yaw);
-        var cos = Math.cos(yaw);
+        var yawRadians = Math.toRadians(entity.yaw);
+        var sin = Math.sin(yawRadians);
+        var cos = Math.cos(yawRadians);
 
         var vel = entity.vel;
         vel.x -= strafe * cos + forward * sin;
@@ -459,10 +445,13 @@ public class BotMovementManagerV2 {
 
     public boolean doesNotCollide(LevelState world, MutableVector3d pos) {
         var pBB = getPlayerBB(pos);
-        return getSurroundingBBs(world, pBB).stream().noneMatch(pBB::intersects) && getWaterInBB(world, pBB).isEmpty();
+        return getSurroundingBBs(world, pBB)
+                .stream()
+                .noneMatch(pBB::intersects)
+                && getWaterInBB(world, pBB).isEmpty();
     }
 
-    public void moveEntityWithHeading(LevelState world, double strafe, double forward) {
+    public void moveEntityWithHeading(LevelState world, float strafe, float forward) {
         var vel = entity.vel;
         var pos = entity.pos;
 
@@ -601,6 +590,7 @@ public class BotMovementManagerV2 {
             } else {
                 vel.y -= physics.gravity * gravityMultiplier;
             }
+
             vel.y *= physics.airdrag;
             vel.x *= inertia;
             vel.z *= inertia;
@@ -723,7 +713,10 @@ public class BotMovementManagerV2 {
         return isInWater;
     }
 
-    public void simulatePlayer(LevelState world) {
+    public void tick() {
+        var world = dataManager.getCurrentLevel();
+        if (world == null) return;
+
         var vel = entity.vel;
         var pos = entity.pos;
 
@@ -758,11 +751,13 @@ public class BotMovementManagerV2 {
                 if (entity.jumpBoost > 0) {
                     vel.y += 0.1 * entity.jumpBoost;
                 }
+
                 if (controlState.isSprinting()) {
                     var yaw = Math.PI - entity.yaw;
                     vel.x -= Math.sin(yaw) * 0.2;
                     vel.z += Math.cos(yaw) * 0.2;
                 }
+
                 entity.jumpTicks = physics.autojumpCooldown;
             }
         } else {
@@ -770,16 +765,30 @@ public class BotMovementManagerV2 {
         }
         entity.jumpQueued = false;
 
-        var rightNumber = controlState.isRight() ? 1 : 0;
-        var leftNumber = controlState.isLeft() ? 1 : 0;
-        var forwardNumber = controlState.isForward() ? 1 : 0;
-        var backNumber = controlState.isBackward() ? 1 : 0;
-        var strafe = (rightNumber - leftNumber) * 0.98;
-        var forward = (forwardNumber - backNumber) * 0.98;
+        var forward = 0.0F;
+        if (controlState.isForward()) {
+            forward++;
+        }
+
+        if (controlState.isBackward()) {
+            forward--;
+        }
+
+        var strafe = 0.0F;
+        if (controlState.isLeft()) {
+            strafe++;
+        }
+
+        if (controlState.isRight()) {
+            strafe--;
+        }
+
+        strafe *= 0.98F;
+        forward *= 0.98F;
 
         if (controlState.isSneaking()) {
-            strafe *= physics.sneakSpeed;
-            forward *= physics.sneakSpeed;
+            strafe *= (float) ((double) strafe * physics.sneakSpeed);
+            forward *= (float) ((double) forward * physics.sneakSpeed);
         }
 
         entity.elytraFlying = entity.elytraFlying && entity.elytraEquipped && !entity.onGround && entity.levitation == 0;
@@ -870,6 +879,10 @@ public class BotMovementManagerV2 {
 
         entity.yaw = (float) yaw;
         entity.pitch = (float) pitch;
+    }
+
+    public float getBoundingBoxHeight() {
+        return this.controlState.isSneaking() ? 1.5F : 1.8F;
     }
 
     public Vector3d getEyePosition() {

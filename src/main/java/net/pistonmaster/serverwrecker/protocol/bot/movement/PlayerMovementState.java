@@ -29,21 +29,32 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.EntityAttributesState;
 @RequiredArgsConstructor
 public class PlayerMovementState {
     private final EntityAttributesState attributesState;
+
+    // Position
     public MutableVector3d pos;
-    public MutableVector3d vel;
+
+    // Rotation
+    public float yaw;
+    public float pitch;
+
+    // Motion
+    public MutableVector3d vel = new MutableVector3d(0, 0, 0);
+
+    // Collision
     public boolean onGround;
     public boolean isInWater;
     public boolean isInLava;
     public boolean isInWeb;
     public boolean isCollidedHorizontally;
     public boolean isCollidedVertically;
+
+    // State
     public boolean elytraFlying;
     public int jumpTicks;
     public boolean jumpQueued;
     public int fireworkRocketDuration;
-    public float yaw;
-    public float pitch;
-    public ControlState control;
+
+    // Effects
     public int jumpBoost;
     public int speed;
     public int slowness;
@@ -51,5 +62,7 @@ public class PlayerMovementState {
     public int slowFalling;
     public int levitation;
     public int depthStrider;
+
+    // Inventory
     public boolean elytraEquipped;
 }

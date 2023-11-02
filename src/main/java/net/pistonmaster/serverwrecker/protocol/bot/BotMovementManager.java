@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot;
 
-import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
@@ -32,7 +31,6 @@ import net.pistonmaster.serverwrecker.protocol.bot.model.AbilitiesData;
 import net.pistonmaster.serverwrecker.protocol.bot.movement.ControlState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
-import net.pistonmaster.serverwrecker.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
@@ -113,56 +111,6 @@ public final class BotMovementManager {
         this.motionX = x;
         this.motionY = y;
         this.motionZ = z;
-    }
-
-    public void turn(float xo, float yo) {
-        this.yaw = ((float) (this.yaw + xo * 0.15D));
-        this.pitch = ((float) (this.pitch - yo * 0.15D));
-        if (this.pitch < -90.0F) {
-            this.pitch = -90.0F;
-        }
-
-        if (this.pitch > 90.0F) {
-            this.pitch = 90.0F;
-        }
-    }
-
-    /**
-     * Updates the rotation to look at a given block or location.
-     *
-     * @param origin The rotation origin, either EYES or FEET.
-     * @param block  The block or location to look at.
-     */
-    public void lookAt(RotationOrigin origin, Vector3d block) {
-        var eyes = origin == RotationOrigin.EYES;
-
-        var dx = block.getX() - this.x;
-        var dy = block.getY() - (eyes ? this.y + getEyeHeight() : this.y);
-        var dz = block.getZ() - this.z;
-
-        var r = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        var yaw = -Math.atan2(dx, dz) / Math.PI * 180;
-        if (yaw < 0) {
-            yaw = 360 + yaw;
-        }
-
-        var pitch = -Math.asin(dy / r) / Math.PI * 180;
-
-        this.yaw = (float) yaw;
-        this.pitch = (float) pitch;
-    }
-
-    private float updateRotation(float angle, float targetAngle, float maxIncrease) {
-        var f = MathHelper.wrapDegrees(targetAngle - angle);
-        if (f > maxIncrease) {
-            f = maxIncrease;
-        }
-
-        if (f < -maxIncrease) {
-            f = -maxIncrease;
-        }
-
-        return angle + f;
     }
 
     public void tick() {
@@ -650,15 +598,6 @@ public final class BotMovementManager {
         var level = dataManager.getCurrentLevel();
         assert level != null;
         return level;
-    }
-
-    public Vector3d getRotationVector() {
-        var yawRadians = (float) Math.toRadians(this.yaw);
-        var pitchRadians = (float) Math.toRadians(this.pitch);
-        var x = -Math.sin(yawRadians) * Math.cos(pitchRadians);
-        var y = -Math.sin(pitchRadians);
-        var z = Math.cos(yawRadians) * Math.cos(pitchRadians);
-        return Vector3d.from(x, y, z);
     }
 
     private record BestXZMoveData(double totalMotion, double dx, double dz) {
