@@ -93,16 +93,19 @@ public class BotMovementManagerV2 {
                 for (cursor.x = Math.floor(queryBB.minX); cursor.x <= Math.floor(queryBB.maxX); cursor.x++) {
                     var blockPos = cursor.toImmutableInt();
                     var block = world.getBlockStateAt(cursor.toImmutableInt());
-                    if (block.isPresent()) {
-                        for (var shape : block.get().blockShapeType().blockShapes()) {
-                            var blockBB = new AABB(shape.minX(), shape.minY(), shape.minZ(), shape.maxX(), shape.maxY(), shape.maxZ());
-                            blockBB.offset(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-                            surroundingBBs.add(blockBB);
-                        }
+                    if (block.isEmpty()) {
+                        continue;
+                    }
+
+                    for (var shape : block.get().blockShapeType().blockShapes()) {
+                        var blockBB = new AABB(shape.minX(), shape.minY(), shape.minZ(), shape.maxX(), shape.maxY(), shape.maxZ());
+                        blockBB.offset(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                        surroundingBBs.add(blockBB);
                     }
                 }
             }
         }
+
         return surroundingBBs;
     }
 
@@ -271,19 +274,21 @@ public class BotMovementManagerV2 {
             for (cursor.z = Math.floor(playerBB.minZ); cursor.z <= Math.floor(playerBB.maxZ); cursor.z++) {
                 for (cursor.x = Math.floor(playerBB.minX); cursor.x <= Math.floor(playerBB.maxX); cursor.x++) {
                     var block = world.getBlockStateAt(cursor.toImmutableInt());
-                    if (block.isPresent()) {
-                        if (block.get().blockType() == BlockType.COBWEB) {
-                            entity.isInWeb = true;
-                        } else if (block.get().blockType() == BlockType.BUBBLE_COLUMN) {
-                            var down = !block.get().blockShapeType().properties().getBoolean("drag");
-                            var aboveBlock = world.getBlockStateAt(cursor.offset(0, 1, 0).toImmutableInt());
-                            var bubbleDrag = (aboveBlock.isPresent() && aboveBlock.get().blockType() == BlockType.AIR) ?
-                                    physics.bubbleColumnSurfaceDrag : physics.bubbleColumnDrag;
-                            if (down) {
-                                vel.y = Math.max(bubbleDrag.maxDown(), vel.y - bubbleDrag.down());
-                            } else {
-                                vel.y = Math.min(bubbleDrag.maxUp(), vel.y + bubbleDrag.up());
-                            }
+                    if (block.isEmpty()) {
+                        continue;
+                    }
+
+                    if (block.get().blockType() == BlockType.COBWEB) {
+                        entity.isInWeb = true;
+                    } else if (block.get().blockType() == BlockType.BUBBLE_COLUMN) {
+                        var down = !block.get().blockShapeType().properties().getBoolean("drag");
+                        var aboveBlock = world.getBlockStateAt(cursor.offset(0, 1, 0).toImmutableInt());
+                        var bubbleDrag = (aboveBlock.isPresent() && aboveBlock.get().blockType() == BlockType.AIR) ?
+                                physics.bubbleColumnSurfaceDrag : physics.bubbleColumnDrag;
+                        if (down) {
+                            vel.y = Math.max(bubbleDrag.maxDown(), vel.y - bubbleDrag.down());
+                        } else {
+                            vel.y = Math.min(bubbleDrag.maxUp(), vel.y + bubbleDrag.up());
                         }
                     }
                 }
@@ -541,8 +546,10 @@ public class BotMovementManagerV2 {
                     // Create an attribute if the player does not have it
                     playerSpeedAttribute = new Attribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED, physics.playerSpeed);
                 }
+
                 if (controlState.isSprinting()) {
-                    if (playerSpeedAttribute.getModifiers().stream().noneMatch(modifier -> modifier.getUuid().equals(physics.sprintingUUID))) {
+                    if (playerSpeedAttribute.getModifiers().stream().noneMatch(modifier ->
+                            modifier.getUuid().equals(physics.sprintingUUID))) {
                         playerSpeedAttribute.getModifiers().add(new AttributeModifier(
                                 physics.sprintingUUID,
                                 physics.sprintSpeed,
@@ -552,14 +559,17 @@ public class BotMovementManagerV2 {
                 } else {
                     // Client-side sprinting (don't rely on server-side sprinting)
                     // setSprinting in LivingEntity.java
-                    playerSpeedAttribute.getModifiers().removeIf(modifier -> modifier.getUuid().equals(physics.sprintingUUID));
+                    playerSpeedAttribute.getModifiers().removeIf(modifier ->
+                            modifier.getUuid().equals(physics.sprintingUUID));
                 }
 
                 // Calculate what the speed is (0.1 if no modification)
                 var attributeSpeed = EntityAttributesState.getAttributeValue(playerSpeedAttribute);
                 inertia = getBlockSlipperiness(blockUnder.get().blockType()) * 0.91;
                 acceleration = attributeSpeed * (0.1627714 / (inertia * inertia * inertia));
-                if (acceleration < 0) acceleration = 0; // acceleration should not be negative
+                if (acceleration < 0) {
+                    acceleration = 0; // acceleration should not be negative
+                }
             } else {
                 acceleration = physics.airborneAcceleration;
                 inertia = physics.airborneInertia;
@@ -604,7 +614,11 @@ public class BotMovementManagerV2 {
                 for (cursor.x = Math.floor(queryBB.minX); cursor.x <= Math.floor(queryBB.maxX); cursor.x++) {
                     var block = world.getBlockStateAt(cursor.toImmutableInt());
 
-                    if (block.isPresent() && types.contains(block.get().blockType())) {
+                    if (block.isEmpty()) {
+                        continue;
+                    }
+
+                    if (types.contains(block.get().blockType())) {
                         return true;
                     }
                 }
@@ -614,7 +628,7 @@ public class BotMovementManagerV2 {
         return false;
     }
 
-    public int getLiquidHeightPcent(@Nullable BlockStateMeta meta) {
+    public int getLiquidHeightPercent(@Nullable BlockStateMeta meta) {
         return (getRenderedDepth(meta) + 1) / 9;
     }
 
@@ -684,7 +698,7 @@ public class BotMovementManagerV2 {
                     if (block.isPresent() && (WATER_TYPES.contains(block.get().blockType())
                             || WATER_LIKE_TYPES.contains(block.get().blockType())
                             || block.get().blockShapeType().properties().getBoolean("waterlogged"))) {
-                        var waterLevel = cursor.y + 1 - getLiquidHeightPcent(block.get());
+                        var waterLevel = cursor.y + 1 - getLiquidHeightPercent(block.get());
                         if (Math.ceil(bb.maxY) >= waterLevel) {
                             waterBlocks.add(Pair.of(cursorVec, block.get()));
                         }
@@ -775,11 +789,11 @@ public class BotMovementManagerV2 {
         }
 
         var strafe = 0.0F;
-        if (controlState.isLeft()) {
+        if (controlState.isRight()) {
             strafe++;
         }
 
-        if (controlState.isRight()) {
+        if (controlState.isLeft()) {
             strafe--;
         }
 
@@ -854,7 +868,6 @@ public class BotMovementManagerV2 {
     public void jump() {
         entity.jumpQueued = true;
     }
-
 
     /**
      * Updates the rotation to look at a given block or location.

@@ -108,6 +108,12 @@ public class AABB {
                 this.minZ < other.maxZ && this.maxZ > other.minZ;
     }
 
+    public boolean collides(AABB other) {
+        return this.minX <= other.maxX && this.maxX >= other.minX &&
+                this.minY <= other.maxY && this.maxY >= other.minY &&
+                this.minZ <= other.maxZ && this.maxZ >= other.minZ;
+    }
+
     public AABB copy() {
         return new AABB(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
     }
