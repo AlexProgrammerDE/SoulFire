@@ -49,10 +49,16 @@ public class MutableVector3d {
         return new MutableVector3d(Math.floor(x), Math.floor(y), Math.floor(z));
     }
 
-    public void add(Vector3i flow) {
-        this.x += flow.getX();
-        this.y += flow.getY();
-        this.z += flow.getZ();
+    public void add(Vector3i vector3i) {
+        this.x += vector3i.getX();
+        this.y += vector3i.getY();
+        this.z += vector3i.getZ();
+    }
+
+    public void add(Vector3d vector3d) {
+        this.x += vector3d.getX();
+        this.y += vector3d.getY();
+        this.z += vector3d.getZ();
     }
 
     public double norm() {

@@ -23,7 +23,7 @@ import java.util.UUID;
 
 public class PhysicsData {
     public double gravity = 0.08;
-    public double airdrag = 0.9800000190734863D;
+    public float airdrag = 0.98F;
     public double yawSpeed = 3.0;
     public double pitchSpeed = 3.0;
     public double playerSpeed = 0.1;
@@ -39,10 +39,10 @@ public class PhysicsData {
     public double playerHalfWidth = 0.3D;
     public double playerHeight = 1.8D;
     public double playerSneakHeight = 1.5D;
-    public double waterInertia = 0.8;
-    public double lavaInertia = 0.5;
-    public double liquidAcceleration = 0.02;
-    public float airborneAcceleration = 0.02F;
+    public float waterSpeed = 0.8F;
+    public float lavaSpeed = 0.5F;
+    public float liquidSpeed = 0.02F;
+    public float airborneFriction = 0.02F;
     public float defaultSlipperiness = 0.6F;
     public double outOfLiquidImpulse = 0.3;
     public int autojumpCooldown = 10;

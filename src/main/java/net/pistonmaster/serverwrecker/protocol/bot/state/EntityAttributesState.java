@@ -44,15 +44,9 @@ public class EntityAttributesState {
 
         for (var modifier : attribute.getModifiers()) {
             switch (modifier.getOperation()) {
-                case ADD -> {
-                    value += modifier.getAmount();
-                }
-                case ADD_MULTIPLIED -> {
-                    value += modifier.getAmount() * value;
-                }
-                case MULTIPLY -> {
-                    value *= modifier.getAmount();
-                }
+                case ADD -> value += modifier.getAmount();
+                case ADD_MULTIPLIED -> value += modifier.getAmount() * value;
+                case MULTIPLY -> value *= modifier.getAmount();
             }
         }
 
@@ -73,14 +67,7 @@ public class EntityAttributesState {
     }
 
     public void setAbilities(AbilitiesData abilitiesData) {
-        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_MAX_HEALTH, abilitiesData.invulnerable() ? 1000 : 20));
         setAttribute(new Attribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED, abilitiesData.walkSpeed()));
         setAttribute(new Attribute(AttributeType.Builtin.GENERIC_FLYING_SPEED, abilitiesData.flySpeed()));
-        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_ATTACK_DAMAGE, abilitiesData.creativeModeBreak() ? 1000 : 1));
-        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_ATTACK_SPEED, 4));
-        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_ARMOR, 0));
-        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_ARMOR_TOUGHNESS, 0));
-        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_LUCK, 0));
-        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_KNOCKBACK_RESISTANCE, 0));
     }
 }

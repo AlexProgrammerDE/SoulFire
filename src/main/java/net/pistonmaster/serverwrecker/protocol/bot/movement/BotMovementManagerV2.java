@@ -107,7 +107,10 @@ public class BotMovementManagerV2 {
 
         // Handle inputs
         if (controlState.isJumping() || entity.jumpQueued) {
-            if (entity.jumpTicks > 0) entity.jumpTicks--;
+            if (entity.jumpTicks > 0) {
+                entity.jumpTicks--;
+            }
+
             if (entity.isInWater || entity.isInLava) {
                 vel.y += 0.04;
             } else if (entity.onGround && entity.jumpTicks == 0) {
@@ -173,6 +176,9 @@ public class BotMovementManagerV2 {
 
         moveEntityWithHeading(world, strafe, forward);
 
+        System.out.println("vel: " + vel);
+        System.out.println("pos: " + pos);
+
         // Detect whether positions changed
         var positionChanged = startX != entity.pos.x || startY != entity.pos.y || startZ != entity.pos.z;
         var rotationChanged = startYaw != entity.yaw || startPitch != entity.pitch;
@@ -221,30 +227,40 @@ public class BotMovementManagerV2 {
         var pos = entity.pos;
 
         var gravityMultiplier = (vel.y <= 0 && entity.slowFalling > 0) ? physics.slowFalling : 1;
+        var speed = getSpeed();
 
         if (entity.isInWater || entity.isInLava) {
             // Water / Lava movement
             var lastY = pos.y;
-            var acceleration = physics.liquidAcceleration;
-            var inertia = entity.isInWater ? physics.waterInertia : physics.lavaInertia;
-            var horizontalInertia = inertia;
+            var liquidSpeed = physics.liquidSpeed;
+            var typeSpeed = entity.isInWater ? physics.waterSpeed : physics.lavaSpeed;
+            var horizontalInertia = typeSpeed;
 
             if (entity.isInWater) {
-                double strider = Math.min(entity.depthStrider, 3);
-                if (!entity.onGround) {
-                    strider *= 0.5;
-                }
-                if (strider > 0) {
-                    horizontalInertia += (0.546 - horizontalInertia) * strider / 3;
-                    acceleration += (0.7 - acceleration) * strider / 3;
+                var depthStrider = (float) entity.depthStrider;
+
+                if (depthStrider > 3) {
+                    depthStrider = 3;
                 }
 
-                if (entity.dolphinsGrace > 0) horizontalInertia = 0.96;
+                if (!entity.onGround) {
+                    depthStrider *= 0.5F;
+                }
+
+                if (depthStrider > 0) {
+                    horizontalInertia += ((0.54600006F - horizontalInertia) * depthStrider) / 3;
+                    liquidSpeed += (speed - liquidSpeed) * depthStrider / 3;
+                }
+
+                if (entity.dolphinsGrace > 0) {
+                    horizontalInertia = 0.96F;
+                }
             }
 
-            applyHeading(strafe, forward, acceleration);
+            applyHeading(strafe, forward, liquidSpeed);
+
             moveEntity(world, vel.x, vel.y, vel.z);
-            vel.y *= inertia;
+            vel.y *= typeSpeed;
             vel.y -= (entity.isInWater ? physics.waterGravity : physics.lavaGravity) * gravityMultiplier;
             vel.x *= horizontalInertia;
             vel.z *= horizontalInertia;
@@ -293,56 +309,19 @@ public class BotMovementManagerV2 {
             }
         } else {
             // Normal movement
-            float acceleration;
-            float inertia;
+            var xzMultiplier = 0.91F;
+            float frictionInfluencedSpeed;
 
-            var blockUnder = world.getBlockStateAt(pos.offset(0, -1, 0).toImmutableInt());
+            var blockUnder = world.getBlockStateAt(pos.offset(0, -0.500001F, 0).toImmutableInt());
             if (entity.onGround && blockUnder.isPresent()) {
-                var attribute = entity.getAttributesState();
-                Attribute playerSpeedAttribute;
-                if (attribute.hasAttribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED)) {
-                    // Use server-side player attributes
-                    playerSpeedAttribute = attribute.getAttribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED);
-                } else {
-                    // Create an attribute if the player does not have it
-                    playerSpeedAttribute = new Attribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED, physics.playerSpeed);
-                }
-
-                if (controlState.isSprinting()) {
-                    if (playerSpeedAttribute.getModifiers().stream().noneMatch(modifier ->
-                            modifier.getUuid().equals(physics.sprintingUUID))) {
-                        playerSpeedAttribute.getModifiers().add(new AttributeModifier(
-                                physics.sprintingUUID,
-                                physics.sprintSpeed,
-                                ModifierOperation.MULTIPLY
-                        ));
-                    }
-                } else {
-                    // Client-side sprinting (don't rely on server-side sprinting)
-                    // setSprinting in LivingEntity.java
-                    playerSpeedAttribute.getModifiers().removeIf(modifier ->
-                            modifier.getUuid().equals(physics.sprintingUUID));
-                }
-
-                // Calculate what the speed is (0.1 if no modification)
-                inertia = getBlockSlipperiness(blockUnder.get().blockType()) * 0.91F;
-
-                var attributeSpeed = (float) EntityAttributesState.getAttributeValue(playerSpeedAttribute);
-                acceleration = attributeSpeed * (0.1627714F / (inertia * inertia * inertia));
-                if (acceleration < 0) {
-                    acceleration = 0; // acceleration should not be negative
-                }
+                var friction = getBlockFriction(blockUnder.get().blockType());
+                xzMultiplier *= friction;
+                frictionInfluencedSpeed = speed * (0.21600002F / (friction * friction * friction));
             } else {
-                inertia = 0.91F;
-
-                acceleration = physics.airborneAcceleration;
-                if (controlState.isSprinting()) {
-                    var airSprintFactor = physics.airborneAcceleration * 0.3F;
-                    acceleration += airSprintFactor;
-                }
+                frictionInfluencedSpeed = getFlyingSpeed();
             }
 
-            applyHeading(strafe, forward, acceleration);
+            applyHeading(strafe, forward, frictionInfluencedSpeed);
 
             if (isOnLadder(world, pos.toImmutableInt())) {
                 vel.x = GenericMath.clamp(-physics.ladderMaxSpeed, vel.x, physics.ladderMaxSpeed);
@@ -352,7 +331,7 @@ public class BotMovementManagerV2 {
 
             moveEntity(world, vel.x, vel.y, vel.z);
 
-            if (entity.isCollidedHorizontally && isOnLadder(world, pos.toImmutableInt())) {
+            if ((entity.isCollidedHorizontally || controlState.isJumping()) && isOnLadder(world, pos.toImmutableInt())) {
                 vel.y = physics.ladderClimbSpeed; // climb ladder
             }
 
@@ -363,10 +342,50 @@ public class BotMovementManagerV2 {
                 vel.y -= physics.gravity * gravityMultiplier;
             }
 
-            vel.x *= inertia;
+            vel.x *= xzMultiplier;
             vel.y *= physics.airdrag;
-            vel.z *= inertia;
+            vel.z *= xzMultiplier;
         }
+    }
+
+    private float getFlyingSpeed() {
+        if (entity.flying) {
+            var abilitiesData = dataManager.getAbilitiesData();
+            var flySpeed = abilitiesData == null ? 0.05F : abilitiesData.flySpeed();
+            return controlState.isSprinting() ? flySpeed * 2.0F : flySpeed;
+        } else {
+            return controlState.isSprinting() ? 0.025999999F : 0.02F;
+        }
+    }
+
+    public float getSpeed() {
+        var attribute = entity.getAttributesState();
+        Attribute playerSpeedAttribute;
+        if (attribute.hasAttribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED)) {
+            // Use server-side player attributes
+            playerSpeedAttribute = attribute.getAttribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED);
+        } else {
+            // Create an attribute if the player does not have it
+            playerSpeedAttribute = new Attribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED, physics.playerSpeed);
+        }
+
+        if (controlState.isSprinting()) {
+            if (playerSpeedAttribute.getModifiers().stream().noneMatch(modifier ->
+                    modifier.getUuid().equals(physics.sprintingUUID))) {
+                playerSpeedAttribute.getModifiers().add(new AttributeModifier(
+                        physics.sprintingUUID,
+                        physics.sprintSpeed,
+                        ModifierOperation.MULTIPLY
+                ));
+            }
+        } else {
+            // Client-side sprinting (don't rely on server-side sprinting)
+            // setSprinting in LivingEntity.java
+            playerSpeedAttribute.getModifiers().removeIf(modifier ->
+                    modifier.getUuid().equals(physics.sprintingUUID));
+        }
+
+        return (float) EntityAttributesState.getAttributeValue(playerSpeedAttribute);
     }
 
     public void moveEntity(LevelState world, double dx, double dy, double dz) {
@@ -578,11 +597,17 @@ public class BotMovementManagerV2 {
         }
     }
 
-    public void applyHeading(double strafe, double forward, double multiplier) {
-        var speed = Math.sqrt(strafe * strafe + forward * forward);
-        if (speed < 0.01) return;
+    public void applyHeading(double strafe, double forward, float speed) {
+        var distanceSquared = strafe * strafe + forward * forward;
+        if (distanceSquared < 1.0E-7) {
+            return;
+        }
 
-        speed = multiplier / Math.max(speed, 1);
+        if (distanceSquared > 1) {
+            var distance = Math.sqrt(distanceSquared);
+            strafe /= distance;
+            forward /= distance;
+        }
 
         strafe *= speed;
         forward *= speed;
@@ -727,6 +752,65 @@ public class BotMovementManagerV2 {
                 && getWaterInBB(world, pBB).isEmpty();
     }
 
+    public int getLiquidHeightPercent(@Nullable BlockStateMeta meta) {
+        return (getRenderedDepth(meta) + 1) / 9;
+    }
+
+    public int getRenderedDepth(@Nullable BlockStateMeta meta) {
+        if (meta == null) return -1;
+
+        if (WATER_LIKE_TYPES.contains(meta.blockType())) return 0;
+
+        if (meta.blockShapeType().properties().getBoolean("waterlogged")) return 0;
+
+        if (!WATER_TYPES.contains(meta.blockType())) return -1;
+
+        var level = meta.blockShapeType().properties().getInt("level");
+        return level >= 8 ? 0 : level;
+    }
+
+    public Vector3i getFlow(LevelState world, BlockStateMeta meta, Vector3i block) {
+        var curlevel = getRenderedDepth(meta);
+        var flow = new MutableVector3d(0, 0, 0);
+        for (var combination : new int[][]{new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0}}) {
+            var dx = combination[0];
+            var dz = combination[1];
+            var adjBlockVec = block.add(dx, 0, dz);
+            var adjBlock = world.getBlockStateAt(adjBlockVec);
+            var adjLevel = getRenderedDepth(adjBlock.orElse(null));
+            if (adjLevel < 0) {
+                if (adjBlock.isPresent() && adjBlock.get().blockShapeType().isEmpty()) {
+                    var adjLevel2Vec = block.add(dx, -1, dz);
+                    var adjLevel2 = getRenderedDepth(world.getBlockStateAt(adjLevel2Vec).orElse(null));
+                    if (adjLevel2 >= 0) {
+                        var f = adjLevel2 - (curlevel - 8);
+                        flow.x += dx * f;
+                        flow.z += dz * f;
+                    }
+                }
+            } else {
+                var f = adjLevel - curlevel;
+                flow.x += dx * f;
+                flow.z += dz * f;
+            }
+        }
+
+        if (meta.blockShapeType().properties().getInt("level") >= 8) {
+            for (var combination : new int[][]{new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0}}) {
+                var dx = combination[0];
+                var dz = combination[1];
+                var adjBlock = world.getBlockStateAt(block.add(dx, 0, dz));
+                var adjUpBlock = world.getBlockStateAt(block.add(dx, 1, dz));
+                if ((adjBlock.isPresent() && adjBlock.get().blockShapeType().isEmpty())
+                        || (adjUpBlock.isPresent() && adjUpBlock.get().blockShapeType().isEmpty())) {
+                    flow.normalize().translate(0, -6, 0);
+                }
+            }
+        }
+
+        return flow.normalize().toImmutableInt();
+    }
+
     public List<AABB> getSurroundingBBs(LevelState world, AABB queryBB) {
         var surroundingBBs = new ArrayList<AABB>();
 
@@ -787,65 +871,6 @@ public class BotMovementManagerV2 {
         }
 
         return false;
-    }
-
-    public int getLiquidHeightPercent(@Nullable BlockStateMeta meta) {
-        return (getRenderedDepth(meta) + 1) / 9;
-    }
-
-    public int getRenderedDepth(@Nullable BlockStateMeta meta) {
-        if (meta == null) return -1;
-
-        if (WATER_LIKE_TYPES.contains(meta.blockType())) return 0;
-
-        if (meta.blockShapeType().properties().getBoolean("waterlogged")) return 0;
-
-        if (!WATER_TYPES.contains(meta.blockType())) return -1;
-
-        var level = meta.blockShapeType().properties().getInt("level");
-        return level >= 8 ? 0 : level;
-    }
-
-    public Vector3i getFlow(LevelState world, BlockStateMeta meta, Vector3i block) {
-        var curlevel = getRenderedDepth(meta);
-        var flow = new MutableVector3d(0, 0, 0);
-        for (var combination : new int[][]{new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0}}) {
-            var dx = combination[0];
-            var dz = combination[1];
-            var adjBlockVec = block.add(dx, 0, dz);
-            var adjBlock = world.getBlockStateAt(adjBlockVec);
-            var adjLevel = getRenderedDepth(adjBlock.orElse(null));
-            if (adjLevel < 0) {
-                if (adjBlock.isPresent() && adjBlock.get().blockShapeType().isEmpty()) {
-                    var adjLevel2Vec = block.add(dx, -1, dz);
-                    var adjLevel2 = getRenderedDepth(world.getBlockStateAt(adjLevel2Vec).orElse(null));
-                    if (adjLevel2 >= 0) {
-                        var f = adjLevel2 - (curlevel - 8);
-                        flow.x += dx * f;
-                        flow.z += dz * f;
-                    }
-                }
-            } else {
-                var f = adjLevel - curlevel;
-                flow.x += dx * f;
-                flow.z += dz * f;
-            }
-        }
-
-        if (meta.blockShapeType().properties().getInt("level") >= 8) {
-            for (var combination : new int[][]{new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0}}) {
-                var dx = combination[0];
-                var dz = combination[1];
-                var adjBlock = world.getBlockStateAt(block.add(dx, 0, dz));
-                var adjUpBlock = world.getBlockStateAt(block.add(dx, 1, dz));
-                if ((adjBlock.isPresent() && adjBlock.get().blockShapeType().isEmpty())
-                        || (adjUpBlock.isPresent() && adjUpBlock.get().blockShapeType().isEmpty())) {
-                    flow.normalize().translate(0, -6, 0);
-                }
-            }
-        }
-
-        return flow.normalize().toImmutableInt();
     }
 
     public List<Pair<Vector3i, BlockStateMeta>> getWaterInBB(LevelState world, AABB bb) {
@@ -953,7 +978,7 @@ public class BotMovementManagerV2 {
         return this.controlState.isSneaking() ? 1.50F : 1.62F;
     }
 
-    private float getBlockSlipperiness(BlockType blockType) {
+    private float getBlockFriction(BlockType blockType) {
         if (blockType == BlockType.SLIME_BLOCK) {
             return 0.8F;
         } else if (blockType == BlockType.ICE || blockType == BlockType.PACKED_ICE) {

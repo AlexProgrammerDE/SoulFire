@@ -153,14 +153,14 @@ public final class BotMovementManager {
         this.moveForward *= 0.98F;
 
         if (this.controlState.isFlying()) {
-            this.travelFlying(this.moveForward, 0, this.moveStrafing);
+            this.travelFlying(this.moveForward, this.moveStrafing);
         } else {
             if (this.isInFluid()) {
                 // Is inside of water
-                this.travelInWater(this.moveForward, 0, this.moveStrafing);
+                this.travelInWater(this.moveForward, this.moveStrafing);
             } else {
                 // Is on land
-                this.travel(this.moveForward, 0, this.moveStrafing);
+                this.travel(this.moveForward, this.moveStrafing);
             }
         }
 
@@ -276,7 +276,7 @@ public final class BotMovementManager {
         }
     }
 
-    private void travelFlying(float forward, float vertical, float strafe) {
+    private void travelFlying(float forward, float strafe) {
         var flySpeed = getFlySpeed();
         // Fly move up and down
         if (this.controlState.isSneaking()) {
@@ -293,7 +293,7 @@ public final class BotMovementManager {
         var prevJumpMovementFactor = this.jumpMovementFactor;
         this.jumpMovementFactor = flySpeed * (this.controlState.isSprinting() ? 2 : 1);
 
-        this.travel(forward, vertical, strafe);
+        this.travel(forward, strafe);
 
         this.motionY = prevMotionY * 0.6D;
         this.jumpMovementFactor = prevJumpMovementFactor;
@@ -303,11 +303,11 @@ public final class BotMovementManager {
         }
     }
 
-    private void travelInWater(float forward, float vertical, float strafe) {
+    private void travelInWater(float forward, float strafe) {
         var slipperiness = 0.8F;
         var friction = 0.02F;
 
-        this.moveRelative(forward, vertical, strafe, friction);
+        this.moveRelative(forward, strafe, friction);
         this.horizontalCollision = this.moveCollide(this.motionX, this.motionY, this.motionZ);
 
         this.motionX *= slipperiness;
@@ -316,7 +316,7 @@ public final class BotMovementManager {
         this.motionY -= 0.02D;
     }
 
-    public void travel(float forward, float vertical, float strafe) {
+    public void travel(float forward, float strafe) {
         var prevSlipperiness = this.getBlockSlipperiness() * 0.91F;
 
         var value = 0.16277136F / (prevSlipperiness * prevSlipperiness * prevSlipperiness);
@@ -328,7 +328,7 @@ public final class BotMovementManager {
             friction = this.jumpMovementFactor;
         }
 
-        this.moveRelative(forward, vertical, strafe, friction);
+        this.moveRelative(forward, strafe, friction);
 
         // Get new speed
         var slipperiness = this.getBlockSlipperiness() * 0.91F;
@@ -380,8 +380,8 @@ public final class BotMovementManager {
         return this.controlState.isSprinting() ? 0.13000001F : walkSpeed;
     }
 
-    public void moveRelative(double forward, double up, double strafe, double friction) {
-        var distance = strafe * strafe + up * up + forward * forward;
+    public void moveRelative(double forward, double strafe, double friction) {
+        var distance = strafe * strafe + forward * forward;
 
         if (distance < 1.0E-4F) {
             return;
@@ -395,7 +395,6 @@ public final class BotMovementManager {
 
         distance = friction / distance;
         strafe = strafe * distance;
-        up = up * distance;
         forward = forward * distance;
 
         var yawRadians = Math.toRadians(this.yaw);
@@ -403,7 +402,6 @@ public final class BotMovementManager {
         var cos = Math.cos(yawRadians);
 
         this.motionX += strafe * cos - forward * sin;
-        this.motionY += up;
         this.motionZ += forward * cos + strafe * sin;
     }
 

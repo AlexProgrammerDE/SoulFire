@@ -73,6 +73,9 @@ public class PlayerMovementState {
     // Inventory
     public boolean elytraEquipped;
 
+    // Flying (creative)
+    public boolean flying;
+
     public void updateData() {
         jumpBoost = effectState.getEffect(Effect.JUMP_BOOST).map(EffectData::amplifier).orElse(0);
         speed = effectState.getEffect(Effect.SPEED).map(EffectData::amplifier).orElse(0);
