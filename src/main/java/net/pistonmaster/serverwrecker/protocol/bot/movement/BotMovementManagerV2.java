@@ -35,6 +35,8 @@ import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.EntityAttributesState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
+import net.pistonmaster.serverwrecker.util.MathHelper;
+import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Java port of
+ * Java port of prismarine-physics
  */
 public class BotMovementManagerV2 {
     @Getter
@@ -54,10 +56,6 @@ public class BotMovementManagerV2 {
     private final SessionDataManager dataManager;
     private int ticksWithoutPacket = 0;
 
-    public static double clamp(double val, double min, double max) {
-        return Math.max(min, Math.min(val, max));
-    }
-
     private final List<BlockType> WATER_TYPES = List.of(BlockType.WATER);
     private final List<BlockType> LAVA_TYPES = List.of(BlockType.WATER);
     private final List<BlockType> WATER_LIKE_TYPES = List.of(
@@ -66,7 +64,11 @@ public class BotMovementManagerV2 {
     );
 
     public BotMovementManagerV2(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
-        this.entity = new PlayerMovementState(dataManager.getSelfAttributeState());
+        this.entity = new PlayerMovementState(
+                dataManager.getSelfAttributeState(),
+                dataManager.getSelfEffectState(),
+                dataManager.getInventoryManager().getPlayerInventory()
+        );
         entity.pos = new MutableVector3d(x, y, z);
 
         entity.yaw = yaw;
@@ -80,27 +82,37 @@ public class BotMovementManagerV2 {
     }
 
     public void setPositionToBB(AABB bb, MutableVector3d pos) {
-        pos.x = bb.minX + physics.playerHalfWidth;
+        pos.x = (bb.minX + bb.maxX) / 2;
         pos.y = bb.minY;
-        pos.z = bb.minZ + physics.playerHalfWidth;
+        pos.z = (bb.minZ + bb.maxZ) / 2;
     }
 
     public List<AABB> getSurroundingBBs(LevelState world, AABB queryBB) {
         var surroundingBBs = new ArrayList<AABB>();
-        var cursor = new MutableVector3d(0, 0, 0);
-        for (cursor.y = Math.floor(queryBB.minY) - 1; cursor.y <= Math.floor(queryBB.maxY); cursor.y++) {
-            for (cursor.z = Math.floor(queryBB.minZ); cursor.z <= Math.floor(queryBB.maxZ); cursor.z++) {
-                for (cursor.x = Math.floor(queryBB.minX); cursor.x <= Math.floor(queryBB.maxX); cursor.x++) {
-                    var blockPos = cursor.toImmutableInt();
-                    var block = world.getBlockStateAt(cursor.toImmutableInt());
-                    if (block.isEmpty()) {
+
+        var minX = MathHelper.floorDouble(queryBB.minX);
+        var minY = MathHelper.floorDouble(queryBB.minY - 1);
+        var minZ = MathHelper.floorDouble(queryBB.minZ);
+
+        var maxX = MathHelper.floorDouble(queryBB.maxX);
+        var maxY = MathHelper.floorDouble(queryBB.maxY);
+        var maxZ = MathHelper.floorDouble(queryBB.maxZ);
+
+        for (var x = minX; x <= maxX; x++) {
+            for (var y = minY; y <= maxY; y++) {
+                for (var z = minZ; z <= maxZ; z++) {
+                    var blockState = world.getBlockStateAt(Vector3i.from(x, y, z));
+                    if (blockState.isEmpty()) {
                         continue;
                     }
 
-                    for (var shape : block.get().blockShapeType().blockShapes()) {
-                        var blockBB = new AABB(shape.minX(), shape.minY(), shape.minZ(), shape.maxX(), shape.maxY(), shape.maxZ());
-                        blockBB.offset(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-                        surroundingBBs.add(blockBB);
+                    var blockShapeType = blockState.get().blockShapeType();
+                    if (blockShapeType.hasNoCollisions()) {
+                        continue;
+                    }
+
+                    for (var shape : blockShapeType.blockShapes()) {
+                        surroundingBBs.add(shape.createAABBAt(x, y, z));
                     }
                 }
             }
@@ -269,11 +281,19 @@ public class BotMovementManagerV2 {
 
         // Finally, apply block collisions (web, soulsand...)
         playerBB.contract(0.001, 0.001, 0.001);
-        var cursor = new MutableVector3d(0, 0, 0);
-        for (cursor.y = Math.floor(playerBB.minY); cursor.y <= Math.floor(playerBB.maxY); cursor.y++) {
-            for (cursor.z = Math.floor(playerBB.minZ); cursor.z <= Math.floor(playerBB.maxZ); cursor.z++) {
-                for (cursor.x = Math.floor(playerBB.minX); cursor.x <= Math.floor(playerBB.maxX); cursor.x++) {
-                    var block = world.getBlockStateAt(cursor.toImmutableInt());
+        var minX = MathHelper.floorDouble(playerBB.minX);
+        var minY = MathHelper.floorDouble(playerBB.minY);
+        var minZ = MathHelper.floorDouble(playerBB.minZ);
+
+        var maxX = MathHelper.floorDouble(playerBB.maxX);
+        var maxY = MathHelper.floorDouble(playerBB.maxY);
+        var maxZ = MathHelper.floorDouble(playerBB.maxZ);
+
+        for (var x = minX; x <= maxX; x++) {
+            for (var y = minY; y <= maxY; y++) {
+                for (var z = minZ; z <= maxZ; z++) {
+                    var cursor = Vector3i.from(x, y, z);
+                    var block = world.getBlockStateAt(cursor);
                     if (block.isEmpty()) {
                         continue;
                     }
@@ -282,7 +302,7 @@ public class BotMovementManagerV2 {
                         entity.isInWeb = true;
                     } else if (block.get().blockType() == BlockType.BUBBLE_COLUMN) {
                         var down = !block.get().blockShapeType().properties().getBoolean("drag");
-                        var aboveBlock = world.getBlockStateAt(cursor.offset(0, 1, 0).toImmutableInt());
+                        var aboveBlock = world.getBlockStateAt(cursor.add(0, 1, 0));
                         var bubbleDrag = (aboveBlock.isPresent() && aboveBlock.get().blockType() == BlockType.AIR) ?
                                 physics.bubbleColumnSurfaceDrag : physics.bubbleColumnDrag;
                         if (down) {
@@ -583,8 +603,8 @@ public class BotMovementManagerV2 {
             applyHeading(strafe, forward, acceleration);
 
             if (isOnLadder(world, pos.toImmutableInt())) {
-                vel.x = clamp(-physics.ladderMaxSpeed, vel.x, physics.ladderMaxSpeed);
-                vel.z = clamp(-physics.ladderMaxSpeed, vel.z, physics.ladderMaxSpeed);
+                vel.x = GenericMath.clamp(-physics.ladderMaxSpeed, vel.x, physics.ladderMaxSpeed);
+                vel.z = GenericMath.clamp(-physics.ladderMaxSpeed, vel.z, physics.ladderMaxSpeed);
                 vel.y = Math.max(vel.y, controlState.isSneaking() ? 0 : -physics.ladderMaxSpeed);
             }
 
@@ -608,11 +628,18 @@ public class BotMovementManagerV2 {
     }
 
     public boolean isMaterialInBB(LevelState world, AABB queryBB, List<BlockType> types) {
-        var cursor = new MutableVector3d(0, 0, 0);
-        for (cursor.y = Math.floor(queryBB.minY); cursor.y <= Math.floor(queryBB.maxY); cursor.y++) {
-            for (cursor.z = Math.floor(queryBB.minZ); cursor.z <= Math.floor(queryBB.maxZ); cursor.z++) {
-                for (cursor.x = Math.floor(queryBB.minX); cursor.x <= Math.floor(queryBB.maxX); cursor.x++) {
-                    var block = world.getBlockStateAt(cursor.toImmutableInt());
+        var minX = MathHelper.floorDouble(queryBB.minX);
+        var minY = MathHelper.floorDouble(queryBB.minY);
+        var minZ = MathHelper.floorDouble(queryBB.minZ);
+
+        var maxX = MathHelper.floorDouble(queryBB.maxX);
+        var maxY = MathHelper.floorDouble(queryBB.maxY);
+        var maxZ = MathHelper.floorDouble(queryBB.maxZ);
+
+        for (var x = minX; x <= maxX; x++) {
+            for (var y = minY; y <= maxY; y++) {
+                for (var z = minZ; z <= maxZ; z++) {
+                    var block = world.getBlockStateAt(Vector3i.from(x, y, z));
 
                     if (block.isEmpty()) {
                         continue;
@@ -689,23 +716,36 @@ public class BotMovementManagerV2 {
 
     public List<Pair<Vector3i, BlockStateMeta>> getWaterInBB(LevelState world, AABB bb) {
         var waterBlocks = new ArrayList<Pair<Vector3i, BlockStateMeta>>();
-        var cursor = new MutableVector3d(0, 0, 0);
-        for (cursor.y = Math.floor(bb.minY); cursor.y <= Math.floor(bb.maxY); cursor.y++) {
-            for (cursor.z = Math.floor(bb.minZ); cursor.z <= Math.floor(bb.maxZ); cursor.z++) {
-                for (cursor.x = Math.floor(bb.minX); cursor.x <= Math.floor(bb.maxX); cursor.x++) {
-                    var cursorVec = cursor.toImmutableInt();
-                    var block = world.getBlockStateAt(cursorVec);
-                    if (block.isPresent() && (WATER_TYPES.contains(block.get().blockType())
+
+        var minX = MathHelper.floorDouble(bb.minX);
+        var minY = MathHelper.floorDouble(bb.minY);
+        var minZ = MathHelper.floorDouble(bb.minZ);
+
+        var maxX = MathHelper.floorDouble(bb.maxX);
+        var maxY = MathHelper.floorDouble(bb.maxY);
+        var maxZ = MathHelper.floorDouble(bb.maxZ);
+
+        for (var x = minX; x <= maxX; x++) {
+            for (var y = minY; y <= maxY; y++) {
+                for (var z = minZ; z <= maxZ; z++) {
+                    var cursor = Vector3i.from(x, y, z);
+                    var block = world.getBlockStateAt(cursor);
+                    if (block.isEmpty()) {
+                        continue;
+                    }
+
+                    if (WATER_TYPES.contains(block.get().blockType())
                             || WATER_LIKE_TYPES.contains(block.get().blockType())
-                            || block.get().blockShapeType().properties().getBoolean("waterlogged"))) {
-                        var waterLevel = cursor.y + 1 - getLiquidHeightPercent(block.get());
+                            || block.get().blockShapeType().properties().getBoolean("waterlogged")) {
+                        var waterLevel = y + 1 - getLiquidHeightPercent(block.get());
                         if (Math.ceil(bb.maxY) >= waterLevel) {
-                            waterBlocks.add(Pair.of(cursorVec, block.get()));
+                            waterBlocks.add(Pair.of(cursor, block.get()));
                         }
                     }
                 }
             }
         }
+
         return waterBlocks;
     }
 
@@ -730,6 +770,8 @@ public class BotMovementManagerV2 {
     public void tick() {
         var world = dataManager.getCurrentLevel();
         if (world == null) return;
+
+        entity.updateData();
 
         var vel = entity.vel;
         var pos = entity.pos;

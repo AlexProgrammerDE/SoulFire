@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.data;
 
+import net.pistonmaster.serverwrecker.protocol.bot.movement.AABB;
 import net.pistonmaster.serverwrecker.util.BoundingBox;
 
 public record BlockShape(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
@@ -28,5 +29,9 @@ public record BlockShape(double minX, double minY, double minZ, double maxX, dou
 
     public BoundingBox createBoundingBoxAt(double x, double y, double z) {
         return new BoundingBox(x + minX, y + minY, z + minZ, x + maxX, y + maxY, z + maxZ);
+    }
+
+    public AABB createAABBAt(double x, double y, double z) {
+        return new AABB(x + minX, y + minY, z + minZ, x + maxX, y + maxY, z + maxZ);
     }
 }

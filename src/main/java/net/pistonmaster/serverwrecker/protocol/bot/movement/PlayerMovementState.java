@@ -19,16 +19,23 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.movement;
 
+import com.github.steveice10.mc.protocol.data.game.entity.Effect;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.pistonmaster.serverwrecker.data.ItemType;
+import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
+import net.pistonmaster.serverwrecker.protocol.bot.model.EffectData;
 import net.pistonmaster.serverwrecker.protocol.bot.state.EntityAttributesState;
+import net.pistonmaster.serverwrecker.protocol.bot.state.EntityEffectState;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 public class PlayerMovementState {
     private final EntityAttributesState attributesState;
+    private final EntityEffectState effectState;
+    private final PlayerInventoryContainer inventoryContainer;
 
     // Position
     public MutableVector3d pos;
@@ -65,4 +72,19 @@ public class PlayerMovementState {
 
     // Inventory
     public boolean elytraEquipped;
+
+    public void updateData() {
+        jumpBoost = effectState.getEffect(Effect.JUMP_BOOST).map(EffectData::amplifier).orElse(0);
+        speed = effectState.getEffect(Effect.SPEED).map(EffectData::amplifier).orElse(0);
+        slowness = effectState.getEffect(Effect.SLOWNESS).map(EffectData::amplifier).orElse(0);
+        dolphinsGrace = effectState.getEffect(Effect.DOLPHINS_GRACE).map(EffectData::amplifier).orElse(0);
+        slowFalling = effectState.getEffect(Effect.SLOW_FALLING).map(EffectData::amplifier).orElse(0);
+        levitation = effectState.getEffect(Effect.LEVITATION).map(EffectData::amplifier).orElse(0);
+
+        var bootsItem = inventoryContainer.getBoots().item();
+        depthStrider = bootsItem == null ? 0 : bootsItem.getEnchantmentLevel("minecraft:depth_strider");
+
+        var chestItem = inventoryContainer.getChestplate().item();
+        elytraEquipped = chestItem != null && chestItem.getType() == ItemType.ELYTRA;
+    }
 }

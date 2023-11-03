@@ -48,7 +48,7 @@ public class MathHelper {
         return v;
     }
 
-    public static short clamp(short value, short min, short max) {
+    public static short shortClamp(short value, short min, short max) {
         return value < min ? min : (value > max ? max : value);
     }
 }

@@ -104,7 +104,7 @@ public class Costs {
 
             if (efficiency > 0) {
                 // Efficiency is capped at 255
-                efficiency = MathHelper.clamp(efficiency, (short) 0, (short) 255);
+                efficiency = MathHelper.shortClamp(efficiency, (short) 0, (short) 255);
                 speedMultiplier += (float) (efficiency * efficiency + 1);
             }
         }
