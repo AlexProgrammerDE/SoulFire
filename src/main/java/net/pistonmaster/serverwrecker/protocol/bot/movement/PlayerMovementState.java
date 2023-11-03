@@ -49,11 +49,11 @@ public class PlayerMovementState {
 
     // Collision
     public boolean onGround;
+    public boolean isCollidedHorizontally;
+    public boolean isCollidedVertically;
     public boolean isInWater;
     public boolean isInLava;
     public boolean isInWeb;
-    public boolean isCollidedHorizontally;
-    public boolean isCollidedVertically;
 
     // State
     public boolean elytraFlying;

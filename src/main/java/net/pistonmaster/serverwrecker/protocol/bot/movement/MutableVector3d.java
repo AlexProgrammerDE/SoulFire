@@ -21,11 +21,13 @@ package net.pistonmaster.serverwrecker.protocol.bot.movement;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 @Getter
 @AllArgsConstructor
+@ToString
 public class MutableVector3d {
     public double x;
     public double y;

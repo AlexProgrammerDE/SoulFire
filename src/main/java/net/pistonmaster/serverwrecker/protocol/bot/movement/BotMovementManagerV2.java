@@ -271,8 +271,11 @@ public class BotMovementManagerV2 {
 
         if (dx != oldVelX) vel.x = 0;
         if (dz != oldVelZ) vel.z = 0;
+
         if (dy != oldVelY) {
-            if (blockAtFeet.isPresent() && blockAtFeet.get().blockType() == BlockType.SLIME_BLOCK && !controlState.isSneaking()) {
+            if (blockAtFeet.isPresent()
+                    && blockAtFeet.get().blockType() == BlockType.SLIME_BLOCK
+                    && !controlState.isSneaking()) {
                 vel.y = -vel.y;
             } else {
                 vel.y = 0;
@@ -454,8 +457,8 @@ public class BotMovementManagerV2 {
         var cos = Math.cos(yawRadians);
 
         var vel = entity.vel;
-        vel.x -= strafe * cos + forward * sin;
-        vel.z += forward * cos - strafe * sin;
+        vel.x += strafe * cos - forward * sin;
+        vel.z += forward * cos + strafe * sin;
     }
 
     public boolean isOnLadder(LevelState world, Vector3i pos) {
@@ -553,8 +556,9 @@ public class BotMovementManagerV2 {
             }
         } else {
             // Normal movement
-            var acceleration = 0.0;
-            var inertia = 0.0;
+            float acceleration;
+            float inertia;
+
             var blockUnder = world.getBlockStateAt(pos.offset(0, -1, 0).toImmutableInt());
             if (entity.onGround && blockUnder.isPresent()) {
                 var attribute = entity.getAttributesState();
@@ -584,18 +588,19 @@ public class BotMovementManagerV2 {
                 }
 
                 // Calculate what the speed is (0.1 if no modification)
-                var attributeSpeed = EntityAttributesState.getAttributeValue(playerSpeedAttribute);
-                inertia = getBlockSlipperiness(blockUnder.get().blockType()) * 0.91;
-                acceleration = attributeSpeed * (0.1627714 / (inertia * inertia * inertia));
+                inertia = getBlockSlipperiness(blockUnder.get().blockType()) * 0.91F;
+
+                var attributeSpeed = (float) EntityAttributesState.getAttributeValue(playerSpeedAttribute);
+                acceleration = attributeSpeed * (0.1627714F / (inertia * inertia * inertia));
                 if (acceleration < 0) {
                     acceleration = 0; // acceleration should not be negative
                 }
             } else {
-                acceleration = physics.airborneAcceleration;
-                inertia = physics.airborneInertia;
+                inertia = 0.91F;
 
+                acceleration = physics.airborneAcceleration;
                 if (controlState.isSprinting()) {
-                    var airSprintFactor = physics.airborneAcceleration * 0.3;
+                    var airSprintFactor = physics.airborneAcceleration * 0.3F;
                     acceleration += airSprintFactor;
                 }
             }
@@ -621,8 +626,8 @@ public class BotMovementManagerV2 {
                 vel.y -= physics.gravity * gravityMultiplier;
             }
 
-            vel.y *= physics.airdrag;
             vel.x *= inertia;
+            vel.y *= physics.airdrag;
             vel.z *= inertia;
         }
     }
@@ -864,6 +869,9 @@ public class BotMovementManagerV2 {
 
         moveEntityWithHeading(world, strafe, forward);
 
+        System.out.println("vel: " + vel);
+        System.out.println("pos: " + pos);
+
         // Detect whether positions changed
         var positionChanged = startX != entity.pos.x || startY != entity.pos.y || startZ != entity.pos.z;
         var rotationChanged = startYaw != entity.yaw || startPitch != entity.pitch;
@@ -936,8 +944,8 @@ public class BotMovementManagerV2 {
         entity.pitch = (float) pitch;
     }
 
-    public float getBoundingBoxHeight() {
-        return this.controlState.isSneaking() ? 1.5F : 1.8F;
+    public double getBoundingBoxHeight() {
+        return this.controlState.isSneaking() ? physics.playerSneakHeight : physics.playerHeight;
     }
 
     public Vector3d getEyePosition() {
@@ -948,13 +956,13 @@ public class BotMovementManagerV2 {
         return this.controlState.isSneaking() ? 1.50F : 1.62F;
     }
 
-    private double getBlockSlipperiness(BlockType blockType) {
+    private float getBlockSlipperiness(BlockType blockType) {
         if (blockType == BlockType.SLIME_BLOCK) {
-            return 0.8D;
+            return 0.8F;
         } else if (blockType == BlockType.ICE || blockType == BlockType.PACKED_ICE) {
-            return 0.98D;
+            return 0.98F;
         } else if (blockType == BlockType.BLUE_ICE) {
-            return 0.989D;
+            return 0.989F;
         } else {
             return physics.defaultSlipperiness; // Normal block
         }
