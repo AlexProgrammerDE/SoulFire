@@ -47,7 +47,7 @@ import java.util.List;
 /**
  * Java port of prismarine-physics
  */
-public class BotMovementManagerV2 {
+public class BotMovementManager {
     @Getter
     private final ControlState controlState = new ControlState();
     private final PhysicsData physics = new PhysicsData();
@@ -69,7 +69,7 @@ public class BotMovementManagerV2 {
             BlockType.KELP, BlockType.KELP_PLANT, BlockType.BUBBLE_COLUMN
     );
 
-    public BotMovementManagerV2(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
+    public BotMovementManager(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
         this.entity = new PlayerMovementState(
                 dataManager.getSelfAttributeState(),
                 dataManager.getSelfEffectState(),

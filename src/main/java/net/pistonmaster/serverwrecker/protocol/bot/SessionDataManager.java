@@ -73,7 +73,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
 import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.protocol.bot.container.WindowContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.model.*;
-import net.pistonmaster.serverwrecker.protocol.bot.movement.BotMovementManagerV2;
+import net.pistonmaster.serverwrecker.protocol.bot.movement.BotMovementManager;
 import net.pistonmaster.serverwrecker.protocol.bot.state.*;
 import net.pistonmaster.serverwrecker.protocol.bot.state.entity.EntityState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.entity.ExperienceOrbState;
@@ -114,7 +114,7 @@ public final class SessionDataManager {
     private final TagsState tagsState = new TagsState();
     private @Nullable ServerPlayData serverPlayData;
     private BorderState borderState;
-    private BotMovementManagerV2 botMovementManager;
+    private BotMovementManager botMovementManager;
     private HealthData healthData;
     private GameMode gameMode = null;
     private @Nullable GameMode previousGameMode = null;
@@ -221,7 +221,7 @@ public final class SessionDataManager {
         var pitch = pitchRelative ? currentPitch + packet.getPitch() : packet.getPitch();
 
         if (isInitial) {
-            botMovementManager = new BotMovementManagerV2(this, x, y, z, yaw, pitch);
+            botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch);
             var position = botMovementManager.getBlockPos();
             log.info("Joined server at position: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
 
