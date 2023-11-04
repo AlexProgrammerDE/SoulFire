@@ -472,24 +472,16 @@ public class BotMovementManagerV2 {
         }
 
         var playerBB = getPlayerBB(pos);
-        var queryBB = playerBB.copy().extend(dx, dy, dz);
+        var queryBB = playerBB.copy().expand(dx, dy, dz);
         var surroundingBBs = getSurroundingBBs(world, queryBB);
         var oldBB = playerBB.copy();
 
-        for (var blockBB : surroundingBBs) {
-            dy = blockBB.computeOffsetY(playerBB, dy);
-        }
-        playerBB.offset(0, dy, 0);
+        var collisionResult = collideWith(Vector3d.from(dx, dy, dz), playerBB.copy(), surroundingBBs);
+        dx = collisionResult.getX();
+        dy = collisionResult.getY();
+        dz = collisionResult.getZ();
 
-        for (var blockBB : surroundingBBs) {
-            dx = blockBB.computeOffsetX(playerBB, dx);
-        }
-        playerBB.offset(dx, 0, 0);
-
-        for (var blockBB : surroundingBBs) {
-            dz = blockBB.computeOffsetZ(playerBB, dz);
-        }
-        playerBB.offset(0, 0, dz);
+        playerBB.offset(dx, dy, dz);
 
         // Step on block if height < stepHeight
         if (physics.stepHeight > 0 &&
@@ -501,12 +493,12 @@ public class BotMovementManagerV2 {
             var oldBBCol = playerBB.copy();
 
             dy = physics.stepHeight;
-            var queryBB2 = oldBB.copy().extend(oldVelX, dy, oldVelZ);
+            var queryBB2 = oldBB.copy().expand(oldVelX, dy, oldVelZ);
             var surroundingBBs2 = getSurroundingBBs(world, queryBB2);
 
             var BB1 = oldBB.copy();
             var BB2 = oldBB.copy();
-            var BB_XZ = BB1.copy().extend(dx, 0, dz);
+            var BB_XZ = BB1.copy().expand(dx, 0, dz);
 
             var dy1 = dy;
             var dy2 = dy;
@@ -569,12 +561,17 @@ public class BotMovementManagerV2 {
         entity.isCollidedVertically = dy != oldVelY;
         entity.onGround = entity.isCollidedVertically && oldVelY < 0;
 
-        var blockAtFeet = world.getBlockStateAt(pos.offset(0, -0.2, 0).toImmutableInt());
+        // We collided, so we block the motion
+        if (dx != oldVelX) {
+            vel.x = 0;
+        }
 
-        if (dx != oldVelX) vel.x = 0;
-        if (dz != oldVelZ) vel.z = 0;
+        if (dz != oldVelZ) {
+            vel.z = 0;
+        }
 
         if (dy != oldVelY) {
+            var blockAtFeet = world.getBlockStateAt(pos.offset(0, -0.2, 0).toImmutableInt());
             if (blockAtFeet.isPresent()
                     && blockAtFeet.get().blockType() == BlockType.SLIME_BLOCK
                     && !controlState.isSneaking()) {
@@ -630,6 +627,51 @@ public class BotMovementManagerV2 {
                 vel.z *= physics.honeyblockSpeed;
             }
         }
+    }
+
+    private static Vector3d collideWith(Vector3d direction, AABB boundingBox, List<AABB> collisionBoxes) {
+        var dx = direction.getX();
+        var dy = direction.getY();
+        var dz = direction.getZ();
+
+        if (dy != 0) {
+            for (var blockBB : collisionBoxes) {
+                dy = blockBB.computeOffsetY(boundingBox, dy);
+            }
+
+            if (dy != 0) {
+                boundingBox.offset(0, dy, 0);
+            }
+        }
+
+        var xLessThanZ = Math.abs(dx) < Math.abs(dz);
+        if (xLessThanZ && dz != 0) {
+            for (var blockBB : collisionBoxes) {
+                dz = blockBB.computeOffsetZ(boundingBox, dz);
+            }
+
+            if (dz != 0) {
+                boundingBox.offset(0, 0, dz);
+            }
+        }
+
+        if (dx != 0) {
+            for (var blockBB : collisionBoxes) {
+                dx = blockBB.computeOffsetX(boundingBox, dx);
+            }
+
+            if (!xLessThanZ && dx != 0) {
+                boundingBox.offset(dx, 0, 0);
+            }
+        }
+
+        if (!xLessThanZ && dz != 0.0) {
+            for (var blockBB : collisionBoxes) {
+                dz = blockBB.computeOffsetZ(boundingBox, dz);
+            }
+        }
+
+        return Vector3d.from(dx, dy, dz);
     }
 
     public void applyHeading(double strafe, double forward, float speed) {
@@ -962,8 +1004,9 @@ public class BotMovementManagerV2 {
     }
 
     public AABB getPlayerBB(MutableVector3d pos) {
-        var w = physics.playerHalfWidth;
-        return new AABB(pos.x - w, pos.y, pos.z - w, pos.x + w, pos.y + getBoundingBoxHeight(), pos.z + w);
+        var w = physics.playerWidth / 2F;
+        var h = getBoundingBoxHeight();
+        return new AABB(pos.x - w, pos.y, pos.z - w, pos.x + w, pos.y + h, pos.z + w);
     }
 
     public void setPositionToBB(AABB bb, MutableVector3d pos) {
@@ -1001,7 +1044,7 @@ public class BotMovementManagerV2 {
         entity.pitch = (float) pitch;
     }
 
-    public double getBoundingBoxHeight() {
+    public float getBoundingBoxHeight() {
         return this.controlState.isSneaking() ? physics.playerSneakHeight : physics.playerHeight;
     }
 

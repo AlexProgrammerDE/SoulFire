@@ -20,7 +20,9 @@
 package net.pistonmaster.serverwrecker.protocol.bot.movement;
 
 import lombok.AllArgsConstructor;
+import lombok.ToString;
 
+@ToString
 @AllArgsConstructor
 public class AABB {
     public double minX;
@@ -49,13 +51,27 @@ public class AABB {
         return this;
     }
 
-    public AABB extend(double x, double y, double z) {
-        this.minX -= x;
-        this.minY -= y;
-        this.minZ -= z;
-        this.maxX += x;
-        this.maxY += y;
-        this.maxZ += z;
+    public AABB expand(double x, double y, double z) {
+        // Handle expanding of min/max x
+        if (x < 0.0) {
+            minX += x;
+        } else if (x > 0.0) {
+            maxX += x;
+        }
+
+        // Handle expanding of min/max y
+        if (y < 0.0) {
+            minY += y;
+        } else if (y > 0.0) {
+            maxY += y;
+        }
+
+        // Handle expanding of min/max z
+        if (z < 0.0) {
+            minZ += z;
+        } else if (z > 0.0) {
+            maxZ += z;
+        }
         return this;
     }
 
@@ -70,7 +86,13 @@ public class AABB {
     }
 
     public double computeOffsetX(AABB other, double offsetX) {
-        if (other.maxY > this.minY && other.minY < this.maxY && other.maxZ > this.minZ && other.minZ < this.maxZ) {
+        if (Math.abs(offsetX) < 1.0E-7) {
+            return 0.0;
+        }
+
+        var betweenY = other.maxY > this.minY && other.minY < this.maxY;
+        var betweenZ = other.maxZ > this.minZ && other.minZ < this.maxZ;
+        if (betweenY && betweenZ) {
             if (offsetX > 0.0 && other.maxX <= this.minX) {
                 offsetX = Math.min(this.minX - other.maxX, offsetX);
             } else if (offsetX < 0.0 && other.minX >= this.maxX) {
@@ -81,7 +103,13 @@ public class AABB {
     }
 
     public double computeOffsetY(AABB other, double offsetY) {
-        if (other.maxX > this.minX && other.minX < this.maxX && other.maxZ > this.minZ && other.minZ < this.maxZ) {
+        if (Math.abs(offsetY) < 1.0E-7) {
+            return 0.0;
+        }
+
+        var betweenX = other.maxX > this.minX && other.minX < this.maxX;
+        var betweenZ = other.maxZ > this.minZ && other.minZ < this.maxZ;
+        if (betweenX && betweenZ) {
             if (offsetY > 0.0 && other.maxY <= this.minY) {
                 offsetY = Math.min(this.minY - other.maxY, offsetY);
             } else if (offsetY < 0.0 && other.minY >= this.maxY) {
@@ -92,7 +120,13 @@ public class AABB {
     }
 
     public double computeOffsetZ(AABB other, double offsetZ) {
-        if (other.maxX > this.minX && other.minX < this.maxX && other.maxY > this.minY && other.minY < this.maxY) {
+        if (Math.abs(offsetZ) < 1.0E-7) {
+            return 0.0;
+        }
+
+        var betweenX = other.maxX > this.minX && other.minX < this.maxX;
+        var betweenY = other.maxY > this.minY && other.minY < this.maxY;
+        if (betweenX && betweenY) {
             if (offsetZ > 0.0 && other.maxZ <= this.minZ) {
                 offsetZ = Math.min(this.minZ - other.maxZ, offsetZ);
             } else if (offsetZ < 0.0 && other.minZ >= this.maxZ) {

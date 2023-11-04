@@ -567,10 +567,6 @@ public final class BotMovementManager {
         }
     }
 
-    public float getEyeHeight() {
-        return this.controlState.isSneaking() ? 1.50F : 1.62F;
-    }
-
     public float getBoundingBoxWidth() {
         return 0.6F;
     }
