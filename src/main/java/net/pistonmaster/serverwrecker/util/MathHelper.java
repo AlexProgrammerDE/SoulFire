@@ -51,4 +51,12 @@ public class MathHelper {
     public static short shortClamp(short value, short min, short max) {
         return value < min ? min : (value > max ? max : value);
     }
+
+    public static double lengthSquared(double x, double y, double z) {
+        return x * x + y * y + z * z;
+    }
+
+    public static double square(double x) {
+        return x * x;
+    }
 }

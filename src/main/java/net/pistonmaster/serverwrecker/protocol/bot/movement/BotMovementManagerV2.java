@@ -54,7 +54,13 @@ public class BotMovementManagerV2 {
     @Getter
     private final PlayerMovementState entity;
     private final SessionDataManager dataManager;
-    private int ticksWithoutPacket = 0;
+    private double lastX = 0;
+    private double lastY = 0;
+    private double lastZ = 0;
+    private float lastYaw = 0;
+    private float lastPitch = 0;
+    private boolean lastOnGround = false;
+    private int positionReminder = 0;
 
     private final List<BlockType> WATER_TYPES = List.of(BlockType.WATER);
     private final List<BlockType> LAVA_TYPES = List.of(BlockType.WATER);
@@ -84,15 +90,6 @@ public class BotMovementManagerV2 {
 
         var vel = entity.vel;
         var pos = entity.pos;
-
-        var startX = entity.pos.x;
-        var startY = entity.pos.y;
-        var startZ = entity.pos.z;
-
-        var startYaw = entity.yaw;
-        var startPitch = entity.pitch;
-
-        var startOnGround = entity.onGround;
 
         var waterBB = getPlayerBB(pos).contract(0.001, 0.401, 0.001);
         var lavaBB = getPlayerBB(pos).contract(0.1, 0.4, 0.1);
@@ -176,50 +173,88 @@ public class BotMovementManagerV2 {
 
         moveEntityWithHeading(world, strafe, forward);
 
-        System.out.println("vel: " + vel);
-        System.out.println("pos: " + pos);
-
-        // Detect whether positions changed
-        var positionChanged = startX != entity.pos.x || startY != entity.pos.y || startZ != entity.pos.z;
-        var rotationChanged = startYaw != entity.yaw || startPitch != entity.pitch;
-        var onGroundChanged = startOnGround != entity.onGround;
+        // Detect whether anything changed
+        var xDiff = entity.pos.x - lastX;
+        var yDiff = entity.pos.y - lastY;
+        var zDiff = entity.pos.z - lastZ;
+        var yawDiff = (double) (entity.yaw - lastYaw);
+        var pitchDiff = (double) (entity.pitch - lastPitch);
+        var sendPos = MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4) || ++positionReminder >= 20;
+        var sendRot = pitchDiff != 0.0 || yawDiff != 0.0;
+        var sendOnGround = entity.onGround != lastOnGround;
 
         // Send position packets if changed
-        if (positionChanged && rotationChanged) {
-            ticksWithoutPacket = 0;
+        if (sendPos && sendRot) {
             sendPosRot();
-        } else if (positionChanged) {
-            ticksWithoutPacket = 0;
+        } else if (sendPos) {
             sendPos();
-        } else if (rotationChanged) {
-            ticksWithoutPacket = 0;
+        } else if (sendRot) {
             sendRot();
-        } else if (onGroundChanged) {
-            ticksWithoutPacket = 0;
+        } else if (sendOnGround) {
             sendOnGround();
-        } else if (++ticksWithoutPacket > 20) {
-            // Vanilla sends a position packet every 20 ticks if nothing changed
-            ticksWithoutPacket = 0;
-            sendPos();
         }
     }
 
     public void sendPosRot() {
-        var pos = entity.pos;
-        dataManager.getSession().send(new ServerboundMovePlayerPosRotPacket(entity.onGround, pos.x, pos.y, pos.z, entity.yaw, entity.pitch));
+        var onGround = entity.onGround;
+
+        lastOnGround = onGround;
+
+        var x = entity.pos.x;
+        var y = entity.pos.y;
+        var z = entity.pos.z;
+
+        lastX = x;
+        lastY = y;
+        lastZ = z;
+        positionReminder = 0;
+
+        var yaw = entity.yaw;
+        var pitch = entity.pitch;
+
+        lastYaw = yaw;
+        lastPitch = pitch;
+
+        dataManager.getSession().send(new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
     }
 
     public void sendPos() {
-        var pos = entity.pos;
-        dataManager.getSession().send(new ServerboundMovePlayerPosPacket(entity.onGround, pos.x, pos.y, pos.z));
+        var onGround = entity.onGround;
+
+        lastOnGround = onGround;
+
+        var x = entity.pos.x;
+        var y = entity.pos.y;
+        var z = entity.pos.z;
+
+        lastX = x;
+        lastY = y;
+        lastZ = z;
+        positionReminder = 0;
+
+        dataManager.getSession().send(new ServerboundMovePlayerPosPacket(onGround, x, y, z));
     }
 
     public void sendRot() {
-        dataManager.getSession().send(new ServerboundMovePlayerRotPacket(entity.onGround, entity.yaw, entity.pitch));
+        var onGround = entity.onGround;
+
+        lastOnGround = onGround;
+
+        var yaw = entity.yaw;
+        var pitch = entity.pitch;
+
+        lastYaw = yaw;
+        lastPitch = pitch;
+
+        dataManager.getSession().send(new ServerboundMovePlayerRotPacket(onGround, yaw, pitch));
     }
 
     public void sendOnGround() {
-        dataManager.getSession().send(new ServerboundMovePlayerStatusOnlyPacket(entity.onGround));
+        var onGround = entity.onGround;
+
+        lastOnGround = onGround;
+
+        dataManager.getSession().send(new ServerboundMovePlayerStatusOnlyPacket(onGround));
     }
 
     public void moveEntityWithHeading(LevelState world, float strafe, float forward) {
