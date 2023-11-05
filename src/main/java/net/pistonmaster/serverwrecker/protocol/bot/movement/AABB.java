@@ -19,39 +19,50 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.movement;
 
-import lombok.AllArgsConstructor;
 import lombok.ToString;
+import org.cloudburstmc.math.vector.Vector3d;
 
 @ToString
-@AllArgsConstructor
 public class AABB {
-    public double minX;
-    public double minY;
-    public double minZ;
-    public double maxX;
-    public double maxY;
-    public double maxZ;
+    public final double minX;
+    public final double minY;
+    public final double minZ;
+    public final double maxX;
+    public final double maxY;
+    public final double maxZ;
 
-    public void floor() {
-        this.minX = Math.floor(this.minX);
-        this.minY = Math.floor(this.minY);
-        this.minZ = Math.floor(this.minZ);
-        this.maxX = Math.floor(this.maxX);
-        this.maxY = Math.floor(this.maxY);
-        this.maxZ = Math.floor(this.maxZ);
+    public AABB(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+        this.minX = Math.min(minX, maxX);
+        this.minY = Math.min(minY, maxY);
+        this.minZ = Math.min(minZ, maxZ);
+        this.maxX = Math.max(minX, maxX);
+        this.maxY = Math.max(minY, maxY);
+        this.maxZ = Math.max(minZ, maxZ);
     }
 
-    public AABB contract(double x, double y, double z) {
-        this.minX += x;
-        this.minY += y;
-        this.minZ += z;
-        this.maxX -= x;
-        this.maxY -= y;
-        this.maxZ -= z;
-        return this;
+    public AABB deflate(double x, double y, double z) {
+        return new AABB(
+                this.minX + x,
+                this.minY + y,
+                this.minZ + z,
+                this.maxX - x,
+                this.maxY - y,
+                this.maxZ - z
+        );
     }
 
-    public AABB expand(double x, double y, double z) {
+    public AABB expandTowards(Vector3d targetVec) {
+        return this.expandTowards(targetVec.getX(), targetVec.getY(), targetVec.getZ());
+    }
+
+    public AABB expandTowards(double x, double y, double z) {
+        var minX = this.minX;
+        var minY = this.minY;
+        var minZ = this.minZ;
+        var maxX = this.maxX;
+        var maxY = this.maxY;
+        var maxZ = this.maxZ;
+
         // Handle expanding of min/max x
         if (x < 0.0) {
             minX += x;
@@ -72,17 +83,23 @@ public class AABB {
         } else if (z > 0.0) {
             maxZ += z;
         }
-        return this;
+
+        return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    public AABB offset(double x, double y, double z) {
-        this.minX += x;
-        this.minY += y;
-        this.minZ += z;
-        this.maxX += x;
-        this.maxY += y;
-        this.maxZ += z;
-        return this;
+    public AABB move(Vector3d vec) {
+        return this.move(vec.getX(), vec.getY(), vec.getZ());
+    }
+
+    public AABB move(double x, double y, double z) {
+        return new AABB(
+                this.minX + x,
+                this.minY + y,
+                this.minZ + z,
+                this.maxX + x,
+                this.maxY + y,
+                this.maxZ + z
+        );
     }
 
     public double computeOffsetX(AABB other, double offsetX) {
@@ -140,9 +157,5 @@ public class AABB {
         return this.minX < other.maxX && this.maxX > other.minX &&
                 this.minY < other.maxY && this.maxY > other.minY &&
                 this.minZ < other.maxZ && this.maxZ > other.minZ;
-    }
-
-    public AABB copy() {
-        return new AABB(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
     }
 }

@@ -29,7 +29,7 @@ public class PhysicsData {
     public double playerSpeed = 0.1;
     public double sprintSpeed = 0.3;
     public double sneakSpeed = 0.3;
-    public double stepHeight = 0.6;
+    public double stepHeight = 0.6F;
     public double negligeableVelocity = 0.003;
     public double soulsandSpeed = 0.4;
     public double honeyblockSpeed = 0.4;
@@ -42,14 +42,12 @@ public class PhysicsData {
     public float waterSpeed = 0.8F;
     public float lavaSpeed = 0.5F;
     public float liquidSpeed = 0.02F;
-    public float airborneFriction = 0.02F;
     public float defaultSlipperiness = 0.6F;
     public double outOfLiquidImpulse = 0.3;
     public int autojumpCooldown = 10;
     public BubbleColumnDrag bubbleColumnSurfaceDrag = new BubbleColumnDrag(0.03, -0.9, 0.1, 1.8);
     public BubbleColumnDrag bubbleColumnDrag = new BubbleColumnDrag(0.03, -0.3, 0.06, 0.7);
     public double slowFalling = 0.125;
-    public double movementSpeedAttribute = 0.125;
     // SPEED_MODIFIER_SPRINTING_UUID is from LivingEntity.java
     public UUID sprintingUUID = UUID.fromString("662a6b8d-da3e-4c1c-8813-96ea6097278d");
     public double waterGravity = gravity / 16;
