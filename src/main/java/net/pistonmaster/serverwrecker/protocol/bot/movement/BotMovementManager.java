@@ -477,15 +477,10 @@ public class BotMovementManager {
             }
         }
 
-        System.out.println("Current bb: " + playerBB);
-
-        System.out.println("Before dx: " + dx + ", dy: " + dy + ", dz: " + dz);
         var collisionResult = collide(world, playerBB, Vector3d.from(dx, dy, dz));
         dx = collisionResult.getX();
         dy = collisionResult.getY();
         dz = collisionResult.getZ();
-
-        System.out.println("After dx: " + dx + ", dy: " + dy + ", dz: " + dz);
 
         var resultingBB = playerBB.move(dx, dy, dz);
 
@@ -573,7 +568,6 @@ public class BotMovementManager {
     }
 
     private Vector3d collide(LevelState world, AABB playerBB, Vector3d targetVec) {
-        System.out.println("Collision boxes: " + world.getCollisionBoxes(playerBB.expandTowards(targetVec)));
         var initialCollisionVec = targetVec.lengthSquared() == 0.0 ? targetVec : collideBoundingBox(world, targetVec, playerBB);
         var xChanged = targetVec.getX() != initialCollisionVec.getY();
         var yChanged = targetVec.getY() != initialCollisionVec.getY();
