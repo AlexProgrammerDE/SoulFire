@@ -26,8 +26,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
-import net.pistonmaster.serverwrecker.protocol.bot.block.BlockProperties;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateProperties;
 import net.pistonmaster.serverwrecker.protocol.bot.block.GlobalBlockPalette;
 
 import java.io.IOException;
@@ -40,9 +40,10 @@ public class ResourceData {
     public static final GlobalBlockPalette GLOBAL_BLOCK_PALETTE;
     public static final Map<String, String> MOJANG_TRANSLATIONS;
     // For loading by BlockShapeType
-    protected static final Int2ObjectMap<BlockProperties> BLOCK_PROPERTIES;
+    protected static final Int2ObjectMap<BlockStateProperties> BLOCK_STATE_PROPERTIES;
     // For loading by BlockShapeType
     protected static final IntSet BLOCK_STATE_DEFAULTS;
+    public static final Int2ObjectMap<BlockProperty> BLOCK_PROPERTY_MAP;
 
     // Static initialization allows us to preload this in a native image
     static {
@@ -73,7 +74,7 @@ public class ResourceData {
             throw new IllegalStateException(e);
         }
 
-        var blockProperties = new Int2ObjectOpenHashMap<BlockProperties>();
+        var blockStateProperties = new Int2ObjectOpenHashMap<BlockStateProperties>();
         var blockStateDefaults = new IntArraySet();
         for (var blockEntry : blocks.entrySet()) {
             for (var state : blockEntry.getValue().getAsJsonObject().getAsJsonArray("states")) {
@@ -83,12 +84,38 @@ public class ResourceData {
                     blockStateDefaults.add(stateId);
                 }
 
-                blockProperties.put(stateId, new BlockProperties(stateObject.getAsJsonObject("properties")));
+                blockStateProperties.put(stateId, new BlockStateProperties(stateObject.getAsJsonObject("properties")));
             }
         }
 
-        BLOCK_PROPERTIES = blockProperties;
+        BLOCK_STATE_PROPERTIES = blockStateProperties;
         BLOCK_STATE_DEFAULTS = blockStateDefaults;
+
+        JsonObject blockProperties;
+        try (var stream = ResourceData.class.getClassLoader().getResourceAsStream("minecraft/blockProperties.json")) {
+            Objects.requireNonNull(stream, "blocks.json not found");
+            blockProperties = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+
+        var blockPropertyMap = new Int2ObjectOpenHashMap<BlockProperty>();
+        for (var blockEntry : blockProperties.entrySet()) {
+            var blockName = blockEntry.getKey();
+            var blockObject = blockEntry.getValue().getAsJsonObject();
+
+            var blockProperty = new BlockProperty(
+                    blockObject.get("maxHorizontalOffset").getAsFloat(),
+                    blockObject.get("maxVerticalOffset").getAsFloat(),
+                    OffsetType.valueOf(blockObject.get("offsetType").getAsString()),
+                    blockObject.get("replaceable").getAsBoolean()
+            );
+
+            blockPropertyMap.put(Objects.requireNonNull(BlockType.getByName(blockName)).id(), blockProperty);
+        }
+
+        BLOCK_PROPERTY_MAP = blockPropertyMap;
+        System.out.println("Loaded " + BLOCK_PROPERTY_MAP + " block properties!");
 
         // Load global palette
         Int2ObjectMap<BlockStateMeta> stateMap = new Int2ObjectOpenHashMap<>();

@@ -22,12 +22,12 @@ package net.pistonmaster.serverwrecker.protocol.bot.block;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.*;
 
-public class BlockProperties {
+public class BlockStateProperties {
     private final Object2BooleanMap<String> booleanProperties;
     private final Object2IntMap<String> intProperties;
     private final Object2ObjectMap<String, String> stringProperties;
 
-    public BlockProperties(JsonObject properties) {
+    public BlockStateProperties(JsonObject properties) {
         this.booleanProperties = new Object2BooleanArrayMap<>();
         this.intProperties = new Object2IntArrayMap<>();
         this.stringProperties = new Object2ObjectArrayMap<>();

@@ -451,19 +451,19 @@ public class BotMovementManager {
             var step = 0.05;
 
             // In the 3 loops bellow, y offset should be -1, but that doesnt reproduce vanilla behavior.
-            for (; dx != 0 && getSurroundingBBs(world, playerBB.move(dx, 0, 0)).isEmpty(); oldVelX = dx) {
+            for (; dx != 0 && world.getCollisionBoxes(playerBB.move(dx, 0, 0)).isEmpty(); oldVelX = dx) {
                 if (dx < step && dx >= -step) dx = 0;
                 else if (dx > 0) dx -= step;
                 else dx += step;
             }
 
-            for (; dz != 0 && getSurroundingBBs(world, playerBB.move(0, 0, dz)).isEmpty(); oldVelZ = dz) {
+            for (; dz != 0 && world.getCollisionBoxes(playerBB.move(0, 0, dz)).isEmpty(); oldVelZ = dz) {
                 if (dz < step && dz >= -step) dz = 0;
                 else if (dz > 0) dz -= step;
                 else dz += step;
             }
 
-            while (dx != 0 && dz != 0 && getSurroundingBBs(world, playerBB.move(dx, 0, dz)).isEmpty()) {
+            while (dx != 0 && dz != 0 && world.getCollisionBoxes(playerBB.move(dx, 0, dz)).isEmpty()) {
                 if (dx < step && dx >= -step) dx = 0;
                 else if (dx > 0) dx -= step;
                 else dx += step;
@@ -477,10 +477,15 @@ public class BotMovementManager {
             }
         }
 
+        System.out.println("Current bb: " + playerBB);
+
+        System.out.println("Before dx: " + dx + ", dy: " + dy + ", dz: " + dz);
         var collisionResult = collide(world, playerBB, Vector3d.from(dx, dy, dz));
         dx = collisionResult.getX();
         dy = collisionResult.getY();
         dz = collisionResult.getZ();
+
+        System.out.println("After dx: " + dx + ", dy: " + dy + ", dz: " + dz);
 
         var resultingBB = playerBB.move(dx, dy, dz);
 
@@ -511,7 +516,7 @@ public class BotMovementManager {
         }
 
         // Finally, apply block collisions (web, soulsand...)
-        consumeCollisionBlocks(world, resultingBB.deflate(0.001, 0.001, 0.001), (block, cursor) -> {
+        consumeIntersectedBlocks(world, resultingBB.deflate(0.001, 0.001, 0.001), (block, cursor) -> {
             if (block.blockType() == BlockType.COBWEB) {
                 entity.isInWeb = true;
             } else if (block.blockType() == BlockType.BUBBLE_COLUMN) {
@@ -539,7 +544,7 @@ public class BotMovementManager {
         }
     }
 
-    private static void consumeCollisionBlocks(LevelState world, AABB queryBB, BiConsumer<BlockStateMeta, Vector3i> consumer) {
+    private static void consumeIntersectedBlocks(LevelState world, AABB queryBB, BiConsumer<BlockStateMeta, Vector3i> consumer) {
         var startX = MathHelper.floorDouble(queryBB.minX - 1.0E-7) - 1;
         var endX = MathHelper.floorDouble(queryBB.maxX + 1.0E-7) + 1;
         var startY = MathHelper.floorDouble(queryBB.minY - 1.0E-7) - 1;
@@ -556,46 +561,19 @@ public class BotMovementManager {
                         continue;
                     }
 
-                    consumer.accept(block.get(), cursor);
-                }
-            }
-        }
-    }
-
-    private static List<AABB> getCollisionBoxes(LevelState world, AABB queryBB) {
-        var startX = MathHelper.floorDouble(queryBB.minX - 1.0E-7) - 1;
-        var endX = MathHelper.floorDouble(queryBB.maxX + 1.0E-7) + 1;
-        var startY = MathHelper.floorDouble(queryBB.minY - 1.0E-7) - 1;
-        var endY = MathHelper.floorDouble(queryBB.maxY + 1.0E-7) + 1;
-        var startZ = MathHelper.floorDouble(queryBB.minZ - 1.0E-7) - 1;
-        var endZ = MathHelper.floorDouble(queryBB.maxZ + 1.0E-7) + 1;
-
-        var predictedSize = (endX - startX + 1) * (endY - startY + 1) * (endZ - startZ + 1);
-        var collisionBoxes = new ArrayList<AABB>(predictedSize);
-        for (var x = startX; x <= endX; x++) {
-            for (var y = startY; y <= endY; y++) {
-                for (var z = startZ; z <= endZ; z++) {
-                    var cursor = Vector3i.from(x, y, z);
-                    var block = world.getBlockStateAt(cursor);
-                    if (block.isEmpty()) {
-                        continue;
-                    }
-
-                    for (var shape : block.get().blockShapeType().blockShapes()) {
-                        var shapeBB = shape.createAABBAt(x, y, z);
-
-                        if (shapeBB.intersects(queryBB)) {
-                            collisionBoxes.add(shapeBB);
+                    for (var collisionBox : block.get().getCollisionBoxes(cursor)) {
+                        if (collisionBox.intersects(queryBB)) {
+                            consumer.accept(block.get(), cursor);
+                            break;
                         }
                     }
                 }
             }
         }
-
-        return collisionBoxes;
     }
 
     private Vector3d collide(LevelState world, AABB playerBB, Vector3d targetVec) {
+        System.out.println("Collision boxes: " + world.getCollisionBoxes(playerBB.expandTowards(targetVec)));
         var initialCollisionVec = targetVec.lengthSquared() == 0.0 ? targetVec : collideBoundingBox(world, targetVec, playerBB);
         var xChanged = targetVec.getX() != initialCollisionVec.getY();
         var yChanged = targetVec.getY() != initialCollisionVec.getY();
@@ -626,7 +604,7 @@ public class BotMovementManager {
     }
 
     public static Vector3d collideBoundingBox(LevelState world, Vector3d targetVec, AABB queryBB) {
-        return collideWith(targetVec, queryBB, getCollisionBoxes(world, queryBB.expandTowards(targetVec)));
+        return collideWith(targetVec, queryBB, world.getCollisionBoxes(queryBB.expandTowards(targetVec)));
     }
 
     private static Vector3d collideWith(Vector3d direction, AABB boundingBox, List<AABB> collisionBoxes) {
@@ -698,7 +676,7 @@ public class BotMovementManager {
         vel.z += forward * cos + strafe * sin;
     }
 
-    private LookingVectorData getLookingVector(PlayerMovementState entity) {
+    private static LookingVectorData getLookingVector(PlayerMovementState entity) {
         // given a yaw pitch, we need the looking vector
 
         // yaw is right handed rotation about y (up) starting from -z (north)
@@ -811,7 +789,7 @@ public class BotMovementManager {
     ) {
     }
 
-    public boolean isOnLadder(LevelState world, Vector3i pos) {
+    public static boolean isOnLadder(LevelState world, Vector3i pos) {
         var block = world.getBlockStateAt(pos);
         if (block.isEmpty()) {
             return false;
@@ -823,10 +801,7 @@ public class BotMovementManager {
 
     public boolean doesNotCollide(LevelState world, MutableVector3d pos) {
         var pBB = getPlayerBB(pos);
-        return getSurroundingBBs(world, pBB)
-                .stream()
-                .noneMatch(pBB::intersects)
-                && getWaterInBB(world, pBB).isEmpty();
+        return world.getCollisionBoxes(pBB).isEmpty() && getWaterInBB(world, pBB).isEmpty();
     }
 
     public int getLiquidHeightPercent(@Nullable BlockStateMeta meta) {
@@ -888,41 +863,7 @@ public class BotMovementManager {
         return flow.normalize().toImmutableInt();
     }
 
-    public List<AABB> getSurroundingBBs(LevelState world, AABB queryBB) {
-        var surroundingBBs = new ArrayList<AABB>();
-
-        var minX = MathHelper.floorDouble(queryBB.minX);
-        var minY = MathHelper.floorDouble(queryBB.minY - 1);
-        var minZ = MathHelper.floorDouble(queryBB.minZ);
-
-        var maxX = MathHelper.floorDouble(queryBB.maxX);
-        var maxY = MathHelper.floorDouble(queryBB.maxY);
-        var maxZ = MathHelper.floorDouble(queryBB.maxZ);
-
-        for (var x = minX; x <= maxX; x++) {
-            for (var y = minY; y <= maxY; y++) {
-                for (var z = minZ; z <= maxZ; z++) {
-                    var blockState = world.getBlockStateAt(Vector3i.from(x, y, z));
-                    if (blockState.isEmpty()) {
-                        continue;
-                    }
-
-                    var blockShapeType = blockState.get().blockShapeType();
-                    if (blockShapeType.hasNoCollisions()) {
-                        continue;
-                    }
-
-                    for (var shape : blockShapeType.blockShapes()) {
-                        surroundingBBs.add(shape.createAABBAt(x, y, z));
-                    }
-                }
-            }
-        }
-
-        return surroundingBBs;
-    }
-
-    public boolean isMaterialInBB(LevelState world, AABB queryBB, List<BlockType> types) {
+    public static boolean isMaterialInBB(LevelState world, AABB queryBB, List<BlockType> types) {
         var minX = MathHelper.floorDouble(queryBB.minX);
         var minY = MathHelper.floorDouble(queryBB.minY);
         var minZ = MathHelper.floorDouble(queryBB.minZ);
@@ -953,7 +894,7 @@ public class BotMovementManager {
     public List<Pair<Vector3i, BlockStateMeta>> getWaterInBB(LevelState world, AABB bb) {
         var waterBlocks = new ArrayList<Pair<Vector3i, BlockStateMeta>>();
 
-        consumeCollisionBlocks(world, bb, (block, cursor) -> {
+        consumeIntersectedBlocks(world, bb, (block, cursor) -> {
             if (WATER_TYPES.contains(block.blockType())
                     || WATER_LIKE_TYPES.contains(block.blockType())
                     || block.blockShapeType().properties().getBoolean("waterlogged")) {
@@ -991,7 +932,7 @@ public class BotMovementManager {
         return new AABB(pos.x - w, pos.y, pos.z - w, pos.x + w, pos.y + h, pos.z + w);
     }
 
-    public void setPositionToBB(AABB bb, MutableVector3d pos) {
+    public static void setPositionToBB(AABB bb, MutableVector3d pos) {
         pos.x = (bb.minX + bb.maxX) / 2;
         pos.y = bb.minY;
         pos.z = (bb.minZ + bb.maxZ) / 2;

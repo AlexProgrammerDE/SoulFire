@@ -1,0 +1,6020 @@
+{
+  "air": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "stone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "granite": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_granite": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "diorite": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_diorite": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "andesite": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_andesite": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "grass_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dirt": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "coarse_dirt": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "podzol": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cobblestone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_planks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_planks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_planks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_planks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_planks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_planks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_planks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_planks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_planks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_mosaic": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_propagule": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "bedrock": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "water": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "lava": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "sand": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "suspicious_sand": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_sand": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gravel": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "suspicious_gravel": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gold_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_gold_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "iron_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_iron_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "coal_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_coal_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "nether_gold_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_roots": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "muddy_mangrove_roots": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_spruce_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_birch_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_jungle_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_acacia_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_cherry_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_dark_oak_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_oak_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_mangrove_log": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_bamboo_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_oak_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_spruce_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_birch_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_jungle_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_acacia_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_cherry_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_dark_oak_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_mangrove_wood": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_leaves": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_leaves": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_leaves": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_leaves": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_leaves": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_leaves": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_leaves": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_leaves": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "azalea_leaves": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "flowering_azalea_leaves": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sponge": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "wet_sponge": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lapis_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_lapis_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lapis_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dispenser": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sandstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chiseled_sandstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cut_sandstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "note_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "white_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_bed": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "powered_rail": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "detector_rail": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sticky_piston": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cobweb": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "grass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XYZ",
+    "replaceable": true
+  },
+  "fern": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XYZ",
+    "replaceable": true
+  },
+  "dead_bush": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "seagrass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "tall_seagrass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": true
+  },
+  "piston": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "piston_head": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "white_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_wool": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "moving_piston": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dandelion": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "torchflower": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "poppy": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "blue_orchid": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "allium": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "azure_bluet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "red_tulip": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "orange_tulip": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "white_tulip": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "pink_tulip": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "oxeye_daisy": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "cornflower": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "wither_rose": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "lily_of_the_valley": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "brown_mushroom": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_mushroom": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gold_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "iron_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "tnt": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bookshelf": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chiseled_bookshelf": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mossy_cobblestone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "obsidian": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "torch": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "wall_torch": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "fire": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "soul_fire": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "spawner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chest": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "redstone_wire": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "diamond_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_diamond_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "diamond_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crafting_table": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "wheat": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "farmland": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "furnace": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_door": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "ladder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "rail": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cobblestone_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_wall_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_wall_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_wall_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_wall_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_wall_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_wall_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_wall_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_wall_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_wall_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_wall_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_wall_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_wall_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_wall_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_wall_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_wall_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_wall_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_wall_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_wall_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_wall_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_wall_hanging_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lever": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stone_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "iron_door": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "redstone_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_redstone_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "redstone_torch": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "redstone_wall_torch": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stone_button": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "snow": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "ice": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "snow_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cactus": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "clay": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sugar_cane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jukebox": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_fence": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pumpkin": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "netherrack": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "soul_sand": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "soul_soil": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "basalt": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_basalt": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "soul_torch": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "soul_wall_torch": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "glowstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "nether_portal": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "carved_pumpkin": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jack_o_lantern": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "repeater": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "white_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_stained_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_trapdoor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_trapdoor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_trapdoor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_trapdoor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_trapdoor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_trapdoor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_trapdoor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_trapdoor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_trapdoor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stone_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mossy_stone_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cracked_stone_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chiseled_stone_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "packed_mud": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mud_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "infested_stone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "infested_cobblestone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "infested_stone_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "infested_mossy_stone_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "infested_cracked_stone_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "infested_chiseled_stone_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_mushroom_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_mushroom_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mushroom_stem": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "iron_bars": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chain": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "melon": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "attached_pumpkin_stem": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "attached_melon_stem": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pumpkin_stem": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "melon_stem": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "vine": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "glow_lichen": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "oak_fence_gate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brick_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stone_brick_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mud_brick_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mycelium": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lily_pad": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "nether_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "nether_brick_fence": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "nether_brick_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "nether_wart": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "enchanting_table": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brewing_stand": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cauldron": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "water_cauldron": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lava_cauldron": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "powder_snow_cauldron": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "end_portal": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "end_portal_frame": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "end_stone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dragon_egg": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "redstone_lamp": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cocoa": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sandstone_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "emerald_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_emerald_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "ender_chest": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "tripwire_hook": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "tripwire": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "emerald_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "command_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "beacon": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cobblestone_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mossy_cobblestone_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "flower_pot": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_torchflower": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_oak_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_spruce_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_birch_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_jungle_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_acacia_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_cherry_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_dark_oak_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_mangrove_propagule": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_fern": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_dandelion": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_poppy": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_blue_orchid": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_allium": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_azure_bluet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_red_tulip": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_orange_tulip": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_white_tulip": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_pink_tulip": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_oxeye_daisy": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_cornflower": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_lily_of_the_valley": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_wither_rose": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_red_mushroom": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_brown_mushroom": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_dead_bush": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_cactus": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "carrots": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potatoes": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_button": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_button": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_button": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_button": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_button": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_button": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_button": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_button": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_button": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "skeleton_skull": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "skeleton_wall_skull": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "wither_skeleton_skull": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "wither_skeleton_wall_skull": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "zombie_head": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "zombie_wall_head": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "player_head": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "player_wall_head": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "creeper_head": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "creeper_wall_head": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dragon_head": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dragon_wall_head": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "piglin_head": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "piglin_wall_head": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "anvil": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chipped_anvil": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "damaged_anvil": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "trapped_chest": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_weighted_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "heavy_weighted_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "comparator": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "daylight_detector": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "redstone_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "nether_quartz_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "hopper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "quartz_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chiseled_quartz_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "quartz_pillar": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "quartz_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "activator_rail": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dropper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "white_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "white_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_stained_glass_pane": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_mosaic_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "slime_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "barrier": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "iron_trapdoor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "prismarine": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "prismarine_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_prismarine": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "prismarine_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "prismarine_brick_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_prismarine_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "prismarine_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "prismarine_brick_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_prismarine_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sea_lantern": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "hay_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "white_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "coal_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "packed_ice": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sunflower": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "lilac": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "rose_bush": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "peony": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "tall_grass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": true
+  },
+  "large_fern": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": true
+  },
+  "white_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "white_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_wall_banner": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_sandstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chiseled_red_sandstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cut_red_sandstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_sandstone_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oak_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_mosaic_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stone_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smooth_stone_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sandstone_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cut_sandstone_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "petrified_oak_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cobblestone_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brick_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stone_brick_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mud_brick_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "nether_brick_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "quartz_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_sandstone_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cut_red_sandstone_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purpur_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smooth_stone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smooth_sandstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smooth_quartz": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smooth_red_sandstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_fence_gate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_fence_gate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_fence_gate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_fence_gate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_fence_gate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_fence_gate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_fence_gate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_fence_gate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_fence": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_fence": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_fence": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_fence": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_fence": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_fence": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_fence": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_fence": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spruce_door": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "birch_door": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jungle_door": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "acacia_door": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cherry_door": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dark_oak_door": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mangrove_door": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_door": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "end_rod": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chorus_plant": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chorus_flower": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purpur_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purpur_pillar": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purpur_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "end_stone_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "torchflower_crop": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pitcher_crop": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pitcher_plant": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "beetroots": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dirt_path": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "end_gateway": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "repeating_command_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chain_command_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "frosted_ice": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magma_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "nether_wart_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_nether_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bone_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "structure_void": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "observer": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "white_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_shulker_box": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "white_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_glazed_terracotta": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "white_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_concrete": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "white_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_concrete_powder": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "kelp": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "kelp_plant": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dried_kelp_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "turtle_egg": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sniffer_egg": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_tube_coral_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_brain_coral_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_bubble_coral_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_fire_coral_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_horn_coral_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "tube_coral_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brain_coral_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bubble_coral_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "fire_coral_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "horn_coral_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_tube_coral": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_brain_coral": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_bubble_coral": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_fire_coral": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_horn_coral": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "tube_coral": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brain_coral": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bubble_coral": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "fire_coral": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "horn_coral": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_tube_coral_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_brain_coral_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_bubble_coral_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_fire_coral_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_horn_coral_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "tube_coral_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brain_coral_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bubble_coral_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "fire_coral_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "horn_coral_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_tube_coral_wall_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_brain_coral_wall_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_bubble_coral_wall_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_fire_coral_wall_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "dead_horn_coral_wall_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "tube_coral_wall_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brain_coral_wall_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bubble_coral_wall_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "fire_coral_wall_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "horn_coral_wall_fan": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sea_pickle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_ice": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "conduit": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bamboo_sapling": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "bamboo": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "potted_bamboo": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "void_air": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "cave_air": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "bubble_column": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": true
+  },
+  "polished_granite_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smooth_red_sandstone_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mossy_stone_brick_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_diorite_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mossy_cobblestone_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "end_stone_brick_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stone_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smooth_sandstone_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smooth_quartz_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "granite_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "andesite_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_nether_brick_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_andesite_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "diorite_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_granite_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smooth_red_sandstone_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mossy_stone_brick_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_diorite_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mossy_cobblestone_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "end_stone_brick_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smooth_sandstone_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smooth_quartz_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "granite_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "andesite_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_nether_brick_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_andesite_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "diorite_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brick_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "prismarine_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_sandstone_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mossy_stone_brick_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "granite_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stone_brick_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mud_brick_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "nether_brick_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "andesite_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_nether_brick_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sandstone_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "end_stone_brick_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "diorite_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "scaffolding": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "loom": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "barrel": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smoker": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blast_furnace": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cartography_table": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "fletching_table": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "grindstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lectern": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smithing_table": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stonecutter": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bell": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lantern": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "soul_lantern": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "campfire": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "soul_campfire": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sweet_berry_bush": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_stem": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_warped_stem": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_hyphae": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_warped_hyphae": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_nylium": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_fungus": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_wart_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_roots": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": true
+  },
+  "nether_sprouts": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": true
+  },
+  "crimson_stem": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_crimson_stem": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_hyphae": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "stripped_crimson_hyphae": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_nylium": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_fungus": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "shroomlight": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "weeping_vines": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "weeping_vines_plant": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "twisting_vines": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "twisting_vines_plant": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_roots": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": true
+  },
+  "crimson_planks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_planks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_fence": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_fence": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_trapdoor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_trapdoor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_fence_gate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_fence_gate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_button": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_button": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_door": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_door": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crimson_wall_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "warped_wall_sign": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "structure_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "jigsaw": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "composter": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "target": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "bee_nest": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "beehive": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "honey_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "honeycomb_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "netherite_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "ancient_debris": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "crying_obsidian": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "respawn_anchor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_crimson_fungus": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_warped_fungus": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_crimson_roots": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_warped_roots": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lodestone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blackstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blackstone_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blackstone_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blackstone_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_blackstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_blackstone_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cracked_polished_blackstone_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chiseled_polished_blackstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_blackstone_brick_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_blackstone_brick_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_blackstone_brick_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gilded_blackstone": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_blackstone_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_blackstone_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_blackstone_pressure_plate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_blackstone_button": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_blackstone_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chiseled_nether_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cracked_nether_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "quartz_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "white_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_candle": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "white_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "orange_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "magenta_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_blue_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "yellow_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lime_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "gray_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "light_gray_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cyan_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "purple_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "blue_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "brown_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "green_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "red_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "black_candle_cake": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "amethyst_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "budding_amethyst": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "amethyst_cluster": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "large_amethyst_bud": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "medium_amethyst_bud": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "small_amethyst_bud": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "tuff": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "calcite": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "tinted_glass": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "powder_snow": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sculk_sensor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "calibrated_sculk_sensor": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sculk": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sculk_vein": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sculk_catalyst": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "sculk_shrieker": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oxidized_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "weathered_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "exposed_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "copper_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "copper_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_copper_ore": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oxidized_cut_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "weathered_cut_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "exposed_cut_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cut_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oxidized_cut_copper_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "weathered_cut_copper_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "exposed_cut_copper_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cut_copper_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "oxidized_cut_copper_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "weathered_cut_copper_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "exposed_cut_copper_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cut_copper_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_copper_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_weathered_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_exposed_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_oxidized_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_oxidized_cut_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_weathered_cut_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_exposed_cut_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_cut_copper": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_oxidized_cut_copper_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_weathered_cut_copper_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_exposed_cut_copper_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_cut_copper_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_oxidized_cut_copper_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_weathered_cut_copper_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_exposed_cut_copper_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "waxed_cut_copper_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "lightning_rod": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pointed_dripstone": {
+    "maxHorizontalOffset": 0.125,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": false
+  },
+  "dripstone_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cave_vines": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cave_vines_plant": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "spore_blossom": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "azalea": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "flowering_azalea": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "moss_carpet": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pink_petals": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "moss_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "big_dripleaf": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "big_dripleaf_stem": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "small_dripleaf": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.1,
+    "offsetType": "XYZ",
+    "replaceable": false
+  },
+  "hanging_roots": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "XZ",
+    "replaceable": true
+  },
+  "rooted_dirt": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "mud": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cobbled_deepslate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cobbled_deepslate_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cobbled_deepslate_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cobbled_deepslate_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_deepslate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_deepslate_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_deepslate_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "polished_deepslate_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_tiles": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_tile_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_tile_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_tile_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_brick_stairs": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_brick_slab": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "deepslate_brick_wall": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "chiseled_deepslate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cracked_deepslate_bricks": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "cracked_deepslate_tiles": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "infested_deepslate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "smooth_basalt": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "raw_iron_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "raw_copper_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "raw_gold_block": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_azalea_bush": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "potted_flowering_azalea_bush": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "ochre_froglight": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "verdant_froglight": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "pearlescent_froglight": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "frogspawn": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "reinforced_deepslate": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  },
+  "decorated_pot": {
+    "maxHorizontalOffset": 0.25,
+    "maxVerticalOffset": 0.2,
+    "offsetType": "NONE",
+    "replaceable": false
+  }
+}

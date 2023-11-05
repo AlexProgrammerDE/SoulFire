@@ -20,14 +20,15 @@
 package net.pistonmaster.serverwrecker.data;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.pistonmaster.serverwrecker.protocol.bot.block.BlockProperties;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateProperties;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record BlockShapeType(int id, List<BlockShape> blockShapes, boolean defaultShape, BlockProperties properties) {
+public record BlockShapeType(int id, List<BlockShape> blockShapes, boolean defaultShape,
+                             BlockStateProperties properties) {
     public static final List<BlockShapeType> VALUES = new ObjectArrayList<>();
 
     static {
@@ -57,7 +58,7 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes, boolean defau
                     }
                 }
 
-                VALUES.add(new BlockShapeType(id, blockShapes, ResourceData.BLOCK_STATE_DEFAULTS.contains(id), ResourceData.BLOCK_PROPERTIES.get(id)));
+                VALUES.add(new BlockShapeType(id, blockShapes, ResourceData.BLOCK_STATE_DEFAULTS.contains(id), ResourceData.BLOCK_STATE_PROPERTIES.get(id)));
             });
         } catch (IOException e) {
             throw new IllegalStateException(e);

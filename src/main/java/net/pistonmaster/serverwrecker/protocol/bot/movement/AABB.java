@@ -22,6 +22,8 @@ package net.pistonmaster.serverwrecker.protocol.bot.movement;
 import lombok.ToString;
 import org.cloudburstmc.math.vector.Vector3d;
 
+import java.util.Optional;
+
 @ToString
 public class AABB {
     public final double minX;
@@ -38,6 +40,10 @@ public class AABB {
         this.maxX = Math.max(minX, maxX);
         this.maxY = Math.max(minY, maxY);
         this.maxZ = Math.max(minZ, maxZ);
+    }
+
+    public AABB(Vector3d min, Vector3d max) {
+        this(min.getX(), min.getY(), min.getZ(), max.getX(), max.getY(), max.getZ());
     }
 
     public AABB deflate(double x, double y, double z) {
@@ -157,5 +163,55 @@ public class AABB {
         return this.minX < other.maxX && this.maxX > other.minX &&
                 this.minY < other.maxY && this.maxY > other.minY &&
                 this.minZ < other.maxZ && this.maxZ > other.minZ;
+    }
+
+    public static void main(String[] args) {
+        var shapeBB = new AABB(368.1875, 75.0, -918.8125, 368.5625, 75.6875, -918.4375);
+        var queryBB = new AABB(367.58749997615814, 74.92159999847412, -918.412555291236, 368.3838712938225, 76.79999995231628, -917.7229257389088);
+
+        System.out.println("ShapeBB: " + shapeBB);
+        System.out.println("QueryBB: " + queryBB);
+
+        System.out.println("Intersects: " + shapeBB.intersects(queryBB));
+        // Returns false, but should return true
+
+        System.out.println("First compare: " + (shapeBB.minX < queryBB.maxX));
+        System.out.println("Second compare: " + (shapeBB.maxX > queryBB.minX));
+        System.out.println("Third compare: " + (shapeBB.minY < queryBB.maxY));
+        System.out.println("Fourth compare: " + (shapeBB.maxY > queryBB.minY));
+        System.out.println("Fifth compare: " + (shapeBB.minZ < queryBB.maxZ));
+        System.out.println("Sixth compare: " + (shapeBB.maxZ > queryBB.minZ));
+    }
+
+    public Optional<Vector3d> getIntersection(Vector3d origin, Vector3d direction) {
+        var x1 = origin.getX();
+        var y1 = origin.getY();
+        var z1 = origin.getZ();
+        var x2 = direction.getX();
+        var y2 = direction.getY();
+        var z2 = direction.getZ();
+
+        var xMin = this.minX;
+        var yMin = this.minY;
+        var zMin = this.minZ;
+        var xMax = this.maxX;
+        var yMax = this.maxY;
+        var zMax = this.maxZ;
+
+        var txMin = (xMin - x1) / x2;
+        var txMax = (xMax - x1) / x2;
+        var tyMin = (yMin - y1) / y2;
+        var tyMax = (yMax - y1) / y2;
+        var tzMin = (zMin - z1) / z2;
+        var tzMax = (zMax - z1) / z2;
+
+        var tMin = Math.max(Math.max(Math.min(txMin, txMax), Math.min(tyMin, tyMax)), Math.min(tzMin, tzMax));
+        var tMax = Math.min(Math.min(Math.max(txMin, txMax), Math.max(tyMin, tyMax)), Math.max(tzMin, tzMax));
+
+        if (tMax < 0 || tMin > tMax) {
+            return Optional.empty();
+        }
+
+        return Optional.of(origin.add(direction.mul(tMin)));
     }
 }
