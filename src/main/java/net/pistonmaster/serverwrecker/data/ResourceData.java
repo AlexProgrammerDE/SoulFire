@@ -115,7 +115,6 @@ public class ResourceData {
         }
 
         BLOCK_PROPERTY_MAP = blockPropertyMap;
-        System.out.println("Loaded " + BLOCK_PROPERTY_MAP + " block properties!");
 
         // Load global palette
         Int2ObjectMap<BlockStateMeta> stateMap = new Int2ObjectOpenHashMap<>();

@@ -165,24 +165,6 @@ public class AABB {
                 this.minZ < other.maxZ && this.maxZ > other.minZ;
     }
 
-    public static void main(String[] args) {
-        var shapeBB = new AABB(368.1875, 75.0, -918.8125, 368.5625, 75.6875, -918.4375);
-        var queryBB = new AABB(367.58749997615814, 74.92159999847412, -918.412555291236, 368.3838712938225, 76.79999995231628, -917.7229257389088);
-
-        System.out.println("ShapeBB: " + shapeBB);
-        System.out.println("QueryBB: " + queryBB);
-
-        System.out.println("Intersects: " + shapeBB.intersects(queryBB));
-        // Returns false, but should return true
-
-        System.out.println("First compare: " + (shapeBB.minX < queryBB.maxX));
-        System.out.println("Second compare: " + (shapeBB.maxX > queryBB.minX));
-        System.out.println("Third compare: " + (shapeBB.minY < queryBB.maxY));
-        System.out.println("Fourth compare: " + (shapeBB.maxY > queryBB.minY));
-        System.out.println("Fifth compare: " + (shapeBB.minZ < queryBB.maxZ));
-        System.out.println("Sixth compare: " + (shapeBB.maxZ > queryBB.minZ));
-    }
-
     public Optional<Vector3d> getIntersection(Vector3d origin, Vector3d direction) {
         var x1 = origin.getX();
         var y1 = origin.getY();
