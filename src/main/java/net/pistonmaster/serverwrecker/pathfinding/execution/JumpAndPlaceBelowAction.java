@@ -146,7 +146,7 @@ public class JumpAndPlaceBelowAction implements WorldAction {
             return;
         }
 
-        if (movementManager.getY() <= blockPosition.getY() + 1) {
+        if (movementManager.getEntity().getPos().getY() <= blockPosition.getY() + 1) {
             // Make sure we are so high that we can place the block
             movementManager.getControlState().setJumping(true);
             return;

@@ -17,10 +17,12 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.data;
+package net.pistonmaster.serverwrecker.protocol.bot.movement;
 
-public record BlockShape(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
-    public boolean isFullBlock() {
-        return minX == 0 && minY == 0 && minZ == 0 && maxX == 1 && maxY == 1 && maxZ == 1;
-    }
+public record BubbleColumnDrag(
+        double down,
+        double maxDown,
+        double up,
+        double maxUp
+) {
 }

@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.util;
 
 import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 
 public class BlockTypeHelper {
@@ -27,25 +28,7 @@ public class BlockTypeHelper {
     }
 
     public static boolean isReplaceable(BlockType type) {
-        return isAir(type) || isFluid(type)
-                || type == BlockType.DEAD_BUSH
-                || type == BlockType.FERN
-                || type == BlockType.LARGE_FERN
-                || type == BlockType.FIRE
-                || type == BlockType.SOUL_FIRE
-                || type == BlockType.GLOW_LICHEN
-                || type == BlockType.GRASS
-                || type == BlockType.TALL_GRASS
-                || type == BlockType.HANGING_ROOTS
-                || type == BlockType.LIGHT
-                || type == BlockType.NETHER_SPROUTS
-                || type == BlockType.CRIMSON_ROOTS
-                || type == BlockType.WARPED_ROOTS
-                || type == BlockType.SEAGRASS
-                || type == BlockType.TALL_SEAGRASS
-                || type == BlockType.SNOW
-                || type == BlockType.STRUCTURE_VOID
-                || type == BlockType.VINE;
+        return ResourceData.BLOCK_PROPERTY_MAP.get(type.id()).replaceable();
     }
 
     public static boolean isAir(BlockType type) {

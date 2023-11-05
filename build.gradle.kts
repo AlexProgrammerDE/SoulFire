@@ -191,18 +191,18 @@ tasks.withType<Checkstyle> {
     exclude("**/net/pistonmaster/serverwrecker/grpc/generated**")
 }
 
-tasks.compileJava.get().apply {
+tasks.compileJava {
     options.compilerArgs.add("-Aproject=${project.name}")
 }
 
-tasks.named<Jar>("jar").get().apply {
+tasks.named<Jar>("jar") {
     manifest {
         attributes["Main-Class"] = "net.pistonmaster.serverwrecker.ServerWreckerBootstrap"
         attributes["Add-Opens"] = moduleOpens.joinToString(" ")
     }
 }
 
-tasks.named<ShadowJar>("shadowJar").get().apply {
+tasks.named<ShadowJar>("shadowJar") {
     excludes.addAll(
         setOf(
             "META-INF/*.DSA",

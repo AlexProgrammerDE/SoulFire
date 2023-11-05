@@ -73,6 +73,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
 import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.protocol.bot.container.WindowContainer;
 import net.pistonmaster.serverwrecker.protocol.bot.model.*;
+import net.pistonmaster.serverwrecker.protocol.bot.movement.BotMovementManager;
 import net.pistonmaster.serverwrecker.protocol.bot.state.*;
 import net.pistonmaster.serverwrecker.protocol.bot.state.entity.EntityState;
 import net.pistonmaster.serverwrecker.protocol.bot.state.entity.ExperienceOrbState;
@@ -200,11 +201,12 @@ public final class SessionDataManager {
     @BusHandler
     public void onPosition(ClientboundPlayerPositionPacket packet) {
         var isInitial = botMovementManager == null;
-        var currentX = isInitial ? 0 : botMovementManager.getX();
-        var currentY = isInitial ? 0 : botMovementManager.getY();
-        var currentZ = isInitial ? 0 : botMovementManager.getZ();
-        var currentYaw = isInitial ? 0 : botMovementManager.getYaw();
-        var currentPitch = isInitial ? 0 : botMovementManager.getPitch();
+        var posData = isInitial ? null : botMovementManager.getEntity().getPos();
+        var currentX = isInitial ? 0 : posData.getX();
+        var currentY = isInitial ? 0 : posData.getY();
+        var currentZ = isInitial ? 0 : posData.getZ();
+        var currentYaw = isInitial ? 0 : botMovementManager.getEntity().getYaw();
+        var currentPitch = isInitial ? 0 : botMovementManager.getEntity().getPitch();
 
         var xRelative = packet.getRelative().contains(PositionElement.X);
         var yRelative = packet.getRelative().contains(PositionElement.Y);
@@ -219,7 +221,7 @@ public final class SessionDataManager {
         var pitch = pitchRelative ? currentPitch + packet.getPitch() : packet.getPitch();
 
         if (isInitial) {
-            botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch, abilitiesData);
+            botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch);
             var position = botMovementManager.getBlockPos();
             log.info("Joined server at position: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
 
@@ -369,10 +371,10 @@ public final class SessionDataManager {
                 packet.getWalkSpeed()
         );
 
+        selfAttributeState.setAbilities(abilitiesData);
+
         if (botMovementManager != null) {
             botMovementManager.getControlState().setFlying(abilitiesData.flying());
-            botMovementManager.setAbilitiesFlySpeed(abilitiesData.flySpeed());
-            botMovementManager.setWalkSpeed(abilitiesData.walkSpeed());
         }
     }
 

@@ -27,6 +27,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.pistonmaster.serverwrecker.protocol.bot.movement.BotMovementManager;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -76,7 +77,7 @@ public class BotControlAPI {
 
     public boolean toggleSneak() {
         var newSneak = !botMovementManager.getControlState().isSneaking();
-        botMovementManager.setSneaking(newSneak);
+        botMovementManager.getControlState().setSneaking(newSneak);
 
         // Let the server know we are sneaking
         sessionDataManager.getSession().send(new ServerboundPlayerCommandPacket(

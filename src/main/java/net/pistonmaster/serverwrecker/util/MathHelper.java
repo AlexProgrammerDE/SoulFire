@@ -19,6 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.util;
 
+import org.cloudburstmc.math.vector.Vector3i;
+
 public class MathHelper {
     private MathHelper() {
     }
@@ -48,7 +50,25 @@ public class MathHelper {
         return v;
     }
 
-    public static short clamp(short value, short min, short max) {
+    public static short shortClamp(short value, short min, short max) {
         return value < min ? min : (value > max ? max : value);
+    }
+
+    public static double lengthSquared(double x, double y, double z) {
+        return x * x + y * y + z * z;
+    }
+
+    public static double square(double x) {
+        return x * x;
+    }
+
+    public static long getSeed(Vector3i vec3i) {
+        return getSeed(vec3i.getX(), vec3i.getY(), vec3i.getZ());
+    }
+
+    public static long getSeed(int i, int j, int k) {
+        var l = (i * 3129871L) ^ (long) k * 116129781L ^ (long) j;
+        l = l * l * 42317861L + l * 11L;
+        return l >> 16;
     }
 }

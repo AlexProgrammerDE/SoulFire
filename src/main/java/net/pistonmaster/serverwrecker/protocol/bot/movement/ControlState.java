@@ -17,9 +17,8 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol.bot;
+package net.pistonmaster.serverwrecker.protocol.bot.movement;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -39,7 +38,7 @@ public class ControlState {
     private boolean sprinting;
     @Setter
     private boolean jumping;
-    @Setter(AccessLevel.PROTECTED)
+    @Setter
     private boolean sneaking;
     @Setter
     private boolean flying;

@@ -1046,9 +1046,9 @@ public record BlockType(int id, String name, String displayName, float hardness,
         return null;
     }
 
-    public static BlockType getByMcName(String mcName) {
+    public static BlockType getByName(String name) {
         for (var blockType : VALUES) {
-            if (("minecraft:" + blockType.name()).equals(mcName)) {
+            if (blockType.name().equals(name) || ("minecraft:" + blockType.name()).equals(name)) {
                 return blockType;
             }
         }

@@ -29,8 +29,8 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import net.pistonmaster.serverwrecker.data.BlockShapeType;
-import net.pistonmaster.serverwrecker.util.BoundingBox;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.protocol.bot.movement.AABB;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -70,7 +70,7 @@ public class BotActionManager {
         }
 
         var eyePosition = movementManager.getEyePosition();
-        var insideBlock = !levelState.getCollisionBoxes(new BoundingBox(eyePosition, eyePosition)).isEmpty();
+        var insideBlock = !levelState.getCollisionBoxes(new AABB(eyePosition, eyePosition)).isEmpty();
 
         var againstPlacePosition = getMiddleBlockFace(againstBlock, againstFace);
         var previousYaw = movementManager.getYaw();
@@ -85,7 +85,7 @@ public class BotActionManager {
             return;
         }
 
-        var rayCast = rayCastToBlock(blockState.get().blockShapeType(), eyePosition, movementManager.getRotationVector(), againstBlock);
+        var rayCast = rayCastToBlock(blockState.get(), eyePosition, movementManager.getRotationVector(), againstBlock);
         if (rayCast.isEmpty()) {
             return;
         }
@@ -104,12 +104,11 @@ public class BotActionManager {
         ));
     }
 
-    private Optional<Vector3f> rayCastToBlock(BlockShapeType shapeType, Vector3d eyePosition, Vector3d headRotation, Vector3i targetBlock) {
+    private static Optional<Vector3f> rayCastToBlock(BlockStateMeta blockStateMeta, Vector3d eyePosition, Vector3d headRotation, Vector3i targetBlock) {
         var intersections = new ArrayList<Vector3f>();
 
-        for (var shape : shapeType.blockShapes()) {
-            var boundingBox = shape.createBoundingBoxAt(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ());
-            boundingBox.getIntersection(eyePosition, headRotation)
+        for (var shape : blockStateMeta.getCollisionBoxes(targetBlock)) {
+            shape.getIntersection(eyePosition, headRotation)
                     .map(Vector3d::toFloat)
                     .ifPresent(intersections::add);
         }
@@ -134,7 +133,7 @@ public class BotActionManager {
         return Optional.of(closestIntersection);
     }
 
-    public Vector3d getMiddleBlockFace(Vector3i blockPos, Direction blockFace) {
+    public static Vector3d getMiddleBlockFace(Vector3i blockPos, Direction blockFace) {
         var blockPosDouble = blockPos.toDouble();
         return switch (blockFace) {
             case DOWN -> blockPosDouble.add(0.5, 0, 0.5);
@@ -172,7 +171,7 @@ public class BotActionManager {
         var eyePosition = dataManager.getBotMovementManager().getEyePosition();
         var headRotation = dataManager.getBotMovementManager().getRotationVector();
         var blockPosDouble = blockPos.toDouble();
-        var blockBoundingBox = new BoundingBox(blockPosDouble, blockPosDouble.add(1, 1, 1));
+        var blockBoundingBox = new AABB(blockPosDouble, blockPosDouble.add(1, 1, 1));
         var intersection = blockBoundingBox.getIntersection(eyePosition, headRotation).map(Vector3d::toFloat);
         if (intersection.isEmpty()) {
             return null;

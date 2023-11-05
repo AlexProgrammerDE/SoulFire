@@ -19,22 +19,27 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.block;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.pistonmaster.serverwrecker.data.BlockProperty;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.data.ResourceData;
+import net.pistonmaster.serverwrecker.protocol.bot.movement.AABB;
+import org.cloudburstmc.math.vector.Vector3i;
 
+import java.util.List;
 import java.util.Objects;
 
-public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType, int precalculatedHash) {
+public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType, BlockProperty blockProperty,
+                             int precalculatedHash) {
     private static final BlockShapeType EMPTY_SHAPE = BlockShapeType.getById(0);
-    public static final BlockStateMeta AIR_BLOCK_STATE = new BlockStateMeta(BlockType.AIR, EMPTY_SHAPE);
-    public static final BlockStateMeta VOID_AIR_BLOCK_STATE = new BlockStateMeta(BlockType.VOID_AIR, EMPTY_SHAPE);
 
     public BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType) {
-        this(blockType, blockShapeType, Objects.hash(blockType, blockShapeType));
+        this(blockType, blockShapeType, ResourceData.BLOCK_PROPERTY_MAP.get(blockType.id()), Objects.hash(blockType, blockShapeType));
     }
 
     public BlockStateMeta(String blockName, int stateIndex) {
-        this(Objects.requireNonNull(BlockType.getByMcName(blockName), "BlockType was null!"), stateIndex);
+        this(Objects.requireNonNull(BlockType.getByName(blockName), "BlockType was null!"), stateIndex);
     }
 
     private BlockStateMeta(BlockType blockType, int stateIndex) {
@@ -67,5 +72,31 @@ public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType,
     @Override
     public int hashCode() {
         return precalculatedHash;
+    }
+
+    public List<AABB> getCollisionBoxes(Vector3i block) {
+        var shapes = blockShapeType.blockShapes();
+
+        var collisionBoxes = new ObjectArrayList<AABB>(shapes.size());
+        for (var shape : shapes) {
+            var shapeBB = new AABB(
+                    shape.minX(),
+                    shape.minY(),
+                    shape.minZ(),
+                    shape.maxX(),
+                    shape.maxY(),
+                    shape.maxZ()
+            );
+
+            // Apply random offset if needed
+            shapeBB = shapeBB.move(blockProperty.getOffsetForBlock(block));
+
+            // Apply block offset
+            shapeBB = shapeBB.move(block.getX(), block.getY(), block.getZ());
+
+            collisionBoxes.add(shapeBB);
+        }
+
+        return collisionBoxes;
     }
 }

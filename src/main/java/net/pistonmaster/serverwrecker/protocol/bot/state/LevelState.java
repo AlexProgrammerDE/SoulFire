@@ -25,11 +25,12 @@ import lombok.Setter;
 import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.protocol.bot.movement.AABB;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.MCUniform;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.UniformOrInt;
 import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
-import net.pistonmaster.serverwrecker.util.BoundingBox;
 import net.pistonmaster.serverwrecker.util.MathHelper;
+import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
@@ -133,6 +134,10 @@ public class LevelState {
         return chunks.isChunkLoaded(block);
     }
 
+    public Optional<BlockStateMeta> getBlockStateAt(Vector3d block) {
+        return getBlockStateAt(block.toInt());
+    }
+
     public Optional<BlockStateMeta> getBlockStateAt(Vector3i block) {
         return chunks.getBlockStateAt(block);
     }
@@ -145,44 +150,35 @@ public class LevelState {
         return block.getY() < this.getMinBuildHeight() || block.getY() >= this.getMaxBuildHeight();
     }
 
-    public List<BoundingBox> getCollisionBoxes(BoundingBox aabb) {
-        var boundingBoxList = new ArrayList<BoundingBox>();
+    public List<AABB> getCollisionBoxes(AABB aabb) {
+        var startX = MathHelper.floorDouble(aabb.minX - 1.0E-7) - 1;
+        var endX = MathHelper.floorDouble(aabb.maxX + 1.0E-7) + 1;
+        var startY = MathHelper.floorDouble(aabb.minY - 1.0E-7) - 1;
+        var endY = MathHelper.floorDouble(aabb.maxY + 1.0E-7) + 1;
+        var startZ = MathHelper.floorDouble(aabb.minZ - 1.0E-7) - 1;
+        var endZ = MathHelper.floorDouble(aabb.maxZ + 1.0E-7) + 1;
 
-        var minX = MathHelper.floorDouble(aabb.minX);
-        var maxX = MathHelper.floorDouble(aabb.maxX + 1.0);
-        var minY = MathHelper.floorDouble(aabb.minY);
-        var maxY = MathHelper.floorDouble(aabb.maxY + 1.0);
-        var minZ = MathHelper.floorDouble(aabb.minZ);
-        var maxZ = MathHelper.floorDouble(aabb.maxZ + 1.0);
+        var predictedSize = (endX - startX + 1) * (endY - startY + 1) * (endZ - startZ + 1);
+        var surroundingBBs = new ArrayList<AABB>(predictedSize);
 
-        for (var x = minX; x < maxX; x++) {
-            for (var y = minY; y < maxY; y++) {
-                for (var z = minZ; z < maxZ; z++) {
-                    var block = Vector3i.from(x, y, z);
-                    if (isOutOfWorld(block)) {
-                        continue;
-                    }
-
-                    var blockState = getBlockStateAt(block);
+        for (var x = startX; x <= endX; x++) {
+            for (var y = startY; y <= endY; y++) {
+                for (var z = startZ; z <= endZ; z++) {
+                    var cursor = Vector3i.from(x, y, z);
+                    var blockState = getBlockStateAt(cursor);
                     if (blockState.isEmpty()) {
                         continue;
                     }
 
-                    var blockShapeType = blockState.get().blockShapeType();
-                    if (blockShapeType.hasNoCollisions()) {
-                        continue;
-                    }
-
-                    for (var shape : blockShapeType.blockShapes()) {
-                        var boundingBox = shape.createBoundingBoxAt(x, y, z);
-                        if (boundingBox.intersects(aabb)) {
-                            boundingBoxList.add(boundingBox);
+                    for (var collisionBox : blockState.get().getCollisionBoxes(cursor)) {
+                        if (collisionBox.intersects(aabb)) {
+                            surroundingBBs.add(collisionBox);
                         }
                     }
                 }
             }
         }
 
-        return boundingBoxList;
+        return surroundingBBs;
     }
 }
