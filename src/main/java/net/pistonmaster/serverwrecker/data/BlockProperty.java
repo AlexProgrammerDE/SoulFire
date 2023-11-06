@@ -25,7 +25,7 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public record BlockProperty(float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType,
-                            boolean replaceable) {
+                            boolean replaceable, boolean fallingBlock) {
 
     public Vector3d getOffsetForBlock(Vector3i block) {
         return switch (offsetType) {

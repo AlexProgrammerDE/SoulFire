@@ -309,7 +309,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
                                 var unsafe = switch (subscriber.safetyType) {
                                     case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
-                                            || BlockTypeHelper.isFallingAroundMinedBlock(blockState.blockType());
+                                            || BlockTypeHelper.isAffectedByGravity(blockState.blockType());
                                     case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
                                 };
 
@@ -484,7 +484,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
                                 var unsafe = switch (subscriber.safetyType) {
                                     case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
-                                            || BlockTypeHelper.isFallingAroundMinedBlock(blockState.blockType());
+                                            || BlockTypeHelper.isAffectedByGravity(blockState.blockType());
                                     case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
                                 };
 

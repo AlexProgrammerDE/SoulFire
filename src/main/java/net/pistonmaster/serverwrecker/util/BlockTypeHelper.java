@@ -60,12 +60,8 @@ public class BlockTypeHelper {
                 || type == BlockType.LAVA;
     }
 
-    public static boolean isFallingAroundMinedBlock(BlockType type) {
-        return type == BlockType.SAND
-                || type == BlockType.GRAVEL
-                || type == BlockType.ANVIL
-                || type == BlockType.CHIPPED_ANVIL
-                || type == BlockType.DAMAGED_ANVIL;
+    public static boolean isAffectedByGravity(BlockType type) {
+        return ResourceData.BLOCK_PROPERTY_MAP.get(type.id()).fallingBlock();
     }
 
     public static boolean isHurtWhenStoodOn(BlockType type) {

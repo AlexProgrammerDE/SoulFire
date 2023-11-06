@@ -108,7 +108,8 @@ public class ResourceData {
                     blockObject.get("maxHorizontalOffset").getAsFloat(),
                     blockObject.get("maxVerticalOffset").getAsFloat(),
                     OffsetType.valueOf(blockObject.get("offsetType").getAsString()),
-                    blockObject.get("replaceable").getAsBoolean()
+                    blockObject.get("replaceable").getAsBoolean(),
+                    blockObject.get("fallingBlock").getAsBoolean()
             );
 
             blockPropertyMap.put(Objects.requireNonNull(BlockType.getByName(blockName)).id(), blockProperty);
