@@ -24,12 +24,14 @@ import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-public record BlockProperty(float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType,
-                            boolean replaceable, boolean fallingBlock) {
+public record OffsetData(OffsetType type, float maxHorizontalOffset, float maxVerticalOffset) {
+    public enum OffsetType {
+        XZ,
+        XYZ
+    }
 
     public Vector3d getOffsetForBlock(Vector3i block) {
-        return switch (offsetType) {
-            case NONE -> Vector3d.ZERO;
+        return switch (type) {
             case XYZ -> {
                 var seed = MathHelper.getSeed(block.getX(), 0, block.getZ());
                 var yOffset = ((double) ((float) (seed >> 4 & 15L) / 15.0F) - 1.0) * (double) maxVerticalOffset;

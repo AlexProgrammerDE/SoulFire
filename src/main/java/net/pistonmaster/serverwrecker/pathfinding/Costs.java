@@ -146,7 +146,7 @@ public class Costs {
     }
 
     private static boolean isCorrectToolUsed(TagsState tagsState, ItemType itemType, BlockType blockType) {
-        if (!blockType.requiresCorrectTool()) {
+        if (!blockType.blockProperties().requiresCorrectToolForDrops()) {
             return true;
         }
 

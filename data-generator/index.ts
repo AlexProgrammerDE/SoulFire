@@ -89,7 +89,7 @@ if (mcData == null) {
     let result = fs.readFileSync("templates/BlockType.java", "utf-8");
     let enumValues: string[] = []
     for (const block of mcData.blocksArray) {
-      enumValues.push(`public static final BlockType ${block.name.toUpperCase()} = register(new BlockType(${block.id}, "${block.name}", "${block.displayName}", ${block.hardness ?? -1}F, ${block.stackSize}, ${block.diggable}, ${!!block.harvestTools}, BlockStateLoader.getBlockShapes("${block.name}")));`)
+      enumValues.push(`public static final BlockType ${block.name.toUpperCase()} = register(new BlockType(${block.id}, "${block.name}", "${block.displayName}", ${block.hardness ?? -1}F, ${block.stackSize}, ${block.diggable}, ResourceData.BLOCK_PROPERTY_MAP.get("${block.name}"), BlockStateLoader.getBlockShapes("${block.name}")));`)
     }
 
     result = result.replace(enumReplace, enumValues.join("\n    "))

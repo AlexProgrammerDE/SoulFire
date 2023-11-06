@@ -309,7 +309,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
                                 var unsafe = switch (subscriber.safetyType) {
                                     case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
-                                            || BlockTypeHelper.isAffectedByGravity(blockState.blockType());
+                                            || blockState.blockType().blockProperties().fallingBlock();
                                     case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
                                 };
 
@@ -335,7 +335,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
                                 if (movement.isAllowBlockActions()
                                         && node.inventory().hasBlockToPlace()
-                                        && BlockTypeHelper.isReplaceable(blockState.blockType())) {
+                                        && blockState.blockType().blockProperties().replaceable()) {
                                     // We can place a block here, but we need to find a block to place against
                                     movement.setRequiresAgainstBlock(true);
                                 } else {
@@ -484,7 +484,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
                                 var unsafe = switch (subscriber.safetyType) {
                                     case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
-                                            || BlockTypeHelper.isAffectedByGravity(blockState.blockType());
+                                            || blockState.blockType().blockProperties().fallingBlock();
                                     case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
                                 };
 

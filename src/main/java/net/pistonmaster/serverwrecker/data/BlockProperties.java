@@ -19,8 +19,17 @@
  */
 package net.pistonmaster.serverwrecker.data;
 
-public enum OffsetType {
-    NONE,
-    XZ,
-    XYZ
+import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
+
+public record BlockProperties(OffsetData offsetData, boolean replaceable, boolean fallingBlock,
+                              boolean requiresCorrectToolForDrops) {
+
+    public Vector3d getOffsetForBlock(Vector3i block) {
+        if (offsetData == null) {
+            return Vector3d.ZERO;
+        }
+
+        return offsetData.getOffsetForBlock(block);
+    }
 }

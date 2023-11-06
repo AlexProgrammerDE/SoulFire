@@ -20,15 +20,10 @@
 package net.pistonmaster.serverwrecker.util;
 
 import net.pistonmaster.serverwrecker.data.BlockType;
-import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 
 public class BlockTypeHelper {
     private BlockTypeHelper() {
-    }
-
-    public static boolean isReplaceable(BlockType type) {
-        return ResourceData.BLOCK_PROPERTY_MAP.get(type.id()).replaceable();
     }
 
     public static boolean isAir(BlockType type) {
@@ -58,10 +53,6 @@ public class BlockTypeHelper {
                 || type == BlockType.FIRE
                 || type == BlockType.SOUL_FIRE
                 || type == BlockType.LAVA;
-    }
-
-    public static boolean isAffectedByGravity(BlockType type) {
-        return ResourceData.BLOCK_PROPERTY_MAP.get(type.id()).fallingBlock();
     }
 
     public static boolean isHurtWhenStoodOn(BlockType type) {

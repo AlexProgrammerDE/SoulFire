@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.data;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -43,7 +44,7 @@ public class ResourceData {
     protected static final Int2ObjectMap<BlockStateProperties> BLOCK_STATE_PROPERTIES;
     // For loading by BlockShapeType
     protected static final IntSet BLOCK_STATE_DEFAULTS;
-    public static final Int2ObjectMap<BlockProperty> BLOCK_PROPERTY_MAP;
+    protected static final Map<String, BlockProperties> BLOCK_PROPERTY_MAP;
 
     // Static initialization allows us to preload this in a native image
     static {
@@ -99,20 +100,30 @@ public class ResourceData {
             throw new IllegalStateException(e);
         }
 
-        var blockPropertyMap = new Int2ObjectOpenHashMap<BlockProperty>();
+        var blockPropertyMap = new HashMap<String, BlockProperties>();
         for (var blockEntry : blockProperties.entrySet()) {
             var blockName = blockEntry.getKey();
             var blockObject = blockEntry.getValue().getAsJsonObject();
 
-            var blockProperty = new BlockProperty(
-                    blockObject.get("maxHorizontalOffset").getAsFloat(),
-                    blockObject.get("maxVerticalOffset").getAsFloat(),
-                    OffsetType.valueOf(blockObject.get("offsetType").getAsString()),
-                    blockObject.get("replaceable").getAsBoolean(),
-                    blockObject.get("fallingBlock").getAsBoolean()
+            OffsetData offsetData = null;
+            var offsetObject = blockObject.getAsJsonObject("offsetData");
+            if (offsetObject != null) {
+                offsetData = new OffsetData(
+                        OffsetData.OffsetType.valueOf(offsetObject.get("type").getAsString()),
+                        offsetObject.get("maxHorizontalOffset").getAsFloat(),
+                        offsetObject.get("maxVerticalOffset").getAsFloat()
+                );
+            }
+
+            var propertyArray = blockObject.getAsJsonArray("properties");
+            var blockProperty = new BlockProperties(
+                    offsetData,
+                    hasValue(propertyArray, "replaceable"),
+                    hasValue(propertyArray, "fallingBlock"),
+                    hasValue(propertyArray, "requiresCorrectToolForDrops")
             );
 
-            blockPropertyMap.put(Objects.requireNonNull(BlockType.getByName(blockName)).id(), blockProperty);
+            blockPropertyMap.put(blockName, blockProperty);
         }
 
         BLOCK_PROPERTY_MAP = blockPropertyMap;
@@ -144,5 +155,14 @@ public class ResourceData {
     @SuppressWarnings("unused")
     private static void doNothing(Object param) {
         // Do nothing
+    }
+
+    private static boolean hasValue(JsonArray json, String value) {
+        for (var element : json) {
+            if (element.getAsString().equals(value)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

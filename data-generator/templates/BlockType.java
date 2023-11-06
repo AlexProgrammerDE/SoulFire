@@ -5,7 +5,7 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public record BlockType(int id, String name, String displayName, float hardness, int stackSize,
-                        boolean diggable, boolean requiresCorrectTool, List<BlockShapeType> blockShapeTypes) {
+                        boolean diggable, BlockProperties blockProperties, List<BlockShapeType> blockShapeTypes) {
     public static final List<BlockType> VALUES = new ArrayList<>();
 
     // VALUES REPLACE
@@ -25,9 +25,9 @@ public record BlockType(int id, String name, String displayName, float hardness,
         return null;
     }
 
-    public static BlockType getByMcName(String mcName) {
+    public static BlockType getByName(String name) {
         for (var blockType : VALUES) {
-            if (("minecraft:" + blockType.name()).equals(mcName)) {
+            if (blockType.name().equals(name) || ("minecraft:" + blockType.name()).equals(name)) {
                 return blockType;
             }
         }
