@@ -1,7 +1,7 @@
 [versions]
-log4j = "2.21.0"
+log4j = "2.21.1"
 grpc = "1.59.0"
-protobuf = "3.24.4"
+protobuf = "3.25.0"
 protoc = "3.24.0"
 
 [plugins]
@@ -12,7 +12,7 @@ log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "lo
 log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
 log4j-iostreams = { module = "org.apache.logging.log4j:log4j-iostreams", version.ref = "log4j" }
 log4j-jul = { module = "org.apache.logging.log4j:log4j-jul", version.ref = "log4j" }
-jline = "org.jline:jline-terminal-jansi:3.23.0"
+jline = "org.jline:jline-terminal-jansi:3.24.1"
 jansi = "org.fusesource.jansi:jansi:2.4.1"
 terminalconsoleappender = "net.minecrell:terminalconsoleappender:1.3.0"
 slf4j = "org.slf4j:slf4j-api:2.0.9"
@@ -28,8 +28,8 @@ miglayout-swing = "com.miglayout:miglayout-swing:11.2"
 mcprotocollib = "com.github.GeyserMC:MCProtocolLib:2f05a23"
 velocity-native = "com.velocitypowered:velocity-native:3.1.2-SNAPSHOT"
 netty-raknet = "org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT"
-via-version = "com.viaversion:viaversion:4.9.0-23w42a-SNAPSHOT"
-via-backwards = "com.viaversion:viabackwards-common:4.9.0-23w42a-SNAPSHOT"
+via-version = "com.viaversion:viaversion:4.9.0-23w44a-SNAPSHOT"
+via-backwards = "com.viaversion:viabackwards-common:4.9.0-23w44a-SNAPSHOT"
 via-rewind = "com.viaversion:viarewind-common:3.0.3-SNAPSHOT"
 via-legacy = "net.raphimc:ViaLegacy:2.2.21-SNAPSHOT"
 via-aprilfools = "net.raphimc:ViaAprilFools:2.0.10-SNAPSHOT"
@@ -41,7 +41,7 @@ kyori-event = "net.kyori:event-api:5.0.0-SNAPSHOT"
 kyori-plain = "net.kyori:adventure-text-serializer-plain:4.14.0"
 kyori-gson = "net.kyori:adventure-text-serializer-gson:4.14.0"
 commons-validator = "commons-validator:commons-validator:1.7"
-commons-io = "commons-io:commons-io:2.14.0"
+commons-io = "commons-io:commons-io:2.15.0"
 guava = "com.google.guava:guava:32.1.3-jre"
 gson = "com.google.code.gson:gson:2.10.1"
 pf4j = "org.pf4j:pf4j:3.10.0"
