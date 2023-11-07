@@ -10,7 +10,7 @@ plugins {
     id("org.graalvm.buildtools.native")
 }
 
-version = "1.3.0"
+version = "1.4.0-SNAPSHOT"
 description = "Advanced Minecraft Server-Stresser Tool."
 
 val moduleOpens = setOf(
