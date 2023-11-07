@@ -363,8 +363,8 @@ public class BotMovementManager {
             applyHeading(strafe, forward, frictionInfluencedSpeed);
 
             if (isOnLadder(world, pos.toImmutableInt())) {
-                vel.x = GenericMath.clamp(-physics.ladderMaxSpeed, vel.x, physics.ladderMaxSpeed);
-                vel.z = GenericMath.clamp(-physics.ladderMaxSpeed, vel.z, physics.ladderMaxSpeed);
+                vel.x = GenericMath.clamp(vel.x, -physics.ladderMaxSpeed, physics.ladderMaxSpeed);
+                vel.z = GenericMath.clamp(vel.z, -physics.ladderMaxSpeed, physics.ladderMaxSpeed);
                 vel.y = Math.max(vel.y, controlState.isSneaking() ? 0 : -physics.ladderMaxSpeed);
             }
 
