@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "minecraft-data": "^3.37.0",
-    "tsx": "^3.12.7",
+    "tsx": "^4.0.0",
     "typescript": "^5.0.4"
   },
   "devDependencies": {
