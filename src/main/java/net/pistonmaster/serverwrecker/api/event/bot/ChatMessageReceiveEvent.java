@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.api.event.bot;
 
 import net.kyori.adventure.text.Component;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
@@ -32,6 +32,6 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
  */
 public record ChatMessageReceiveEvent(BotConnection connection, Component message) implements ServerWreckerBotEvent {
     public String parseToText() {
-        return ServerWrecker.PLAIN_MESSAGE_SERIALIZER.serialize(message);
+        return ServerWreckerServer.PLAIN_MESSAGE_SERIALIZER.serialize(message);
     }
 }

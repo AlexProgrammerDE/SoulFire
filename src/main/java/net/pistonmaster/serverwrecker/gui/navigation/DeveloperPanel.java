@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import javafx.stage.FileChooser;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.LogPanel;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
@@ -40,8 +40,8 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
     private final JCheckBox coreDebug = new JCheckBox();
 
     @Inject
-    public DeveloperPanel(ServerWrecker serverWrecker, GUIManager guiManager, LogPanel logPanel) {
-        serverWrecker.getSettingsManager().registerDuplex(DevSettings.class, this);
+    public DeveloperPanel(GUIManager guiManager, LogPanel logPanel) {
+        guiManager.getSettingsManager().registerDuplex(DevSettings.class, this);
 
         setLayout(new GridLayout(0, 2));
 
@@ -63,7 +63,7 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
 
         saveLog.addActionListener(listener -> {
             var chooser = new FileChooser();
-            chooser.setInitialDirectory(ServerWrecker.DATA_FOLDER.toFile());
+            chooser.setInitialDirectory(ServerWreckerServer.DATA_FOLDER.toFile());
             chooser.setTitle("Save Log");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log Files", "*.log"));
             JFXFileHelper.showSaveDialog(chooser).thenAcceptAsync(file -> {
@@ -77,7 +77,7 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
                 } catch (IOException e) {
                     guiManager.getLogger().error("Failed to save log!", e);
                 }
-            }, serverWrecker.getThreadPool());
+            }, guiManager.getThreadPool());
         });
     }
 

@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
@@ -148,9 +148,9 @@ public class AutoArmor implements InternalAddon {
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        AutoArmorPanel(ServerWrecker serverWrecker) {
+        AutoArmorPanel(ServerWreckerServer serverWreckerServer) {
             super();
-            serverWrecker.getSettingsManager().registerDuplex(AutoArmorSettings.class, this);
+            serverWreckerServer.getSettingsManager().registerDuplex(AutoArmorSettings.class, this);
 
             setLayout(new GridLayout(0, 2));
 

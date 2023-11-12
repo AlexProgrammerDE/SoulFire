@@ -25,7 +25,7 @@ import com.github.steveice10.mc.protocol.data.game.setting.SkinPart;
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundClientInformationPacket;
 import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
@@ -129,9 +129,9 @@ public class ClientSettings implements InternalAddon {
         private final JCheckBox textFilteringEnabled;
         private final JCheckBox allowsListing;
 
-        ClientSettingsPanel(ServerWrecker serverWrecker) {
+        ClientSettingsPanel(ServerWreckerServer serverWreckerServer) {
             super();
-            serverWrecker.getSettingsManager().registerDuplex(ClientSettingsSettings.class, this);
+            serverWreckerServer.getSettingsManager().registerDuplex(ClientSettingsSettings.class, this);
 
             setLayout(new GridLayout(0, 2));
 

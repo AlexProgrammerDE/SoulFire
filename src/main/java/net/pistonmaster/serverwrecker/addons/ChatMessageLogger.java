@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.addons;
 
 import net.kyori.event.EventSubscriber;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
@@ -108,9 +108,9 @@ public class ChatMessageLogger implements InternalAddon {
         private final JCheckBox logChat;
         private final JSpinner interval;
 
-        ChatMessagePanel(ServerWrecker serverWrecker) {
+        ChatMessagePanel(ServerWreckerServer serverWreckerServer) {
             super();
-            serverWrecker.getSettingsManager().registerDuplex(ChatMessageSettings.class, this);
+            serverWreckerServer.getSettingsManager().registerDuplex(ChatMessageSettings.class, this);
 
             setLayout(new GridLayout(0, 2));
 

@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.pistonmaster.serverwrecker.SWConstants;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
@@ -48,8 +48,8 @@ public class SettingsPanel extends NavigationItem implements SettingsDuplex<BotS
     private final JSpinner concurrentConnects = new JSpinner();
 
     @Inject
-    public SettingsPanel(ServerWrecker serverWrecker) {
-        serverWrecker.getSettingsManager().registerDuplex(BotSettings.class, this);
+    public SettingsPanel(GUIManager guiManager) {
+        guiManager.getSettingsManager().registerDuplex(BotSettings.class, this);
 
         setLayout(new GridLayout(0, 2));
 

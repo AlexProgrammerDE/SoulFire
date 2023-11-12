@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.gui;
 
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
@@ -31,7 +31,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 
 public class GUIClientProps {
-    private static final Path SETTINGS_PATH = ServerWrecker.DATA_FOLDER.resolve("gui-data.properties");
+    private static final Path SETTINGS_PATH = ServerWreckerServer.DATA_FOLDER.resolve("gui-data.properties");
     private static final Properties SETTINGS = new Properties();
 
     private GUIClientProps() {

@@ -22,7 +22,7 @@ package net.pistonmaster.serverwrecker.addons;
 import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
@@ -61,7 +61,7 @@ public class AutoRespawn implements InternalAddon {
                 return;
             }
 
-            var message = ServerWrecker.PLAIN_MESSAGE_SERIALIZER.serialize(combatKillPacket.getMessage());
+            var message = ServerWreckerServer.PLAIN_MESSAGE_SERIALIZER.serialize(combatKillPacket.getMessage());
             event.connection().logger().info("[AutoRespawn] Died with killer: {} and message: '{}'",
                     combatKillPacket.getPlayerId(), message);
 
@@ -86,9 +86,9 @@ public class AutoRespawn implements InternalAddon {
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        AutoRespawnPanel(ServerWrecker serverWrecker) {
+        AutoRespawnPanel(ServerWreckerServer serverWreckerServer) {
             super();
-            serverWrecker.getSettingsManager().registerDuplex(AutoRespawnSettings.class, this);
+            serverWreckerServer.getSettingsManager().registerDuplex(AutoRespawnSettings.class, this);
 
             setLayout(new GridLayout(0, 2));
 

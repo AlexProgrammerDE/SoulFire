@@ -31,7 +31,7 @@ import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.AttackManager;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.DispatcherInitEvent;
@@ -74,10 +74,10 @@ public class CommandManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandManager.class);
     @Getter
     private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
-    private final ServerWrecker serverWrecker;
+    private final ServerWreckerServer serverWreckerServer;
     private final ConsoleSubject consoleSubject;
     private final List<String> commandHistory = Collections.synchronizedList(new ArrayList<>());
-    private final Path targetFile = ServerWrecker.DATA_FOLDER.resolve(".command_history");
+    private final Path targetFile = ServerWreckerServer.DATA_FOLDER.resolve(".command_history");
 
     @PostConstruct
     public void postConstruct() {
@@ -114,7 +114,7 @@ public class CommandManager {
             return Command.SINGLE_SUCCESS;
         })));
         dispatcher.register(literal("clear-console").executes(help("Clears the GUIs log panel", c -> {
-            var logPanel = serverWrecker.getInjector().getIfAvailable(LogPanel.class);
+            var logPanel = serverWreckerServer.getInjector().getIfAvailable(LogPanel.class);
             if (logPanel != null) {
                 logPanel.getMessageLogPanel().clear();
             }
@@ -223,13 +223,13 @@ public class CommandManager {
         // Attack controls
         dispatcher.register(literal("start-attack")
                 .executes(help("Starts an attack using the current profile", c -> {
-                    var id = serverWrecker.startAttack();
+                    var id = serverWreckerServer.startAttack();
                     LOGGER.info("Started an attack with id {}", id);
                     return Command.SINGLE_SUCCESS;
                 })));
         dispatcher.register(literal("stop-attack")
                 .executes(help("Stops the ongoing attacks", c -> forEveryAttack(attackManager -> {
-                    serverWrecker.stopAttack(attackManager.getId());
+                    serverWreckerServer.stopAttack(attackManager.getId());
                     return Command.SINGLE_SUCCESS;
                 }))));
 
@@ -303,13 +303,13 @@ public class CommandManager {
     }
 
     private int forEveryAttack(ToIntFunction<AttackManager> consumer) {
-        if (serverWrecker.getAttacks().isEmpty()) {
+        if (serverWreckerServer.getAttacks().isEmpty()) {
             LOGGER.warn("No attacks found!");
             return 2;
         }
 
         var resultCode = Command.SINGLE_SUCCESS;
-        for (var attackManager : serverWrecker.getAttacks().values()) {
+        for (var attackManager : serverWreckerServer.getAttacks().values()) {
             LOGGER.info("Running command for attack {}", attackManager.getId());
             var result = consumer.applyAsInt(attackManager);
             if (result != Command.SINGLE_SUCCESS) {

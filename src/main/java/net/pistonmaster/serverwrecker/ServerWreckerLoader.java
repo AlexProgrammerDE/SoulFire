@@ -55,7 +55,7 @@ public class ServerWreckerLoader {
             AnsiConsole.systemInstall();
         }
 
-        ServerWrecker.setupLogging(DevSettings.DEFAULT);
+        ServerWreckerServer.setupLogging(DevSettings.DEFAULT);
     }
 
     public static void injectTheme() {
@@ -78,7 +78,7 @@ public class ServerWreckerLoader {
     }
 
     public static void runHeadless(int port, String[] args) {
-        var serverWrecker = new ServerWrecker(OperationMode.CLI, "localhost", port);
+        var serverWrecker = new ServerWreckerServer(OperationMode.CLI, "localhost", port);
         var serverWreckerCommand = new SWCommandDefinition(serverWrecker);
         var commandLine = new CommandLine(serverWreckerCommand);
         serverWreckerCommand.setCommandLine(commandLine);
@@ -95,7 +95,7 @@ public class ServerWreckerLoader {
     }
 
     public static void runGUI(int port) {
-        var serverWrecker = new ServerWrecker(OperationMode.GUI, "localhost", port);
+        var serverWrecker = new ServerWreckerServer(OperationMode.GUI, "localhost", port);
         serverWrecker.initConsole();
 
         var guiManager = new GUIManager(serverWrecker, serverWrecker.getInjector().getSingleton(RPCClient.class));

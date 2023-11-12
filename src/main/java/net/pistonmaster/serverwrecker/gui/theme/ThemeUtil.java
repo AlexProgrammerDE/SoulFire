@@ -23,7 +23,7 @@ import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.util.SystemInfo;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class ThemeUtil {
-    public static final Path THEME_PATH = ServerWrecker.DATA_FOLDER.resolve("theme.json");
+    public static final Path THEME_PATH = ServerWreckerServer.DATA_FOLDER.resolve("theme.json");
     public static final SettingsManager THEME_MANAGER = new SettingsManager(ThemeSettings.class);
     public static final ThemeProvider THEME_PROVIDER = new ThemeProvider(FlatDarculaLaf.class);
     private static final Logger LOGGER = LoggerFactory.getLogger(ThemeUtil.class);

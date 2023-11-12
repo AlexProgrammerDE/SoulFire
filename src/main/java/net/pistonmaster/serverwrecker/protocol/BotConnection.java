@@ -23,7 +23,7 @@ import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import net.kyori.event.EventBus;
 import net.pistonmaster.serverwrecker.AttackManager;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.protocol.bot.BotControlAPI;
@@ -38,7 +38,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public record BotConnection(UUID connectionId, BotConnectionFactory factory, AttackManager attackManager,
-                            ServerWrecker serverWrecker, SettingsHolder settingsHolder,
+                            ServerWreckerServer serverWreckerServer, SettingsHolder settingsHolder,
                             Logger logger, MinecraftProtocol protocol, ViaClientSession session,
                             ExecutorManager executorManager, BotConnectionMeta meta,
                             EventBus<ServerWreckerBotEvent> eventBus) {

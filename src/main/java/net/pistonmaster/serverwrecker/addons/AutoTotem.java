@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
@@ -111,9 +111,9 @@ public class AutoTotem implements InternalAddon {
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        AutoTotemPanel(ServerWrecker serverWrecker) {
+        AutoTotemPanel(ServerWreckerServer serverWreckerServer) {
             super();
-            serverWrecker.getSettingsManager().registerDuplex(AutoTotemSettings.class, this);
+            serverWreckerServer.getSettingsManager().registerDuplex(AutoTotemSettings.class, this);
 
             setLayout(new GridLayout(0, 2));
 

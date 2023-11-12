@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.command;
 
 import lombok.RequiredArgsConstructor;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandCompletionRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandRequest;
@@ -38,20 +37,20 @@ import javax.inject.Inject;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class SWTerminalConsole extends SimpleTerminalConsole {
     private static final Logger logger = LogManager.getLogger("ServerWrecker");
-    private final ServerWrecker serverWrecker;
+    private final ShutdownManager shutdownManager;
     private final RPCClient rpcClient;
 
     /**
      * Sets up {@code System.out} and {@code System.err} to redirect to log4j.
      */
-    public void setupStreams() {
+    public static void setupStreams() {
         System.setOut(IoBuilder.forLogger(logger).setLevel(Level.INFO).buildPrintStream());
         System.setErr(IoBuilder.forLogger(logger).setLevel(Level.ERROR).buildPrintStream());
     }
 
     @Override
     protected boolean isRunning() {
-        return !serverWrecker.isShutdown();
+        return !shutdownManager.isShutdown();
     }
 
     @Override
@@ -63,7 +62,7 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
 
     @Override
     protected void shutdown() {
-        serverWrecker.shutdown(true);
+        shutdownManager.shutdown(true);
     }
 
     @Override

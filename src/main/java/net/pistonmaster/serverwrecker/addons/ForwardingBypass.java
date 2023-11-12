@@ -28,7 +28,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
@@ -237,7 +237,7 @@ public class ForwardingBypass implements InternalAddon {
                 .append('\0')
                 .append(UUIDHelper.convertToNoDashes(botUniqueId))
                 .append('\0');
-        ServerWrecker.GENERAL_GSON
+        ServerWreckerServer.GENERAL_GSON
                 .toJson(propertiesTransform.apply(List.of()), data);
         return data.toString();
     }
@@ -260,9 +260,9 @@ public class ForwardingBypass implements InternalAddon {
         private final JComboBox<ForwardingBypassSettings.ForwardingMode> forwardingMode;
         private final JTextField secret;
 
-        ForwardingBypassPanel(ServerWrecker serverWrecker) {
+        ForwardingBypassPanel(ServerWreckerServer serverWreckerServer) {
             super();
-            serverWrecker.getSettingsManager().registerDuplex(ForwardingBypassSettings.class, this);
+            serverWreckerServer.getSettingsManager().registerDuplex(ForwardingBypassSettings.class, this);
 
             setLayout(new GridLayout(0, 2));
 

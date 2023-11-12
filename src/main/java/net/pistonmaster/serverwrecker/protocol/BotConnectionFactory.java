@@ -50,7 +50,7 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
         var botSettings = settingsHolder.get(BotSettings.class);
         var meta = new BotConnectionMeta(minecraftAccount, targetState);
         var session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
-        var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.getServerWrecker(),
+        var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.getServerWreckerServer(),
                 settingsHolder, logger, protocol, session, new ExecutorManager("ServerWrecker-Attack-" + attackManager.getId()), meta,
                 EventBus.create(ServerWreckerBotEvent.class));
 

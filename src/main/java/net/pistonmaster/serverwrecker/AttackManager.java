@@ -64,7 +64,7 @@ public class AttackManager {
     private final Logger logger = LoggerFactory.getLogger("AttackManager-" + id);
     private final EventBus<ServerWreckerAttackEvent> eventBus = EventBus.create(ServerWreckerAttackEvent.class);
     private final List<BotConnection> botConnections = new CopyOnWriteArrayList<>();
-    private final ServerWrecker serverWrecker;
+    private final ServerWreckerServer serverWreckerServer;
     @Setter
     private AttackState attackState = AttackState.STOPPED;
 
@@ -85,7 +85,7 @@ public class AttackManager {
         var accountSettings = settingsHolder.get(AccountSettings.class);
         var proxySettings = settingsHolder.get(ProxySettings.class);
 
-        serverWrecker.setupLoggingAndVia(settingsHolder.get(DevSettings.class));
+        ServerWreckerServer.setupLoggingAndVia(settingsHolder.get(DevSettings.class));
 
         this.attackState = AttackState.RUNNING;
 

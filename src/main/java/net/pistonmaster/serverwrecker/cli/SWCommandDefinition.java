@@ -22,7 +22,7 @@ package net.pistonmaster.serverwrecker.cli;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
         description = BuildData.DESCRIPTION, sortOptions = false)
 public class SWCommandDefinition implements Callable<Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SWCommandDefinition.class);
-    private final ServerWrecker serverWrecker;
+    private final ServerWreckerServer serverWreckerServer;
     @Setter
     private CommandLine commandLine;
 
@@ -141,14 +141,14 @@ public class SWCommandDefinition implements Callable<Integer> {
                 var description = option.description() == null ? "" : String.join(", ", option.description());
                 System.out.printf("| %s | %s | %s |%n", name, defaultValue, description);
             });
-            serverWrecker.shutdown(true);
+            serverWreckerServer.shutdown();
             return 0;
         }
 
         // Delayed to here, so help and version do not get cut off
-        serverWrecker.initConsole();
+        serverWreckerServer.initConsole();
 
-        serverWrecker.getSettingsManager().registerProvider(BotSettings.class,
+        serverWreckerServer.getSettingsManager().registerProvider(BotSettings.class,
                 () -> new BotSettings(
                         host,
                         port,
@@ -163,7 +163,7 @@ public class SWCommandDefinition implements Callable<Integer> {
                         concurrentConnects
                 ));
 
-        serverWrecker.getSettingsManager().registerProvider(DevSettings.class,
+        serverWreckerServer.getSettingsManager().registerProvider(DevSettings.class,
                 () -> new DevSettings(
                         viaDebug,
                         nettyDebug,
@@ -171,20 +171,20 @@ public class SWCommandDefinition implements Callable<Integer> {
                         coreDebug
                 ));
 
-        serverWrecker.getSettingsManager().registerProvider(AccountSettings.class,
+        serverWreckerServer.getSettingsManager().registerProvider(AccountSettings.class,
                 () -> new AccountSettings(
                         nameFormat,
                         shuffleAccounts
                 ));
 
-        serverWrecker.getSettingsManager().registerProvider(ProxySettings.class,
+        serverWreckerServer.getSettingsManager().registerProvider(ProxySettings.class,
                 () -> new ProxySettings(
                         botsPerProxy
                 ));
 
         if (accountFile != null && authType != null) {
             try {
-                serverWrecker.getAccountRegistry().loadFromString(Files.readString(accountFile), authType);
+                serverWreckerServer.getAccountRegistry().loadFromString(Files.readString(accountFile), authType);
             } catch (IOException e) {
                 LOGGER.error("Failed to load accounts!", e);
                 return 1;
@@ -193,7 +193,7 @@ public class SWCommandDefinition implements Callable<Integer> {
 
         if (proxyFile != null && proxyType != null) {
             try {
-                serverWrecker.getProxyRegistry().loadFromString(Files.readString(proxyFile), proxyType);
+                serverWreckerServer.getProxyRegistry().loadFromString(Files.readString(proxyFile), proxyType);
             } catch (IOException e) {
                 LOGGER.error("Failed to load proxies!", e);
                 return 1;
@@ -202,7 +202,7 @@ public class SWCommandDefinition implements Callable<Integer> {
 
         if (profileFile != null) {
             try {
-                serverWrecker.getSettingsManager().loadProfile(profileFile);
+                serverWreckerServer.getSettingsManager().loadProfile(profileFile);
             } catch (IOException e) {
                 LOGGER.error("Failed to load profile!", e);
                 return 1;
@@ -210,7 +210,7 @@ public class SWCommandDefinition implements Callable<Integer> {
         }
 
         if (start) {
-            serverWrecker.startAttack();
+            serverWreckerServer.startAttack();
         } else {
             LOGGER.info("ServerWrecker is ready to go! Type 'start-attack' to start the attack!");
         }

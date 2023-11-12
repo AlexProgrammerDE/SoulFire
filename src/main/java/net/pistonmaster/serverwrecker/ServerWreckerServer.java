@@ -43,6 +43,7 @@ import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
+import net.pistonmaster.serverwrecker.command.ShutdownManager;
 import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.data.ResourceData;
@@ -71,6 +72,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -85,12 +87,12 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
-public class ServerWrecker {
-    public static final Logger LOGGER = LoggerFactory.getLogger(ServerWrecker.class);
+public class ServerWreckerServer {
+    public static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerServer.class);
     public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
+    public static final Path PLUGINS_FOLDER = DATA_FOLDER.resolve("plugins");
     public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER;
     public static final Gson GENERAL_GSON = new Gson();
 
@@ -109,7 +111,6 @@ public class ServerWrecker {
             .create();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final Map<String, String> serviceServerConfig = new HashMap<>();
-    private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
     private final SWTerminalConsole terminalConsole;
     private final AccountRegistry accountRegistry = new AccountRegistry();
     private final ProxyRegistry proxyRegistry = new ProxyRegistry();
@@ -122,39 +123,36 @@ public class ServerWrecker {
             ProxyList.class
     );
     private final OperationMode operationMode;
-    private final Path profilesFolder;
-    private final Path pluginsFolder;
     private final boolean outdated;
     private final Map<Integer, AttackManager> attacks = Collections.synchronizedMap(new Int2ObjectArrayMap<>());
     private final RPCServer rpcServer;
-    private boolean shutdown = false;
+    private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
+    private final SecretKey jwtSecretKey;
 
-    public ServerWrecker(OperationMode operationMode, String host, int port) {
+    public ServerWreckerServer(OperationMode operationMode, String host, int port) {
         this.operationMode = operationMode;
-        this.profilesFolder = DATA_FOLDER.resolve("profiles");
-        this.pluginsFolder = DATA_FOLDER.resolve("plugins");
 
         // Register into injector
-        injector.register(ServerWrecker.class, this);
+        injector.register(ServerWreckerServer.class, this);
 
         // Init API
         ServerWreckerAPI.setServerWrecker(this);
+
+        injector.register(ShutdownManager.class, shutdownManager);
 
         var logAppender = new SWLogAppender();
         logAppender.start();
         injector.register(SWLogAppender.class, logAppender);
         ((org.apache.logging.log4j.core.Logger) LogManager.getRootLogger()).addAppender(logAppender);
 
-        KeyGenerator keyGen;
         try {
-            keyGen = KeyGenerator.getInstance("HmacSHA256");
+            var keyGen = KeyGenerator.getInstance("HmacSHA256");
+            this.jwtSecretKey = keyGen.generateKey();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
 
-        var jwtKey = keyGen.generateKey();
-
-        rpcServer = new RPCServer(port, injector, jwtKey);
+        rpcServer = new RPCServer(port, injector, jwtSecretKey);
         try {
             rpcServer.start();
         } catch (IOException e) {
@@ -166,20 +164,13 @@ public class ServerWrecker {
 
         LOGGER.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
-        var jwt = Jwts.builder()
-                .subject("admin")
-                .signWith(jwtKey, Jwts.SIG.HS256)
-                .compact();
-
-        var rpcClient = new RPCClient(host, port, jwt);
+        var rpcClient = new RPCClient(host, port, generateAdminJWT());
         injector.register(RPCClient.class, rpcClient);
 
         terminalConsole = injector.getSingleton(SWTerminalConsole.class);
 
         try {
             Files.createDirectories(DATA_FOLDER);
-            Files.createDirectories(profilesFolder);
-            Files.createDirectories(pluginsFolder);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -231,7 +222,7 @@ public class ServerWrecker {
             addon.onEnable(this);
         }
 
-        initPlugins(pluginsFolder);
+        initPlugins();
 
         LOGGER.info("Checking for updates...");
         outdated = checkForUpdates();
@@ -250,7 +241,7 @@ public class ServerWrecker {
         Configurator.setLevel("io.grpc", grpcLevel);
     }
 
-    private boolean checkForUpdates() {
+    private static boolean checkForUpdates() {
         try {
             var url = URI.create("https://api.github.com/repos/AlexProgrammerDE/ServerWrecker/releases/latest").toURL();
             var connection = (HttpURLConnection) url.openConnection();
@@ -281,20 +272,32 @@ public class ServerWrecker {
         return false;
     }
 
+    /**
+     * Generates a JWT for the admin user.
+     *
+     * @return The JWT.
+     */
+    public String generateAdminJWT() {
+        return Jwts.builder()
+                .subject("admin")
+                .signWith(jwtSecretKey, Jwts.SIG.HS256)
+                .compact();
+    }
+
     public void initConsole() {
-        terminalConsole.setupStreams();
+        SWTerminalConsole.setupStreams();
         threadPool.execute(terminalConsole::start);
     }
 
-    private void initPlugins(Path pluginDir) {
+    private static void initPlugins() {
         try {
-            Files.createDirectories(pluginDir);
+            Files.createDirectories(PLUGINS_FOLDER);
         } catch (IOException e) {
             LOGGER.error("Failed to create plugin directory", e);
         }
 
         // create the plugin manager
-        PluginManager pluginManager = new JarPluginManager(pluginDir);
+        PluginManager pluginManager = new JarPluginManager(PLUGINS_FOLDER);
 
         pluginManager.setSystemVersion(BuildData.VERSION);
 
@@ -304,25 +307,12 @@ public class ServerWrecker {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public void setupLoggingAndVia(DevSettings devSettings) {
+    public static void setupLoggingAndVia(DevSettings devSettings) {
         Via.getManager().debugHandler().setEnabled(devSettings.viaDebug());
         setupLogging(devSettings);
     }
 
-    /**
-     * Shuts down the proxy, kicking players with the specified reason.
-     *
-     * @param explicitExit whether the user explicitly shut down the proxy
-     */
-    public void shutdown(boolean explicitExit) {
-        if (!shutdownInProgress.compareAndSet(false, true)) {
-            return;
-        }
-
-        if (explicitExit) {
-            LOGGER.info("Shutting down...");
-        }
-
+    private void shutdownHook() {
         // Shutdown the attacks if there is any
         stopAllAttacks().join();
 
@@ -334,15 +324,6 @@ public class ServerWrecker {
             rpcServer.stop();
         } catch (InterruptedException e) {
             LOGGER.error("Failed to stop RPC server", e);
-        }
-
-        // Since we manually removed the shutdown hook, we need to handle the shutdown ourselves.
-        LogManager.shutdown(true, true);
-
-        shutdown = true;
-
-        if (explicitExit) {
-            System.exit(0);
         }
     }
 
@@ -374,5 +355,9 @@ public class ServerWrecker {
 
     public CompletableFuture<Void> stopAttack(int id) {
         return attacks.remove(id).stop();
+    }
+
+    public void shutdown() {
+        shutdownManager.shutdown(true);
     }
 }

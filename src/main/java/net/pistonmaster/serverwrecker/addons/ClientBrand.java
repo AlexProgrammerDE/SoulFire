@@ -23,7 +23,7 @@ import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundCu
 import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
@@ -85,9 +85,9 @@ public class ClientBrand implements InternalAddon {
         private final JCheckBox sendClientBrand;
         private final JTextField clientBrand;
 
-        ClientBrandPanel(ServerWrecker serverWrecker) {
+        ClientBrandPanel(ServerWreckerServer serverWreckerServer) {
             super();
-            serverWrecker.getSettingsManager().registerDuplex(ClientBrandSettings.class, this);
+            serverWreckerServer.getSettingsManager().registerDuplex(ClientBrandSettings.class, this);
 
             setLayout(new GridLayout(0, 2));
 

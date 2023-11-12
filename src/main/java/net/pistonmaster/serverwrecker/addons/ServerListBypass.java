@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.addons;
 
 import com.github.steveice10.mc.protocol.data.ProtocolState;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
@@ -84,9 +84,9 @@ public class ServerListBypass implements InternalAddon {
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        ServerListBypassPanel(ServerWrecker serverWrecker) {
+        ServerListBypassPanel(ServerWreckerServer serverWreckerServer) {
             super();
-            serverWrecker.getSettingsManager().registerDuplex(ServerListBypassSettings.class, this);
+            serverWreckerServer.getSettingsManager().registerDuplex(ServerListBypassSettings.class, this);
 
             setLayout(new GridLayout(0, 2));
 

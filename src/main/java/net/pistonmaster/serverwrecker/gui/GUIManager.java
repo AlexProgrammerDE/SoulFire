@@ -20,30 +20,55 @@
 package net.pistonmaster.serverwrecker.gui;
 
 import ch.jalu.injector.Injector;
+import ch.jalu.injector.InjectorBuilder;
 import javafx.embed.swing.JFXPanel;
 import lombok.Getter;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.auth.AccountRegistry;
+import net.pistonmaster.serverwrecker.command.ShutdownManager;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
+import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Getter
 public class GUIManager {
+    public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwreckerclient");
+    public static final Path PROFILES_FOLDER = DATA_FOLDER.resolve("profiles");
     private final RPCClient rpcClient;
-    private final Injector injector;
+    private final Injector injector = new InjectorBuilder()
+            .addDefaultHandlers("net.pistonmaster.serverwrecker")
+            .create();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final Logger logger = LoggerFactory.getLogger(GUIManager.class);
+    private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
+    private final AccountRegistry accountRegistry = new AccountRegistry();
+    private final ProxyRegistry proxyRegistry = new ProxyRegistry();
+    private final SettingsManager settingsManager;
 
-    public GUIManager(ServerWrecker serverWrecker, RPCClient rpcClient) {
+    public GUIManager(ServerWreckerServer serverWreckerServer, RPCClient rpcClient) {
         this.rpcClient = rpcClient;
-        this.injector = serverWrecker.getInjector(); // TODO: Separate injector for GUI
         injector.register(GUIManager.class, this);
+
+        // TODO: Remove instance dependency on ServerWreckerServer (Receive settings and panels via gRPC?)
+        this.settingsManager = serverWreckerServer.getSettingsManager();
+
+        try {
+            Files.createDirectories(PROFILES_FOLDER);
+        } catch (IOException e) {
+            logger.error("Failed to create profiles folder!", e);
+        }
     }
 
     public void initGUI() {
@@ -63,6 +88,14 @@ public class GUIManager {
         SwingUtilities.invokeLater(() -> guiFrame.open(injector));
     }
 
+    private void shutdownHook() {
+        threadPool.shutdown();
+        SwingUtilities.invokeLater(() -> {
+            var frame = (GUIFrame) injector.getSingleton(GUIFrame.class);
+            frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+        });
+    }
+
     public void setAppTitle() {
         try {
             var xToolkit = Toolkit.getDefaultToolkit();
@@ -78,5 +111,9 @@ public class GUIManager {
         } catch (Exception e) {
             logger.error("Failed to set app title!", e);
         }
+    }
+
+    public void shutdown() {
+        shutdownManager.shutdown(true);
     }
 }

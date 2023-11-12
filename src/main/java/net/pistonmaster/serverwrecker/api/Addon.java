@@ -19,13 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.api;
 
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 
 public interface Addon {
     default void onLoad() {
     }
 
-    default void onEnable(ServerWrecker serverWrecker) {
+    default void onEnable(ServerWreckerServer serverWreckerServer) {
     }
 
 }

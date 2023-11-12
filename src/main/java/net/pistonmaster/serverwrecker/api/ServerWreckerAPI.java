@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.api;
 
 import net.kyori.event.EventBus;
 import net.kyori.event.EventSubscriber;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
 
@@ -34,7 +34,7 @@ import java.util.Objects;
 public class ServerWreckerAPI {
     private static final EventBus<ServerWreckerGlobalEvent> eventBus = EventBus.create(ServerWreckerGlobalEvent.class);
     private static final List<Addon> addons = new ArrayList<>();
-    private static ServerWrecker serverWrecker;
+    private static ServerWreckerServer serverWreckerServer;
 
     private ServerWreckerAPI() {
     }
@@ -44,22 +44,22 @@ public class ServerWreckerAPI {
      *
      * @return The current ServerWrecker instance.
      */
-    public static ServerWrecker getServerWrecker() {
-        Objects.requireNonNull(serverWrecker, "ServerWreckerAPI not initialized! (Wait for ServerWreckerEnableEvent to fire)");
-        return serverWrecker;
+    public static ServerWreckerServer getServerWrecker() {
+        Objects.requireNonNull(serverWreckerServer, "ServerWreckerAPI not initialized! (Wait for ServerWreckerEnableEvent to fire)");
+        return serverWreckerServer;
     }
 
     /**
      * Internal method to set the current ServerWrecker instance.
      *
-     * @param serverWrecker The current ServerWrecker instance.
+     * @param serverWreckerServer The current ServerWrecker instance.
      */
-    public static void setServerWrecker(ServerWrecker serverWrecker) {
-        if (ServerWreckerAPI.serverWrecker != null) {
+    public static void setServerWrecker(ServerWreckerServer serverWreckerServer) {
+        if (ServerWreckerAPI.serverWreckerServer != null) {
             throw new IllegalStateException("ServerWreckerAPI already initialized!");
         }
 
-        ServerWreckerAPI.serverWrecker = serverWrecker;
+        ServerWreckerAPI.serverWreckerServer = serverWreckerServer;
     }
 
     public static void postEvent(ServerWreckerGlobalEvent event) {

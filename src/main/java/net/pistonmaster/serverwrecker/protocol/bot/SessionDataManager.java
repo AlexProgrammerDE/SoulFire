@@ -62,7 +62,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.ToString;
 import net.kyori.adventure.text.Component;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
@@ -95,7 +95,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class SessionDataManager {
     private final SettingsHolder settingsHolder;
     private final Logger log;
-    private final ServerWrecker serverWrecker;
+    private final ServerWreckerServer serverWreckerServer;
     private final ViaClientSession session;
     private final BotConnection connection;
     private final WeatherState weatherState = new WeatherState();
@@ -136,7 +136,7 @@ public final class SessionDataManager {
     public SessionDataManager(BotConnection connection) {
         this.settingsHolder = connection.settingsHolder();
         this.log = connection.logger();
-        this.serverWrecker = connection.serverWrecker();
+        this.serverWreckerServer = connection.serverWreckerServer();
         this.session = connection.session();
         this.connection = connection;
     }
@@ -896,7 +896,7 @@ public final class SessionDataManager {
     }
 
     private String toPlainText(Component component) {
-        return ServerWrecker.PLAIN_MESSAGE_SERIALIZER.serialize(component);
+        return ServerWreckerServer.PLAIN_MESSAGE_SERIALIZER.serialize(component);
     }
 
     public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {

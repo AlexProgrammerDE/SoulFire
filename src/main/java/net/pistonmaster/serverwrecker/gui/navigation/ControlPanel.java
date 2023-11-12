@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import io.grpc.stub.StreamObserver;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.grpc.generated.*;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 
@@ -31,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ControlPanel extends JPanel {
     @Inject
-    public ControlPanel(ServerWrecker serverWrecker, GUIManager guiManager) {
+    public ControlPanel(GUIManager guiManager) {
         var attackId = new AtomicInteger();
 
         var startButton = new JButton("Start");
@@ -56,7 +55,7 @@ public class ControlPanel extends JPanel {
             stopButton.setEnabled(true);
 
             guiManager.getRpcClient().getAttackStub().startAttack(AttackStartRequest.newBuilder()
-                    .setSettings(serverWrecker.getSettingsManager().exportSettings()).build(), new StreamObserver<>() {
+                    .setSettings(guiManager.getSettingsManager().exportSettings()).build(), new StreamObserver<>() {
                 @Override
                 public void onNext(AttackStartResponse value) {
                     guiManager.getLogger().debug("Started bot attack with id {}", value.getId());

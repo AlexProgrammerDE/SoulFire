@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.data;
 
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.TranslatableComponent;
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class TranslationMapper implements Function<TranslatableComponent, String
         }
 
         var args = component.args().stream()
-                .map(ServerWrecker.PLAIN_MESSAGE_SERIALIZER::serialize)
+                .map(ServerWreckerServer.PLAIN_MESSAGE_SERIALIZER::serialize)
                 .toArray(String[]::new);
         return String.format(translation, (Object[]) args);
     }

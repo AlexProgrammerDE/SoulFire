@@ -19,8 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.GUIFrame;
+import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.gui.popups.ImportTextDialog;
@@ -43,8 +43,8 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
     private final JSpinner botsPerProxy = new JSpinner();
 
     @Inject
-    public ProxyPanel(ServerWrecker serverWrecker, GUIFrame parent) {
-        serverWrecker.getSettingsManager().registerDuplex(ProxySettings.class, this);
+    public ProxyPanel(GUIManager guiManager, GUIFrame parent) {
+        guiManager.getSettingsManager().registerDuplex(ProxySettings.class, this);
 
         setLayout(new GridLayout(2, 1, 10, 10));
 
@@ -54,9 +54,9 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         var addProxyPanel = new JPanel();
         addProxyPanel.setLayout(new GridLayout(1, 3, 10, 10));
 
-        addProxyPanel.add(createProxyLoadButton(serverWrecker, parent, ProxyType.HTTP));
-        addProxyPanel.add(createProxyLoadButton(serverWrecker, parent, ProxyType.SOCKS4));
-        addProxyPanel.add(createProxyLoadButton(serverWrecker, parent, ProxyType.SOCKS5));
+        addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.HTTP));
+        addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS4));
+        addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS5));
 
         proxyOptionsPanel.add(addProxyPanel);
 
@@ -88,14 +88,15 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
 
         var proxyList = new JTable(model);
 
-        serverWrecker.getProxyRegistry().addLoadHook(() -> {
+        var proxyRegistry = guiManager.getProxyRegistry();
+        proxyRegistry.addLoadHook(() -> {
             model.getDataVector().removeAllElements();
 
-            var registry = serverWrecker.getProxyRegistry();
-            var registrySize = registry.getProxies().size();
+            var proxies = proxyRegistry.getProxies();
+            var registrySize = proxies.size();
             var dataVector = new Object[registrySize][];
             for (var i = 0; i < registrySize; i++) {
-                var proxy = registry.getProxies().get(i);
+                var proxy = proxies.get(i);
 
                 dataVector[i] = new Object[]{
                         proxy.host(),
@@ -135,7 +136,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
                     proxies.add(new SWProxy(type, host, port, username, password, enabled));
                 }
 
-                serverWrecker.getProxyRegistry().setProxies(proxies);
+                proxyRegistry.setProxies(proxies);
             }
         });
 
@@ -146,16 +147,16 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         add(proxyListPanel);
     }
 
-    private JButton createProxyLoadButton(ServerWrecker serverWrecker, GUIFrame parent, ProxyType type) {
+    private static JButton createProxyLoadButton(GUIManager guiManager, GUIFrame parent, ProxyType type) {
         var button = new JButton(SwingTextUtils.htmlCenterText(String.format("Load %s proxies", type)));
 
         button.addActionListener(e -> new ImportTextDialog(
                 Path.of(System.getProperty("user.dir")),
                 String.format("Load %s proxies", type),
                 String.format("%s list file", type),
-                serverWrecker,
+                guiManager,
                 parent,
-                text -> serverWrecker.getProxyRegistry().loadFromString(text, type)
+                text -> guiManager.getProxyRegistry().loadFromString(text, type)
         ));
 
         return button;

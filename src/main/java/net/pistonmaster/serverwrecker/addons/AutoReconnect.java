@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
@@ -93,9 +93,9 @@ public class AutoReconnect implements InternalAddon {
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        AutoReconnectPanel(ServerWrecker serverWrecker) {
+        AutoReconnectPanel(ServerWreckerServer serverWreckerServer) {
             super();
-            serverWrecker.getSettingsManager().registerDuplex(AutoReconnectSettings.class, this);
+            serverWreckerServer.getSettingsManager().registerDuplex(AutoReconnectSettings.class, this);
 
             setLayout(new GridLayout(0, 2));
 

@@ -20,8 +20,8 @@
 package net.pistonmaster.serverwrecker.gui.popups;
 
 import javafx.stage.FileChooser;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.gui.GUIFrame;
+import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ import java.util.function.Consumer;
 public class ImportTextDialog extends JDialog {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImportTextDialog.class);
 
-    public ImportTextDialog(Path initialDirectory, String loadText, String typeText, ServerWrecker serverWrecker, GUIFrame frame, Consumer<String> consumer) {
+    public ImportTextDialog(Path initialDirectory, String loadText, String typeText, GUIManager guiManager, GUIFrame frame, Consumer<String> consumer) {
         super(frame, loadText, true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -57,11 +57,11 @@ public class ImportTextDialog extends JDialog {
         chooser.setTitle(loadText);
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(typeText, "*.txt"));
 
-        loadFromFileButton.addActionListener(new ImportFileListener(serverWrecker, frame, chooser, consumer, this));
+        loadFromFileButton.addActionListener(new ImportFileListener(guiManager, frame, chooser, consumer, this));
 
         var getFromClipboardButton = new JButton("Get from Clipboard");
 
-        getFromClipboardButton.addActionListener(new ImportClipboardListener(serverWrecker, frame, chooser, consumer, this));
+        getFromClipboardButton.addActionListener(new ImportClipboardListener(guiManager, frame, chooser, consumer, this));
 
         buttonPanel.add(loadFromFileButton);
         buttonPanel.add(getFromClipboardButton);
@@ -73,7 +73,7 @@ public class ImportTextDialog extends JDialog {
         var textScrollPane = new JScrollPane(textArea);
         var submitButton = new JButton("Submit");
 
-        submitButton.addActionListener(new SubmitTextListener(serverWrecker, frame, chooser, consumer, this, textArea));
+        submitButton.addActionListener(new SubmitTextListener(guiManager, frame, chooser, consumer, this, textArea));
 
         var inputPanel = new JPanel(new BorderLayout());
         inputPanel.add(textScrollPane, BorderLayout.CENTER);
@@ -107,7 +107,7 @@ public class ImportTextDialog extends JDialog {
         }
     }
 
-    private record ImportFileListener(ServerWrecker serverWrecker, GUIFrame frame,
+    private record ImportFileListener(GUIManager guiManager, GUIFrame frame,
                                       FileChooser chooser, Consumer<String> consumer,
                                       ImportTextDialog dialog) implements ActionListener {
         @Override
@@ -131,18 +131,18 @@ public class ImportTextDialog extends JDialog {
                 } catch (Throwable e) {
                     LOGGER.error("Failed to import text!", e);
                 }
-            }, serverWrecker.getThreadPool());
+            }, guiManager.getThreadPool());
         }
     }
 
-    private record ImportClipboardListener(ServerWrecker serverWrecker, GUIFrame frame,
+    private record ImportClipboardListener(GUIManager guiManager, GUIFrame frame,
                                            FileChooser chooser, Consumer<String> consumer,
                                            ImportTextDialog dialog) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             dialog.dispose();
 
-            serverWrecker.getThreadPool().submit(() -> {
+            guiManager.getThreadPool().submit(() -> {
                 try {
                     getClipboard().ifPresent(consumer);
                 } catch (Throwable e) {
@@ -152,14 +152,14 @@ public class ImportTextDialog extends JDialog {
         }
     }
 
-    private record SubmitTextListener(ServerWrecker serverWrecker, GUIFrame frame,
+    private record SubmitTextListener(GUIManager guiManager, GUIFrame frame,
                                       FileChooser chooser, Consumer<String> consumer,
                                       ImportTextDialog dialog, JTextArea textArea) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             dialog.dispose();
 
-            serverWrecker.getThreadPool().submit(() -> {
+            guiManager.getThreadPool().submit(() -> {
                 try {
                     consumer.accept(textArea.getText());
                 } catch (Throwable e) {

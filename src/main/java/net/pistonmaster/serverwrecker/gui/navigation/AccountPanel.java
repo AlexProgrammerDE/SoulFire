@@ -19,11 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.gui.GUIFrame;
+import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
@@ -45,8 +45,8 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
     private final JCheckBox shuffleAccounts = new PresetJCheckBox(AccountSettings.DEFAULT_SHUFFLE_ACCOUNTS);
 
     @Inject
-    public AccountPanel(ServerWrecker serverWrecker, GUIFrame parent) {
-        serverWrecker.getSettingsManager().registerDuplex(AccountSettings.class, this);
+    public AccountPanel(GUIManager guiManager, GUIFrame parent) {
+        guiManager.getSettingsManager().registerDuplex(AccountSettings.class, this);
 
         setLayout(new GridLayout(2, 1, 10, 10));
 
@@ -56,11 +56,11 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         var addAccountPanel = new JPanel();
         addAccountPanel.setLayout(new GridLayout(1, 3, 10, 10));
 
-        addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.OFFLINE));
-        addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.MICROSOFT_JAVA));
-        addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.MICROSOFT_BEDROCK));
-        addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.THE_ALTENING));
-        addAccountPanel.add(createAccountLoadButton(serverWrecker, parent, AuthType.EASYMC));
+        addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.OFFLINE));
+        addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_JAVA));
+        addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_BEDROCK));
+        addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.THE_ALTENING));
+        addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.EASYMC));
 
         accountOptionsPanel.add(addAccountPanel);
 
@@ -92,11 +92,11 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
 
         var accountList = new JTable(model);
 
-        serverWrecker.getAccountRegistry().addLoadHook(() -> {
+        var accountRegistry = guiManager.getAccountRegistry();
+        accountRegistry.addLoadHook(() -> {
             model.getDataVector().removeAllElements();
 
-            var registry = serverWrecker.getAccountRegistry();
-            var accounts = registry.getAccounts();
+            var accounts = accountRegistry.getAccounts();
             var registrySize = accounts.size();
             var dataVector = new Object[registrySize][];
             for (var i = 0; i < registrySize; i++) {
@@ -131,12 +131,12 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
                     var authType = (AuthType) row[1];
                     var enabled = (boolean) row[2];
 
-                    var account = serverWrecker.getAccountRegistry().getAccount(username, authType);
+                    var account = accountRegistry.getAccount(username, authType);
 
                     accounts.add(new MinecraftAccount(authType, username, account.accountData(), enabled));
                 }
 
-                serverWrecker.getAccountRegistry().setAccounts(accounts);
+                accountRegistry.setAccounts(accounts);
             }
         });
 
@@ -147,16 +147,16 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         add(accountListPanel);
     }
 
-    private JButton createAccountLoadButton(ServerWrecker serverWrecker, GUIFrame parent, AuthType type) {
+    private static JButton createAccountLoadButton(GUIManager guiManager, GUIFrame parent, AuthType type) {
         var button = new JButton(SwingTextUtils.htmlCenterText(String.format("Load %s accounts", type)));
 
         button.addActionListener(e -> new ImportTextDialog(
                 Path.of(System.getProperty("user.dir")),
                 String.format("Load %s accounts", type),
                 String.format("%s list file", type),
-                serverWrecker,
+                guiManager,
                 parent,
-                text -> serverWrecker.getAccountRegistry().loadFromString(text, type)
+                text -> guiManager.getAccountRegistry().loadFromString(text, type)
         ));
 
         return button;

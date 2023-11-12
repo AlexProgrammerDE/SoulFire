@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
-import net.pistonmaster.serverwrecker.ServerWrecker;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
@@ -86,9 +86,9 @@ public class AutoJump implements InternalAddon {
         private final JSpinner minDelay;
         private final JSpinner maxDelay;
 
-        AutoJumpPanel(ServerWrecker serverWrecker) {
+        AutoJumpPanel(ServerWreckerServer serverWreckerServer) {
             super();
-            serverWrecker.getSettingsManager().registerDuplex(AutoJumpSettings.class, this);
+            serverWreckerServer.getSettingsManager().registerDuplex(AutoJumpSettings.class, this);
 
             setLayout(new GridLayout(0, 2));
 

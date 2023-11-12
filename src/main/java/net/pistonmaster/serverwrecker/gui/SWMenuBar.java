@@ -25,7 +25,6 @@ import com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import javafx.stage.FileChooser;
-import net.pistonmaster.serverwrecker.ServerWrecker;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.gui.WindowCloseEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
@@ -57,12 +56,12 @@ public class SWMenuBar extends JMenuBar {
     }
 
     @Inject
-    public SWMenuBar(ServerWrecker serverWrecker) {
+    public SWMenuBar(GUIManager guiManager) {
         var fileMenu = new JMenu("File");
         var loadProfile = new JMenuItem("Load Profile");
         loadProfile.addActionListener(e -> {
             var chooser = new FileChooser();
-            chooser.setInitialDirectory(serverWrecker.getProfilesFolder().toFile());
+            chooser.setInitialDirectory(GUIManager.PROFILES_FOLDER.toFile());
             chooser.setTitle("Load Profile");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ServerWrecker profile", "*.json"));
             JFXFileHelper.showOpenDialog(chooser).thenAcceptAsync(file -> {
@@ -71,19 +70,19 @@ public class SWMenuBar extends JMenuBar {
                 }
 
                 try {
-                    serverWrecker.getSettingsManager().loadProfile(file);
+                    guiManager.getSettingsManager().loadProfile(file);
                     SettingsManager.LOGGER.info("Loaded profile!");
                 } catch (IOException ex) {
                     SettingsManager.LOGGER.warn("Failed to load profile!", ex);
                 }
-            }, serverWrecker.getThreadPool());
+            }, guiManager.getThreadPool());
         });
 
         fileMenu.add(loadProfile);
         var saveProfile = new JMenuItem("Save Profile");
         saveProfile.addActionListener(e -> {
             var chooser = new FileChooser();
-            chooser.setInitialDirectory(serverWrecker.getProfilesFolder().toFile());
+            chooser.setInitialDirectory(GUIManager.PROFILES_FOLDER.toFile());
             chooser.setTitle("Save Profile");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ServerWrecker profile", "*.json"));
             JFXFileHelper.showSaveDialog(chooser).thenAcceptAsync(file -> {
@@ -98,12 +97,12 @@ public class SWMenuBar extends JMenuBar {
                 }
 
                 try {
-                    serverWrecker.getSettingsManager().saveProfile(Path.of(path));
+                    guiManager.getSettingsManager().saveProfile(Path.of(path));
                     SettingsManager.LOGGER.info("Saved profile!");
                 } catch (IOException ex) {
                     SettingsManager.LOGGER.warn("Failed to save profile!", ex);
                 }
-            }, serverWrecker.getThreadPool());
+            }, guiManager.getThreadPool());
         });
 
         fileMenu.add(saveProfile);
@@ -111,7 +110,7 @@ public class SWMenuBar extends JMenuBar {
         fileMenu.addSeparator();
 
         var exit = new JMenuItem("Exit");
-        exit.addActionListener(e -> serverWrecker.shutdown(true));
+        exit.addActionListener(e -> guiManager.shutdown());
         fileMenu.add(exit);
         add(fileMenu);
 
@@ -130,9 +129,7 @@ public class SWMenuBar extends JMenuBar {
 
         var helpMenu = new JMenu("Help");
         var about = new JMenuItem("About");
-        about.addActionListener(e -> {
-            showAboutDialog();
-        });
+        about.addActionListener(e -> showAboutDialog());
         helpMenu.add(about);
         add(helpMenu);
 
