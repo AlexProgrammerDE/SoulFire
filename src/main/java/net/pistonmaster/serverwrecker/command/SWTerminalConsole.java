@@ -32,9 +32,9 @@ import org.jline.reader.Candidate;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 
-import javax.inject.Inject;
+import java.util.concurrent.ExecutorService;
 
-@RequiredArgsConstructor(onConstructor_ = @Inject)
+@RequiredArgsConstructor
 public class SWTerminalConsole extends SimpleTerminalConsole {
     private static final Logger logger = LogManager.getLogger("ServerWrecker");
     private final ShutdownManager shutdownManager;
@@ -46,6 +46,11 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
     public static void setupStreams() {
         System.setOut(IoBuilder.forLogger(logger).setLevel(Level.INFO).buildPrintStream());
         System.setErr(IoBuilder.forLogger(logger).setLevel(Level.ERROR).buildPrintStream());
+    }
+
+    public static void setupTerminalConsole(ExecutorService threadPool, ShutdownManager shutdownManager, RPCClient rpcClient) {
+        SWTerminalConsole.setupStreams();
+        threadPool.execute(new SWTerminalConsole(shutdownManager, rpcClient)::start);
     }
 
     @Override

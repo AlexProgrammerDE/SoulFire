@@ -42,13 +42,11 @@ import net.pistonmaster.serverwrecker.auth.AccountList;
 import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
-import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.command.ShutdownManager;
 import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.data.TranslationMapper;
-import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.grpc.RPCServer;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.SWLogAppender;
@@ -111,7 +109,6 @@ public class ServerWreckerServer {
             .create();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final Map<String, String> serviceServerConfig = new HashMap<>();
-    private final SWTerminalConsole terminalConsole;
     private final AccountRegistry accountRegistry = new AccountRegistry();
     private final ProxyRegistry proxyRegistry = new ProxyRegistry();
     private final SettingsManager settingsManager = new SettingsManager(
@@ -152,7 +149,7 @@ public class ServerWreckerServer {
             throw new RuntimeException(e);
         }
 
-        rpcServer = new RPCServer(port, injector, jwtSecretKey);
+        rpcServer = new RPCServer(host, port, injector, jwtSecretKey);
         try {
             rpcServer.start();
         } catch (IOException e) {
@@ -163,11 +160,6 @@ public class ServerWreckerServer {
         settingsManager.registerDuplex(ProxyList.class, proxyRegistry);
 
         LOGGER.info("Starting ServerWrecker v{}...", BuildData.VERSION);
-
-        var rpcClient = new RPCClient(host, port, generateAdminJWT());
-        injector.register(RPCClient.class, rpcClient);
-
-        terminalConsole = injector.getSingleton(SWTerminalConsole.class);
 
         try {
             Files.createDirectories(DATA_FOLDER);
@@ -282,11 +274,6 @@ public class ServerWreckerServer {
                 .subject("admin")
                 .signWith(jwtSecretKey, Jwts.SIG.HS256)
                 .compact();
-    }
-
-    public void initConsole() {
-        SWTerminalConsole.setupStreams();
-        threadPool.execute(terminalConsole::start);
     }
 
     private static void initPlugins() {

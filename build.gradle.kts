@@ -150,7 +150,7 @@ dependencies {
     implementation(libs.grpc.proto)
     implementation(libs.grpc.services)
     implementation(libs.grpc.stub)
-    runtimeOnly(libs.grpc.netty)
+    implementation(libs.grpc.netty)
 
     // For JsonFormat
     implementation(libs.protobuf.util)

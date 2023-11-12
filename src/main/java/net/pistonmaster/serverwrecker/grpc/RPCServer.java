@@ -21,24 +21,31 @@ package net.pistonmaster.serverwrecker.grpc;
 
 import ch.jalu.injector.Injector;
 import io.grpc.*;
+import io.grpc.netty.NettyServerBuilder;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 public class RPCServer {
     private static final Logger logger = LoggerFactory.getLogger(RPCServer.class);
 
+    @Getter
+    private final String host;
+    @Getter
     private final int port;
     private final Server server;
 
-    public RPCServer(int port, Injector injector, SecretKey jwtKey) {
-        this(jwtKey, Grpc.newServerBuilderForPort(port, InsecureServerCredentials.create()), port, injector);
+    public RPCServer(String host, int port, Injector injector, SecretKey jwtKey) {
+        this(jwtKey, NettyServerBuilder.forAddress(new InetSocketAddress(host, port), InsecureServerCredentials.create()), host, port, injector);
     }
 
-    public RPCServer(SecretKey jwtKey, ServerBuilder<?> serverBuilder, int port, Injector injector) {
+    public RPCServer(SecretKey jwtKey, ServerBuilder<?> serverBuilder, String host, int port, Injector injector) {
+        this.host = host;
         this.port = port;
         server = serverBuilder
                 .intercept(new ServerInterceptor() {

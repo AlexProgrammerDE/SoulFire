@@ -25,6 +25,7 @@ import javafx.embed.swing.JFXPanel;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.auth.AccountRegistry;
+import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.command.ShutdownManager;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
@@ -63,15 +64,17 @@ public class GUIManager {
 
         // TODO: Remove instance dependency on ServerWreckerServer (Receive settings and panels via gRPC?)
         this.settingsManager = serverWreckerServer.getSettingsManager();
+    }
 
+    public void initGUI() {
         try {
             Files.createDirectories(PROFILES_FOLDER);
         } catch (IOException e) {
             logger.error("Failed to create profiles folder!", e);
         }
-    }
 
-    public void initGUI() {
+        SWTerminalConsole.setupTerminalConsole(threadPool, shutdownManager, rpcClient);
+
         // Override the title in AWT (GNOME displays the class name otherwise)
         setAppTitle();
 

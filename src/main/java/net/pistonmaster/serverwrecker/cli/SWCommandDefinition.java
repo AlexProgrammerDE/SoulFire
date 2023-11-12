@@ -26,6 +26,8 @@ import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
+import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
+import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
@@ -146,7 +148,10 @@ public class SWCommandDefinition implements Callable<Integer> {
         }
 
         // Delayed to here, so help and version do not get cut off
-        serverWreckerServer.initConsole();
+        var gRPCHost = serverWreckerServer.getRpcServer().getHost();
+        var gRPCPort = serverWreckerServer.getRpcServer().getPort();
+        var rpcClient = new RPCClient(gRPCHost, gRPCPort, serverWreckerServer.generateAdminJWT());
+        SWTerminalConsole.setupTerminalConsole(serverWreckerServer.getThreadPool(), serverWreckerServer.getShutdownManager(), rpcClient);
 
         serverWreckerServer.getSettingsManager().registerProvider(BotSettings.class,
                 () -> new BotSettings(
