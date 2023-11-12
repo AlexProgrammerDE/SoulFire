@@ -44,7 +44,7 @@ import java.util.concurrent.Executors;
 
 @Getter
 public class GUIManager {
-    public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwreckerclient");
+    public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
     public static final Path PROFILES_FOLDER = DATA_FOLDER.resolve("profiles");
     private final RPCClient rpcClient;
     private final Injector injector = new InjectorBuilder()
