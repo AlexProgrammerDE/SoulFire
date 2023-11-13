@@ -48,7 +48,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ClientSettings implements InternalAddon {
+public class ClientSettings implements InternalExtension {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);

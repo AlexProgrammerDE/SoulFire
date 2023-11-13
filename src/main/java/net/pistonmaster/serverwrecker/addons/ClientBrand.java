@@ -41,7 +41,7 @@ import picocli.CommandLine;
 import javax.swing.*;
 import java.awt.*;
 
-public class ClientBrand implements InternalAddon {
+public class ClientBrand implements InternalExtension {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);

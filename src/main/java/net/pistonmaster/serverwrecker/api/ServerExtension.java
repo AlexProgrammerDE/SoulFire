@@ -17,9 +17,19 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.api;
 
-import net.pistonmaster.serverwrecker.api.Addon;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
+import org.pf4j.ExtensionPoint;
 
-public interface InternalAddon extends Addon {
+/**
+ * This interface loads only when the JVM is running as a ServerWrecker server.
+ * Therefore you can also use this to load server-only classes.
+ */
+public interface ServerExtension extends ExtensionPoint {
+    default void onLoad() {
+    }
+
+    default void onEnable(ServerWreckerServer serverWreckerServer) {
+    }
 }

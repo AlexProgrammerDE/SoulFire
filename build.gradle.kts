@@ -134,6 +134,12 @@ dependencies {
     implementation(libs.fastutil)
     implementation(libs.caffeine)
 
+    implementation("net.lenni0451.classtransform:mixinstranslator:1.12.0")
+    implementation("net.lenni0451.classtransform:mixinsdummy:1.12.0")
+    implementation("net.lenni0451.classtransform:additionalclassprovider:1.12.0")
+    implementation("net.lenni0451:Reflect:1.3.0")
+    implementation("net.lenni0451:LambdaEvents:2.3.2")
+
     // For microsoft account authentication
     implementation(libs.minecraftauth) {
         exclude("com.google.code.gson", "gson")

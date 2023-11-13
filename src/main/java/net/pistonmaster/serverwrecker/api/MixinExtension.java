@@ -19,13 +19,20 @@
  */
 package net.pistonmaster.serverwrecker.api;
 
-import net.pistonmaster.serverwrecker.ServerWreckerServer;
+import org.pf4j.ExtensionPoint;
 
-public interface Addon {
-    default void onLoad() {
-    }
+import java.util.Set;
 
-    default void onEnable(ServerWreckerServer serverWreckerServer) {
-    }
-
+/**
+ * This interface is used to load mixins from third-party plugins.
+ * Mixin paths are wildcard paths, so you can use something like
+ * "net.pistonmaster.serverwrecker.mixins.*" to load all mixins from a package.
+ */
+public interface MixinExtension extends ExtensionPoint {
+    /**
+     * This method is used to inject into ServerWrecker classes.
+     *
+     * @return A list of mixin paths.
+     */
+    Set<String> getMixinPaths();
 }

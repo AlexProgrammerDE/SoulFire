@@ -28,7 +28,7 @@ import net.pistonmaster.serverwrecker.util.TickTimer;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class BotTicker implements InternalAddon {
+public class BotTicker implements InternalExtension {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);

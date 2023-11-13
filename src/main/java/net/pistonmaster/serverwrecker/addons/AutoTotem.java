@@ -42,7 +42,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.TimeUnit;
 
-public class AutoTotem implements InternalAddon {
+public class AutoTotem implements InternalExtension {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);

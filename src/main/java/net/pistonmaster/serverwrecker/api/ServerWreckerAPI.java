@@ -33,7 +33,7 @@ import java.util.Objects;
 
 public class ServerWreckerAPI {
     private static final EventBus<ServerWreckerGlobalEvent> eventBus = EventBus.create(ServerWreckerGlobalEvent.class);
-    private static final List<Addon> addons = new ArrayList<>();
+    private static final List<ServerExtension> SERVER_ADDONS = new ArrayList<>();
     private static ServerWreckerServer serverWreckerServer;
 
     private ServerWreckerAPI() {
@@ -108,12 +108,12 @@ public class ServerWreckerAPI {
         eventBus.unsubscribeIf(eventSubscriber -> eventSubscriber.equals(listener));
     }
 
-    public static void registerAddon(Addon addon) {
-        addons.add(addon);
-        addon.onLoad();
+    public static void registerServerExtension(ServerExtension serverExtension) {
+        SERVER_ADDONS.add(serverExtension);
+        serverExtension.onLoad();
     }
 
-    public static List<Addon> getAddons() {
-        return Collections.unmodifiableList(addons);
+    public static List<ServerExtension> getServerExtensions() {
+        return Collections.unmodifiableList(SERVER_ADDONS);
     }
 }

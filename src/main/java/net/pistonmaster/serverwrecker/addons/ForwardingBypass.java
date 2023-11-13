@@ -60,7 +60,7 @@ import java.util.function.UnaryOperator;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ForwardingBypass implements InternalAddon {
+public class ForwardingBypass implements InternalExtension {
     private static int findForwardingVersion(int requested, BotConnection player) {
         // TODO: Fix this
         /*

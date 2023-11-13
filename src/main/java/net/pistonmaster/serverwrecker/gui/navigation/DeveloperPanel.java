@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import javafx.stage.FileChooser;
-import net.pistonmaster.serverwrecker.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.LogPanel;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
@@ -63,7 +63,7 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
 
         saveLog.addActionListener(listener -> {
             var chooser = new FileChooser();
-            chooser.setInitialDirectory(ServerWreckerServer.DATA_FOLDER.toFile());
+            chooser.setInitialDirectory(ServerWreckerBootstrap.DATA_FOLDER.toFile());
             chooser.setTitle("Save Log");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log Files", "*.log"));
             JFXFileHelper.showSaveDialog(chooser).thenAcceptAsync(file -> {

@@ -32,7 +32,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 public class RPCServer {
-    private static final Logger logger = LoggerFactory.getLogger(RPCServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RPCServer.class);
 
     @Getter
     private final String host;
@@ -65,22 +65,20 @@ public class RPCServer {
 
     public void start() throws IOException {
         server.start();
-        logger.info("RPC Server started, listening on " + port);
+        LOGGER.info("RPC Server started, listening on " + port);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-            System.err.println("*** shutting down gRPC server since JVM is shutting down");
+            LOGGER.info("*** shutting down gRPC server since JVM is shutting down");
             try {
-                RPCServer.this.stop();
-            } catch (InterruptedException e) {
-                e.printStackTrace(System.err);
+                shutdown();
+            } catch (Throwable e) {
+                LOGGER.error("Error while shutting down gRPC server", e);
+                return;
             }
-            System.err.println("*** server shut down");
+            LOGGER.info("*** server shut down");
         }));
     }
 
-    public void stop() throws InterruptedException {
-        if (server != null) {
-            server.shutdownNow().awaitTermination(30, TimeUnit.SECONDS);
-        }
+    public void shutdown() throws InterruptedException {
+        server.shutdownNow().awaitTermination(30, TimeUnit.SECONDS);
     }
 }

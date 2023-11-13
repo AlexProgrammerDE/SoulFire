@@ -47,7 +47,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class AutoArmor implements InternalAddon {
+public class AutoArmor implements InternalExtension {
     private static void putOn(InventoryManager inventoryManager, PlayerInventoryContainer inventory, ContainerSlot targetSlot, ArmorType armorType) {
         var bestItem = Arrays.stream(inventory.getStorage()).filter(s -> {
             if (s.item() == null) {

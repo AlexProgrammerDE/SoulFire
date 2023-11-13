@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.command;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.LogManager;
+import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +51,8 @@ public class ShutdownManager {
 
         shutdownHook.run();
 
-        // Since we manually removed the shutdown hook, we need to handle the shutdown ourselves.
-        LogManager.shutdown(true, true);
+        ServerWreckerBootstrap.PLUGIN_MANAGER.stopPlugins();
+        ServerWreckerBootstrap.PLUGIN_MANAGER.unloadPlugins();
 
         shutdown = true;
 

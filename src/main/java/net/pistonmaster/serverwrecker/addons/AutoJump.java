@@ -39,7 +39,7 @@ import picocli.CommandLine;
 import javax.swing.*;
 import java.awt.*;
 
-public class AutoJump implements InternalAddon {
+public class AutoJump implements InternalExtension {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);

@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker;
 
-import net.pistonmaster.serverwrecker.addons.*;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.cli.SWCommandDefinition;
@@ -28,34 +27,14 @@ import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.gui.GUIClientProps;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
-import net.pistonmaster.serverwrecker.settings.DevSettings;
-import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
-
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.List;
 
 public class ServerWreckerLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerLoader.class);
 
     private ServerWreckerLoader() {
-    }
-
-    public static void injectJvm() {
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            LOGGER.error("Exception in thread {}", thread.getName());
-            //noinspection CallToPrintStackTrace
-            throwable.printStackTrace();
-        });
-
-        if (System.console() != null) {
-            AnsiConsole.systemInstall();
-        }
-
-        ServerWreckerServer.setupLogging(DevSettings.DEFAULT);
     }
 
     public static void injectTheme() {
@@ -65,16 +44,6 @@ public class ServerWreckerLoader {
 
     public static void loadGUIProperties() {
         GUIClientProps.loadSettings();
-    }
-
-    public static void loadInternalAddons() {
-        var addons = List.of(
-                new BotTicker(), new ClientBrand(), new ClientSettings(),
-                new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
-                new AutoTotem(), new AutoJump(), new AutoArmor(), new AutoEat(),
-                new ChatMessageLogger(), new ServerListBypass());
-
-        addons.forEach(ServerWreckerAPI::registerAddon);
     }
 
     public static void runHeadless(int port, String[] args) {
@@ -101,22 +70,5 @@ public class ServerWreckerLoader {
         var rpcClient = new RPCClient(host, port, serverWrecker.generateAdminJWT());
         var guiManager = new GUIManager(serverWrecker, rpcClient);
         guiManager.initGUI();
-    }
-
-    public static int getAvailablePort() {
-        var initialPort = 38765;
-
-        while (true) {
-            try {
-                var serverSocket = new ServerSocket(initialPort);
-                serverSocket.close();
-                break; // Port is available, exit the loop
-            } catch (IOException e) {
-                LOGGER.info("Port {} is already in use, trying next port...", initialPort);
-                initialPort++; // Increment the port number and try again
-            }
-        }
-
-        return initialPort;
     }
 }

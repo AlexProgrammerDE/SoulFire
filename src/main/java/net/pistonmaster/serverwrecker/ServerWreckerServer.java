@@ -36,6 +36,8 @@ import lombok.Getter;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.pistonmaster.serverwrecker.addons.*;
+import net.pistonmaster.serverwrecker.api.ServerExtension;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackInitEvent;
 import net.pistonmaster.serverwrecker.auth.AccountList;
@@ -61,11 +63,7 @@ import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 import net.pistonmaster.serverwrecker.util.VersionComparator;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.pf4j.JarPluginManager;
-import org.pf4j.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,13 +73,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -89,8 +82,6 @@ import java.util.concurrent.Executors;
 @Getter
 public class ServerWreckerServer {
     public static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerServer.class);
-    public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
-    public static final Path PLUGINS_FOLDER = DATA_FOLDER.resolve("plugins");
     public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER;
     public static final Gson GENERAL_GSON = new Gson();
 
@@ -161,12 +152,6 @@ public class ServerWreckerServer {
 
         LOGGER.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
-        try {
-            Files.createDirectories(DATA_FOLDER);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
         // Override status packet, so we can support any version
         MinecraftCodec.CODEC.getCodec(ProtocolState.STATUS)
                 .registerClientbound(new PacketDefinition<>(0x00,
@@ -174,7 +159,7 @@ public class ServerWreckerServer {
                         new MinecraftPacketSerializer<>(SWClientboundStatusResponsePacket::new)));
 
         // Init via
-        var viaPath = DATA_FOLDER.resolve("ViaVersion");
+        var viaPath = ServerWreckerBootstrap.DATA_FOLDER.resolve("ViaVersion");
         var platform = new SWViaPlatform(viaPath);
 
         Via.init(ViaManagerImpl.builder()
@@ -191,11 +176,11 @@ public class ServerWreckerServer {
         ((ProtocolManagerImpl) Via.getManager().getProtocolManager()).refreshVersions();
 
         Via.getManager().addEnableListener(() -> {
-            new SWViaRewind(DATA_FOLDER.resolve("ViaRewind")).init();
-            new SWViaBackwards(DATA_FOLDER.resolve("ViaBackwards")).init();
-            new SWViaAprilFools(DATA_FOLDER.resolve("ViaAprilFools")).init();
-            new SWViaLegacy(DATA_FOLDER.resolve("ViaLegacy")).init();
-            new SWViaBedrock(DATA_FOLDER.resolve("ViaBedrock")).init();
+            new SWViaRewind(ServerWreckerBootstrap.DATA_FOLDER.resolve("ViaRewind")).init();
+            new SWViaBackwards(ServerWreckerBootstrap.DATA_FOLDER.resolve("ViaBackwards")).init();
+            new SWViaAprilFools(ServerWreckerBootstrap.DATA_FOLDER.resolve("ViaAprilFools")).init();
+            new SWViaLegacy(ServerWreckerBootstrap.DATA_FOLDER.resolve("ViaLegacy")).init();
+            new SWViaBedrock(ServerWreckerBootstrap.DATA_FOLDER.resolve("ViaBedrock")).init();
         });
 
         var manager = (ViaManagerImpl) Via.getManager();
@@ -210,11 +195,12 @@ public class ServerWreckerServer {
             settingsPanel.registerVersions();
         }
 
-        for (var addon : ServerWreckerAPI.getAddons()) {
-            addon.onEnable(this);
-        }
+        registerInternalServerExtensions();
+        registerServerExtensions();
 
-        initPlugins();
+        for (var serverExtension : ServerWreckerAPI.getServerExtensions()) {
+            serverExtension.onEnable(this);
+        }
 
         LOGGER.info("Checking for updates...");
         outdated = checkForUpdates();
@@ -222,18 +208,27 @@ public class ServerWreckerServer {
         LOGGER.info("Finished loading!");
     }
 
-    public static void setupLogging(DevSettings devSettings) {
-        var level = devSettings.coreDebug() ? Level.DEBUG : Level.INFO;
-        var nettyLevel = devSettings.nettyDebug() ? Level.DEBUG : Level.INFO;
-        var grpcLevel = devSettings.grpcDebug() ? Level.DEBUG : Level.INFO;
-        Configurator.setRootLevel(level);
-        Configurator.setLevel(LOGGER.getName(), level);
-        Configurator.setLevel("org.pf4j", level);
-        Configurator.setLevel("io.netty", nettyLevel);
-        Configurator.setLevel("io.grpc", grpcLevel);
+    private static void registerInternalServerExtensions() {
+        var addons = List.of(
+                new BotTicker(), new ClientBrand(), new ClientSettings(),
+                new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
+                new AutoTotem(), new AutoJump(), new AutoArmor(), new AutoEat(),
+                new ChatMessageLogger(), new ServerListBypass());
+
+        addons.forEach(ServerWreckerAPI::registerServerExtension);
+    }
+
+    private static void registerServerExtensions() {
+        ServerWreckerBootstrap.PLUGIN_MANAGER.getExtensions(ServerExtension.class)
+                .forEach(ServerWreckerAPI::registerServerExtension);
     }
 
     private static boolean checkForUpdates() {
+        if (Boolean.getBoolean("serverwrecker.disable-updates")) {
+            LOGGER.info("Skipping update check because of system property");
+            return false;
+        }
+
         try {
             var url = URI.create("https://api.github.com/repos/AlexProgrammerDE/ServerWrecker/releases/latest").toURL();
             var connection = (HttpURLConnection) url.openConnection();
@@ -276,27 +271,10 @@ public class ServerWreckerServer {
                 .compact();
     }
 
-    private static void initPlugins() {
-        try {
-            Files.createDirectories(PLUGINS_FOLDER);
-        } catch (IOException e) {
-            LOGGER.error("Failed to create plugin directory", e);
-        }
-
-        // create the plugin manager
-        PluginManager pluginManager = new JarPluginManager(PLUGINS_FOLDER);
-
-        pluginManager.setSystemVersion(BuildData.VERSION);
-
-        // start and load all plugins of application
-        pluginManager.loadPlugins();
-        pluginManager.startPlugins();
-    }
-
     @SuppressWarnings("UnstableApiUsage")
     public static void setupLoggingAndVia(DevSettings devSettings) {
         Via.getManager().debugHandler().setEnabled(devSettings.viaDebug());
-        setupLogging(devSettings);
+        ServerWreckerBootstrap.setupLogging(devSettings);
     }
 
     private void shutdownHook() {
@@ -308,7 +286,7 @@ public class ServerWreckerServer {
 
         // Shut down RPC
         try {
-            rpcServer.stop();
+            rpcServer.shutdown();
         } catch (InterruptedException e) {
             LOGGER.error("Failed to stop RPC server", e);
         }

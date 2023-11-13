@@ -31,6 +31,7 @@ import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.AttackManager;
+import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
@@ -77,7 +78,7 @@ public class CommandManager {
     private final ServerWreckerServer serverWreckerServer;
     private final ConsoleSubject consoleSubject;
     private final List<String> commandHistory = Collections.synchronizedList(new ArrayList<>());
-    private final Path targetFile = ServerWreckerServer.DATA_FOLDER.resolve(".command_history");
+    private final Path targetFile = ServerWreckerBootstrap.DATA_FOLDER.resolve(".command_history");
 
     @PostConstruct
     public void postConstruct() {

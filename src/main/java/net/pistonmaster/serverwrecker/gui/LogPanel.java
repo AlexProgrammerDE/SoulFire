@@ -25,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.grpc.generated.*;
 import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -37,6 +39,7 @@ import java.util.List;
 
 @Getter
 public class LogPanel extends JPanel {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogPanel.class);
     private final MessageLogPanel messageLogPanel = new MessageLogPanel(3000);
     private final GUIManager guiManager;
 
@@ -53,7 +56,7 @@ public class LogPanel extends JPanel {
 
             @Override
             public void onError(Throwable t) {
-                t.printStackTrace();
+                LOGGER.error("Error while logging!", t);
             }
 
             @Override
@@ -113,7 +116,7 @@ public class LogPanel extends JPanel {
 
                 @Override
                 public void onError(Throwable t) {
-                    t.printStackTrace();
+                    LOGGER.error("Error while executing command!", t);
                 }
 
                 @Override

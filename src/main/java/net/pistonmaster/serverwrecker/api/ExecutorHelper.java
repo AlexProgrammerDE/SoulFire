@@ -20,12 +20,16 @@
 package net.pistonmaster.serverwrecker.api;
 
 import net.pistonmaster.serverwrecker.util.RandomUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExecutorHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExecutorHelper.class);
+
     private ExecutorHelper() {
     }
 
@@ -42,7 +46,7 @@ public class ExecutorHelper {
                 try {
                     runnable.run();
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    LOGGER.error("Error while executing task!", t);
                 }
 
                 counter.set(0);

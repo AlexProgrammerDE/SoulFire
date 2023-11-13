@@ -37,7 +37,7 @@ import picocli.CommandLine;
 import javax.swing.*;
 import java.awt.*;
 
-public class AutoRegister implements InternalAddon {
+public class AutoRegister implements InternalExtension {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(this);

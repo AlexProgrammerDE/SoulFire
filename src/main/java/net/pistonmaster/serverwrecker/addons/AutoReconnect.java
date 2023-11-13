@@ -42,7 +42,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class AutoReconnect implements InternalAddon {
+public class AutoReconnect implements InternalExtension {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @Override
