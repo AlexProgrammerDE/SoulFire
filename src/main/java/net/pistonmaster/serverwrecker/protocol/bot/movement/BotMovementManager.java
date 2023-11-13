@@ -132,6 +132,7 @@ public class BotMovementManager {
         } else {
             entity.jumpTicks = 0; // reset autojump cooldown
         }
+
         entity.jumpQueued = false;
 
         var forward = 0.0F;

@@ -17,18 +17,22 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.protocol.bot.movement;
+package net.pistonmaster.serverwrecker.grpc;
 
-import lombok.AllArgsConstructor;
-import org.cloudburstmc.math.vector.Vector3i;
+import io.grpc.stub.StreamObserver;
+import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.command.CommandManager;
+import net.pistonmaster.serverwrecker.grpc.generated.*;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 
-@AllArgsConstructor
-public class MutableVector3i {
-    public int x;
-    public int y;
-    public int z;
+import javax.inject.Inject;
 
-    public Vector3i toImmutable() {
-        return Vector3i.from(x, y, z);
+@RequiredArgsConstructor(onConstructor_ = @Inject)
+public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
+    private final SettingsManager settingsManager;
+
+
+    @Override
+    public void getUIClientData(ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
     }
 }

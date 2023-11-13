@@ -27,6 +27,7 @@ import lombok.Getter;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.grpc.generated.AttackServiceGrpc;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandServiceGrpc;
+import net.pistonmaster.serverwrecker.grpc.generated.ConfigServiceGrpc;
 import net.pistonmaster.serverwrecker.grpc.generated.LogsServiceGrpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,7 @@ public class RPCClient {
     private final CommandServiceGrpc.CommandServiceStub commandStub;
     private final CommandServiceGrpc.CommandServiceBlockingStub commandStubBlocking;
     private final AttackServiceGrpc.AttackServiceStub attackStub;
+    private final ConfigServiceGrpc.ConfigServiceBlockingStub configStubBlocking;
 
     public RPCClient(String host, int port, String jwt) {
         this(new JwtCredential(jwt), Grpc.newChannelBuilderForAddress(host, port, InsecureChannelCredentials.create())
@@ -64,6 +66,7 @@ public class RPCClient {
         commandStub = CommandServiceGrpc.newStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
         commandStubBlocking = CommandServiceGrpc.newBlockingStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
         attackStub = AttackServiceGrpc.newStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
+        configStubBlocking = ConfigServiceGrpc.newBlockingStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
     }
 
     public void shutdown() throws InterruptedException {
