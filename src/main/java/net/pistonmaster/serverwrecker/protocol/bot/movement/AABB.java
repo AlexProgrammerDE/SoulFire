@@ -173,19 +173,12 @@ public class AABB {
         var y2 = direction.getY();
         var z2 = direction.getZ();
 
-        var xMin = this.minX;
-        var yMin = this.minY;
-        var zMin = this.minZ;
-        var xMax = this.maxX;
-        var yMax = this.maxY;
-        var zMax = this.maxZ;
-
-        var txMin = (xMin - x1) / x2;
-        var txMax = (xMax - x1) / x2;
-        var tyMin = (yMin - y1) / y2;
-        var tyMax = (yMax - y1) / y2;
-        var tzMin = (zMin - z1) / z2;
-        var tzMax = (zMax - z1) / z2;
+        var txMin = (this.minX - x1) / x2;
+        var txMax = (this.maxX - x1) / x2;
+        var tyMin = (this.minY - y1) / y2;
+        var tyMax = (this.maxY - y1) / y2;
+        var tzMin = (this.minZ - z1) / z2;
+        var tzMax = (this.maxZ - z1) / z2;
 
         var tMin = Math.max(Math.max(Math.min(txMin, txMax), Math.min(tyMin, tyMax)), Math.min(tzMin, tzMax));
         var tMax = Math.min(Math.min(Math.max(txMin, txMax), Math.max(tyMin, tyMax)), Math.max(tzMin, tzMax));
