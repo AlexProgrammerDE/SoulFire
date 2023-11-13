@@ -19,12 +19,12 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
+import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
@@ -45,11 +45,11 @@ import java.util.concurrent.TimeUnit;
 public class AutoTotem implements InternalExtension {
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListeners(this);
-        AddonHelper.registerBotEventConsumer(BotJoinedEvent.class, this::onJoined);
+        ServerWreckerAPI.registerListeners(AutoTotem.class);
+        AddonHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoTotem::onJoined);
     }
 
-    public void onJoined(BotJoinedEvent event) {
+    public static void onJoined(BotJoinedEvent event) {
         var connection = event.connection();
         if (!connection.settingsHolder().has(AutoTotemSettings.class)) {
             return;
@@ -96,13 +96,13 @@ public class AutoTotem implements InternalExtension {
         }, settings.minDelay(), settings.maxDelay());
     }
 
-    @GlobalEventHandler
-    public void onAddonPanel(AddonPanelInitEvent event) {
+    @EventHandler
+    public static void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new AutoTotemPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @GlobalEventHandler
-    public void onCommandLine(CommandManagerInitEvent event) {
+    @EventHandler
+    public static void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), AutoTotemSettings.class, new AutoTotemCommand());
     }
 

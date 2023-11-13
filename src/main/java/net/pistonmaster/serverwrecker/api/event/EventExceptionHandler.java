@@ -19,12 +19,18 @@
  */
 package net.pistonmaster.serverwrecker.api.event;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import net.lenni0451.lambdaevents.AHandler;
+import net.lenni0451.lambdaevents.IExceptionHandler;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface GlobalEventHandler {
+public class EventExceptionHandler implements IExceptionHandler {
+    public static final EventExceptionHandler INSTANCE = new EventExceptionHandler();
+    private static final Logger LOGGER = LoggerFactory.getLogger("ServerWrecker");
+
+    @Override
+    public void handle(@NotNull AHandler handler, @NotNull Object event, @NotNull Throwable t) {
+        LOGGER.error("Exception while handling event " + event.getClass().getName() + " in handler " + handler.getClass().getName(), t);
+    }
 }

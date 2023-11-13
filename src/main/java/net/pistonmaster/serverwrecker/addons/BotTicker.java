@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.addons;
 
 import net.pistonmaster.serverwrecker.api.AddonHelper;
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.util.TickTimer;
@@ -31,18 +30,17 @@ import java.util.concurrent.TimeUnit;
 public class BotTicker implements InternalExtension {
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListeners(this);
-        AddonHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, this::onConnectionInit);
+        AddonHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, BotTicker::onConnectionInit);
     }
 
-    public void onConnectionInit(BotConnectionInitEvent event) {
+    public static void onConnectionInit(BotConnectionInitEvent event) {
         startTicker(event.connection(),
                 event.connection().executorManager().newScheduledExecutorService("Tick"),
                 new TickTimer(20));
     }
 
-    private void startTicker(BotConnection connection, ScheduledExecutorService executor,
-                             TickTimer tickTimer) {
+    private static void startTicker(BotConnection connection, ScheduledExecutorService executor,
+                                    TickTimer tickTimer) {
         executor.scheduleWithFixedDelay(() -> {
             tickTimer.advanceTime();
 

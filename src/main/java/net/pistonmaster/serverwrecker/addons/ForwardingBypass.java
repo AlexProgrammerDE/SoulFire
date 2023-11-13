@@ -28,11 +28,11 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSendingEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
@@ -147,7 +147,7 @@ public class ForwardingBypass implements InternalExtension {
 
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListeners(this);
+        ServerWreckerAPI.registerListeners(ForwardingBypass.class);
         AddonHelper.registerBotEventConsumer(SWPacketSendingEvent.class, this::onPacket);
         AddonHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, this::onPacketReceive);
     }
@@ -214,13 +214,13 @@ public class ForwardingBypass implements InternalExtension {
         return "127.0.0.1";
     }
 
-    @GlobalEventHandler
-    public void onAddonPanel(AddonPanelInitEvent event) {
+    @EventHandler
+    public static void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new ForwardingBypassPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @GlobalEventHandler
-    public void onCommandLine(CommandManagerInitEvent event) {
+    @EventHandler
+    public static void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), ForwardingBypassSettings.class, new ForwardingBypassCommand());
     }
 

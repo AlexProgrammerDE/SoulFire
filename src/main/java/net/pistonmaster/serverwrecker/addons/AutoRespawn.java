@@ -22,11 +22,11 @@ package net.pistonmaster.serverwrecker.addons;
 import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
+import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
@@ -46,11 +46,11 @@ import java.util.concurrent.TimeUnit;
 public class AutoRespawn implements InternalExtension {
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListeners(this);
-        AddonHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, this::onPacket);
+        ServerWreckerAPI.registerListeners(AutoRespawn.class);
+        AddonHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, AutoRespawn::onPacket);
     }
 
-    public void onPacket(SWPacketReceiveEvent event) {
+    public static void onPacket(SWPacketReceiveEvent event) {
         if (event.getPacket() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
             if (!event.connection().settingsHolder().has(AutoRespawnSettings.class)) {
                 return;
@@ -71,13 +71,13 @@ public class AutoRespawn implements InternalExtension {
         }
     }
 
-    @GlobalEventHandler
-    public void onAddonPanel(AddonPanelInitEvent event) {
+    @EventHandler
+    public static void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new AutoRespawnPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @GlobalEventHandler
-    public void onCommandLine(CommandManagerInitEvent event) {
+    @EventHandler
+    public static void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), AutoRespawnSettings.class, new AutoRespawnCommand());
     }
 

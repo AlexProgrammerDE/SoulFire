@@ -19,11 +19,12 @@
  */
 package net.pistonmaster.serverwrecker.api;
 
-import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerAttackEvent;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackInitEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.BotConnectionInitEvent;
+
+import java.util.function.Consumer;
 
 /**
  * This class contains helper methods for addons to use to make their life easier.
@@ -41,11 +42,11 @@ public class AddonHelper {
      * @param clazz    The class of the bot event.
      * @param consumer The consumer that is called when the event is posted.
      * @param <T>      The type of the bot event.
-     * @see #registerAttackEventConsumer(Class, EventSubscriber)
+     * @see #registerAttackEventConsumer(Class, Consumer)
      */
-    public static <T extends ServerWreckerBotEvent> void registerBotEventConsumer(Class<T> clazz, EventSubscriber<T> consumer) {
+    public static <T extends ServerWreckerBotEvent> void registerBotEventConsumer(Class<T> clazz, Consumer<T> consumer) {
         registerAttackEventConsumer(BotConnectionInitEvent.class, event ->
-                event.connection().eventBus().subscribe(clazz, consumer));
+                event.connection().eventBus().register(clazz, consumer));
     }
 
     /**
@@ -55,8 +56,8 @@ public class AddonHelper {
      * @param consumer The consumer that is called when the event is posted.
      * @param <T>      The type of the attack event.
      */
-    public static <T extends ServerWreckerAttackEvent> void registerAttackEventConsumer(Class<T> clazz, EventSubscriber<T> consumer) {
+    public static <T extends ServerWreckerAttackEvent> void registerAttackEventConsumer(Class<T> clazz, Consumer<T> consumer) {
         ServerWreckerAPI.registerListener(AttackInitEvent.class, event ->
-                event.attackManager().getEventBus().subscribe(clazz, consumer));
+                event.attackManager().getEventBus().register(clazz, consumer));
     }
 }

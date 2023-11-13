@@ -142,7 +142,7 @@ public class SWMenuBar extends JMenuBar {
             desktop.setQuitHandler((e, response) -> {
                 var event = new WindowCloseEvent();
                 ServerWreckerAPI.postEvent(event);
-                var canQuit = !event.cancelled();
+                var canQuit = !event.isCancelled();
                 if (canQuit) {
                     response.performQuit();
                 } else {

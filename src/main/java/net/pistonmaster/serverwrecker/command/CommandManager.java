@@ -152,15 +152,7 @@ public class CommandManager {
                         }))));
         dispatcher.register(literal("stop-path")
                 .executes(help("Makes all connected bots stop pathfinding", c -> forEveryBot(bot -> {
-                    bot.eventBus().unsubscribeIf(p -> {
-                        if (PathExecutor.class.isInstance(p)) {
-                            PathExecutor.class.cast(p).cancel();
-
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    });
+                    bot.eventBus().unregister(PathExecutor.class);
 
                     bot.sessionDataManager().getBotMovementManager().getControlState().resetAll();
                     return Command.SINGLE_SUCCESS;

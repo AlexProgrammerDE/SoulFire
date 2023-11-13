@@ -20,18 +20,17 @@
 package net.pistonmaster.serverwrecker.grpc;
 
 import io.grpc.stub.StreamObserver;
-import net.kyori.event.EventSubscriber;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.system.SystemLogEvent;
 import net.pistonmaster.serverwrecker.grpc.generated.LogRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.LogResponse;
 import net.pistonmaster.serverwrecker.grpc.generated.LogsServiceGrpc;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.function.Consumer;
 
 public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     private final QueueWithMaxSize<String> logs = new QueueWithMaxSize<>(300); // Keep max 300 logs
@@ -62,9 +61,9 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     }
 
     private record LogEventListener(
-            StreamObserver<LogResponse> responseObserver) implements EventSubscriber<SystemLogEvent> {
+            StreamObserver<LogResponse> responseObserver) implements Consumer<SystemLogEvent> {
         @Override
-        public void on(@NonNull SystemLogEvent event) {
+        public void accept(SystemLogEvent event) {
             publishLine(event.message(), responseObserver);
         }
     }

@@ -25,11 +25,11 @@ import com.github.steveice10.mc.protocol.data.game.setting.SkinPart;
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundClientInformationPacket;
 import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
 import lombok.RequiredArgsConstructor;
+import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSentEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
@@ -51,11 +51,11 @@ import java.util.Objects;
 public class ClientSettings implements InternalExtension {
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListeners(this);
-        AddonHelper.registerBotEventConsumer(SWPacketSentEvent.class, this::onPacket);
+        ServerWreckerAPI.registerListeners(ClientSettings.class);
+        AddonHelper.registerBotEventConsumer(SWPacketSentEvent.class, ClientSettings::onPacket);
     }
 
-    public void onPacket(SWPacketSentEvent event) {
+    public static void onPacket(SWPacketSentEvent event) {
         if (event.packet() instanceof ServerboundLoginAcknowledgedPacket) {
             if (!event.connection().settingsHolder().has(ClientSettingsSettings.class)) {
                 return;
@@ -102,13 +102,13 @@ public class ClientSettings implements InternalExtension {
         }
     }
 
-    @GlobalEventHandler
-    public void onAddonPanel(AddonPanelInitEvent event) {
+    @EventHandler
+    public static void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new ClientSettingsPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @GlobalEventHandler
-    public void onCommandLine(CommandManagerInitEvent event) {
+    @EventHandler
+    public static void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), ClientSettingsSettings.class, new ClientSettingsCommand());
     }
 

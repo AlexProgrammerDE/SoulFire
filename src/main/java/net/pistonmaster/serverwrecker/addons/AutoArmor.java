@@ -19,12 +19,12 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
+import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
@@ -48,6 +48,12 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class AutoArmor implements InternalExtension {
+    @Override
+    public void onLoad() {
+        ServerWreckerAPI.registerListeners(AutoArmor.class);
+        AddonHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoArmor::onJoined);
+    }
+
     private static void putOn(InventoryManager inventoryManager, PlayerInventoryContainer inventory, ContainerSlot targetSlot, ArmorType armorType) {
         var bestItem = Arrays.stream(inventory.getStorage()).filter(s -> {
             if (s.item() == null) {
@@ -98,12 +104,7 @@ public class AutoArmor implements InternalExtension {
         });
     }
 
-    @Override
-    public void onLoad() {
-        AddonHelper.registerBotEventConsumer(BotJoinedEvent.class, this::onJoined);
-    }
-
-    public void onJoined(BotJoinedEvent event) {
+    public static void onJoined(BotJoinedEvent event) {
         if (!event.connection().settingsHolder().has(AutoArmorSettings.class)) {
             return;
         }
@@ -133,13 +134,13 @@ public class AutoArmor implements InternalExtension {
         }, settings.minDelay(), settings.maxDelay());
     }
 
-    @GlobalEventHandler
-    public void onAddonPanel(AddonPanelInitEvent event) {
+    @EventHandler
+    public static void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new AutoArmorPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @GlobalEventHandler
-    public void onCommandLine(CommandManagerInitEvent event) {
+    @EventHandler
+    public static void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), AutoArmorSettings.class, new AutoArmorCommand());
     }
 

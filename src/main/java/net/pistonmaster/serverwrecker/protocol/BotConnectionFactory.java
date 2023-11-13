@@ -22,9 +22,9 @@ package net.pistonmaster.serverwrecker.protocol;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import io.netty.channel.EventLoopGroup;
-import net.kyori.event.EventBus;
+import net.lenni0451.lambdaevents.LambdaManager;
+import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import net.pistonmaster.serverwrecker.AttackManager;
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.protocol.bot.BotControlAPI;
@@ -52,7 +52,7 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
         var session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
         var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.getServerWreckerServer(),
                 settingsHolder, logger, protocol, session, new ExecutorManager("ServerWrecker-Attack-" + attackManager.getId()), meta,
-                EventBus.create(ServerWreckerBotEvent.class));
+                LambdaManager.basic(new ASMGenerator()));
 
         var sessionDataManager = new SessionDataManager(botConnection);
         session.getMeta().setSessionDataManager(sessionDataManager);
@@ -65,7 +65,7 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
         session.addListener(new SWBaseListener(botConnection, targetState));
         session.addListener(new SWSessionListener(sessionDataManager, botConnection));
 
-        attackManager.getEventBus().post(new BotConnectionInitEvent(botConnection));
+        attackManager.getEventBus().call(new BotConnectionInitEvent(botConnection));
 
         return botConnection;
     }

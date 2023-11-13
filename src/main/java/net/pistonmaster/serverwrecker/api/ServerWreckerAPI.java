@@ -19,22 +19,26 @@
  */
 package net.pistonmaster.serverwrecker.api;
 
-import net.kyori.event.EventBus;
-import net.kyori.event.EventSubscriber;
+import net.lenni0451.lambdaevents.LambdaManager;
+import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
+import net.pistonmaster.serverwrecker.api.event.EventExceptionHandler;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
 
-import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class ServerWreckerAPI {
-    private static final EventBus<ServerWreckerGlobalEvent> eventBus = EventBus.create(ServerWreckerGlobalEvent.class);
+    private static final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator());
     private static final List<ServerExtension> SERVER_ADDONS = new ArrayList<>();
     private static ServerWreckerServer serverWreckerServer;
+
+    static {
+        eventBus.setExceptionHandler(EventExceptionHandler.INSTANCE);
+    }
 
     private ServerWreckerAPI() {
     }
@@ -63,49 +67,19 @@ public class ServerWreckerAPI {
     }
 
     public static void postEvent(ServerWreckerGlobalEvent event) {
-        eventBus.post(event);
+        eventBus.call(event);
     }
 
-    public static <T extends ServerWreckerGlobalEvent> void registerListener(Class<T> clazz, EventSubscriber<? super T> subscriber) {
-        eventBus.subscribe(clazz, subscriber);
+    public static <T extends ServerWreckerGlobalEvent> void registerListener(Class<T> clazz, Consumer<? super T> subscriber) {
+        eventBus.register(subscriber, clazz);
     }
 
-    public static void registerListeners(Object listener) {
-        var publicLookup = MethodHandles.publicLookup();
-        for (var method : listener.getClass().getDeclaredMethods()) {
-            if (!method.isAnnotationPresent(GlobalEventHandler.class)) {
-                continue;
-            }
-
-            if (method.getParameterCount() != 1) {
-                throw new IllegalArgumentException("Listener method must have exactly one parameter!");
-            }
-
-            if (!ServerWreckerGlobalEvent.class.isAssignableFrom(method.getParameterTypes()[0])) {
-                throw new IllegalArgumentException("Listener method parameter must be a subclass of ServerWreckerGlobalEvent!");
-            }
-
-            method.setAccessible(true);
-
-            try {
-                var methodHandle = publicLookup.unreflect(method);
-
-                registerListener(method.getParameterTypes()[0].asSubclass(ServerWreckerGlobalEvent.class),
-                        event -> {
-                            try {
-                                methodHandle.invoke(listener, event);
-                            } catch (Throwable t) {
-                                t.printStackTrace();
-                            }
-                        });
-            } catch (ReflectiveOperationException e) {
-                throw new IllegalStateException("Unable to create method handle!", e);
-            }
-        }
+    public static void registerListeners(Class<?> listenerClass) {
+        eventBus.register(listenerClass);
     }
 
-    public static void unregisterListener(EventSubscriber<? extends ServerWreckerGlobalEvent> listener) {
-        eventBus.unsubscribeIf(eventSubscriber -> eventSubscriber.equals(listener));
+    public static void unregisterListener(Object listener) {
+        eventBus.unregister(listener);
     }
 
     public static void registerServerExtension(ServerExtension serverExtension) {

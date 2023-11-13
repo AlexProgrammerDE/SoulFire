@@ -46,8 +46,8 @@ public class SWSessionListener extends SessionAdapter {
     @Override
     public void packetReceived(Session session, Packet packet) {
         var event = new SWPacketReceiveEvent(botConnection, (MinecraftPacket) packet);
-        botConnection.eventBus().post(event);
-        if (event.cancelled()) {
+        botConnection.eventBus().call(event);
+        if (event.isCancelled()) {
             return;
         }
 
@@ -63,11 +63,11 @@ public class SWSessionListener extends SessionAdapter {
     @Override
     public void packetSending(PacketSendingEvent event) {
         var event1 = new SWPacketSendingEvent(botConnection, event.getPacket());
-        botConnection.eventBus().post(event1);
+        botConnection.eventBus().call(event1);
         event.setPacket(event1.getPacket());
-        event.setCancelled(event1.cancelled());
+        event.setCancelled(event1.isCancelled());
 
-        if (event1.cancelled()) {
+        if (event1.isCancelled()) {
             return;
         }
 
@@ -77,7 +77,7 @@ public class SWSessionListener extends SessionAdapter {
     @Override
     public void packetSent(Session session, Packet packet) {
         var event = new SWPacketSentEvent(botConnection, (MinecraftPacket) packet);
-        botConnection.eventBus().post(event);
+        botConnection.eventBus().call(event);
 
         botConnection.logger().trace("Sent packet: {}", packet.getClass().getSimpleName());
     }
@@ -90,6 +90,6 @@ public class SWSessionListener extends SessionAdapter {
             botConnection.logger().error("Error while handling disconnect event!", t);
         }
 
-        botConnection.eventBus().post(new BotDisconnectedEvent(botConnection));
+        botConnection.eventBus().call(new BotDisconnectedEvent(botConnection));
     }
 }

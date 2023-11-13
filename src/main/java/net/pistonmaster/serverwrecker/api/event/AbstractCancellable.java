@@ -17,10 +17,14 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event.gui;
+package net.pistonmaster.serverwrecker.api.event;
 
-import net.pistonmaster.serverwrecker.api.event.AbstractCancellable;
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
+import lombok.Getter;
+import lombok.Setter;
+import net.lenni0451.lambdaevents.types.ICancellableEvent;
 
-public class WindowCloseEvent extends AbstractCancellable implements ServerWreckerGlobalEvent {
+@Getter
+@Setter
+public class AbstractCancellable implements ICancellableEvent {
+    private boolean cancelled;
 }

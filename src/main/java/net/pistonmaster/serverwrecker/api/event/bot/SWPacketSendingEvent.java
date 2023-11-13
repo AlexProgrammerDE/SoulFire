@@ -23,7 +23,7 @@ import com.github.steveice10.mc.protocol.codec.MinecraftPacket;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.event.AbstractCancellable;
+import net.pistonmaster.serverwrecker.api.event.AbstractCancellable;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 

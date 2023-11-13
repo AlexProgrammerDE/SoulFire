@@ -21,10 +21,10 @@ package net.pistonmaster.serverwrecker.protocol;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
-import net.kyori.event.EventBus;
+import net.lenni0451.lambdaevents.LambdaManager;
 import net.pistonmaster.serverwrecker.AttackManager;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
+import net.pistonmaster.serverwrecker.api.event.EventExceptionHandler;
 import net.pistonmaster.serverwrecker.api.event.attack.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.protocol.bot.BotControlAPI;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
@@ -41,10 +41,14 @@ public record BotConnection(UUID connectionId, BotConnectionFactory factory, Att
                             ServerWreckerServer serverWreckerServer, SettingsHolder settingsHolder,
                             Logger logger, MinecraftProtocol protocol, ViaClientSession session,
                             ExecutorManager executorManager, BotConnectionMeta meta,
-                            EventBus<ServerWreckerBotEvent> eventBus) {
+                            LambdaManager eventBus) {
+    public BotConnection {
+        eventBus.setExceptionHandler(EventExceptionHandler.INSTANCE);
+    }
+
     public CompletableFuture<Void> connect() {
         return CompletableFuture.runAsync(() -> {
-            attackManager.getEventBus().post(new PreBotConnectEvent(this));
+            attackManager.getEventBus().call(new PreBotConnectEvent(this));
             session.connect(true);
         });
     }

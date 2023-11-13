@@ -19,12 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.addons;
 
-import net.kyori.event.EventSubscriber;
+import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
 import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.GlobalEventHandler;
 import net.pistonmaster.serverwrecker.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
@@ -34,7 +33,6 @@ import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import picocli.CommandLine;
 
@@ -46,39 +44,40 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class ChatMessageLogger implements InternalExtension {
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListeners(this);
-        AddonHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, this::onConnectionInit);
+        ServerWreckerAPI.registerListeners(ChatMessageLogger.class);
+        AddonHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, ChatMessageLogger::onConnectionInit);
     }
 
-    public void onConnectionInit(BotConnectionInitEvent event) {
+    public static void onConnectionInit(BotConnectionInitEvent event) {
         var chatMessageSettings = event.connection().settingsHolder().get(ChatMessageSettings.class);
         if (!chatMessageSettings.logChat()) {
             return;
         }
 
-        event.connection().eventBus().subscribe(ChatMessageReceiveEvent.class,
+        event.connection().eventBus().register(ChatMessageReceiveEvent.class,
                 new BotChatListener(event.connection().connectionId(), event.connection().logger(),
                         event.connection().executorManager().newScheduledExecutorService("Chat"),
                         new LinkedHashSet<>(), chatMessageSettings));
     }
 
-    @GlobalEventHandler
-    public void onAddonPanel(AddonPanelInitEvent event) {
+    @EventHandler
+    public static void onAddonPanel(AddonPanelInitEvent event) {
         event.navigationItems().add(new ChatMessagePanel(ServerWreckerAPI.getServerWrecker()));
     }
 
-    @GlobalEventHandler
-    public void onCommandLine(CommandManagerInitEvent event) {
+    @EventHandler
+    public static void onCommandLine(CommandManagerInitEvent event) {
         AddonCLIHelper.registerCommands(event.commandLine(), ChatMessageSettings.class, new ChatMessageCommand());
     }
 
     private record BotChatListener(UUID connectionId, Logger logger, ScheduledExecutorService executor,
                                    Set<String> messageQueue, ChatMessageSettings chatMessageSettings)
-            implements EventSubscriber<ChatMessageReceiveEvent> {
+            implements Consumer<ChatMessageReceiveEvent> {
         public BotChatListener {
             executor.scheduleWithFixedDelay(() -> {
                 var iter = messageQueue.iterator();
@@ -95,7 +94,7 @@ public class ChatMessageLogger implements InternalExtension {
         }
 
         @Override
-        public void on(@NonNull ChatMessageReceiveEvent event) {
+        public void accept(ChatMessageReceiveEvent event) {
             if (!event.connection().connectionId().equals(connectionId)) {
                 return;
             }

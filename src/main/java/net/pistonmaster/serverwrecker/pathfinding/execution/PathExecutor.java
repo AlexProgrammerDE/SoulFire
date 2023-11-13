@@ -20,26 +20,23 @@
 package net.pistonmaster.serverwrecker.pathfinding.execution;
 
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
-import net.kyori.event.EventSubscriber;
-import net.kyori.event.EventSubscription;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
-public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
+public class PathExecutor implements Consumer<BotPreTickEvent> {
     private final Queue<WorldAction> worldActions;
     private final BotConnection connection;
     private final Boolean2ObjectFunction<List<WorldAction>> findPath;
     private final ExecutorService executorService;
     private final int totalMovements;
-    private EventSubscription subscription;
     private int ticks = 0;
     private int movementNumber;
     private boolean cancelled = false;
@@ -56,7 +53,7 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
     }
 
     @Override
-    public void on(@NonNull BotPreTickEvent event) {
+    public void accept(BotPreTickEvent event) {
         var connection = event.connection();
         if (connection != this.connection) {
             return;
@@ -112,11 +109,11 @@ public class PathExecutor implements EventSubscriber<BotPreTickEvent> {
     }
 
     public void register() {
-        subscription = connection.eventBus().subscribe(BotPreTickEvent.class, this);
+        connection.eventBus().register(BotPreTickEvent.class, this);
     }
 
     public void unregister() {
-        subscription.unsubscribe();
+        connection.eventBus().unregister(BotPreTickEvent.class, this);
     }
 
     public void cancel() {

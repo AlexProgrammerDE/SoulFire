@@ -114,7 +114,6 @@ dependencies {
     // For YAML support (ViaVersion)
     implementation(libs.snakeyaml)
 
-    implementation(libs.kyori.event)
     implementation(libs.kyori.plain)
     implementation(libs.kyori.gson)
 
@@ -133,7 +132,7 @@ dependencies {
     implementation("net.lenni0451.classtransform:mixinsdummy:1.12.1")
     implementation("net.lenni0451.classtransform:additionalclassprovider:1.12.1")
     implementation("net.lenni0451:Reflect:1.3.0")
-    implementation("net.lenni0451:LambdaEvents:2.3.2")
+    implementation("net.lenni0451:LambdaEvents:2.3.3-SNAPSHOT")
 
     // For microsoft account authentication
     implementation(libs.minecraftauth) {

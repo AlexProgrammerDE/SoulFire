@@ -225,7 +225,7 @@ public final class SessionDataManager {
             var position = botMovementManager.getBlockPos();
             log.info("Joined server at position: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
 
-            connection.eventBus().post(new BotJoinedEvent(connection));
+            connection.eventBus().call(new BotJoinedEvent(connection));
         } else {
             botMovementManager.setPosition(x, y, z);
             botMovementManager.setRotation(yaw, pitch);
@@ -299,7 +299,7 @@ public final class SessionDataManager {
     }
 
     private void onChat(Component message) {
-        connection.eventBus().post(new ChatMessageReceiveEvent(connection, message));
+        connection.eventBus().call(new ChatMessageReceiveEvent(connection, message));
     }
 
     //
@@ -922,7 +922,7 @@ public final class SessionDataManager {
     }
 
     public void tick() {
-        connection.eventBus().post(new BotPreTickEvent(connection));
+        connection.eventBus().call(new BotPreTickEvent(connection));
 
         if (borderState != null) {
             borderState.tick();
@@ -937,6 +937,6 @@ public final class SessionDataManager {
             botMovementManager.tick();
         }
 
-        connection.eventBus().post(new BotPostTickEvent(connection));
+        connection.eventBus().call(new BotPostTickEvent(connection));
     }
 }
