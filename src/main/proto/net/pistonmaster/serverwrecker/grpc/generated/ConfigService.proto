@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package net.pistonmaster.serverwrecker.grpc.generated;
+
+message ClientDataRequest {
+}
+
+message StringSetting {
+  optional string def = 1;
+}
+
+message IntSetting {
+  // 0 if missing
+  optional int64 def = 1;
+}
+
+message IntRange {
+  int64 min = 1;
+  int64 max = 3;
+  // 0 if missing
+  optional int64 def = 2;
+}
+
+message BoolSetting {
+  // false if missing
+  optional bool def = 1;
+}
+
+message ComboOption {
+  // Sent to server
+  string name = 1;
+  // Displayed to user
+  string displayName = 2;
+}
+
+message ComboSetting {
+  // List of options
+  repeated ComboOption options = 1;
+  // 0 if missing
+  optional int64 def = 2;
+}
+
+// A single setting type with optional default value
+message ClientExtensionSettingType {
+  oneof value {
+    StringSetting string = 1;
+    IntSetting int = 2;
+    IntRange intRange = 3;
+    BoolSetting bool = 4;
+  }
+}
+
+// A single setting question
+message ClientExtensionSetting {
+  string name = 1;
+  optional string hint = 2;
+  ClientExtensionSettingType type = 3;
+}
+
+message ClientExtensionSettingsData {
+  // Used to assign a settings object
+  string id = 1;
+  repeated ClientExtensionSetting settings = 2;
+}
+
+// New options that extend the clients options
+message ClientExtension {
+  string id = 1;
+  string name = 2;
+  string version = 3;
+  string description = 4;
+  ClientExtensionSettingsData settings = 6;
+}
+
+message UIClientDataResponse {
+  string username = 1;
+  repeated ClientExtension extensions = 2;
+}
+
+service ConfigService {
+  rpc getUIClientData(ClientDataRequest) returns (UIClientDataResponse);
+}
