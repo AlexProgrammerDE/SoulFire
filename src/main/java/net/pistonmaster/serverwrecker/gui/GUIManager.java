@@ -23,6 +23,7 @@ import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import javafx.embed.swing.JFXPanel;
 import lombok.Getter;
+import net.lenni0451.reflect.Modules;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
@@ -105,6 +106,9 @@ public class GUIManager {
             if (!xToolkit.getClass().getName().equals("sun.awt.X11.XToolkit")) {
                 return;
             }
+
+            // Force open this module
+            Modules.openModule(xToolkit.getClass());
 
             var CLASS_NAME_VARIABLE = MethodHandles
                     .privateLookupIn(xToolkit.getClass(), MethodHandles.lookup())

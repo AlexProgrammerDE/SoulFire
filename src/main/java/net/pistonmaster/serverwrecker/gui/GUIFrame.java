@@ -90,7 +90,7 @@ public class GUIFrame extends JFrame {
         }
     }
 
-    public void showHints(Injector injector) {
+    public static void showHints(Injector injector) {
         var logPanel = injector.getSingleton(LogPanel.class);
         var cardContainer = injector.getSingleton(CardsContainer.class);
 

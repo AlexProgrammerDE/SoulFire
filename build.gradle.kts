@@ -13,14 +13,9 @@ plugins {
 version = "1.4.0-SNAPSHOT"
 description = "Advanced Minecraft Server-Stresser Tool."
 
-val moduleOpens = setOf(
-    "java.desktop/sun.awt.X11"
-)
-
 application {
     applicationName = "ServerWrecker"
     mainClass.set("net.pistonmaster.serverwrecker.ServerWreckerBootstrap")
-    applicationDefaultJvmArgs += moduleOpens.map { "--add-opens=$it=ALL-UNNAMED" }
 }
 
 tasks {
@@ -204,7 +199,6 @@ tasks.compileJava {
 tasks.named<Jar>("jar") {
     manifest {
         attributes["Main-Class"] = "net.pistonmaster.serverwrecker.ServerWreckerBootstrap"
-        attributes["Add-Opens"] = moduleOpens.joinToString(" ")
     }
 }
 
