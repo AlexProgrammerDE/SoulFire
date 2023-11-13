@@ -21,8 +21,9 @@ package net.pistonmaster.serverwrecker.grpc;
 
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.command.CommandManager;
-import net.pistonmaster.serverwrecker.grpc.generated.*;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.ConfigServiceGrpc;
+import net.pistonmaster.serverwrecker.grpc.generated.UIClientDataResponse;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 
 import javax.inject.Inject;
