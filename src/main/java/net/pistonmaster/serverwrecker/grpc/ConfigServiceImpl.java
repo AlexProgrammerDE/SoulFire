@@ -32,7 +32,6 @@ import javax.inject.Inject;
 public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
     private final SettingsManager settingsManager;
 
-
     @Override
     public void getUIClientData(ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
     }
