@@ -70,7 +70,6 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
     private Collection<ClientExtensionSettingsData> getExtensionSettings() {
         var extensionSettings = new ArrayList<ClientExtensionSettingsData>();
 
-
         return extensionSettings;
     }
 }
