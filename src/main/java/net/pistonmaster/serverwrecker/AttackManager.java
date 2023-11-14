@@ -66,7 +66,13 @@ public class AttackManager {
     private final Logger logger = LoggerFactory.getLogger("AttackManager-" + id);
     private final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator())
             .setExceptionHandler(EventExceptionHandler.INSTANCE)
-            .setEventFilter((c, h) -> ServerWreckerAttackEvent.class.isAssignableFrom(c));
+            .setEventFilter((c, h) -> {
+                if (ServerWreckerAttackEvent.class.isAssignableFrom(c)) {
+                    return true;
+                } else {
+                    throw new IllegalStateException("This event handler only accepts attack events");
+                }
+            });
     private final List<BotConnection> botConnections = new CopyOnWriteArrayList<>();
     private final ServerWreckerServer serverWreckerServer;
     @Setter

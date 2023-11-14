@@ -34,7 +34,13 @@ import java.util.function.Consumer;
 public class ServerWreckerAPI {
     private static final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator())
             .setExceptionHandler(EventExceptionHandler.INSTANCE)
-            .setEventFilter((c, h) -> ServerWreckerGlobalEvent.class.isAssignableFrom(c));
+            .setEventFilter((c, h) -> {
+                if (ServerWreckerGlobalEvent.class.isAssignableFrom(c)) {
+                    return true;
+                } else {
+                    throw new IllegalStateException("This event handler only accepts global events");
+                }
+            });
     private static final List<ServerExtension> SERVER_EXTENSIONS = new ArrayList<>();
     private static ServerWreckerServer serverWreckerServer;
 

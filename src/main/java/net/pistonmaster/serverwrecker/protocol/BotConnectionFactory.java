@@ -56,7 +56,13 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
                 settingsHolder, logger, protocol, session, new ExecutorManager("ServerWrecker-Attack-" + attackManager.getId()), meta,
                 LambdaManager.basic(new ASMGenerator())
                         .setExceptionHandler(EventExceptionHandler.INSTANCE)
-                        .setEventFilter((c, h) -> ServerWreckerBotEvent.class.isAssignableFrom(c)));
+                        .setEventFilter((c, h) -> {
+                            if (ServerWreckerBotEvent.class.isAssignableFrom(c)) {
+                                return true;
+                            } else {
+                                throw new IllegalStateException("This event handler only accepts bot events");
+                            }
+                        }));
 
         var sessionDataManager = new SessionDataManager(botConnection);
         session.getMeta().setSessionDataManager(sessionDataManager);

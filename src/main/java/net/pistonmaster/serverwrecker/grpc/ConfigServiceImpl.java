@@ -46,7 +46,7 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
         responseObserver.onCompleted();
     }
 
-    private Collection<ClientExtension> getExtensions() {
+    private static Collection<ClientExtension> getExtensions() {
         var extensions = new ArrayList<ClientExtension>();
         for (var pluginWrapper : ServerWreckerBootstrap.PLUGIN_MANAGER.getPlugins()) {
             var id = pluginWrapper.getPluginId();
