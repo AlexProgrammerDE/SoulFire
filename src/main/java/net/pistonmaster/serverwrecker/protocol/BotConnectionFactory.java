@@ -25,6 +25,8 @@ import io.netty.channel.EventLoopGroup;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import net.pistonmaster.serverwrecker.AttackManager;
+import net.pistonmaster.serverwrecker.api.event.EventExceptionHandler;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.protocol.bot.BotControlAPI;
@@ -52,7 +54,9 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
         var session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
         var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.getServerWreckerServer(),
                 settingsHolder, logger, protocol, session, new ExecutorManager("ServerWrecker-Attack-" + attackManager.getId()), meta,
-                LambdaManager.basic(new ASMGenerator()));
+                LambdaManager.basic(new ASMGenerator())
+                        .setExceptionHandler(EventExceptionHandler.INSTANCE)
+                        .setEventFilter((c, h) -> ServerWreckerBotEvent.class.isAssignableFrom(c)));
 
         var sessionDataManager = new SessionDataManager(botConnection);
         session.getMeta().setSessionDataManager(sessionDataManager);

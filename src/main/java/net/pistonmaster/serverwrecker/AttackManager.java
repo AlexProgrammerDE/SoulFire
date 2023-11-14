@@ -30,6 +30,7 @@ import lombok.Setter;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import net.pistonmaster.serverwrecker.api.event.EventExceptionHandler;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerAttackEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackEndedEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackStartEvent;
 import net.pistonmaster.serverwrecker.auth.AccountList;
@@ -63,15 +64,13 @@ public class AttackManager {
     private static final GameProfile EMPTY_GAME_PROFILE = new GameProfile((UUID) null, "DoNotUseGameProfile");
     private final int id = ID_COUNTER.getAndIncrement();
     private final Logger logger = LoggerFactory.getLogger("AttackManager-" + id);
-    private final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator());
+    private final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator())
+            .setExceptionHandler(EventExceptionHandler.INSTANCE)
+            .setEventFilter((c, h) -> ServerWreckerAttackEvent.class.isAssignableFrom(c));
     private final List<BotConnection> botConnections = new CopyOnWriteArrayList<>();
     private final ServerWreckerServer serverWreckerServer;
     @Setter
     private AttackState attackState = AttackState.STOPPED;
-
-    {
-        eventBus.setExceptionHandler(EventExceptionHandler.INSTANCE);
-    }
 
     public CompletableFuture<Void> start(SettingsHolder settingsHolder) {
         if (!attackState.isStopped()) {

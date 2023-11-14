@@ -62,21 +62,22 @@ message ClientExtensionSetting {
 message ClientExtensionSettingsData {
   // Used to assign a settings object
   string id = 1;
-  repeated ClientExtensionSetting settings = 2;
+  string pageName = 2;
+  repeated ClientExtensionSetting settings = 3;
 }
 
 // New options that extend the clients options
 message ClientExtension {
   string id = 1;
-  string name = 2;
-  string version = 3;
-  string description = 4;
-  ClientExtensionSettingsData settings = 6;
+  string version = 2;
+  string description = 3;
+  string provider = 4;
 }
 
 message UIClientDataResponse {
   string username = 1;
   repeated ClientExtension extensions = 2;
+  repeated ClientExtensionSettingsData extensionSettings = 3;
 }
 
 service ConfigService {

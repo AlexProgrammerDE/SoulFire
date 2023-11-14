@@ -32,13 +32,11 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public class ServerWreckerAPI {
-    private static final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator());
-    private static final List<ServerExtension> SERVER_ADDONS = new ArrayList<>();
+    private static final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator())
+            .setExceptionHandler(EventExceptionHandler.INSTANCE)
+            .setEventFilter((c, h) -> ServerWreckerGlobalEvent.class.isAssignableFrom(c));
+    private static final List<ServerExtension> SERVER_EXTENSIONS = new ArrayList<>();
     private static ServerWreckerServer serverWreckerServer;
-
-    static {
-        eventBus.setExceptionHandler(EventExceptionHandler.INSTANCE);
-    }
 
     private ServerWreckerAPI() {
     }
@@ -83,11 +81,11 @@ public class ServerWreckerAPI {
     }
 
     public static void registerServerExtension(ServerExtension serverExtension) {
-        SERVER_ADDONS.add(serverExtension);
+        SERVER_EXTENSIONS.add(serverExtension);
         serverExtension.onLoad();
     }
 
     public static List<ServerExtension> getServerExtensions() {
-        return Collections.unmodifiableList(SERVER_ADDONS);
+        return Collections.unmodifiableList(SERVER_EXTENSIONS);
     }
 }

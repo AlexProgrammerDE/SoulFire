@@ -35,6 +35,7 @@ import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.DispatcherInitEvent;
 import net.pistonmaster.serverwrecker.gui.LogPanel;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
@@ -152,7 +153,7 @@ public class CommandManager {
                         }))));
         dispatcher.register(literal("stop-path")
                 .executes(help("Makes all connected bots stop pathfinding", c -> forEveryBot(bot -> {
-                    bot.eventBus().unregister(PathExecutor.class);
+                    bot.eventBus().unregisterAll(BotPreTickEvent.class, PathExecutor.class::isAssignableFrom);
 
                     bot.sessionDataManager().getBotMovementManager().getControlState().resetAll();
                     return Command.SINGLE_SUCCESS;
