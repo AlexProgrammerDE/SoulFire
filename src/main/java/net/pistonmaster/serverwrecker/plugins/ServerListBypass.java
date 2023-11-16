@@ -17,17 +17,17 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.plugins;
 
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
-import net.pistonmaster.serverwrecker.api.AddonHelper;
+import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
+import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.attack.PreBotConnectEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
@@ -46,7 +46,7 @@ public class ServerListBypass implements InternalExtension {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(ServerListBypass.class);
-        AddonHelper.registerAttackEventConsumer(PreBotConnectEvent.class, ServerListBypass::onPreConnect);
+        PluginHelper.registerAttackEventConsumer(PreBotConnectEvent.class, ServerListBypass::onPreConnect);
     }
 
     public static void onPreConnect(PreBotConnectEvent event) {
@@ -70,13 +70,13 @@ public class ServerListBypass implements InternalExtension {
     }
 
     @EventHandler
-    public static void onAddonPanel(AddonPanelInitEvent event) {
+    public static void onPluginPanel(PluginPanelInitEvent event) {
         event.navigationItems().add(new ServerListBypassPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
     @EventHandler
     public static void onCommandLine(CommandManagerInitEvent event) {
-        AddonCLIHelper.registerCommands(event.commandLine(), ServerListBypassSettings.class, new ServerListBypassCommand());
+        PluginCLIHelper.registerCommands(event.commandLine(), ServerListBypassSettings.class, new ServerListBypassCommand());
     }
 
     private static class ServerListBypassPanel extends NavigationItem implements SettingsDuplex<ServerListBypassSettings> {

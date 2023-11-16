@@ -36,7 +36,6 @@ import lombok.Getter;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.pistonmaster.serverwrecker.addons.*;
 import net.pistonmaster.serverwrecker.api.ServerExtension;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackInitEvent;
@@ -52,6 +51,7 @@ import net.pistonmaster.serverwrecker.data.TranslationMapper;
 import net.pistonmaster.serverwrecker.grpc.RPCServer;
 import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.SWLogAppender;
+import net.pistonmaster.serverwrecker.plugins.*;
 import net.pistonmaster.serverwrecker.protocol.packet.SWClientboundStatusResponsePacket;
 import net.pistonmaster.serverwrecker.proxy.ProxyList;
 import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
@@ -102,14 +102,14 @@ public class ServerWreckerServer {
     private final Map<String, String> serviceServerConfig = new HashMap<>();
     private final AccountRegistry accountRegistry = new AccountRegistry();
     private final ProxyRegistry proxyRegistry = new ProxyRegistry();
-    private final SettingsManager settingsManager = new SettingsManager(
-            BotSettings.class,
-            DevSettings.class,
-            AccountSettings.class,
-            AccountList.class,
-            ProxySettings.class,
-            ProxyList.class
-    );
+    private final SettingsManager settingsManager = new SettingsManager(Map.ofEntries(
+            Map.entry("bot", BotSettings.class),
+            Map.entry("dev", DevSettings.class),
+            Map.entry("account", AccountSettings.class),
+            Map.entry("accountList", AccountList.class),
+            Map.entry("proxy", ProxySettings.class),
+            Map.entry("proxyList", ProxyList.class)
+    ));
     private final OperationMode operationMode;
     private final boolean outdated;
     private final Map<Integer, AttackManager> attacks = Collections.synchronizedMap(new Int2ObjectArrayMap<>());
@@ -209,13 +209,13 @@ public class ServerWreckerServer {
     }
 
     private static void registerInternalServerExtensions() {
-        var addons = List.of(
+        var plugins = List.of(
                 new BotTicker(), new ClientBrand(), new ClientSettings(),
                 new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
                 new AutoTotem(), new AutoJump(), new AutoArmor(), new AutoEat(),
                 new ChatMessageLogger(), new ServerListBypass());
 
-        addons.forEach(ServerWreckerAPI::registerServerExtension);
+        plugins.forEach(ServerWreckerAPI::registerServerExtension);
     }
 
     private static void registerServerExtensions() {

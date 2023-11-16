@@ -104,15 +104,15 @@ public class GUIFrame extends JFrame {
                 injector.getSingleton(ControlPanel.class),
                 SwingConstants.TOP, "hint.controls", commandsHint);
 
-        var addonsHint = new HintManager.Hint(
-                "Click to configure addons to make the attack more effective.",
-                (Component) cardContainer.getClientProperty("addon-menu-button"),
-                SwingConstants.BOTTOM, "hint.addonsButton", controlsHint);
+        var pluginsHint = new HintManager.Hint(
+                "Click to configure plugins to make the attack more effective.",
+                (Component) cardContainer.getClientProperty("plugin-menu-button"),
+                SwingConstants.BOTTOM, "hint.pluginsButton", controlsHint);
 
         var proxyHint = new HintManager.Hint(
                 "Click to import HTTP, SOCKS4 and SOCKS5 proxies",
                 (Component) cardContainer.getClientProperty("proxy-menu-button"),
-                SwingConstants.LEFT, "hint.proxyButton", addonsHint);
+                SwingConstants.LEFT, "hint.proxyButton", pluginsHint);
 
         var accountsHint = new HintManager.Hint(
                 "Click to configure the bot offline-mode name format or bring your own accounts.",

@@ -17,19 +17,19 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.plugins;
 
 import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
-import net.pistonmaster.serverwrecker.api.AddonHelper;
+import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
+import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
@@ -47,7 +47,7 @@ public class AutoRespawn implements InternalExtension {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(AutoRespawn.class);
-        AddonHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, AutoRespawn::onPacket);
+        PluginHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, AutoRespawn::onPacket);
     }
 
     public static void onPacket(SWPacketReceiveEvent event) {
@@ -72,13 +72,13 @@ public class AutoRespawn implements InternalExtension {
     }
 
     @EventHandler
-    public static void onAddonPanel(AddonPanelInitEvent event) {
+    public static void onPluginPanel(PluginPanelInitEvent event) {
         event.navigationItems().add(new AutoRespawnPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
     @EventHandler
     public static void onCommandLine(CommandManagerInitEvent event) {
-        AddonCLIHelper.registerCommands(event.commandLine(), AutoRespawnSettings.class, new AutoRespawnCommand());
+        PluginCLIHelper.registerCommands(event.commandLine(), AutoRespawnSettings.class, new AutoRespawnCommand());
     }
 
     private static class AutoRespawnPanel extends NavigationItem implements SettingsDuplex<AutoRespawnSettings> {

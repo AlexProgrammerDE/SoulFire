@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.plugins;
 
 import com.github.steveice10.mc.protocol.data.game.entity.player.HandPreference;
 import com.github.steveice10.mc.protocol.data.game.setting.ChatVisibility;
@@ -27,12 +27,12 @@ import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLog
 import lombok.RequiredArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
-import net.pistonmaster.serverwrecker.api.AddonHelper;
+import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
+import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSentEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
@@ -52,7 +52,7 @@ public class ClientSettings implements InternalExtension {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(ClientSettings.class);
-        AddonHelper.registerBotEventConsumer(SWPacketSentEvent.class, ClientSettings::onPacket);
+        PluginHelper.registerBotEventConsumer(SWPacketSentEvent.class, ClientSettings::onPacket);
     }
 
     public static void onPacket(SWPacketSentEvent event) {
@@ -103,13 +103,13 @@ public class ClientSettings implements InternalExtension {
     }
 
     @EventHandler
-    public static void onAddonPanel(AddonPanelInitEvent event) {
+    public static void onPluginPanel(PluginPanelInitEvent event) {
         event.navigationItems().add(new ClientSettingsPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
     @EventHandler
     public static void onCommandLine(CommandManagerInitEvent event) {
-        AddonCLIHelper.registerCommands(event.commandLine(), ClientSettingsSettings.class, new ClientSettingsCommand());
+        PluginCLIHelper.registerCommands(event.commandLine(), ClientSettingsSettings.class, new ClientSettingsCommand());
     }
 
     private static class ClientSettingsPanel extends NavigationItem implements SettingsDuplex<ClientSettingsSettings> {

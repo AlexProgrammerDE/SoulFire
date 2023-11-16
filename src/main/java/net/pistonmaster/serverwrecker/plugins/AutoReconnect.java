@@ -17,16 +17,16 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.plugins;
 
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
-import net.pistonmaster.serverwrecker.api.AddonHelper;
+import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
+import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
@@ -48,7 +48,7 @@ public class AutoReconnect implements InternalExtension {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(AutoReconnect.class);
-        AddonHelper.registerBotEventConsumer(BotDisconnectedEvent.class, this::onDisconnect);
+        PluginHelper.registerBotEventConsumer(BotDisconnectedEvent.class, this::onDisconnect);
     }
 
     public void onDisconnect(BotDisconnectedEvent event) {
@@ -79,13 +79,13 @@ public class AutoReconnect implements InternalExtension {
     }
 
     @EventHandler
-    public static void onAddonPanel(AddonPanelInitEvent event) {
+    public static void onPluginPanel(PluginPanelInitEvent event) {
         event.navigationItems().add(new AutoReconnectPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
     @EventHandler
     public static void onCommandLine(CommandManagerInitEvent event) {
-        AddonCLIHelper.registerCommands(event.commandLine(), AutoReconnectSettings.class, new AutoReconnectCommand());
+        PluginCLIHelper.registerCommands(event.commandLine(), AutoReconnectSettings.class, new AutoReconnectCommand());
     }
 
     private static class AutoReconnectPanel extends NavigationItem implements SettingsDuplex<AutoReconnectSettings> {

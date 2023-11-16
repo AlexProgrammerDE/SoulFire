@@ -17,18 +17,18 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.plugins;
 
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
-import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
+import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
+import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
 import net.pistonmaster.serverwrecker.data.DangerFood;
 import net.pistonmaster.serverwrecker.data.FoodType;
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
@@ -48,7 +48,7 @@ public class AutoEat implements InternalExtension {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(AutoEat.class);
-        AddonHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoEat::onJoined);
+        PluginHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoEat::onJoined);
     }
 
     public static void onJoined(BotJoinedEvent event) {
@@ -147,13 +147,13 @@ public class AutoEat implements InternalExtension {
     }
 
     @EventHandler
-    public static void onAddonPanel(AddonPanelInitEvent event) {
+    public static void onPluginPanel(PluginPanelInitEvent event) {
         event.navigationItems().add(new AutoEatPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
     @EventHandler
     public static void onCommandLine(CommandManagerInitEvent event) {
-        AddonCLIHelper.registerCommands(event.commandLine(), AutoEatSettings.class, new AutoEatCommand());
+        PluginCLIHelper.registerCommands(event.commandLine(), AutoEatSettings.class, new AutoEatCommand());
     }
 
     private static class AutoEatPanel extends NavigationItem implements SettingsDuplex<AutoEatSettings> {

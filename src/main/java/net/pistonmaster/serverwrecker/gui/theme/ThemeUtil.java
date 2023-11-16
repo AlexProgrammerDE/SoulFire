@@ -33,10 +33,11 @@ import javax.swing.plaf.basic.BasicLookAndFeel;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 public class ThemeUtil {
     public static final Path THEME_PATH = ServerWreckerBootstrap.DATA_FOLDER.resolve("theme.json");
-    public static final SettingsManager THEME_MANAGER = new SettingsManager(ThemeSettings.class);
+    public static final SettingsManager THEME_MANAGER = new SettingsManager(Map.of("theme", ThemeSettings.class));
     public static final ThemeProvider THEME_PROVIDER = new ThemeProvider(FlatDarculaLaf.class);
     private static final Logger LOGGER = LoggerFactory.getLogger(ThemeUtil.class);
 

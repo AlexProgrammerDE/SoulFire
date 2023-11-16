@@ -19,6 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.settings.lib;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.gson.*;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.pistonmaster.serverwrecker.auth.service.AccountData;
@@ -36,15 +38,13 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 public class SettingsManager {
     public static final Logger LOGGER = LoggerFactory.getLogger(SettingsManager.class);
     private final List<ListenerRegistration<?>> listeners = new ArrayList<>();
     private final List<ProviderRegistration<?>> providers = new ArrayList<>();
-    private final Class<? extends SettingsObject>[] registeredSettings;
+    private final BiMap<String, Class<? extends SettingsObject>> classMap = HashBiMap.create();
     // Used to read & write the settings file
     private final Gson dumpGson = new GsonBuilder().setPrettyPrinting().create();
     private final Gson baseGson = new GsonBuilder()
@@ -53,15 +53,14 @@ public class SettingsManager {
             .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
             .create();
     private final Gson normalGson = baseGson.newBuilder()
-            .registerTypeHierarchyAdapter(AccountData.class, new ClassObjectAdapter(baseGson))
+            .registerTypeHierarchyAdapter(AccountData.class, new ClassObjectAdapter(baseGson, classMap))
             .create();
     private final Gson settingsTypeGson = new GsonBuilder()
-            .registerTypeHierarchyAdapter(Object.class, new ClassObjectAdapter(normalGson))
+            .registerTypeHierarchyAdapter(Object.class, new ClassObjectAdapter(normalGson, classMap))
             .create();
 
-    @SafeVarargs
-    public SettingsManager(Class<? extends SettingsObject>... registeredSettings) {
-        this.registeredSettings = registeredSettings;
+    public SettingsManager(Map<String, Class<? extends SettingsObject>> registeredSettings) {
+        this.classMap.putAll(registeredSettings);
     }
 
     public <T extends SettingsObject> void registerListener(Class<T> clazz, SettingsListener<T> listener) {
@@ -83,7 +82,7 @@ public class SettingsManager {
                 .map(SettingsProvider::collectSettings)
                 .toList());
 
-        for (var clazz : registeredSettings) {
+        for (var clazz : classMap.values()) {
             if (!settingsHolder.has(clazz)) {
                 throw new IllegalArgumentException("No settings found for " + clazz.getSimpleName());
             }
@@ -140,7 +139,7 @@ public class SettingsManager {
     }
 
     public String exportSettings() {
-        List<JsonElement> settingsHolder = new ArrayList<>();
+        var settingsHolder = new ArrayList<JsonElement>();
         for (SettingsObject settingsObject : collectSettings().settings()) {
             settingsHolder.add(settingsTypeGson.toJsonTree(settingsObject));
         }
@@ -166,25 +165,27 @@ public class SettingsManager {
         }
     }
 
-    private record ClassObjectAdapter(Gson gson) implements JsonSerializer<Object>, JsonDeserializer<Object> {
+    private record ClassObjectAdapter(Gson gson, BiMap<String, Class<? extends SettingsObject>> classMap)
+            implements JsonSerializer<Object>, JsonDeserializer<Object> {
         @Override
         public JsonElement serialize(Object src, Type typeOfSrc, JsonSerializationContext context) {
             var serialized = gson.toJsonTree(src);
             var jsonObject = serialized.getAsJsonObject();
-            jsonObject.addProperty("class", src.getClass().getName());
+            var settingClass = classMap.inverse().get(src.getClass());
+            Objects.requireNonNull(settingClass, "Setting name for " + src.getClass().getSimpleName() + " is null!");
+
+            jsonObject.addProperty("settingType", settingClass);
             return jsonObject;
         }
 
         @Override
         public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             var jsonObject = json.getAsJsonObject();
-            var className = jsonObject.get("class").getAsString();
-            try {
-                var clazz = Class.forName(className);
-                return gson.fromJson(jsonObject, clazz);
-            } catch (ClassNotFoundException e) {
-                return null; // Some extension might not be loaded, so we just ignore it
-            }
+            var settingType = jsonObject.get("settingType").getAsString();
+            var clazz = classMap.get(settingType);
+            Objects.requireNonNull(clazz, "Class for " + settingType + " is null!");
+
+            return gson.fromJson(jsonObject, clazz);
         }
     }
 

@@ -17,9 +17,9 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.plugins;
 
-import net.pistonmaster.serverwrecker.api.AddonHelper;
+import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.util.TickTimer;
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class BotTicker implements InternalExtension {
     @Override
     public void onLoad() {
-        AddonHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, BotTicker::onConnectionInit);
+        PluginHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, BotTicker::onConnectionInit);
     }
 
     public static void onConnectionInit(BotConnectionInitEvent event) {

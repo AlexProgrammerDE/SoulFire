@@ -39,23 +39,23 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
         responseObserver.onNext(
                 UIClientDataResponse.newBuilder()
                         .setUsername(username)
-                        .addAllExtensions(getExtensions())
-                        .addAllExtensionSettings(getExtensionSettings())
+                        .addAllPlugins(getExtensions())
+                        .addAllPluginSettings(getExtensionSettings())
                         .build()
         );
         responseObserver.onCompleted();
     }
 
-    private static Collection<ClientExtension> getExtensions() {
-        var extensions = new ArrayList<ClientExtension>();
+    private static Collection<ClientPlugin> getExtensions() {
+        var plugins = new ArrayList<ClientPlugin>();
         for (var pluginWrapper : ServerWreckerBootstrap.PLUGIN_MANAGER.getPlugins()) {
             var id = pluginWrapper.getPluginId();
             var description = pluginWrapper.getDescriptor().getPluginDescription();
             var version = pluginWrapper.getDescriptor().getVersion();
             var provider = pluginWrapper.getDescriptor().getProvider();
 
-            extensions.add(
-                    ClientExtension.newBuilder()
+            plugins.add(
+                    ClientPlugin.newBuilder()
                             .setId(id)
                             .setDescription(description)
                             .setVersion(version)
@@ -64,12 +64,12 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
             );
         }
 
-        return extensions;
+        return plugins;
     }
 
-    private Collection<ClientExtensionSettingsData> getExtensionSettings() {
-        var extensionSettings = new ArrayList<ClientExtensionSettingsData>();
+    private Collection<ClientPluginSettingsPage> getExtensionSettings() {
+        var pluginSettings = new ArrayList<ClientPluginSettingsPage>();
 
-        return extensionSettings;
+        return pluginSettings;
     }
 }

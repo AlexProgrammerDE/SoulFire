@@ -20,8 +20,9 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import lombok.Getter;
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingsPage;
+import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 
 import javax.inject.Inject;
@@ -31,20 +32,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-public class AddonPanel extends NavigationItem {
-    private final List<NavigationItem> navigationItems = new ArrayList<>();
+public class PluginListPanel extends NavigationItem {
+    private final List<ClientPluginSettingsPage> pluginPages = new ArrayList<>();
 
     @Inject
-    public AddonPanel(CardsContainer container) {
-        ServerWreckerAPI.postEvent(new AddonPanelInitEvent(navigationItems));
-
+    public PluginListPanel(GUIManager guiManager, CardsContainer container) {
         setLayout(new GridLayout(3, 3, 10, 10));
         var cardLayout = (CardLayout) container.getLayout();
 
-        for (var item : navigationItems) {
-            var button = new JButton(SwingTextUtils.htmlCenterText(item.getNavigationName()));
+        pluginPages.addAll(guiManager.getRpcClient().getConfigStubBlocking()
+                .getUIClientData(ClientDataRequest.getDefaultInstance())
+                .getPluginSettingsList());
+        for (var item : pluginPages) {
+            var pageId = item.getPageId();
+            var button = new JButton(SwingTextUtils.htmlCenterText(pageId));
 
-            button.addActionListener(action -> cardLayout.show(container, item.getNavigationId()));
+            button.addActionListener(action -> cardLayout.show(container, pageId));
             button.setSize(new Dimension(50, 50));
 
             add(button);
@@ -53,11 +56,11 @@ public class AddonPanel extends NavigationItem {
 
     @Override
     public String getNavigationName() {
-        return "Addons";
+        return "Plugins";
     }
 
     @Override
     public String getNavigationId() {
-        return "addon-menu";
+        return "plugin-menu";
     }
 }

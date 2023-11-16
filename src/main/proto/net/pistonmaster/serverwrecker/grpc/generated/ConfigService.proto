@@ -8,29 +8,23 @@ message ClientDataRequest {
 }
 
 message StringSetting {
-  optional string def = 1;
+  string def = 1;
 }
 
 message IntSetting {
-  // 0 if missing
-  optional int64 def = 1;
-}
-
-message IntRange {
-  int64 min = 1;
-  int64 max = 3;
-  // 0 if missing
-  optional int64 def = 2;
+  int32 def = 1;
+  int32 min = 2;
+  int32 max = 3;
+  int32 step = 4;
 }
 
 message BoolSetting {
-  // false if missing
-  optional bool def = 1;
+  bool def = 1;
 }
 
 message ComboOption {
   // Sent to server
-  string name = 1;
+  string id = 1;
   // Displayed to user
   string displayName = 2;
 }
@@ -38,36 +32,60 @@ message ComboOption {
 message ComboSetting {
   // List of options
   repeated ComboOption options = 1;
-  // 0 if missing
-  optional int64 def = 2;
+  int32 def = 2;
 }
 
 // A single setting type with optional default value
-message ClientExtensionSettingType {
+message ClientPluginSettingType {
   oneof value {
     StringSetting string = 1;
     IntSetting int = 2;
-    IntRange intRange = 3;
-    BoolSetting bool = 4;
+    BoolSetting bool = 3;
+    ComboSetting combo = 4;
   }
 }
 
-// A single setting question
-message ClientExtensionSetting {
-  string name = 1;
-  optional string hint = 2;
-  ClientExtensionSettingType type = 3;
+// A single option in the settings page
+message ClientPluginSettingEntrySingle {
+  // Basically we only send a kv map to the server with every setting entry
+  string settingEntryId = 1;
+  string name = 2;
+  optional string hint = 3;
+  ClientPluginSettingType type = 4;
 }
 
-message ClientExtensionSettingsData {
-  // Used to assign a settings object
-  string id = 1;
-  string pageName = 2;
-  repeated ClientExtensionSetting settings = 3;
+message ClientPluginSettingEntryMinMaxPairSingle {
+  // Basically we only send a kv map to the server with every setting entry
+  string settingEntryId = 1;
+  string name = 2;
+  optional string hint = 3;
+  IntSetting intSetting = 4;
+}
+
+// A paired option in the settings page
+message ClientPluginSettingEntryMinMaxPair {
+  // Required to be IntSetting
+  ClientPluginSettingEntryMinMaxPairSingle min = 4;
+  // Required to be IntSetting
+  ClientPluginSettingEntryMinMaxPairSingle max = 5;
+}
+
+// A entry in the settings page
+message ClientPluginSettingEntry {
+  oneof value {
+    ClientPluginSettingEntrySingle single = 1;
+    ClientPluginSettingEntryMinMaxPair minMaxPair = 2;
+  }
+}
+
+message ClientPluginSettingsPage {
+  string pageId = 2;
+  string pageName = 3;
+  repeated ClientPluginSettingEntry entries = 4;
 }
 
 // New options that extend the clients options
-message ClientExtension {
+message ClientPlugin {
   string id = 1;
   string version = 2;
   string description = 3;
@@ -76,8 +94,8 @@ message ClientExtension {
 
 message UIClientDataResponse {
   string username = 1;
-  repeated ClientExtension extensions = 2;
-  repeated ClientExtensionSettingsData extensionSettings = 3;
+  repeated ClientPlugin plugins = 2;
+  repeated ClientPluginSettingsPage pluginSettings = 3;
 }
 
 service ConfigService {

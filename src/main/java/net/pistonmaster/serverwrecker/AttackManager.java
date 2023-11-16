@@ -204,7 +204,7 @@ public class AttackManager {
         });
     }
 
-    private MinecraftAccount getAccount(AccountSettings accountSettings, List<MinecraftAccount> accounts, int botId) {
+    private static MinecraftAccount getAccount(AccountSettings accountSettings, List<MinecraftAccount> accounts, int botId) {
         if (accounts.isEmpty()) {
             return new MinecraftAccount(String.format(accountSettings.nameFormat(), botId));
         }
@@ -212,7 +212,7 @@ public class AttackManager {
         return accounts.remove(0);
     }
 
-    private Optional<SWProxy> getProxy(int accountsPerProxy, Object2IntMap<SWProxy> proxyUseMap) {
+    private static Optional<SWProxy> getProxy(int accountsPerProxy, Object2IntMap<SWProxy> proxyUseMap) {
         if (proxyUseMap.isEmpty()) {
             return Optional.empty(); // No proxies available
         }
@@ -269,7 +269,7 @@ public class AttackManager {
             }
         } while (!botConnections.isEmpty()); // To make sure really all bots are disconnected
 
-        // Notify addons of state change
+        // Notify plugins of state change
         eventBus.call(new AttackEndedEvent(this));
 
         logger.info("Attack stopped");

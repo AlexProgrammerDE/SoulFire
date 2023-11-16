@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.plugins;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.packet.handshake.serverbound.ClientIntentionPacket;
@@ -30,12 +30,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
-import net.pistonmaster.serverwrecker.api.AddonHelper;
+import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
+import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSendingEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
@@ -148,8 +147,8 @@ public class ForwardingBypass implements InternalExtension {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(ForwardingBypass.class);
-        AddonHelper.registerBotEventConsumer(SWPacketSendingEvent.class, this::onPacket);
-        AddonHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, this::onPacketReceive);
+        PluginHelper.registerBotEventConsumer(SWPacketSendingEvent.class, this::onPacket);
+        PluginHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, this::onPacketReceive);
     }
 
     public void onPacket(SWPacketSendingEvent event) {
@@ -215,13 +214,13 @@ public class ForwardingBypass implements InternalExtension {
     }
 
     @EventHandler
-    public static void onAddonPanel(AddonPanelInitEvent event) {
+    public static void onPluginPanel(PluginPanelInitEvent event) {
         event.navigationItems().add(new ForwardingBypassPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
     @EventHandler
     public static void onCommandLine(CommandManagerInitEvent event) {
-        AddonCLIHelper.registerCommands(event.commandLine(), ForwardingBypassSettings.class, new ForwardingBypassCommand());
+        PluginCLIHelper.registerCommands(event.commandLine(), ForwardingBypassSettings.class, new ForwardingBypassCommand());
     }
 
     /*

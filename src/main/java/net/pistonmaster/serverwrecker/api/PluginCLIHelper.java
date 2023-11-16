@@ -23,8 +23,8 @@ import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
 import picocli.CommandLine;
 
-public class AddonCLIHelper {
-    private AddonCLIHelper() {
+public class PluginCLIHelper {
+    private PluginCLIHelper() {
     }
 
     public static <T extends SettingsObject> void registerCommands(CommandLine commandLine, Class<T> clazz, SettingsProvider<T> command) {

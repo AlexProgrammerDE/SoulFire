@@ -17,16 +17,16 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.plugins;
 
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
-import net.pistonmaster.serverwrecker.api.AddonHelper;
+import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
+import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
@@ -41,7 +41,7 @@ public class AutoRegister implements InternalExtension {
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(AutoRegister.class);
-        AddonHelper.registerBotEventConsumer(ChatMessageReceiveEvent.class, AutoRegister::onChat);
+        PluginHelper.registerBotEventConsumer(ChatMessageReceiveEvent.class, AutoRegister::onChat);
     }
 
     public static void onChat(ChatMessageReceiveEvent event) {
@@ -77,13 +77,13 @@ public class AutoRegister implements InternalExtension {
     }
 
     @EventHandler
-    public static void onAddonPanel(AddonPanelInitEvent event) {
+    public static void onPluginPanel(PluginPanelInitEvent event) {
         event.navigationItems().add(new AutoRegisterPanel(ServerWreckerAPI.getServerWrecker()));
     }
 
     @EventHandler
     public static void onCommandLine(CommandManagerInitEvent event) {
-        AddonCLIHelper.registerCommands(event.commandLine(), AutoRegisterSettings.class, new AutoRegisterCommand());
+        PluginCLIHelper.registerCommands(event.commandLine(), AutoRegisterSettings.class, new AutoRegisterCommand());
     }
 
     private static class AutoRegisterPanel extends NavigationItem implements SettingsDuplex<AutoRegisterSettings> {

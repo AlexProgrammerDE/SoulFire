@@ -64,8 +64,9 @@ public class HintManager {
 
     public static void hideAllHints() {
         var hintPanels2 = hintPanels.toArray(new HintPanel[0]);
-        for (var hintPanel : hintPanels2)
+        for (var hintPanel : hintPanels2) {
             hintPanel.hideHint();
+        }
     }
 
     //---- class HintPanel ----------------------------------------------------

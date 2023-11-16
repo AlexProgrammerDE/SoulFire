@@ -17,17 +17,16 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event.lifecycle;
+package net.pistonmaster.serverwrecker.plugins;
 
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
+import net.pistonmaster.serverwrecker.api.MixinExtension;
+import net.pistonmaster.serverwrecker.api.ServerExtension;
 
-import java.util.List;
+import java.util.Set;
 
-/**
- * Add yourself to the addon panel by adding a {@link NavigationItem} to the list.
- *
- * @param navigationItems The list of navigation items.
- */
-public record AddonPanelInitEvent(List<NavigationItem> navigationItems) implements ServerWreckerGlobalEvent {
+public interface InternalExtension extends ServerExtension, MixinExtension {
+    @Override
+    default Set<String> getMixinPaths() {
+        return Set.of();
+    }
 }

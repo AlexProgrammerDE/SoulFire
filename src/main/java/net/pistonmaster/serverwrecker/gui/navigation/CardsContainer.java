@@ -40,8 +40,8 @@ public class CardsContainer extends JPanel {
         setLayout(new CardLayout());
 
         panels.add(injector.getSingleton(SettingsPanel.class));
-        var addonPanel = injector.getSingleton(AddonPanel.class);
-        panels.add(addonPanel);
+        var pluginPanel = injector.getSingleton(PluginListPanel.class);
+        panels.add(pluginPanel);
         panels.add(injector.getSingleton(AccountPanel.class));
         panels.add(injector.getSingleton(ProxyPanel.class));
         panels.add(injector.getSingleton(DeveloperPanel.class));
@@ -53,8 +53,8 @@ public class CardsContainer extends JPanel {
             add(NavigationWrapper.createBackWrapper(this, NAVIGATION_MENU, item), item.getNavigationId());
         }
 
-        for (var item : addonPanel.getNavigationItems()) {
-            add(NavigationWrapper.createBackWrapper(this, addonPanel.getNavigationId(), item), item.getNavigationId());
+        for (var item : pluginPanel.getPluginPages()) {
+            add(NavigationWrapper.createBackWrapper(this, pluginPanel.getNavigationId(), new PluginSettingsPanel(item)), item.getPageId());
         }
 
         setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));
