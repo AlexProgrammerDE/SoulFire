@@ -22,8 +22,8 @@ package net.pistonmaster.serverwrecker.grpc;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.grpc.generated.*;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import java.util.Collection;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
-    private final SettingsManager settingsManager;
+    private final ServerWreckerServer serverWreckerServer;
 
     @Override
     public void getUIClientData(ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {

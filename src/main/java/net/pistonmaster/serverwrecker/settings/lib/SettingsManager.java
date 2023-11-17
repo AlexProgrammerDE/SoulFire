@@ -174,14 +174,14 @@ public class SettingsManager {
             var settingClass = classMap.inverse().get(src.getClass());
             Objects.requireNonNull(settingClass, "Setting name for " + src.getClass().getSimpleName() + " is null!");
 
-            jsonObject.addProperty("settingType", settingClass);
+            jsonObject.addProperty("settingsId", settingClass);
             return jsonObject;
         }
 
         @Override
         public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             var jsonObject = json.getAsJsonObject();
-            var settingType = jsonObject.get("settingType").getAsString();
+            var settingType = jsonObject.get("settingId").getAsString();
             var clazz = classMap.get(settingType);
             Objects.requireNonNull(clazz, "Class for " + settingType + " is null!");
 
