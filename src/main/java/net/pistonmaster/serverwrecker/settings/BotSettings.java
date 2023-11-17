@@ -21,14 +21,19 @@ package net.pistonmaster.serverwrecker.settings;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.pistonmaster.serverwrecker.SWConstants;
+import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
+import net.pistonmaster.serverwrecker.settings.lib.property.StringProperty;
 
 public record BotSettings(String host, int port,
                           int amount, int minJoinDelayMs, int maxJoinDelayMs,
                           ProtocolVersion protocolVersion,
                           int readTimeout, int writeTimeout, int connectTimeout,
                           boolean trySrv, int concurrentConnects) implements SettingsObject {
-    public static final String DEFAULT_HOST = "127.0.0.1";
+    private static final Property.Builder BUILDER = Property.builder("bot");
+    public static final StringProperty HOST = BUILDER.of("host", "Host", "Host to connect to", "Host to connect to", new String[]{"--host"}, "127.0.0.1");
+    public static final IntProperty PORT = BUILDER.of("port", "Port", "Port to connect to", "Port to connect to", new String[]{"--port"}, 25565);
     public static final int DEFAULT_PORT = 25565;
     public static final int DEFAULT_AMOUNT = 1;
     public static final int DEFAULT_MIN_JOIN_DELAY_MS = 1000;
