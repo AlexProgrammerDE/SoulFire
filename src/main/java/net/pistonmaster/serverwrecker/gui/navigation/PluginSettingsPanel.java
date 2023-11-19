@@ -51,7 +51,7 @@ public class PluginSettingsPanel extends NavigationItem {
                         }
                         case INT -> {
                             var intEntry = settingType.getInt();
-                            yield createSpinner(intEntry);
+                            yield createIntObject(intEntry);
                         }
                         case BOOL -> {
                             var boolEntry = settingType.getBool();
@@ -76,12 +76,12 @@ public class PluginSettingsPanel extends NavigationItem {
 
                     var min = minMaxEntry.getMin();
                     add(new JLabel(min.getName()));
-                    var minSpinner = createSpinner(min.getIntSetting());
+                    var minSpinner = createIntObject(min.getIntSetting());
                     add(minSpinner);
 
                     var max = minMaxEntry.getMax();
                     add(new JLabel(max.getName()));
-                    var maxSpinner = createSpinner(max.getIntSetting());
+                    var maxSpinner = createIntObject(max.getIntSetting());
                     add(maxSpinner);
 
                     JMinMaxHelper.applyLink(minSpinner, maxSpinner);
@@ -92,7 +92,7 @@ public class PluginSettingsPanel extends NavigationItem {
         }
     }
 
-    private static JSpinner createSpinner(IntSetting intSetting) {
+    private static JComponent createIntObject(IntSetting intSetting) {
         return new JSpinner(new SpinnerNumberModel(intSetting.getDef(), intSetting.getMin(), intSetting.getMax(), intSetting.getStep()));
     }
 

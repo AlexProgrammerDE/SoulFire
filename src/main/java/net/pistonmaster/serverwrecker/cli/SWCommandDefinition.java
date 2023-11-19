@@ -58,51 +58,6 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Option(names = {"-s", "--start"}, description = "Whether to start the attack automatically")
     private boolean start;
 
-    @Option(names = {"--host", "--target"}, description = "Target url to connect to")
-    private String host = BotSettings.DEFAULT_HOST;
-
-    @Option(names = {"--port"}, description = "Target port to connect to")
-    private int port = BotSettings.DEFAULT_PORT;
-
-    @Option(names = {"-a", "--amount"}, description = "Amount of bots to connect to the server")
-    private int amount = BotSettings.DEFAULT_AMOUNT;
-
-    @Option(names = {"--min-join-delay"}, description = "The minimum delay between bot connections, in milliseconds")
-    private int minJoinDelay = BotSettings.DEFAULT_MIN_JOIN_DELAY_MS;
-
-    @Option(names = {"--max-join-delay"}, description = "The maximum delay between bot connections, in milliseconds")
-    private int maxJoinDelay = BotSettings.DEFAULT_MAX_JOIN_DELAY_MS;
-
-    @Option(names = {"-mc", "--mc-version"}, description = "Minecraft version of the server to connect to")
-    private String version = BotSettings.DEFAULT_PROTOCOL_VERSION.getName();
-
-    @Option(names = {"--read-timeout"}, description = "Bot read timeout")
-    private int readTimeout = BotSettings.DEFAULT_READ_TIMEOUT;
-
-    @Option(names = {"--write-timeout"}, description = "Bot write timeout")
-    private int writeTimout = BotSettings.DEFAULT_WRITE_TIMEOUT;
-
-    @Option(names = {"--connect-timeout"}, description = "Bot connect timeout")
-    private int connectTimeout = BotSettings.DEFAULT_CONNECT_TIMEOUT;
-
-    @Option(names = {"--try-srv"}, description = "Try to connect to the target using SRV records")
-    private boolean trySrv = BotSettings.DEFAULT_TRY_SRV;
-
-    @Option(names = {"--concurrent-connects"}, description = "Amount of bots that can try to connect at the same time")
-    private int concurrentConnects = BotSettings.DEFAULT_CONCURRENT_CONNECTS;
-
-    @Option(names = {"--via-debug"}, description = "Set Via* to debug mode")
-    private boolean viaDebug = DevSettings.DEFAULT_VIA_DEBUG;
-
-    @Option(names = {"--netty-debug"}, description = "Set Netty to debug mode")
-    private boolean nettyDebug = DevSettings.DEFAULT_NETTY_DEBUG;
-
-    @Option(names = {"--grpc-debug"}, description = "Set gRPC to debug mode")
-    private boolean gRPCDebug = DevSettings.DEFAULT_GRPC_DEBUG;
-
-    @Option(names = {"--core-debug"}, description = "Set core loggers to debug mode")
-    private boolean coreDebug = DevSettings.DEFAULT_CORE_DEBUG;
-
     @Option(names = {"--bots-per-proxy"}, description = "Amount of bots that can be on a single proxy")
     private int botsPerProxy = ProxySettings.DEFAULT_BOTS_PER_PROXY;
 

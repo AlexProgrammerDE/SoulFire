@@ -12,10 +12,16 @@ message StringSetting {
 }
 
 message IntSetting {
-  int32 def = 1;
-  int32 min = 2;
-  int32 max = 3;
-  int32 step = 4;
+  enum IntSettingType {
+    SPINNER = 0;
+    TEXT = 1;
+  }
+
+  IntSettingType type = 1;
+  int32 def = 2;
+  int32 min = 3;
+  int32 max = 4;
+  int32 step = 5;
 }
 
 message BoolSetting {
@@ -79,8 +85,10 @@ message ClientPluginSettingEntry {
 }
 
 message ClientPluginSettingsPage {
-  string pageId = 2;
+  // The name of the page for these settings
   string pageName = 3;
+  // What namespace the settings of this page represent
+  string namespace = 2;
   repeated ClientPluginSettingEntry entries = 4;
 }
 

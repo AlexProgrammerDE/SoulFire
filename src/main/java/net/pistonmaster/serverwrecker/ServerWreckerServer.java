@@ -102,13 +102,13 @@ public class ServerWreckerServer {
     private final Map<String, String> serviceServerConfig = new HashMap<>();
     private final AccountRegistry accountRegistry = new AccountRegistry();
     private final ProxyRegistry proxyRegistry = new ProxyRegistry();
-    private final SettingsManager settingsManager = new SettingsManager(Map.ofEntries(
-            Map.entry("bot", BotSettings.class),
-            Map.entry("dev", DevSettings.class),
-            Map.entry("account", AccountSettings.class),
-            Map.entry("accountList", AccountList.class),
-            Map.entry("proxy", ProxySettings.class),
-            Map.entry("proxyList", ProxyList.class)
+    private final SettingsManager settingsManager = new SettingsManager(List.of(
+            BotSettings.class,
+            DevSettings.class,
+            AccountSettings.class,
+            AccountList.class,
+            ProxySettings.class,
+            ProxyList.class
     ));
     private final OperationMode operationMode;
     private final boolean outdated;

@@ -19,13 +19,45 @@
  */
 package net.pistonmaster.serverwrecker.settings;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
+import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 
-public record DevSettings(boolean viaDebug, boolean nettyDebug, boolean grpcDebug,
-                          boolean coreDebug) implements SettingsObject {
-    public static final boolean DEFAULT_VIA_DEBUG = false;
-    public static final boolean DEFAULT_NETTY_DEBUG = false;
-    public static final boolean DEFAULT_GRPC_DEBUG = false;
-    public static final boolean DEFAULT_CORE_DEBUG = false;
-    public static DevSettings DEFAULT = new DevSettings(DEFAULT_VIA_DEBUG, DEFAULT_NETTY_DEBUG, DEFAULT_GRPC_DEBUG, DEFAULT_CORE_DEBUG);
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class DevSettings implements SettingsObject {
+    public static final Property.Builder BUILDER = Property.builder("dev");
+    public static final BooleanProperty VIA_DEBUG = BUILDER.of(
+            "viaDebug",
+            "Via Debug",
+            "Enable Via debug",
+            "Enable Via debug",
+            new String[]{"--viaDebug"},
+            false
+    );
+    public static final BooleanProperty NETTY_DEBUG = BUILDER.of(
+            "nettyDebug",
+            "Netty Debug",
+            "Enable Netty debug",
+            "Enable Netty debug",
+            new String[]{"--nettyDebug"},
+            false
+    );
+    public static final BooleanProperty GRPC_DEBUG = BUILDER.of(
+            "grpcDebug",
+            "GRPC Debug",
+            "Enable GRPC debug",
+            "Enable GRPC debug",
+            new String[]{"--grpcDebug"},
+            false
+    );
+    public static final BooleanProperty CORE_DEBUG = BUILDER.of(
+            "coreDebug",
+            "Core Debug",
+            "Enable Core debug",
+            "Enable Core debug",
+            new String[]{"--coreDebug"},
+            false
+    );
 }

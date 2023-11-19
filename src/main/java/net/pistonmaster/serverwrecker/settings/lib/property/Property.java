@@ -19,26 +19,34 @@
  */
 package net.pistonmaster.serverwrecker.settings.lib.property;
 
-public class Property {
-    public static Builder builder(String settingsId) {
-        return new Builder(settingsId);
+public sealed interface Property permits BooleanProperty, ComboProperty, IntProperty, StringProperty {
+    String namespace();
+
+    String name();
+
+    default PropertyKey propertyKey() {
+        return new PropertyKey(namespace(), name());
     }
 
-    public record Builder(String settingsId) {
+    static Builder builder(String namespace) {
+        return new Builder(namespace);
+    }
+
+    record Builder(String namespace) {
         public BooleanProperty of(String name, String uiDescription, String cliDescription, String fullDescription, String[] cliNames, boolean defaultValue) {
-            return new BooleanProperty(settingsId, name, uiDescription, cliDescription, fullDescription, cliNames, defaultValue);
+            return new BooleanProperty(namespace, name, uiDescription, cliDescription, fullDescription, cliNames, defaultValue);
         }
 
         public IntProperty of(String name, String uiDescription, String cliDescription, String fullDescription, String[] cliNames, int defaultValue) {
-            return new IntProperty(settingsId, name, uiDescription, cliDescription, fullDescription, cliNames, defaultValue);
+            return new IntProperty(namespace, name, uiDescription, cliDescription, fullDescription, cliNames, defaultValue);
         }
 
         public StringProperty of(String name, String uiDescription, String cliDescription, String fullDescription, String[] cliNames, String defaultValue) {
-            return new StringProperty(settingsId, name, uiDescription, cliDescription, fullDescription, cliNames, defaultValue);
+            return new StringProperty(namespace, name, uiDescription, cliDescription, fullDescription, cliNames, defaultValue);
         }
 
         public ComboProperty of(String name, String uiDescription, String cliDescription, String fullDescription, String[] cliNames, ComboProperty.ComboOption[] values, int defaultValue) {
-            return new ComboProperty(settingsId, name, uiDescription, cliDescription, fullDescription, cliNames, values, defaultValue);
+            return new ComboProperty(namespace, name, uiDescription, cliDescription, fullDescription, cliNames, values, defaultValue);
         }
     }
 }

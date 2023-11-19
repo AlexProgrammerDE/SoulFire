@@ -19,8 +19,21 @@
  */
 package net.pistonmaster.serverwrecker.proxy;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
+import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 
-public record ProxySettings(int botsPerProxy) implements SettingsObject {
-    public static final int DEFAULT_BOTS_PER_PROXY = -1;
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class ProxySettings implements SettingsObject {
+    private static final Property.Builder builder = Property.builder("proxy");
+    public static final IntProperty BOTS_PER_PROXY = builder.of(
+            "botsPerProxy",
+            "Bots Per Proxy",
+            "Amount of bots that can be on a single proxy",
+            "Amount of bots that can be on a single proxy",
+            new String[]{"--bots-per-proxy"},
+            -1
+    );
 }

@@ -42,7 +42,6 @@ import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.netty.ResolveUtil;
 import net.pistonmaster.serverwrecker.protocol.netty.SWNettyHelper;
 import net.pistonmaster.serverwrecker.proxy.ProxyList;
-import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
@@ -91,17 +90,14 @@ public class AttackManager {
         var proxies = new ArrayList<>(proxyListSettings.proxies()
                 .stream().filter(SWProxy::enabled).toList());
 
-        var botSettings = settingsHolder.get(BotSettings.class);
-        var accountSettings = settingsHolder.get(AccountSettings.class);
-        var proxySettings = settingsHolder.get(ProxySettings.class);
-
         ServerWreckerServer.setupLoggingAndVia(settingsHolder.get(DevSettings.class));
 
         this.attackState = AttackState.RUNNING;
 
-        logger.info("Preparing bot attack at {}", botSettings.host());
+        String host = settingsHolder.get(BotSettings.HOST);
+        logger.info("Preparing bot attack at {}", host);
 
-        var botAmount = botSettings.amount(); // How many bots to connect
+        var botAmount = settingsHolder.get(BotSettings.AMOUNT); // How many bots to connect
         var botsPerProxy = proxySettings.botsPerProxy(); // How many bots per proxy are allowed
         var availableProxiesCount = proxies.size(); // How many proxies are available?
         var maxBots = botsPerProxy > 0 ? botsPerProxy * availableProxiesCount : botAmount; // How many bots can be used at max

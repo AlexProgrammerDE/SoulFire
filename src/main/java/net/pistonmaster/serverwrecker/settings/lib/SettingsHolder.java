@@ -19,17 +19,27 @@
  */
 package net.pistonmaster.serverwrecker.settings.lib;
 
-import java.util.List;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.StringProperty;
 
-public record SettingsHolder(List<? extends SettingsObject> settings) {
-    public <T extends SettingsObject> T get(Class<T> clazz) {
-        return settings.stream()
-                .filter(clazz::isInstance)
-                .map(clazz::cast)
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("No settings found for " + clazz.getSimpleName()));
+public record SettingsHolder(
+        Object2IntMap<IntProperty> intProperties,
+        Object2BooleanMap<BooleanProperty> booleanProperties,
+        Object2ObjectMap<StringProperty, String> stringProperties
+) {
+    public int get(IntProperty property) {
+        return intProperties.getInt(property);
     }
 
-    public <T extends SettingsObject> boolean has(Class<T> clazz) {
-        return settings.stream().anyMatch(clazz::isInstance);
+    public boolean get(SettingsObject property) {
+        return booleanProperties.getBoolean(property);
+    }
+
+    public String get(StringProperty property) {
+        return stringProperties.get(property);
     }
 }

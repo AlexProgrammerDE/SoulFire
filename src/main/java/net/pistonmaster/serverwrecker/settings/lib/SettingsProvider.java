@@ -19,11 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.settings.lib;
 
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
+
 /**
  * Provides a setting to the {@link SettingsHolder}.
  *
  * @param <T> The type of settings object.
  */
-public interface SettingsProvider<T extends SettingsObject> {
+public interface SettingsProvider<T extends Property> {
     T collectSettings();
 }

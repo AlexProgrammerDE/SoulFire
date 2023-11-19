@@ -20,22 +20,27 @@
 package net.pistonmaster.serverwrecker.settings.lib;
 
 import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.gson.*;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.pistonmaster.serverwrecker.auth.service.AccountData;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
+import net.pistonmaster.serverwrecker.settings.lib.property.PropertyKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Provider;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
@@ -44,7 +49,7 @@ public class SettingsManager {
     public static final Logger LOGGER = LoggerFactory.getLogger(SettingsManager.class);
     private final List<ListenerRegistration<?>> listeners = new ArrayList<>();
     private final List<ProviderRegistration<?>> providers = new ArrayList<>();
-    private final BiMap<String, Class<? extends SettingsObject>> classMap = HashBiMap.create();
+    private final Multimap<String, Property> classMap = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
     // Used to read & write the settings file
     private final Gson dumpGson = new GsonBuilder().setPrettyPrinting().create();
     private final Gson baseGson = new GsonBuilder()
@@ -59,21 +64,37 @@ public class SettingsManager {
             .registerTypeHierarchyAdapter(Object.class, new ClassObjectAdapter(normalGson, classMap))
             .create();
 
-    public SettingsManager(Map<String, Class<? extends SettingsObject>> registeredSettings) {
-        this.classMap.putAll(registeredSettings);
+    public SettingsManager(List<Class<? extends SettingsObject>> registeredSettings) {
+        for (var clazz : registeredSettings) {
+            registerSettingsClass(clazz);
+        }
     }
 
-    public <T extends SettingsObject> void registerListener(Class<T> clazz, SettingsListener<T> listener) {
+    public void registerSettingsClass(Class<? extends SettingsObject> clazz) {
+        for (var field : clazz.getDeclaredFields()) {
+            if (!Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+
+            if (!Property.class.isAssignableFrom(field.getType())) {
+                continue;
+            }
+
+            try {
+                var property = (Property) field.get(null);
+                classMap.put(property.namespace(), property);
+            } catch (IllegalAccessException e) {
+                LOGGER.error("Failed to register property!", e);
+            }
+        }
+    }
+
+    public <T extends Property> void registerListener(String propertyKey, SettingsListener<T> listener) {
         listeners.add(new ListenerRegistration<>(clazz, listener));
     }
 
-    public <T extends SettingsObject> void registerProvider(Class<T> clazz, SettingsProvider<T> provider) {
+    public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {
         providers.add(new ProviderRegistration<>(clazz, provider));
-    }
-
-    public <T extends SettingsObject> void registerDuplex(Class<T> clazz, SettingsDuplex<T> duplex) {
-        registerListener(clazz, duplex);
-        registerProvider(clazz, duplex);
     }
 
     public SettingsHolder collectSettings() {
@@ -189,43 +210,44 @@ public class SettingsManager {
         }
     }
 
-    private static class ECPublicKeyAdapter implements JsonSerializer<ECPublicKey>, JsonDeserializer<ECPublicKey> {
+    private static class ECPublicKeyAdapter extends AbstractKeyAdapter<ECPublicKey> {
         @Override
-        public ECPublicKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            var base64 = json.getAsString();
-            var bytes = Base64.getDecoder().decode(base64);
-
+        protected ECPublicKey createKey(byte[] bytes) throws JsonParseException {
             try {
                 var keyFactory = KeyFactory.getInstance("EC");
                 return (ECPublicKey) keyFactory.generatePublic(new X509EncodedKeySpec(bytes));
-            } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            } catch (GeneralSecurityException e) {
                 throw new JsonParseException(e);
             }
-        }
-
-        @Override
-        public JsonElement serialize(ECPublicKey src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(Base64.getEncoder().encodeToString(src.getEncoded()));
         }
     }
 
-    private static class ECPrivateKeyAdapter implements JsonSerializer<ECPrivateKey>, JsonDeserializer<ECPrivateKey> {
+    private static class ECPrivateKeyAdapter extends AbstractKeyAdapter<ECPrivateKey> {
         @Override
-        public ECPrivateKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            var base64 = json.getAsString();
-            var bytes = Base64.getDecoder().decode(base64);
-
+        protected ECPrivateKey createKey(byte[] bytes) throws JsonParseException {
             try {
                 var keyFactory = KeyFactory.getInstance("EC");
                 return (ECPrivateKey) keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
-            } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            } catch (GeneralSecurityException e) {
                 throw new JsonParseException(e);
             }
         }
+    }
+
+    private static abstract class AbstractKeyAdapter<T> implements JsonSerializer<Key>, JsonDeserializer<T> {
+        @Override
+        public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            var base64 = json.getAsString();
+            var bytes = Base64.getDecoder().decode(base64);
+
+            return createKey(bytes);
+        }
 
         @Override
-        public JsonElement serialize(ECPrivateKey src, Type typeOfSrc, JsonSerializationContext context) {
+        public JsonElement serialize(Key src, Type typeOfSrc, JsonSerializationContext context) {
             return new JsonPrimitive(Base64.getEncoder().encodeToString(src.getEncoded()));
         }
+
+        protected abstract T createKey(byte[] bytes) throws JsonParseException;
     }
 }
