@@ -19,25 +19,21 @@
  */
 package net.pistonmaster.serverwrecker.plugins;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
-import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
-import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.util.RandomUtil;
-import picocli.CommandLine;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -53,12 +49,8 @@ public class AutoReconnect implements InternalExtension {
 
     public void onDisconnect(BotDisconnectedEvent event) {
         var connection = event.connection();
-        if (!connection.settingsHolder().has(AutoReconnectSettings.class)) {
-            return;
-        }
-
-        var autoReconnectSettings = connection.settingsHolder().get(AutoReconnectSettings.class);
-        if (!autoReconnectSettings.autoReconnect() || connection.attackManager().getAttackState().isInactive()) {
+        var settingsHolder = connection.settingsHolder();
+        if (!settingsHolder.get(AutoReconnectSettings.AUTO_RECONNECT) || connection.attackManager().getAttackState().isInactive()) {
             return;
         }
 
@@ -75,7 +67,7 @@ public class AutoReconnect implements InternalExtension {
                     .replaceAll(connectionEntry -> connectionEntry == connection ? newConnection : connectionEntry);
 
             newConnection.connect();
-        }, RandomUtil.getRandomInt(autoReconnectSettings.minDelay(), autoReconnectSettings.maxDelay()), TimeUnit.SECONDS);
+        }, RandomUtil.getRandomInt(settingsHolder.get(AutoReconnectSettings.MIN_DELAY), settingsHolder.get(AutoReconnectSettings.MAX_DELAY)), TimeUnit.SECONDS);
     }
 
     @EventHandler
@@ -88,84 +80,27 @@ public class AutoReconnect implements InternalExtension {
         PluginCLIHelper.registerCommands(event.commandLine(), AutoReconnectSettings.class, new AutoReconnectCommand());
     }
 
-    private static class AutoReconnectPanel extends NavigationItem implements SettingsDuplex<AutoReconnectSettings> {
-        private final JCheckBox autoReconnect;
-        private final JSpinner minDelay;
-        private final JSpinner maxDelay;
-
-        AutoReconnectPanel(ServerWreckerServer serverWreckerServer) {
-            super();
-            serverWreckerServer.getSettingsManager().registerDuplex(AutoReconnectSettings.class, this);
-
-            setLayout(new GridLayout(0, 2));
-
-            add(new JLabel("Do Auto Reconnect?"));
-            autoReconnect = new PresetJCheckBox(AutoReconnectSettings.DEFAULT_AUTO_RECONNECT);
-            add(autoReconnect);
-
-            add(new JLabel("Min Delay (Seconds)"));
-            minDelay = new JSpinner(new SpinnerNumberModel(AutoReconnectSettings.DEFAULT_MIN_DELAY, 1, 1000, 1));
-            add(minDelay);
-
-            add(new JLabel("Max Delay (Seconds)"));
-            maxDelay = new JSpinner(new SpinnerNumberModel(AutoReconnectSettings.DEFAULT_MAX_DELAY, 1, 1000, 1));
-            add(maxDelay);
-
-            JMinMaxHelper.applyLink(minDelay, maxDelay);
-        }
-
-        @Override
-        public String getNavigationName() {
-            return "Auto Reconnect";
-        }
-
-        @Override
-        public String getNavigationId() {
-            return "auto-reconnect";
-        }
-
-        @Override
-        public void onSettingsChange(AutoReconnectSettings settings) {
-            autoReconnect.setSelected(settings.autoReconnect());
-            minDelay.setValue(settings.minDelay());
-            maxDelay.setValue(settings.maxDelay());
-        }
-
-        @Override
-        public AutoReconnectSettings collectSettings() {
-            return new AutoReconnectSettings(
-                    autoReconnect.isSelected(),
-                    (int) minDelay.getValue(),
-                    (int) maxDelay.getValue()
-            );
-        }
-    }
-
-    private static class AutoReconnectCommand implements SettingsProvider<AutoReconnectSettings> {
-        @CommandLine.Option(names = {"--auto-reconnect"}, description = "Reconnect bots after being disconnected")
-        private boolean autoReconnect = AutoReconnectSettings.DEFAULT_AUTO_RECONNECT;
-        @CommandLine.Option(names = {"--reconnect-min-delay"}, description = "Minimum delay between reconnects")
-        private int minDelay = AutoReconnectSettings.DEFAULT_MIN_DELAY;
-        @CommandLine.Option(names = {"--reconnect-max-delay"}, description = "Maximum delay between reconnects")
-        private int maxDelay = AutoReconnectSettings.DEFAULT_MAX_DELAY;
-
-        @Override
-        public AutoReconnectSettings collectSettings() {
-            return new AutoReconnectSettings(
-                    autoReconnect,
-                    minDelay,
-                    maxDelay
-            );
-        }
-    }
-
-    private record AutoReconnectSettings(
-            boolean autoReconnect,
-            int minDelay,
-            int maxDelay
-    ) implements SettingsObject {
-        public static final boolean DEFAULT_AUTO_RECONNECT = true;
-        public static final int DEFAULT_MIN_DELAY = 1;
-        public static final int DEFAULT_MAX_DELAY = 5;
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    private static class AutoReconnectSettings implements SettingsObject {
+        private static final Property.Builder BUILDER = Property.builder("auto-reconnect");
+        public static final BooleanProperty AUTO_RECONNECT = BUILDER.ofBoolean("auto-reconnect",
+                "Do Auto Reconnect?",
+                "Do Auto Reconnect?",
+                new String[]{"--auto-reconnect"},
+                true
+        );
+        public static final IntProperty MIN_DELAY = BUILDER.ofInt("reconnect-min-delay",
+                "Min delay (seconds)",
+                "Minimum delay between reconnects",
+                new String[]{"--reconnect-min-delay"},
+                1
+        );
+        public static final IntProperty MAX_DELAY = BUILDER.ofInt("reconnect-max-delay",
+                "Max delay (seconds)",
+                "Maximum delay between reconnects",
+                new String[]{"--reconnect-max-delay"},
+                5
+        );
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(MIN_DELAY, MAX_DELAY);
     }
 }

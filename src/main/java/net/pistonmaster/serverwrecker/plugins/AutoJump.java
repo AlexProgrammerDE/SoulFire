@@ -19,8 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.plugins;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
@@ -28,16 +29,11 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
-import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
-import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
-import picocli.CommandLine;
-
-import javax.swing.*;
-import java.awt.*;
+import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 
 public class AutoJump implements InternalExtension {
     @Override
@@ -48,12 +44,8 @@ public class AutoJump implements InternalExtension {
 
     public static void onJoined(BotJoinedEvent event) {
         var connection = event.connection();
-        if (!connection.settingsHolder().has(AutoJumpSettings.class)) {
-            return;
-        }
-
-        var settings = connection.settingsHolder().get(AutoJumpSettings.class);
-        if (!settings.autoJump()) {
+        var settingsHolder = connection.settingsHolder();
+        if (!settingsHolder.get(AutoJumpSettings.AUTO_JUMP)) {
             return;
         }
 
@@ -68,7 +60,7 @@ public class AutoJump implements InternalExtension {
                 connection.logger().info("[AutoJump] Jumping!");
                 movementManager.jump();
             }
-        }, settings.minDelay(), settings.maxDelay());
+        }, settingsHolder.get(AutoJumpSettings.MIN_DELAY), settingsHolder.get(AutoJumpSettings.MAX_DELAY));
     }
 
     @EventHandler
@@ -81,84 +73,27 @@ public class AutoJump implements InternalExtension {
         PluginCLIHelper.registerCommands(event.commandLine(), AutoJumpSettings.class, new AutoJumpCommand());
     }
 
-    private static class AutoJumpPanel extends NavigationItem implements SettingsDuplex<AutoJumpSettings> {
-        private final JCheckBox autoJump;
-        private final JSpinner minDelay;
-        private final JSpinner maxDelay;
-
-        AutoJumpPanel(ServerWreckerServer serverWreckerServer) {
-            super();
-            serverWreckerServer.getSettingsManager().registerDuplex(AutoJumpSettings.class, this);
-
-            setLayout(new GridLayout(0, 2));
-
-            add(new JLabel("Do Auto Jump?"));
-            autoJump = new PresetJCheckBox(AutoJumpSettings.DEFAULT_AUTO_JUMP);
-            add(autoJump);
-
-            add(new JLabel("Min Delay (Seconds)"));
-            minDelay = new JSpinner(new SpinnerNumberModel(AutoJumpSettings.DEFAULT_MIN_DELAY, 1, 1000, 1));
-            add(minDelay);
-
-            add(new JLabel("Max Delay (Seconds)"));
-            maxDelay = new JSpinner(new SpinnerNumberModel(AutoJumpSettings.DEFAULT_MAX_DELAY, 1, 1000, 1));
-            add(maxDelay);
-
-            JMinMaxHelper.applyLink(minDelay, maxDelay);
-        }
-
-        @Override
-        public String getNavigationName() {
-            return "Auto Jump";
-        }
-
-        @Override
-        public String getNavigationId() {
-            return "auto-jump";
-        }
-
-        @Override
-        public void onSettingsChange(AutoJumpSettings settings) {
-            autoJump.setSelected(settings.autoJump());
-            minDelay.setValue(settings.minDelay());
-            maxDelay.setValue(settings.maxDelay());
-        }
-
-        @Override
-        public AutoJumpSettings collectSettings() {
-            return new AutoJumpSettings(
-                    autoJump.isSelected(),
-                    (int) minDelay.getValue(),
-                    (int) maxDelay.getValue()
-            );
-        }
-    }
-
-    private static class AutoJumpCommand implements SettingsProvider<AutoJumpSettings> {
-        @CommandLine.Option(names = {"--auto-jump"}, description = "Do auto jump?")
-        private boolean autoJump = AutoJumpSettings.DEFAULT_AUTO_JUMP;
-        @CommandLine.Option(names = {"--jump-min-delay"}, description = "Minimum delay between jumps")
-        private int minDelay = AutoJumpSettings.DEFAULT_MIN_DELAY;
-        @CommandLine.Option(names = {"--jump-max-delay"}, description = "Maximum delay between jumps")
-        private int maxDelay = AutoJumpSettings.DEFAULT_MAX_DELAY;
-
-        @Override
-        public AutoJumpSettings collectSettings() {
-            return new AutoJumpSettings(
-                    autoJump,
-                    minDelay,
-                    maxDelay
-            );
-        }
-    }
-
-    private record AutoJumpSettings(
-            boolean autoJump,
-            int minDelay,
-            int maxDelay
-    ) implements SettingsObject {
-        public static final boolean DEFAULT_AUTO_JUMP = false;
-        public static final int DEFAULT_MIN_DELAY = 2;
-        public static final int DEFAULT_MAX_DELAY = 5;
+    @NoArgsConstructor(access = AccessLevel.NONE)
+    private static class AutoJumpSettings implements SettingsObject {
+        private static final Property.Builder BUILDER = Property.builder("auto-jump");
+        public static final BooleanProperty AUTO_JUMP = BUILDER.ofBoolean("auto-jump",
+                "Do Auto Jump?",
+                "Do Auto Jump?",
+                new String[]{"--auto-jump"},
+                true
+        );
+        public static final IntProperty MIN_DELAY = BUILDER.ofInt("jump-min-delay",
+                "Min delay (seconds)",
+                "Minimum delay between jumps",
+                new String[]{"--jump-min-delay"},
+                2
+        );
+        public static final IntProperty MAX_DELAY = BUILDER.ofInt("jump-max-delay",
+                "Max delay (seconds)",
+                "Maximum delay between jumps",
+                new String[]{"--jump-max-delay"},
+                5
+        );
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(MIN_DELAY, MAX_DELAY);
     }
 }

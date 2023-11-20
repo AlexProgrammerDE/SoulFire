@@ -28,34 +28,30 @@ import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DevSettings implements SettingsObject {
     public static final Property.Builder BUILDER = Property.builder("dev");
-    public static final BooleanProperty VIA_DEBUG = BUILDER.of(
+    public static final BooleanProperty VIA_DEBUG = BUILDER.ofBoolean(
             "viaDebug",
             "Via Debug",
-            "Enable Via debug",
             "Enable Via debug",
             new String[]{"--viaDebug"},
             false
     );
-    public static final BooleanProperty NETTY_DEBUG = BUILDER.of(
+    public static final BooleanProperty NETTY_DEBUG = BUILDER.ofBoolean(
             "nettyDebug",
             "Netty Debug",
-            "Enable Netty debug",
             "Enable Netty debug",
             new String[]{"--nettyDebug"},
             false
     );
-    public static final BooleanProperty GRPC_DEBUG = BUILDER.of(
+    public static final BooleanProperty GRPC_DEBUG = BUILDER.ofBoolean(
             "grpcDebug",
             "GRPC Debug",
-            "Enable GRPC debug",
             "Enable GRPC debug",
             new String[]{"--grpcDebug"},
             false
     );
-    public static final BooleanProperty CORE_DEBUG = BUILDER.of(
+    public static final BooleanProperty CORE_DEBUG = BUILDER.ofBoolean(
             "coreDebug",
             "Core Debug",
-            "Enable Core debug",
             "Enable Core debug",
             new String[]{"--coreDebug"},
             false

@@ -19,27 +19,34 @@
  */
 package net.pistonmaster.serverwrecker.settings.lib;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.*;
 import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
 import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
 import net.pistonmaster.serverwrecker.settings.lib.property.StringProperty;
+
+import java.util.Map;
+import java.util.Set;
 
 public record SettingsHolder(
         Object2IntMap<IntProperty> intProperties,
         Object2BooleanMap<BooleanProperty> booleanProperties,
         Object2ObjectMap<StringProperty, String> stringProperties
 ) {
+    public static final SettingsHolder EMPTY = new SettingsHolder(
+            Object2IntMaps.emptyMap(),
+            Object2BooleanMaps.emptyMap(),
+            Object2ObjectMaps.emptyMap()
+    );
+
     public int get(IntProperty property) {
-        return intProperties.getInt(property);
+        return intProperties.getOrDefault(property, property.defaultValue());
     }
 
-    public boolean get(SettingsObject property) {
-        return booleanProperties.getBoolean(property);
+    public boolean get(BooleanProperty property) {
+        return booleanProperties.getOrDefault(property, property.defaultValue());
     }
 
     public String get(StringProperty property) {
-        return stringProperties.get(property);
+        return stringProperties.getOrDefault(property, property.defaultValue());
     }
 }

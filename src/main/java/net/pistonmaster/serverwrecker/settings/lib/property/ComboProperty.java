@@ -5,7 +5,6 @@ public record ComboProperty(
         String name,
         String uiDescription,
         String cliDescription,
-        String fullDescription,
         String[] cliNames,
         ComboOption[] options,
         int defaultValue

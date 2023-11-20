@@ -28,10 +28,9 @@ import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProxySettings implements SettingsObject {
     private static final Property.Builder builder = Property.builder("proxy");
-    public static final IntProperty BOTS_PER_PROXY = builder.of(
+    public static final IntProperty BOTS_PER_PROXY = builder.ofInt(
             "botsPerProxy",
             "Bots Per Proxy",
-            "Amount of bots that can be on a single proxy",
             "Amount of bots that can be on a single proxy",
             new String[]{"--bots-per-proxy"},
             -1

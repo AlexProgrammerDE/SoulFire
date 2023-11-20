@@ -147,9 +147,6 @@ public class ServerWreckerServer {
             throw new RuntimeException(e);
         }
 
-        settingsManager.registerDuplex(AccountList.class, accountRegistry);
-        settingsManager.registerDuplex(ProxyList.class, proxyRegistry);
-
         LOGGER.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
         // Override status packet, so we can support any version
@@ -272,9 +269,9 @@ public class ServerWreckerServer {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public static void setupLoggingAndVia(DevSettings devSettings) {
-        Via.getManager().debugHandler().setEnabled(devSettings.viaDebug());
-        ServerWreckerBootstrap.setupLogging(devSettings);
+    public static void setupLoggingAndVia(SettingsHolder settingsHolder) {
+        Via.getManager().debugHandler().setEnabled(settingsHolder.get(DevSettings.VIA_DEBUG));
+        ServerWreckerBootstrap.setupLogging(settingsHolder);
     }
 
     private void shutdownHook() {

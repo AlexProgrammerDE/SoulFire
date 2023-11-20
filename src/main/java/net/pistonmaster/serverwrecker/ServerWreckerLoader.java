@@ -60,6 +60,7 @@ public class ServerWreckerLoader {
         });
 
         ServerWreckerAPI.postEvent(new CommandManagerInitEvent(commandLine));
+
         commandLine.execute(args);
     }
 

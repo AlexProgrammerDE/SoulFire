@@ -20,26 +20,22 @@
 package net.pistonmaster.serverwrecker.plugins;
 
 import com.github.steveice10.mc.protocol.data.ProtocolState;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.attack.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
-import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
-import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.util.RandomUtil;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
-import picocli.CommandLine;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.concurrent.TimeUnit;
 
 public class ServerListBypass implements InternalExtension {
@@ -56,17 +52,14 @@ public class ServerListBypass implements InternalExtension {
         }
 
         var factory = connection.factory();
-        if (!connection.settingsHolder().has(ServerListBypassSettings.class)) {
-            return;
-        }
-
-        var settings = connection.settingsHolder().get(ServerListBypassSettings.class);
-        if (!settings.serverListBypass()) {
+        var settingsHolder = connection.settingsHolder();
+        if (!settingsHolder.get(ServerListBypassSettings.SERVER_LIST_BYPASS)) {
             return;
         }
 
         factory.prepareConnectionInternal(ProtocolState.STATUS).connect().join();
-        TimeUtil.waitTime(RandomUtil.getRandomInt(settings.minDelay(), settings.maxDelay()), TimeUnit.SECONDS);
+        TimeUtil.waitTime(RandomUtil.getRandomInt(settingsHolder.get(ServerListBypassSettings.MIN_DELAY),
+                settingsHolder.get(ServerListBypassSettings.MAX_DELAY)), TimeUnit.SECONDS);
     }
 
     @EventHandler
@@ -79,84 +72,27 @@ public class ServerListBypass implements InternalExtension {
         PluginCLIHelper.registerCommands(event.commandLine(), ServerListBypassSettings.class, new ServerListBypassCommand());
     }
 
-    private static class ServerListBypassPanel extends NavigationItem implements SettingsDuplex<ServerListBypassSettings> {
-        private final JCheckBox serverListBypass;
-        private final JSpinner minDelay;
-        private final JSpinner maxDelay;
-
-        ServerListBypassPanel(ServerWreckerServer serverWreckerServer) {
-            super();
-            serverWreckerServer.getSettingsManager().registerDuplex(ServerListBypassSettings.class, this);
-
-            setLayout(new GridLayout(0, 2));
-
-            add(new JLabel("Do Server List Bypass?"));
-            serverListBypass = new PresetJCheckBox(ServerListBypassSettings.DEFAULT_SERVER_LIST_BYPASS);
-            add(serverListBypass);
-
-            add(new JLabel("Min Delay (Seconds)"));
-            minDelay = new JSpinner(new SpinnerNumberModel(ServerListBypassSettings.DEFAULT_MIN_DELAY, 1, 1000, 1));
-            add(minDelay);
-
-            add(new JLabel("Max Delay (Seconds)"));
-            maxDelay = new JSpinner(new SpinnerNumberModel(ServerListBypassSettings.DEFAULT_MAX_DELAY, 1, 1000, 1));
-            add(maxDelay);
-
-            JMinMaxHelper.applyLink(minDelay, maxDelay);
-        }
-
-        @Override
-        public String getNavigationName() {
-            return "Server List Bypass";
-        }
-
-        @Override
-        public String getNavigationId() {
-            return "server-list-bypass";
-        }
-
-        @Override
-        public void onSettingsChange(ServerListBypassSettings settings) {
-            serverListBypass.setSelected(settings.serverListBypass());
-            minDelay.setValue(settings.minDelay());
-            maxDelay.setValue(settings.maxDelay());
-        }
-
-        @Override
-        public ServerListBypassSettings collectSettings() {
-            return new ServerListBypassSettings(
-                    serverListBypass.isSelected(),
-                    (int) minDelay.getValue(),
-                    (int) maxDelay.getValue()
-            );
-        }
-    }
-
-    private static class ServerListBypassCommand implements SettingsProvider<ServerListBypassSettings> {
-        @CommandLine.Option(names = {"--server-list-bypass"}, description = "Do server list bypass?")
-        private boolean serverListBypass = ServerListBypassSettings.DEFAULT_SERVER_LIST_BYPASS;
-        @CommandLine.Option(names = {"--server-list-bypass-min-delay"}, description = "Minimum join delay after pinging the server")
-        private int minDelay = ServerListBypassSettings.DEFAULT_MIN_DELAY;
-        @CommandLine.Option(names = {"--server-list-bypass-max-delay"}, description = "Maximum join delay after pinging the server")
-        private int maxDelay = ServerListBypassSettings.DEFAULT_MAX_DELAY;
-
-        @Override
-        public ServerListBypassSettings collectSettings() {
-            return new ServerListBypassSettings(
-                    serverListBypass,
-                    minDelay,
-                    maxDelay
-            );
-        }
-    }
-
-    private record ServerListBypassSettings(
-            boolean serverListBypass,
-            int minDelay,
-            int maxDelay
-    ) implements SettingsObject {
-        public static final boolean DEFAULT_SERVER_LIST_BYPASS = false;
-        public static final int DEFAULT_MIN_DELAY = 1;
-        public static final int DEFAULT_MAX_DELAY = 3;
+    @NoArgsConstructor(access = AccessLevel.NONE)
+    private static class ServerListBypassSettings implements SettingsObject {
+        private static final Property.Builder BUILDER = Property.builder("server-list-bypass");
+        public static final BooleanProperty SERVER_LIST_BYPASS = BUILDER.ofBoolean("server-list-bypass",
+                "Do Server List Bypass?",
+                "Do Server List Bypass?",
+                new String[]{"--server-list-bypass"},
+                false
+        );
+        public static final IntProperty MIN_DELAY = BUILDER.ofInt("server-list-bypass-min-delay",
+                "Min delay (seconds)",
+                "Minimum delay between joining the server",
+                new String[]{"--server-list-bypass-min-delay"},
+                1
+        );
+        public static final IntProperty MAX_DELAY = BUILDER.ofInt("server-list-bypass-max-delay",
+                "Max delay (seconds)",
+                "Maximum delay between joining the server",
+                new String[]{"--server-list-bypass-max-delay"},
+                3
+        );
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(MIN_DELAY, MAX_DELAY);
     }
 }

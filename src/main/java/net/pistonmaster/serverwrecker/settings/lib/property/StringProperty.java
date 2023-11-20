@@ -5,7 +5,6 @@ public record StringProperty(
         String name,
         String uiDescription,
         String cliDescription,
-        String fullDescription,
         String[] cliNames,
         String defaultValue
 ) implements Property {

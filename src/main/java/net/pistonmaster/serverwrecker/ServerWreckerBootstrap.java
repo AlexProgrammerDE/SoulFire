@@ -27,6 +27,7 @@ import net.lenni0451.reflect.Agents;
 import net.pistonmaster.serverwrecker.api.MixinExtension;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.fusesource.jansi.AnsiConsole;
@@ -73,7 +74,7 @@ public class ServerWreckerBootstrap {
 
     public static void main(String[] args) {
         injectAnsi();
-        setupLogging(DevSettings.DEFAULT);
+        setupLogging(SettingsHolder.EMPTY);
 
         injectExceptionHandler();
 
@@ -167,10 +168,10 @@ public class ServerWreckerBootstrap {
         AnsiConsole.systemInstall();
     }
 
-    public static void setupLogging(DevSettings devSettings) {
-        var level = devSettings.coreDebug() ? Level.DEBUG : Level.INFO;
-        var nettyLevel = devSettings.nettyDebug() ? Level.DEBUG : Level.INFO;
-        var grpcLevel = devSettings.grpcDebug() ? Level.DEBUG : Level.INFO;
+    public static void setupLogging(SettingsHolder settingsHolder) {
+        var level = settingsHolder.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO;
+        var nettyLevel = settingsHolder.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO;
+        var grpcLevel = settingsHolder.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO;
         Configurator.setRootLevel(level);
         Configurator.setLevel("io.netty", nettyLevel);
         Configurator.setLevel("io.grpc", grpcLevel);

@@ -22,6 +22,8 @@ package net.pistonmaster.serverwrecker.plugins;
 import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
@@ -30,17 +32,13 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
-import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
-import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.util.RandomUtil;
-import picocli.CommandLine;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.concurrent.TimeUnit;
 
 public class AutoRespawn implements InternalExtension {
@@ -52,12 +50,8 @@ public class AutoRespawn implements InternalExtension {
 
     public static void onPacket(SWPacketReceiveEvent event) {
         if (event.getPacket() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
-            if (!event.connection().settingsHolder().has(AutoRespawnSettings.class)) {
-                return;
-            }
-
-            var autoRespawnSettings = event.connection().settingsHolder().get(AutoRespawnSettings.class);
-            if (!autoRespawnSettings.autoRespawn()) {
+            var settingsHolder = event.connection().settingsHolder();
+            if (!settingsHolder.get(AutoRespawnSettings.AUTO_RESPAWN)) {
                 return;
             }
 
@@ -67,7 +61,7 @@ public class AutoRespawn implements InternalExtension {
 
             event.connection().executorManager().newScheduledExecutorService("Respawn").schedule(() ->
                             event.connection().session().send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
-                    RandomUtil.getRandomInt(autoRespawnSettings.minDelay(), autoRespawnSettings.maxDelay()), TimeUnit.SECONDS);
+                    RandomUtil.getRandomInt(settingsHolder.get(AutoRespawnSettings.MIN_DELAY), settingsHolder.get(AutoRespawnSettings.MAX_DELAY)), TimeUnit.SECONDS);
         }
     }
 
@@ -81,84 +75,27 @@ public class AutoRespawn implements InternalExtension {
         PluginCLIHelper.registerCommands(event.commandLine(), AutoRespawnSettings.class, new AutoRespawnCommand());
     }
 
-    private static class AutoRespawnPanel extends NavigationItem implements SettingsDuplex<AutoRespawnSettings> {
-        private final JCheckBox autoRespawn;
-        private final JSpinner minDelay;
-        private final JSpinner maxDelay;
-
-        AutoRespawnPanel(ServerWreckerServer serverWreckerServer) {
-            super();
-            serverWreckerServer.getSettingsManager().registerDuplex(AutoRespawnSettings.class, this);
-
-            setLayout(new GridLayout(0, 2));
-
-            add(new JLabel("Do Auto Respawn?"));
-            autoRespawn = new PresetJCheckBox(AutoRespawnSettings.DEFAULT_AUTO_RESPAWN);
-            add(autoRespawn);
-
-            add(new JLabel("Min Delay (Seconds)"));
-            minDelay = new JSpinner(new SpinnerNumberModel(AutoRespawnSettings.DEFAULT_MIN_DELAY, 1, 1000, 1));
-            add(minDelay);
-
-            add(new JLabel("Max Delay (Seconds)"));
-            maxDelay = new JSpinner(new SpinnerNumberModel(AutoRespawnSettings.DEFAULT_MAX_DELAY, 1, 1000, 1));
-            add(maxDelay);
-
-            JMinMaxHelper.applyLink(minDelay, maxDelay);
-        }
-
-        @Override
-        public String getNavigationName() {
-            return "Auto Respawn";
-        }
-
-        @Override
-        public String getNavigationId() {
-            return "auto-respawn";
-        }
-
-        @Override
-        public void onSettingsChange(AutoRespawnSettings settings) {
-            autoRespawn.setSelected(settings.autoRespawn());
-            minDelay.setValue(settings.minDelay());
-            maxDelay.setValue(settings.maxDelay());
-        }
-
-        @Override
-        public AutoRespawnSettings collectSettings() {
-            return new AutoRespawnSettings(
-                    autoRespawn.isSelected(),
-                    (int) minDelay.getValue(),
-                    (int) maxDelay.getValue()
-            );
-        }
-    }
-
-    private static class AutoRespawnCommand implements SettingsProvider<AutoRespawnSettings> {
-        @CommandLine.Option(names = {"--auto-respawn"}, description = "Respawn bots after death")
-        private boolean autoRespawn = AutoRespawnSettings.DEFAULT_AUTO_RESPAWN;
-        @CommandLine.Option(names = {"--respawn-min-delay"}, description = "Minimum delay between respawns")
-        private int minDelay = AutoRespawnSettings.DEFAULT_MIN_DELAY;
-        @CommandLine.Option(names = {"--respawn-max-delay"}, description = "Maximum delay between respawns")
-        private int maxDelay = AutoRespawnSettings.DEFAULT_MAX_DELAY;
-
-        @Override
-        public AutoRespawnSettings collectSettings() {
-            return new AutoRespawnSettings(
-                    autoRespawn,
-                    minDelay,
-                    maxDelay
-            );
-        }
-    }
-
-    private record AutoRespawnSettings(
-            boolean autoRespawn,
-            int minDelay,
-            int maxDelay
-    ) implements SettingsObject {
-        public static final boolean DEFAULT_AUTO_RESPAWN = true;
-        public static final int DEFAULT_MIN_DELAY = 1;
-        public static final int DEFAULT_MAX_DELAY = 3;
+    @NoArgsConstructor(access = AccessLevel.NONE)
+    private static class AutoRespawnSettings implements SettingsObject {
+        private static final Property.Builder BUILDER = Property.builder("auto-respawn");
+        public static final BooleanProperty AUTO_RESPAWN = BUILDER.ofBoolean("auto-respawn",
+                "Do Auto Respawn?",
+                "Do Auto Respawn?",
+                new String[]{"--auto-respawn"},
+                true
+        );
+        public static final IntProperty MIN_DELAY = BUILDER.ofInt("respawn-min-delay",
+                "Min delay (seconds)",
+                "Minimum delay between respawns",
+                new String[]{"--respawn-min-delay"},
+                1
+        );
+        public static final IntProperty MAX_DELAY = BUILDER.ofInt("respawn-max-delay",
+                "Max delay (seconds)",
+                "Maximum delay between respawns",
+                new String[]{"--respawn-max-delay"},
+                3
+        );
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(MIN_DELAY, MAX_DELAY);
     }
 }

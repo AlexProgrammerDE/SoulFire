@@ -19,30 +19,26 @@
  */
 package net.pistonmaster.serverwrecker.plugins;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
 import net.pistonmaster.serverwrecker.data.ArmorType;
-import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
-import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
-import picocli.CommandLine;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -105,12 +101,8 @@ public class AutoArmor implements InternalExtension {
     }
 
     public static void onJoined(BotJoinedEvent event) {
-        if (!event.connection().settingsHolder().has(AutoArmorSettings.class)) {
-            return;
-        }
-
-        var settings = event.connection().settingsHolder().get(AutoArmorSettings.class);
-        if (!settings.autoArmor()) {
+        var settingsHolder = event.connection().settingsHolder();
+        if (!settingsHolder.get(AutoArmorSettings.AUTO_ARMOR)) {
             return;
         }
 
@@ -131,7 +123,7 @@ public class AutoArmor implements InternalExtension {
             for (var entry : armorTypes.entrySet()) {
                 putOn(inventoryManager, playerInventory, entry.getValue(), entry.getKey());
             }
-        }, settings.minDelay(), settings.maxDelay());
+        }, settingsHolder.get(AutoArmorSettings.MIN_DELAY), settingsHolder.get(AutoArmorSettings.MAX_DELAY));
     }
 
     @EventHandler
@@ -144,84 +136,27 @@ public class AutoArmor implements InternalExtension {
         PluginCLIHelper.registerCommands(event.commandLine(), AutoArmorSettings.class, new AutoArmorCommand());
     }
 
-    private static class AutoArmorPanel extends NavigationItem implements SettingsDuplex<AutoArmorSettings> {
-        private final JCheckBox autoArmor;
-        private final JSpinner minDelay;
-        private final JSpinner maxDelay;
-
-        AutoArmorPanel(ServerWreckerServer serverWreckerServer) {
-            super();
-            serverWreckerServer.getSettingsManager().registerDuplex(AutoArmorSettings.class, this);
-
-            setLayout(new GridLayout(0, 2));
-
-            add(new JLabel("Do Auto Armor?"));
-            autoArmor = new PresetJCheckBox(AutoArmorSettings.DEFAULT_AUTO_ARMOR);
-            add(autoArmor);
-
-            add(new JLabel("Min Delay (Seconds)"));
-            minDelay = new JSpinner(new SpinnerNumberModel(AutoArmorSettings.DEFAULT_MIN_DELAY, 1, 1000, 1));
-            add(minDelay);
-
-            add(new JLabel("Max Delay (Seconds)"));
-            maxDelay = new JSpinner(new SpinnerNumberModel(AutoArmorSettings.DEFAULT_MAX_DELAY, 1, 1000, 1));
-            add(maxDelay);
-
-            JMinMaxHelper.applyLink(minDelay, maxDelay);
-        }
-
-        @Override
-        public String getNavigationName() {
-            return "Auto Armor";
-        }
-
-        @Override
-        public String getNavigationId() {
-            return "auto-armor";
-        }
-
-        @Override
-        public void onSettingsChange(AutoArmorSettings settings) {
-            autoArmor.setSelected(settings.autoArmor());
-            minDelay.setValue(settings.minDelay());
-            maxDelay.setValue(settings.maxDelay());
-        }
-
-        @Override
-        public AutoArmorSettings collectSettings() {
-            return new AutoArmorSettings(
-                    autoArmor.isSelected(),
-                    (int) minDelay.getValue(),
-                    (int) maxDelay.getValue()
-            );
-        }
-    }
-
-    private static class AutoArmorCommand implements SettingsProvider<AutoArmorSettings> {
-        @CommandLine.Option(names = {"--auto-armor"}, description = "Do auto armor?")
-        private boolean autoArmor = AutoArmorSettings.DEFAULT_AUTO_ARMOR;
-        @CommandLine.Option(names = {"--armor-min-delay"}, description = "Minimum delay between putting on armor")
-        private int minDelay = AutoArmorSettings.DEFAULT_MIN_DELAY;
-        @CommandLine.Option(names = {"--armor-max-delay"}, description = "Maximum delay between putting on armor")
-        private int maxDelay = AutoArmorSettings.DEFAULT_MAX_DELAY;
-
-        @Override
-        public AutoArmorSettings collectSettings() {
-            return new AutoArmorSettings(
-                    autoArmor,
-                    minDelay,
-                    maxDelay
-            );
-        }
-    }
-
-    private record AutoArmorSettings(
-            boolean autoArmor,
-            int minDelay,
-            int maxDelay
-    ) implements SettingsObject {
-        public static final boolean DEFAULT_AUTO_ARMOR = true;
-        public static final int DEFAULT_MIN_DELAY = 1;
-        public static final int DEFAULT_MAX_DELAY = 2;
+    @NoArgsConstructor(access = AccessLevel.NONE)
+    private static class AutoArmorSettings implements SettingsObject {
+        private static final Property.Builder BUILDER = Property.builder("auto-armor");
+        public static final BooleanProperty AUTO_ARMOR = BUILDER.ofBoolean("auto-armor",
+                "Do Auto Armor?",
+                "Do Auto Armor?",
+                new String[]{"--auto-armor"},
+                true
+        );
+        public static final IntProperty MIN_DELAY = BUILDER.ofInt("armor-min-delay",
+                "Min delay (seconds)",
+                "Minimum delay between putting on armor",
+                new String[]{"--armor-min-delay"},
+                1
+        );
+        public static final IntProperty MAX_DELAY = BUILDER.ofInt("armor-max-delay",
+                "Max delay (seconds)",
+                "Maximum delay between putting on armor",
+                new String[]{"--armor-max-delay"},
+                2
+        );
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(MIN_DELAY, MAX_DELAY);
     }
 }

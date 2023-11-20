@@ -19,27 +19,23 @@
  */
 package net.pistonmaster.serverwrecker.plugins;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
 import net.pistonmaster.serverwrecker.data.ItemType;
-import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
-import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
-import picocli.CommandLine;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.concurrent.TimeUnit;
 
 public class AutoTotem implements InternalExtension {
@@ -51,12 +47,8 @@ public class AutoTotem implements InternalExtension {
 
     public static void onJoined(BotJoinedEvent event) {
         var connection = event.connection();
-        if (!connection.settingsHolder().has(AutoTotemSettings.class)) {
-            return;
-        }
-
-        var settings = connection.settingsHolder().get(AutoTotemSettings.class);
-        if (!settings.autoTotem()) {
+        var settingsHolder = connection.settingsHolder();
+        if (!settingsHolder.get(AutoTotemSettings.AUTO_TOTEM)) {
             return;
         }
 
@@ -93,7 +85,7 @@ public class AutoTotem implements InternalExtension {
                     return;
                 }
             }
-        }, settings.minDelay(), settings.maxDelay());
+        }, settingsHolder.get(AutoTotemSettings.MIN_DELAY), settingsHolder.get(AutoTotemSettings.MAX_DELAY));
     }
 
     @EventHandler
@@ -106,84 +98,27 @@ public class AutoTotem implements InternalExtension {
         PluginCLIHelper.registerCommands(event.commandLine(), AutoTotemSettings.class, new AutoTotemCommand());
     }
 
-    private static class AutoTotemPanel extends NavigationItem implements SettingsDuplex<AutoTotemSettings> {
-        private final JCheckBox autoTotem;
-        private final JSpinner minDelay;
-        private final JSpinner maxDelay;
-
-        AutoTotemPanel(ServerWreckerServer serverWreckerServer) {
-            super();
-            serverWreckerServer.getSettingsManager().registerDuplex(AutoTotemSettings.class, this);
-
-            setLayout(new GridLayout(0, 2));
-
-            add(new JLabel("Do Auto Totem?"));
-            autoTotem = new PresetJCheckBox(AutoTotemSettings.DEFAULT_AUTO_TOTEM);
-            add(autoTotem);
-
-            add(new JLabel("Min Delay (Seconds)"));
-            minDelay = new JSpinner(new SpinnerNumberModel(AutoTotemSettings.DEFAULT_MIN_DELAY, 1, 1000, 1));
-            add(minDelay);
-
-            add(new JLabel("Max Delay (Seconds)"));
-            maxDelay = new JSpinner(new SpinnerNumberModel(AutoTotemSettings.DEFAULT_MAX_DELAY, 1, 1000, 1));
-            add(maxDelay);
-
-            JMinMaxHelper.applyLink(minDelay, maxDelay);
-        }
-
-        @Override
-        public String getNavigationName() {
-            return "Auto Totem";
-        }
-
-        @Override
-        public String getNavigationId() {
-            return "auto-totem";
-        }
-
-        @Override
-        public void onSettingsChange(AutoTotemSettings settings) {
-            autoTotem.setSelected(settings.autoTotem());
-            minDelay.setValue(settings.minDelay());
-            maxDelay.setValue(settings.maxDelay());
-        }
-
-        @Override
-        public AutoTotemSettings collectSettings() {
-            return new AutoTotemSettings(
-                    autoTotem.isSelected(),
-                    (int) minDelay.getValue(),
-                    (int) maxDelay.getValue()
-            );
-        }
-    }
-
-    private static class AutoTotemCommand implements SettingsProvider<AutoTotemSettings> {
-        @CommandLine.Option(names = {"--auto-totem"}, description = "Do auto totem?")
-        private boolean autoTotem = AutoTotemSettings.DEFAULT_AUTO_TOTEM;
-        @CommandLine.Option(names = {"--totem-min-delay"}, description = "Minimum delay between using totems")
-        private int minDelay = AutoTotemSettings.DEFAULT_MIN_DELAY;
-        @CommandLine.Option(names = {"--totem-max-delay"}, description = "Maximum delay between using totems")
-        private int maxDelay = AutoTotemSettings.DEFAULT_MAX_DELAY;
-
-        @Override
-        public AutoTotemSettings collectSettings() {
-            return new AutoTotemSettings(
-                    autoTotem,
-                    minDelay,
-                    maxDelay
-            );
-        }
-    }
-
-    private record AutoTotemSettings(
-            boolean autoTotem,
-            int minDelay,
-            int maxDelay
-    ) implements SettingsObject {
-        public static final boolean DEFAULT_AUTO_TOTEM = true;
-        public static final int DEFAULT_MIN_DELAY = 1;
-        public static final int DEFAULT_MAX_DELAY = 2;
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    private static class AutoTotemSettings implements SettingsObject {
+        private static final Property.Builder BUILDER = Property.builder("auto-totem");
+        public static final BooleanProperty AUTO_TOTEM = BUILDER.ofBoolean("auto-totem",
+                "Do Auto Totem?",
+                "Do Auto Totem?",
+                new String[]{"--auto-totem"},
+                true
+        );
+        public static final IntProperty MIN_DELAY = BUILDER.ofInt("totem-min-delay",
+                "Min delay (seconds)",
+                "Minimum delay between using totems",
+                new String[]{"--totem-min-delay"},
+                1
+        );
+        public static final IntProperty MAX_DELAY = BUILDER.ofInt("totem-max-delay",
+                "Max delay (seconds)",
+                "Maximum delay between using totems",
+                new String[]{"--totem-max-delay"},
+                2
+        );
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(MIN_DELAY, MAX_DELAY);
     }
 }

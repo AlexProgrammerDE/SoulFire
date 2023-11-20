@@ -28,92 +28,81 @@ import net.pistonmaster.serverwrecker.settings.lib.property.*;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BotSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("bot");
-    public static final StringProperty HOST = BUILDER.of(
+    public static final StringProperty HOST = BUILDER.ofString(
             "host",
             "Host",
-            "Host to connect to",
             "Host to connect to",
             new String[]{"--host"},
             "127.0.0.1"
     );
-    public static final IntProperty PORT = BUILDER.of(
+    public static final IntProperty PORT = BUILDER.ofInt(
             "port",
             "Port",
-            "Port to connect to",
             "Port to connect to",
             new String[]{"--port"},
             25565
     );
-    public static final IntProperty AMOUNT = BUILDER.of(
+    public static final IntProperty AMOUNT = BUILDER.ofInt(
             "amount",
             "Amount",
-            "Amount of bots to connect",
             "Amount of bots to connect",
             new String[]{"--amount"},
             1
     );
-    public static final IntProperty MIN_JOIN_DELAY_MS = BUILDER.of(
+    public static final IntProperty MIN_JOIN_DELAY_MS = BUILDER.ofInt(
             "minJoinDelayMs",
             "Min Join Delay",
-            "Minimum delay between joins in milliseconds",
             "Minimum delay between joins in milliseconds",
             new String[]{"--minJoinDelayMs"},
             1000
     );
-    public static final IntProperty MAX_JOIN_DELAY_MS = BUILDER.of(
+    public static final IntProperty MAX_JOIN_DELAY_MS = BUILDER.ofInt(
             "maxJoinDelayMs",
             "Max Join Delay",
-            "Maximum delay between joins in milliseconds",
             "Maximum delay between joins in milliseconds",
             new String[]{"--maxJoinDelayMs"},
             3000
     );
     public static final MinMaxPropertyLink JOIN_DELAY_MS = new MinMaxPropertyLink(MIN_JOIN_DELAY_MS, MAX_JOIN_DELAY_MS);
-    public static final ComboProperty PROTOCOL_VERSION = BUILDER.of(
+    public static final ComboProperty PROTOCOL_VERSION = BUILDER.ofCombo(
             "protocolVersion",
             "Protocol Version",
-            "Protocol version to use",
             "Protocol version to use",
             new String[]{"--protocolVersion"},
             getProtocolVersionOptions(),
             0
     );
-    public static final IntProperty READ_TIMEOUT = BUILDER.of(
+    public static final IntProperty READ_TIMEOUT = BUILDER.ofInt(
             "readTimeout",
             "Read Timeout",
-            "Read timeout in seconds",
             "Read timeout in seconds",
             new String[]{"--readTimeout"},
             30
     );
-    public static final IntProperty WRITE_TIMEOUT = BUILDER.of(
+    public static final IntProperty WRITE_TIMEOUT = BUILDER.ofInt(
             "writeTimeout",
             "Write Timeout",
-            "Write timeout in seconds",
             "Write timeout in seconds",
             new String[]{"--writeTimeout"},
             0
     );
-    public static final IntProperty CONNECT_TIMEOUT = BUILDER.of(
+    public static final IntProperty CONNECT_TIMEOUT = BUILDER.ofInt(
             "connectTimeout",
             "Connect Timeout",
-            "Connect timeout in seconds",
             "Connect timeout in seconds",
             new String[]{"--connectTimeout"},
             30
     );
-    public static final BooleanProperty TRY_SRV = BUILDER.of(
+    public static final BooleanProperty TRY_SRV = BUILDER.ofBoolean(
             "trySrv",
             "Try SRV",
-            "Try to use SRV records",
             "Try to use SRV records",
             new String[]{"--trySrv"},
             true
     );
-    public static final IntProperty CONCURRENT_CONNECTS = BUILDER.of(
+    public static final IntProperty CONCURRENT_CONNECTS = BUILDER.ofInt(
             "concurrentConnects",
             "Concurrent Connects",
-            "Amount of concurrent connects",
             "Amount of concurrent connects",
             new String[]{"--concurrentConnects"},
             1

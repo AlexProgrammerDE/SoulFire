@@ -33,20 +33,24 @@ public sealed interface Property permits BooleanProperty, ComboProperty, IntProp
     }
 
     record Builder(String namespace) {
-        public BooleanProperty of(String name, String uiDescription, String cliDescription, String fullDescription, String[] cliNames, boolean defaultValue) {
-            return new BooleanProperty(namespace, name, uiDescription, cliDescription, fullDescription, cliNames, defaultValue);
+        public BooleanProperty ofBoolean(String name, String uiDescription, String cliDescription, String[] cliNames, boolean defaultValue) {
+            return new BooleanProperty(namespace, name, uiDescription, cliDescription, cliNames, defaultValue);
         }
 
-        public IntProperty of(String name, String uiDescription, String cliDescription, String fullDescription, String[] cliNames, int defaultValue) {
-            return new IntProperty(namespace, name, uiDescription, cliDescription, fullDescription, cliNames, defaultValue);
+        public IntProperty ofInt(String name, String uiDescription, String cliDescription, String[] cliNames, int defaultValue) {
+            return new IntProperty(namespace, name, uiDescription, cliDescription, cliNames, defaultValue);
         }
 
-        public StringProperty of(String name, String uiDescription, String cliDescription, String fullDescription, String[] cliNames, String defaultValue) {
-            return new StringProperty(namespace, name, uiDescription, cliDescription, fullDescription, cliNames, defaultValue);
+        public StringProperty ofString(String name, String uiDescription, String cliDescription, String[] cliNames, String defaultValue) {
+            return new StringProperty(namespace, name, uiDescription, cliDescription, cliNames, defaultValue);
         }
 
-        public ComboProperty of(String name, String uiDescription, String cliDescription, String fullDescription, String[] cliNames, ComboProperty.ComboOption[] values, int defaultValue) {
-            return new ComboProperty(namespace, name, uiDescription, cliDescription, fullDescription, cliNames, values, defaultValue);
+        public ComboProperty ofCombo(String name, String uiDescription, String cliDescription, String[] cliNames, ComboProperty.ComboOption[] values, int defaultValue) {
+            return new ComboProperty(namespace, name, uiDescription, cliDescription, cliNames, values, defaultValue);
+        }
+
+        public ComboProperty ofEnum(String name, String uiDescription, String cliDescription, String[] cliNames, Enum<?>[] values, int defaultValue) {
+            return new ComboProperty(namespace, name, uiDescription, cliDescription, cliNames, ComboProperty.ComboOption.fromEnum(values), defaultValue);
         }
     }
 }

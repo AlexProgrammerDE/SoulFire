@@ -39,6 +39,7 @@ import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.settings.lib.property.*;
 import picocli.CommandLine;
 
 import javax.inject.Inject;
@@ -334,5 +335,31 @@ public class ClientSettings implements InternalExtension {
         public static final HandPreference DEFAULT_HAND_PREFERENCE = HandPreference.RIGHT_HAND;
         public static final boolean DEFAULT_TEXT_FILTERING_ENABLED = true;
         public static final boolean DEFAULT_ALLOWS_LISTING = true;
+        private static final Property.Builder BUILDER = Property.builder("client-settings");
+        public static final BooleanProperty SEND_CLIENT_SETTINGS = BUILDER.ofBoolean("send-client-settings",
+                "Send client settings",
+                "Send client settings",
+                new String[]{"--send-client-settings"},
+                true
+        );
+        public static final StringProperty CLIENT_LOCALE = BUILDER.ofString("client-locale",
+                "Client locale",
+                "Client locale",
+                new String[]{"--client-locale"},
+                "en_gb"
+        );
+        public static final IntProperty RENDER_DISTANCE = BUILDER.ofInt("render-distance",
+                "Render distance",
+                "Render distance",
+                new String[]{"--render-distance"},
+                8
+        );
+        public static final ComboProperty CHAT_VISIBILITY = BUILDER.ofCombo("chat-visibility",
+                "Chat visibility",
+                "Chat visibility",
+                new String[]{"--chat-visibility"},
+                ChatVisibility.class,
+                ChatVisibility.FULL
+        );
     }
 }

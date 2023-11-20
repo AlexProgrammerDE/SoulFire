@@ -42,6 +42,7 @@ import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.netty.ResolveUtil;
 import net.pistonmaster.serverwrecker.protocol.netty.SWNettyHelper;
 import net.pistonmaster.serverwrecker.proxy.ProxyList;
+import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
@@ -90,7 +91,7 @@ public class AttackManager {
         var proxies = new ArrayList<>(proxyListSettings.proxies()
                 .stream().filter(SWProxy::enabled).toList());
 
-        ServerWreckerServer.setupLoggingAndVia(settingsHolder.get(DevSettings.class));
+        ServerWreckerServer.setupLoggingAndVia(settingsHolder);
 
         this.attackState = AttackState.RUNNING;
 
@@ -98,7 +99,7 @@ public class AttackManager {
         logger.info("Preparing bot attack at {}", host);
 
         var botAmount = settingsHolder.get(BotSettings.AMOUNT); // How many bots to connect
-        var botsPerProxy = proxySettings.botsPerProxy(); // How many bots per proxy are allowed
+        var botsPerProxy = settingsHolder.get(ProxySettings.BOTS_PER_PROXY); // How many bots per proxy are allowed
         var availableProxiesCount = proxies.size(); // How many proxies are available?
         var maxBots = botsPerProxy > 0 ? botsPerProxy * availableProxiesCount : botAmount; // How many bots can be used at max
 
@@ -117,7 +118,7 @@ public class AttackManager {
             botAmount = availableAccounts;
         }
 
-        if (accountSettings.shuffleAccounts()) {
+        if (settingsHolder.get(AccountSettings.SHUFFLE_ACCOUNTS)) {
             Collections.shuffle(accounts);
         }
 
@@ -159,15 +160,15 @@ public class AttackManager {
         }
 
         if (availableProxiesCount == 0) {
-            logger.info("Starting attack at {} with {} bots", botSettings.host(), factories.size());
+            logger.info("Starting attack at {} with {} bots", host, factories.size());
         } else {
-            logger.info("Starting attack at {} with {} bots and {} proxies", botSettings.host(), factories.size(), availableProxiesCount);
+            logger.info("Starting attack at {} with {} bots and {} proxies", host, factories.size(), availableProxiesCount);
         }
 
         eventBus.call(new AttackStartEvent(this));
 
         // Used for concurrent bot connecting
-        var connectService = Executors.newFixedThreadPool(botSettings.concurrentConnects());
+        var connectService = Executors.newFixedThreadPool(settingsHolder.get(BotSettings.CONCURRENT_CONNECTS));
 
         return CompletableFuture.runAsync(() -> {
             while (!factories.isEmpty()) {
@@ -195,7 +196,7 @@ public class AttackManager {
                     }
                 });
 
-                TimeUtil.waitTime(RandomUtil.getRandomInt(botSettings.minJoinDelayMs(), botSettings.maxJoinDelayMs()), TimeUnit.MILLISECONDS);
+                TimeUtil.waitTime(RandomUtil.getRandomInt(settingsHolder.get(BotSettings.MIN_JOIN_DELAY_MS), settingsHolder.get(BotSettings.MAX_JOIN_DELAY_MS)), TimeUnit.MILLISECONDS);
             }
         });
     }
