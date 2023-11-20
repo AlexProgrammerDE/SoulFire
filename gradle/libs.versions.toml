@@ -1,5 +1,5 @@
 [versions]
-log4j = "2.21.1"
+log4j = "2.22.0"
 grpc = "1.59.0"
 protobuf = "3.25.1"
 protoc = "3.24.0"
