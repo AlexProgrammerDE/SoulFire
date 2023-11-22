@@ -27,12 +27,11 @@ import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLog
 import lombok.RequiredArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSentEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
@@ -104,13 +103,8 @@ public class ClientSettings implements InternalExtension {
     }
 
     @EventHandler
-    public static void onPluginPanel(PluginPanelInitEvent event) {
-        event.navigationItems().add(new ClientSettingsPanel(ServerWreckerAPI.getServerWrecker()));
-    }
-
-    @EventHandler
-    public static void onCommandLine(CommandManagerInitEvent event) {
-        PluginCLIHelper.registerCommands(event.commandLine(), ClientSettingsSettings.class, new ClientSettingsCommand());
+    public static void onPluginPanel(SettingsManagerInitEvent event) {
+        event.settingsManager().addClass(ClientSettingsSettings.class);
     }
 
     private static class ClientSettingsPanel extends NavigationItem implements SettingsDuplex<ClientSettingsSettings> {

@@ -30,12 +30,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSendingEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
 import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
@@ -214,13 +213,8 @@ public class ForwardingBypass implements InternalExtension {
     }
 
     @EventHandler
-    public static void onPluginPanel(PluginPanelInitEvent event) {
-        event.navigationItems().add(new ForwardingBypassPanel(ServerWreckerAPI.getServerWrecker()));
-    }
-
-    @EventHandler
-    public static void onCommandLine(CommandManagerInitEvent event) {
-        PluginCLIHelper.registerCommands(event.commandLine(), ForwardingBypassSettings.class, new ForwardingBypassCommand());
+    public static void onPluginPanel(SettingsManagerInitEvent event) {
+        event.settingsManager().addClass(ForwardingBypassSettings.class);
     }
 
     /*

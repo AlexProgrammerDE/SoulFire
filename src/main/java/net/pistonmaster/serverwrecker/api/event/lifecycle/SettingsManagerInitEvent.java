@@ -20,12 +20,7 @@
 package net.pistonmaster.serverwrecker.api.event.lifecycle;
 
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
-import picocli.CommandLine;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 
-/**
- * Add yourself to the command manager by adding an ArgSpec to the CommandLine
- *
- * @param commandLine The command line
- */
-public record CommandManagerInitEvent(CommandLine commandLine) implements ServerWreckerGlobalEvent {
+public record SettingsManagerInitEvent(SettingsManager settingsManager) implements ServerWreckerGlobalEvent {
 }

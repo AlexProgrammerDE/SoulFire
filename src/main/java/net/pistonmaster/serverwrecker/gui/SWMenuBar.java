@@ -30,7 +30,6 @@ import net.pistonmaster.serverwrecker.api.event.gui.WindowCloseEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.popups.AboutPopup;
 import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 
 import javax.inject.Inject;
 import javax.swing.*;

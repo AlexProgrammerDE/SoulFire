@@ -57,14 +57,11 @@ public class GUIManager {
     private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
     private final AccountRegistry accountRegistry = new AccountRegistry();
     private final ProxyRegistry proxyRegistry = new ProxyRegistry();
-    private final SettingsManager settingsManager;
+    private final SettingsManager settingsManager = new SettingsManager();
 
     public GUIManager(ServerWreckerServer serverWreckerServer, RPCClient rpcClient) {
         this.rpcClient = rpcClient;
         injector.register(GUIManager.class, this);
-
-        // TODO: Remove instance dependency on ServerWreckerServer (Receive settings and panels via gRPC?)
-        this.settingsManager = serverWreckerServer.getSettingsManager();
     }
 
     public void initGUI() {

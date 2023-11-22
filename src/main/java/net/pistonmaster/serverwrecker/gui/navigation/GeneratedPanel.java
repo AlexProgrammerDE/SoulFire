@@ -29,10 +29,10 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
 
-public class PluginSettingsPanel extends NavigationItem {
+public class GeneratedPanel extends NavigationItem {
     private final ClientPluginSettingsPage settingsPage;
 
-    public PluginSettingsPanel(ClientPluginSettingsPage settingsPage) {
+    public GeneratedPanel(ClientPluginSettingsPage settingsPage) {
         this.settingsPage = settingsPage;
 
         setLayout(new GridLayout(0, 2));
@@ -103,7 +103,7 @@ public class PluginSettingsPanel extends NavigationItem {
 
     @Override
     public String getNavigationId() {
-        return settingsPage.getPageId();
+        return settingsPage.getNamespace();
     }
 
     private static class ComboRenderer extends BasicComboBoxRenderer {

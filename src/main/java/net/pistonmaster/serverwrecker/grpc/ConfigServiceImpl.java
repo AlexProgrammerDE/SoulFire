@@ -40,7 +40,7 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
                 UIClientDataResponse.newBuilder()
                         .setUsername(username)
                         .addAllPlugins(getExtensions())
-                        .addAllPluginSettings(getExtensionSettings())
+                        .addAllPluginSettings(serverWreckerServer.getSettingsManager().exportSettingsMeta())
                         .build()
         );
         responseObserver.onCompleted();
@@ -65,11 +65,5 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
         }
 
         return plugins;
-    }
-
-    private Collection<ClientPluginSettingsPage> getExtensionSettings() {
-        var pluginSettings = new ArrayList<ClientPluginSettingsPage>();
-
-        return pluginSettings;
     }
 }

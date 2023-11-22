@@ -54,7 +54,7 @@ public class CardsContainer extends JPanel {
         }
 
         for (var item : pluginPanel.getPluginPages()) {
-            add(NavigationWrapper.createBackWrapper(this, pluginPanel.getNavigationId(), new PluginSettingsPanel(item)), item.getPageId());
+            add(NavigationWrapper.createBackWrapper(this, pluginPanel.getNavigationId(), new GeneratedPanel(item)), item.getPageId());
         }
 
         setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));

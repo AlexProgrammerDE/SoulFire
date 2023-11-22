@@ -39,6 +39,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.pistonmaster.serverwrecker.api.ServerExtension;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
 import net.pistonmaster.serverwrecker.auth.AccountList;
 import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
@@ -49,7 +50,6 @@ import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.data.TranslationMapper;
 import net.pistonmaster.serverwrecker.grpc.RPCServer;
-import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.SWLogAppender;
 import net.pistonmaster.serverwrecker.plugins.*;
 import net.pistonmaster.serverwrecker.protocol.packet.SWClientboundStatusResponsePacket;
@@ -198,6 +198,8 @@ public class ServerWreckerServer {
         for (var serverExtension : ServerWreckerAPI.getServerExtensions()) {
             serverExtension.onEnable(this);
         }
+
+        ServerWreckerAPI.postEvent(new SettingsManagerInitEvent(settingsManager));
 
         LOGGER.info("Checking for updates...");
         outdated = checkForUpdates();

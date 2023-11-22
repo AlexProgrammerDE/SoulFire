@@ -23,11 +23,10 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
-import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
 import net.pistonmaster.serverwrecker.data.ArmorType;
 import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
@@ -127,13 +126,8 @@ public class AutoArmor implements InternalExtension {
     }
 
     @EventHandler
-    public static void onPluginPanel(PluginPanelInitEvent event) {
-        event.navigationItems().add(new AutoArmorPanel(ServerWreckerAPI.getServerWrecker()));
-    }
-
-    @EventHandler
-    public static void onCommandLine(CommandManagerInitEvent event) {
-        PluginCLIHelper.registerCommands(event.commandLine(), AutoArmorSettings.class, new AutoArmorCommand());
+    public static void onPluginPanel(SettingsManagerInitEvent event) {
+        event.settingsManager().addClass(AutoArmorSettings.class);
     }
 
     @NoArgsConstructor(access = AccessLevel.NONE)

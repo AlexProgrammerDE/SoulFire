@@ -24,7 +24,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.*;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import net.pistonmaster.serverwrecker.auth.service.AccountData;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingsPage;
 import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.settings.lib.property.PropertyKey;
 import org.slf4j.Logger;
@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Provider;
 import java.io.IOException;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,7 +48,7 @@ public class SettingsManager {
     public static final Logger LOGGER = LoggerFactory.getLogger(SettingsManager.class);
     private final List<ListenerRegistration<?>> listeners = new ArrayList<>();
     private final List<ProviderRegistration<?>> providers = new ArrayList<>();
-    private final Multimap<String, Property> classMap = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
+    private final Multimap<String, Property> propertyMap = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
     // Used to read & write the settings file
     private final Gson dumpGson = new GsonBuilder().setPrettyPrinting().create();
     private final Gson baseGson = new GsonBuilder()
@@ -57,36 +56,15 @@ public class SettingsManager {
             .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
             .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
             .create();
-    private final Gson normalGson = baseGson.newBuilder()
-            .registerTypeHierarchyAdapter(AccountData.class, new ClassObjectAdapter(baseGson, classMap))
-            .create();
-    private final Gson settingsTypeGson = new GsonBuilder()
-            .registerTypeHierarchyAdapter(Object.class, new ClassObjectAdapter(normalGson, classMap))
-            .create();
 
-    public SettingsManager(List<Class<? extends SettingsObject>> registeredSettings) {
-        for (var clazz : registeredSettings) {
-            registerSettingsClass(clazz);
+    public SettingsManager(List<Class<? extends SettingsObject>> classes) {
+        for (var clazz : classes) {
+            addClass(clazz);
         }
     }
 
-    public void registerSettingsClass(Class<? extends SettingsObject> clazz) {
-        for (var field : clazz.getDeclaredFields()) {
-            if (!Modifier.isStatic(field.getModifiers())) {
-                continue;
-            }
+    public void addClass(Class<? extends SettingsObject> clazz) {
 
-            if (!Property.class.isAssignableFrom(field.getType())) {
-                continue;
-            }
-
-            try {
-                var property = (Property) field.get(null);
-                classMap.put(property.namespace(), property);
-            } catch (IllegalAccessException e) {
-                LOGGER.error("Failed to register property!", e);
-            }
-        }
     }
 
     public <T extends Property> void registerListener(String propertyKey, SettingsListener<T> listener) {
@@ -103,7 +81,7 @@ public class SettingsManager {
                 .map(SettingsProvider::collectSettings)
                 .toList());
 
-        for (var clazz : classMap.values()) {
+        for (var clazz : propertyMap.values()) {
             if (!settingsHolder.has(clazz)) {
                 throw new IllegalArgumentException("No settings found for " + clazz.getSimpleName());
             }
@@ -117,13 +95,6 @@ public class SettingsManager {
             for (var listener : listeners) {
                 loadSetting(setting, listener);
             }
-        }
-    }
-
-    private <T extends SettingsObject> void loadSetting(SettingsObject setting, ListenerRegistration<T> registration) {
-        if (registration.clazz.isInstance(setting)) {
-            var castedSetting = registration.clazz.cast(setting);
-            registration.listener.onSettingsChange(castedSetting);
         }
     }
 
@@ -166,6 +137,10 @@ public class SettingsManager {
         }
 
         return dumpGson.toJson(settingsHolder);
+    }
+
+    public List<ClientPluginSettingsPage> exportSettingsMeta() {
+
     }
 
     private record ListenerRegistration<T extends SettingsObject>(Class<T> clazz, SettingsListener<T> listener) {

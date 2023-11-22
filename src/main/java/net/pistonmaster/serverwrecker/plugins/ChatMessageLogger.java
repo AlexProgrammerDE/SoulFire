@@ -19,25 +19,22 @@
  */
 package net.pistonmaster.serverwrecker.plugins;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.api.PluginCLIHelper;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
-import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import org.slf4j.Logger;
-import picocli.CommandLine;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -54,29 +51,25 @@ public class ChatMessageLogger implements InternalExtension {
     }
 
     public static void onConnectionInit(BotConnectionInitEvent event) {
-        var chatMessageSettings = event.connection().settingsHolder().get(ChatMessageSettings.class);
-        if (!chatMessageSettings.logChat()) {
+        var connection = event.connection();
+        var settingsHolder = connection.settingsHolder();
+        if (!settingsHolder.get(ChatMessageSettings.LOG_CHAT)) {
             return;
         }
 
-        event.connection().eventBus().register(ChatMessageReceiveEvent.class,
-                new BotChatListener(event.connection().connectionId(), event.connection().logger(),
-                        event.connection().executorManager().newScheduledExecutorService("Chat"),
-                        new LinkedHashSet<>(), chatMessageSettings));
+        connection.eventBus().register(ChatMessageReceiveEvent.class,
+                new BotChatListener(connection.connectionId(), connection.logger(),
+                        connection.executorManager().newScheduledExecutorService("Chat"),
+                        new LinkedHashSet<>(), settingsHolder));
     }
 
     @EventHandler
-    public static void onPluginPanel(PluginPanelInitEvent event) {
-        event.navigationItems().add(new ChatMessagePanel(ServerWreckerAPI.getServerWrecker()));
-    }
-
-    @EventHandler
-    public static void onCommandLine(CommandManagerInitEvent event) {
-        PluginCLIHelper.registerCommands(event.commandLine(), ChatMessageSettings.class, new ChatMessageCommand());
+    public static void onPluginPanel(SettingsManagerInitEvent event) {
+        event.settingsManager().addClass(ChatMessageSettings.class);
     }
 
     private record BotChatListener(UUID connectionId, Logger logger, ScheduledExecutorService executor,
-                                   Set<String> messageQueue, ChatMessageSettings chatMessageSettings)
+                                   Set<String> messageQueue, SettingsHolder settingsHolder)
             implements Consumer<ChatMessageReceiveEvent> {
         public BotChatListener {
             executor.scheduleWithFixedDelay(() -> {
@@ -90,7 +83,7 @@ public class ChatMessageLogger implements InternalExtension {
 
                     logger.info("[Chat] Received Message: {}", message);
                 }
-            }, 0, chatMessageSettings.interval(), TimeUnit.SECONDS);
+            }, 0, settingsHolder.get(ChatMessageSettings.INTERVAL), TimeUnit.SECONDS);
         }
 
         @Override
@@ -103,70 +96,22 @@ public class ChatMessageLogger implements InternalExtension {
         }
     }
 
-    private static class ChatMessagePanel extends NavigationItem implements SettingsDuplex<ChatMessageSettings> {
-        private final JCheckBox logChat;
-        private final JSpinner interval;
-
-        ChatMessagePanel(ServerWreckerServer serverWreckerServer) {
-            super();
-            serverWreckerServer.getSettingsManager().registerDuplex(ChatMessageSettings.class, this);
-
-            setLayout(new GridLayout(0, 2));
-
-            add(new JLabel("Log chat to terminal?"));
-            logChat = new PresetJCheckBox(ChatMessageSettings.DEFAULT_LOG_CHAT);
-            add(logChat);
-
-            add(new JLabel("Interval (Seconds)"));
-            interval = new JSpinner(new SpinnerNumberModel(ChatMessageSettings.DEFAULT_INTERVAL, 1, 1000, 1));
-            add(interval);
-        }
-
-        @Override
-        public String getNavigationName() {
-            return "Chat Logger";
-        }
-
-        @Override
-        public String getNavigationId() {
-            return "chat-logger";
-        }
-
-        @Override
-        public void onSettingsChange(ChatMessageSettings settings) {
-            logChat.setSelected(settings.logChat());
-            interval.setValue(settings.interval());
-        }
-
-        @Override
-        public ChatMessageSettings collectSettings() {
-            return new ChatMessageSettings(
-                    logChat.isSelected(),
-                    (int) interval.getValue()
-            );
-        }
-    }
-
-    private static class ChatMessageCommand implements SettingsProvider<ChatMessageSettings> {
-        @CommandLine.Option(names = {"--log-chat"}, description = "Log chat to terminal")
-        private boolean logChat = ChatMessageSettings.DEFAULT_LOG_CHAT;
-        @CommandLine.Option(names = {"--chat-interval"}, description = "Minimum delay between logging chat")
-        private int interval = ChatMessageSettings.DEFAULT_INTERVAL;
-
-        @Override
-        public ChatMessageSettings collectSettings() {
-            return new ChatMessageSettings(
-                    logChat,
-                    interval
-            );
-        }
-    }
-
-    private record ChatMessageSettings(
-            boolean logChat,
-            int interval
-    ) implements SettingsObject {
-        public static final boolean DEFAULT_LOG_CHAT = true;
-        public static final int DEFAULT_INTERVAL = 2;
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    private static class ChatMessageSettings implements SettingsObject {
+        private static final Property.Builder BUILDER = Property.builder("chat-message-logger");
+        public static final BooleanProperty LOG_CHAT = BUILDER.ofBoolean(
+                "log-chat",
+                "Log chat to terminal",
+                "If this is enabled, all chat messages will be logged to the terminal",
+                new String[] {"--log-chat"},
+                true
+        );
+        public static IntProperty INTERVAL = BUILDER.ofInt(
+                "chat-interval",
+                "Minimum delay between logging chat",
+                "This is the minimum delay between logging chat messages",
+                new String[] {"--chat-interval"},
+                2
+        );
     }
 }
