@@ -23,27 +23,29 @@ import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.auth.HttpHelper;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
-import net.raphimc.mcauth.MinecraftAuth;
-import net.raphimc.mcauth.step.msa.StepCredentialsMsaCode;
+import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 
 import java.io.IOException;
 
 public class SWBedrockMicrosoftAuthService implements MCAuthService {
     public MinecraftAccount login(String email, String password, SWProxy proxyData) throws IOException {
         try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-            var mcChain = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(httpClient,
+            var fullBedrockSession = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(httpClient,
                     new StepCredentialsMsaCode.MsaCredentials(email, password));
 
-            var xblXsts = mcChain.prevResult();
-            var deviceId = xblXsts.initialXblSession().prevResult2().id();
-            return new MinecraftAccount(AuthType.MICROSOFT_BEDROCK, mcChain.displayName(),
+            var mcChain = fullBedrockSession.getMcChain();
+            var xblXsts = mcChain.getXblXsts();
+            var deviceId = xblXsts.getInitialXblSession().getXblDeviceToken().getId();
+            var playFabId = fullBedrockSession.getPlayFabToken().getPlayFabId();
+            return new MinecraftAccount(AuthType.MICROSOFT_BEDROCK, mcChain.getDisplayName(),
                     new BedrockData(
-                            mcChain.mojangJwt(),
-                            mcChain.identityJwt(),
-                            mcChain.publicKey(),
-                            mcChain.privateKey(),
+                            mcChain.getMojangJwt(),
+                            mcChain.getIdentityJwt(),
+                            mcChain.getPublicKey(),
+                            mcChain.getPrivateKey(),
                             deviceId,
-                            "" // PlayFab token is pretty much never verified
+                            playFabId
                     ),
                     true);
         } catch (Exception e) {

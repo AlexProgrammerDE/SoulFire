@@ -23,18 +23,19 @@ import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.auth.HttpHelper;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
-import net.raphimc.mcauth.MinecraftAuth;
-import net.raphimc.mcauth.step.msa.StepCredentialsMsaCode;
+import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 
 import java.io.IOException;
 
 public class SWJavaMicrosoftAuthService implements MCAuthService {
     public MinecraftAccount login(String email, String password, SWProxy proxyData) throws IOException {
         try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-            var mcProfile = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient,
+            var fullJavaSession = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient,
                     new StepCredentialsMsaCode.MsaCredentials(email, password));
-            var mcToken = mcProfile.prevResult().prevResult();
-            return new MinecraftAccount(AuthType.MICROSOFT_JAVA, mcProfile.name(), new JavaData(mcProfile.id(), mcToken.access_token(), mcToken.expireTimeMs()), true);
+            var mcProfile = fullJavaSession.getMcProfile();
+            var mcToken = mcProfile.getMcToken();
+            return new MinecraftAccount(AuthType.MICROSOFT_JAVA, mcProfile.getName(), new JavaData(mcProfile.getId(), mcToken.getAccessToken(), mcToken.getExpireTimeMs()), true);
         } catch (Exception e) {
             throw new IOException(e);
         }
