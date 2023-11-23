@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -45,7 +46,6 @@ import net.pistonmaster.serverwrecker.proxy.ProxyList;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
-import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.util.RandomUtil;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
@@ -133,7 +133,8 @@ public class AttackManager {
 
         var attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(threads, String.format("Attack-%d", id));
 
-        var isBedrock = SWConstants.isBedrock(botSettings.protocolVersion());
+        var protocolVersion = settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+        var isBedrock = SWConstants.isBedrock(protocolVersion);
         var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder, attackEventLoopGroup);
 
         var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);

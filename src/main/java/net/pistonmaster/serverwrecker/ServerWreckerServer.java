@@ -187,11 +187,6 @@ public class ServerWreckerServer {
 
         manager.onServerLoaded();
 
-        var settingsPanel = injector.getIfAvailable(SettingsPanel.class);
-        if (settingsPanel != null) {
-            settingsPanel.registerVersions();
-        }
-
         registerInternalServerExtensions();
         registerServerExtensions();
 

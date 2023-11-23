@@ -28,6 +28,7 @@ import com.github.steveice10.packetlib.event.session.PacketSendingEvent;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpSession;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.exception.CancelCodecException;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
@@ -109,8 +110,7 @@ public class ViaClientSession extends TcpSession {
         }
 
         try {
-            var botSettings = settingsHolder.get(BotSettings.class);
-            var version = botSettings.protocolVersion();
+            var version = settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
             var isLegacy = SWConstants.isLegacy(version);
             var isBedrock = SWConstants.isBedrock(version);
             var bootstrap = new Bootstrap();
