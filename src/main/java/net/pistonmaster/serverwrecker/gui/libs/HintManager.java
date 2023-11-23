@@ -136,8 +136,9 @@ public class HintManager {
 
         void showHint() {
             var rootPane = SwingUtilities.getRootPane(hint.owner);
-            if (rootPane == null)
+            if (rootPane == null) {
                 return;
+            }
 
             var layeredPane = rootPane.getLayeredPane();
 
