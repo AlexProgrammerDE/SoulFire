@@ -24,11 +24,9 @@ import com.formdev.flatlaf.util.SystemInfo;
 import net.pistonmaster.serverwrecker.gui.libs.HintManager;
 import net.pistonmaster.serverwrecker.gui.navigation.CardsContainer;
 import net.pistonmaster.serverwrecker.gui.navigation.ControlPanel;
-import net.pistonmaster.serverwrecker.util.TimeUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.concurrent.TimeUnit;
 
 public class GUIFrame extends JFrame {
     public static final String MAIN_MENU = "MainMenu";
