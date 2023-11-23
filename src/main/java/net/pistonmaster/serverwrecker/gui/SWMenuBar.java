@@ -20,8 +20,12 @@
 package net.pistonmaster.serverwrecker.gui;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
-import com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme;
+import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.intellijthemes.*;
+import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDarkerIJTheme;
+import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicIJTheme;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import javafx.stage.FileChooser;
@@ -48,9 +52,18 @@ public class SWMenuBar extends JMenuBar {
         var tempThemes = new ArrayList<>(List.of(
                 FlatDarculaLaf.class,
                 FlatIntelliJLaf.class,
+                FlatDarkLaf.class,
+                FlatLightLaf.class,
                 FlatMacDarkLaf.class,
                 FlatMacLightLaf.class,
-                FlatOneDarkIJTheme.class
+                FlatOneDarkIJTheme.class,
+                FlatArcOrangeIJTheme.class,
+                FlatArcDarkOrangeIJTheme.class,
+                FlatCyanLightIJTheme.class,
+                FlatDarkPurpleIJTheme.class,
+                FlatMaterialDarkerIJTheme.class,
+                FlatMaterialOceanicIJTheme.class,
+                FlatCarbonIJTheme.class
         ));
         THEMES = List.copyOf(tempThemes);
     }

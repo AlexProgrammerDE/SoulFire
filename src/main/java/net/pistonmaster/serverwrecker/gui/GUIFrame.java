@@ -65,11 +65,13 @@ public class GUIFrame extends JFrame {
     public void open(Injector injector) {
         setVisible(true);
 
+        // User says they are a first time user that wants hints
         if (GUIClientProps.getBoolean("firstTimeUser", false)) {
             SwingUtilities.invokeLater(() -> showHints(injector));
             return;
         }
 
+        // Ask whether the user wants hints
         if (GUIClientProps.getBoolean("firstRun", true)) {
             var result = JOptionPane.showConfirmDialog(
                     this,
@@ -78,15 +80,17 @@ public class GUIFrame extends JFrame {
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE
             );
+
             if (result == JOptionPane.YES_OPTION) {
                 GUIClientProps.setBoolean("firstTimeUser", true);
+                GUIClientProps.setBoolean("firstRun", false);
 
-                // Give the window a bit of time to close
-                TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+                requestFocusInWindow();
                 SwingUtilities.invokeLater(() -> showHints(injector));
+            } else if (result == JOptionPane.NO_OPTION || result == JOptionPane.CLOSED_OPTION) {
+                GUIClientProps.setBoolean("firstTimeUser", false);
+                GUIClientProps.setBoolean("firstRun", false);
             }
-
-            GUIClientProps.setBoolean("firstRun", false);
         }
     }
 
