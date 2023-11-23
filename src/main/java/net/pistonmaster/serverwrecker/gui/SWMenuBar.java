@@ -33,7 +33,8 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.gui.WindowCloseEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.popups.AboutPopup;
-import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -45,6 +46,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SWMenuBar extends JMenuBar {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SWMenuBar.class);
     private static final List<Class<? extends BasicLookAndFeel>> THEMES;
 
     static {
@@ -83,9 +85,9 @@ public class SWMenuBar extends JMenuBar {
 
                 try {
                     guiManager.getSettingsManager().loadProfile(file);
-                    SettingsManager.LOGGER.info("Loaded profile!");
+                    LOGGER.info("Loaded profile!");
                 } catch (IOException ex) {
-                    SettingsManager.LOGGER.warn("Failed to load profile!", ex);
+                    LOGGER.warn("Failed to load profile!", ex);
                 }
             }, guiManager.getThreadPool());
         });
@@ -110,9 +112,9 @@ public class SWMenuBar extends JMenuBar {
 
                 try {
                     guiManager.getSettingsManager().saveProfile(Path.of(path));
-                    SettingsManager.LOGGER.info("Saved profile!");
+                    LOGGER.info("Saved profile!");
                 } catch (IOException ex) {
-                    SettingsManager.LOGGER.warn("Failed to save profile!", ex);
+                    LOGGER.warn("Failed to save profile!", ex);
                 }
             }, guiManager.getThreadPool());
         });
@@ -131,7 +133,7 @@ public class SWMenuBar extends JMenuBar {
         for (var theme : THEMES) {
             var themeItem = new JMenuItem(theme.getSimpleName());
             themeItem.addActionListener(e -> {
-                ThemeUtil.THEME_PROVIDER.setThemeClass(theme);
+                GUIClientProps.setString("theme", theme.getName());
                 SwingUtilities.invokeLater(ThemeUtil::setLookAndFeel);
             });
             themeSelector.add(themeItem);

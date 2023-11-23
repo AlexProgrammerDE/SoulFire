@@ -63,4 +63,13 @@ public class GUIClientProps {
         SETTINGS.setProperty(key, String.valueOf(value));
         saveSettings();
     }
+
+    public static String getString(String key, String def) {
+        return SETTINGS.getProperty(key, def);
+    }
+
+    public static void setString(String key, String value) {
+        SETTINGS.setProperty(key, value);
+        saveSettings();
+    }
 }

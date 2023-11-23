@@ -25,7 +25,7 @@ import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.gui.GUIClientProps;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
-import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
+import net.pistonmaster.serverwrecker.gui.ThemeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
