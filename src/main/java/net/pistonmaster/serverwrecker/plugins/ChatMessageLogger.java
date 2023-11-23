@@ -26,7 +26,6 @@ import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
@@ -64,7 +63,7 @@ public class ChatMessageLogger implements InternalExtension {
     }
 
     @EventHandler
-    public static void onPluginPanel(SettingsManagerInitEvent event) {
+    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(ChatMessageSettings.class);
     }
 

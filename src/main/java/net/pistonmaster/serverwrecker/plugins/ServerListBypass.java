@@ -62,7 +62,7 @@ public class ServerListBypass implements InternalExtension {
     }
 
     @EventHandler
-    public static void onPluginPanel(SettingsManagerInitEvent event) {
+    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(ServerListBypassSettings.class);
     }
 
@@ -75,13 +75,15 @@ public class ServerListBypass implements InternalExtension {
                 new String[]{"--server-list-bypass"},
                 false
         );
-        public static final IntProperty MIN_DELAY = BUILDER.ofInt("server-list-bypass-min-delay",
+        public static final IntProperty MIN_DELAY = BUILDER.ofInt(
+                "server-list-bypass-min-delay",
                 "Min delay (seconds)",
                 "Minimum delay between joining the server",
                 new String[]{"--server-list-bypass-min-delay"},
                 1
         );
-        public static final IntProperty MAX_DELAY = BUILDER.ofInt("server-list-bypass-max-delay",
+        public static final IntProperty MAX_DELAY = BUILDER.ofInt(
+                "server-list-bypass-max-delay",
                 "Max delay (seconds)",
                 "Maximum delay between joining the server",
                 new String[]{"--server-list-bypass-max-delay"},

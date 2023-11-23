@@ -26,6 +26,8 @@ import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundCus
 import com.google.common.collect.ImmutableList;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -35,20 +37,17 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSendingEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.settings.lib.property.ComboProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
+import net.pistonmaster.serverwrecker.settings.lib.property.StringProperty;
 import net.pistonmaster.serverwrecker.util.UUIDHelper;
 import net.pistonmaster.serverwrecker.util.VelocityConstants;
-import picocli.CommandLine;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Inject;
-import javax.swing.*;
-import java.awt.*;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -155,19 +154,16 @@ public class ForwardingBypass implements InternalExtension {
             return;
         }
 
-        if (!event.connection().settingsHolder().has(ForwardingBypassSettings.class)) {
-            return;
-        }
-
-        var settings = event.connection().settingsHolder().get(ForwardingBypassSettings.class);
+        var connection = event.connection();
+        var settingsHolder = connection.settingsHolder();
         var hostname = handshake.getHostname();
-        var uuid = event.connection().meta().getMinecraftAccount().getUUID();
+        var uuid = connection.meta().getMinecraftAccount().getUUID();
 
-        switch (settings.forwardingMode()) {
+        switch (settingsHolder.get(ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)) {
             case LEGACY -> event.setPacket(handshake
                     .withHostname(createLegacyForwardingAddress(uuid, getForwardedIp(), hostname)));
             case BUNGEE_GUARD -> event.setPacket(handshake
-                    .withHostname(createBungeeGuardForwardingAddress(uuid, getForwardedIp(), hostname, settings.secret())));
+                    .withHostname(createBungeeGuardForwardingAddress(uuid, getForwardedIp(), hostname, settingsHolder.get(ForwardingBypassSettings.SECRET))));
         }
     }
 
@@ -180,12 +176,10 @@ public class ForwardingBypass implements InternalExtension {
             return;
         }
 
-        if (!event.connection().settingsHolder().has(ForwardingBypassSettings.class)) {
-            return;
-        }
-
-        var settings = event.connection().settingsHolder().get(ForwardingBypassSettings.class);
-        if (settings.forwardingMode() != ForwardingBypassSettings.ForwardingMode.MODERN) {
+        var connection = event.connection();
+        var settingsHolder = connection.settingsHolder();
+        if (settingsHolder.get(ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)
+                != ForwardingBypassSettings.ForwardingMode.MODERN) {
             log.warn("Received modern forwarding request packet, but forwarding mode is not modern!");
             return;
         }
@@ -198,14 +192,14 @@ public class ForwardingBypass implements InternalExtension {
             }
         }
 
-        var forwardingData = createForwardingData(settings.secret(),
-                getForwardedIp(), event.connection(),
+        var forwardingData = createForwardingData(settingsHolder.get(ForwardingBypassSettings.SECRET),
+                getForwardedIp(), connection,
                 requestedForwardingVersion);
 
         var bytes = new byte[forwardingData.readableBytes()];
         forwardingData.readBytes(bytes);
         var response = new ServerboundCustomQueryAnswerPacket(loginPluginMessage.getMessageId(), bytes);
-        event.connection().session().send(response);
+        connection.session().send(response);
     }
 
     private String getForwardedIp() {
@@ -213,7 +207,7 @@ public class ForwardingBypass implements InternalExtension {
     }
 
     @EventHandler
-    public static void onPluginPanel(SettingsManagerInitEvent event) {
+    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(ForwardingBypassSettings.class);
     }
 
@@ -249,75 +243,24 @@ public class ForwardingBypass implements InternalExtension {
                 properties -> ImmutableList.<GameProfile.Property>builder().addAll(properties).add(property).build());
     }
 
-    private static class ForwardingBypassPanel extends NavigationItem implements SettingsDuplex<ForwardingBypassSettings> {
-        private final JComboBox<ForwardingBypassSettings.ForwardingMode> forwardingMode;
-        private final JTextField secret;
-
-        ForwardingBypassPanel(ServerWreckerServer serverWreckerServer) {
-            super();
-            serverWreckerServer.getSettingsManager().registerDuplex(ForwardingBypassSettings.class, this);
-
-            setLayout(new GridLayout(0, 2));
-
-            add(new JLabel("Send Client Settings: "));
-            forwardingMode = new JComboBox<>();
-            for (var mode : ForwardingBypassSettings.ForwardingMode.values()) {
-                forwardingMode.addItem(mode);
-            }
-            forwardingMode.setSelectedItem(ForwardingBypassSettings.DEFAULT_FORWARDING_MODE);
-            add(forwardingMode);
-
-            add(new JLabel("Forwarding secret: "));
-            secret = new JTextField(ForwardingBypassSettings.DEFAULT_SECRET);
-            add(secret);
-        }
-
-        @Override
-        public String getNavigationName() {
-            return "Forwarding Bypass";
-        }
-
-        @Override
-        public String getNavigationId() {
-            return "forwarding-bypass";
-        }
-
-        @Override
-        public void onSettingsChange(ForwardingBypassSettings settings) {
-            forwardingMode.setSelectedItem(settings.forwardingMode());
-            secret.setText(settings.secret());
-        }
-
-        @Override
-        public ForwardingBypassSettings collectSettings() {
-            return new ForwardingBypassSettings(
-                    (ForwardingBypassSettings.ForwardingMode) forwardingMode.getSelectedItem(),
-                    secret.getText()
-            );
-        }
-    }
-
-    private static class ForwardingBypassCommand implements SettingsProvider<ForwardingBypassSettings> {
-        @CommandLine.Option(names = {"--forwarding-bypass-mode"}, description = "Bypass backend proxy protocols such as of BungeeCord, BungeeGuard and Velocity")
-        private ForwardingBypassSettings.ForwardingMode forwardingMode = ForwardingBypassSettings.DEFAULT_FORWARDING_MODE;
-        @CommandLine.Option(names = {"--forwarding-bypass-secret"}, description = "Secret of the forwarding, used in BungeeGuard and Modern mode")
-        private String secret = ForwardingBypassSettings.DEFAULT_SECRET;
-
-        @Override
-        public ForwardingBypassSettings collectSettings() {
-            return new ForwardingBypassSettings(
-                    forwardingMode,
-                    secret
-            );
-        }
-    }
-
-    private record ForwardingBypassSettings(
-            ForwardingMode forwardingMode,
-            String secret
-    ) implements SettingsObject {
-        public static final ForwardingMode DEFAULT_FORWARDING_MODE = ForwardingMode.NONE;
-        public static final String DEFAULT_SECRET = "forwarding secret";
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    private static class ForwardingBypassSettings implements SettingsObject {
+        private static final Property.Builder BUILDER = Property.builder("forwarding-bypass");
+        public static final ComboProperty FORWARDING_MODE = BUILDER.ofEnum(
+                "forwarding-mode",
+                "Forwarding mode",
+                "Forwarding mode",
+                new String[]{"--forwarding-mode"},
+                ForwardingMode.values(),
+                ForwardingMode.NONE
+        );
+        public static final StringProperty SECRET = BUILDER.ofString(
+                "secret",
+                "Secret",
+                "Secret",
+                new String[]{"--secret"},
+                "forwarding secret"
+        );
 
         enum ForwardingMode {
             NONE,

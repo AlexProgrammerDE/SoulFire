@@ -21,8 +21,6 @@ package net.pistonmaster.serverwrecker.settings.lib;
 
 /**
  * Represents a settings object. A settings object has to be json serializable.
- *
- * @see SettingsManager#registerProvider(Class, SettingsProvider)
  */
 public interface SettingsObject {
 }

@@ -49,8 +49,8 @@ public sealed interface Property permits BooleanProperty, ComboProperty, IntProp
             return new ComboProperty(namespace, name, uiDescription, cliDescription, cliNames, values, defaultValue);
         }
 
-        public ComboProperty ofEnum(String name, String uiDescription, String cliDescription, String[] cliNames, Enum<?>[] values, int defaultValue) {
-            return new ComboProperty(namespace, name, uiDescription, cliDescription, cliNames, ComboProperty.ComboOption.fromEnum(values), defaultValue);
+        public <T extends Enum<?>> ComboProperty ofEnum(String name, String uiDescription, String cliDescription, String[] cliNames, T[] values, T defaultValue) {
+            return new ComboProperty(namespace, name, uiDescription, cliDescription, cliNames, ComboProperty.ComboOption.fromEnum(values), defaultValue.ordinal());
         }
     }
 }

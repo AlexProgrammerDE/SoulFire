@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.proxy;
 
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +28,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class ProxyRegistry implements SettingsDuplex<ProxyList> {
+public class ProxyRegistry implements SettingsListener<T>, net.pistonmaster.serverwrecker.settings.lib.SettingsProvider<ProxyList> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyRegistry.class);
     private final List<SWProxy> proxies = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();

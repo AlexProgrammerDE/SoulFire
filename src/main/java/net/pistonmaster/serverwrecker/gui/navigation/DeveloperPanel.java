@@ -25,7 +25,6 @@ import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.LogPanel;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -33,7 +32,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 
-public class DeveloperPanel extends NavigationItem implements SettingsDuplex<DevSettings> {
+public class DeveloperPanel extends NavigationItem implements SettingsListener<T>, net.pistonmaster.serverwrecker.settings.lib.SettingsProvider<DevSettings> {
     private final JCheckBox viaDebug = new JCheckBox();
     private final JCheckBox nettyDebug = new JCheckBox();
     private final JCheckBox gRPCDebug = new JCheckBox();

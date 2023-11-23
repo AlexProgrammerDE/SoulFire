@@ -23,22 +23,17 @@ import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundCu
 import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSentEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
-import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
-import picocli.CommandLine;
-
-import javax.swing.*;
-import java.awt.*;
+import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
+import net.pistonmaster.serverwrecker.settings.lib.property.StringProperty;
 
 public class ClientBrand implements InternalExtension {
     @Override
@@ -49,21 +44,18 @@ public class ClientBrand implements InternalExtension {
 
     public static void onPacket(SWPacketSentEvent event) {
         if (event.packet() instanceof ServerboundLoginAcknowledgedPacket) {
-            if (!event.connection().settingsHolder().has(ClientBrandSettings.class)) {
-                return;
-            }
+            var connection = event.connection();
+            var settingsHolder = connection.settingsHolder();
 
-            var clientBrandSettings = event.connection().settingsHolder().get(ClientBrandSettings.class);
-
-            if (!clientBrandSettings.sendClientBrand()) {
+            if (!settingsHolder.get(ClientBrandSettings.SEND_CLIENT_BRAND)) {
                 return;
             }
 
             var buf = Unpooled.buffer();
-            event.connection().session().getCodecHelper()
-                    .writeString(buf, clientBrandSettings.clientBrand());
+            connection.session().getCodecHelper()
+                    .writeString(buf, settingsHolder.get(ClientBrandSettings.CLIENT_BRAND));
 
-            event.connection().session().send(new ServerboundCustomPayloadPacket(
+            connection.session().send(new ServerboundCustomPayloadPacket(
                     "minecraft:brand",
                     ByteBufUtil.getBytes(buf)
             ));
@@ -71,74 +63,24 @@ public class ClientBrand implements InternalExtension {
     }
 
     @EventHandler
-    public static void onPluginPanel(SettingsManagerInitEvent event) {
+    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(ClientBrandSettings.class);
     }
 
-    private static class ClientBrandPanel extends NavigationItem implements SettingsDuplex<ClientBrandSettings> {
-        private final JCheckBox sendClientBrand;
-        private final JTextField clientBrand;
-
-        ClientBrandPanel(ServerWreckerServer serverWreckerServer) {
-            super();
-            serverWreckerServer.getSettingsManager().registerDuplex(ClientBrandSettings.class, this);
-
-            setLayout(new GridLayout(0, 2));
-
-            add(new JLabel("Send Client Brand: "));
-            sendClientBrand = new PresetJCheckBox(ClientBrandSettings.DEFAULT_SEND_CLIENT_BRAND);
-            add(sendClientBrand);
-
-            add(new JLabel("Client Brand: "));
-            clientBrand = new JTextField(ClientBrandSettings.DEFAULT_CLIENT_BRAND);
-            add(clientBrand);
-        }
-
-        @Override
-        public String getNavigationName() {
-            return "Client Brand";
-        }
-
-        @Override
-        public String getNavigationId() {
-            return "client-brand";
-        }
-
-        @Override
-        public void onSettingsChange(ClientBrandSettings settings) {
-            sendClientBrand.setSelected(settings.sendClientBrand());
-            clientBrand.setText(settings.clientBrand());
-        }
-
-        @Override
-        public ClientBrandSettings collectSettings() {
-            return new ClientBrandSettings(
-                    sendClientBrand.isSelected(),
-                    clientBrand.getText()
-            );
-        }
-    }
-
-    private static class ClientBrandCommand implements SettingsProvider<ClientBrandSettings> {
-        @CommandLine.Option(names = {"--send-client-brand"}, description = "Send client brand")
-        private boolean sendClientBrand = ClientBrandSettings.DEFAULT_SEND_CLIENT_BRAND;
-        @CommandLine.Option(names = {"--client-brand"}, description = "Client brand")
-        private String clientBrand = ClientBrandSettings.DEFAULT_CLIENT_BRAND;
-
-        @Override
-        public ClientBrandSettings collectSettings() {
-            return new ClientBrandSettings(
-                    sendClientBrand,
-                    clientBrand
-            );
-        }
-    }
-
-    private record ClientBrandSettings(
-            boolean sendClientBrand,
-            String clientBrand
-    ) implements SettingsObject {
-        public static final boolean DEFAULT_SEND_CLIENT_BRAND = true;
-        public static final String DEFAULT_CLIENT_BRAND = "vanilla";
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    private static class ClientBrandSettings implements SettingsObject {
+        private static final Property.Builder BUILDER = Property.builder("client-brand");
+        public static final BooleanProperty SEND_CLIENT_BRAND = BUILDER.ofBoolean("send-client-brand",
+                "Send client brand",
+                "Send client brand",
+                new String[]{"--send-client-brand"},
+                true
+        );
+        public static final StringProperty CLIENT_BRAND = BUILDER.ofString("client-brand",
+                "Client brand",
+                "Client brand",
+                new String[]{"--client-brand"},
+                "vanilla"
+        );
     }
 }

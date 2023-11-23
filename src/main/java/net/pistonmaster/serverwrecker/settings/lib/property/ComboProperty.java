@@ -32,5 +32,7 @@ public record ComboProperty(
             String id,
             String displayName
     ) {
+        public static <T> ComboOption[] fromEnum(T[] values) {
+        }
     }
 }

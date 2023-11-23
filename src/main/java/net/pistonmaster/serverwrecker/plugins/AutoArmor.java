@@ -126,7 +126,7 @@ public class AutoArmor implements InternalExtension {
     }
 
     @EventHandler
-    public static void onPluginPanel(SettingsManagerInitEvent event) {
+    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(AutoArmorSettings.class);
     }
 

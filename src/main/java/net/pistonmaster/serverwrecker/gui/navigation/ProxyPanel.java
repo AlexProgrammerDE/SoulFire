@@ -27,7 +27,6 @@ import net.pistonmaster.serverwrecker.gui.popups.ImportTextDialog;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +37,7 @@ import java.awt.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySettings> {
+public class ProxyPanel extends NavigationItem implements SettingsListener<T>, net.pistonmaster.serverwrecker.settings.lib.SettingsProvider<ProxySettings> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyPanel.class);
     private final JSpinner botsPerProxy = new JSpinner();
 
@@ -170,17 +169,5 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
     @Override
     public String getNavigationId() {
         return "proxy-menu";
-    }
-
-    @Override
-    public void onSettingsChange(ProxySettings settings) {
-        botsPerProxy.setValue(settings.botsPerProxy());
-    }
-
-    @Override
-    public ProxySettings collectSettings() {
-        return new ProxySettings(
-                (int) botsPerProxy.getValue()
-        );
     }
 }

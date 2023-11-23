@@ -46,8 +46,6 @@ import java.util.*;
 
 public class SettingsManager {
     public static final Logger LOGGER = LoggerFactory.getLogger(SettingsManager.class);
-    private final List<ListenerRegistration<?>> listeners = new ArrayList<>();
-    private final List<ProviderRegistration<?>> providers = new ArrayList<>();
     private final Multimap<String, Property> propertyMap = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
     // Used to read & write the settings file
     private final Gson dumpGson = new GsonBuilder().setPrettyPrinting().create();
@@ -67,7 +65,7 @@ public class SettingsManager {
 
     }
 
-    public <T extends Property> void registerListener(String propertyKey, SettingsListener<T> listener) {
+    public <T extends Property> void registerListener(String propertyKey, SettingsListener listener) {
         listeners.add(new ListenerRegistration<>(clazz, listener));
     }
 
@@ -76,16 +74,6 @@ public class SettingsManager {
     }
 
     public SettingsHolder collectSettings() {
-        var settingsHolder = new SettingsHolder(providers.stream()
-                .map(ProviderRegistration::provider)
-                .map(SettingsProvider::collectSettings)
-                .toList());
-
-        for (var clazz : propertyMap.values()) {
-            if (!settingsHolder.has(clazz)) {
-                throw new IllegalArgumentException("No settings found for " + clazz.getSimpleName());
-            }
-        }
 
         return settingsHolder;
     }
@@ -141,12 +129,6 @@ public class SettingsManager {
 
     public List<ClientPluginSettingsPage> exportSettingsMeta() {
 
-    }
-
-    private record ListenerRegistration<T extends SettingsObject>(Class<T> clazz, SettingsListener<T> listener) {
-    }
-
-    private record ProviderRegistration<T extends SettingsObject>(Class<T> clazz, SettingsProvider<T> provider) {
     }
 
     private static class ProtocolVersionAdapter implements JsonSerializer<ProtocolVersion>, JsonDeserializer<ProtocolVersion> {

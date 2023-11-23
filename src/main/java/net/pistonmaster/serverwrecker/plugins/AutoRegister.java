@@ -25,7 +25,6 @@ import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.PluginPanelInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
@@ -40,35 +39,36 @@ public class AutoRegister implements InternalExtension {
     }
 
     public static void onChat(ChatMessageReceiveEvent event) {
-        var settingsHolder = event.connection().settingsHolder();
-        var plainMessage = event.parseToText();
-        if (!autoRegisterSettings.autoRegister()) {
+        var connection = event.connection();
+        var settingsHolder = connection.settingsHolder();
+        if (!settingsHolder.get(AutoRegisterSettings.AUTO_REGISTER)) {
             return;
         }
 
-        var password = autoRegisterSettings.passwordFormat();
+        var plainMessage = event.parseToText();
+        var password = settingsHolder.get(AutoRegisterSettings.PASSWORD_FORMAT);
 
         // TODO: Add more password options
         if (plainMessage.contains("/register")) {
-            event.connection().botControl()
-                    .sendMessage(autoRegisterSettings.registerCommand().replace("%password%", password));
+            var registerCommand = settingsHolder.get(AutoRegisterSettings.REGISTER_COMMAND);
+            connection.botControl().sendMessage(registerCommand.replace("%password%", password));
         } else if (plainMessage.contains("/login")) {
-            event.connection().botControl()
-                    .sendMessage(autoRegisterSettings.loginCommand().replace("%password%", password));
+            var loginCommand = settingsHolder.get(AutoRegisterSettings.LOGIN_COMMAND);
+            connection.botControl().sendMessage(loginCommand.replace("%password%", password));
         } else if (plainMessage.contains("/captcha")) {
+            var captchaCommand = settingsHolder.get(AutoRegisterSettings.CAPTCHA_COMMAND);
             var split = plainMessage.split(" ");
 
             for (var i = 0; i < split.length; i++) {
                 if (split[i].equals("/captcha")) {
-                    event.connection().botControl()
-                            .sendMessage(autoRegisterSettings.captchaCommand().replace("%captcha%", split[i + 1]));
+                    connection.botControl().sendMessage(captchaCommand.replace("%captcha%", split[i + 1]));
                 }
             }
         }
     }
 
     @EventHandler
-    public static void onPluginPanel(SettingsManagerInitEvent event) {
+    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(AutoRegisterSettings.class);
     }
 

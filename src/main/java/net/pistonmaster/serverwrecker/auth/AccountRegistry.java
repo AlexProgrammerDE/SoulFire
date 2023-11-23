@@ -27,7 +27,6 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.auth.service.*;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +35,7 @@ import java.io.IOException;
 import java.util.*;
 
 @RequiredArgsConstructor
-public class AccountRegistry implements SettingsDuplex<AccountList> {
+public class AccountRegistry implements SettingsListener<T>, net.pistonmaster.serverwrecker.settings.lib.SettingsProvider<AccountList> {
     public static final Logger LOGGER = LoggerFactory.getLogger(AccountRegistry.class);
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final List<MinecraftAccount> accounts = new ArrayList<>();

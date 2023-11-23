@@ -28,7 +28,6 @@ import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.gui.popups.ImportTextDialog;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ import java.awt.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class AccountPanel extends NavigationItem implements SettingsDuplex<AccountSettings> {
+public class AccountPanel extends NavigationItem implements SettingsListener<T>, net.pistonmaster.serverwrecker.settings.lib.SettingsProvider<AccountSettings> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountPanel.class);
     private final JTextField nameFormat = new JTextField(AccountSettings.DEFAULT_NAME_FORMAT);
     private final JCheckBox shuffleAccounts = new PresetJCheckBox(AccountSettings.DEFAULT_SHUFFLE_ACCOUNTS);

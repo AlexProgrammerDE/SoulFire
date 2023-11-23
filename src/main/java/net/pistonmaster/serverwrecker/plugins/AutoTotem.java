@@ -88,7 +88,7 @@ public class AutoTotem implements InternalExtension {
     }
 
     @EventHandler
-    public static void onPluginPanel(SettingsManagerInitEvent event) {
+    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(AutoTotemSettings.class);
     }
 

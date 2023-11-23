@@ -20,17 +20,16 @@
 package net.pistonmaster.serverwrecker.settings.lib;
 
 import it.unimi.dsi.fastutil.objects.*;
-import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
-import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
-import net.pistonmaster.serverwrecker.settings.lib.property.StringProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.*;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 public record SettingsHolder(
-        Object2IntMap<IntProperty> intProperties,
-        Object2BooleanMap<BooleanProperty> booleanProperties,
-        Object2ObjectMap<StringProperty, String> stringProperties
+        Object2IntMap<PropertyKey> intProperties,
+        Object2BooleanMap<PropertyKey> booleanProperties,
+        Object2ObjectMap<PropertyKey, String> stringProperties
 ) {
     public static final SettingsHolder EMPTY = new SettingsHolder(
             Object2IntMaps.emptyMap(),
@@ -39,14 +38,22 @@ public record SettingsHolder(
     );
 
     public int get(IntProperty property) {
-        return intProperties.getOrDefault(property, property.defaultValue());
+        return intProperties.getOrDefault(property.propertyKey(), property.defaultValue());
     }
 
     public boolean get(BooleanProperty property) {
-        return booleanProperties.getOrDefault(property, property.defaultValue());
+        return booleanProperties.getOrDefault(property.propertyKey(), property.defaultValue());
     }
 
     public String get(StringProperty property) {
-        return stringProperties.getOrDefault(property, property.defaultValue());
+        return stringProperties.getOrDefault(property.propertyKey(), property.defaultValue());
+    }
+
+    public <T> T get(ComboProperty property, Function<String, T> converter) {
+        return converter.apply(stringProperties.getOrDefault(property.propertyKey(), property.options()[property.defaultValue()].id()));
+    }
+
+    public <T extends Enum<T>> T get(ComboProperty property, Class<T> clazz) {
+        return get(property, s -> Enum.valueOf(clazz, s));
     }
 }
