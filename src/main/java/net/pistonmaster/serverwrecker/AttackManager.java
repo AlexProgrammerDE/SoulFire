@@ -34,7 +34,6 @@ import net.pistonmaster.serverwrecker.api.event.EventExceptionHandler;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerAttackEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackEndedEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackStartEvent;
-import net.pistonmaster.serverwrecker.auth.AccountList;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.common.AttackState;
@@ -42,7 +41,6 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.netty.ResolveUtil;
 import net.pistonmaster.serverwrecker.protocol.netty.SWNettyHelper;
-import net.pistonmaster.serverwrecker.proxy.ProxyList;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
@@ -83,13 +81,8 @@ public class AttackManager {
             throw new IllegalStateException("Attack is already running");
         }
 
-        var accountListSettings = settingsHolder.get(AccountList.class);
-        var accounts = new ArrayList<>(accountListSettings.accounts()
-                .stream().filter(MinecraftAccount::enabled).toList());
-
-        var proxyListSettings = settingsHolder.get(ProxyList.class);
-        var proxies = new ArrayList<>(proxyListSettings.proxies()
-                .stream().filter(SWProxy::enabled).toList());
+        var accounts = new ArrayList<>(settingsHolder.accounts());
+        var proxies = new ArrayList<>(settingsHolder.proxies());
 
         ServerWreckerServer.setupLoggingAndVia(settingsHolder);
 
@@ -140,7 +133,7 @@ public class AttackManager {
         var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
         for (var botId = 1; botId <= botAmount; botId++) {
             var proxyData = getProxy(botsPerProxy, proxyUseMap).orElse(null);
-            var minecraftAccount = getAccount(accountSettings, accounts, botId);
+            var minecraftAccount = getAccount(settingsHolder, accounts, botId);
 
             // AuthData will be used internally instead of the MCProtocol data
             var protocol = new MinecraftProtocol(EMPTY_GAME_PROFILE, null);
@@ -202,9 +195,9 @@ public class AttackManager {
         });
     }
 
-    private static MinecraftAccount getAccount(AccountSettings accountSettings, List<MinecraftAccount> accounts, int botId) {
+    private static MinecraftAccount getAccount(SettingsHolder settingsHolder, List<MinecraftAccount> accounts, int botId) {
         if (accounts.isEmpty()) {
-            return new MinecraftAccount(String.format(accountSettings.nameFormat(), botId));
+            return new MinecraftAccount(String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), botId));
         }
 
         return accounts.remove(0);

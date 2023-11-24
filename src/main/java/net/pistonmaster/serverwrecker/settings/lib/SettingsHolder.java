@@ -20,8 +20,11 @@
 package net.pistonmaster.serverwrecker.settings.lib;
 
 import it.unimi.dsi.fastutil.objects.*;
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.lib.property.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -29,12 +32,16 @@ import java.util.function.Function;
 public record SettingsHolder(
         Object2IntMap<PropertyKey> intProperties,
         Object2BooleanMap<PropertyKey> booleanProperties,
-        Object2ObjectMap<PropertyKey, String> stringProperties
+        Object2ObjectMap<PropertyKey, String> stringProperties,
+        List<MinecraftAccount> accounts,
+        List<SWProxy> proxies
 ) {
     public static final SettingsHolder EMPTY = new SettingsHolder(
             Object2IntMaps.emptyMap(),
             Object2BooleanMaps.emptyMap(),
-            Object2ObjectMaps.emptyMap()
+            Object2ObjectMaps.emptyMap(),
+            List.of(),
+            List.of()
     );
 
     public int get(IntProperty property) {

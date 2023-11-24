@@ -19,12 +19,15 @@
  */
 package net.pistonmaster.serverwrecker.auth;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
 import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.settings.lib.property.StringProperty;
 
-public record AccountSettings(String nameFormat, boolean shuffleAccounts) implements SettingsObject {
+@NoArgsConstructor(access = AccessLevel.NONE)
+public class AccountSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("account");
     public static final StringProperty NAME_FORMAT = BUILDER.ofString(
             "nameFormat",
