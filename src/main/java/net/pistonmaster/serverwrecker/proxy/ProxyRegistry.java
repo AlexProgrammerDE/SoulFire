@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class ProxyRegistry implements SettingsListener<T>, net.pistonmaster.serverwrecker.settings.lib.SettingsProvider<ProxyList> {
+public class ProxyRegistry {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyRegistry.class);
     private final List<SWProxy> proxies = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
@@ -88,17 +88,6 @@ public class ProxyRegistry implements SettingsListener<T>, net.pistonmaster.serv
     public void setProxies(List<SWProxy> proxies) {
         this.proxies.clear();
         this.proxies.addAll(proxies);
-    }
-
-    @Override
-    public void onSettingsChange(ProxyList settings) {
-        proxies.clear();
-        proxies.addAll(settings.proxies());
-    }
-
-    @Override
-    public ProxyList collectSettings() {
-        return new ProxyList(List.copyOf(proxies));
     }
 
     public void addLoadHook(Runnable runnable) {

@@ -58,15 +58,6 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Option(names = {"-s", "--start"}, description = "Whether to start the attack automatically")
     private boolean start;
 
-    @Option(names = {"--bots-per-proxy"}, description = "Amount of bots that can be on a single proxy")
-    private int botsPerProxy = ProxySettings.DEFAULT_BOTS_PER_PROXY;
-
-    @Option(names = {"--name-format"}, description = "Format for bot names. allows integer placeholder '%%d'")
-    private String nameFormat = AccountSettings.DEFAULT_NAME_FORMAT;
-
-    @Option(names = {"--shuffle-accounts"}, description = "Shuffle accounts before connecting")
-    private boolean shuffleAccounts = AccountSettings.DEFAULT_SHUFFLE_ACCOUNTS;
-
     @Option(names = {"--account-file"}, description = "File to load accounts from")
     private Path accountFile;
 
@@ -107,40 +98,6 @@ public class SWCommandDefinition implements Callable<Integer> {
         var gRPCPort = serverWreckerServer.getRpcServer().getPort();
         var rpcClient = new RPCClient(gRPCHost, gRPCPort, serverWreckerServer.generateAdminJWT());
         SWTerminalConsole.setupTerminalConsole(serverWreckerServer.getThreadPool(), serverWreckerServer.getShutdownManager(), rpcClient);
-
-        serverWreckerServer.getSettingsManager().registerProvider(BotSettings.class,
-                () -> new BotSettings(
-                        host,
-                        port,
-                        amount,
-                        minJoinDelay,
-                        maxJoinDelay,
-                        ProtocolVersion.getClosest(version),
-                        readTimeout,
-                        writeTimout,
-                        connectTimeout,
-                        trySrv,
-                        concurrentConnects
-                ));
-
-        serverWreckerServer.getSettingsManager().registerProvider(DevSettings.class,
-                () -> new DevSettings(
-                        viaDebug,
-                        nettyDebug,
-                        gRPCDebug,
-                        coreDebug
-                ));
-
-        serverWreckerServer.getSettingsManager().registerProvider(AccountSettings.class,
-                () -> new AccountSettings(
-                        nameFormat,
-                        shuffleAccounts
-                ));
-
-        serverWreckerServer.getSettingsManager().registerProvider(ProxySettings.class,
-                () -> new ProxySettings(
-                        botsPerProxy
-                ));
 
         if (accountFile != null && authType != null) {
             try {

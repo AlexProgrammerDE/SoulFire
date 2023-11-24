@@ -48,6 +48,7 @@ import com.github.steveice10.packetlib.event.session.ConnectedEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.viaversion.viaversion.api.connection.UserConnection;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.SWConstants;
@@ -74,7 +75,6 @@ public class SWBaseListener extends SessionAdapter {
         var protocol = (MinecraftProtocol) session.getPacketProtocol();
         if (protocol.getState() == ProtocolState.LOGIN) {
             if (packet instanceof ClientboundHelloPacket helloPacket) {
-                var botSettings = botConnection.settingsHolder().get(BotSettings.class);
                 var minecraftAccount = botConnection.meta().getMinecraftAccount();
                 UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
 
@@ -84,7 +84,7 @@ public class SWBaseListener extends SessionAdapter {
                 }
 
                 var auth = authSupport;
-                var isLegacy = SWConstants.isLegacy(botSettings.protocolVersion());
+                var isLegacy = SWConstants.isLegacy(botConnection.settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest));
                 if (auth && isLegacy) {
                     auth = Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
                 }
@@ -164,9 +164,9 @@ public class SWBaseListener extends SessionAdapter {
     @Override
     public void connected(ConnectedEvent event) {
         var protocol = (MinecraftProtocol) event.getSession().getPacketProtocol();
-        var botSettings = botConnection.settingsHolder().get(BotSettings.class);
-        var host = botSettings.host();
-        var port = botSettings.port();
+        var settingsHolder = botConnection.settingsHolder();
+        var host = settingsHolder.get(BotSettings.HOST);
+        var port = settingsHolder.get(BotSettings.PORT);
 
         event.getSession().send(new ClientIntentionPacket(
                 protocol.getCodec().getProtocolVersion(),

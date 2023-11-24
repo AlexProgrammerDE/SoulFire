@@ -35,7 +35,7 @@ import java.io.IOException;
 import java.util.*;
 
 @RequiredArgsConstructor
-public class AccountRegistry implements SettingsListener<T>, net.pistonmaster.serverwrecker.settings.lib.SettingsProvider<AccountList> {
+public class AccountRegistry {
     public static final Logger LOGGER = LoggerFactory.getLogger(AccountRegistry.class);
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final List<MinecraftAccount> accounts = new ArrayList<>();
@@ -205,17 +205,6 @@ public class AccountRegistry implements SettingsListener<T>, net.pistonmaster.se
         return accounts.stream()
                 .filter(MinecraftAccount::enabled)
                 .toList();
-    }
-
-    @Override
-    public void onSettingsChange(AccountList settings) {
-        accounts.clear();
-        accounts.addAll(settings.accounts());
-    }
-
-    @Override
-    public AccountList collectSettings() {
-        return new AccountList(List.copyOf(accounts));
     }
 
     public void addLoadHook(Runnable hook) {

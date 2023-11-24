@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -57,7 +58,7 @@ public class GUIManager {
     private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
     private final AccountRegistry accountRegistry = new AccountRegistry();
     private final ProxyRegistry proxyRegistry = new ProxyRegistry();
-    private final SettingsManager settingsManager = new SettingsManager();
+    private final SettingsManager settingsManager = new SettingsManager(List.of());
 
     public GUIManager(ServerWreckerServer serverWreckerServer, RPCClient rpcClient) {
         this.rpcClient = rpcClient;

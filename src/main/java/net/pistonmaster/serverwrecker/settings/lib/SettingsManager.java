@@ -67,10 +67,6 @@ public class SettingsManager {
         var pageName = hidden ? "" : pluginSettings.pageName();
     }
 
-    public <T extends Property> void registerListener(String propertyKey, SettingsListener listener) {
-        listeners.add(new ListenerRegistration<>(clazz, listener));
-    }
-
     public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {
         providers.add(new ProviderRegistration<>(clazz, provider));
     }
