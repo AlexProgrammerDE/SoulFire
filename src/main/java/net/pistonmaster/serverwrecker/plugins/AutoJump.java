@@ -34,12 +34,6 @@ import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
 import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 
 public class AutoJump implements InternalExtension {
-    @Override
-    public void onLoad() {
-        ServerWreckerAPI.registerListeners(AutoJump.class);
-        PluginHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoJump::onJoined);
-    }
-
     public static void onJoined(BotJoinedEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
@@ -64,6 +58,12 @@ public class AutoJump implements InternalExtension {
     @EventHandler
     public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(AutoJumpSettings.class);
+    }
+
+    @Override
+    public void onLoad() {
+        ServerWreckerAPI.registerListeners(AutoJump.class);
+        PluginHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoJump::onJoined);
     }
 
     @NoArgsConstructor(access = AccessLevel.NONE)

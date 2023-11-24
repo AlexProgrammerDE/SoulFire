@@ -24,7 +24,6 @@ import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.LogPanel;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
-import net.pistonmaster.serverwrecker.settings.DevSettings;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -37,7 +36,7 @@ public class DeveloperPanel extends NavigationItem {
     public DeveloperPanel(GUIManager guiManager, LogPanel logPanel, CardsContainer cardsContainer) {
         setLayout(new GridLayout(0, 2));
 
-        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace("dev"));
+        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace("dev"), guiManager.getSettingsManager());
 
         add(new JLabel("Save Log:"));
         var saveLog = new JButton("Save Log");

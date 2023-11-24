@@ -36,12 +36,6 @@ import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.settings.lib.property.StringProperty;
 
 public class ClientBrand implements InternalExtension {
-    @Override
-    public void onLoad() {
-        ServerWreckerAPI.registerListeners(ClientBrand.class);
-        PluginHelper.registerBotEventConsumer(SWPacketSentEvent.class, ClientBrand::onPacket);
-    }
-
     public static void onPacket(SWPacketSentEvent event) {
         if (event.packet() instanceof ServerboundLoginAcknowledgedPacket) {
             var connection = event.connection();
@@ -65,6 +59,12 @@ public class ClientBrand implements InternalExtension {
     @EventHandler
     public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(ClientBrandSettings.class);
+    }
+
+    @Override
+    public void onLoad() {
+        ServerWreckerAPI.registerListeners(ClientBrand.class);
+        PluginHelper.registerBotEventConsumer(SWPacketSentEvent.class, ClientBrand::onPacket);
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)

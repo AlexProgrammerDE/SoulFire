@@ -40,9 +40,10 @@ public class CardsContainer extends JPanel {
     private final GUIManager guiManager;
     @Getter
     private final List<ClientPluginSettingsPage> pluginPages = new ArrayList<>();
+    private final CardLayout cardLayout = new CardLayout();
 
     public void create() {
-        setLayout(new CardLayout());
+        setLayout(cardLayout);
 
         // Add bot settings
         panels.add(new GeneratedPanel(guiManager.getSettingsManager(), getByNamespace("bot")));
@@ -80,7 +81,6 @@ public class CardsContainer extends JPanel {
     }
 
     public void show(String id) {
-        var cardLayout = (CardLayout) getLayout();
         cardLayout.show(this, id);
     }
 }

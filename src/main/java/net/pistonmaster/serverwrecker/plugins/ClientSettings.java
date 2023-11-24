@@ -40,12 +40,6 @@ import java.util.ArrayList;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientSettings implements InternalExtension {
-    @Override
-    public void onLoad() {
-        ServerWreckerAPI.registerListeners(ClientSettings.class);
-        PluginHelper.registerBotEventConsumer(SWPacketSentEvent.class, ClientSettings::onPacket);
-    }
-
     public static void onPacket(SWPacketSentEvent event) {
         if (event.packet() instanceof ServerboundLoginAcknowledgedPacket) {
             var connection = event.connection();
@@ -93,6 +87,12 @@ public class ClientSettings implements InternalExtension {
     @EventHandler
     public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(ClientSettingsSettings.class);
+    }
+
+    @Override
+    public void onLoad() {
+        ServerWreckerAPI.registerListeners(ClientSettings.class);
+        PluginHelper.registerBotEventConsumer(SWPacketSentEvent.class, ClientSettings::onPacket);
     }
 
     @NoArgsConstructor(access = AccessLevel.NONE)

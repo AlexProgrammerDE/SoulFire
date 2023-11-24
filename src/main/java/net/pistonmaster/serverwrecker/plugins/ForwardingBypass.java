@@ -142,6 +142,11 @@ public class ForwardingBypass implements InternalExtension {
         }
     }
 
+    @EventHandler
+    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
+        event.settingsManager().addClass(ForwardingBypassSettings.class);
+    }
+
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(ForwardingBypass.class);
@@ -204,11 +209,6 @@ public class ForwardingBypass implements InternalExtension {
 
     private String getForwardedIp() {
         return "127.0.0.1";
-    }
-
-    @EventHandler
-    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
-        event.settingsManager().addClass(ForwardingBypassSettings.class);
     }
 
     /*

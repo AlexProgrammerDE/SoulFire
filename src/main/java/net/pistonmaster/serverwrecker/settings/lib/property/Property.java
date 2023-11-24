@@ -20,16 +20,16 @@
 package net.pistonmaster.serverwrecker.settings.lib.property;
 
 public sealed interface Property permits BooleanProperty, ComboProperty, IntProperty, StringProperty {
+    static Builder builder(String namespace) {
+        return new Builder(namespace);
+    }
+
     String namespace();
 
     String name();
 
     default PropertyKey propertyKey() {
         return new PropertyKey(namespace(), name());
-    }
-
-    static Builder builder(String namespace) {
-        return new Builder(namespace);
     }
 
     record Builder(String namespace) {

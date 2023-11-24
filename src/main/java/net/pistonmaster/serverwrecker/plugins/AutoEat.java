@@ -40,12 +40,6 @@ import net.pistonmaster.serverwrecker.util.TimeUtil;
 import java.util.concurrent.TimeUnit;
 
 public class AutoEat implements InternalExtension {
-    @Override
-    public void onLoad() {
-        ServerWreckerAPI.registerListeners(AutoEat.class);
-        PluginHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoEat::onJoined);
-    }
-
     public static void onJoined(BotJoinedEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
@@ -140,6 +134,12 @@ public class AutoEat implements InternalExtension {
     @EventHandler
     public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(AutoEatSettings.class);
+    }
+
+    @Override
+    public void onLoad() {
+        ServerWreckerAPI.registerListeners(AutoEat.class);
+        PluginHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoEat::onJoined);
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)

@@ -40,12 +40,6 @@ import net.pistonmaster.serverwrecker.util.RandomUtil;
 import java.util.concurrent.TimeUnit;
 
 public class AutoRespawn implements InternalExtension {
-    @Override
-    public void onLoad() {
-        ServerWreckerAPI.registerListeners(AutoRespawn.class);
-        PluginHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, AutoRespawn::onPacket);
-    }
-
     public static void onPacket(SWPacketReceiveEvent event) {
         if (event.getPacket() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
             var settingsHolder = event.connection().settingsHolder();
@@ -66,6 +60,12 @@ public class AutoRespawn implements InternalExtension {
     @EventHandler
     public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(AutoRespawnSettings.class);
+    }
+
+    @Override
+    public void onLoad() {
+        ServerWreckerAPI.registerListeners(AutoRespawn.class);
+        PluginHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, AutoRespawn::onPacket);
     }
 
     @NoArgsConstructor(access = AccessLevel.NONE)

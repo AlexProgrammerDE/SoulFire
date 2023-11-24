@@ -43,12 +43,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class AutoArmor implements InternalExtension {
-    @Override
-    public void onLoad() {
-        ServerWreckerAPI.registerListeners(AutoArmor.class);
-        PluginHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoArmor::onJoined);
-    }
-
     private static void putOn(InventoryManager inventoryManager, PlayerInventoryContainer inventory, ContainerSlot targetSlot, ArmorType armorType) {
         var bestItem = Arrays.stream(inventory.getStorage()).filter(s -> {
             if (s.item() == null) {
@@ -128,6 +122,12 @@ public class AutoArmor implements InternalExtension {
     @EventHandler
     public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(AutoArmorSettings.class);
+    }
+
+    @Override
+    public void onLoad() {
+        ServerWreckerAPI.registerListeners(AutoArmor.class);
+        PluginHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoArmor::onJoined);
     }
 
     @NoArgsConstructor(access = AccessLevel.NONE)

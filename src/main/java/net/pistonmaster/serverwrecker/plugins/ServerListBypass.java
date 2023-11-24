@@ -38,12 +38,6 @@ import net.pistonmaster.serverwrecker.util.TimeUtil;
 import java.util.concurrent.TimeUnit;
 
 public class ServerListBypass implements InternalExtension {
-    @Override
-    public void onLoad() {
-        ServerWreckerAPI.registerListeners(ServerListBypass.class);
-        PluginHelper.registerAttackEventConsumer(PreBotConnectEvent.class, ServerListBypass::onPreConnect);
-    }
-
     public static void onPreConnect(PreBotConnectEvent event) {
         var connection = event.connection();
         if (connection.meta().getTargetState() == ProtocolState.STATUS) {
@@ -64,6 +58,12 @@ public class ServerListBypass implements InternalExtension {
     @EventHandler
     public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(ServerListBypassSettings.class);
+    }
+
+    @Override
+    public void onLoad() {
+        ServerWreckerAPI.registerListeners(ServerListBypass.class);
+        PluginHelper.registerAttackEventConsumer(PreBotConnectEvent.class, ServerListBypass::onPreConnect);
     }
 
     @NoArgsConstructor(access = AccessLevel.NONE)

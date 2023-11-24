@@ -76,6 +76,30 @@ public class AttackManager {
     @Setter
     private AttackState attackState = AttackState.STOPPED;
 
+    private static MinecraftAccount getAccount(SettingsHolder settingsHolder, List<MinecraftAccount> accounts, int botId) {
+        if (accounts.isEmpty()) {
+            return new MinecraftAccount(String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), botId));
+        }
+
+        return accounts.remove(0);
+    }
+
+    private static Optional<SWProxy> getProxy(int accountsPerProxy, Object2IntMap<SWProxy> proxyUseMap) {
+        if (proxyUseMap.isEmpty()) {
+            return Optional.empty(); // No proxies available
+        }
+
+        var selectedProxy = proxyUseMap.object2IntEntrySet().stream()
+                .filter(entry -> accountsPerProxy == -1 || entry.getIntValue() < accountsPerProxy)
+                .min(Comparator.comparingInt(Map.Entry::getValue))
+                .orElseThrow(() -> new IllegalStateException("No proxies available!")); // Should never happen
+
+        // Always present
+        selectedProxy.setValue(selectedProxy.getIntValue() + 1);
+
+        return Optional.of(selectedProxy.getKey());
+    }
+
     public CompletableFuture<Void> start(SettingsHolder settingsHolder) {
         if (!attackState.isStopped()) {
             throw new IllegalStateException("Attack is already running");
@@ -193,30 +217,6 @@ public class AttackManager {
                 TimeUtil.waitTime(RandomUtil.getRandomInt(settingsHolder.get(BotSettings.MIN_JOIN_DELAY_MS), settingsHolder.get(BotSettings.MAX_JOIN_DELAY_MS)), TimeUnit.MILLISECONDS);
             }
         });
-    }
-
-    private static MinecraftAccount getAccount(SettingsHolder settingsHolder, List<MinecraftAccount> accounts, int botId) {
-        if (accounts.isEmpty()) {
-            return new MinecraftAccount(String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), botId));
-        }
-
-        return accounts.remove(0);
-    }
-
-    private static Optional<SWProxy> getProxy(int accountsPerProxy, Object2IntMap<SWProxy> proxyUseMap) {
-        if (proxyUseMap.isEmpty()) {
-            return Optional.empty(); // No proxies available
-        }
-
-        var selectedProxy = proxyUseMap.object2IntEntrySet().stream()
-                .filter(entry -> accountsPerProxy == -1 || entry.getIntValue() < accountsPerProxy)
-                .min(Comparator.comparingInt(Map.Entry::getValue))
-                .orElseThrow(() -> new IllegalStateException("No proxies available!")); // Should never happen
-
-        // Always present
-        selectedProxy.setValue(selectedProxy.getIntValue() + 1);
-
-        return Optional.of(selectedProxy.getKey());
     }
 
     public CompletableFuture<Void> stop() {

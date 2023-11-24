@@ -82,12 +82,12 @@ public class SWItemStack extends ItemStack {
         return new SWItemStack(itemStack);
     }
 
-    public short getEnchantmentLevel(String enchantment) {
-        return this.enchantments.getShort(enchantment);
-    }
-
     public static SWItemStack forType(ItemType itemType) {
         return new SWItemStack(itemType, 1);
+    }
+
+    public short getEnchantmentLevel(String enchantment) {
+        return this.enchantments.getShort(enchantment);
     }
 
     private int precalculateHash() {

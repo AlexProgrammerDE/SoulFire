@@ -48,6 +48,11 @@ import java.util.HashSet;
  * setting up logging.
  */
 public class ServerWreckerBootstrap {
+    public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
+    public static final Path PLUGINS_FOLDER = DATA_FOLDER.resolve("plugins");
+    public static final PluginManager PLUGIN_MANAGER = new JarPluginManager(PLUGINS_FOLDER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerBootstrap.class);
+
     static {
         System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
 
@@ -63,11 +68,6 @@ public class ServerWreckerBootstrap {
             ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
         }
     }
-
-    public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
-    public static final Path PLUGINS_FOLDER = DATA_FOLDER.resolve("plugins");
-    public static final PluginManager PLUGIN_MANAGER = new JarPluginManager(PLUGINS_FOLDER);
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerBootstrap.class);
 
     private ServerWreckerBootstrap() {
     }

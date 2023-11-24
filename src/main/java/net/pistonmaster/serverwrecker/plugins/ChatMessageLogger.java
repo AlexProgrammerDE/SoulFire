@@ -43,12 +43,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class ChatMessageLogger implements InternalExtension {
-    @Override
-    public void onLoad() {
-        ServerWreckerAPI.registerListeners(ChatMessageLogger.class);
-        PluginHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, ChatMessageLogger::onConnectionInit);
-    }
-
     public static void onConnectionInit(BotConnectionInitEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
@@ -65,6 +59,12 @@ public class ChatMessageLogger implements InternalExtension {
     @EventHandler
     public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(ChatMessageSettings.class);
+    }
+
+    @Override
+    public void onLoad() {
+        ServerWreckerAPI.registerListeners(ChatMessageLogger.class);
+        PluginHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, ChatMessageLogger::onConnectionInit);
     }
 
     private record BotChatListener(UUID connectionId, Logger logger, ScheduledExecutorService executor,
@@ -102,14 +102,14 @@ public class ChatMessageLogger implements InternalExtension {
                 "log-chat",
                 "Log chat to terminal",
                 "If this is enabled, all chat messages will be logged to the terminal",
-                new String[] {"--log-chat"},
+                new String[]{"--log-chat"},
                 true
         );
         public static IntProperty INTERVAL = BUILDER.ofInt(
                 "chat-interval",
                 "Minimum delay between logging chat",
                 "This is the minimum delay between logging chat messages",
-                new String[] {"--chat-interval"},
+                new String[]{"--chat-interval"},
                 2
         );
     }

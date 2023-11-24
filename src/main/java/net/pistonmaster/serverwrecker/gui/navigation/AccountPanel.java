@@ -19,17 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
-import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
-import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.gui.popups.ImportTextDialog;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -60,7 +56,7 @@ public class AccountPanel extends NavigationItem {
         var accountSettingsPanel = new JPanel();
         accountSettingsPanel.setLayout(new GridLayout(0, 2));
 
-        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace("account"));
+        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace("account"), guiManager.getSettingsManager());
 
         accountOptionsPanel.add(accountSettingsPanel);
 

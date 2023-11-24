@@ -253,6 +253,12 @@ public class ServerWreckerServer {
         return false;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
+    public static void setupLoggingAndVia(SettingsHolder settingsHolder) {
+        Via.getManager().debugHandler().setEnabled(settingsHolder.get(DevSettings.VIA_DEBUG));
+        ServerWreckerBootstrap.setupLogging(settingsHolder);
+    }
+
     /**
      * Generates a JWT for the admin user.
      *
@@ -263,12 +269,6 @@ public class ServerWreckerServer {
                 .subject("admin")
                 .signWith(jwtSecretKey, Jwts.SIG.HS256)
                 .compact();
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    public static void setupLoggingAndVia(SettingsHolder settingsHolder) {
-        Via.getManager().debugHandler().setEnabled(settingsHolder.get(DevSettings.VIA_DEBUG));
-        ServerWreckerBootstrap.setupLogging(settingsHolder);
     }
 
     private void shutdownHook() {

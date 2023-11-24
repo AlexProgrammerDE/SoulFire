@@ -23,7 +23,10 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.grpc.generated.*;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientPlugin;
+import net.pistonmaster.serverwrecker.grpc.generated.ConfigServiceGrpc;
+import net.pistonmaster.serverwrecker.grpc.generated.UIClientDataResponse;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -32,19 +35,6 @@ import java.util.Collection;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
     private final ServerWreckerServer serverWreckerServer;
-
-    @Override
-    public void getUIClientData(ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
-        var username = Constant.CLIENT_ID_CONTEXT_KEY.get();
-        responseObserver.onNext(
-                UIClientDataResponse.newBuilder()
-                        .setUsername(username)
-                        .addAllPlugins(getExtensions())
-                        .addAllPluginSettings(serverWreckerServer.getSettingsManager().exportSettingsMeta())
-                        .build()
-        );
-        responseObserver.onCompleted();
-    }
 
     private static Collection<ClientPlugin> getExtensions() {
         var plugins = new ArrayList<ClientPlugin>();
@@ -65,5 +55,18 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
         }
 
         return plugins;
+    }
+
+    @Override
+    public void getUIClientData(ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
+        var username = Constant.CLIENT_ID_CONTEXT_KEY.get();
+        responseObserver.onNext(
+                UIClientDataResponse.newBuilder()
+                        .setUsername(username)
+                        .addAllPlugins(getExtensions())
+                        .addAllPluginSettings(serverWreckerServer.getSettingsManager().exportSettingsMeta())
+                        .build()
+        );
+        responseObserver.onCompleted();
     }
 }

@@ -40,6 +40,11 @@ import java.util.concurrent.TimeUnit;
 public class AutoReconnect implements InternalExtension {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
+    @EventHandler
+    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
+        event.settingsManager().addClass(AutoReconnectSettings.class);
+    }
+
     @Override
     public void onLoad() {
         ServerWreckerAPI.registerListeners(AutoReconnect.class);
@@ -67,11 +72,6 @@ public class AutoReconnect implements InternalExtension {
 
             newConnection.connect();
         }, RandomUtil.getRandomInt(settingsHolder.get(AutoReconnectSettings.MIN_DELAY), settingsHolder.get(AutoReconnectSettings.MAX_DELAY)), TimeUnit.SECONDS);
-    }
-
-    @EventHandler
-    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
-        event.settingsManager().addClass(AutoReconnectSettings.class);
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)

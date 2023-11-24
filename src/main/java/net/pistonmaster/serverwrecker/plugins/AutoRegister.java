@@ -32,12 +32,6 @@ import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.settings.lib.property.StringProperty;
 
 public class AutoRegister implements InternalExtension {
-    @Override
-    public void onLoad() {
-        ServerWreckerAPI.registerListeners(AutoRegister.class);
-        PluginHelper.registerBotEventConsumer(ChatMessageReceiveEvent.class, AutoRegister::onChat);
-    }
-
     public static void onChat(ChatMessageReceiveEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
@@ -70,6 +64,12 @@ public class AutoRegister implements InternalExtension {
     @EventHandler
     public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(AutoRegisterSettings.class);
+    }
+
+    @Override
+    public void onLoad() {
+        ServerWreckerAPI.registerListeners(AutoRegister.class);
+        PluginHelper.registerBotEventConsumer(ChatMessageReceiveEvent.class, AutoRegister::onChat);
     }
 
     @NoArgsConstructor(access = AccessLevel.NONE)

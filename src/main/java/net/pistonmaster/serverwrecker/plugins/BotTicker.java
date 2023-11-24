@@ -28,11 +28,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class BotTicker implements InternalExtension {
-    @Override
-    public void onLoad() {
-        PluginHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, BotTicker::onConnectionInit);
-    }
-
     public static void onConnectionInit(BotConnectionInitEvent event) {
         startTicker(event.connection(),
                 event.connection().executorManager().newScheduledExecutorService("Tick"),
@@ -50,5 +45,10 @@ public class BotTicker implements InternalExtension {
                 connection.logger().error("Exception ticking bot", t);
             }
         }, 0, 50, TimeUnit.MILLISECONDS); // 20 TPS
+    }
+
+    @Override
+    public void onLoad() {
+        PluginHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, BotTicker::onConnectionInit);
     }
 }

@@ -48,6 +48,47 @@ public class BotActionManager {
     private final SessionDataManager dataManager;
     private int sequenceNumber = 0;
 
+    private static Optional<Vector3f> rayCastToBlock(BlockStateMeta blockStateMeta, Vector3d eyePosition, Vector3d headRotation, Vector3i targetBlock) {
+        var intersections = new ArrayList<Vector3f>();
+
+        for (var shape : blockStateMeta.getCollisionBoxes(targetBlock)) {
+            shape.getIntersection(eyePosition, headRotation)
+                    .map(Vector3d::toFloat)
+                    .ifPresent(intersections::add);
+        }
+
+        if (intersections.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Vector3f closestIntersection = null;
+        var closestDistance = Double.MAX_VALUE;
+
+        for (var intersection : intersections) {
+            double distance = intersection.distance(eyePosition.getX(), eyePosition.getY(), eyePosition.getZ());
+
+            if (distance < closestDistance) {
+                closestIntersection = intersection;
+                closestDistance = distance;
+            }
+        }
+
+        assert closestIntersection != null;
+        return Optional.of(closestIntersection);
+    }
+
+    public static Vector3d getMiddleBlockFace(Vector3i blockPos, Direction blockFace) {
+        var blockPosDouble = blockPos.toDouble();
+        return switch (blockFace) {
+            case DOWN -> blockPosDouble.add(0.5, 0, 0.5);
+            case UP -> blockPosDouble.add(0.5, 1, 0.5);
+            case NORTH -> blockPosDouble.add(0.5, 0.5, 0);
+            case SOUTH -> blockPosDouble.add(0.5, 0.5, 1);
+            case WEST -> blockPosDouble.add(0, 0.5, 0.5);
+            case EAST -> blockPosDouble.add(1, 0.5, 0.5);
+        };
+    }
+
     public void incrementSequenceNumber() {
         sequenceNumber++;
     }
@@ -102,47 +143,6 @@ public class BotActionManager {
                 insideBlock,
                 sequenceNumber
         ));
-    }
-
-    private static Optional<Vector3f> rayCastToBlock(BlockStateMeta blockStateMeta, Vector3d eyePosition, Vector3d headRotation, Vector3i targetBlock) {
-        var intersections = new ArrayList<Vector3f>();
-
-        for (var shape : blockStateMeta.getCollisionBoxes(targetBlock)) {
-            shape.getIntersection(eyePosition, headRotation)
-                    .map(Vector3d::toFloat)
-                    .ifPresent(intersections::add);
-        }
-
-        if (intersections.isEmpty()) {
-            return Optional.empty();
-        }
-
-        Vector3f closestIntersection = null;
-        var closestDistance = Double.MAX_VALUE;
-
-        for (var intersection : intersections) {
-            double distance = intersection.distance(eyePosition.getX(), eyePosition.getY(), eyePosition.getZ());
-
-            if (distance < closestDistance) {
-                closestIntersection = intersection;
-                closestDistance = distance;
-            }
-        }
-
-        assert closestIntersection != null;
-        return Optional.of(closestIntersection);
-    }
-
-    public static Vector3d getMiddleBlockFace(Vector3i blockPos, Direction blockFace) {
-        var blockPosDouble = blockPos.toDouble();
-        return switch (blockFace) {
-            case DOWN -> blockPosDouble.add(0.5, 0, 0.5);
-            case UP -> blockPosDouble.add(0.5, 1, 0.5);
-            case NORTH -> blockPosDouble.add(0.5, 0.5, 0);
-            case SOUTH -> blockPosDouble.add(0.5, 0.5, 1);
-            case WEST -> blockPosDouble.add(0, 0.5, 0.5);
-            case EAST -> blockPosDouble.add(1, 0.5, 0.5);
-        };
     }
 
     public void sendStartBreakBlock(Vector3i blockPos) {

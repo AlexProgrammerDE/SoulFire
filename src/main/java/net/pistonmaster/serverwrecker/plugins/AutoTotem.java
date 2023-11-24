@@ -38,12 +38,6 @@ import net.pistonmaster.serverwrecker.util.TimeUtil;
 import java.util.concurrent.TimeUnit;
 
 public class AutoTotem implements InternalExtension {
-    @Override
-    public void onLoad() {
-        ServerWreckerAPI.registerListeners(AutoTotem.class);
-        PluginHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoTotem::onJoined);
-    }
-
     public static void onJoined(BotJoinedEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
@@ -90,6 +84,12 @@ public class AutoTotem implements InternalExtension {
     @EventHandler
     public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
         event.settingsManager().addClass(AutoTotemSettings.class);
+    }
+
+    @Override
+    public void onLoad() {
+        ServerWreckerAPI.registerListeners(AutoTotem.class);
+        PluginHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoTotem::onJoined);
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
