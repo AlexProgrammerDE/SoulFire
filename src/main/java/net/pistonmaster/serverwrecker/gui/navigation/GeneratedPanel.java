@@ -19,51 +19,68 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
+import com.google.gson.JsonPrimitive;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingsPage;
 import net.pistonmaster.serverwrecker.grpc.generated.ComboOption;
 import net.pistonmaster.serverwrecker.grpc.generated.IntSetting;
 import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
+import net.pistonmaster.serverwrecker.settings.lib.property.PropertyKey;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
+import java.util.Objects;
 
 public class GeneratedPanel extends NavigationItem {
     private final ClientPluginSettingsPage settingsPage;
 
-    public GeneratedPanel(ClientPluginSettingsPage settingsPage) {
+    public GeneratedPanel(SettingsManager settingsManager, ClientPluginSettingsPage settingsPage) {
         this.settingsPage = settingsPage;
 
         setLayout(new GridLayout(0, 2));
 
-        addComponents(this, settingsPage);
+        addComponents(this, settingsPage, settingsManager);
     }
 
-    private static JSpinner createIntObject(IntSetting intSetting) {
-        return new JSpinner(new SpinnerNumberModel(intSetting.getDef(), intSetting.getMin(), intSetting.getMax(), intSetting.getStep()));
+    private static JSpinner createIntObject(PropertyKey propertyKey, SettingsManager settingsManager, IntSetting intSetting) {
+        var spinner = new JSpinner(new SpinnerNumberModel(intSetting.getDef(), intSetting.getMin(), intSetting.getMax(), intSetting.getStep()));
+        settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive((int) spinner.getValue()));
+        settingsManager.registerListener(propertyKey, s -> spinner.setValue(s.getAsInt()));
+
+        return spinner;
     }
 
-    public static void addComponents(JPanel panel, ClientPluginSettingsPage settingsPage) {
+    public static void addComponents(JPanel panel, ClientPluginSettingsPage settingsPage, SettingsManager settingsManager) {
         for (var settingEntry : settingsPage.getEntriesList()) {
             switch (settingEntry.getValueCase()) {
                 case SINGLE -> {
                     var singleEntry = settingEntry.getSingle();
+                    var propertyKey = new PropertyKey(settingsPage.getNamespace(), singleEntry.getSettingEntryId());
 
                     panel.add(new JLabel(singleEntry.getName()));
                     var settingType = singleEntry.getType();
                     panel.add(switch (settingType.getValueCase()) {
                         case STRING -> {
                             var stringEntry = settingType.getString();
-                            yield new JTextField(stringEntry.getDef());
+                            var textField = new JTextField(stringEntry.getDef());
+                            settingsManager.registerListener(propertyKey, s -> textField.setText(s.getAsString()));
+                            settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(textField.getText()));
+
+                            yield textField;
                         }
                         case INT -> {
                             var intEntry = settingType.getInt();
-                            yield createIntObject(intEntry);
+                            yield createIntObject(propertyKey, settingsManager, intEntry);
                         }
                         case BOOL -> {
                             var boolEntry = settingType.getBool();
-                            yield new PresetJCheckBox(boolEntry.getDef());
+                            var checkBox = new PresetJCheckBox(boolEntry.getDef());
+                            settingsManager.registerListener(propertyKey, s -> checkBox.setSelected(s.getAsBoolean()));
+                            settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(checkBox.isSelected()));
+
+                            yield checkBox;
                         }
                         case COMBO -> {
                             var comboEntry = settingType.getCombo();
@@ -72,6 +89,10 @@ public class GeneratedPanel extends NavigationItem {
                             var comboBox = new JComboBox<ComboOption>(options.toArray(new ComboOption[0]));
                             comboBox.setRenderer(new ComboRenderer());
                             comboBox.setSelectedItem(options.get(comboEntry.getDef()));
+                            settingsManager.registerListener(propertyKey,
+                                    s -> comboBox.setSelectedItem(options.get(s.getAsInt())));
+                            settingsManager.registerProvider(propertyKey,
+                                    () -> new JsonPrimitive(((ComboOption) Objects.requireNonNull(comboBox.getSelectedItem())).getId()));
 
                             yield comboBox;
                         }
@@ -81,15 +102,17 @@ public class GeneratedPanel extends NavigationItem {
                 }
                 case MINMAXPAIR -> {
                     var minMaxEntry = settingEntry.getMinMaxPair();
+                    var minPropertyKey = new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMin().getSettingEntryId());
+                    var maxPropertyKey = new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMax().getSettingEntryId());
 
                     var min = minMaxEntry.getMin();
                     panel.add(new JLabel(min.getName()));
-                    var minSpinner = createIntObject(min.getIntSetting());
+                    var minSpinner = createIntObject(minPropertyKey, settingsManager, min.getIntSetting());
                     panel.add(minSpinner);
 
                     var max = minMaxEntry.getMax();
                     panel.add(new JLabel(max.getName()));
-                    var maxSpinner = createIntObject(max.getIntSetting());
+                    var maxSpinner = createIntObject(maxPropertyKey, settingsManager, max.getIntSetting());
                     panel.add(maxSpinner);
 
                     JMinMaxHelper.applyLink(minSpinner, maxSpinner);

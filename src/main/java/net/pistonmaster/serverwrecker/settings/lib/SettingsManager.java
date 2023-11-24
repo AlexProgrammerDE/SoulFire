@@ -43,6 +43,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class SettingsManager {
     public static final Logger LOGGER = LoggerFactory.getLogger(SettingsManager.class);
@@ -68,7 +69,11 @@ public class SettingsManager {
     }
 
     public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {
-        providers.add(new ProviderRegistration<>(clazz, provider));
+
+    }
+
+    public void registerListener(PropertyKey property, Consumer<JsonElement> listener) {
+
     }
 
     public SettingsHolder collectSettings() {

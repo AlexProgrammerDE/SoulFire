@@ -23,6 +23,7 @@ import ch.jalu.injector.Injector;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingsPage;
+import net.pistonmaster.serverwrecker.gui.GUIManager;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -36,6 +37,7 @@ public class CardsContainer extends JPanel {
     @Getter
     private final List<NavigationItem> panels = new ArrayList<>();
     private final Injector injector;
+    private final GUIManager guiManager;
     @Getter
     private final List<ClientPluginSettingsPage> pluginPages = new ArrayList<>();
 
@@ -43,7 +45,7 @@ public class CardsContainer extends JPanel {
         setLayout(new CardLayout());
 
         // Add bot settings
-        panels.add(new GeneratedPanel(getByNamespace("bot")));
+        panels.add(new GeneratedPanel(guiManager.getSettingsManager(), getByNamespace("bot")));
         var pluginPanel = injector.getSingleton(PluginListPanel.class);
         panels.add(pluginPanel);
         panels.add(injector.getSingleton(AccountPanel.class));
@@ -60,7 +62,8 @@ public class CardsContainer extends JPanel {
 
         // Add the plugin page cards
         for (var item : pluginPages) {
-            add(NavigationWrapper.createBackWrapper(this, pluginPanel.getNavigationId(), new GeneratedPanel(item)), item.getNamespace());
+            add(NavigationWrapper.createBackWrapper(this, pluginPanel.getNavigationId(),
+                    new GeneratedPanel(guiManager.getSettingsManager(), item)), item.getNamespace());
         }
 
         setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));

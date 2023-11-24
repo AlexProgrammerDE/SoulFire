@@ -66,7 +66,7 @@ public class ServerWreckerLoader {
         var serverWrecker = new ServerWreckerServer(OperationMode.GUI, host, port);
 
         var rpcClient = new RPCClient(host, port, serverWrecker.generateAdminJWT());
-        var guiManager = new GUIManager(serverWrecker, rpcClient);
+        var guiManager = new GUIManager(rpcClient);
         guiManager.initGUI();
     }
 }

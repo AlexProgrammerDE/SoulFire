@@ -60,7 +60,7 @@ public class GUIManager {
     private final ProxyRegistry proxyRegistry = new ProxyRegistry();
     private final SettingsManager settingsManager = new SettingsManager(List.of());
 
-    public GUIManager(ServerWreckerServer serverWreckerServer, RPCClient rpcClient) {
+    public GUIManager(RPCClient rpcClient) {
         this.rpcClient = rpcClient;
         injector.register(GUIManager.class, this);
     }
