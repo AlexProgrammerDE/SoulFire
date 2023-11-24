@@ -37,14 +37,8 @@ import java.awt.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class ProxyPanel extends NavigationItem implements SettingsListener<T>, net.pistonmaster.serverwrecker.settings.lib.SettingsProvider<ProxySettings> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyPanel.class);
-    private final JSpinner botsPerProxy = new JSpinner();
-
-    @Inject
-    public ProxyPanel(GUIManager guiManager, GUIFrame parent) {
-        guiManager.getSettingsManager().registerDuplex(ProxySettings.class, this);
-
+public class ProxyPanel extends NavigationItem {    @Inject
+    public ProxyPanel(GUIManager guiManager, GUIFrame parent, CardsContainer cardsContainer) {
         setLayout(new GridLayout(2, 1, 10, 10));
 
         var proxyOptionsPanel = new JPanel();
@@ -62,9 +56,7 @@ public class ProxyPanel extends NavigationItem implements SettingsListener<T>, n
         var proxySettingsPanel = new JPanel();
         proxySettingsPanel.setLayout(new GridLayout(0, 2));
 
-        proxySettingsPanel.add(new JLabel("Accounts per proxy: "));
-        botsPerProxy.setValue(ProxySettings.DEFAULT_BOTS_PER_PROXY);
-        proxySettingsPanel.add(botsPerProxy);
+        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace("proxy"));
 
         proxyOptionsPanel.add(proxySettingsPanel);
 

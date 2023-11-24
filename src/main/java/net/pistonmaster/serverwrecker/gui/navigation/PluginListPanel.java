@@ -20,34 +20,27 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import lombok.Getter;
-import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingsPage;
-import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 public class PluginListPanel extends NavigationItem {
-    private final List<ClientPluginSettingsPage> pluginPages = new ArrayList<>();
-
     @Inject
-    public PluginListPanel(GUIManager guiManager, CardsContainer container) {
+    public PluginListPanel(CardsContainer container) {
         setLayout(new GridLayout(3, 3, 10, 10));
-        var cardLayout = (CardLayout) container.getLayout();
 
-        pluginPages.addAll(guiManager.getRpcClient().getConfigStubBlocking()
-                .getUIClientData(ClientDataRequest.getDefaultInstance())
-                .getPluginSettingsList());
-        for (var item : pluginPages) {
-            var pageId = item.getPageId();
+        for (var item : container.getPluginPages()) {
+            if (item.getHidden()) {
+                continue;
+            }
+
+            var pageId = item.getNamespace();
             var button = new JButton(SwingTextUtils.htmlCenterText(pageId));
 
-            button.addActionListener(action -> cardLayout.show(container, pageId));
+            button.addActionListener(action -> container.show(pageId));
             button.setSize(new Dimension(50, 50));
 
             add(button);

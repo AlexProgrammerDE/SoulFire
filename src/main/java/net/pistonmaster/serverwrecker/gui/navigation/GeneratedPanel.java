@@ -37,14 +37,22 @@ public class GeneratedPanel extends NavigationItem {
 
         setLayout(new GridLayout(0, 2));
 
+        addComponents(this, settingsPage);
+    }
+
+    private static JSpinner createIntObject(IntSetting intSetting) {
+        return new JSpinner(new SpinnerNumberModel(intSetting.getDef(), intSetting.getMin(), intSetting.getMax(), intSetting.getStep()));
+    }
+
+    public static void addComponents(JPanel panel, ClientPluginSettingsPage settingsPage) {
         for (var settingEntry : settingsPage.getEntriesList()) {
             switch (settingEntry.getValueCase()) {
                 case SINGLE -> {
                     var singleEntry = settingEntry.getSingle();
 
-                    add(new JLabel(singleEntry.getName()));
+                    panel.add(new JLabel(singleEntry.getName()));
                     var settingType = singleEntry.getType();
-                    add(switch (settingType.getValueCase()) {
+                    panel.add(switch (settingType.getValueCase()) {
                         case STRING -> {
                             var stringEntry = settingType.getString();
                             yield new JTextField(stringEntry.getDef());
@@ -75,14 +83,14 @@ public class GeneratedPanel extends NavigationItem {
                     var minMaxEntry = settingEntry.getMinMaxPair();
 
                     var min = minMaxEntry.getMin();
-                    add(new JLabel(min.getName()));
+                    panel.add(new JLabel(min.getName()));
                     var minSpinner = createIntObject(min.getIntSetting());
-                    add(minSpinner);
+                    panel.add(minSpinner);
 
                     var max = minMaxEntry.getMax();
-                    add(new JLabel(max.getName()));
+                    panel.add(new JLabel(max.getName()));
                     var maxSpinner = createIntObject(max.getIntSetting());
-                    add(maxSpinner);
+                    panel.add(maxSpinner);
 
                     JMinMaxHelper.applyLink(minSpinner, maxSpinner);
                 }
@@ -90,10 +98,6 @@ public class GeneratedPanel extends NavigationItem {
                         throw new IllegalStateException("Unexpected value: " + settingEntry.getValueCase());
             }
         }
-    }
-
-    private static JComponent createIntObject(IntSetting intSetting) {
-        return new JSpinner(new SpinnerNumberModel(intSetting.getDef(), intSetting.getMin(), intSetting.getMax(), intSetting.getStep()));
     }
 
     @Override

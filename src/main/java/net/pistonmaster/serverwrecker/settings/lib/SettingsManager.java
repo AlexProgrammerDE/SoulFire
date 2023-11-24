@@ -62,7 +62,9 @@ public class SettingsManager {
     }
 
     public void addClass(Class<? extends SettingsObject> clazz) {
-
+        var pluginSettings = clazz.getAnnotation(PluginSettings.class);
+        var hidden = pluginSettings == null;
+        var pageName = hidden ? "" : pluginSettings.pageName();
     }
 
     public <T extends Property> void registerListener(String propertyKey, SettingsListener listener) {

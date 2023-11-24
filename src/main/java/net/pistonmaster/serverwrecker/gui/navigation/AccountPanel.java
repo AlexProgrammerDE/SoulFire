@@ -38,15 +38,9 @@ import java.awt.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class AccountPanel extends NavigationItem implements SettingsListener<T>, net.pistonmaster.serverwrecker.settings.lib.SettingsProvider<AccountSettings> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AccountPanel.class);
-    private final JTextField nameFormat = new JTextField(AccountSettings.DEFAULT_NAME_FORMAT);
-    private final JCheckBox shuffleAccounts = new PresetJCheckBox(AccountSettings.DEFAULT_SHUFFLE_ACCOUNTS);
-
+public class AccountPanel extends NavigationItem {
     @Inject
-    public AccountPanel(GUIManager guiManager, GUIFrame parent) {
-        guiManager.getSettingsManager().registerDuplex(AccountSettings.class, this);
-
+    public AccountPanel(GUIManager guiManager, GUIFrame parent, CardsContainer cardsContainer) {
         setLayout(new GridLayout(2, 1, 10, 10));
 
         var accountOptionsPanel = new JPanel();
@@ -66,11 +60,7 @@ public class AccountPanel extends NavigationItem implements SettingsListener<T>,
         var accountSettingsPanel = new JPanel();
         accountSettingsPanel.setLayout(new GridLayout(0, 2));
 
-        accountSettingsPanel.add(new JLabel("Shuffle accounts: "));
-        accountSettingsPanel.add(shuffleAccounts);
-
-        accountSettingsPanel.add(new JLabel("Name Format: "));
-        accountSettingsPanel.add(nameFormat);
+        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace("account"));
 
         accountOptionsPanel.add(accountSettingsPanel);
 
@@ -169,19 +159,5 @@ public class AccountPanel extends NavigationItem implements SettingsListener<T>,
     @Override
     public String getNavigationId() {
         return "account-menu";
-    }
-
-    @Override
-    public void onSettingsChange(AccountSettings settings) {
-        nameFormat.setText(settings.nameFormat());
-        shuffleAccounts.setSelected(settings.shuffleAccounts());
-    }
-
-    @Override
-    public AccountSettings collectSettings() {
-        return new AccountSettings(
-                nameFormat.getText(),
-                shuffleAccounts.isSelected()
-        );
     }
 }

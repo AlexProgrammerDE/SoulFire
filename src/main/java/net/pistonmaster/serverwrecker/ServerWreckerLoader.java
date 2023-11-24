@@ -58,8 +58,6 @@ public class ServerWreckerLoader {
             return 1;
         });
 
-        ServerWreckerAPI.postEvent(new CommandManagerInitEvent(commandLine));
-
         commandLine.execute(args);
     }
 

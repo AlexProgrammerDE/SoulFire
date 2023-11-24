@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import ch.jalu.injector.Injector;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingsPage;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -35,11 +36,14 @@ public class CardsContainer extends JPanel {
     @Getter
     private final List<NavigationItem> panels = new ArrayList<>();
     private final Injector injector;
+    @Getter
+    private final List<ClientPluginSettingsPage> pluginPages = new ArrayList<>();
 
     public void create() {
         setLayout(new CardLayout());
 
-        panels.add(injector.getSingleton(SettingsPanel.class));
+        // Add bot settings
+        panels.add(new GeneratedPanel(getByNamespace("bot")));
         var pluginPanel = injector.getSingleton(PluginListPanel.class);
         panels.add(pluginPanel);
         panels.add(injector.getSingleton(AccountPanel.class));
@@ -49,14 +53,31 @@ public class CardsContainer extends JPanel {
         var navigationPanel = injector.getSingleton(NavigationPanel.class);
         add(navigationPanel, NAVIGATION_MENU);
 
+        // Add the main page cards
         for (var item : panels) {
             add(NavigationWrapper.createBackWrapper(this, NAVIGATION_MENU, item), item.getNavigationId());
         }
 
-        for (var item : pluginPanel.getPluginPages()) {
-            add(NavigationWrapper.createBackWrapper(this, pluginPanel.getNavigationId(), new GeneratedPanel(item)), item.getPageId());
+        // Add the plugin page cards
+        for (var item : pluginPages) {
+            add(NavigationWrapper.createBackWrapper(this, pluginPanel.getNavigationId(), new GeneratedPanel(item)), item.getNamespace());
         }
 
         setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));
+    }
+
+    public ClientPluginSettingsPage getByNamespace(String namespace) {
+        for (var page : pluginPages) {
+            if (page.getNamespace().equals(namespace)) {
+                return page;
+            }
+        }
+
+        throw new IllegalArgumentException("No page found with namespace " + namespace);
+    }
+
+    public void show(String id) {
+        var cardLayout = (CardLayout) getLayout();
+        cardLayout.show(this, id);
     }
 }

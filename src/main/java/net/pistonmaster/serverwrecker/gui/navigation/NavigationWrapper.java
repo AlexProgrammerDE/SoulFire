@@ -34,15 +34,16 @@ public class NavigationWrapper {
         topBar.setLayout(new BorderLayout());
 
         var back = new JButton("Back");
-        var cardLayout = (CardLayout) container.getLayout();
-        back.addActionListener(action -> cardLayout.show(container, target));
+        back.addActionListener(action -> container.show(target));
 
         topBar.add(back, BorderLayout.PAGE_END);
         topBar.setSize(new Dimension(topBar.getWidth(), 20));
         topBar.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         panel.add(topBar, BorderLayout.NORTH);
-        panel.add(item, BorderLayout.CENTER);
+
+        var scrollPane = new JScrollPane(item);
+        panel.add(scrollPane, BorderLayout.CENTER);
 
         return panel;
     }

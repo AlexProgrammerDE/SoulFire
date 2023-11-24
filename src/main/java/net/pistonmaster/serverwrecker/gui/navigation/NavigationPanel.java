@@ -32,12 +32,11 @@ public class NavigationPanel extends JPanel {
         super();
 
         setLayout(new GridLayout(3, 3, 10, 10));
-        var cardLayout = (CardLayout) container.getLayout();
 
         for (var item : container.getPanels()) {
             var button = new JButton(SwingTextUtils.htmlCenterText(item.getNavigationName()));
 
-            button.addActionListener(action -> cardLayout.show(container, item.getNavigationId()));
+            button.addActionListener(action -> container.show(item.getNavigationId()));
             container.putClientProperty(item.getNavigationId() + "-button", button);
 
             add(button);

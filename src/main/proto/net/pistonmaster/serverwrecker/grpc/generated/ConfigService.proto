@@ -12,12 +12,6 @@ message StringSetting {
 }
 
 message IntSetting {
-  enum IntSettingType {
-    SPINNER = 0;
-    TEXT = 1;
-  }
-
-  IntSettingType type = 1;
   int32 def = 2;
   int32 min = 3;
   int32 max = 4;
@@ -71,9 +65,9 @@ message ClientPluginSettingEntryMinMaxPairSingle {
 // A paired option in the settings page
 message ClientPluginSettingEntryMinMaxPair {
   // Required to be IntSetting
-  ClientPluginSettingEntryMinMaxPairSingle min = 4;
+  ClientPluginSettingEntryMinMaxPairSingle min = 1;
   // Required to be IntSetting
-  ClientPluginSettingEntryMinMaxPairSingle max = 5;
+  ClientPluginSettingEntryMinMaxPairSingle max = 2;
 }
 
 // A entry in the settings page
@@ -85,10 +79,11 @@ message ClientPluginSettingEntry {
 }
 
 message ClientPluginSettingsPage {
+  bool hidden = 1;
   // The name of the page for these settings
-  string pageName = 3;
+  string pageName = 2;
   // What namespace the settings of this page represent
-  string namespace = 2;
+  string namespace = 3;
   repeated ClientPluginSettingEntry entries = 4;
 }
 
