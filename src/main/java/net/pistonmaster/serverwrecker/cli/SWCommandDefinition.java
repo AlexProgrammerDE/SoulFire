@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.cli;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
@@ -66,6 +67,9 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Option(names = {"--generate-flags"}, description = "Create a list of flags", hidden = true)
     private boolean generateFlags;
 
+    @Option(names = {"--generate-versions"}, description = "Create a list of supported versions", hidden = true)
+    private boolean generateVersions;
+
     @Override
     public Integer call() {
         if (generateFlags) {
@@ -78,6 +82,21 @@ public class SWCommandDefinition implements Callable<Integer> {
                 var defaultValue = option.defaultValueString() == null ? "" : String.format("`%s`", option.defaultValueString());
                 var description = option.description() == null ? "" : String.join(", ", option.description());
                 System.out.printf("| %s | %s | %s |%n", name, defaultValue, description);
+            });
+            cliManager.shutdown();
+            return 0;
+        } else if (generateVersions) {
+            var yesEmoji = "✅";
+            var noEmoji = "❌";
+
+            SWConstants.getVersionsSorted().forEach(version -> {
+                var nativeVersion = SWConstants.CURRENT_PROTOCOL_VERSION == version ? yesEmoji : noEmoji;
+                var bedrockVersion = SWConstants.isBedrock(version) ? yesEmoji : noEmoji;
+                var javaVersion = !SWConstants.isBedrock(version) ? yesEmoji : noEmoji;
+                var snapshotVersion = SWConstants.isAprilFools(version) ? yesEmoji : noEmoji;
+                var legacyVersion = SWConstants.isLegacy(version) ? yesEmoji : noEmoji;
+
+                System.out.printf("| %s | %s | %s | %s | %s | %s |%n", version.getName(), nativeVersion, javaVersion, snapshotVersion, legacyVersion, bedrockVersion);
             });
             cliManager.shutdown();
             return 0;

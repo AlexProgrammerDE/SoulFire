@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import net.raphimc.viaaprilfools.api.AprilFoolsProtocolVersion;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 
@@ -96,5 +97,9 @@ public class SWConstants {
 
     public static boolean isBedrock(ProtocolVersion version) {
         return BedrockProtocolVersion.PROTOCOLS.contains(version);
+    }
+
+    public static boolean isAprilFools(ProtocolVersion version) {
+        return AprilFoolsProtocolVersion.PROTOCOLS.contains(version);
     }
 }
