@@ -50,7 +50,6 @@ public class HintManager {
     public static void showHint(Hint hint) {
         // check whether user already closed the hint
         if (GUIClientProps.getBoolean(hint.prefsKey, false)) {
-            System.out.println("HintManager: hint '" + hint.prefsKey + "' was already closed." + hint.nextHint);
             if (hint.nextHint != null) {
                 showHint(hint.nextHint);
             }

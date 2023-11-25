@@ -35,6 +35,21 @@ public class SWConstants {
     private SWConstants() {
     }
 
+    static {
+        // Initialize all classes
+        doNothing(
+                ProtocolVersion.getProtocols(),
+                LegacyProtocolVersion.PROTOCOLS,
+                BedrockProtocolVersion.PROTOCOLS,
+                AprilFoolsProtocolVersion.PROTOCOLS
+        );
+    }
+
+    @SuppressWarnings("unused")
+    private static void doNothing(Object... objects) {
+        // Do nothing
+    }
+
     public static List<ProtocolVersion> getVersionsSorted() {
         var normalVersions = new ArrayList<ProtocolVersion>();
         var legacyVersions = new ArrayList<ProtocolVersion>();
