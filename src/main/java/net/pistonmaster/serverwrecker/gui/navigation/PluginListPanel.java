@@ -37,10 +37,9 @@ public class PluginListPanel extends NavigationItem {
                 continue;
             }
 
-            var pageId = item.getNamespace();
-            var button = new JButton(SwingTextUtils.htmlCenterText(pageId));
+            var button = new JButton(SwingTextUtils.htmlCenterText(item.getPageName()));
 
-            button.addActionListener(action -> container.show(pageId));
+            button.addActionListener(action -> container.show(item.getNamespace()));
             button.setSize(new Dimension(50, 50));
 
             add(button);
