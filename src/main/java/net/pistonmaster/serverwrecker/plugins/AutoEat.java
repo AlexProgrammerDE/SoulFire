@@ -46,7 +46,7 @@ public class AutoEat implements InternalExtension {
             return;
         }
 
-        var executor = connection.executorManager().newScheduledExecutorService("AutoEat");
+        var executor = connection.executorManager().newScheduledExecutorService(connection, "AutoEat");
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
             var sessionDataManager = connection.sessionDataManager();
 

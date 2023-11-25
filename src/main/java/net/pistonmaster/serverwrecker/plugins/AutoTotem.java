@@ -44,7 +44,7 @@ public class AutoTotem implements InternalExtension {
             return;
         }
 
-        var executor = connection.executorManager().newScheduledExecutorService("AutoTotem");
+        var executor = connection.executorManager().newScheduledExecutorService(connection, "AutoTotem");
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
             var sessionDataManager = connection.sessionDataManager();
             var inventoryManager = sessionDataManager.getInventoryManager();

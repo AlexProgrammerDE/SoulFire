@@ -93,13 +93,13 @@ public class AutoArmor implements InternalExtension {
     }
 
     public static void onJoined(BotJoinedEvent event) {
-        var settingsHolder = event.connection().settingsHolder();
+        var connection = event.connection();
+        var settingsHolder = connection.settingsHolder();
         if (!settingsHolder.get(AutoArmorSettings.AUTO_ARMOR)) {
             return;
         }
 
-        var executor = event.connection().executorManager().newScheduledExecutorService("AutoJump");
-        var connection = event.connection();
+        var executor = connection.executorManager().newScheduledExecutorService(connection, "AutoJump");
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
             var sessionDataManager = connection.sessionDataManager();
             var inventoryManager = sessionDataManager.getInventoryManager();

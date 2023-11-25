@@ -337,7 +337,7 @@ public class CommandManager {
     private int executePathfinding(GoalScorer goalScorer) {
         return forEveryBot(bot -> {
             var logger = bot.logger();
-            var executorService = bot.executorManager().newExecutorService("Pathfinding");
+            var executorService = bot.executorManager().newExecutorService(bot, "Pathfinding");
             executorService.execute(() -> {
                 var sessionDataManager = bot.sessionDataManager();
                 var botMovementManager = sessionDataManager.getBotMovementManager();

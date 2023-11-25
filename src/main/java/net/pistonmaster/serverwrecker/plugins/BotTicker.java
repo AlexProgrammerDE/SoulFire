@@ -29,8 +29,9 @@ import java.util.concurrent.TimeUnit;
 
 public class BotTicker implements InternalExtension {
     public static void onConnectionInit(BotConnectionInitEvent event) {
-        startTicker(event.connection(),
-                event.connection().executorManager().newScheduledExecutorService("Tick"),
+        var connection = event.connection();
+        startTicker(connection,
+                connection.executorManager().newScheduledExecutorService(connection, "Tick"),
                 new TickTimer(20));
     }
 

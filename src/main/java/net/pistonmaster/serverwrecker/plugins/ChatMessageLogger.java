@@ -52,7 +52,7 @@ public class ChatMessageLogger implements InternalExtension {
 
         connection.eventBus().register(ChatMessageReceiveEvent.class,
                 new BotChatListener(connection.connectionId(), connection.logger(),
-                        connection.executorManager().newScheduledExecutorService("Chat"),
+                        connection.executorManager().newScheduledExecutorService(connection, "Chat"),
                         new LinkedHashSet<>(), settingsHolder));
     }
 

@@ -41,17 +41,18 @@ import java.util.concurrent.TimeUnit;
 public class AutoRespawn implements InternalExtension {
     public static void onPacket(SWPacketReceiveEvent event) {
         if (event.getPacket() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
-            var settingsHolder = event.connection().settingsHolder();
+            var connection = event.connection();
+            var settingsHolder = connection.settingsHolder();
             if (!settingsHolder.get(AutoRespawnSettings.AUTO_RESPAWN)) {
                 return;
             }
 
             var message = ServerWreckerServer.PLAIN_MESSAGE_SERIALIZER.serialize(combatKillPacket.getMessage());
-            event.connection().logger().info("[AutoRespawn] Died with killer: {} and message: '{}'",
+            connection.logger().info("[AutoRespawn] Died with killer: {} and message: '{}'",
                     combatKillPacket.getPlayerId(), message);
 
-            event.connection().executorManager().newScheduledExecutorService("Respawn").schedule(() ->
-                            event.connection().session().send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
+            connection.executorManager().newScheduledExecutorService(connection, "Respawn").schedule(() ->
+                            connection.session().send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
                     RandomUtil.getRandomInt(settingsHolder.get(AutoRespawnSettings.DELAY.min()), settingsHolder.get(AutoRespawnSettings.DELAY.max())), TimeUnit.SECONDS);
         }
     }

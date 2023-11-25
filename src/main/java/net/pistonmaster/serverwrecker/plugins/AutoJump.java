@@ -40,7 +40,7 @@ public class AutoJump implements InternalExtension {
             return;
         }
 
-        var executor = connection.executorManager().newScheduledExecutorService("AutoJump");
+        var executor = connection.executorManager().newScheduledExecutorService(connection, "AutoJump");
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
             var sessionDataManager = connection.sessionDataManager();
             var level = sessionDataManager.getCurrentLevel();

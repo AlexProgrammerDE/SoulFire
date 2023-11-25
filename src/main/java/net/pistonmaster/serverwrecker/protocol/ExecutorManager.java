@@ -33,42 +33,48 @@ import java.util.concurrent.ThreadFactory;
 @Getter
 @RequiredArgsConstructor
 public class ExecutorManager {
+    public static final ThreadLocal<BotConnection> BOT_CONNECTION_THREAD_LOCAL = new ThreadLocal<>();
     private final List<ExecutorService> executors = Collections.synchronizedList(new ArrayList<>());
     private final String threadPrefix;
     private boolean shutdown = false;
 
-    public ScheduledExecutorService newScheduledExecutorService(String threadName) {
+    public ScheduledExecutorService newScheduledExecutorService(BotConnection botConnection, String threadName) {
         if (shutdown) {
             throw new IllegalStateException("Cannot create new executor after shutdown!");
         }
 
-        var executor = Executors.newSingleThreadScheduledExecutor(getThreadFactory(threadName));
+        var executor = Executors.newSingleThreadScheduledExecutor(getThreadFactory(botConnection, threadName));
 
         executors.add(executor);
 
         return executor;
     }
 
-    public ExecutorService newExecutorService(String threadName) {
+    public ExecutorService newExecutorService(BotConnection botConnection, String threadName) {
         if (shutdown) {
             throw new IllegalStateException("Cannot create new executor after shutdown!");
         }
 
-        var executor = Executors.newSingleThreadExecutor(getThreadFactory(threadName));
+        var executor = Executors.newSingleThreadExecutor(getThreadFactory(botConnection, threadName));
 
         executors.add(executor);
 
         return executor;
     }
 
-    private ThreadFactory getThreadFactory(String threadName) {
+    private ThreadFactory getThreadFactory(BotConnection botConnection, String threadName) {
         return runnable -> {
-            var thread = new Thread(runnable);
+            var thread = new Thread( () -> {
+                BOT_CONNECTION_THREAD_LOCAL.set(botConnection);
+                runnable.run();
+                BOT_CONNECTION_THREAD_LOCAL.remove();
+            });
             var usedThreadName = threadName;
             if (runnable instanceof NamedRunnable named) {
                 usedThreadName = named.name();
             }
             thread.setName(threadPrefix + "-" + usedThreadName);
+
             return thread;
         };
     }
