@@ -54,7 +54,7 @@ public class ProxyPanel extends NavigationItem {
         var proxySettingsPanel = new JPanel();
         proxySettingsPanel.setLayout(new GridLayout(0, 2));
 
-        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace("proxy"), guiManager.getSettingsManager());
+        GeneratedPanel.addComponents(proxySettingsPanel, cardsContainer.getByNamespace("proxy"), guiManager.getSettingsManager());
 
         proxyOptionsPanel.add(proxySettingsPanel);
 

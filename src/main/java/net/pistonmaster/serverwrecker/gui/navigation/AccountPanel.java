@@ -56,7 +56,7 @@ public class AccountPanel extends NavigationItem {
         var accountSettingsPanel = new JPanel();
         accountSettingsPanel.setLayout(new GridLayout(0, 2));
 
-        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace("account"), guiManager.getSettingsManager());
+        GeneratedPanel.addComponents(accountSettingsPanel, cardsContainer.getByNamespace("account"), guiManager.getSettingsManager());
 
         accountOptionsPanel.add(accountSettingsPanel);
 
