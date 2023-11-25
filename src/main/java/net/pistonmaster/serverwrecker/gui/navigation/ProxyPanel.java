@@ -37,7 +37,7 @@ import java.util.ArrayList;
 public class ProxyPanel extends NavigationItem {
     @Inject
     public ProxyPanel(GUIManager guiManager, GUIFrame parent, CardsContainer cardsContainer) {
-        setLayout(new GridLayout(2, 1, 10, 10));
+        setLayout(new GridLayout(0, 1, 10, 10));
 
         var proxyOptionsPanel = new JPanel();
         proxyOptionsPanel.setLayout(new GridLayout(2, 1, 10, 10));

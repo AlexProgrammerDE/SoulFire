@@ -39,7 +39,7 @@ public class GeneratedPanel extends NavigationItem {
     public GeneratedPanel(SettingsManager settingsManager, ClientPluginSettingsPage settingsPage) {
         this.settingsPage = settingsPage;
 
-        setLayout(new GridLayout(-1, 2));
+        setLayout(new GridLayout(0, 2));
 
         addComponents(this, settingsPage, settingsManager);
     }

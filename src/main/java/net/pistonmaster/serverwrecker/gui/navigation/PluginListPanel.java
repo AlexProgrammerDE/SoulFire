@@ -30,7 +30,7 @@ import java.awt.*;
 public class PluginListPanel extends NavigationItem {
     @Inject
     public PluginListPanel(CardsContainer container) {
-        setLayout(new GridLayout(3, 3, 10, 10));
+        setLayout(new GridLayout(0, 3, 10, 10));
 
         for (var item : container.getPluginPages()) {
             if (item.getHidden()) {

@@ -37,7 +37,7 @@ import java.util.ArrayList;
 public class AccountPanel extends NavigationItem {
     @Inject
     public AccountPanel(GUIManager guiManager, GUIFrame parent, CardsContainer cardsContainer) {
-        setLayout(new GridLayout(2, 1, 10, 10));
+        setLayout(new GridLayout(0, 1, 10, 10));
 
         var accountOptionsPanel = new JPanel();
         accountOptionsPanel.setLayout(new GridLayout(2, 1, 10, 10));
