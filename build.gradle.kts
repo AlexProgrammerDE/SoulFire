@@ -9,9 +9,11 @@ plugins {
     id("net.kyori.indra.checkstyle")
 }
 
-group = "net.pistonmaster"
-version = "1.4.0-SNAPSHOT"
-description = "Advanced Minecraft Server-Stresser Tool."
+allprojects {
+    group = "net.pistonmaster"
+    version = "1.4.0-SNAPSHOT"
+    description = "Advanced Minecraft Server-Stresser Tool."
+}
 
 application {
     applicationName = "ServerWrecker"
