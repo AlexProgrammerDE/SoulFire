@@ -12,10 +12,11 @@ message StringSetting {
 }
 
 message IntSetting {
-  int32 def = 2;
-  int32 min = 3;
-  int32 max = 4;
-  int32 step = 5;
+  int32 def = 1;
+  int32 min = 2;
+  int32 max = 3;
+  int32 step = 4;
+  optional string format = 5;
 }
 
 message BoolSetting {

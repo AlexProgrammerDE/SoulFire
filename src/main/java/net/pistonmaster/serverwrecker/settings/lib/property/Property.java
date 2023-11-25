@@ -40,7 +40,12 @@ public sealed interface Property permits BooleanProperty, ComboProperty, IntProp
 
         public IntProperty ofInt(String key, String uiDescription, String cliDescription, String[] cliNames,
                                  int defaultValue, int minValue, int maxValue, int stepValue) {
-            return new IntProperty(namespace, key, uiDescription, cliDescription, cliNames, defaultValue, minValue, maxValue, stepValue);
+            return new IntProperty(namespace, key, uiDescription, cliDescription, cliNames, defaultValue, minValue, maxValue, stepValue, null);
+        }
+
+        public IntProperty ofInt(String key, String uiDescription, String cliDescription, String[] cliNames,
+                                 int defaultValue, int minValue, int maxValue, int stepValue, String format) {
+            return new IntProperty(namespace, key, uiDescription, cliDescription, cliNames, defaultValue, minValue, maxValue, stepValue, format);
         }
 
         public StringProperty ofString(String key, String uiDescription, String cliDescription, String[] cliNames,

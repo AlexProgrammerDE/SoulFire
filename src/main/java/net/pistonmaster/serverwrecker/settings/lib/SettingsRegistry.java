@@ -89,12 +89,7 @@ public class SettingsRegistry {
                                     .setKey(property.key())
                                     .setName(intProperty.uiDescription())
                                     .setType(ClientPluginSettingType.newBuilder()
-                                            .setInt(IntSetting.newBuilder()
-                                                    .setDef(intProperty.defaultValue())
-                                                    .setMin(intProperty.minValue())
-                                                    .setMax(intProperty.maxValue())
-                                                    .setStep(intProperty.stepValue())
-                                                    .build())
+                                            .setInt(createIntSetting(intProperty))
                                             .build())
                                     .build())
                             .build());
@@ -106,22 +101,12 @@ public class SettingsRegistry {
                                     .setMin(ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
                                             .setKey(minProperty.key())
                                             .setName(minProperty.uiDescription())
-                                            .setIntSetting(IntSetting.newBuilder()
-                                                    .setDef(minProperty.defaultValue())
-                                                    .setMin(minProperty.minValue())
-                                                    .setMax(minProperty.maxValue())
-                                                    .setStep(minProperty.stepValue())
-                                                    .build())
+                                            .setIntSetting(createIntSetting(minProperty))
                                             .build())
                                     .setMax(ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
                                             .setKey(maxProperty.key())
                                             .setName(maxProperty.uiDescription())
-                                            .setIntSetting(IntSetting.newBuilder()
-                                                    .setDef(maxProperty.defaultValue())
-                                                    .setMin(maxProperty.minValue())
-                                                    .setMax(maxProperty.maxValue())
-                                                    .setStep(maxProperty.stepValue())
-                                                    .build())
+                                            .setIntSetting(createIntSetting(maxProperty))
                                             .build())
                                     .build())
                             .build());
@@ -172,6 +157,20 @@ public class SettingsRegistry {
         }
 
         return list;
+    }
+
+    private static IntSetting createIntSetting(IntProperty property) {
+        var builder = IntSetting.newBuilder()
+                .setDef(property.defaultValue())
+                .setMin(property.minValue())
+                .setMax(property.maxValue())
+                .setStep(property.stepValue());
+
+        if (property.format() != null) {
+            builder = builder.setFormat(property.format());
+        }
+
+        return builder.build();
     }
 
     private record NamespaceRegistry(String pageName, boolean hidden, List<Property> properties) {

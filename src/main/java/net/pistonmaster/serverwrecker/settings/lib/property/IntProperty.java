@@ -19,6 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.settings.lib.property;
 
+import javax.annotation.Nullable;
+
 public record IntProperty(String namespace,
                           String key,
                           String uiDescription,
@@ -27,6 +29,7 @@ public record IntProperty(String namespace,
                           int defaultValue,
                           int minValue,
                           int maxValue,
-                          int stepValue
+                          int stepValue,
+                          @Nullable String format
 ) implements Property {
 }

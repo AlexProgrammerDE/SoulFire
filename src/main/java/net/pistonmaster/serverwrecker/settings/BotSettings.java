@@ -43,7 +43,8 @@ public class BotSettings implements SettingsObject {
             25565,
             1,
             65535,
-            1
+            1,
+            "#"
     );
     public static final IntProperty AMOUNT = BUILDER.ofInt(
             "amount",

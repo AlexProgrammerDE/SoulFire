@@ -48,6 +48,9 @@ public class GeneratedPanel extends NavigationItem {
         var spinner = new JSpinner(new SpinnerNumberModel(intSetting.getDef(), intSetting.getMin(), intSetting.getMax(), intSetting.getStep()));
         settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive((int) spinner.getValue()));
         settingsManager.registerListener(propertyKey, s -> spinner.setValue(s.getAsInt()));
+        if (intSetting.hasFormat()) {
+            spinner.setEditor(new JSpinner.NumberEditor(spinner, intSetting.getFormat()));
+        }
 
         return spinner;
     }
