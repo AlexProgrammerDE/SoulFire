@@ -5,8 +5,6 @@ plugins {
     id("net.kyori.indra.git")
 }
 
-group = "net.pistonmaster"
-
 sourceSets {
     main {
         blossom {
