@@ -104,6 +104,12 @@ public class SettingsManager {
                 }
             }
 
+            // Apply loaded accounts & proxies
+            if (settingsManager != null) {
+                settingsManager.accountRegistry.setAccounts(settingsSerialized.accounts());
+                settingsManager.proxyRegistry.setProxies(settingsSerialized.proxies());
+            }
+
             return new SettingsHolder(
                     intProperties,
                     booleanProperties,
