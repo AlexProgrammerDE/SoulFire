@@ -64,7 +64,7 @@ public class ExecutorManager {
 
     private ThreadFactory getThreadFactory(BotConnection botConnection, String threadName) {
         return runnable -> {
-            var thread = new Thread( () -> {
+            var thread = new Thread(() -> {
                 BOT_CONNECTION_THREAD_LOCAL.set(botConnection);
                 runnable.run();
                 BOT_CONNECTION_THREAD_LOCAL.remove();
