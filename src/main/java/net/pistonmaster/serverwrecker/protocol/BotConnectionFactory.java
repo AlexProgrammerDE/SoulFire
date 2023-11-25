@@ -49,7 +49,6 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
     }
 
     public BotConnection prepareConnectionInternal(ProtocolState targetState) {
-        var botSettings = settingsHolder.get(BotSettings.class);
         var meta = new BotConnectionMeta(minecraftAccount, targetState);
         var session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
         var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.getServerWreckerServer(),
@@ -68,9 +67,9 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
         session.getMeta().setSessionDataManager(sessionDataManager);
         session.getMeta().setBotControlAPI(new BotControlAPI(sessionDataManager, sessionDataManager.getBotMovementManager()));
 
-        session.setConnectTimeout(botSettings.connectTimeout());
-        session.setReadTimeout(botSettings.readTimeout());
-        session.setWriteTimeout(botSettings.writeTimeout());
+        session.setConnectTimeout(settingsHolder.get(BotSettings.CONNECT_TIMEOUT));
+        session.setReadTimeout(settingsHolder.get(BotSettings.READ_TIMEOUT));
+        session.setWriteTimeout(settingsHolder.get(BotSettings.WRITE_TIMEOUT));
 
         session.addListener(new SWBaseListener(botConnection, targetState));
         session.addListener(new SWSessionListener(sessionDataManager, botConnection));

@@ -17,12 +17,16 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.settings.lib;
+package net.pistonmaster.serverwrecker.plugins;
 
-/**
- * A duplex of {@link SettingsListener} and {@link SettingsProvider}.
- *
- * @param <T> The type of settings object.
- */
-public interface SettingsDuplex<T extends SettingsObject> extends SettingsListener<T>, SettingsProvider<T> {
+import net.pistonmaster.serverwrecker.api.MixinExtension;
+import net.pistonmaster.serverwrecker.api.ServerExtension;
+
+import java.util.Set;
+
+public interface InternalExtension extends ServerExtension, MixinExtension {
+    @Override
+    default Set<String> getMixinPaths() {
+        return Set.of();
+    }
 }

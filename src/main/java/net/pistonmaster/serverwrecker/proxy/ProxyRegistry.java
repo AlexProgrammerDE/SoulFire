@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.proxy;
 
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +28,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class ProxyRegistry implements SettingsDuplex<ProxyList> {
+public class ProxyRegistry {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyRegistry.class);
     private final List<SWProxy> proxies = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
@@ -75,13 +74,6 @@ public class ProxyRegistry implements SettingsDuplex<ProxyList> {
         }
     }
 
-    public List<SWProxy> getUsableProxies() {
-        return proxies
-                .stream()
-                .filter(SWProxy::enabled)
-                .toList();
-    }
-
     public List<SWProxy> getProxies() {
         return Collections.unmodifiableList(proxies);
     }
@@ -89,17 +81,6 @@ public class ProxyRegistry implements SettingsDuplex<ProxyList> {
     public void setProxies(List<SWProxy> proxies) {
         this.proxies.clear();
         this.proxies.addAll(proxies);
-    }
-
-    @Override
-    public void onSettingsChange(ProxyList settings) {
-        proxies.clear();
-        proxies.addAll(settings.proxies());
-    }
-
-    @Override
-    public ProxyList collectSettings() {
-        return new ProxyList(List.copyOf(proxies));
     }
 
     public void addLoadHook(Runnable runnable) {

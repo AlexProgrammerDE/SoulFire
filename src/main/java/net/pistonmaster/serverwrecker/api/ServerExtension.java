@@ -24,7 +24,7 @@ import org.pf4j.ExtensionPoint;
 
 /**
  * This interface loads only when the JVM is running as a ServerWrecker server.
- * Therefore you can also use this to load server-only classes.
+ * Therefore, you can also use this to load server-only classes.
  */
 public interface ServerExtension extends ExtensionPoint {
     default void onLoad() {

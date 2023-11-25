@@ -32,16 +32,16 @@ import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
 import io.jsonwebtoken.Jwts;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import lombok.Getter;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.pistonmaster.serverwrecker.addons.*;
 import net.pistonmaster.serverwrecker.api.ServerExtension;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackInitEvent;
-import net.pistonmaster.serverwrecker.auth.AccountList;
-import net.pistonmaster.serverwrecker.auth.AccountRegistry;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.command.ShutdownManager;
@@ -50,16 +50,14 @@ import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.data.TranslationMapper;
 import net.pistonmaster.serverwrecker.grpc.RPCServer;
-import net.pistonmaster.serverwrecker.gui.navigation.SettingsPanel;
 import net.pistonmaster.serverwrecker.logging.SWLogAppender;
+import net.pistonmaster.serverwrecker.plugins.*;
 import net.pistonmaster.serverwrecker.protocol.packet.SWClientboundStatusResponsePacket;
-import net.pistonmaster.serverwrecker.proxy.ProxyList;
-import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsRegistry;
 import net.pistonmaster.serverwrecker.util.VersionComparator;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
@@ -74,7 +72,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -100,19 +101,14 @@ public class ServerWreckerServer {
             .create();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final Map<String, String> serviceServerConfig = new HashMap<>();
-    private final AccountRegistry accountRegistry = new AccountRegistry();
-    private final ProxyRegistry proxyRegistry = new ProxyRegistry();
-    private final SettingsManager settingsManager = new SettingsManager(
-            BotSettings.class,
-            DevSettings.class,
-            AccountSettings.class,
-            AccountList.class,
-            ProxySettings.class,
-            ProxyList.class
-    );
+    private final SettingsRegistry settingsRegistry = new SettingsRegistry()
+            .addClass(BotSettings.class, "Bot Settings", true)
+            .addClass(DevSettings.class, "Dev Settings", true)
+            .addClass(AccountSettings.class, "Account Settings", true)
+            .addClass(ProxySettings.class, "Proxy Settings", true);
     private final OperationMode operationMode;
     private final boolean outdated;
-    private final Map<Integer, AttackManager> attacks = Collections.synchronizedMap(new Int2ObjectArrayMap<>());
+    private final Int2ObjectMap<AttackManager> attacks = Int2ObjectMaps.synchronize(new Int2ObjectArrayMap<>());
     private final RPCServer rpcServer;
     private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
     private final SecretKey jwtSecretKey;
@@ -146,9 +142,6 @@ public class ServerWreckerServer {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        settingsManager.registerDuplex(AccountList.class, accountRegistry);
-        settingsManager.registerDuplex(ProxyList.class, proxyRegistry);
 
         LOGGER.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
@@ -190,17 +183,14 @@ public class ServerWreckerServer {
 
         manager.onServerLoaded();
 
-        var settingsPanel = injector.getIfAvailable(SettingsPanel.class);
-        if (settingsPanel != null) {
-            settingsPanel.registerVersions();
-        }
-
         registerInternalServerExtensions();
         registerServerExtensions();
 
         for (var serverExtension : ServerWreckerAPI.getServerExtensions()) {
             serverExtension.onEnable(this);
         }
+
+        ServerWreckerAPI.postEvent(new SettingsRegistryInitEvent(settingsRegistry));
 
         LOGGER.info("Checking for updates...");
         outdated = checkForUpdates();
@@ -209,13 +199,13 @@ public class ServerWreckerServer {
     }
 
     private static void registerInternalServerExtensions() {
-        var addons = List.of(
+        var plugins = List.of(
                 new BotTicker(), new ClientBrand(), new ClientSettings(),
                 new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
                 new AutoTotem(), new AutoJump(), new AutoArmor(), new AutoEat(),
                 new ChatMessageLogger(), new ServerListBypass());
 
-        addons.forEach(ServerWreckerAPI::registerServerExtension);
+        plugins.forEach(ServerWreckerAPI::registerServerExtension);
     }
 
     private static void registerServerExtensions() {
@@ -259,6 +249,12 @@ public class ServerWreckerServer {
         return false;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
+    public static void setupLoggingAndVia(SettingsHolder settingsHolder) {
+        Via.getManager().debugHandler().setEnabled(settingsHolder.get(DevSettings.VIA_DEBUG));
+        ServerWreckerBootstrap.setupLogging(settingsHolder);
+    }
+
     /**
      * Generates a JWT for the admin user.
      *
@@ -269,12 +265,6 @@ public class ServerWreckerServer {
                 .subject("admin")
                 .signWith(jwtSecretKey, Jwts.SIG.HS256)
                 .compact();
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    public static void setupLoggingAndVia(DevSettings devSettings) {
-        Via.getManager().debugHandler().setEnabled(devSettings.viaDebug());
-        ServerWreckerBootstrap.setupLogging(devSettings);
     }
 
     private void shutdownHook() {
@@ -290,10 +280,6 @@ public class ServerWreckerServer {
         } catch (InterruptedException e) {
             LOGGER.error("Failed to stop RPC server", e);
         }
-    }
-
-    public int startAttack() {
-        return startAttack(settingsManager.collectSettings());
     }
 
     public int startAttack(SettingsHolder settingsHolder) {

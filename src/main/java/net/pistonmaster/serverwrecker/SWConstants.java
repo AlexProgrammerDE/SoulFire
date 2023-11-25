@@ -20,10 +20,12 @@
 package net.pistonmaster.serverwrecker;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import net.raphimc.viaaprilfools.api.AprilFoolsProtocolVersion;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -72,7 +74,10 @@ public class SWConstants {
         legacyVersions.remove(LegacyProtocolVersion.c0_30cpe);
         legacyVersions.add(index + 1, LegacyProtocolVersion.c0_30cpe);
 
-        return mergeLists(BedrockProtocolVersion.PROTOCOLS, legacyVersions, normalVersions);
+        var merged = mergeLists(BedrockProtocolVersion.PROTOCOLS, legacyVersions, normalVersions);
+        Collections.reverse(merged);
+
+        return merged;
     }
 
     @SafeVarargs
@@ -92,5 +97,9 @@ public class SWConstants {
 
     public static boolean isBedrock(ProtocolVersion version) {
         return BedrockProtocolVersion.PROTOCOLS.contains(version);
+    }
+
+    public static boolean isAprilFools(ProtocolVersion version) {
+        return AprilFoolsProtocolVersion.PROTOCOLS.contains(version);
     }
 }

@@ -19,17 +19,14 @@
  */
 package net.pistonmaster.serverwrecker;
 
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
-import net.pistonmaster.serverwrecker.cli.SWCommandDefinition;
+import net.pistonmaster.serverwrecker.cli.CLIManager;
 import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.gui.GUIClientProps;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
-import net.pistonmaster.serverwrecker.gui.theme.ThemeUtil;
+import net.pistonmaster.serverwrecker.gui.ThemeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import picocli.CommandLine;
 
 public class ServerWreckerLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerLoader.class);
@@ -47,20 +44,12 @@ public class ServerWreckerLoader {
     }
 
     public static void runHeadless(int port, String[] args) {
-        var serverWrecker = new ServerWreckerServer(OperationMode.CLI, "localhost", port);
-        var serverWreckerCommand = new SWCommandDefinition(serverWrecker);
-        var commandLine = new CommandLine(serverWreckerCommand);
-        serverWreckerCommand.setCommandLine(commandLine);
-        commandLine.setCaseInsensitiveEnumValuesAllowed(true);
-        commandLine.setUsageHelpAutoWidth(true);
-        commandLine.setUsageHelpLongOptionsMaxWidth(30);
-        commandLine.setExecutionExceptionHandler((ex, cmdLine, parseResult) -> {
-            LOGGER.error("Exception while executing command", ex);
-            return 1;
-        });
+        var host = "localhost";
+        var serverWrecker = new ServerWreckerServer(OperationMode.CLI, host, port);
 
-        ServerWreckerAPI.postEvent(new CommandManagerInitEvent(commandLine));
-        commandLine.execute(args);
+        var rpcClient = new RPCClient(host, port, serverWrecker.generateAdminJWT());
+        var cliManager = new CLIManager(rpcClient);
+        cliManager.initCLI(args);
     }
 
     public static void runGUI(int port) {
@@ -68,7 +57,7 @@ public class ServerWreckerLoader {
         var serverWrecker = new ServerWreckerServer(OperationMode.GUI, host, port);
 
         var rpcClient = new RPCClient(host, port, serverWrecker.generateAdminJWT());
-        var guiManager = new GUIManager(serverWrecker, rpcClient);
+        var guiManager = new GUIManager(rpcClient);
         guiManager.initGUI();
     }
 }

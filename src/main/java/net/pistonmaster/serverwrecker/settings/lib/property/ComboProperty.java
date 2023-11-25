@@ -17,16 +17,29 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.settings.lib.property;
 
-import net.pistonmaster.serverwrecker.api.MixinExtension;
-import net.pistonmaster.serverwrecker.api.ServerExtension;
+public record ComboProperty(
+        String namespace,
+        String key,
+        String uiDescription,
+        String cliDescription,
+        String[] cliNames,
+        ComboOption[] options,
+        int defaultValue
+) implements Property {
+    public record ComboOption(
+            String id,
+            String displayName
+    ) {
+        public static <T extends Enum<T>> ComboOption[] fromEnum(T[] values) {
+            ComboOption[] options = new ComboOption[values.length];
 
-import java.util.Set;
+            for (int i = 0; i < values.length; i++) {
+                options[i] = new ComboOption(values[i].name(), values[i].toString());
+            }
 
-public interface InternalExtension extends ServerExtension, MixinExtension {
-    @Override
-    default Set<String> getMixinPaths() {
-        return Set.of();
+            return options;
+        }
     }
 }

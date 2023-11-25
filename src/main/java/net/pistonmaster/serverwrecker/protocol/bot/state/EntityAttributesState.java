@@ -31,14 +31,6 @@ import java.util.Map;
 public class EntityAttributesState {
     private final Map<AttributeType, Attribute> attributeStore = new Object2ObjectOpenHashMap<>();
 
-    public boolean hasAttribute(AttributeType type) {
-        return attributeStore.containsKey(type);
-    }
-
-    public Attribute getAttribute(AttributeType type) {
-        return attributeStore.get(type);
-    }
-
     public static double getAttributeValue(Attribute attribute) {
         var value = attribute.getValue();
 
@@ -51,6 +43,14 @@ public class EntityAttributesState {
         }
 
         return value;
+    }
+
+    public boolean hasAttribute(AttributeType type) {
+        return attributeStore.containsKey(type);
+    }
+
+    public Attribute getAttribute(AttributeType type) {
+        return attributeStore.get(type);
     }
 
     public double getAttributeValue(AttributeType type) {

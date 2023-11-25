@@ -41,11 +41,10 @@ public class ResolveUtil {
     }
 
     public static InetSocketAddress resolveAddress(boolean isBedrock, SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup) {
-        var settings = settingsHolder.get(BotSettings.class);
-        var host = settings.host();
-        var port = settings.port();
+        var host = settingsHolder.get(BotSettings.HOST);
+        var port = settingsHolder.get(BotSettings.PORT);
 
-        if (!isBedrock && settings.trySrv()) {
+        if (!isBedrock && settingsHolder.get(BotSettings.TRY_SRV)) {
             var resolved = resolveSrv(host, port, eventLoopGroup);
             if (resolved.isPresent()) {
                 return resolved.get();

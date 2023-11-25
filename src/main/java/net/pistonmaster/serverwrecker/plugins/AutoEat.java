@@ -17,48 +17,32 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.addons;
+package net.pistonmaster.serverwrecker.plugins;
 
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.api.AddonCLIHelper;
-import net.pistonmaster.serverwrecker.api.AddonHelper;
 import net.pistonmaster.serverwrecker.api.ExecutorHelper;
+import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.CommandManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.data.DangerFood;
 import net.pistonmaster.serverwrecker.data.FoodType;
-import net.pistonmaster.serverwrecker.gui.libs.JMinMaxHelper;
-import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsProvider;
+import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
-import picocli.CommandLine;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.concurrent.TimeUnit;
 
 public class AutoEat implements InternalExtension {
-    @Override
-    public void onLoad() {
-        ServerWreckerAPI.registerListeners(AutoEat.class);
-        AddonHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoEat::onJoined);
-    }
-
     public static void onJoined(BotJoinedEvent event) {
         var connection = event.connection();
-        if (!connection.settingsHolder().has(AutoEatSettings.class)) {
-            return;
-        }
-
-        var settings = connection.settingsHolder().get(AutoEatSettings.class);
-        if (!settings.autoEat()) {
+        var settingsHolder = connection.settingsHolder();
+        if (!settingsHolder.get(AutoEatSettings.AUTO_EAT)) {
             return;
         }
 
@@ -143,97 +127,48 @@ public class AutoEat implements InternalExtension {
                     inventoryManager.unlockInventoryControl();
                 }
             }
-        }, settings.minDelay(), settings.maxDelay());
+        }, settingsHolder.get(AutoEatSettings.DELAY.min()), settingsHolder.get(AutoEatSettings.DELAY.max()));
     }
 
     @EventHandler
-    public static void onAddonPanel(AddonPanelInitEvent event) {
-        event.navigationItems().add(new AutoEatPanel(ServerWreckerAPI.getServerWrecker()));
+    public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+        event.settingsRegistry().addClass(AutoEatSettings.class, "Auto Eat");
     }
 
-    @EventHandler
-    public static void onCommandLine(CommandManagerInitEvent event) {
-        AddonCLIHelper.registerCommands(event.commandLine(), AutoEatSettings.class, new AutoEatCommand());
+    @Override
+    public void onLoad() {
+        ServerWreckerAPI.registerListeners(AutoEat.class);
+        PluginHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoEat::onJoined);
     }
 
-    private static class AutoEatPanel extends NavigationItem implements SettingsDuplex<AutoEatSettings> {
-        private final JCheckBox autoEat;
-        private final JSpinner minDelay;
-        private final JSpinner maxDelay;
-
-        AutoEatPanel(ServerWreckerServer serverWreckerServer) {
-            super();
-            serverWreckerServer.getSettingsManager().registerDuplex(AutoEatSettings.class, this);
-
-            setLayout(new GridLayout(0, 2));
-
-            add(new JLabel("Do Auto Eat?"));
-            autoEat = new PresetJCheckBox(AutoEatSettings.DEFAULT_AUTO_EAT);
-            add(autoEat);
-
-            add(new JLabel("Min Delay (Seconds)"));
-            minDelay = new JSpinner(new SpinnerNumberModel(AutoEatSettings.DEFAULT_MIN_DELAY, 1, 1000, 1));
-            add(minDelay);
-
-            add(new JLabel("Max Delay (Seconds)"));
-            maxDelay = new JSpinner(new SpinnerNumberModel(AutoEatSettings.DEFAULT_MAX_DELAY, 1, 1000, 1));
-            add(maxDelay);
-
-            JMinMaxHelper.applyLink(minDelay, maxDelay);
-        }
-
-        @Override
-        public String getNavigationName() {
-            return "Auto Eat";
-        }
-
-        @Override
-        public String getNavigationId() {
-            return "auto-eat";
-        }
-
-        @Override
-        public void onSettingsChange(AutoEatSettings settings) {
-            autoEat.setSelected(settings.autoEat());
-            minDelay.setValue(settings.minDelay());
-            maxDelay.setValue(settings.maxDelay());
-        }
-
-        @Override
-        public AutoEatSettings collectSettings() {
-            return new AutoEatSettings(
-                    autoEat.isSelected(),
-                    (int) minDelay.getValue(),
-                    (int) maxDelay.getValue()
-            );
-        }
-    }
-
-    private static class AutoEatCommand implements SettingsProvider<AutoEatSettings> {
-        @CommandLine.Option(names = {"--auto-eat"}, description = "Do auto eat?")
-        private boolean autoEat = AutoEatSettings.DEFAULT_AUTO_EAT;
-        @CommandLine.Option(names = {"--eat-min-delay"}, description = "Minimum delay between eating")
-        private int minDelay = AutoEatSettings.DEFAULT_MIN_DELAY;
-        @CommandLine.Option(names = {"--eat-max-delay"}, description = "Maximum delay between eating")
-        private int maxDelay = AutoEatSettings.DEFAULT_MAX_DELAY;
-
-        @Override
-        public AutoEatSettings collectSettings() {
-            return new AutoEatSettings(
-                    autoEat,
-                    minDelay,
-                    maxDelay
-            );
-        }
-    }
-
-    private record AutoEatSettings(
-            boolean autoEat,
-            int minDelay,
-            int maxDelay
-    ) implements SettingsObject {
-        public static final boolean DEFAULT_AUTO_EAT = true;
-        public static final int DEFAULT_MIN_DELAY = 1;
-        public static final int DEFAULT_MAX_DELAY = 2;
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    private static class AutoEatSettings implements SettingsObject {
+        public static final Property.Builder BUILDER = Property.builder("auto-eat");
+        public static final BooleanProperty AUTO_EAT = BUILDER.ofBoolean("auto-eat",
+                "Do Auto Eat?",
+                "Do Auto Eat?",
+                new String[]{"--auto-eat"},
+                true
+        );
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
+                BUILDER.ofInt("eat-min-delay",
+                        "Min delay (seconds)",
+                        "Minimum delay between eating",
+                        new String[]{"--eat-min-delay"},
+                        1,
+                        0,
+                        Integer.MAX_VALUE,
+                        1
+                ),
+                BUILDER.ofInt("eat-max-delay",
+                        "Max delay (seconds)",
+                        "Maximum delay between eating",
+                        new String[]{"--eat-max-delay"},
+                        2,
+                        0,
+                        Integer.MAX_VALUE,
+                        1
+                )
+        );
     }
 }

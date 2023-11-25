@@ -17,8 +17,10 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.auth;
+package net.pistonmaster.serverwrecker.api.event.lifecycle;
 
-public record StoredAccountData(AuthType authType, String username, String email, String password, String authToken,
-                                long tokenExpireAt) {
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsRegistry;
+
+public record SettingsRegistryInitEvent(SettingsRegistry settingsRegistry) implements ServerWreckerGlobalEvent {
 }

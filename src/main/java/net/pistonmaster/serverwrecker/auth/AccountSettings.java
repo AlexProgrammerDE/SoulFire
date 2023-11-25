@@ -19,9 +19,28 @@
  */
 package net.pistonmaster.serverwrecker.auth;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
+import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
+import net.pistonmaster.serverwrecker.settings.lib.property.StringProperty;
 
-public record AccountSettings(String nameFormat, boolean shuffleAccounts) implements SettingsObject {
-    public static final String DEFAULT_NAME_FORMAT = "Bot_%d";
-    public static final boolean DEFAULT_SHUFFLE_ACCOUNTS = false;
+@NoArgsConstructor(access = AccessLevel.NONE)
+public class AccountSettings implements SettingsObject {
+    private static final Property.Builder BUILDER = Property.builder("account");
+    public static final StringProperty NAME_FORMAT = BUILDER.ofString(
+            "nameFormat",
+            "Name format",
+            "The format of the bot names. %d will be replaced with the bot number.",
+            new String[]{"--name-format"},
+            "Bot_%d"
+    );
+    public static final BooleanProperty SHUFFLE_ACCOUNTS = BUILDER.ofBoolean(
+            "shuffleAccounts",
+            "Shuffle accounts",
+            "Should the accounts be shuffled?",
+            new String[]{"--shuffle-accounts"},
+            false
+    );
 }

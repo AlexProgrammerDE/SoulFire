@@ -34,8 +34,7 @@ public class NavigationWrapper {
         topBar.setLayout(new BorderLayout());
 
         var back = new JButton("Back");
-        var cardLayout = (CardLayout) container.getLayout();
-        back.addActionListener(action -> cardLayout.show(container, target));
+        back.addActionListener(action -> container.show(target));
 
         topBar.add(back, BorderLayout.PAGE_END);
         topBar.setSize(new Dimension(topBar.getWidth(), 20));

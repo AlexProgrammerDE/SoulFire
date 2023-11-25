@@ -27,7 +27,6 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.auth.service.*;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +35,7 @@ import java.io.IOException;
 import java.util.*;
 
 @RequiredArgsConstructor
-public class AccountRegistry implements SettingsDuplex<AccountList> {
+public class AccountRegistry {
     public static final Logger LOGGER = LoggerFactory.getLogger(AccountRegistry.class);
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final List<MinecraftAccount> accounts = new ArrayList<>();
@@ -200,23 +199,6 @@ public class AccountRegistry implements SettingsDuplex<AccountList> {
     public void setAccounts(List<MinecraftAccount> accounts) {
         this.accounts.clear();
         this.accounts.addAll(accounts);
-    }
-
-    public List<MinecraftAccount> getUsableAccounts() {
-        return accounts.stream()
-                .filter(MinecraftAccount::enabled)
-                .toList();
-    }
-
-    @Override
-    public void onSettingsChange(AccountList settings) {
-        accounts.clear();
-        accounts.addAll(settings.accounts());
-    }
-
-    @Override
-    public AccountList collectSettings() {
-        return new AccountList(List.copyOf(accounts));
     }
 
     public void addLoadHook(Runnable hook) {

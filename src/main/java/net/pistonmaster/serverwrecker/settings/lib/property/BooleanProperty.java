@@ -17,9 +17,13 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.gui.theme;
+package net.pistonmaster.serverwrecker.settings.lib.property;
 
-import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-
-public record ThemeSettings(String themeClass) implements SettingsObject {
+public record BooleanProperty(String namespace,
+                              String key,
+                              String uiDescription,
+                              String cliDescription,
+                              String[] cliNames,
+                              boolean defaultValue
+) implements Property {
 }

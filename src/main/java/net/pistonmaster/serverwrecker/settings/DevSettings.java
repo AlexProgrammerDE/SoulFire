@@ -19,13 +19,41 @@
  */
 package net.pistonmaster.serverwrecker.settings;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
+import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 
-public record DevSettings(boolean viaDebug, boolean nettyDebug, boolean grpcDebug,
-                          boolean coreDebug) implements SettingsObject {
-    public static final boolean DEFAULT_VIA_DEBUG = false;
-    public static final boolean DEFAULT_NETTY_DEBUG = false;
-    public static final boolean DEFAULT_GRPC_DEBUG = false;
-    public static final boolean DEFAULT_CORE_DEBUG = false;
-    public static DevSettings DEFAULT = new DevSettings(DEFAULT_VIA_DEBUG, DEFAULT_NETTY_DEBUG, DEFAULT_GRPC_DEBUG, DEFAULT_CORE_DEBUG);
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class DevSettings implements SettingsObject {
+    public static final Property.Builder BUILDER = Property.builder("dev");
+    public static final BooleanProperty VIA_DEBUG = BUILDER.ofBoolean(
+            "viaDebug",
+            "Via Debug",
+            "Enable Via debug",
+            new String[]{"--via-debug"},
+            false
+    );
+    public static final BooleanProperty NETTY_DEBUG = BUILDER.ofBoolean(
+            "nettyDebug",
+            "Netty Debug",
+            "Enable Netty debug",
+            new String[]{"--netty-debug"},
+            false
+    );
+    public static final BooleanProperty GRPC_DEBUG = BUILDER.ofBoolean(
+            "grpcDebug",
+            "GRPC Debug",
+            "Enable GRPC debug",
+            new String[]{"--grpc-debug"},
+            false
+    );
+    public static final BooleanProperty CORE_DEBUG = BUILDER.ofBoolean(
+            "coreDebug",
+            "Core Debug",
+            "Enable Core debug",
+            new String[]{"--core-debug"},
+            false
+    );
 }

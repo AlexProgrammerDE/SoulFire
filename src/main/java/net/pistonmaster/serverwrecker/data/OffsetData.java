@@ -25,11 +25,6 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public record OffsetData(OffsetType type, float maxHorizontalOffset, float maxVerticalOffset) {
-    public enum OffsetType {
-        XZ,
-        XYZ
-    }
-
     public Vector3d getOffsetForBlock(Vector3i block) {
         return switch (type) {
             case XYZ -> {
@@ -46,5 +41,10 @@ public record OffsetData(OffsetType type, float maxHorizontalOffset, float maxVe
                 yield Vector3d.from(xOffset, 0.0, zOffset);
             }
         };
+    }
+
+    public enum OffsetType {
+        XZ,
+        XYZ
     }
 }

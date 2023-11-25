@@ -27,6 +27,7 @@ import net.pistonmaster.serverwrecker.gui.navigation.ControlPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 public class GUIFrame extends JFrame {
     public static final String MAIN_MENU = "MainMenu";
@@ -35,9 +36,51 @@ public class GUIFrame extends JFrame {
         super("ServerWrecker");
     }
 
+    public static void showHints(Injector injector) {
+        var logPanel = injector.getSingleton(LogPanel.class);
+        var cardContainer = injector.getSingleton(CardsContainer.class);
+
+        var commandsHint = new HintManager.Hint(
+                "Use \"help\" to get a list of all commands.",
+                (Component) Objects.requireNonNull(logPanel.getClientProperty("log-panel-command-input")),
+                SwingConstants.TOP, "hint.commandInput", null);
+
+        var controlsHint = new HintManager.Hint(
+                "Here you can start, pause and stop a attack.",
+                injector.getSingleton(ControlPanel.class),
+                SwingConstants.TOP, "hint.controls", commandsHint);
+
+        var pluginsHint = new HintManager.Hint(
+                "Click to configure plugins to make the attack more effective.",
+                (Component) Objects.requireNonNull(cardContainer.getClientProperty("plugin-menu-button")),
+                SwingConstants.BOTTOM, "hint.pluginsButton", controlsHint);
+
+        var proxyHint = new HintManager.Hint(
+                "Click to import HTTP, SOCKS4 and SOCKS5 proxies",
+                (Component) Objects.requireNonNull(cardContainer.getClientProperty("proxy-menu-button")),
+                SwingConstants.LEFT, "hint.proxyButton", pluginsHint);
+
+        var accountsHint = new HintManager.Hint(
+                "Click to configure the bot offline-mode key format or bring your own accounts.",
+                (Component) Objects.requireNonNull(cardContainer.getClientProperty("account-menu-button")),
+                SwingConstants.RIGHT, "hint.accountsButton", proxyHint);
+
+        var settingsHint = new HintManager.Hint(
+                "Click to configure host, port, version and more.",
+                (Component) Objects.requireNonNull(cardContainer.getClientProperty("bot-button")),
+                SwingConstants.BOTTOM, "hint.settingsButton", accountsHint);
+
+        var logsHint = new HintManager.Hint(
+                "Here are all logs of the software displayed. You can select text and right click it to upload it to pastes.dev",
+                logPanel,
+                SwingConstants.LEFT, "hint.logPanel", settingsHint);
+
+        HintManager.showHint(logsHint);
+    }
+
     public void initComponents(Injector injector) {
         if (SystemInfo.isMacOS) {
-            // Hide window title because we want to avoid dark-mode name issues
+            // Hide window title because we want to avoid dark-mode key issues
             getRootPane().putClientProperty("apple.awt.windowTitleVisible", false);
         }
 
@@ -90,47 +133,5 @@ public class GUIFrame extends JFrame {
                 GUIClientProps.setBoolean("firstRun", false);
             }
         }
-    }
-
-    public static void showHints(Injector injector) {
-        var logPanel = injector.getSingleton(LogPanel.class);
-        var cardContainer = injector.getSingleton(CardsContainer.class);
-
-        var commandsHint = new HintManager.Hint(
-                "Use \"help\" to get a list of all commands.",
-                (Component) logPanel.getClientProperty("log-panel-command-input"),
-                SwingConstants.TOP, "hint.commandInput", null);
-
-        var controlsHint = new HintManager.Hint(
-                "Here you can start, pause and stop a attack.",
-                injector.getSingleton(ControlPanel.class),
-                SwingConstants.TOP, "hint.controls", commandsHint);
-
-        var addonsHint = new HintManager.Hint(
-                "Click to configure addons to make the attack more effective.",
-                (Component) cardContainer.getClientProperty("addon-menu-button"),
-                SwingConstants.BOTTOM, "hint.addonsButton", controlsHint);
-
-        var proxyHint = new HintManager.Hint(
-                "Click to import HTTP, SOCKS4 and SOCKS5 proxies",
-                (Component) cardContainer.getClientProperty("proxy-menu-button"),
-                SwingConstants.LEFT, "hint.proxyButton", addonsHint);
-
-        var accountsHint = new HintManager.Hint(
-                "Click to configure the bot offline-mode name format or bring your own accounts.",
-                (Component) cardContainer.getClientProperty("account-menu-button"),
-                SwingConstants.RIGHT, "hint.accountsButton", proxyHint);
-
-        var settingsHint = new HintManager.Hint(
-                "Click to configure host, port, version and more.",
-                (Component) cardContainer.getClientProperty("settings-menu-button"),
-                SwingConstants.BOTTOM, "hint.settingsButton", accountsHint);
-
-        var logsHint = new HintManager.Hint(
-                "Here are all logs of the software displayed. You can select text and right click it to upload it to pastes.dev",
-                logPanel,
-                SwingConstants.LEFT, "hint.logPanel", settingsHint);
-
-        HintManager.showHint(logsHint);
     }
 }

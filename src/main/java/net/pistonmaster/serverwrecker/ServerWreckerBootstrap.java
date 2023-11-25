@@ -27,6 +27,7 @@ import net.lenni0451.reflect.Agents;
 import net.pistonmaster.serverwrecker.api.MixinExtension;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.fusesource.jansi.AnsiConsole;
@@ -47,6 +48,11 @@ import java.util.HashSet;
  * setting up logging.
  */
 public class ServerWreckerBootstrap {
+    public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
+    public static final Path PLUGINS_FOLDER = DATA_FOLDER.resolve("plugins");
+    public static final PluginManager PLUGIN_MANAGER = new JarPluginManager(PLUGINS_FOLDER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerBootstrap.class);
+
     static {
         System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
 
@@ -63,17 +69,12 @@ public class ServerWreckerBootstrap {
         }
     }
 
-    public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
-    public static final Path PLUGINS_FOLDER = DATA_FOLDER.resolve("plugins");
-    public static final PluginManager PLUGIN_MANAGER = new JarPluginManager(PLUGINS_FOLDER);
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerBootstrap.class);
-
     private ServerWreckerBootstrap() {
     }
 
     public static void main(String[] args) {
         injectAnsi();
-        setupLogging(DevSettings.DEFAULT);
+        setupLogging(SettingsHolder.EMPTY);
 
         injectExceptionHandler();
 
@@ -167,10 +168,10 @@ public class ServerWreckerBootstrap {
         AnsiConsole.systemInstall();
     }
 
-    public static void setupLogging(DevSettings devSettings) {
-        var level = devSettings.coreDebug() ? Level.DEBUG : Level.INFO;
-        var nettyLevel = devSettings.nettyDebug() ? Level.DEBUG : Level.INFO;
-        var grpcLevel = devSettings.grpcDebug() ? Level.DEBUG : Level.INFO;
+    public static void setupLogging(SettingsHolder settingsHolder) {
+        var level = settingsHolder.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO;
+        var nettyLevel = settingsHolder.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO;
+        var grpcLevel = settingsHolder.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO;
         Configurator.setRootLevel(level);
         Configurator.setLevel("io.netty", nettyLevel);
         Configurator.setLevel("io.grpc", grpcLevel);

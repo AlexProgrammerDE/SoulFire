@@ -22,8 +22,11 @@ package net.pistonmaster.serverwrecker.grpc;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
-import net.pistonmaster.serverwrecker.grpc.generated.*;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
+import net.pistonmaster.serverwrecker.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientPlugin;
+import net.pistonmaster.serverwrecker.grpc.generated.ConfigServiceGrpc;
+import net.pistonmaster.serverwrecker.grpc.generated.UIClientDataResponse;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -31,31 +34,18 @@ import java.util.Collection;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
-    private final SettingsManager settingsManager;
+    private final ServerWreckerServer serverWreckerServer;
 
-    @Override
-    public void getUIClientData(ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
-        var username = Constant.CLIENT_ID_CONTEXT_KEY.get();
-        responseObserver.onNext(
-                UIClientDataResponse.newBuilder()
-                        .setUsername(username)
-                        .addAllExtensions(getExtensions())
-                        .addAllExtensionSettings(getExtensionSettings())
-                        .build()
-        );
-        responseObserver.onCompleted();
-    }
-
-    private static Collection<ClientExtension> getExtensions() {
-        var extensions = new ArrayList<ClientExtension>();
+    private static Collection<ClientPlugin> getExtensions() {
+        var plugins = new ArrayList<ClientPlugin>();
         for (var pluginWrapper : ServerWreckerBootstrap.PLUGIN_MANAGER.getPlugins()) {
             var id = pluginWrapper.getPluginId();
             var description = pluginWrapper.getDescriptor().getPluginDescription();
             var version = pluginWrapper.getDescriptor().getVersion();
             var provider = pluginWrapper.getDescriptor().getProvider();
 
-            extensions.add(
-                    ClientExtension.newBuilder()
+            plugins.add(
+                    ClientPlugin.newBuilder()
                             .setId(id)
                             .setDescription(description)
                             .setVersion(version)
@@ -64,12 +54,19 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
             );
         }
 
-        return extensions;
+        return plugins;
     }
 
-    private Collection<ClientExtensionSettingsData> getExtensionSettings() {
-        var extensionSettings = new ArrayList<ClientExtensionSettingsData>();
-
-        return extensionSettings;
+    @Override
+    public void getUIClientData(ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
+        var username = Constant.CLIENT_ID_CONTEXT_KEY.get();
+        responseObserver.onNext(
+                UIClientDataResponse.newBuilder()
+                        .setUsername(username)
+                        .addAllPlugins(getExtensions())
+                        .addAllPluginSettings(serverWreckerServer.getSettingsRegistry().exportSettingsMeta())
+                        .build()
+        );
+        responseObserver.onCompleted();
     }
 }

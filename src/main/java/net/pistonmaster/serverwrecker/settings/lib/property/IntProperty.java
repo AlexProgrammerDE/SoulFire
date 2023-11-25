@@ -17,17 +17,19 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.api.event.lifecycle;
+package net.pistonmaster.serverwrecker.settings.lib.property;
 
-import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
-import net.pistonmaster.serverwrecker.gui.navigation.NavigationItem;
+import javax.annotation.Nullable;
 
-import java.util.List;
-
-/**
- * Add yourself to the addon panel by adding a {@link NavigationItem} to the list.
- *
- * @param navigationItems The list of navigation items.
- */
-public record AddonPanelInitEvent(List<NavigationItem> navigationItems) implements ServerWreckerGlobalEvent {
+public record IntProperty(String namespace,
+                          String key,
+                          String uiDescription,
+                          String cliDescription,
+                          String[] cliNames,
+                          int defaultValue,
+                          int minValue,
+                          int maxValue,
+                          int stepValue,
+                          @Nullable String format
+) implements Property {
 }

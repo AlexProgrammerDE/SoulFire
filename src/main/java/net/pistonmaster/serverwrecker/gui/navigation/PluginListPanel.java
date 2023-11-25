@@ -20,31 +20,26 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import lombok.Getter;
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.AddonPanelInitEvent;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
-public class AddonPanel extends NavigationItem {
-    private final List<NavigationItem> navigationItems = new ArrayList<>();
-
+public class PluginListPanel extends NavigationItem {
     @Inject
-    public AddonPanel(CardsContainer container) {
-        ServerWreckerAPI.postEvent(new AddonPanelInitEvent(navigationItems));
+    public PluginListPanel(CardsContainer container) {
+        setLayout(new GridLayout(0, 3, 10, 10));
 
-        setLayout(new GridLayout(3, 3, 10, 10));
-        var cardLayout = (CardLayout) container.getLayout();
+        for (var item : container.getPluginPages()) {
+            if (item.getHidden()) {
+                continue;
+            }
 
-        for (var item : navigationItems) {
-            var button = new JButton(SwingTextUtils.htmlCenterText(item.getNavigationName()));
+            var button = new JButton(SwingTextUtils.htmlCenterText(item.getPageName()));
 
-            button.addActionListener(action -> cardLayout.show(container, item.getNavigationId()));
+            button.addActionListener(action -> container.show(item.getNamespace()));
             button.setSize(new Dimension(50, 50));
 
             add(button);
@@ -53,11 +48,11 @@ public class AddonPanel extends NavigationItem {
 
     @Override
     public String getNavigationName() {
-        return "Addons";
+        return "Plugins";
     }
 
     @Override
     public String getNavigationId() {
-        return "addon-menu";
+        return "plugin-menu";
     }
 }

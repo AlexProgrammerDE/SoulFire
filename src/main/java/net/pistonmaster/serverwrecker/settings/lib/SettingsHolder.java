@@ -19,17 +19,46 @@
  */
 package net.pistonmaster.serverwrecker.settings.lib;
 
-import java.util.List;
+import it.unimi.dsi.fastutil.objects.*;
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
+import net.pistonmaster.serverwrecker.settings.lib.property.*;
 
-public record SettingsHolder(List<? extends SettingsObject> settings) {
-    public <T extends SettingsObject> T get(Class<T> clazz) {
-        return settings.stream()
-                .filter(clazz::isInstance)
-                .map(clazz::cast)
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("No settings found for " + clazz.getSimpleName()));
+import java.util.List;
+import java.util.function.Function;
+
+public record SettingsHolder(
+        Object2IntMap<PropertyKey> intProperties,
+        Object2BooleanMap<PropertyKey> booleanProperties,
+        Object2ObjectMap<PropertyKey, String> stringProperties,
+        List<MinecraftAccount> accounts,
+        List<SWProxy> proxies
+) {
+    public static final SettingsHolder EMPTY = new SettingsHolder(
+            Object2IntMaps.emptyMap(),
+            Object2BooleanMaps.emptyMap(),
+            Object2ObjectMaps.emptyMap(),
+            List.of(),
+            List.of()
+    );
+
+    public int get(IntProperty property) {
+        return intProperties.getOrDefault(property.propertyKey(), property.defaultValue());
     }
 
-    public <T extends SettingsObject> boolean has(Class<T> clazz) {
-        return settings.stream().anyMatch(clazz::isInstance);
+    public boolean get(BooleanProperty property) {
+        return booleanProperties.getOrDefault(property.propertyKey(), property.defaultValue());
+    }
+
+    public String get(StringProperty property) {
+        return stringProperties.getOrDefault(property.propertyKey(), property.defaultValue());
+    }
+
+    public <T> T get(ComboProperty property, Function<String, T> converter) {
+        return converter.apply(stringProperties.getOrDefault(property.propertyKey(), property.options()[property.defaultValue()].id()));
+    }
+
+    public <T extends Enum<T>> T get(ComboProperty property, Class<T> clazz) {
+        return get(property, s -> Enum.valueOf(clazz, s));
     }
 }

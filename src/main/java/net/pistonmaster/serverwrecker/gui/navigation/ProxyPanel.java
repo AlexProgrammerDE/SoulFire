@@ -24,12 +24,8 @@ import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.gui.popups.ImportTextDialog;
-import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -38,15 +34,10 @@ import java.awt.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySettings> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyPanel.class);
-    private final JSpinner botsPerProxy = new JSpinner();
-
+public class ProxyPanel extends NavigationItem {
     @Inject
-    public ProxyPanel(GUIManager guiManager, GUIFrame parent) {
-        guiManager.getSettingsManager().registerDuplex(ProxySettings.class, this);
-
-        setLayout(new GridLayout(2, 1, 10, 10));
+    public ProxyPanel(GUIManager guiManager, GUIFrame parent, CardsContainer cardsContainer) {
+        setLayout(new GridLayout(0, 1, 10, 10));
 
         var proxyOptionsPanel = new JPanel();
         proxyOptionsPanel.setLayout(new GridLayout(2, 1, 10, 10));
@@ -63,9 +54,7 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
         var proxySettingsPanel = new JPanel();
         proxySettingsPanel.setLayout(new GridLayout(0, 2));
 
-        proxySettingsPanel.add(new JLabel("Accounts per proxy: "));
-        botsPerProxy.setValue(ProxySettings.DEFAULT_BOTS_PER_PROXY);
-        proxySettingsPanel.add(botsPerProxy);
+        GeneratedPanel.addComponents(proxySettingsPanel, cardsContainer.getByNamespace("proxy"), guiManager.getSettingsManager());
 
         proxyOptionsPanel.add(proxySettingsPanel);
 
@@ -170,17 +159,5 @@ public class ProxyPanel extends NavigationItem implements SettingsDuplex<ProxySe
     @Override
     public String getNavigationId() {
         return "proxy-menu";
-    }
-
-    @Override
-    public void onSettingsChange(ProxySettings settings) {
-        botsPerProxy.setValue(settings.botsPerProxy());
-    }
-
-    @Override
-    public ProxySettings collectSettings() {
-        return new ProxySettings(
-                (int) botsPerProxy.getValue()
-        );
     }
 }

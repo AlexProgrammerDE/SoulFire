@@ -19,113 +19,122 @@
  */
 package net.pistonmaster.serverwrecker.settings.lib;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.gson.*;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import net.pistonmaster.serverwrecker.auth.service.AccountData;
+import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import lombok.Getter;
+import net.pistonmaster.serverwrecker.auth.AccountRegistry;
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
+import net.pistonmaster.serverwrecker.settings.lib.property.PropertyKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
+import javax.inject.Provider;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class SettingsManager {
     public static final Logger LOGGER = LoggerFactory.getLogger(SettingsManager.class);
-    private final List<ListenerRegistration<?>> listeners = new ArrayList<>();
-    private final List<ProviderRegistration<?>> providers = new ArrayList<>();
-    private final Class<? extends SettingsObject>[] registeredSettings;
     // Used to read & write the settings file
-    private final Gson dumpGson = new GsonBuilder().setPrettyPrinting().create();
-    private final Gson baseGson = new GsonBuilder()
-            .registerTypeAdapter(ProtocolVersion.class, new ProtocolVersionAdapter())
+    private static final Gson dumpGson = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson baseGson = new GsonBuilder()
             .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
             .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
             .create();
-    private final Gson normalGson = baseGson.newBuilder()
-            .registerTypeHierarchyAdapter(AccountData.class, new ClassObjectAdapter(baseGson))
-            .create();
-    private final Gson settingsTypeGson = new GsonBuilder()
-            .registerTypeHierarchyAdapter(Object.class, new ClassObjectAdapter(normalGson))
-            .create();
+    private final Multimap<PropertyKey, Consumer<JsonElement>> listeners = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
+    private final Map<PropertyKey, Provider<JsonElement>> providers = new HashMap<>();
+    @Getter
+    private final AccountRegistry accountRegistry = new AccountRegistry();
+    @Getter
+    private final ProxyRegistry proxyRegistry = new ProxyRegistry();
 
-    @SafeVarargs
-    public SettingsManager(Class<? extends SettingsObject>... registeredSettings) {
-        this.registeredSettings = registeredSettings;
-    }
+    public static SettingsHolder createSettingsHolder(String json, @Nullable SettingsManager settingsManager) {
+        try {
+            var settingsSerialized = baseGson.fromJson(json, RootDataStructure.class);
+            var settingsData = settingsSerialized.settings();
+            var intProperties = new Object2IntArrayMap<PropertyKey>();
+            var booleanProperties = new Object2BooleanArrayMap<PropertyKey>();
+            var stringProperties = new Object2ObjectArrayMap<PropertyKey, String>();
 
-    public <T extends SettingsObject> void registerListener(Class<T> clazz, SettingsListener<T> listener) {
-        listeners.add(new ListenerRegistration<>(clazz, listener));
-    }
+            for (var entry : settingsData.entrySet()) {
+                var namespace = entry.getKey();
+                for (var setting : entry.getValue().getAsJsonObject().entrySet()) {
+                    var key = setting.getKey();
+                    var settingData = setting.getValue();
 
-    public <T extends SettingsObject> void registerProvider(Class<T> clazz, SettingsProvider<T> provider) {
-        providers.add(new ProviderRegistration<>(clazz, provider));
-    }
+                    var propertyKey = new PropertyKey(namespace, key);
 
-    public <T extends SettingsObject> void registerDuplex(Class<T> clazz, SettingsDuplex<T> duplex) {
-        registerListener(clazz, duplex);
-        registerProvider(clazz, duplex);
-    }
+                    if (settingsManager != null) {
+                        // Notify all listeners that this setting has been loaded
+                        settingsManager.listeners.get(propertyKey)
+                                .forEach(listener -> listener.accept(settingData));
+                    }
 
-    public SettingsHolder collectSettings() {
-        var settingsHolder = new SettingsHolder(providers.stream()
-                .map(ProviderRegistration::provider)
-                .map(SettingsProvider::collectSettings)
-                .toList());
-
-        for (var clazz : registeredSettings) {
-            if (!settingsHolder.has(clazz)) {
-                throw new IllegalArgumentException("No settings found for " + clazz.getSimpleName());
+                    if (settingData.isJsonPrimitive()) {
+                        var primitive = settingData.getAsJsonPrimitive();
+                        if (primitive.isBoolean()) {
+                            booleanProperties.put(propertyKey, primitive.getAsBoolean());
+                        } else if (primitive.isNumber()) {
+                            intProperties.put(propertyKey, primitive.getAsInt());
+                        } else if (primitive.isString()) {
+                            stringProperties.put(propertyKey, primitive.getAsString());
+                        } else {
+                            throw new IllegalArgumentException("Unknown primitive type: " + primitive);
+                        }
+                    } else {
+                        throw new IllegalArgumentException("Unknown type: " + settingData);
+                    }
+                }
             }
-        }
 
-        return settingsHolder;
-    }
-
-    public void onSettingsLoad(SettingsHolder settings) {
-        for (SettingsObject setting : settings.settings()) {
-            for (var listener : listeners) {
-                loadSetting(setting, listener);
+            // Apply loaded accounts & proxies
+            if (settingsManager != null) {
+                settingsManager.accountRegistry.setAccounts(settingsSerialized.accounts());
+                settingsManager.proxyRegistry.setProxies(settingsSerialized.proxies());
             }
+
+            return new SettingsHolder(
+                    intProperties,
+                    booleanProperties,
+                    stringProperties,
+                    settingsSerialized.accounts(),
+                    settingsSerialized.proxies()
+            );
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
         }
     }
 
-    private <T extends SettingsObject> void loadSetting(SettingsObject setting, ListenerRegistration<T> registration) {
-        if (registration.clazz.isInstance(setting)) {
-            var castedSetting = registration.clazz.cast(setting);
-            registration.listener.onSettingsChange(castedSetting);
-        }
+    public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {
+        providers.put(property, provider);
+    }
+
+    public void registerListener(PropertyKey property, Consumer<JsonElement> listener) {
+        listeners.put(property, listener);
     }
 
     public void loadProfile(Path path) throws IOException {
         try {
-            onSettingsLoad(createSettingsHolder(Files.readString(path)));
+            createSettingsHolder(Files.readString(path), this);
         } catch (Exception e) {
             throw new IOException(e);
-        }
-    }
-
-    public SettingsHolder createSettingsHolder(String json) {
-        try {
-            var settingsHolder = dumpGson.fromJson(json, JsonArray.class);
-            List<SettingsObject> settingsObjects = new ArrayList<>();
-            for (var jsonElement : settingsHolder) {
-                settingsObjects.add(settingsTypeGson.fromJson(jsonElement, SettingsObject.class));
-            }
-
-            return new SettingsHolder(settingsObjects);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
         }
     }
 
@@ -140,91 +149,75 @@ public class SettingsManager {
     }
 
     public String exportSettings() {
-        List<JsonElement> settingsHolder = new ArrayList<>();
-        for (SettingsObject settingsObject : collectSettings().settings()) {
-            settingsHolder.add(settingsTypeGson.toJsonTree(settingsObject));
-        }
+        var settingsData = new JsonObject();
+        for (var providerEntry : providers.entrySet()) {
+            var property = providerEntry.getKey();
+            var provider = providerEntry.getValue();
 
-        return dumpGson.toJson(settingsHolder);
-    }
+            var namespace = property.namespace();
+            var settingId = property.key();
+            var value = provider.get();
 
-    private record ListenerRegistration<T extends SettingsObject>(Class<T> clazz, SettingsListener<T> listener) {
-    }
-
-    private record ProviderRegistration<T extends SettingsObject>(Class<T> clazz, SettingsProvider<T> provider) {
-    }
-
-    private static class ProtocolVersionAdapter implements JsonSerializer<ProtocolVersion>, JsonDeserializer<ProtocolVersion> {
-        @Override
-        public ProtocolVersion deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            return ProtocolVersion.getClosest(json.getAsString());
-        }
-
-        @Override
-        public JsonElement serialize(ProtocolVersion src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(src.getName());
-        }
-    }
-
-    private record ClassObjectAdapter(Gson gson) implements JsonSerializer<Object>, JsonDeserializer<Object> {
-        @Override
-        public JsonElement serialize(Object src, Type typeOfSrc, JsonSerializationContext context) {
-            var serialized = gson.toJsonTree(src);
-            var jsonObject = serialized.getAsJsonObject();
-            jsonObject.addProperty("class", src.getClass().getName());
-            return jsonObject;
-        }
-
-        @Override
-        public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            var jsonObject = json.getAsJsonObject();
-            var className = jsonObject.get("class").getAsString();
-            try {
-                var clazz = Class.forName(className);
-                return gson.fromJson(jsonObject, clazz);
-            } catch (ClassNotFoundException e) {
-                return null; // Some extension might not be loaded, so we just ignore it
+            var namespaceData = settingsData.getAsJsonObject(namespace);
+            if (namespaceData == null) {
+                namespaceData = new JsonObject();
+                settingsData.add(namespace, namespaceData);
             }
+
+            namespaceData.add(settingId, value);
         }
+
+        var settingsSerialized = new RootDataStructure(
+                settingsData,
+                accountRegistry.getAccounts(),
+                proxyRegistry.getProxies()
+        );
+
+        return dumpGson.toJson(settingsSerialized);
     }
 
-    private static class ECPublicKeyAdapter implements JsonSerializer<ECPublicKey>, JsonDeserializer<ECPublicKey> {
-        @Override
-        public ECPublicKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            var base64 = json.getAsString();
-            var bytes = Base64.getDecoder().decode(base64);
+    private record RootDataStructure(
+            JsonObject settings,
+            List<MinecraftAccount> accounts,
+            List<SWProxy> proxies
+    ) {
+    }
 
+    private static class ECPublicKeyAdapter extends AbstractKeyAdapter<ECPublicKey> {
+        @Override
+        protected ECPublicKey createKey(byte[] bytes) throws JsonParseException {
             try {
                 var keyFactory = KeyFactory.getInstance("EC");
                 return (ECPublicKey) keyFactory.generatePublic(new X509EncodedKeySpec(bytes));
-            } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            } catch (GeneralSecurityException e) {
                 throw new JsonParseException(e);
             }
-        }
-
-        @Override
-        public JsonElement serialize(ECPublicKey src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(Base64.getEncoder().encodeToString(src.getEncoded()));
         }
     }
 
-    private static class ECPrivateKeyAdapter implements JsonSerializer<ECPrivateKey>, JsonDeserializer<ECPrivateKey> {
+    private static class ECPrivateKeyAdapter extends AbstractKeyAdapter<ECPrivateKey> {
         @Override
-        public ECPrivateKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            var base64 = json.getAsString();
-            var bytes = Base64.getDecoder().decode(base64);
-
+        protected ECPrivateKey createKey(byte[] bytes) throws JsonParseException {
             try {
                 var keyFactory = KeyFactory.getInstance("EC");
                 return (ECPrivateKey) keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
-            } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            } catch (GeneralSecurityException e) {
                 throw new JsonParseException(e);
             }
         }
+    }
+
+    private static abstract class AbstractKeyAdapter<T> implements JsonSerializer<Key>, JsonDeserializer<T> {
+        @Override
+        public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            return createKey(Base64.getDecoder().decode(json.getAsString()));
+        }
 
         @Override
-        public JsonElement serialize(ECPrivateKey src, Type typeOfSrc, JsonSerializationContext context) {
+        public JsonElement serialize(Key src, Type typeOfSrc, JsonSerializationContext context) {
             return new JsonPrimitive(Base64.getEncoder().encodeToString(src.getEncoded()));
         }
+
+        protected abstract T createKey(byte[] bytes) throws JsonParseException;
     }
 }

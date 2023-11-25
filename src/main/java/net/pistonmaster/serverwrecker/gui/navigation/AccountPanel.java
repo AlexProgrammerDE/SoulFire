@@ -19,18 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
-import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
-import net.pistonmaster.serverwrecker.gui.libs.PresetJCheckBox;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.gui.popups.ImportTextDialog;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -39,16 +34,10 @@ import java.awt.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class AccountPanel extends NavigationItem implements SettingsDuplex<AccountSettings> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AccountPanel.class);
-    private final JTextField nameFormat = new JTextField(AccountSettings.DEFAULT_NAME_FORMAT);
-    private final JCheckBox shuffleAccounts = new PresetJCheckBox(AccountSettings.DEFAULT_SHUFFLE_ACCOUNTS);
-
+public class AccountPanel extends NavigationItem {
     @Inject
-    public AccountPanel(GUIManager guiManager, GUIFrame parent) {
-        guiManager.getSettingsManager().registerDuplex(AccountSettings.class, this);
-
-        setLayout(new GridLayout(2, 1, 10, 10));
+    public AccountPanel(GUIManager guiManager, GUIFrame parent, CardsContainer cardsContainer) {
+        setLayout(new GridLayout(0, 1, 10, 10));
 
         var accountOptionsPanel = new JPanel();
         accountOptionsPanel.setLayout(new GridLayout(2, 1, 10, 10));
@@ -67,11 +56,7 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
         var accountSettingsPanel = new JPanel();
         accountSettingsPanel.setLayout(new GridLayout(0, 2));
 
-        accountSettingsPanel.add(new JLabel("Shuffle accounts: "));
-        accountSettingsPanel.add(shuffleAccounts);
-
-        accountSettingsPanel.add(new JLabel("Name Format: "));
-        accountSettingsPanel.add(nameFormat);
+        GeneratedPanel.addComponents(accountSettingsPanel, cardsContainer.getByNamespace("account"), guiManager.getSettingsManager());
 
         accountOptionsPanel.add(accountSettingsPanel);
 
@@ -170,19 +155,5 @@ public class AccountPanel extends NavigationItem implements SettingsDuplex<Accou
     @Override
     public String getNavigationId() {
         return "account-menu";
-    }
-
-    @Override
-    public void onSettingsChange(AccountSettings settings) {
-        nameFormat.setText(settings.nameFormat());
-        shuffleAccounts.setSelected(settings.shuffleAccounts());
-    }
-
-    @Override
-    public AccountSettings collectSettings() {
-        return new AccountSettings(
-                nameFormat.getText(),
-                shuffleAccounts.isSelected()
-        );
     }
 }

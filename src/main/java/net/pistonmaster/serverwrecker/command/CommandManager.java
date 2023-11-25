@@ -215,12 +215,6 @@ public class CommandManager {
                 }))));
 
         // Attack controls
-        dispatcher.register(literal("start-attack")
-                .executes(help("Starts an attack using the current profile", c -> {
-                    var id = serverWreckerServer.startAttack();
-                    LOGGER.info("Started an attack with id {}", id);
-                    return Command.SINGLE_SUCCESS;
-                })));
         dispatcher.register(literal("stop-attack")
                 .executes(help("Stops the ongoing attacks", c -> forEveryAttack(attackManager -> {
                     serverWreckerServer.stopAttack(attackManager.getId());

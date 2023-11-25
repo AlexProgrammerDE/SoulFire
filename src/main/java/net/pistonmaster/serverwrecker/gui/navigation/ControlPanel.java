@@ -31,6 +31,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ControlPanel extends JPanel {
     @Inject
     public ControlPanel(GUIManager guiManager) {
+        setLayout(new GridLayout(0, 1));
+
         var attackId = new AtomicInteger();
 
         var startButton = new JButton("Start");
@@ -41,7 +43,6 @@ public class ControlPanel extends JPanel {
         pauseButton.setEnabled(false);
         stopButton.setEnabled(false);
 
-        setLayout(new GridLayout(3, 3));
         add(startButton);
         add(pauseButton);
         add(stopButton);

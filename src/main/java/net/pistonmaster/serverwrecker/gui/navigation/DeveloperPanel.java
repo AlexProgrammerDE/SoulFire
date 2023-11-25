@@ -24,8 +24,6 @@ import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.LogPanel;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
-import net.pistonmaster.serverwrecker.settings.DevSettings;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -33,29 +31,12 @@ import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 
-public class DeveloperPanel extends NavigationItem implements SettingsDuplex<DevSettings> {
-    private final JCheckBox viaDebug = new JCheckBox();
-    private final JCheckBox nettyDebug = new JCheckBox();
-    private final JCheckBox gRPCDebug = new JCheckBox();
-    private final JCheckBox coreDebug = new JCheckBox();
-
+public class DeveloperPanel extends NavigationItem {
     @Inject
-    public DeveloperPanel(GUIManager guiManager, LogPanel logPanel) {
-        guiManager.getSettingsManager().registerDuplex(DevSettings.class, this);
-
+    public DeveloperPanel(GUIManager guiManager, LogPanel logPanel, CardsContainer cardsContainer) {
         setLayout(new GridLayout(0, 2));
 
-        add(new JLabel("Via Debug:"));
-        add(viaDebug);
-
-        add(new JLabel("Netty Debug:"));
-        add(nettyDebug);
-
-        add(new JLabel("gRPC Debug:"));
-        add(gRPCDebug);
-
-        add(new JLabel("Core Debug:"));
-        add(coreDebug);
+        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace("dev"), guiManager.getSettingsManager());
 
         add(new JLabel("Save Log:"));
         var saveLog = new JButton("Save Log");
@@ -89,23 +70,5 @@ public class DeveloperPanel extends NavigationItem implements SettingsDuplex<Dev
     @Override
     public String getNavigationId() {
         return "dev-menu";
-    }
-
-    @Override
-    public void onSettingsChange(DevSettings settings) {
-        viaDebug.setSelected(settings.viaDebug());
-        nettyDebug.setSelected(settings.nettyDebug());
-        gRPCDebug.setSelected(settings.grpcDebug());
-        coreDebug.setSelected(settings.coreDebug());
-    }
-
-    @Override
-    public DevSettings collectSettings() {
-        return new DevSettings(
-                viaDebug.isSelected(),
-                nettyDebug.isSelected(),
-                gRPCDebug.isSelected(),
-                coreDebug.isSelected()
-        );
     }
 }

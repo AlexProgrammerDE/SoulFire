@@ -19,19 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.cli;
 
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.pistonmaster.serverwrecker.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.auth.AccountSettings;
+import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
-import net.pistonmaster.serverwrecker.grpc.RPCClient;
-import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
-import net.pistonmaster.serverwrecker.settings.BotSettings;
-import net.pistonmaster.serverwrecker.settings.DevSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -51,66 +45,9 @@ import java.util.stream.Collectors;
         description = BuildData.DESCRIPTION, sortOptions = false)
 public class SWCommandDefinition implements Callable<Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SWCommandDefinition.class);
-    private final ServerWreckerServer serverWreckerServer;
+    private final CLIManager cliManager;
     @Setter
     private CommandLine commandLine;
-
-    @Option(names = {"-s", "--start"}, description = "Whether to start the attack automatically")
-    private boolean start;
-
-    @Option(names = {"--host", "--target"}, description = "Target url to connect to")
-    private String host = BotSettings.DEFAULT_HOST;
-
-    @Option(names = {"--port"}, description = "Target port to connect to")
-    private int port = BotSettings.DEFAULT_PORT;
-
-    @Option(names = {"-a", "--amount"}, description = "Amount of bots to connect to the server")
-    private int amount = BotSettings.DEFAULT_AMOUNT;
-
-    @Option(names = {"--min-join-delay"}, description = "The minimum delay between bot connections, in milliseconds")
-    private int minJoinDelay = BotSettings.DEFAULT_MIN_JOIN_DELAY_MS;
-
-    @Option(names = {"--max-join-delay"}, description = "The maximum delay between bot connections, in milliseconds")
-    private int maxJoinDelay = BotSettings.DEFAULT_MAX_JOIN_DELAY_MS;
-
-    @Option(names = {"-mc", "--mc-version"}, description = "Minecraft version of the server to connect to")
-    private String version = BotSettings.DEFAULT_PROTOCOL_VERSION.getName();
-
-    @Option(names = {"--read-timeout"}, description = "Bot read timeout")
-    private int readTimeout = BotSettings.DEFAULT_READ_TIMEOUT;
-
-    @Option(names = {"--write-timeout"}, description = "Bot write timeout")
-    private int writeTimout = BotSettings.DEFAULT_WRITE_TIMEOUT;
-
-    @Option(names = {"--connect-timeout"}, description = "Bot connect timeout")
-    private int connectTimeout = BotSettings.DEFAULT_CONNECT_TIMEOUT;
-
-    @Option(names = {"--try-srv"}, description = "Try to connect to the target using SRV records")
-    private boolean trySrv = BotSettings.DEFAULT_TRY_SRV;
-
-    @Option(names = {"--concurrent-connects"}, description = "Amount of bots that can try to connect at the same time")
-    private int concurrentConnects = BotSettings.DEFAULT_CONCURRENT_CONNECTS;
-
-    @Option(names = {"--via-debug"}, description = "Set Via* to debug mode")
-    private boolean viaDebug = DevSettings.DEFAULT_VIA_DEBUG;
-
-    @Option(names = {"--netty-debug"}, description = "Set Netty to debug mode")
-    private boolean nettyDebug = DevSettings.DEFAULT_NETTY_DEBUG;
-
-    @Option(names = {"--grpc-debug"}, description = "Set gRPC to debug mode")
-    private boolean gRPCDebug = DevSettings.DEFAULT_GRPC_DEBUG;
-
-    @Option(names = {"--core-debug"}, description = "Set core loggers to debug mode")
-    private boolean coreDebug = DevSettings.DEFAULT_CORE_DEBUG;
-
-    @Option(names = {"--bots-per-proxy"}, description = "Amount of bots that can be on a single proxy")
-    private int botsPerProxy = ProxySettings.DEFAULT_BOTS_PER_PROXY;
-
-    @Option(names = {"--name-format"}, description = "Format for bot names. allows integer placeholder '%%d'")
-    private String nameFormat = AccountSettings.DEFAULT_NAME_FORMAT;
-
-    @Option(names = {"--shuffle-accounts"}, description = "Shuffle accounts before connecting")
-    private boolean shuffleAccounts = AccountSettings.DEFAULT_SHUFFLE_ACCOUNTS;
 
     @Option(names = {"--account-file"}, description = "File to load accounts from")
     private Path accountFile;
@@ -130,6 +67,9 @@ public class SWCommandDefinition implements Callable<Integer> {
     @Option(names = {"--generate-flags"}, description = "Create a list of flags", hidden = true)
     private boolean generateFlags;
 
+    @Option(names = {"--generate-versions"}, description = "Create a list of supported versions", hidden = true)
+    private boolean generateVersions;
+
     @Override
     public Integer call() {
         if (generateFlags) {
@@ -143,53 +83,31 @@ public class SWCommandDefinition implements Callable<Integer> {
                 var description = option.description() == null ? "" : String.join(", ", option.description());
                 System.out.printf("| %s | %s | %s |%n", name, defaultValue, description);
             });
-            serverWreckerServer.shutdown();
+            cliManager.shutdown();
+            return 0;
+        } else if (generateVersions) {
+            var yesEmoji = "✅";
+            var noEmoji = "❌";
+
+            SWConstants.getVersionsSorted().forEach(version -> {
+                var nativeVersion = SWConstants.CURRENT_PROTOCOL_VERSION == version ? yesEmoji : noEmoji;
+                var bedrockVersion = SWConstants.isBedrock(version) ? yesEmoji : noEmoji;
+                var javaVersion = !SWConstants.isBedrock(version) ? yesEmoji : noEmoji;
+                var snapshotVersion = SWConstants.isAprilFools(version) ? yesEmoji : noEmoji;
+                var legacyVersion = SWConstants.isLegacy(version) ? yesEmoji : noEmoji;
+
+                System.out.printf("| %s | %s | %s | %s | %s | %s |%n", version.getName(), nativeVersion, javaVersion, snapshotVersion, legacyVersion, bedrockVersion);
+            });
+            cliManager.shutdown();
             return 0;
         }
 
         // Delayed to here, so help and version do not get cut off
-        var gRPCHost = serverWreckerServer.getRpcServer().getHost();
-        var gRPCPort = serverWreckerServer.getRpcServer().getPort();
-        var rpcClient = new RPCClient(gRPCHost, gRPCPort, serverWreckerServer.generateAdminJWT());
-        SWTerminalConsole.setupTerminalConsole(serverWreckerServer.getThreadPool(), serverWreckerServer.getShutdownManager(), rpcClient);
-
-        serverWreckerServer.getSettingsManager().registerProvider(BotSettings.class,
-                () -> new BotSettings(
-                        host,
-                        port,
-                        amount,
-                        minJoinDelay,
-                        maxJoinDelay,
-                        ProtocolVersion.getClosest(version),
-                        readTimeout,
-                        writeTimout,
-                        connectTimeout,
-                        trySrv,
-                        concurrentConnects
-                ));
-
-        serverWreckerServer.getSettingsManager().registerProvider(DevSettings.class,
-                () -> new DevSettings(
-                        viaDebug,
-                        nettyDebug,
-                        gRPCDebug,
-                        coreDebug
-                ));
-
-        serverWreckerServer.getSettingsManager().registerProvider(AccountSettings.class,
-                () -> new AccountSettings(
-                        nameFormat,
-                        shuffleAccounts
-                ));
-
-        serverWreckerServer.getSettingsManager().registerProvider(ProxySettings.class,
-                () -> new ProxySettings(
-                        botsPerProxy
-                ));
+        SWTerminalConsole.setupTerminalConsole(cliManager.getThreadPool(), cliManager.getShutdownManager(), cliManager.getRpcClient());
 
         if (accountFile != null && authType != null) {
             try {
-                serverWreckerServer.getAccountRegistry().loadFromString(Files.readString(accountFile), authType);
+                cliManager.getSettingsManager().getAccountRegistry().loadFromString(Files.readString(accountFile), authType);
             } catch (IOException e) {
                 LOGGER.error("Failed to load accounts!", e);
                 return 1;
@@ -198,7 +116,7 @@ public class SWCommandDefinition implements Callable<Integer> {
 
         if (proxyFile != null && proxyType != null) {
             try {
-                serverWreckerServer.getProxyRegistry().loadFromString(Files.readString(proxyFile), proxyType);
+                cliManager.getSettingsManager().getProxyRegistry().loadFromString(Files.readString(proxyFile), proxyType);
             } catch (IOException e) {
                 LOGGER.error("Failed to load proxies!", e);
                 return 1;
@@ -207,17 +125,11 @@ public class SWCommandDefinition implements Callable<Integer> {
 
         if (profileFile != null) {
             try {
-                serverWreckerServer.getSettingsManager().loadProfile(profileFile);
+                cliManager.getSettingsManager().loadProfile(profileFile);
             } catch (IOException e) {
                 LOGGER.error("Failed to load profile!", e);
                 return 1;
             }
-        }
-
-        if (start) {
-            serverWreckerServer.startAttack();
-        } else {
-            LOGGER.info("ServerWrecker is ready to go! Type 'start-attack' to start the attack!");
         }
 
         return 0;

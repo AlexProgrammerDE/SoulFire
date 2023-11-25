@@ -17,32 +17,16 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.gui.theme;
+package net.pistonmaster.serverwrecker.settings.lib.property;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsDuplex;
-
-import javax.swing.plaf.basic.BasicLookAndFeel;
-
-@Getter
-@Setter
-@AllArgsConstructor
-public class ThemeProvider implements SettingsDuplex<ThemeSettings> {
-    private Class<? extends BasicLookAndFeel> themeClass;
-
+public record MinMaxPropertyLink(IntProperty min, IntProperty max) implements Property {
     @Override
-    public void onSettingsChange(ThemeSettings settings) {
-        try {
-            themeClass = Class.forName(settings.themeClass()).asSubclass(BasicLookAndFeel.class);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+    public String namespace() {
+        return min.namespace();
     }
 
     @Override
-    public ThemeSettings collectSettings() {
-        return new ThemeSettings(themeClass.getName());
+    public String key() {
+        throw new UnsupportedOperationException("This is a link!");
     }
 }

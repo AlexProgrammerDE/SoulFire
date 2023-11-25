@@ -57,6 +57,7 @@ public class RPCServer {
                     }
                 })
                 .addService(injector.getSingleton(LogServiceImpl.class))
+                .addService(injector.getSingleton(ConfigServiceImpl.class))
                 .addService(injector.getSingleton(CommandServiceImpl.class))
                 .addService(injector.getSingleton(AttackServiceImpl.class))
                 .intercept(new JwtServerInterceptor(jwtKey))

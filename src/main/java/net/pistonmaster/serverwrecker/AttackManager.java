@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -33,7 +34,6 @@ import net.pistonmaster.serverwrecker.api.event.EventExceptionHandler;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerAttackEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackEndedEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackStartEvent;
-import net.pistonmaster.serverwrecker.auth.AccountList;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.common.AttackState;
@@ -41,11 +41,9 @@ import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
 import net.pistonmaster.serverwrecker.protocol.netty.ResolveUtil;
 import net.pistonmaster.serverwrecker.protocol.netty.SWNettyHelper;
-import net.pistonmaster.serverwrecker.proxy.ProxyList;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
-import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.util.RandomUtil;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
@@ -56,6 +54,7 @@ import javax.inject.Inject;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Getter
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -78,31 +77,51 @@ public class AttackManager {
     @Setter
     private AttackState attackState = AttackState.STOPPED;
 
+    private static MinecraftAccount getAccount(SettingsHolder settingsHolder, List<MinecraftAccount> accounts, int botId) {
+        if (accounts.isEmpty()) {
+            return new MinecraftAccount(String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), botId));
+        }
+
+        return accounts.remove(0);
+    }
+
+    private static Optional<SWProxy> getProxy(int accountsPerProxy, Object2IntMap<SWProxy> proxyUseMap) {
+        if (proxyUseMap.isEmpty()) {
+            return Optional.empty(); // No proxies available
+        }
+
+        var selectedProxy = proxyUseMap.object2IntEntrySet().stream()
+                .filter(entry -> accountsPerProxy == -1 || entry.getIntValue() < accountsPerProxy)
+                .min(Comparator.comparingInt(Map.Entry::getValue))
+                .orElseThrow(() -> new IllegalStateException("No proxies available!")); // Should never happen
+
+        // Always present
+        selectedProxy.setValue(selectedProxy.getIntValue() + 1);
+
+        return Optional.of(selectedProxy.getKey());
+    }
+
     public CompletableFuture<Void> start(SettingsHolder settingsHolder) {
         if (!attackState.isStopped()) {
             throw new IllegalStateException("Attack is already running");
         }
 
-        var accountListSettings = settingsHolder.get(AccountList.class);
-        var accounts = new ArrayList<>(accountListSettings.accounts()
-                .stream().filter(MinecraftAccount::enabled).toList());
+        var accounts = settingsHolder.accounts().stream()
+                .filter(MinecraftAccount::enabled)
+                .collect(Collectors.toCollection(ArrayList::new));
+        var proxies = settingsHolder.proxies().stream()
+                .filter(SWProxy::enabled)
+                .collect(Collectors.toCollection(ArrayList::new));
 
-        var proxyListSettings = settingsHolder.get(ProxyList.class);
-        var proxies = new ArrayList<>(proxyListSettings.proxies()
-                .stream().filter(SWProxy::enabled).toList());
-
-        var botSettings = settingsHolder.get(BotSettings.class);
-        var accountSettings = settingsHolder.get(AccountSettings.class);
-        var proxySettings = settingsHolder.get(ProxySettings.class);
-
-        ServerWreckerServer.setupLoggingAndVia(settingsHolder.get(DevSettings.class));
+        ServerWreckerServer.setupLoggingAndVia(settingsHolder);
 
         this.attackState = AttackState.RUNNING;
 
-        logger.info("Preparing bot attack at {}", botSettings.host());
+        String host = settingsHolder.get(BotSettings.HOST);
+        logger.info("Preparing bot attack at {}", host);
 
-        var botAmount = botSettings.amount(); // How many bots to connect
-        var botsPerProxy = proxySettings.botsPerProxy(); // How many bots per proxy are allowed
+        var botAmount = settingsHolder.get(BotSettings.AMOUNT); // How many bots to connect
+        var botsPerProxy = settingsHolder.get(ProxySettings.BOTS_PER_PROXY); // How many bots per proxy are allowed
         var availableProxiesCount = proxies.size(); // How many proxies are available?
         var maxBots = botsPerProxy > 0 ? botsPerProxy * availableProxiesCount : botAmount; // How many bots can be used at max
 
@@ -121,7 +140,7 @@ public class AttackManager {
             botAmount = availableAccounts;
         }
 
-        if (accountSettings.shuffleAccounts()) {
+        if (settingsHolder.get(AccountSettings.SHUFFLE_ACCOUNTS)) {
             Collections.shuffle(accounts);
         }
 
@@ -136,13 +155,14 @@ public class AttackManager {
 
         var attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(threads, String.format("Attack-%d", id));
 
-        var isBedrock = SWConstants.isBedrock(botSettings.protocolVersion());
+        var protocolVersion = settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+        var isBedrock = SWConstants.isBedrock(protocolVersion);
         var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder, attackEventLoopGroup);
 
         var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
         for (var botId = 1; botId <= botAmount; botId++) {
             var proxyData = getProxy(botsPerProxy, proxyUseMap).orElse(null);
-            var minecraftAccount = getAccount(accountSettings, accounts, botId);
+            var minecraftAccount = getAccount(settingsHolder, accounts, botId);
 
             // AuthData will be used internally instead of the MCProtocol data
             var protocol = new MinecraftProtocol(EMPTY_GAME_PROFILE, null);
@@ -163,15 +183,15 @@ public class AttackManager {
         }
 
         if (availableProxiesCount == 0) {
-            logger.info("Starting attack at {} with {} bots", botSettings.host(), factories.size());
+            logger.info("Starting attack at {} with {} bots", host, factories.size());
         } else {
-            logger.info("Starting attack at {} with {} bots and {} proxies", botSettings.host(), factories.size(), availableProxiesCount);
+            logger.info("Starting attack at {} with {} bots and {} proxies", host, factories.size(), availableProxiesCount);
         }
 
         eventBus.call(new AttackStartEvent(this));
 
         // Used for concurrent bot connecting
-        var connectService = Executors.newFixedThreadPool(botSettings.concurrentConnects());
+        var connectService = Executors.newFixedThreadPool(settingsHolder.get(BotSettings.CONCURRENT_CONNECTS));
 
         return CompletableFuture.runAsync(() -> {
             while (!factories.isEmpty()) {
@@ -199,33 +219,9 @@ public class AttackManager {
                     }
                 });
 
-                TimeUtil.waitTime(RandomUtil.getRandomInt(botSettings.minJoinDelayMs(), botSettings.maxJoinDelayMs()), TimeUnit.MILLISECONDS);
+                TimeUtil.waitTime(RandomUtil.getRandomInt(settingsHolder.get(BotSettings.JOIN_DELAY_MS.min()), settingsHolder.get(BotSettings.JOIN_DELAY_MS.max())), TimeUnit.MILLISECONDS);
             }
         });
-    }
-
-    private MinecraftAccount getAccount(AccountSettings accountSettings, List<MinecraftAccount> accounts, int botId) {
-        if (accounts.isEmpty()) {
-            return new MinecraftAccount(String.format(accountSettings.nameFormat(), botId));
-        }
-
-        return accounts.remove(0);
-    }
-
-    private Optional<SWProxy> getProxy(int accountsPerProxy, Object2IntMap<SWProxy> proxyUseMap) {
-        if (proxyUseMap.isEmpty()) {
-            return Optional.empty(); // No proxies available
-        }
-
-        var selectedProxy = proxyUseMap.object2IntEntrySet().stream()
-                .filter(entry -> accountsPerProxy == -1 || entry.getIntValue() < accountsPerProxy)
-                .min(Comparator.comparingInt(Map.Entry::getValue))
-                .orElseThrow(() -> new IllegalStateException("No proxies available!")); // Should never happen
-
-        // Always present
-        selectedProxy.setValue(selectedProxy.getIntValue() + 1);
-
-        return Optional.of(selectedProxy.getKey());
     }
 
     public CompletableFuture<Void> stop() {
@@ -269,7 +265,7 @@ public class AttackManager {
             }
         } while (!botConnections.isEmpty()); // To make sure really all bots are disconnected
 
-        // Notify addons of state change
+        // Notify plugins of state change
         eventBus.call(new AttackEndedEvent(this));
 
         logger.info("Attack stopped");

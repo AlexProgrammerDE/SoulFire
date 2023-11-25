@@ -19,24 +19,133 @@
  */
 package net.pistonmaster.serverwrecker.settings;
 
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
+import net.pistonmaster.serverwrecker.settings.lib.property.*;
 
-public record BotSettings(String host, int port,
-                          int amount, int minJoinDelayMs, int maxJoinDelayMs,
-                          ProtocolVersion protocolVersion,
-                          int readTimeout, int writeTimeout, int connectTimeout,
-                          boolean trySrv, int concurrentConnects) implements SettingsObject {
-    public static final String DEFAULT_HOST = "127.0.0.1";
-    public static final int DEFAULT_PORT = 25565;
-    public static final int DEFAULT_AMOUNT = 1;
-    public static final int DEFAULT_MIN_JOIN_DELAY_MS = 1000;
-    public static final int DEFAULT_MAX_JOIN_DELAY_MS = 3000;
-    public static final ProtocolVersion DEFAULT_PROTOCOL_VERSION = SWConstants.CURRENT_PROTOCOL_VERSION;
-    public static final int DEFAULT_READ_TIMEOUT = 30;
-    public static final int DEFAULT_WRITE_TIMEOUT = 0;
-    public static final int DEFAULT_CONNECT_TIMEOUT = 30;
-    public static final boolean DEFAULT_TRY_SRV = true;
-    public static final int DEFAULT_CONCURRENT_CONNECTS = 1;
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class BotSettings implements SettingsObject {
+    private static final Property.Builder BUILDER = Property.builder("bot");
+    public static final StringProperty HOST = BUILDER.ofString(
+            "host",
+            "Host",
+            "Host to connect to",
+            new String[]{"--host"},
+            "127.0.0.1"
+    );
+    public static final IntProperty PORT = BUILDER.ofInt(
+            "port",
+            "Port",
+            "Port to connect to",
+            new String[]{"--port"},
+            25565,
+            1,
+            65535,
+            1,
+            "#"
+    );
+    public static final IntProperty AMOUNT = BUILDER.ofInt(
+            "amount",
+            "Amount",
+            "Amount of bots to connect",
+            new String[]{"--amount"},
+            1,
+            1,
+            Integer.MAX_VALUE,
+            1
+    );
+    public static final MinMaxPropertyLink JOIN_DELAY_MS = new MinMaxPropertyLink(
+            BUILDER.ofInt(
+                    "minJoinDelayMs",
+                    "Min Join Delay",
+                    "Minimum delay between joins in milliseconds",
+                    new String[]{"--min-join-delay-ms"},
+                    1000,
+                    0,
+                    Integer.MAX_VALUE,
+                    1
+            ),
+            BUILDER.ofInt(
+                    "maxJoinDelayMs",
+                    "Max Join Delay",
+                    "Maximum delay between joins in milliseconds",
+                    new String[]{"--max-join-delay-ms"},
+                    3000,
+                    0,
+                    Integer.MAX_VALUE,
+                    1
+            )
+    );
+    public static final ComboProperty PROTOCOL_VERSION = BUILDER.ofCombo(
+            "protocolVersion",
+            "Protocol Version",
+            "Protocol version to use",
+            new String[]{"--protocol-version"},
+            getProtocolVersionOptions(),
+            0
+    );
+    public static final IntProperty READ_TIMEOUT = BUILDER.ofInt(
+            "readTimeout",
+            "Read Timeout",
+            "Read timeout in seconds",
+            new String[]{"--read-timeout"},
+            30,
+            0,
+            Integer.MAX_VALUE,
+            1
+    );
+    public static final IntProperty WRITE_TIMEOUT = BUILDER.ofInt(
+            "writeTimeout",
+            "Write Timeout",
+            "Write timeout in seconds",
+            new String[]{"--write-timeout"},
+            0,
+            0,
+            Integer.MAX_VALUE,
+            1
+    );
+    public static final IntProperty CONNECT_TIMEOUT = BUILDER.ofInt(
+            "connectTimeout",
+            "Connect Timeout",
+            "Connect timeout in seconds",
+            new String[]{"--connect-timeout"},
+            30,
+            0,
+            Integer.MAX_VALUE,
+            1
+    );
+    public static final BooleanProperty TRY_SRV = BUILDER.ofBoolean(
+            "trySrv",
+            "Try SRV",
+            "Try to use SRV records",
+            new String[]{"--try-srv"},
+            true
+    );
+    public static final IntProperty CONCURRENT_CONNECTS = BUILDER.ofInt(
+            "concurrentConnects",
+            "Concurrent Connects",
+            "Amount of concurrent connects",
+            new String[]{"--concurrent-connects"},
+            1,
+            0,
+            Integer.MAX_VALUE,
+            1
+    );
+
+    private static ComboProperty.ComboOption[] getProtocolVersionOptions() {
+        return SWConstants.getVersionsSorted().stream().map(version -> {
+            String displayName;
+            if (SWConstants.isBedrock(version)) {
+                displayName = String.format("%s (%s)", version.getName(), version.getVersion() - 1_000_000);
+            } else if (SWConstants.isLegacy(version)) {
+                displayName = String.format("%s (%s)", version.getName(), Math.abs(version.getVersion()) >> 2);
+            } else {
+                displayName = version.toString();
+            }
+
+            return new ComboProperty.ComboOption(version.getName(), displayName);
+        }).toArray(ComboProperty.ComboOption[]::new);
+    }
 }

@@ -29,15 +29,12 @@ import java.awt.*;
 public class NavigationPanel extends JPanel {
     @Inject
     public NavigationPanel(CardsContainer container, Injector injector) {
-        super();
-
-        setLayout(new GridLayout(3, 3, 10, 10));
-        var cardLayout = (CardLayout) container.getLayout();
+        setLayout(new GridLayout(0, 2, 10, 10));
 
         for (var item : container.getPanels()) {
             var button = new JButton(SwingTextUtils.htmlCenterText(item.getNavigationName()));
 
-            button.addActionListener(action -> cardLayout.show(container, item.getNavigationId()));
+            button.addActionListener(action -> container.show(item.getNavigationId()));
             container.putClientProperty(item.getNavigationId() + "-button", button);
 
             add(button);
