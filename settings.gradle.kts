@@ -16,6 +16,10 @@ pluginManagement {
     }
 }
 
+plugins {
+    id("com.gradle.enterprise") version "3.15.1"
+}
+
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -49,6 +53,15 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             file("gradle/libs.versions.toml")
+        }
+    }
+}
+
+gradleEnterprise {
+    buildScan {
+        if (!System.getenv("CI").isNullOrEmpty()) {
+            termsOfServiceUrl = "https://gradle.com/terms-of-service"
+            termsOfServiceAgree = "yes"
         }
     }
 }
