@@ -15,9 +15,6 @@ tasks {
         options.encoding = Charsets.UTF_8.name()
         (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
     }
-    delombok {
-        onlyIf { project.name.contains("api") }
-    }
     compileJava {
         options.encoding = Charsets.UTF_8.name()
         options.compilerArgs.addAll(
