@@ -105,13 +105,19 @@ public class AutoTotem implements InternalExtension {
                         "Min delay (seconds)",
                         "Minimum delay between using totems",
                         new String[]{"--totem-min-delay"},
+                        1,
+                        0,
+                        Integer.MAX_VALUE,
                         1
                 ),
                 BUILDER.ofInt("totem-max-delay",
                         "Max delay (seconds)",
                         "Maximum delay between using totems",
                         new String[]{"--totem-max-delay"},
-                        2
+                        2,
+                        0,
+                        Integer.MAX_VALUE,
+                        1
                 )
         );
     }

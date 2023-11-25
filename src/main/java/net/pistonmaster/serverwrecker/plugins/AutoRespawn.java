@@ -81,13 +81,19 @@ public class AutoRespawn implements InternalExtension {
                         "Min delay (seconds)",
                         "Minimum delay between respawns",
                         new String[]{"--respawn-min-delay"},
+                        1,
+                        0,
+                        Integer.MAX_VALUE,
                         1
                 ),
                 BUILDER.ofInt("respawn-max-delay",
                         "Max delay (seconds)",
                         "Maximum delay between respawns",
                         new String[]{"--respawn-max-delay"},
-                        3
+                        3,
+                        0,
+                        Integer.MAX_VALUE,
+                        1
                 )
         );
     }

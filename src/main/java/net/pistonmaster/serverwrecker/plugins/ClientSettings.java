@@ -114,7 +114,10 @@ public class ClientSettings implements InternalExtension {
                 "Render distance",
                 "Render distance",
                 new String[]{"--render-distance"},
-                8
+                8,
+                2,
+                32,
+                1
         );
         public static final ComboProperty CHAT_VISIBILITY = BUILDER.ofEnum("chat-visibility",
                 "Chat visibility",

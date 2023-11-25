@@ -20,8 +20,7 @@
 package net.pistonmaster.serverwrecker.settings.lib;
 
 import net.pistonmaster.serverwrecker.grpc.generated.*;
-import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
-import net.pistonmaster.serverwrecker.settings.lib.property.Property;
+import net.pistonmaster.serverwrecker.settings.lib.property.*;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -84,6 +83,83 @@ public class SettingsRegistry {
                                             .build())
                                     .build())
                             .build());
+                } else if (property instanceof IntProperty intProperty) {
+                    entries.add(ClientPluginSettingEntry.newBuilder()
+                            .setSingle(ClientPluginSettingEntrySingle.newBuilder()
+                                    .setKey(property.key())
+                                    .setName(intProperty.uiDescription())
+                                    .setType(ClientPluginSettingType.newBuilder()
+                                            .setInt(IntSetting.newBuilder()
+                                                    .setDef(intProperty.defaultValue())
+                                                    .setMin(intProperty.minValue())
+                                                    .setMax(intProperty.maxValue())
+                                                    .setStep(intProperty.stepValue())
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build());
+                } else if (property instanceof MinMaxPropertyLink minMaxPropertyLink) {
+                    var minProperty = minMaxPropertyLink.min();
+                    var maxProperty = minMaxPropertyLink.max();
+                    entries.add(ClientPluginSettingEntry.newBuilder()
+                            .setMinMaxPair(ClientPluginSettingEntryMinMaxPair.newBuilder()
+                                    .setMin(ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
+                                            .setKey(minProperty.key())
+                                            .setName(minProperty.uiDescription())
+                                            .setIntSetting(IntSetting.newBuilder()
+                                                    .setDef(minProperty.defaultValue())
+                                                    .setMin(minProperty.minValue())
+                                                    .setMax(minProperty.maxValue())
+                                                    .setStep(minProperty.stepValue())
+                                                    .build())
+                                            .build())
+                                    .setMax(ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
+                                            .setKey(maxProperty.key())
+                                            .setName(maxProperty.uiDescription())
+                                            .setIntSetting(IntSetting.newBuilder()
+                                                    .setDef(maxProperty.defaultValue())
+                                                    .setMin(maxProperty.minValue())
+                                                    .setMax(maxProperty.maxValue())
+                                                    .setStep(maxProperty.stepValue())
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build());
+                } else if (property instanceof StringProperty stringProperty) {
+                    entries.add(ClientPluginSettingEntry.newBuilder()
+                            .setSingle(ClientPluginSettingEntrySingle.newBuilder()
+                                    .setKey(property.key())
+                                    .setName(stringProperty.uiDescription())
+                                    .setType(ClientPluginSettingType.newBuilder()
+                                            .setString(StringSetting.newBuilder()
+                                                    .setDef(stringProperty.defaultValue())
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build());
+                } else if (property instanceof ComboProperty comboProperty) {
+                    var options = new ArrayList<ComboOption>();
+                    for (var option : comboProperty.options()) {
+                        options.add(ComboOption.newBuilder()
+                                .setId(option.id())
+                                .setDisplayName(option.displayName())
+                                .build());
+                    }
+
+                    entries.add(ClientPluginSettingEntry.newBuilder()
+                            .setSingle(ClientPluginSettingEntrySingle.newBuilder()
+                                    .setKey(property.key())
+                                    .setName(comboProperty.uiDescription())
+                                    .setType(ClientPluginSettingType.newBuilder()
+                                            .setCombo(ComboSetting.newBuilder()
+                                                    .setDef(comboProperty.defaultValue())
+                                                    .addAllOptions(options)
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build());
+                } else {
+                    throw new IllegalStateException("Unknown property type!");
                 }
             }
 

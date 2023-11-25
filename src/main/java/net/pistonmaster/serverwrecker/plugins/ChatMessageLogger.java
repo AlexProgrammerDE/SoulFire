@@ -110,7 +110,10 @@ public class ChatMessageLogger implements InternalExtension {
                 "Minimum delay between logging chat",
                 "This is the minimum delay between logging chat messages",
                 new String[]{"--chat-interval"},
-                2
+                2,
+                0,
+                Integer.MAX_VALUE,
+                1
         );
     }
 }

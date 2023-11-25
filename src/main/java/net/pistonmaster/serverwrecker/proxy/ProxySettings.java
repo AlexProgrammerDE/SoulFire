@@ -33,6 +33,9 @@ public class ProxySettings implements SettingsObject {
             "Bots Per Proxy",
             "Amount of bots that can be on a single proxy",
             new String[]{"--bots-per-proxy"},
-            -1
+            -1,
+            -1,
+            Integer.MAX_VALUE,
+            1
     );
 }

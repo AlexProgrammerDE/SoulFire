@@ -24,6 +24,9 @@ public record IntProperty(String namespace,
                           String uiDescription,
                           String cliDescription,
                           String[] cliNames,
-                          int defaultValue
+                          int defaultValue,
+                          int minValue,
+                          int maxValue,
+                          int stepValue
 ) implements Property {
 }

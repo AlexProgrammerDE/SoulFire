@@ -79,13 +79,19 @@ public class AutoJump implements InternalExtension {
                         "Min delay (seconds)",
                         "Minimum delay between jumps",
                         new String[]{"--jump-min-delay"},
-                        2
+                        2,
+                        0,
+                        Integer.MAX_VALUE,
+                        1
                 ),
                 BUILDER.ofInt("jump-max-delay",
                         "Max delay (seconds)",
                         "Maximum delay between jumps",
                         new String[]{"--jump-max-delay"},
-                        5
+                        5,
+                        0,
+                        Integer.MAX_VALUE,
+                        1
                 )
         );
     }

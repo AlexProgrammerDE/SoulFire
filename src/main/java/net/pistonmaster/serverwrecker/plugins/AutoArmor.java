@@ -143,13 +143,19 @@ public class AutoArmor implements InternalExtension {
                         "Min delay (seconds)",
                         "Minimum delay between putting on armor",
                         new String[]{"--armor-min-delay"},
+                        1,
+                        0,
+                        Integer.MAX_VALUE,
                         1
                 ),
                 BUILDER.ofInt("armor-max-delay",
                         "Max delay (seconds)",
                         "Maximum delay between putting on armor",
                         new String[]{"--armor-max-delay"},
-                        2
+                        2,
+                        0,
+                        Integer.MAX_VALUE,
+                        1
                 )
         );
     }

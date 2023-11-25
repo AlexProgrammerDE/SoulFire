@@ -155,13 +155,19 @@ public class AutoEat implements InternalExtension {
                         "Min delay (seconds)",
                         "Minimum delay between eating",
                         new String[]{"--eat-min-delay"},
+                        1,
+                        0,
+                        Integer.MAX_VALUE,
                         1
                 ),
                 BUILDER.ofInt("eat-max-delay",
                         "Max delay (seconds)",
                         "Maximum delay between eating",
                         new String[]{"--eat-max-delay"},
-                        2
+                        2,
+                        0,
+                        Integer.MAX_VALUE,
+                        1
                 )
         );
     }

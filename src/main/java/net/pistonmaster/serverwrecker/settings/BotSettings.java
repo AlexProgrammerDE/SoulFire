@@ -40,13 +40,19 @@ public class BotSettings implements SettingsObject {
             "Port",
             "Port to connect to",
             new String[]{"--port"},
-            25565
+            25565,
+            1,
+            65535,
+            1
     );
     public static final IntProperty AMOUNT = BUILDER.ofInt(
             "amount",
             "Amount",
             "Amount of bots to connect",
             new String[]{"--amount"},
+            1,
+            1,
+            Integer.MAX_VALUE,
             1
     );
     public static final MinMaxPropertyLink JOIN_DELAY_MS = new MinMaxPropertyLink(
@@ -55,14 +61,20 @@ public class BotSettings implements SettingsObject {
                     "Min Join Delay",
                     "Minimum delay between joins in milliseconds",
                     new String[]{"--minJoinDelayMs"},
-                    1000
+                    1000,
+                    0,
+                    Integer.MAX_VALUE,
+                    1
             ),
             BUILDER.ofInt(
                     "maxJoinDelayMs",
                     "Max Join Delay",
                     "Maximum delay between joins in milliseconds",
                     new String[]{"--maxJoinDelayMs"},
-                    3000
+                    3000,
+                    0,
+                    Integer.MAX_VALUE,
+                    1
             )
     );
     public static final ComboProperty PROTOCOL_VERSION = BUILDER.ofCombo(
@@ -78,21 +90,30 @@ public class BotSettings implements SettingsObject {
             "Read Timeout",
             "Read timeout in seconds",
             new String[]{"--readTimeout"},
-            30
+            30,
+            0,
+            Integer.MAX_VALUE,
+            1
     );
     public static final IntProperty WRITE_TIMEOUT = BUILDER.ofInt(
             "writeTimeout",
             "Write Timeout",
             "Write timeout in seconds",
             new String[]{"--writeTimeout"},
-            0
+            0,
+            0,
+            Integer.MAX_VALUE,
+            1
     );
     public static final IntProperty CONNECT_TIMEOUT = BUILDER.ofInt(
             "connectTimeout",
             "Connect Timeout",
             "Connect timeout in seconds",
             new String[]{"--connectTimeout"},
-            30
+            30,
+            0,
+            Integer.MAX_VALUE,
+            1
     );
     public static final BooleanProperty TRY_SRV = BUILDER.ofBoolean(
             "trySrv",
@@ -106,6 +127,9 @@ public class BotSettings implements SettingsObject {
             "Concurrent Connects",
             "Amount of concurrent connects",
             new String[]{"--concurrentConnects"},
+            1,
+            0,
+            Integer.MAX_VALUE,
             1
     );
 

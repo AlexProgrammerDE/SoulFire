@@ -87,13 +87,19 @@ public class AutoReconnect implements InternalExtension {
                         "Min delay (seconds)",
                         "Minimum delay between reconnects",
                         new String[]{"--reconnect-min-delay"},
+                        1,
+                        0,
+                        Integer.MAX_VALUE,
                         1
                 ),
                 BUILDER.ofInt("reconnect-max-delay",
                         "Max delay (seconds)",
                         "Maximum delay between reconnects",
                         new String[]{"--reconnect-max-delay"},
-                        5
+                        5,
+                        0,
+                        Integer.MAX_VALUE,
+                        1
                 )
         );
     }

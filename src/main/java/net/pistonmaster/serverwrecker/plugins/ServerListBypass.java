@@ -80,6 +80,9 @@ public class ServerListBypass implements InternalExtension {
                         "Min delay (seconds)",
                         "Minimum delay between joining the server",
                         new String[]{"--server-list-bypass-min-delay"},
+                        1,
+                        0,
+                        Integer.MAX_VALUE,
                         1
                 ),
                 BUILDER.ofInt(
@@ -87,7 +90,10 @@ public class ServerListBypass implements InternalExtension {
                         "Max delay (seconds)",
                         "Maximum delay between joining the server",
                         new String[]{"--server-list-bypass-max-delay"},
-                        3
+                        3,
+                        0,
+                        Integer.MAX_VALUE,
+                        1
                 )
         );
     }
