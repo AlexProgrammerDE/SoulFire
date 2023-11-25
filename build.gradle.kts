@@ -54,11 +54,11 @@ dependencies {
     implementation(libs.jline)
     implementation(libs.jansi)
     implementation(libs.terminalconsoleappender)
-    implementation(libs.slf4j)
+    api(libs.slf4j)
     implementation(libs.disruptor)
 
     // For command handling
-    implementation(libs.brigadier)
+    api(libs.brigadier)
 
     // For CLI support
     implementation(libs.picoli)
@@ -83,7 +83,7 @@ dependencies {
     }
 
     // Main protocol library
-    implementation(libs.mcprotocollib)
+    api(libs.mcprotocollib)
 
     // For advanced encryption and compression
     implementation(libs.velocity.native)
@@ -114,39 +114,39 @@ dependencies {
     annotationProcessor(libs.lombok)
 
     // For YAML support (ViaVersion)
-    implementation(libs.snakeyaml)
+    api(libs.snakeyaml)
 
-    implementation(libs.kyori.plain)
-    implementation(libs.kyori.gson)
+    api(libs.kyori.plain)
+    api(libs.kyori.gson)
 
-    implementation(libs.commons.validator)
-    implementation(libs.commons.io)
+    api(libs.commons.validator)
+    api(libs.commons.io)
 
-    implementation(libs.guava)
-    implementation(libs.gson)
-    implementation(libs.pf4j) {
+    api(libs.guava)
+    api(libs.gson)
+    api(libs.pf4j) {
         isTransitive = false
     }
-    implementation(libs.fastutil)
-    implementation(libs.caffeine)
+    api(libs.fastutil)
+    api(libs.caffeine)
 
-    implementation(libs.classtransform.mixinstranslator)
-    implementation(libs.classtransform.mixinsdummy)
-    implementation(libs.classtransform.additionalclassprovider)
-    implementation(libs.reflect)
-    implementation(libs.lambdaevents)
+    api(libs.classtransform.mixinstranslator)
+    api(libs.classtransform.mixinsdummy)
+    api(libs.classtransform.additionalclassprovider)
+    api(libs.reflect)
+    api(libs.lambdaevents)
 
     // For microsoft account authentication
-    implementation(libs.minecraftauth) {
+    api(libs.minecraftauth) {
         exclude("com.google.code.gson", "gson")
         exclude("org.slf4j", "slf4j-api")
     }
 
     // For TheAltening account authentication
-    implementation(libs.thealtening)
+    api(libs.thealtening)
 
     // For class injection
-    implementation(libs.injector)
+    api(libs.injector)
 
     // gRPC
     implementation(libs.grpc.proto)
