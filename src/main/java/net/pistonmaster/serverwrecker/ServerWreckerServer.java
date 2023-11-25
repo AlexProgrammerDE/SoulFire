@@ -188,7 +188,7 @@ public class ServerWreckerServer {
 
         for (var serverExtension : ServerWreckerAPI.getServerExtensions()) {
             serverExtension.onEnable(this);
-        };
+        }
 
         ServerWreckerAPI.postEvent(new SettingsRegistryInitEvent(settingsRegistry));
 
