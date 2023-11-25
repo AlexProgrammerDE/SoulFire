@@ -72,7 +72,7 @@ public class GUIManager {
 
         SWTerminalConsole.setupTerminalConsole(threadPool, shutdownManager, rpcClient);
 
-        // Override the title in AWT (GNOME displays the class key otherwise)
+        // Override the title in AWT (GNOME displays the class name otherwise)
         setAppTitle();
 
         // Initialize the JavaFX Platform
