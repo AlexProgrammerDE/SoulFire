@@ -23,13 +23,10 @@ import net.pistonmaster.serverwrecker.grpc.generated.*;
 import net.pistonmaster.serverwrecker.settings.lib.property.*;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SettingsRegistry {
-    private final Map<String, NamespaceRegistry> namespaceMap = new HashMap<>();
+    private final Map<String, NamespaceRegistry> namespaceMap = new LinkedHashMap<>();
 
     private static IntSetting createIntSetting(IntProperty property) {
         var builder = IntSetting.newBuilder()

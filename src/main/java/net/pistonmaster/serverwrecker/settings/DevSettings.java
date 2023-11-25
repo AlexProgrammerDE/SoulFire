@@ -32,28 +32,28 @@ public class DevSettings implements SettingsObject {
             "viaDebug",
             "Via Debug",
             "Enable Via debug",
-            new String[]{"--viaDebug"},
+            new String[]{"--via-debug"},
             false
     );
     public static final BooleanProperty NETTY_DEBUG = BUILDER.ofBoolean(
             "nettyDebug",
             "Netty Debug",
             "Enable Netty debug",
-            new String[]{"--nettyDebug"},
+            new String[]{"--netty-debug"},
             false
     );
     public static final BooleanProperty GRPC_DEBUG = BUILDER.ofBoolean(
             "grpcDebug",
             "GRPC Debug",
             "Enable GRPC debug",
-            new String[]{"--grpcDebug"},
+            new String[]{"--grpc-debug"},
             false
     );
     public static final BooleanProperty CORE_DEBUG = BUILDER.ofBoolean(
             "coreDebug",
             "Core Debug",
             "Enable Core debug",
-            new String[]{"--coreDebug"},
+            new String[]{"--core-debug"},
             false
     );
 }

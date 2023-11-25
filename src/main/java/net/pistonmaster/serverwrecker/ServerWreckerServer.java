@@ -57,7 +57,6 @@ import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsRegistry;
 import net.pistonmaster.serverwrecker.util.VersionComparator;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
@@ -102,8 +101,11 @@ public class ServerWreckerServer {
             .create();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final Map<String, String> serviceServerConfig = new HashMap<>();
-    private final SettingsRegistry settingsRegistry;
-    private final SettingsManager settingsManager = new SettingsManager();
+    private final SettingsRegistry settingsRegistry = new SettingsRegistry()
+            .addClass(BotSettings.class, "Bot Settings", true)
+            .addClass(DevSettings.class, "Dev Settings", true)
+            .addClass(AccountSettings.class, "Account Settings", true)
+            .addClass(ProxySettings.class, "Proxy Settings", true);
     private final OperationMode operationMode;
     private final boolean outdated;
     private final Int2ObjectMap<AttackManager> attacks = Int2ObjectMaps.synchronize(new Int2ObjectArrayMap<>());
@@ -186,14 +188,7 @@ public class ServerWreckerServer {
 
         for (var serverExtension : ServerWreckerAPI.getServerExtensions()) {
             serverExtension.onEnable(this);
-        }
-
-        // Delayed to here, so we can let ViaVersion load all ProtocolVersions
-        settingsRegistry = new SettingsRegistry()
-                .addClass(BotSettings.class, "Bot Settings", true)
-                .addClass(DevSettings.class, "Dev Settings", true)
-                .addClass(AccountSettings.class, "Account Settings", true)
-                .addClass(ProxySettings.class, "Proxy Settings", true);
+        };
 
         ServerWreckerAPI.postEvent(new SettingsRegistryInitEvent(settingsRegistry));
 
