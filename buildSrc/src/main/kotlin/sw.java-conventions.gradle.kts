@@ -1,18 +1,86 @@
-import com.google.gson.GsonBuilder
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader
-
 plugins {
     `java-library`
     `maven-publish`
     id("sw.license-conventions")
+    id("net.kyori.indra")
+    id("net.kyori.indra.publishing")
+    id("io.freefair.lombok")
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_17
-java.targetCompatibility = JavaVersion.VERSION_17
+java.javaTarget(17)
 
-tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-    options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
+tasks {
+    javadoc {
+        title = "ServerWrecker Javadocs"
+        options.encoding = Charsets.UTF_8.name()
+        (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+    }
+    delombok {
+        onlyIf { project.name.contains("api") }
+    }
+    compileJava {
+        options.encoding = Charsets.UTF_8.name()
+        options.compilerArgs.addAll(
+            listOf(
+                "-parameters",
+                "-nowarn",
+                "-Xlint:-unchecked",
+                "-Xlint:-deprecation",
+                "-Xlint:-processing"
+            )
+        )
+        options.isFork = true
+    }
+}
+
+indra {
+    github("AlexProgrammerDE", "ServerWrecker") {
+        ci(true)
+    }
+
+    gpl3OnlyLicense()
+    publishReleasesTo("codemc-releases", "https://repo.codemc.org/repository/maven-releases/")
+    publishSnapshotsTo("codemc-snapshots", "https://repo.codemc.org/repository/maven-snapshots/")
+
+    configurePublications {
+        pom {
+            name.set("ServerWrecker")
+            url.set("https://pistonmaster.net/ServerWrecker")
+            organization {
+                name.set("AlexProgrammerDE")
+                url.set("https://pistonmaster.net")
+            }
+            developers {
+                developer {
+                    id.set("AlexProgrammerDE")
+                    timezone.set("Europe/Berlin")
+                    url.set("https://pistonmaster.net")
+                }
+            }
+        }
+
+        versionMapping {
+            usage(Usage.JAVA_API) { fromResolutionOf(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME) }
+            usage(Usage.JAVA_RUNTIME) { fromResolutionResult() }
+        }
+    }
+    javaVersions {
+        target(17)
+        minimumToolchain(17)
+        strictVersions(true)
+        testWith(17)
+    }
+}
+
+val repoName = if (version.toString().endsWith("SNAPSHOT")) "maven-snapshots" else "maven-releases"
+publishing {
+    repositories {
+        maven("https://repo.codemc.org/repository/${repoName}/") {
+            credentials.username = System.getenv("CODEMC_USERNAME")
+            credentials.password = System.getenv("CODEMC_PASSWORD")
+            name = "codemc"
+        }
+    }
 }
 
 /*

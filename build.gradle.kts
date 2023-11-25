@@ -7,7 +7,6 @@ plugins {
     id("sw.shadow-conventions")
     id("com.google.protobuf")
     id("net.kyori.indra.checkstyle")
-    id("org.graalvm.buildtools.native")
 }
 
 version = "1.4.0-SNAPSHOT"
@@ -191,10 +190,6 @@ tasks.withType<Checkstyle> {
     exclude("**/net/pistonmaster/serverwrecker/grpc/generated**")
 }
 
-tasks.compileJava {
-    options.compilerArgs.add("-Aproject=${project.name}")
-}
-
 tasks.named<Jar>("jar") {
     manifest {
         attributes["Main-Class"] = "net.pistonmaster.serverwrecker.ServerWreckerBootstrap"
@@ -214,42 +209,4 @@ tasks.named<ShadowJar>("shadowJar") {
             "velocity-plugin.json"
         )
     )
-}
-
-graalvmNative {
-    binaries {
-        named("main") {
-            javaLauncher.set(javaToolchains.launcherFor {
-                languageVersion.set(JavaLanguageVersion.of(17))
-            })
-
-            // Netty
-            buildArgs(
-                "--initialize-at-run-time=io.netty.util.internal.logging",
-                "--initialize-at-run-time=io.netty.util.AbstractReferenceCounted",
-                "--initialize-at-run-time=io.netty.handler.ssl",
-                "--initialize-at-run-time=io.netty.channel.AbstractChannel",
-                "--initialize-at-run-time=io.netty"
-            )
-
-            // Logging
-            buildArgs(
-                "--initialize-at-run-time=org.slf4j.LoggerFactory",
-                "--initialize-at-run-time=org.slf4j.simple.SimpleLogger",
-                "--initialize-at-run-time=org.slf4j.impl.StaticLoggerBinder"
-            )
-
-            // Allow GSON at build time
-            buildArgs(
-                "--initialize-at-build-time=com.google.gson"
-            )
-
-            // Core
-            buildArgs(
-                "--initialize-at-build-time=net.pistonmaster.serverwrecker.data"
-            )
-
-            sharedLibrary.set(false)
-        }
-    }
 }
