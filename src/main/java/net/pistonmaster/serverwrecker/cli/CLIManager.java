@@ -19,18 +19,28 @@
  */
 package net.pistonmaster.serverwrecker.cli;
 
+import com.google.gson.JsonPrimitive;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.command.ShutdownManager;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.ComboOption;
+import net.pistonmaster.serverwrecker.grpc.generated.ComboSetting;
+import net.pistonmaster.serverwrecker.grpc.generated.IntSetting;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
+import net.pistonmaster.serverwrecker.settings.lib.property.PropertyKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
+@SuppressWarnings("unchecked")
 public class CLIManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(CLIManager.class);
     private final RPCClient rpcClient;
@@ -54,7 +64,129 @@ public class CLIManager {
             return 1;
         });
 
+        var targetCommandSpec = commandLine.getCommandSpec();
+        for (var page : rpcClient.getConfigStubBlocking()
+                .getUIClientData(ClientDataRequest.getDefaultInstance())
+                .getPluginSettingsList()) {
+            for (var entry : page.getEntriesList()) {
+                switch (entry.getValueCase()) {
+                    case SINGLE -> {
+                        var singleEntry = entry.getSingle();
+                        var propertyKey = new PropertyKey(page.getNamespace(), singleEntry.getKey());
+
+                        var settingType = singleEntry.getType();
+                        switch (settingType.getValueCase()) {
+                            case STRING -> {
+                                var stringEntry = settingType.getString();
+                                AtomicReference<String> reference = new AtomicReference<>();
+                                var optionSpec = CommandLine.Model.OptionSpec.builder(singleEntry.getCliNamesList().toArray(new String[0]))
+                                        .description(singleEntry.getCliDescription())
+                                        .type(String.class)
+                                        .initialValue(stringEntry.getDef())
+                                        .hasInitialValue(true)
+                                        .setter(new CommandLine.Model.ISetter() {
+                                            @Override
+                                            public <T> T set(T value) {
+                                                return (T) reference.getAndSet((String) value);
+                                            }
+                                        })
+                                        .build();
+
+                                settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
+
+                                targetCommandSpec.addOption(optionSpec);
+                            }
+                            case INT -> {
+                                var intEntry = settingType.getInt();
+
+                                addIntSetting(targetCommandSpec, propertyKey, settingsManager, singleEntry.getCliDescription(),
+                                        singleEntry.getCliNamesList().toArray(new String[0]), intEntry);
+                            }
+                            case BOOL -> {
+                                var boolEntry = settingType.getBool();
+                                AtomicReference<Boolean> reference = new AtomicReference<>();
+                                var optionSpec = CommandLine.Model.OptionSpec.builder(singleEntry.getCliNamesList().toArray(new String[0]))
+                                        .description(singleEntry.getCliDescription())
+                                        .type(boolean.class)
+                                        .initialValue(boolEntry.getDef())
+                                        .hasInitialValue(true)
+                                        .setter(new CommandLine.Model.ISetter() {
+                                            @Override
+                                            public <T> T set(T value) {
+                                                return (T) reference.getAndSet((boolean) value);
+                                            }
+                                        })
+                                        .build();
+
+                                settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
+
+                                targetCommandSpec.addOption(optionSpec);
+                            }
+                            case COMBO -> {
+                                var comboEntry = settingType.getCombo();
+                                AtomicReference<String> reference = new AtomicReference<>();
+
+                                var optionSpec = CommandLine.Model.OptionSpec.builder(singleEntry.getCliNamesList().toArray(new String[0]))
+                                        .description(singleEntry.getCliDescription())
+                                        .typeInfo(new ComboTypeInfo(comboEntry))
+                                        .initialValue(comboEntry.getOptionsList().get(comboEntry.getDef()).getId())
+                                        .hasInitialValue(true)
+                                        .setter(new CommandLine.Model.ISetter() {
+                                            @Override
+                                            public <T> T set(T value) {
+                                                return (T) reference.getAndSet((String) value);
+                                            }
+                                        })
+                                        .build();
+
+                                settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
+
+                                targetCommandSpec.addOption(optionSpec);
+                            }
+                            case VALUE_NOT_SET ->
+                                    throw new IllegalStateException("Unexpected value: " + settingType.getValueCase());
+                        };
+                    }
+                    case MINMAXPAIR -> {
+                        var minMaxEntry = entry.getMinMaxPair();
+
+                        var min = minMaxEntry.getMin();
+                        var minPropertyKey = new PropertyKey(page.getNamespace(), min.getKey());
+                        addIntSetting(targetCommandSpec, minPropertyKey, settingsManager, min.getCliDescription(),
+                                min.getCliNamesList().toArray(new String[0]), min.getIntSetting());
+
+                        var max = minMaxEntry.getMax();
+                        var maxPropertyKey = new PropertyKey(page.getNamespace(), max.getKey());
+                        addIntSetting(targetCommandSpec, maxPropertyKey, settingsManager, max.getCliDescription(),
+                                max.getCliNamesList().toArray(new String[0]), max.getIntSetting());
+                    }
+                    case VALUE_NOT_SET ->
+                            throw new IllegalStateException("Unexpected value: " + entry.getValueCase());
+                }
+            }
+        }
+
         commandLine.execute(args);
+    }
+
+    private void addIntSetting(CommandLine.Model.CommandSpec commandSpec, PropertyKey propertyKey, SettingsManager settingsManager, String cliDescription, String[] cliNames, IntSetting intEntry) {
+        AtomicInteger reference = new AtomicInteger();
+        var optionSpec = CommandLine.Model.OptionSpec.builder(cliNames)
+                .description(cliDescription)
+                .type(int.class)
+                .initialValue(intEntry.getDef())
+                .hasInitialValue(true)
+                .setter(new CommandLine.Model.ISetter() {
+                    @Override
+                    public <T> T set(T value) {
+                        return (T) (Integer) reference.getAndSet((int) value);
+                    }
+                })
+                .build();
+
+        settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
+
+        commandSpec.addOption(optionSpec);
     }
 
     private void shutdownHook() {
@@ -63,5 +195,77 @@ public class CLIManager {
 
     public void shutdown() {
         shutdownManager.shutdown(true);
+    }
+
+    private record ComboTypeInfo(ComboSetting comboSetting) implements CommandLine.Model.ITypeInfo {
+        @Override
+        public boolean isBoolean() {
+            return false;
+        }
+
+        @Override
+        public boolean isMultiValue() {
+            return false;
+        }
+
+        @Override
+        public boolean isOptional() {
+            return false;
+        }
+
+        @Override
+        public boolean isArray() {
+            return false;
+        }
+
+        @Override
+        public boolean isCollection() {
+            return false;
+        }
+
+        @Override
+        public boolean isMap() {
+            return false;
+        }
+
+        @Override
+        public boolean isEnum() {
+            return true;
+        }
+
+        @Override
+        public List<String> getEnumConstantNames() {
+            return comboSetting.getOptionsList().stream().map(ComboOption::getId).toList();
+        }
+
+        @Override
+        public String getClassName() {
+            return null;
+        }
+
+        @Override
+        public String getClassSimpleName() {
+            return null;
+        }
+
+        @Override
+        public List<CommandLine.Model.ITypeInfo> getAuxiliaryTypeInfos() {
+            return null;
+        }
+
+        @Override
+        public List<String> getActualGenericTypeArguments() {
+            return null;
+        }
+
+        @Override
+        public Class<?> getType() {
+            return null;
+        }
+
+        @Override
+        public Class<?>[] getAuxiliaryTypes() {
+            return new Class[0];
+        }
     }
 }
