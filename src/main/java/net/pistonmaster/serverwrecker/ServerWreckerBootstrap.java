@@ -90,10 +90,10 @@ public class ServerWreckerBootstrap {
         var mixinPaths = new HashSet<String>();
         PLUGIN_MANAGER.getExtensions(MixinExtension.class).forEach(mixinExtension -> {
             for (var mixinPath : mixinExtension.getMixinPaths()) {
-                if (!mixinPaths.add(mixinPath)) {
-                    LOGGER.warn("Mixin path {} is already added!", mixinPath);
+                if (mixinPaths.add(mixinPath)) {
+                    LOGGER.info("Added mixin \"{}\"", mixinPath);
                 } else {
-                    LOGGER.info("Added mixin {}", mixinPath);
+                    LOGGER.warn("Mixin path \"{}\" is already added!", mixinPath);
                 }
             }
         });
@@ -106,9 +106,6 @@ public class ServerWreckerBootstrap {
         try {
             transformerManager.hookInstrumentation(Agents.getInstrumentation());
             LOGGER.info("Used Runtime Agent to inject mixins");
-
-            LOGGER.info("Starting plugins...");
-            startPlugins();
 
             postMixinMain(runServer, args);
         } catch (ReflectiveOperationException | IOException t) {
@@ -151,9 +148,6 @@ public class ServerWreckerBootstrap {
 
         // Load all plugins available
         PLUGIN_MANAGER.loadPlugins();
-    }
-
-    private static void startPlugins() {
         PLUGIN_MANAGER.startPlugins();
     }
 
