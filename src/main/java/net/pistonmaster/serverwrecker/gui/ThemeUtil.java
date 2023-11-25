@@ -23,13 +23,11 @@ import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.util.SystemInfo;
-import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicLookAndFeel;
-import java.nio.file.Path;
 
 public class ThemeUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ThemeUtil.class);

@@ -24,7 +24,6 @@ import com.formdev.flatlaf.ui.FlatDropShadowBorder;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.UIScale;
-import lombok.RequiredArgsConstructor;
 import net.miginfocom.swing.MigLayout;
 import net.pistonmaster.serverwrecker.gui.GUIClientProps;
 

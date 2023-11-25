@@ -31,6 +31,20 @@ import java.util.Map;
 public class SettingsRegistry {
     private final Map<String, NamespaceRegistry> namespaceMap = new HashMap<>();
 
+    private static IntSetting createIntSetting(IntProperty property) {
+        var builder = IntSetting.newBuilder()
+                .setDef(property.defaultValue())
+                .setMin(property.minValue())
+                .setMax(property.maxValue())
+                .setStep(property.stepValue());
+
+        if (property.format() != null) {
+            builder = builder.setFormat(property.format());
+        }
+
+        return builder.build();
+    }
+
     public SettingsRegistry addClass(Class<? extends SettingsObject> clazz, String pageName) {
         return addClass(clazz, pageName, false);
     }
@@ -169,20 +183,6 @@ public class SettingsRegistry {
         }
 
         return list;
-    }
-
-    private static IntSetting createIntSetting(IntProperty property) {
-        var builder = IntSetting.newBuilder()
-                .setDef(property.defaultValue())
-                .setMin(property.minValue())
-                .setMax(property.maxValue())
-                .setStep(property.stepValue());
-
-        if (property.format() != null) {
-            builder = builder.setFormat(property.format());
-        }
-
-        return builder.build();
     }
 
     private record NamespaceRegistry(String pageName, boolean hidden, List<Property> properties) {

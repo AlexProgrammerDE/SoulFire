@@ -42,7 +42,7 @@ public class GUIFrame extends JFrame {
 
         var commandsHint = new HintManager.Hint(
                 "Use \"help\" to get a list of all commands.",
-                (Component)Objects.requireNonNull( logPanel.getClientProperty("log-panel-command-input")),
+                (Component) Objects.requireNonNull(logPanel.getClientProperty("log-panel-command-input")),
                 SwingConstants.TOP, "hint.commandInput", null);
 
         var controlsHint = new HintManager.Hint(
@@ -52,12 +52,12 @@ public class GUIFrame extends JFrame {
 
         var pluginsHint = new HintManager.Hint(
                 "Click to configure plugins to make the attack more effective.",
-                (Component)Objects.requireNonNull( cardContainer.getClientProperty("plugin-menu-button")),
+                (Component) Objects.requireNonNull(cardContainer.getClientProperty("plugin-menu-button")),
                 SwingConstants.BOTTOM, "hint.pluginsButton", controlsHint);
 
         var proxyHint = new HintManager.Hint(
                 "Click to import HTTP, SOCKS4 and SOCKS5 proxies",
-                (Component)Objects.requireNonNull( cardContainer.getClientProperty("proxy-menu-button")),
+                (Component) Objects.requireNonNull(cardContainer.getClientProperty("proxy-menu-button")),
                 SwingConstants.LEFT, "hint.proxyButton", pluginsHint);
 
         var accountsHint = new HintManager.Hint(

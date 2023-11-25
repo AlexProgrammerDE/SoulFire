@@ -145,7 +145,7 @@ public class CLIManager {
                             }
                             case VALUE_NOT_SET ->
                                     throw new IllegalStateException("Unexpected value: " + settingType.getValueCase());
-                        };
+                        }
                     }
                     case MINMAXPAIR -> {
                         var minMaxEntry = entry.getMinMaxPair();
@@ -160,8 +160,7 @@ public class CLIManager {
                         addIntSetting(targetCommandSpec, maxPropertyKey, settingsManager, max.getCliDescription(),
                                 max.getCliNamesList().toArray(new String[0]), max.getIntSetting());
                     }
-                    case VALUE_NOT_SET ->
-                            throw new IllegalStateException("Unexpected value: " + entry.getValueCase());
+                    case VALUE_NOT_SET -> throw new IllegalStateException("Unexpected value: " + entry.getValueCase());
                 }
             }
         }
