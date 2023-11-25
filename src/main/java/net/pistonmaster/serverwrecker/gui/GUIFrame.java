@@ -27,6 +27,7 @@ import net.pistonmaster.serverwrecker.gui.navigation.ControlPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 public class GUIFrame extends JFrame {
     public static final String MAIN_MENU = "MainMenu";
@@ -41,7 +42,7 @@ public class GUIFrame extends JFrame {
 
         var commandsHint = new HintManager.Hint(
                 "Use \"help\" to get a list of all commands.",
-                (Component) logPanel.getClientProperty("log-panel-command-input"),
+                (Component)Objects.requireNonNull( logPanel.getClientProperty("log-panel-command-input")),
                 SwingConstants.TOP, "hint.commandInput", null);
 
         var controlsHint = new HintManager.Hint(
@@ -51,22 +52,22 @@ public class GUIFrame extends JFrame {
 
         var pluginsHint = new HintManager.Hint(
                 "Click to configure plugins to make the attack more effective.",
-                (Component) cardContainer.getClientProperty("plugin-menu-button"),
+                (Component)Objects.requireNonNull( cardContainer.getClientProperty("plugin-menu-button")),
                 SwingConstants.BOTTOM, "hint.pluginsButton", controlsHint);
 
         var proxyHint = new HintManager.Hint(
                 "Click to import HTTP, SOCKS4 and SOCKS5 proxies",
-                (Component) cardContainer.getClientProperty("proxy-menu-button"),
+                (Component)Objects.requireNonNull( cardContainer.getClientProperty("proxy-menu-button")),
                 SwingConstants.LEFT, "hint.proxyButton", pluginsHint);
 
         var accountsHint = new HintManager.Hint(
                 "Click to configure the bot offline-mode key format or bring your own accounts.",
-                (Component) cardContainer.getClientProperty("account-menu-button"),
+                (Component) Objects.requireNonNull(cardContainer.getClientProperty("account-menu-button")),
                 SwingConstants.RIGHT, "hint.accountsButton", proxyHint);
 
         var settingsHint = new HintManager.Hint(
                 "Click to configure host, port, version and more.",
-                (Component) cardContainer.getClientProperty("settings-menu-button"),
+                (Component) Objects.requireNonNull(cardContainer.getClientProperty("bot-button")),
                 SwingConstants.BOTTOM, "hint.settingsButton", accountsHint);
 
         var logsHint = new HintManager.Hint(

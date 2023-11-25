@@ -20,6 +20,8 @@
 package net.pistonmaster.serverwrecker.gui.libs;
 
 import org.intellij.lang.annotations.Language;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
@@ -28,6 +30,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class SwingTextUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SwingTextUtils.class);
+
     private SwingTextUtils() {
     }
 
@@ -38,14 +42,13 @@ public class SwingTextUtils {
         pane.setEditable(false);
         pane.setBackground(null);
         pane.setBorder(null);
-        pane.addHyperlinkListener(e -> {
-            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                if (Desktop.isDesktopSupported()) {
-                    try {
-                        Desktop.getDesktop().browse(e.getURL().toURI());
-                    } catch (IOException | URISyntaxException e1) {
-                        e1.printStackTrace();
-                    }
+        pane.addHyperlinkListener(event -> {
+            if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED
+                    && Desktop.isDesktopSupported()) {
+                try {
+                    Desktop.getDesktop().browse(event.getURL().toURI());
+                } catch (IOException | URISyntaxException e) {
+                    LOGGER.error("Failed to open link!", e);
                 }
             }
         });
@@ -54,6 +57,10 @@ public class SwingTextUtils {
     }
 
     public static String htmlCenterText(String text) {
-        return "<html><center>" + text + "</center></html>";
+        return htmlText("<center>" + text + "</center>");
+    }
+
+    public static String htmlText(String text) {
+        return "<html>" + text + "</html>";
     }
 }

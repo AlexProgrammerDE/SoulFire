@@ -51,8 +51,11 @@ public class HintManager {
     public static void showHint(Hint hint) {
         // check whether user already closed the hint
         if (GUIClientProps.getBoolean(hint.prefsKey, false)) {
-            if (hint.nextHint != null)
+            System.out.println("HintManager: hint '" + hint.prefsKey + "' was already closed." + hint.nextHint);
+            if (hint.nextHint != null) {
                 showHint(hint.nextHint);
+            }
+
             return;
         }
 
@@ -69,14 +72,13 @@ public class HintManager {
         }
     }
 
-    //---- class HintPanel ----------------------------------------------------
-    @RequiredArgsConstructor
-    public static class Hint {
-        private final String message;
-        private final Component owner;
-        private final int position;
-        private final String prefsKey;
-        private final Hint nextHint;
+    public record Hint(
+            String message,
+            Component owner,
+            int position,
+            String prefsKey,
+            Hint nextHint
+    ) {
     }
 
     //---- class HintPanel ----------------------------------------------------
@@ -99,7 +101,7 @@ public class HintManager {
             setOpaque(false);
             updateBalloonBorder();
 
-            hintLabel.setText("<html>" + hint.message + "</html>");
+            hintLabel.setText(SwingTextUtils.htmlText(hint.message));
 
             // grab all mouse events to avoid that components overlapped
             // by the hint panel receive them
@@ -135,6 +137,10 @@ public class HintManager {
         }
 
         void showHint() {
+            if (hint.owner == null) {
+                throw new IllegalStateException("hint owner is null");
+            }
+
             var rootPane = SwingUtilities.getRootPane(hint.owner);
             if (rootPane == null) {
                 return;
@@ -224,8 +230,7 @@ public class HintManager {
                     // columns
                     "[::200,fill]",
                     // rows
-                    "[]para" +
-                            "[]"));
+                    "[]para[]"));
 
             //---- hintLabel ----
             hintLabel.setText("hint");

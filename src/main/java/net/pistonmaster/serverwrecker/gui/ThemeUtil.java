@@ -32,7 +32,6 @@ import javax.swing.plaf.basic.BasicLookAndFeel;
 import java.nio.file.Path;
 
 public class ThemeUtil {
-    public static final Path THEME_PATH = ServerWreckerBootstrap.DATA_FOLDER.resolve("theme.json");
     private static final Logger LOGGER = LoggerFactory.getLogger(ThemeUtil.class);
 
     private ThemeUtil() {
