@@ -46,7 +46,7 @@ public class PluginHelper {
      */
     public static <T extends ServerWreckerBotEvent> void registerBotEventConsumer(Class<T> clazz, Consumer<T> consumer) {
         registerAttackEventConsumer(BotConnectionInitEvent.class, event ->
-                event.connection().eventBus().register(clazz, consumer));
+                event.connection().eventBus().register(consumer, clazz));
     }
 
     /**
@@ -58,6 +58,6 @@ public class PluginHelper {
      */
     public static <T extends ServerWreckerAttackEvent> void registerAttackEventConsumer(Class<T> clazz, Consumer<T> consumer) {
         ServerWreckerAPI.registerListener(AttackInitEvent.class, event ->
-                event.attackManager().getEventBus().register(clazz, consumer));
+                event.attackManager().getEventBus().register(consumer, clazz));
     }
 }
