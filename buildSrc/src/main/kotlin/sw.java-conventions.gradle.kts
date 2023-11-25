@@ -45,7 +45,7 @@ indra {
     configurePublications {
         pom {
             name.set("ServerWrecker")
-            url.set("https://pistonmaster.net/ServerWrecker")
+            url.set("https://github.com/AlexProgrammerDE/ServerWrecker")
             organization {
                 name.set("AlexProgrammerDE")
                 url.set("https://pistonmaster.net")
