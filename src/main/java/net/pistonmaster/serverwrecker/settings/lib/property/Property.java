@@ -19,38 +19,38 @@
  */
 package net.pistonmaster.serverwrecker.settings.lib.property;
 
-public sealed interface Property permits BooleanProperty, ComboProperty, IntProperty, StringProperty {
+public sealed interface Property permits BooleanProperty, ComboProperty, IntProperty, StringProperty, MinMaxPropertyLink {
     static Builder builder(String namespace) {
         return new Builder(namespace);
     }
 
     String namespace();
 
-    String name();
+    String key();
 
     default PropertyKey propertyKey() {
-        return new PropertyKey(namespace(), name());
+        return new PropertyKey(namespace(), key());
     }
 
     record Builder(String namespace) {
-        public BooleanProperty ofBoolean(String name, String uiDescription, String cliDescription, String[] cliNames, boolean defaultValue) {
-            return new BooleanProperty(namespace, name, uiDescription, cliDescription, cliNames, defaultValue);
+        public BooleanProperty ofBoolean(String key, String uiDescription, String cliDescription, String[] cliNames, boolean defaultValue) {
+            return new BooleanProperty(namespace, key, uiDescription, cliDescription, cliNames, defaultValue);
         }
 
-        public IntProperty ofInt(String name, String uiDescription, String cliDescription, String[] cliNames, int defaultValue) {
-            return new IntProperty(namespace, name, uiDescription, cliDescription, cliNames, defaultValue);
+        public IntProperty ofInt(String key, String uiDescription, String cliDescription, String[] cliNames, int defaultValue) {
+            return new IntProperty(namespace, key, uiDescription, cliDescription, cliNames, defaultValue);
         }
 
-        public StringProperty ofString(String name, String uiDescription, String cliDescription, String[] cliNames, String defaultValue) {
-            return new StringProperty(namespace, name, uiDescription, cliDescription, cliNames, defaultValue);
+        public StringProperty ofString(String key, String uiDescription, String cliDescription, String[] cliNames, String defaultValue) {
+            return new StringProperty(namespace, key, uiDescription, cliDescription, cliNames, defaultValue);
         }
 
-        public ComboProperty ofCombo(String name, String uiDescription, String cliDescription, String[] cliNames, ComboProperty.ComboOption[] values, int defaultValue) {
-            return new ComboProperty(namespace, name, uiDescription, cliDescription, cliNames, values, defaultValue);
+        public ComboProperty ofCombo(String key, String uiDescription, String cliDescription, String[] cliNames, ComboProperty.ComboOption[] values, int defaultValue) {
+            return new ComboProperty(namespace, key, uiDescription, cliDescription, cliNames, values, defaultValue);
         }
 
-        public <T extends Enum<?>> ComboProperty ofEnum(String name, String uiDescription, String cliDescription, String[] cliNames, T[] values, T defaultValue) {
-            return new ComboProperty(namespace, name, uiDescription, cliDescription, cliNames, ComboProperty.ComboOption.fromEnum(values), defaultValue.ordinal());
+        public <T extends Enum<T>> ComboProperty ofEnum(String key, String uiDescription, String cliDescription, String[] cliNames, T[] values, T defaultValue) {
+            return new ComboProperty(namespace, key, uiDescription, cliDescription, cliNames, ComboProperty.ComboOption.fromEnum(values), defaultValue.ordinal());
         }
     }
 }

@@ -31,7 +31,7 @@ import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSentEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.*;
 
@@ -85,8 +85,8 @@ public class ClientSettings implements InternalExtension {
     }
 
     @EventHandler
-    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
-        event.settingsManager().addClass(ClientSettingsSettings.class);
+    public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+        event.settingsRegistry().addClass(ClientSettingsSettings.class, "Client Settings");
     }
 
     @Override

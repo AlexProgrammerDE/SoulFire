@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker;
 
+import net.pistonmaster.serverwrecker.cli.CLIManager;
 import net.pistonmaster.serverwrecker.cli.SWCommandDefinition;
 import net.pistonmaster.serverwrecker.common.OperationMode;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
@@ -45,19 +46,12 @@ public class ServerWreckerLoader {
     }
 
     public static void runHeadless(int port, String[] args) {
-        var serverWrecker = new ServerWreckerServer(OperationMode.CLI, "localhost", port);
-        var serverWreckerCommand = new SWCommandDefinition(serverWrecker);
-        var commandLine = new CommandLine(serverWreckerCommand);
-        serverWreckerCommand.setCommandLine(commandLine);
-        commandLine.setCaseInsensitiveEnumValuesAllowed(true);
-        commandLine.setUsageHelpAutoWidth(true);
-        commandLine.setUsageHelpLongOptionsMaxWidth(30);
-        commandLine.setExecutionExceptionHandler((ex, cmdLine, parseResult) -> {
-            LOGGER.error("Exception while executing command", ex);
-            return 1;
-        });
+        var host = "localhost";
+        var serverWrecker = new ServerWreckerServer(OperationMode.CLI, host, port);
 
-        commandLine.execute(args);
+        var rpcClient = new RPCClient(host, port, serverWrecker.generateAdminJWT());
+        var cliManager = new CLIManager(rpcClient);
+        cliManager.initCLI(args);
     }
 
     public static void runGUI(int port) {

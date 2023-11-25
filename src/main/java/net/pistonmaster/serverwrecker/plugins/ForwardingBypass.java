@@ -36,7 +36,7 @@ import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSendingEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.ComboProperty;
@@ -143,8 +143,8 @@ public class ForwardingBypass implements InternalExtension {
     }
 
     @EventHandler
-    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
-        event.settingsManager().addClass(ForwardingBypassSettings.class);
+    public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+        event.settingsRegistry().addClass(ForwardingBypassSettings.class, "Forwarding Bypass");
     }
 
     @Override

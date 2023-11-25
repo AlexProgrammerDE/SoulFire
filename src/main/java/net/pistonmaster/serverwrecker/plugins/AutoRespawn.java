@@ -29,7 +29,7 @@ import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
 import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
@@ -58,8 +58,8 @@ public class AutoRespawn implements InternalExtension {
     }
 
     @EventHandler
-    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
-        event.settingsManager().addClass(AutoRespawnSettings.class);
+    public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+        event.settingsRegistry().addClass(AutoRespawnSettings.class, "Auto Respawn");
     }
 
     @Override

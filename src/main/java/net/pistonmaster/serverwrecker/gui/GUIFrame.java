@@ -60,7 +60,7 @@ public class GUIFrame extends JFrame {
                 SwingConstants.LEFT, "hint.proxyButton", pluginsHint);
 
         var accountsHint = new HintManager.Hint(
-                "Click to configure the bot offline-mode name format or bring your own accounts.",
+                "Click to configure the bot offline-mode key format or bring your own accounts.",
                 (Component) cardContainer.getClientProperty("account-menu-button"),
                 SwingConstants.RIGHT, "hint.accountsButton", proxyHint);
 
@@ -79,7 +79,7 @@ public class GUIFrame extends JFrame {
 
     public void initComponents(Injector injector) {
         if (SystemInfo.isMacOS) {
-            // Hide window title because we want to avoid dark-mode name issues
+            // Hide window title because we want to avoid dark-mode key issues
             getRootPane().putClientProperty("apple.awt.windowTitleVisible", false);
         }
 

@@ -25,7 +25,7 @@ import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
 import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
@@ -41,8 +41,8 @@ public class AutoReconnect implements InternalExtension {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @EventHandler
-    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
-        event.settingsManager().addClass(AutoReconnectSettings.class);
+    public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+        event.settingsRegistry().addClass(AutoReconnectSettings.class, "Auto Reconnect");
     }
 
     @Override

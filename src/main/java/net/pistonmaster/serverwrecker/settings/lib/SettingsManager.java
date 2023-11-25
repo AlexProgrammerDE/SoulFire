@@ -19,17 +19,20 @@
  */
 package net.pistonmaster.serverwrecker.settings.lib;
 
-import com.google.common.collect.BiMap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.*;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingsPage;
-import net.pistonmaster.serverwrecker.settings.lib.property.Property;
+import it.unimi.dsi.fastutil.objects.*;
+import lombok.Getter;
+import net.pistonmaster.serverwrecker.auth.AccountRegistry;
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.lib.property.PropertyKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -47,65 +50,81 @@ import java.util.function.Consumer;
 
 public class SettingsManager {
     public static final Logger LOGGER = LoggerFactory.getLogger(SettingsManager.class);
-    private final Multimap<String, Property> propertyMap = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
+    private final Multimap<PropertyKey, Consumer<JsonElement>> listeners = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
+    private final Map<PropertyKey, Provider<JsonElement>> providers = new HashMap<>();
     // Used to read & write the settings file
-    private final Gson dumpGson = new GsonBuilder().setPrettyPrinting().create();
-    private final Gson baseGson = new GsonBuilder()
-            .registerTypeAdapter(ProtocolVersion.class, new ProtocolVersionAdapter())
+    private static final Gson dumpGson = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson baseGson = new GsonBuilder()
             .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
             .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
             .create();
-
-    public SettingsManager(List<Class<? extends SettingsObject>> classes) {
-        for (var clazz : classes) {
-            addClass(clazz);
-        }
-    }
-
-    public void addClass(Class<? extends SettingsObject> clazz) {
-        var pluginSettings = clazz.getAnnotation(PluginSettings.class);
-        var hidden = pluginSettings == null;
-        var pageName = hidden ? "" : pluginSettings.pageName();
-    }
+    @Getter
+    private final AccountRegistry accountRegistry = new AccountRegistry();
+    @Getter
+    private final ProxyRegistry proxyRegistry = new ProxyRegistry();
 
     public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {
-
+        providers.put(property, provider);
     }
 
     public void registerListener(PropertyKey property, Consumer<JsonElement> listener) {
-
-    }
-
-    public SettingsHolder collectSettings() {
-
-        return settingsHolder;
-    }
-
-    public void onSettingsLoad(SettingsHolder settings) {
-        for (SettingsObject setting : settings.settings()) {
-            for (var listener : listeners) {
-                loadSetting(setting, listener);
-            }
-        }
+        listeners.put(property, listener);
     }
 
     public void loadProfile(Path path) throws IOException {
         try {
-            onSettingsLoad(createSettingsHolder(Files.readString(path)));
+            createSettingsHolder(Files.readString(path), this);
         } catch (Exception e) {
             throw new IOException(e);
         }
     }
 
-    public SettingsHolder createSettingsHolder(String json) {
+    public static SettingsHolder createSettingsHolder(String json, @Nullable SettingsManager settingsManager) {
         try {
-            var settingsHolder = dumpGson.fromJson(json, JsonArray.class);
-            List<SettingsObject> settingsObjects = new ArrayList<>();
-            for (var jsonElement : settingsHolder) {
-                settingsObjects.add(settingsTypeGson.fromJson(jsonElement, SettingsObject.class));
+            var settingsSerialized = baseGson.fromJson(json, RootDataStructure.class);
+            var settingsData = settingsSerialized.settings();
+            var intProperties = new Object2IntArrayMap<PropertyKey>();
+            var booleanProperties = new Object2BooleanArrayMap<PropertyKey>();
+            var stringProperties = new Object2ObjectArrayMap<PropertyKey, String>();
+
+            for (var entry : settingsData.entrySet()) {
+                var namespace = entry.getKey();
+                for (var setting : entry.getValue().getAsJsonObject().entrySet()) {
+                    var key = setting.getKey();
+                    var settingData = setting.getValue();
+
+                    var propertyKey = new PropertyKey(namespace, key);
+
+                    if (settingsManager != null) {
+                        // Notify all listeners that this setting has been loaded
+                        settingsManager.listeners.get(propertyKey)
+                                .forEach(listener -> listener.accept(settingData));
+                    }
+
+                    if (settingData.isJsonPrimitive()) {
+                        var primitive = settingData.getAsJsonPrimitive();
+                        if (primitive.isBoolean()) {
+                            booleanProperties.put(propertyKey, primitive.getAsBoolean());
+                        } else if (primitive.isNumber()) {
+                            intProperties.put(propertyKey, primitive.getAsInt());
+                        } else if (primitive.isString()) {
+                            stringProperties.put(propertyKey, primitive.getAsString());
+                        } else {
+                            throw new IllegalArgumentException("Unknown primitive type: " + primitive);
+                        }
+                    } else {
+                        throw new IllegalArgumentException("Unknown type: " + settingData);
+                    }
+                }
             }
 
-            return new SettingsHolder(settingsObjects);
+            return new SettingsHolder(
+                    intProperties,
+                    booleanProperties,
+                    stringProperties,
+                    settingsSerialized.accounts(),
+                    settingsSerialized.proxies()
+            );
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
@@ -122,52 +141,38 @@ public class SettingsManager {
     }
 
     public String exportSettings() {
-        var settingsHolder = new ArrayList<JsonElement>();
-        for (SettingsObject settingsObject : collectSettings().settings()) {
-            settingsHolder.add(settingsTypeGson.toJsonTree(settingsObject));
+        var settingsData = new JsonObject();
+        for (var providerEntry : providers.entrySet()) {
+            var property = providerEntry.getKey();
+            var provider = providerEntry.getValue();
+
+            var namespace = property.namespace();
+            var settingId = property.key();
+            var value = provider.get();
+
+            var namespaceData = settingsData.getAsJsonObject(namespace);
+            if (namespaceData == null) {
+                namespaceData = new JsonObject();
+                settingsData.add(namespace, namespaceData);
+            }
+
+            namespaceData.add(settingId, value);
         }
 
-        return dumpGson.toJson(settingsHolder);
+        var settingsSerialized = new RootDataStructure(
+                settingsData,
+                accountRegistry.getAccounts(),
+                proxyRegistry.getProxies()
+        );
+
+        return dumpGson.toJson(settingsSerialized);
     }
 
-    public List<ClientPluginSettingsPage> exportSettingsMeta() {
-
-    }
-
-    private static class ProtocolVersionAdapter implements JsonSerializer<ProtocolVersion>, JsonDeserializer<ProtocolVersion> {
-        @Override
-        public ProtocolVersion deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            return ProtocolVersion.getClosest(json.getAsString());
-        }
-
-        @Override
-        public JsonElement serialize(ProtocolVersion src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(src.getName());
-        }
-    }
-
-    private record ClassObjectAdapter(Gson gson, BiMap<String, Class<? extends SettingsObject>> classMap)
-            implements JsonSerializer<Object>, JsonDeserializer<Object> {
-        @Override
-        public JsonElement serialize(Object src, Type typeOfSrc, JsonSerializationContext context) {
-            var serialized = gson.toJsonTree(src);
-            var jsonObject = serialized.getAsJsonObject();
-            var settingClass = classMap.inverse().get(src.getClass());
-            Objects.requireNonNull(settingClass, "Setting name for " + src.getClass().getSimpleName() + " is null!");
-
-            jsonObject.addProperty("settingsId", settingClass);
-            return jsonObject;
-        }
-
-        @Override
-        public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            var jsonObject = json.getAsJsonObject();
-            var settingType = jsonObject.get("settingId").getAsString();
-            var clazz = classMap.get(settingType);
-            Objects.requireNonNull(clazz, "Class for " + settingType + " is null!");
-
-            return gson.fromJson(jsonObject, clazz);
-        }
+    private record RootDataStructure(
+            JsonObject settings,
+            List<MinecraftAccount> accounts,
+            List<SWProxy> proxies
+    ) {
     }
 
     private static class ECPublicKeyAdapter extends AbstractKeyAdapter<ECPublicKey> {
@@ -197,10 +202,7 @@ public class SettingsManager {
     private static abstract class AbstractKeyAdapter<T> implements JsonSerializer<Key>, JsonDeserializer<T> {
         @Override
         public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            var base64 = json.getAsString();
-            var bytes = Base64.getDecoder().decode(base64);
-
-            return createKey(bytes);
+            return createKey(Base64.getDecoder().decode(json.getAsString()));
         }
 
         @Override

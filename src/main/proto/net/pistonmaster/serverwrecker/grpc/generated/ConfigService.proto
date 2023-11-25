@@ -48,7 +48,7 @@ message ClientPluginSettingType {
 // A single option in the settings page
 message ClientPluginSettingEntrySingle {
   // Basically we only send a kv map to the server with every setting entry
-  string settingEntryId = 1;
+  string key = 1;
   string name = 2;
   optional string hint = 3;
   ClientPluginSettingType type = 4;
@@ -56,7 +56,7 @@ message ClientPluginSettingEntrySingle {
 
 message ClientPluginSettingEntryMinMaxPairSingle {
   // Basically we only send a kv map to the server with every setting entry
-  string settingEntryId = 1;
+  string key = 1;
   string name = 2;
   optional string hint = 3;
   IntSetting intSetting = 4;

@@ -23,6 +23,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.grpc.generated.*;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 
 import javax.inject.Inject;
 
@@ -32,7 +33,7 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
 
     @Override
     public void startAttack(AttackStartRequest request, StreamObserver<AttackStartResponse> responseObserver) {
-        var settingsHolder = serverWreckerServer.getSettingsManager().createSettingsHolder(request.getSettings());
+        var settingsHolder = SettingsManager.createSettingsHolder(request.getSettings(), null);
 
         var id = serverWreckerServer.startAttack(settingsHolder);
         responseObserver.onNext(AttackStartResponse.newBuilder().setId(id).build());

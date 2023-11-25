@@ -54,6 +54,7 @@ import javax.inject.Inject;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Getter
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -105,8 +106,12 @@ public class AttackManager {
             throw new IllegalStateException("Attack is already running");
         }
 
-        var accounts = new ArrayList<>(settingsHolder.accounts());
-        var proxies = new ArrayList<>(settingsHolder.proxies());
+        var accounts = settingsHolder.accounts().stream()
+                .filter(MinecraftAccount::enabled)
+                .collect(Collectors.toCollection(ArrayList::new));
+        var proxies = settingsHolder.proxies().stream()
+                .filter(SWProxy::enabled)
+                .collect(Collectors.toCollection(ArrayList::new));
 
         ServerWreckerServer.setupLoggingAndVia(settingsHolder);
 

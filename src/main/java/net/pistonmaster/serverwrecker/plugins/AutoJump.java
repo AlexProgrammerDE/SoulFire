@@ -26,7 +26,7 @@ import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
 import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
@@ -56,8 +56,8 @@ public class AutoJump implements InternalExtension {
     }
 
     @EventHandler
-    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
-        event.settingsManager().addClass(AutoJumpSettings.class);
+    public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+        event.settingsRegistry().addClass(AutoJumpSettings.class, "Auto Jump");
     }
 
     @Override

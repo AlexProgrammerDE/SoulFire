@@ -17,11 +17,11 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.proxy;
+package net.pistonmaster.serverwrecker.api.event.lifecycle;
 
-import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
+import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsRegistry;
 
-import java.util.List;
-
-public record ProxyList(List<SWProxy> proxies) implements SettingsObject {
+public record SettingsRegistryInitEvent(SettingsRegistry settingsRegistry) implements ServerWreckerGlobalEvent {
 }

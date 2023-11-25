@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.gui.navigation;
 import ch.jalu.injector.Injector;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingsPage;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 
@@ -44,6 +45,10 @@ public class CardsContainer extends JPanel {
 
     public void create() {
         setLayout(cardLayout);
+
+        pluginPages.addAll(guiManager.getRpcClient().getConfigStubBlocking()
+                .getUIClientData(ClientDataRequest.getDefaultInstance())
+                .getPluginSettingsList());
 
         // Add bot settings
         panels.add(new GeneratedPanel(guiManager.getSettingsManager(), getByNamespace("bot")));

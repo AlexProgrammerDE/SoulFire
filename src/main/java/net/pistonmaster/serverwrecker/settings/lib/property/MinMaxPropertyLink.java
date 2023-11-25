@@ -19,5 +19,14 @@
  */
 package net.pistonmaster.serverwrecker.settings.lib.property;
 
-public record MinMaxPropertyLink(IntProperty min, IntProperty max) {
+public record MinMaxPropertyLink(IntProperty min, IntProperty max) implements Property {
+    @Override
+    public String namespace() {
+        return min.namespace();
+    }
+
+    @Override
+    public String key() {
+        throw new UnsupportedOperationException("This is a link!");
+    }
 }

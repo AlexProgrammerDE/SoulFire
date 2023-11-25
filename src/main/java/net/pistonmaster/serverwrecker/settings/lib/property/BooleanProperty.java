@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.settings.lib.property;
 
 public record BooleanProperty(String namespace,
-                              String name,
+                              String key,
                               String uiDescription,
                               String cliDescription,
                               String[] cliNames,

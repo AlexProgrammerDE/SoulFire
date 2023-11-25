@@ -27,6 +27,7 @@ import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -46,12 +47,9 @@ import java.util.stream.Collectors;
         description = BuildData.DESCRIPTION, sortOptions = false)
 public class SWCommandDefinition implements Callable<Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SWCommandDefinition.class);
-    private final ServerWreckerServer serverWreckerServer;
+    private final CLIManager cliManager;
     @Setter
     private CommandLine commandLine;
-
-    @Option(names = {"-s", "--start"}, description = "Whether to start the attack automatically")
-    private boolean start;
 
     @Option(names = {"--account-file"}, description = "File to load accounts from")
     private Path accountFile;
@@ -84,19 +82,16 @@ public class SWCommandDefinition implements Callable<Integer> {
                 var description = option.description() == null ? "" : String.join(", ", option.description());
                 System.out.printf("| %s | %s | %s |%n", name, defaultValue, description);
             });
-            serverWreckerServer.shutdown();
+            cliManager.shutdown();
             return 0;
         }
 
         // Delayed to here, so help and version do not get cut off
-        var gRPCHost = serverWreckerServer.getRpcServer().getHost();
-        var gRPCPort = serverWreckerServer.getRpcServer().getPort();
-        var rpcClient = new RPCClient(gRPCHost, gRPCPort, serverWreckerServer.generateAdminJWT());
-        SWTerminalConsole.setupTerminalConsole(serverWreckerServer.getThreadPool(), serverWreckerServer.getShutdownManager(), rpcClient);
+        SWTerminalConsole.setupTerminalConsole(cliManager.getThreadPool(), cliManager.getShutdownManager(), cliManager.getRpcClient());
 
         if (accountFile != null && authType != null) {
             try {
-                serverWreckerServer.getAccountRegistry().loadFromString(Files.readString(accountFile), authType);
+                cliManager.getSettingsManager().getAccountRegistry().loadFromString(Files.readString(accountFile), authType);
             } catch (IOException e) {
                 LOGGER.error("Failed to load accounts!", e);
                 return 1;
@@ -105,7 +100,7 @@ public class SWCommandDefinition implements Callable<Integer> {
 
         if (proxyFile != null && proxyType != null) {
             try {
-                serverWreckerServer.getProxyRegistry().loadFromString(Files.readString(proxyFile), proxyType);
+                cliManager.getSettingsManager().getProxyRegistry().loadFromString(Files.readString(proxyFile), proxyType);
             } catch (IOException e) {
                 LOGGER.error("Failed to load proxies!", e);
                 return 1;
@@ -114,17 +109,11 @@ public class SWCommandDefinition implements Callable<Integer> {
 
         if (profileFile != null) {
             try {
-                serverWreckerServer.getSettingsManager().loadProfile(profileFile);
+                cliManager.getSettingsManager().loadProfile(profileFile);
             } catch (IOException e) {
                 LOGGER.error("Failed to load profile!", e);
                 return 1;
             }
-        }
-
-        if (start) {
-            serverWreckerServer.startAttack();
-        } else {
-            LOGGER.info("ServerWrecker is ready to go! Type 'start-attack' to start the attack!");
         }
 
         return 0;

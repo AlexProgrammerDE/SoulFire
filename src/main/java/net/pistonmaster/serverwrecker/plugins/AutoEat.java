@@ -27,7 +27,7 @@ import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.data.DangerFood;
 import net.pistonmaster.serverwrecker.data.FoodType;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
@@ -132,8 +132,8 @@ public class AutoEat implements InternalExtension {
     }
 
     @EventHandler
-    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
-        event.settingsManager().addClass(AutoEatSettings.class);
+    public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+        event.settingsRegistry().addClass(AutoEatSettings.class, "Auto Eat");
     }
 
     @Override

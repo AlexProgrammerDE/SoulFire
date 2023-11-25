@@ -201,12 +201,6 @@ public class AccountRegistry {
         this.accounts.addAll(accounts);
     }
 
-    public List<MinecraftAccount> getUsableAccounts() {
-        return accounts.stream()
-                .filter(MinecraftAccount::enabled)
-                .toList();
-    }
-
     public void addLoadHook(Runnable hook) {
         loadHooks.add(hook);
     }

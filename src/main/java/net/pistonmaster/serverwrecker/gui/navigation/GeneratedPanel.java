@@ -39,7 +39,7 @@ public class GeneratedPanel extends NavigationItem {
     public GeneratedPanel(SettingsManager settingsManager, ClientPluginSettingsPage settingsPage) {
         this.settingsPage = settingsPage;
 
-        setLayout(new GridLayout(0, 2));
+        setLayout(new GridLayout(-1, 2));
 
         addComponents(this, settingsPage, settingsManager);
     }
@@ -57,7 +57,7 @@ public class GeneratedPanel extends NavigationItem {
             switch (settingEntry.getValueCase()) {
                 case SINGLE -> {
                     var singleEntry = settingEntry.getSingle();
-                    var propertyKey = new PropertyKey(settingsPage.getNamespace(), singleEntry.getSettingEntryId());
+                    var propertyKey = new PropertyKey(settingsPage.getNamespace(), singleEntry.getKey());
 
                     panel.add(new JLabel(singleEntry.getName()));
                     var settingType = singleEntry.getType();
@@ -102,8 +102,8 @@ public class GeneratedPanel extends NavigationItem {
                 }
                 case MINMAXPAIR -> {
                     var minMaxEntry = settingEntry.getMinMaxPair();
-                    var minPropertyKey = new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMin().getSettingEntryId());
-                    var maxPropertyKey = new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMax().getSettingEntryId());
+                    var minPropertyKey = new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMin().getKey());
+                    var maxPropertyKey = new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMax().getKey());
 
                     var min = minMaxEntry.getMin();
                     panel.add(new JLabel(min.getName()));

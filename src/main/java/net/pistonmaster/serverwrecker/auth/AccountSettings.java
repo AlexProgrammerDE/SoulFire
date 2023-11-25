@@ -33,7 +33,7 @@ public class AccountSettings implements SettingsObject {
             "nameFormat",
             "Name format",
             "The format of the bot names. %d will be replaced with the bot number.",
-            new String[]{"--name-format"},
+            new String[]{"--key-format"},
             "Bot_%d"
     );
     public static final BooleanProperty SHUFFLE_ACCOUNTS = BUILDER.ofBoolean(

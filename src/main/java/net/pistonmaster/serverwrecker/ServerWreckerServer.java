@@ -32,6 +32,8 @@ import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
 import io.jsonwebtoken.Jwts;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import lombok.Getter;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
@@ -39,9 +41,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.pistonmaster.serverwrecker.api.ServerExtension;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackInitEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
-import net.pistonmaster.serverwrecker.auth.AccountList;
-import net.pistonmaster.serverwrecker.auth.AccountRegistry;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.command.ShutdownManager;
@@ -53,13 +53,12 @@ import net.pistonmaster.serverwrecker.grpc.RPCServer;
 import net.pistonmaster.serverwrecker.logging.SWLogAppender;
 import net.pistonmaster.serverwrecker.plugins.*;
 import net.pistonmaster.serverwrecker.protocol.packet.SWClientboundStatusResponsePacket;
-import net.pistonmaster.serverwrecker.proxy.ProxyList;
-import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
 import net.pistonmaster.serverwrecker.proxy.ProxySettings;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
+import net.pistonmaster.serverwrecker.settings.lib.SettingsRegistry;
 import net.pistonmaster.serverwrecker.util.VersionComparator;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
@@ -74,7 +73,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -100,19 +102,11 @@ public class ServerWreckerServer {
             .create();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final Map<String, String> serviceServerConfig = new HashMap<>();
-    private final AccountRegistry accountRegistry = new AccountRegistry();
-    private final ProxyRegistry proxyRegistry = new ProxyRegistry();
-    private final SettingsManager settingsManager = new SettingsManager(List.of(
-            BotSettings.class,
-            DevSettings.class,
-            AccountSettings.class,
-            AccountList.class,
-            ProxySettings.class,
-            ProxyList.class
-    ));
+    private final SettingsRegistry settingsRegistry;
+    private final SettingsManager settingsManager = new SettingsManager();
     private final OperationMode operationMode;
     private final boolean outdated;
-    private final Map<Integer, AttackManager> attacks = Collections.synchronizedMap(new Int2ObjectArrayMap<>());
+    private final Int2ObjectMap<AttackManager> attacks = Int2ObjectMaps.synchronize(new Int2ObjectArrayMap<>());
     private final RPCServer rpcServer;
     private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
     private final SecretKey jwtSecretKey;
@@ -194,7 +188,14 @@ public class ServerWreckerServer {
             serverExtension.onEnable(this);
         }
 
-        ServerWreckerAPI.postEvent(new SettingsManagerInitEvent(settingsManager));
+        // Delayed to here, so we can let ViaVersion load all ProtocolVersions
+        settingsRegistry = new SettingsRegistry()
+                .addClass(BotSettings.class, "Bot Settings", true)
+                .addClass(DevSettings.class, "Dev Settings", true)
+                .addClass(AccountSettings.class, "Account Settings", true)
+                .addClass(ProxySettings.class, "Proxy Settings", true);
+
+        ServerWreckerAPI.postEvent(new SettingsRegistryInitEvent(settingsRegistry));
 
         LOGGER.info("Checking for updates...");
         outdated = checkForUpdates();
@@ -284,10 +285,6 @@ public class ServerWreckerServer {
         } catch (InterruptedException e) {
             LOGGER.error("Failed to stop RPC server", e);
         }
-    }
-
-    public int startAttack() {
-        return startAttack(settingsManager.collectSettings());
     }
 
     public int startAttack(SettingsHolder settingsHolder) {

@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.settings.lib.property;
 
 public record ComboProperty(
         String namespace,
-        String name,
+        String key,
         String uiDescription,
         String cliDescription,
         String[] cliNames,
@@ -32,7 +32,14 @@ public record ComboProperty(
             String id,
             String displayName
     ) {
-        public static <T> ComboOption[] fromEnum(T[] values) {
+        public static <T extends Enum<T>> ComboOption[] fromEnum(T[] values) {
+            ComboOption[] options = new ComboOption[values.length];
+
+            for (int i = 0; i < values.length; i++) {
+                options[i] = new ComboOption(values[i].name(), values[i].toString());
+            }
+
+            return options;
         }
     }
 }

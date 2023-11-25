@@ -57,7 +57,7 @@ public class GUIManager {
     private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
     private final AccountRegistry accountRegistry = new AccountRegistry();
     private final ProxyRegistry proxyRegistry = new ProxyRegistry();
-    private final SettingsManager settingsManager = new SettingsManager(List.of());
+    private final SettingsManager settingsManager = new SettingsManager();
 
     public GUIManager(RPCClient rpcClient) {
         this.rpcClient = rpcClient;
@@ -73,7 +73,7 @@ public class GUIManager {
 
         SWTerminalConsole.setupTerminalConsole(threadPool, shutdownManager, rpcClient);
 
-        // Override the title in AWT (GNOME displays the class name otherwise)
+        // Override the title in AWT (GNOME displays the class key otherwise)
         setAppTitle();
 
         // Initialize the JavaFX Platform

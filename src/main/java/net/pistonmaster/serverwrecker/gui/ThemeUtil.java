@@ -70,8 +70,8 @@ public class ThemeUtil {
             // Use top screen menu bar on macOS
             System.setProperty("apple.laf.useScreenMenuBar", "true");
 
-            // Set name in top menu bar
-            System.setProperty("apple.awt.application.name", "ServerWrecker");
+            // Set key in top menu bar
+            System.setProperty("apple.awt.application.key", "ServerWrecker");
 
             // Color the frame
             System.setProperty("apple.awt.application.appearance", "system");

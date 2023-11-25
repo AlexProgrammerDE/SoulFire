@@ -152,7 +152,7 @@ public final class SessionDataManager {
         CompoundTag dimensionRegistry = registry.get("minecraft:dimension_type");
         for (var type : dimensionRegistry.<ListTag>get("value").getValue()) {
             var dimension = (CompoundTag) type;
-            var name = dimension.<StringTag>get("name").getValue();
+            var name = dimension.<StringTag>get("key").getValue();
             int id = dimension.<IntTag>get("id").getValue();
 
             levels.put(name, new LevelState(this, name, id, dimension.get("element")));

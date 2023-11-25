@@ -26,7 +26,7 @@ import net.pistonmaster.serverwrecker.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.api.PluginHelper;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsManagerInitEvent;
+import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.data.ArmorType;
 import net.pistonmaster.serverwrecker.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
@@ -120,8 +120,8 @@ public class AutoArmor implements InternalExtension {
     }
 
     @EventHandler
-    public static void onSettingsManagerInit(SettingsManagerInitEvent event) {
-        event.settingsManager().addClass(AutoArmorSettings.class);
+    public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+        event.settingsRegistry().addClass(AutoArmorSettings.class, "Auto Armor");
     }
 
     @Override
