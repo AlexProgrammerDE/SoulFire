@@ -32,7 +32,6 @@ import net.pistonmaster.serverwrecker.data.DangerFood;
 import net.pistonmaster.serverwrecker.data.FoodType;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
-import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
 import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
 import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
@@ -128,7 +127,7 @@ public class AutoEat implements InternalExtension {
                     inventoryManager.unlockInventoryControl();
                 }
             }
-        }, settingsHolder.get(AutoEatSettings.MIN_DELAY), settingsHolder.get(AutoEatSettings.MAX_DELAY));
+        }, settingsHolder.get(AutoEatSettings.DELAY.min()), settingsHolder.get(AutoEatSettings.DELAY.max()));
     }
 
     @EventHandler
@@ -151,18 +150,19 @@ public class AutoEat implements InternalExtension {
                 new String[]{"--auto-eat"},
                 true
         );
-        public static final IntProperty MIN_DELAY = BUILDER.ofInt("eat-min-delay",
-                "Min delay (seconds)",
-                "Minimum delay between eating",
-                new String[]{"--eat-min-delay"},
-                1
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
+                BUILDER.ofInt("eat-min-delay",
+                        "Min delay (seconds)",
+                        "Minimum delay between eating",
+                        new String[]{"--eat-min-delay"},
+                        1
+                ),
+                BUILDER.ofInt("eat-max-delay",
+                        "Max delay (seconds)",
+                        "Maximum delay between eating",
+                        new String[]{"--eat-max-delay"},
+                        2
+                )
         );
-        public static final IntProperty MAX_DELAY = BUILDER.ofInt("eat-max-delay",
-                "Max delay (seconds)",
-                "Maximum delay between eating",
-                new String[]{"--eat-max-delay"},
-                2
-        );
-        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(MIN_DELAY, MAX_DELAY);
     }
 }

@@ -29,7 +29,6 @@ import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
-import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
 import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
 import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 
@@ -52,7 +51,7 @@ public class AutoJump implements InternalExtension {
                 connection.logger().info("[AutoJump] Jumping!");
                 movementManager.jump();
             }
-        }, settingsHolder.get(AutoJumpSettings.MIN_DELAY), settingsHolder.get(AutoJumpSettings.MAX_DELAY));
+        }, settingsHolder.get(AutoJumpSettings.DELAY.min()), settingsHolder.get(AutoJumpSettings.DELAY.max()));
     }
 
     @EventHandler
@@ -75,18 +74,19 @@ public class AutoJump implements InternalExtension {
                 new String[]{"--auto-jump"},
                 true
         );
-        public static final IntProperty MIN_DELAY = BUILDER.ofInt("jump-min-delay",
-                "Min delay (seconds)",
-                "Minimum delay between jumps",
-                new String[]{"--jump-min-delay"},
-                2
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
+                BUILDER.ofInt("jump-min-delay",
+                        "Min delay (seconds)",
+                        "Minimum delay between jumps",
+                        new String[]{"--jump-min-delay"},
+                        2
+                ),
+                BUILDER.ofInt("jump-max-delay",
+                        "Max delay (seconds)",
+                        "Maximum delay between jumps",
+                        new String[]{"--jump-max-delay"},
+                        5
+                )
         );
-        public static final IntProperty MAX_DELAY = BUILDER.ofInt("jump-max-delay",
-                "Max delay (seconds)",
-                "Maximum delay between jumps",
-                new String[]{"--jump-max-delay"},
-                5
-        );
-        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(MIN_DELAY, MAX_DELAY);
     }
 }

@@ -49,21 +49,22 @@ public class BotSettings implements SettingsObject {
             new String[]{"--amount"},
             1
     );
-    public static final IntProperty MIN_JOIN_DELAY_MS = BUILDER.ofInt(
-            "minJoinDelayMs",
-            "Min Join Delay",
-            "Minimum delay between joins in milliseconds",
-            new String[]{"--minJoinDelayMs"},
-            1000
+    public static final MinMaxPropertyLink JOIN_DELAY_MS = new MinMaxPropertyLink(
+            BUILDER.ofInt(
+                    "minJoinDelayMs",
+                    "Min Join Delay",
+                    "Minimum delay between joins in milliseconds",
+                    new String[]{"--minJoinDelayMs"},
+                    1000
+            ),
+            BUILDER.ofInt(
+                    "maxJoinDelayMs",
+                    "Max Join Delay",
+                    "Maximum delay between joins in milliseconds",
+                    new String[]{"--maxJoinDelayMs"},
+                    3000
+            )
     );
-    public static final IntProperty MAX_JOIN_DELAY_MS = BUILDER.ofInt(
-            "maxJoinDelayMs",
-            "Max Join Delay",
-            "Maximum delay between joins in milliseconds",
-            new String[]{"--maxJoinDelayMs"},
-            3000
-    );
-    public static final MinMaxPropertyLink JOIN_DELAY_MS = new MinMaxPropertyLink(MIN_JOIN_DELAY_MS, MAX_JOIN_DELAY_MS);
     public static final ComboProperty PROTOCOL_VERSION = BUILDER.ofCombo(
             "protocolVersion",
             "Protocol Version",

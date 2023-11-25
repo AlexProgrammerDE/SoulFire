@@ -21,13 +21,10 @@ package net.pistonmaster.serverwrecker.cli;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
-import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;

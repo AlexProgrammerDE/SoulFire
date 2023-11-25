@@ -28,7 +28,6 @@ import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
-import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
 import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
 import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.util.RandomUtil;
@@ -71,7 +70,7 @@ public class AutoReconnect implements InternalExtension {
                     .replaceAll(connectionEntry -> connectionEntry == connection ? newConnection : connectionEntry);
 
             newConnection.connect();
-        }, RandomUtil.getRandomInt(settingsHolder.get(AutoReconnectSettings.MIN_DELAY), settingsHolder.get(AutoReconnectSettings.MAX_DELAY)), TimeUnit.SECONDS);
+        }, RandomUtil.getRandomInt(settingsHolder.get(AutoReconnectSettings.DELAY.min()), settingsHolder.get(AutoReconnectSettings.DELAY.max())), TimeUnit.SECONDS);
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -83,18 +82,19 @@ public class AutoReconnect implements InternalExtension {
                 new String[]{"--auto-reconnect"},
                 true
         );
-        public static final IntProperty MIN_DELAY = BUILDER.ofInt("reconnect-min-delay",
-                "Min delay (seconds)",
-                "Minimum delay between reconnects",
-                new String[]{"--reconnect-min-delay"},
-                1
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
+                BUILDER.ofInt("reconnect-min-delay",
+                        "Min delay (seconds)",
+                        "Minimum delay between reconnects",
+                        new String[]{"--reconnect-min-delay"},
+                        1
+                ),
+                BUILDER.ofInt("reconnect-max-delay",
+                        "Max delay (seconds)",
+                        "Maximum delay between reconnects",
+                        new String[]{"--reconnect-max-delay"},
+                        5
+                )
         );
-        public static final IntProperty MAX_DELAY = BUILDER.ofInt("reconnect-max-delay",
-                "Max delay (seconds)",
-                "Maximum delay between reconnects",
-                new String[]{"--reconnect-max-delay"},
-                5
-        );
-        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(MIN_DELAY, MAX_DELAY);
     }
 }

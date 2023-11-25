@@ -30,7 +30,6 @@ import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEv
 import net.pistonmaster.serverwrecker.data.ItemType;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
-import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
 import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
 import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
@@ -78,7 +77,7 @@ public class AutoTotem implements InternalExtension {
                     return;
                 }
             }
-        }, settingsHolder.get(AutoTotemSettings.MIN_DELAY), settingsHolder.get(AutoTotemSettings.MAX_DELAY));
+        }, settingsHolder.get(AutoTotemSettings.DELAY.min()), settingsHolder.get(AutoTotemSettings.DELAY.max()));
     }
 
     @EventHandler
@@ -101,18 +100,19 @@ public class AutoTotem implements InternalExtension {
                 new String[]{"--auto-totem"},
                 true
         );
-        public static final IntProperty MIN_DELAY = BUILDER.ofInt("totem-min-delay",
-                "Min delay (seconds)",
-                "Minimum delay between using totems",
-                new String[]{"--totem-min-delay"},
-                1
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
+                BUILDER.ofInt("totem-min-delay",
+                        "Min delay (seconds)",
+                        "Minimum delay between using totems",
+                        new String[]{"--totem-min-delay"},
+                        1
+                ),
+                BUILDER.ofInt("totem-max-delay",
+                        "Max delay (seconds)",
+                        "Maximum delay between using totems",
+                        new String[]{"--totem-max-delay"},
+                        2
+                )
         );
-        public static final IntProperty MAX_DELAY = BUILDER.ofInt("totem-max-delay",
-                "Max delay (seconds)",
-                "Maximum delay between using totems",
-                new String[]{"--totem-max-delay"},
-                2
-        );
-        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(MIN_DELAY, MAX_DELAY);
     }
 }

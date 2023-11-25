@@ -33,7 +33,6 @@ import net.pistonmaster.serverwrecker.protocol.bot.container.InventoryManager;
 import net.pistonmaster.serverwrecker.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
-import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
 import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
 import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
@@ -116,7 +115,7 @@ public class AutoArmor implements InternalExtension {
             for (var entry : armorTypes.entrySet()) {
                 putOn(inventoryManager, playerInventory, entry.getValue(), entry.getKey());
             }
-        }, settingsHolder.get(AutoArmorSettings.MIN_DELAY), settingsHolder.get(AutoArmorSettings.MAX_DELAY));
+        }, settingsHolder.get(AutoArmorSettings.DELAY.min()), settingsHolder.get(AutoArmorSettings.DELAY.max()));
     }
 
     @EventHandler
@@ -139,18 +138,19 @@ public class AutoArmor implements InternalExtension {
                 new String[]{"--auto-armor"},
                 true
         );
-        public static final IntProperty MIN_DELAY = BUILDER.ofInt("armor-min-delay",
-                "Min delay (seconds)",
-                "Minimum delay between putting on armor",
-                new String[]{"--armor-min-delay"},
-                1
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
+                BUILDER.ofInt("armor-min-delay",
+                        "Min delay (seconds)",
+                        "Minimum delay between putting on armor",
+                        new String[]{"--armor-min-delay"},
+                        1
+                ),
+                BUILDER.ofInt("armor-max-delay",
+                        "Max delay (seconds)",
+                        "Maximum delay between putting on armor",
+                        new String[]{"--armor-max-delay"},
+                        2
+                )
         );
-        public static final IntProperty MAX_DELAY = BUILDER.ofInt("armor-max-delay",
-                "Max delay (seconds)",
-                "Maximum delay between putting on armor",
-                new String[]{"--armor-max-delay"},
-                2
-        );
-        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(MIN_DELAY, MAX_DELAY);
     }
 }

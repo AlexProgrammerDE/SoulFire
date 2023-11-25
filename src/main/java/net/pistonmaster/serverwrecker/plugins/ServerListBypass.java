@@ -29,7 +29,6 @@ import net.pistonmaster.serverwrecker.api.event.attack.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
-import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
 import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
 import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.util.RandomUtil;
@@ -51,8 +50,8 @@ public class ServerListBypass implements InternalExtension {
         }
 
         factory.prepareConnectionInternal(ProtocolState.STATUS).connect().join();
-        TimeUtil.waitTime(RandomUtil.getRandomInt(settingsHolder.get(ServerListBypassSettings.MIN_DELAY),
-                settingsHolder.get(ServerListBypassSettings.MAX_DELAY)), TimeUnit.SECONDS);
+        TimeUtil.waitTime(RandomUtil.getRandomInt(settingsHolder.get(ServerListBypassSettings.DELAY.min()),
+                settingsHolder.get(ServerListBypassSettings.DELAY.max())), TimeUnit.SECONDS);
     }
 
     @EventHandler
@@ -75,20 +74,21 @@ public class ServerListBypass implements InternalExtension {
                 new String[]{"--server-list-bypass"},
                 false
         );
-        public static final IntProperty MIN_DELAY = BUILDER.ofInt(
-                "server-list-bypass-min-delay",
-                "Min delay (seconds)",
-                "Minimum delay between joining the server",
-                new String[]{"--server-list-bypass-min-delay"},
-                1
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
+                BUILDER.ofInt(
+                        "server-list-bypass-min-delay",
+                        "Min delay (seconds)",
+                        "Minimum delay between joining the server",
+                        new String[]{"--server-list-bypass-min-delay"},
+                        1
+                ),
+                BUILDER.ofInt(
+                        "server-list-bypass-max-delay",
+                        "Max delay (seconds)",
+                        "Maximum delay between joining the server",
+                        new String[]{"--server-list-bypass-max-delay"},
+                        3
+                )
         );
-        public static final IntProperty MAX_DELAY = BUILDER.ofInt(
-                "server-list-bypass-max-delay",
-                "Max delay (seconds)",
-                "Maximum delay between joining the server",
-                new String[]{"--server-list-bypass-max-delay"},
-                3
-        );
-        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(MIN_DELAY, MAX_DELAY);
     }
 }

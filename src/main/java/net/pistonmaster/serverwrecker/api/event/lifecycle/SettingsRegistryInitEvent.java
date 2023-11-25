@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.api.event.lifecycle;
 
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsRegistry;
 
 public record SettingsRegistryInitEvent(SettingsRegistry settingsRegistry) implements ServerWreckerGlobalEvent {

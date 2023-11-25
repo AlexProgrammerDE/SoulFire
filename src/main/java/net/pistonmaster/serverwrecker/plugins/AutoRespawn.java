@@ -32,7 +32,6 @@ import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
-import net.pistonmaster.serverwrecker.settings.lib.property.IntProperty;
 import net.pistonmaster.serverwrecker.settings.lib.property.MinMaxPropertyLink;
 import net.pistonmaster.serverwrecker.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.util.RandomUtil;
@@ -53,7 +52,7 @@ public class AutoRespawn implements InternalExtension {
 
             event.connection().executorManager().newScheduledExecutorService("Respawn").schedule(() ->
                             event.connection().session().send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
-                    RandomUtil.getRandomInt(settingsHolder.get(AutoRespawnSettings.MIN_DELAY), settingsHolder.get(AutoRespawnSettings.MAX_DELAY)), TimeUnit.SECONDS);
+                    RandomUtil.getRandomInt(settingsHolder.get(AutoRespawnSettings.DELAY.min()), settingsHolder.get(AutoRespawnSettings.DELAY.max())), TimeUnit.SECONDS);
         }
     }
 
@@ -77,18 +76,19 @@ public class AutoRespawn implements InternalExtension {
                 new String[]{"--auto-respawn"},
                 true
         );
-        public static final IntProperty MIN_DELAY = BUILDER.ofInt("respawn-min-delay",
-                "Min delay (seconds)",
-                "Minimum delay between respawns",
-                new String[]{"--respawn-min-delay"},
-                1
+        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
+                BUILDER.ofInt("respawn-min-delay",
+                        "Min delay (seconds)",
+                        "Minimum delay between respawns",
+                        new String[]{"--respawn-min-delay"},
+                        1
+                ),
+                BUILDER.ofInt("respawn-max-delay",
+                        "Max delay (seconds)",
+                        "Maximum delay between respawns",
+                        new String[]{"--respawn-max-delay"},
+                        3
+                )
         );
-        public static final IntProperty MAX_DELAY = BUILDER.ofInt("respawn-max-delay",
-                "Max delay (seconds)",
-                "Maximum delay between respawns",
-                new String[]{"--respawn-max-delay"},
-                3
-        );
-        public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(MIN_DELAY, MAX_DELAY);
     }
 }

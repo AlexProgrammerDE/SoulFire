@@ -32,9 +32,6 @@ import java.util.Map;
 public class SettingsRegistry {
     private final Map<String, NamespaceRegistry> namespaceMap = new HashMap<>();
 
-    private record NamespaceRegistry(String pageName, boolean hidden, List<Property> properties) {
-    }
-
     public SettingsRegistry addClass(Class<? extends SettingsObject> clazz, String pageName) {
         return addClass(clazz, pageName, false);
     }
@@ -99,5 +96,8 @@ public class SettingsRegistry {
         }
 
         return list;
+    }
+
+    private record NamespaceRegistry(String pageName, boolean hidden, List<Property> properties) {
     }
 }

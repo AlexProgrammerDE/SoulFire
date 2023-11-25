@@ -219,7 +219,7 @@ public class AttackManager {
                     }
                 });
 
-                TimeUtil.waitTime(RandomUtil.getRandomInt(settingsHolder.get(BotSettings.MIN_JOIN_DELAY_MS), settingsHolder.get(BotSettings.MAX_JOIN_DELAY_MS)), TimeUnit.MILLISECONDS);
+                TimeUtil.waitTime(RandomUtil.getRandomInt(settingsHolder.get(BotSettings.JOIN_DELAY_MS.min()), settingsHolder.get(BotSettings.JOIN_DELAY_MS.max())), TimeUnit.MILLISECONDS);
             }
         });
     }

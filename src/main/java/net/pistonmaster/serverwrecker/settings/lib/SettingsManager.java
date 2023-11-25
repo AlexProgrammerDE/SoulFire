@@ -22,7 +22,9 @@ package net.pistonmaster.serverwrecker.settings.lib;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.*;
-import it.unimi.dsi.fastutil.objects.*;
+import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
@@ -50,34 +52,18 @@ import java.util.function.Consumer;
 
 public class SettingsManager {
     public static final Logger LOGGER = LoggerFactory.getLogger(SettingsManager.class);
-    private final Multimap<PropertyKey, Consumer<JsonElement>> listeners = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
-    private final Map<PropertyKey, Provider<JsonElement>> providers = new HashMap<>();
     // Used to read & write the settings file
     private static final Gson dumpGson = new GsonBuilder().setPrettyPrinting().create();
     private static final Gson baseGson = new GsonBuilder()
             .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
             .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
             .create();
+    private final Multimap<PropertyKey, Consumer<JsonElement>> listeners = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
+    private final Map<PropertyKey, Provider<JsonElement>> providers = new HashMap<>();
     @Getter
     private final AccountRegistry accountRegistry = new AccountRegistry();
     @Getter
     private final ProxyRegistry proxyRegistry = new ProxyRegistry();
-
-    public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {
-        providers.put(property, provider);
-    }
-
-    public void registerListener(PropertyKey property, Consumer<JsonElement> listener) {
-        listeners.put(property, listener);
-    }
-
-    public void loadProfile(Path path) throws IOException {
-        try {
-            createSettingsHolder(Files.readString(path), this);
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
-    }
 
     public static SettingsHolder createSettingsHolder(String json, @Nullable SettingsManager settingsManager) {
         try {
@@ -127,6 +113,22 @@ public class SettingsManager {
             );
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
+        }
+    }
+
+    public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {
+        providers.put(property, provider);
+    }
+
+    public void registerListener(PropertyKey property, Consumer<JsonElement> listener) {
+        listeners.put(property, listener);
+    }
+
+    public void loadProfile(Path path) throws IOException {
+        try {
+            createSettingsHolder(Files.readString(path), this);
+        } catch (Exception e) {
+            throw new IOException(e);
         }
     }
 
