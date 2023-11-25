@@ -12,4 +12,6 @@
 
     <!-- Gradle forces us to use get/set prefixes -->
     <suppress checks="MethodName"/>
+
+    <suppress checks="HideUtilityClassConstructor"/>
 </suppressions>
