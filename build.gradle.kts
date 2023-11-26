@@ -17,7 +17,7 @@ allprojects {
 
 application {
     applicationName = "ServerWrecker"
-    mainClass.set("net.pistonmaster.serverwrecker.ServerWreckerBootstrap")
+    mainClass.set("net.pistonmaster.serverwrecker.ServerWreckerLauncher")
 }
 
 tasks {
@@ -206,7 +206,7 @@ tasks.withType<Checkstyle> {
 
 tasks.named<Jar>("jar") {
     manifest {
-        attributes["Main-Class"] = "net.pistonmaster.serverwrecker.ServerWreckerBootstrap"
+        attributes["Main-Class"] = "net.pistonmaster.serverwrecker.ServerWreckerLauncher"
     }
 }
 

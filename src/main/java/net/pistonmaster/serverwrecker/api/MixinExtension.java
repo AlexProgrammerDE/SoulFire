@@ -25,8 +25,11 @@ import java.util.Set;
 
 /**
  * This interface is used to load mixins from third-party plugins.
- * Mixin paths are wildcard paths, so you can use something like
- * "net.pistonmaster.serverwrecker.mixins.*" to load all mixins from a package.
+ * Use the direct class name for a single transformer <i>(e.g. <b>package.Transformer</b>)</i><br>
+ * Use the package ending with '*'
+ * for all transformers in the packet (not sub packages) <i>(e.g. <b>package.*</b>)</i><br>
+ * Use the package ending with '**'
+ * for all transformers in the package and sub packages <i>(e.g. <b>package.**</b>)</i><br>
  */
 public interface MixinExtension extends ExtensionPoint {
     /**

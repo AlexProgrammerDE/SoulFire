@@ -7,7 +7,12 @@ plugins {
     id("io.freefair.lombok")
 }
 
-java.javaTarget(17)
+java {
+    javaTarget(17)
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 
 tasks {
     javadoc {

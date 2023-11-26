@@ -21,13 +21,14 @@ package net.pistonmaster.serverwrecker;
 
 import io.netty.util.ResourceLeakDetector;
 import net.lenni0451.classtransform.TransformerManager;
-import net.lenni0451.classtransform.additionalclassprovider.GuavaClassPathProvider;
 import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.reflect.Agents;
 import net.pistonmaster.serverwrecker.api.MixinExtension;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
+import net.pistonmaster.serverwrecker.util.CustomClassProvider;
+import net.pistonmaster.serverwrecker.util.SWContextClassLoader;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.fusesource.jansi.AnsiConsole;
@@ -41,7 +42,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * This class prepares the earliest work possible, such as loading mixins and
@@ -72,13 +76,14 @@ public class ServerWreckerBootstrap {
     private ServerWreckerBootstrap() {
     }
 
-    public static void main(String[] args) {
+    @SuppressWarnings("unused")
+    public static void bootstrap(String[] args, List<ClassLoader> classLoaders) {
         injectAnsi();
         setupLogging(SettingsHolder.EMPTY);
 
         injectExceptionHandler();
 
-        initPlugins();
+        initPlugins(classLoaders);
 
         // We may split client and server mixins in the future
         var runServer = GraphicsEnvironment.isHeadless() || args.length > 0;
@@ -98,7 +103,12 @@ public class ServerWreckerBootstrap {
             }
         });
 
-        var classProvider = new GuavaClassPathProvider();
+        var classLoaders = new ArrayList<ClassLoader>();
+        classLoaders.add(ServerWreckerBootstrap.class.getClassLoader());
+        PLUGIN_MANAGER.getPlugins().forEach(pluginWrapper ->
+                classLoaders.add(pluginWrapper.getPluginClassLoader()));
+
+        var classProvider = new CustomClassProvider(classLoaders);
         var transformerManager = new TransformerManager(classProvider);
         transformerManager.addTransformerPreprocessor(new MixinsTranslator());
         mixinPaths.forEach(transformerManager::addTransformer);
@@ -136,7 +146,7 @@ public class ServerWreckerBootstrap {
         });
     }
 
-    private static void initPlugins() {
+    private static void initPlugins(List<ClassLoader> classLoaders) {
         try {
             Files.createDirectories(PLUGINS_FOLDER);
         } catch (IOException e) {
@@ -149,6 +159,10 @@ public class ServerWreckerBootstrap {
         // Load all plugins available
         PLUGIN_MANAGER.loadPlugins();
         PLUGIN_MANAGER.startPlugins();
+
+        for (var plugin : PLUGIN_MANAGER.getPlugins()) {
+            classLoaders.add(plugin.getPluginClassLoader());
+        }
     }
 
     /**
