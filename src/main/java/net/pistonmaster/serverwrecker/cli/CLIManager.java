@@ -98,6 +98,7 @@ public class CLIManager {
                                         })
                                         .build();
 
+                                settingsManager.registerListener(propertyKey, s -> reference.set(s.getAsString()));
                                 settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
 
                                 targetCommandSpec.addOption(optionSpec);
@@ -124,6 +125,7 @@ public class CLIManager {
                                         })
                                         .build();
 
+                                settingsManager.registerListener(propertyKey, s -> reference.set(s.getAsBoolean()));
                                 settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
 
                                 targetCommandSpec.addOption(optionSpec);
@@ -145,6 +147,13 @@ public class CLIManager {
                                         })
                                         .build();
 
+                                settingsManager.registerListener(propertyKey,
+                                        s -> reference.set(comboEntry.getOptionsList().stream()
+                                                .filter(o -> o.getId().equals(s.getAsString()))
+                                                .findFirst()
+                                                .orElseThrow()
+                                                .getId()
+                                        ));
                                 settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
 
                                 targetCommandSpec.addOption(optionSpec);
@@ -191,6 +200,7 @@ public class CLIManager {
                 })
                 .build();
 
+        settingsManager.registerListener(propertyKey, s -> reference.set(s.getAsInt()));
         settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
 
         commandSpec.addOption(optionSpec);

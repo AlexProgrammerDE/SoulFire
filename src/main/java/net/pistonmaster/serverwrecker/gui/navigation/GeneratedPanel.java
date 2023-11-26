@@ -46,11 +46,12 @@ public class GeneratedPanel extends NavigationItem {
 
     private static JSpinner createIntObject(PropertyKey propertyKey, SettingsManager settingsManager, IntSetting intSetting) {
         var spinner = new JSpinner(new SpinnerNumberModel(intSetting.getDef(), intSetting.getMin(), intSetting.getMax(), intSetting.getStep()));
-        settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive((int) spinner.getValue()));
-        settingsManager.registerListener(propertyKey, s -> spinner.setValue(s.getAsInt()));
         if (intSetting.hasFormat()) {
             spinner.setEditor(new JSpinner.NumberEditor(spinner, intSetting.getFormat()));
         }
+
+        settingsManager.registerListener(propertyKey, s -> spinner.setValue(s.getAsInt()));
+        settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive((int) spinner.getValue()));
 
         return spinner;
     }
