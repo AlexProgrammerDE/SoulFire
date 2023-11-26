@@ -27,6 +27,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class NavigationPanel extends JPanel {
+    public static final String NAVIGATION_ID = "navigation-menu";
+
     @Inject
     public NavigationPanel(CardsContainer container, Injector injector) {
         setLayout(new GridLayout(0, 2, 10, 10));

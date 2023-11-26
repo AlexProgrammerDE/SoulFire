@@ -28,6 +28,8 @@ import java.awt.*;
 
 @Getter
 public class PluginListPanel extends NavigationItem {
+    public static final String NAVIGATION_ID = "plugin-menu";
+
     @Inject
     public PluginListPanel(CardsContainer container) {
         setLayout(new GridLayout(0, 3, 10, 10));
@@ -53,6 +55,6 @@ public class PluginListPanel extends NavigationItem {
 
     @Override
     public String getNavigationId() {
-        return "plugin-menu";
+        return NAVIGATION_ID;
     }
 }

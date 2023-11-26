@@ -34,7 +34,6 @@ import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CardsContainer extends JPanel {
-    public static final String NAVIGATION_MENU = "navigation-menu";
     @Getter
     private final List<NavigationItem> panels = new ArrayList<>();
     private final Injector injector;
@@ -52,24 +51,30 @@ public class CardsContainer extends JPanel {
 
         // Add bot settings
         panels.add(new GeneratedPanel(guiManager.getSettingsManager(), getByNamespace("bot")));
-        var pluginPanel = injector.getSingleton(PluginListPanel.class);
-        panels.add(pluginPanel);
+        panels.add(injector.getSingleton(PluginListPanel.class));
         panels.add(injector.getSingleton(AccountPanel.class));
         panels.add(injector.getSingleton(ProxyPanel.class));
         panels.add(injector.getSingleton(DeveloperPanel.class));
 
-        var navigationPanel = injector.getSingleton(NavigationPanel.class);
-        add(navigationPanel, NAVIGATION_MENU);
+        add(injector.getSingleton(NavigationPanel.class), NavigationPanel.NAVIGATION_ID);
 
         // Add the main page cards
         for (var item : panels) {
-            add(NavigationWrapper.createBackWrapper(this, NAVIGATION_MENU, item), item.getNavigationId());
+            add(NavigationWrapper.createBackWrapper(this, NavigationPanel.NAVIGATION_ID, item),
+                    item.getNavigationId()
+            );
         }
 
         // Add the plugin page cards
         for (var item : pluginPages) {
-            add(NavigationWrapper.createBackWrapper(this, pluginPanel.getNavigationId(),
-                    new GeneratedPanel(guiManager.getSettingsManager(), item)), item.getNamespace());
+            if (item.getHidden()) {
+                continue;
+            }
+
+            add(NavigationWrapper.createBackWrapper(this, PluginListPanel.NAVIGATION_ID,
+                            new GeneratedPanel(guiManager.getSettingsManager(), item)),
+                    item.getNamespace()
+            );
         }
 
         setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));
