@@ -107,7 +107,10 @@ public class SettingsManager {
             // Apply loaded accounts & proxies
             if (settingsManager != null) {
                 settingsManager.accountRegistry.setAccounts(settingsSerialized.accounts());
+                settingsManager.accountRegistry.callLoadHooks();
+
                 settingsManager.proxyRegistry.setProxies(settingsSerialized.proxies());
+                settingsManager.proxyRegistry.callLoadHooks();
             }
 
             return new SettingsHolder(

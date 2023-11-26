@@ -69,7 +69,8 @@ public class AccountRegistry {
 
         this.accounts.addAll(newAccounts);
         LOGGER.info("Loaded {} accounts!", newAccounts.size());
-        loadHooks.forEach(Runnable::run);
+
+        callLoadHooks();
     }
 
     private boolean isSupportedJson(String file) {
@@ -199,6 +200,10 @@ public class AccountRegistry {
     public void setAccounts(List<MinecraftAccount> accounts) {
         this.accounts.clear();
         this.accounts.addAll(accounts);
+    }
+
+    public void callLoadHooks() {
+        loadHooks.forEach(Runnable::run);
     }
 
     public void addLoadHook(Runnable hook) {

@@ -50,7 +50,7 @@ public class ProxyRegistry {
         this.proxies.addAll(newProxies);
         LOGGER.info("Loaded {} proxies!", newProxies.size());
 
-        loadHooks.forEach(Runnable::run);
+        callLoadHooks();
     }
 
     private SWProxy fromString(String proxy, ProxyType proxyType) {
@@ -81,6 +81,10 @@ public class ProxyRegistry {
     public void setProxies(List<SWProxy> proxies) {
         this.proxies.clear();
         this.proxies.addAll(proxies);
+    }
+
+    public void callLoadHooks() {
+        loadHooks.forEach(Runnable::run);
     }
 
     public void addLoadHook(Runnable runnable) {
