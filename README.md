@@ -44,16 +44,10 @@ through [nightly.link](https://nightly.link/AlexProgrammerDE/ServerWrecker/workf
 
 ## 🍿 Version support
 
-ServerWrecker currently supports these versions:
+ServerWrecker supports many version of Minecraft, including releases, beta, alpha, classic (including [CPE](https://wiki.vg/Classic_Protocol_Extension)) and even Minecraft Bedrock edition,
+and that includes every single subversion, not just a few specific versions.
 
-- Release (1.0.0 - 1.20.1 (latest))
-- Beta (b1.0 - b1.8.1)
-- Alpha (a1.0.15 - a1.2.6)
-- Classic (c0.0.15 - c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
-- Minecraft Bedrock Edition (1.20.0)
-
-This includes every single subversion, not just a few specific versions.
-The latest Java Release and Bedrock Edition info may be out of sync with the latest development version.
+You can find a up-to-date list of supported versions in [VERSIONS.md](./VERSIONS.md).
 
 ### How does this work?
 
@@ -74,7 +68,7 @@ which include client-side translation externally.
 For a list of all available commands, look at [COMMANDS.md](./COMMANDS.md)
 or run `help` in the GUI or CLI.
 
-## 📻 Built-in modules
+## 📻 Built-in plugins
 
 ### AutoRespawn
 
@@ -185,6 +179,13 @@ or run `java -jar serverwrecker.jar --help`.
 3. Download the latest version of ServerWrecker
 4. Run `./gradlew build` in the ServerWrecker directory
 5. Get the jar file from `build/libs`
+
+## 👨‍💻 Developer API
+
+ServerWrecker offers a Developer API to create your own plugins using the plugin API and mixins.
+The software may regularly have breaking changes, so you'll have to stick to a verson of ServerWrecker or update your plugin regularly.
+
+To learn more about the Dveloper API, take a look at the official [plugin example](https://github.com/AlexProgrammerDE/ServerWreckerPluginExample).
 
 ## 🌈 Community
 
