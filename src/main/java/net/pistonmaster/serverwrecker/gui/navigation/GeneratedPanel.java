@@ -93,7 +93,11 @@ public class GeneratedPanel extends NavigationItem {
                             comboBox.setRenderer(new ComboRenderer());
                             comboBox.setSelectedItem(options.get(comboEntry.getDef()));
                             settingsManager.registerListener(propertyKey,
-                                    s -> comboBox.setSelectedItem(options.get(s.getAsInt())));
+                                    s -> comboBox.setSelectedItem(options.stream()
+                                            .filter(o -> o.getId().equals(s.getAsString()))
+                                            .findFirst()
+                                            .orElseThrow()
+                                    ));
                             settingsManager.registerProvider(propertyKey,
                                     () -> new JsonPrimitive(((ComboOption) Objects.requireNonNull(comboBox.getSelectedItem())).getId()));
 

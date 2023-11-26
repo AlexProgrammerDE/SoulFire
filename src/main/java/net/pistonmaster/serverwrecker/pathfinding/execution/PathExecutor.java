@@ -109,11 +109,11 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     }
 
     public void register() {
-        connection.eventBus().register(BotPreTickEvent.class, this);
+        connection.eventBus().register(this, BotPreTickEvent.class);
     }
 
     public void unregister() {
-        connection.eventBus().unregister(BotPreTickEvent.class, this);
+        connection.eventBus().unregister(this, BotPreTickEvent.class);
     }
 
     public void cancel() {
