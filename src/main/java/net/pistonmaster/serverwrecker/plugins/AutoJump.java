@@ -48,7 +48,7 @@ public class AutoJump implements InternalExtension {
             if (level != null && movementManager != null
                     && level.isChunkLoaded(movementManager.getBlockPos())
                     && movementManager.getEntity().isOnGround()) {
-                connection.logger().info("[AutoJump] Jumping!");
+                connection.logger().debug("[AutoJump] Jumping!");
                 movementManager.jump();
             }
         }, settingsHolder.get(AutoJumpSettings.DELAY.min()), settingsHolder.get(AutoJumpSettings.DELAY.max()));
