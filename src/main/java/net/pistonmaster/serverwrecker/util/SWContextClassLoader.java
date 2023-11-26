@@ -61,16 +61,16 @@ public class SWContextClassLoader extends ClassLoader {
                 if (classData == null) {
                     // Check if child class loaders can load the class
                     for (ClassLoader childClassLoader : childClassLoaders) {
-                        var childClassData = loadClassData(childClassLoader, name);
-                        if (childClassData != null) {
-                            classData = childClassData;
-                            break;
+                        try {
+                            var pluginClass = (Class<?>) Methods.invoke(childClassLoader, findLoadedClassMethod, name, resolve);
+                            if (pluginClass != null) {
+                                return pluginClass;
+                            }
+                        } catch (MethodInvocationException ignored) {
                         }
                     }
 
-                    if (classData == null) {
-                        throw new ClassNotFoundException(name);
-                    }
+                    throw new ClassNotFoundException(name);
                 }
 
                 c = defineClass(name, classData, 0, classData.length);
