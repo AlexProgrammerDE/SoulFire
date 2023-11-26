@@ -32,9 +32,10 @@ import java.util.Objects;
 
 public class SWContextClassLoader extends ClassLoader {
     @Getter
-    private final List<ClassLoader> checkedClassLoaders = new ArrayList<>();
+    private final List<ClassLoader> childClassLoaders = new ArrayList<>();
     private final Method findLoadedClassMethod = Objects.requireNonNull(Methods.getDeclaredMethod(ClassLoader.class, "loadClass", String.class, boolean.class));
     private final ClassLoader platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
+    private final ClassLoader parent;
 
     public SWContextClassLoader() {
         this(ClassLoader.getSystemClassLoader());
@@ -42,7 +43,7 @@ public class SWContextClassLoader extends ClassLoader {
 
     private SWContextClassLoader(ClassLoader parent) {
         super(parent);
-        this.checkedClassLoaders.add(parent);
+        this.parent = parent;
     }
 
     @Override
@@ -56,9 +57,20 @@ public class SWContextClassLoader extends ClassLoader {
                 } catch (MethodInvocationException ignored) {
                 }
 
-                byte[] classData = loadClassData(name);
+                var classData = loadClassData(parent, name);
                 if (classData == null) {
-                    throw new ClassNotFoundException();
+                    // Check if child class loaders can load the class
+                    for (ClassLoader childClassLoader : childClassLoaders) {
+                        var childClassData = loadClassData(childClassLoader, name);
+                        if (childClassData != null) {
+                            classData = childClassData;
+                            break;
+                        }
+                    }
+
+                    if (classData == null) {
+                        throw new ClassNotFoundException(name);
+                    }
                 }
 
                 c = defineClass(name, classData, 0, classData.length);
@@ -72,21 +84,19 @@ public class SWContextClassLoader extends ClassLoader {
         }
     }
 
-    private byte[] loadClassData(String className) {
+    private byte[] loadClassData(ClassLoader classLoader, String className) {
         var classPath = className.replace('.', '/') + ".class";
 
-        for (var classLoader : checkedClassLoaders) {
-            try (InputStream inputStream = classLoader.getResourceAsStream(classPath)) {
-                if (inputStream == null) {
-                    continue;
-                }
-
-                return inputStream.readAllBytes();
-            } catch (IOException e) {
-                e.printStackTrace();
+        try (InputStream inputStream = classLoader.getResourceAsStream(classPath)) {
+            if (inputStream == null) {
+                return null;
             }
-        }
 
-        return null;
+            return inputStream.readAllBytes();
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            return null;
+        }
     }
 }

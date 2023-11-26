@@ -36,7 +36,7 @@ public class ServerWreckerLauncher {
         try {
             SW_CONTEXT_CLASS_LOADER.loadClass("net.pistonmaster.serverwrecker.ServerWreckerBootstrap")
                     .getDeclaredMethod("bootstrap", String[].class, List.class)
-                    .invoke(null, args, SW_CONTEXT_CLASS_LOADER.getCheckedClassLoaders());
+                    .invoke(null, args, SW_CONTEXT_CLASS_LOADER.getChildClassLoaders());
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
