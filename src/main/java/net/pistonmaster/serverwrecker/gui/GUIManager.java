@@ -24,11 +24,9 @@ import ch.jalu.injector.InjectorBuilder;
 import javafx.embed.swing.JFXPanel;
 import lombok.Getter;
 import net.lenni0451.reflect.Modules;
-import net.pistonmaster.serverwrecker.auth.AccountRegistry;
 import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.command.ShutdownManager;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
-import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,8 +52,6 @@ public class GUIManager {
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final Logger logger = LoggerFactory.getLogger(GUIManager.class);
     private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
-    private final AccountRegistry accountRegistry = new AccountRegistry();
-    private final ProxyRegistry proxyRegistry = new ProxyRegistry();
     private final SettingsManager settingsManager = new SettingsManager();
 
     public GUIManager(RPCClient rpcClient) {

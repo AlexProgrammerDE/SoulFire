@@ -77,7 +77,7 @@ public class ProxyPanel extends NavigationItem {
 
         var proxyList = new JTable(model);
 
-        var proxyRegistry = guiManager.getProxyRegistry();
+        var proxyRegistry = guiManager.getSettingsManager().getProxyRegistry();
         proxyRegistry.addLoadHook(() -> {
             model.getDataVector().removeAllElements();
 
@@ -145,7 +145,7 @@ public class ProxyPanel extends NavigationItem {
                 String.format("%s list file", type),
                 guiManager,
                 parent,
-                text -> guiManager.getProxyRegistry().loadFromString(text, type)
+                text -> guiManager.getSettingsManager().getProxyRegistry().loadFromString(text, type)
         ));
 
         return button;

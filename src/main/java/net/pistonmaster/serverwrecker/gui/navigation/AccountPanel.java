@@ -77,7 +77,7 @@ public class AccountPanel extends NavigationItem {
 
         var accountList = new JTable(model);
 
-        var accountRegistry = guiManager.getAccountRegistry();
+        var accountRegistry = guiManager.getSettingsManager().getAccountRegistry();
         accountRegistry.addLoadHook(() -> {
             model.getDataVector().removeAllElements();
 
@@ -141,7 +141,7 @@ public class AccountPanel extends NavigationItem {
                 String.format("%s list file", type),
                 guiManager,
                 parent,
-                text -> guiManager.getAccountRegistry().loadFromString(text, type)
+                text -> guiManager.getSettingsManager().getAccountRegistry().loadFromString(text, type)
         ));
 
         return button;
