@@ -32,9 +32,6 @@ import java.util.List;
 public class SWConstants {
     public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.v1_20_2;
 
-    private SWConstants() {
-    }
-
     static {
         // Initialize all classes
         doNothing(
@@ -43,6 +40,9 @@ public class SWConstants {
                 BedrockProtocolVersion.PROTOCOLS,
                 AprilFoolsProtocolVersion.PROTOCOLS
         );
+    }
+
+    private SWConstants() {
     }
 
     @SuppressWarnings("unused")

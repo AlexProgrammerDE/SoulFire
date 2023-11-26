@@ -22,9 +22,7 @@ package net.pistonmaster.serverwrecker.util;
 import lombok.Getter;
 import net.lenni0451.reflect.Methods;
 import net.lenni0451.reflect.exceptions.MethodInvocationException;
-import net.pistonmaster.serverwrecker.ServerWreckerLauncher;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -61,10 +59,6 @@ public class SWContextClassLoader extends ClassLoader {
                 byte[] classData = loadClassData(name);
                 if (classData == null) {
                     throw new ClassNotFoundException();
-                }
-
-                if (name.equals(ServerWreckerLauncher.class.getName())) {
-                    return super.loadClass(name, resolve);
                 }
 
                 c = defineClass(name, classData, 0, classData.length);

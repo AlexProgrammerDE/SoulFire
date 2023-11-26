@@ -52,6 +52,10 @@ public class CLIManager {
         this.rpcClient = rpcClient;
     }
 
+    private static String escapeFormatSpecifiers(String input) {
+        return input.replace("%", "%%");
+    }
+
     public void initCLI(String[] args) {
         var serverWreckerCommand = new SWCommandDefinition(this);
         var commandLine = new CommandLine(serverWreckerCommand);
@@ -270,9 +274,5 @@ public class CLIManager {
         public Class<?>[] getAuxiliaryTypes() {
             return new Class[0];
         }
-    }
-
-    private static String escapeFormatSpecifiers(String input) {
-        return input.replace("%", "%%");
     }
 }
