@@ -74,7 +74,7 @@ which include client-side translation externally.
 For a list of all available commands, look at [COMMANDS.md](./COMMANDS.md)
 or run `help` in the GUI or CLI.
 
-## 📻 Built-in modules
+## 📻 Built-in plugins
 
 ### AutoRespawn
 
@@ -185,6 +185,13 @@ or run `java -jar serverwrecker.jar --help`.
 3. Download the latest version of ServerWrecker
 4. Run `./gradlew build` in the ServerWrecker directory
 5. Get the jar file from `build/libs`
+
+## 👨‍💻 Developer API
+
+ServerWrecker offers a Developer API to create your own plugins using the plugin API and mixins.
+The software may regularly have breaking changes, so you'll have to stick to a verson of ServerWrecker or update your plugin regularly.
+
+To learn more about the Dveloper API, take a look at the official [plugin example](https://github.com/AlexProgrammerDE/ServerWreckerPluginExample).
 
 ## 🌈 Community
 
