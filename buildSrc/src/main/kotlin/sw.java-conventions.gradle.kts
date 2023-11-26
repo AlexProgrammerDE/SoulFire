@@ -8,9 +8,9 @@ plugins {
 }
 
 java {
-    javaTarget(17)
+    javaTarget(21)
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 
@@ -67,10 +67,10 @@ indra {
         }
     }
     javaVersions {
-        target(17)
-        minimumToolchain(17)
+        target(21)
+        minimumToolchain(21)
         strictVersions(true)
-        testWith(17)
+        testWith(21)
     }
 }
 

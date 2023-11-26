@@ -17,7 +17,7 @@ allprojects {
 
 application {
     applicationName = "ServerWrecker"
-    mainClass.set("net.pistonmaster.serverwrecker.ServerWreckerLauncher")
+    mainClass.set("net.pistonmaster.serverwrecker.launcher.ServerWreckerJava8Launcher")
 }
 
 tasks {
@@ -48,6 +48,9 @@ tasks.run.get().apply {
 
 dependencies {
     implementation(projects.buildData)
+
+    // The java 8 launcher takes care of notifiying the user if they are using an unsupported java version
+    implementation(projects.launcher)
 
     // Log/Console libraries
     implementation(libs.bundles.log4j)
@@ -206,7 +209,7 @@ tasks.withType<Checkstyle> {
 
 tasks.named<Jar>("jar") {
     manifest {
-        attributes["Main-Class"] = "net.pistonmaster.serverwrecker.ServerWreckerLauncher"
+        attributes["Main-Class"] = "net.pistonmaster.launcher.ServerWreckerJava8Launcher"
     }
 }
 
