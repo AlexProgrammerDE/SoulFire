@@ -221,311 +221,319 @@ public record MinecraftGraph(TagsState tagsState) {
     public GraphInstructions[] getActions(BotEntityState node) {
         var actions = new GraphAction[ACTIONS_TEMPLATE.length];
 
-        {
-            for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
-                actions[i] = ACTIONS_TEMPLATE[i].copy(node);
-            }
+        fillTemplateActions(node, actions);
 
-            for (var i = 0; i < SUBSCRIPTION_KEYS.length; i++) {
-                var key = SUBSCRIPTION_KEYS[i];
-                var value = SUBSCRIPTION_VALUES[i];
+        calculateActions(node, actions);
 
-                BlockStateMeta blockState = null;
-                SWVec3i absolutePositionBlock = null;
+        var results = new GraphInstructions[ACTIONS_TEMPLATE.length];
+        convertToInstructions(node, actions, results);
 
-                // We cache only this, but not solid because solid will only occur a single time
-                var calculatedFree = false;
-                var isFree = false;
-                for (var subscriber : value) {
-                    var action = actions[subscriber.movementIndex];
-                    if (action == null) {
-                        continue;
-                    }
+        return results;
+    }
 
-                    if (action.isImpossible()) {
-                        // Calling isImpossible can waste seconds of execution time
-                        // Calling an interface method is expensive!
-                        actions[subscriber.movementIndex] = null;
-                        continue;
-                    }
+    private void fillTemplateActions(BotEntityState node, GraphAction[] actions) {
+        for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
+            actions[i] = ACTIONS_TEMPLATE[i].copy(node);
+        }
+    }
 
-                    if (blockState == null) {
-                        // Lazy calculation to avoid unnecessary calls
-                        absolutePositionBlock = node.positionBlock().add(key);
-                        blockState = node.levelState()
-                                .getBlockStateAt(absolutePositionBlock)
-                                .orElseThrow(OutOfLevelException::new);
-                    }
+    private void calculateActions(BotEntityState node, GraphAction[] actions) {
+        for (var i = 0; i < SUBSCRIPTION_KEYS.length; i++) {
+            var key = SUBSCRIPTION_KEYS[i];
+            var value = SUBSCRIPTION_VALUES[i];
 
-                    if (action instanceof PlayerMovement movement) {
-                        switch (subscriber.type) {
-                            case MOVEMENT_FREE -> {
-                                if (!calculatedFree) {
-                                    // We can walk through blocks like air or grass
-                                    isFree = blockState.blockShapeType().hasNoCollisions()
-                                            && !BlockTypeHelper.isFluid(blockState.blockType());
-                                    calculatedFree = true;
-                                }
+            BlockStateMeta blockState = null;
+            SWVec3i absolutePositionBlock = null;
 
-                                if (isFree) {
-                                    if (movement.isAllowBlockActions()) {
-                                        movement.getNoNeedToBreak()[subscriber.blockArrayIndex] = true;
-                                    }
+            // We cache only this, but not solid because solid will only occur a single time
+            var calculatedFree = false;
+            var isFree = false;
+            for (var subscriber : value) {
+                var action = actions[subscriber.movementIndex];
+                if (action == null) {
+                    continue;
+                }
 
-                                    continue;
-                                }
+                if (action.isImpossible()) {
+                    // Calling isImpossible can waste seconds of execution time
+                    // Calling an interface method is expensive!
+                    actions[subscriber.movementIndex] = null;
+                    continue;
+                }
 
-                                // Search for a way to break this block
-                                if (movement.isAllowBlockActions()
-                                        // Narrow this down to blocks that can be broken
-                                        && blockState.blockType().diggable()
-                                        // Check if we previously found out this block is unsafe to break
-                                        && !movement.getUnsafeToBreak()[subscriber.blockArrayIndex]
-                                        // Narrows the list down to a reasonable size
-                                        && BlockItems.hasItemType(blockState.blockType())) {
-                                    var cacheableMiningCost = node.inventory()
-                                            .getMiningCosts(tagsState, blockState);
-                                    // We can mine this block, lets add costs and continue
-                                    movement.getBlockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
-                                            absolutePositionBlock,
-                                            cacheableMiningCost.miningCost(),
-                                            cacheableMiningCost.willDrop()
-                                    );
-                                } else {
-                                    // No way to break this block
-                                    movement.setImpossible(true);
-                                }
+                if (blockState == null) {
+                    // Lazy calculation to avoid unnecessary calls
+                    absolutePositionBlock = node.positionBlock().add(key);
+                    blockState = node.levelState()
+                            .getBlockStateAt(absolutePositionBlock)
+                            .orElseThrow(OutOfLevelException::new);
+                }
+
+                if (action instanceof PlayerMovement movement) {
+                    switch (subscriber.type) {
+                        case MOVEMENT_FREE -> {
+                            if (!calculatedFree) {
+                                // We can walk through blocks like air or grass
+                                isFree = blockState.blockShapeType().hasNoCollisions()
+                                        && !BlockTypeHelper.isFluid(blockState.blockType());
+                                calculatedFree = true;
                             }
-                            case MOVEMENT_BREAK_SAFETY_CHECK -> {
-                                // There is no need to break this block, so there is no need for safety checks
-                                if (movement.getNoNeedToBreak()[subscriber.blockArrayIndex]) {
-                                    continue;
+
+                            if (isFree) {
+                                if (movement.isAllowBlockActions()) {
+                                    movement.getNoNeedToBreak()[subscriber.blockArrayIndex] = true;
                                 }
 
-                                // The block was already marked as unsafe
-                                if (movement.getUnsafeToBreak()[subscriber.blockArrayIndex]) {
-                                    continue;
-                                }
-
-                                var unsafe = switch (subscriber.safetyType) {
-                                    case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
-                                            || blockState.blockType().blockProperties().fallingBlock();
-                                    case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
-                                };
-
-                                if (unsafe) {
-                                    var currentValue = movement.getBlockBreakCosts()[subscriber.blockArrayIndex];
-
-                                    if (currentValue == null) {
-                                        // Store for a later time that this is unsafe,
-                                        // so if we check this block,
-                                        // we know it's unsafe
-                                        movement.getUnsafeToBreak()[subscriber.blockArrayIndex] = true;
-                                    } else {
-                                        // We learned that this block needs to be broken, so we need to set it as impossible
-                                        movement.setImpossible(true);
-                                    }
-                                }
+                                continue;
                             }
-                            case MOVEMENT_SOLID -> {
-                                // Block is safe to walk on, no need to check for more
-                                if (blockState.blockShapeType().isFullBlock()) {
-                                    continue;
-                                }
 
-                                if (movement.isAllowBlockActions()
-                                        && node.inventory().hasBlockToPlace()
-                                        && blockState.blockType().blockProperties().replaceable()) {
-                                    // We can place a block here, but we need to find a block to place against
-                                    movement.setRequiresAgainstBlock(true);
-                                } else {
-                                    movement.setImpossible(true);
-                                }
-                            }
-                            case MOVEMENT_AGAINST_PLACE_SOLID -> {
-                                // We already found one, no need to check for more
-                                if (movement.getBlockPlaceData() != null) {
-                                    continue;
-                                }
-
-                                // This block should not be placed against
-                                if (!blockState.blockShapeType().isFullBlock()) {
-                                    continue;
-                                }
-
-                                // Fixup the position to be the block we are placing against instead of relative
-                                movement.setBlockPlaceData(new BotActionManager.BlockPlaceData(
+                            // Search for a way to break this block
+                            if (movement.isAllowBlockActions()
+                                    // Narrow this down to blocks that can be broken
+                                    && blockState.blockType().diggable()
+                                    // Check if we previously found out this block is unsafe to break
+                                    && !movement.getUnsafeToBreak()[subscriber.blockArrayIndex]
+                                    // Narrows the list down to a reasonable size
+                                    && BlockItems.hasItemType(blockState.blockType())) {
+                                var cacheableMiningCost = node.inventory()
+                                        .getMiningCosts(tagsState, blockState);
+                                // We can mine this block, lets add costs and continue
+                                movement.getBlockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
                                         absolutePositionBlock,
-                                        subscriber.blockToPlaceAgainst.blockFace()
-                                ));
+                                        cacheableMiningCost.miningCost(),
+                                        cacheableMiningCost.willDrop()
+                                );
+                            } else {
+                                // No way to break this block
+                                movement.setImpossible(true);
                             }
-                            case MOVEMENT_ADD_CORNER_COST_IF_SOLID -> {
-                                // No need to apply the cost multiple times.
-                                if (movement.isAppliedCornerCost()) {
-                                    continue;
-                                }
+                        }
+                        case MOVEMENT_BREAK_SAFETY_CHECK -> {
+                            // There is no need to break this block, so there is no need for safety checks
+                            if (movement.getNoNeedToBreak()[subscriber.blockArrayIndex]) {
+                                continue;
+                            }
 
-                                if (blockState.blockShapeType().isFullBlock()) {
-                                    movement.addCornerCost();
-                                } else if (BlockTypeHelper.isHurtOnTouchSide(blockState.blockType())) {
-                                    // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
+                            // The block was already marked as unsafe
+                            if (movement.getUnsafeToBreak()[subscriber.blockArrayIndex]) {
+                                continue;
+                            }
+
+                            var unsafe = switch (subscriber.safetyType) {
+                                case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
+                                        || blockState.blockType().blockProperties().fallingBlock();
+                                case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
+                            };
+
+                            if (unsafe) {
+                                var currentValue = movement.getBlockBreakCosts()[subscriber.blockArrayIndex];
+
+                                if (currentValue == null) {
+                                    // Store for a later time that this is unsafe,
+                                    // so if we check this block,
+                                    // we know it's unsafe
+                                    movement.getUnsafeToBreak()[subscriber.blockArrayIndex] = true;
+                                } else {
+                                    // We learned that this block needs to be broken, so we need to set it as impossible
                                     movement.setImpossible(true);
                                 }
                             }
                         }
-                    } else if (action instanceof ParkourMovement parkourMovement) {
-                        switch (subscriber.type) {
-                            case MOVEMENT_FREE -> {
-                                if (!calculatedFree) {
-                                    // We can walk through blocks like air or grass
-                                    isFree = blockState.blockShapeType().hasNoCollisions()
-                                            && !BlockTypeHelper.isFluid(blockState.blockType());
-                                    calculatedFree = true;
-                                }
-
-                                if (isFree) {
-                                    continue;
-                                }
-
-                                parkourMovement.setImpossible(true);
+                        case MOVEMENT_SOLID -> {
+                            // Block is safe to walk on, no need to check for more
+                            if (blockState.blockShapeType().isFullBlock()) {
+                                continue;
                             }
-                            // We only want to jump over dangerous blocks/gaps
-                            // So either a non-full-block like water or lava or magma
-                            // since it hurts to stand on.
-                            case PARKOUR_UNSAFE_TO_STAND_ON -> {
-                                if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
-                                    parkourMovement.setImpossible(true);
-                                }
-                            }
-                            case MOVEMENT_SOLID -> {
-                                // Block is safe to walk on, no need to check for more
-                                if (blockState.blockShapeType().isFullBlock()) {
-                                    continue;
-                                }
 
+                            if (movement.isAllowBlockActions()
+                                    && node.inventory().hasBlockToPlace()
+                                    && blockState.blockType().blockProperties().replaceable()) {
+                                // We can place a block here, but we need to find a block to place against
+                                movement.setRequiresAgainstBlock(true);
+                            } else {
+                                movement.setImpossible(true);
+                            }
+                        }
+                        case MOVEMENT_AGAINST_PLACE_SOLID -> {
+                            // We already found one, no need to check for more
+                            if (movement.getBlockPlaceData() != null) {
+                                continue;
+                            }
+
+                            // This block should not be placed against
+                            if (!blockState.blockShapeType().isFullBlock()) {
+                                continue;
+                            }
+
+                            // Fixup the position to be the block we are placing against instead of relative
+                            movement.setBlockPlaceData(new BotActionManager.BlockPlaceData(
+                                    absolutePositionBlock,
+                                    subscriber.blockToPlaceAgainst.blockFace()
+                            ));
+                        }
+                        case MOVEMENT_ADD_CORNER_COST_IF_SOLID -> {
+                            // No need to apply the cost multiple times.
+                            if (movement.isAppliedCornerCost()) {
+                                continue;
+                            }
+
+                            if (blockState.blockShapeType().isFullBlock()) {
+                                movement.addCornerCost();
+                            } else if (BlockTypeHelper.isHurtOnTouchSide(blockState.blockType())) {
+                                // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
+                                movement.setImpossible(true);
+                            }
+                        }
+                    }
+                } else if (action instanceof ParkourMovement parkourMovement) {
+                    switch (subscriber.type) {
+                        case MOVEMENT_FREE -> {
+                            if (!calculatedFree) {
+                                // We can walk through blocks like air or grass
+                                isFree = blockState.blockShapeType().hasNoCollisions()
+                                        && !BlockTypeHelper.isFluid(blockState.blockType());
+                                calculatedFree = true;
+                            }
+
+                            if (isFree) {
+                                continue;
+                            }
+
+                            parkourMovement.setImpossible(true);
+                        }
+                        // We only want to jump over dangerous blocks/gaps
+                        // So either a non-full-block like water or lava or magma
+                        // since it hurts to stand on.
+                        case PARKOUR_UNSAFE_TO_STAND_ON -> {
+                            if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
                                 parkourMovement.setImpossible(true);
                             }
                         }
-                    } else if (action instanceof DownMovement downMovement) {
-                        switch (subscriber.type) {
-                            case MOVEMENT_FREE -> {
-                                if (blockState.blockType().diggable()
-                                        // Narrows the list down to a reasonable size
-                                        && BlockItems.hasItemType(blockState.blockType())) {
-                                    var cacheableMiningCost = node.inventory()
-                                            .getMiningCosts(tagsState, blockState);
-                                    // We can mine this block, lets add costs and continue
-                                    downMovement.setBlockBreakCosts(new MovementMiningCost(
-                                            absolutePositionBlock,
-                                            cacheableMiningCost.miningCost(),
-                                            cacheableMiningCost.willDrop()
-                                    ));
-                                } else {
-                                    // No way to break this block
-                                    downMovement.setImpossible(true);
-                                }
+                        case MOVEMENT_SOLID -> {
+                            // Block is safe to walk on, no need to check for more
+                            if (blockState.blockShapeType().isFullBlock()) {
+                                continue;
                             }
-                            case DOWN_SAFETY_CHECK -> {
-                                var yLevel = key.y;
 
-                                if (yLevel < downMovement.getClosestBlockToFallOn()) {
-                                    // We already found a block to fall on, above this one
-                                    continue;
-                                }
-
-                                if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
-                                    // We found a block to fall on
-                                    downMovement.setClosestBlockToFallOn(yLevel);
-                                }
+                            parkourMovement.setImpossible(true);
+                        }
+                    }
+                } else if (action instanceof DownMovement downMovement) {
+                    switch (subscriber.type) {
+                        case MOVEMENT_FREE -> {
+                            if (blockState.blockType().diggable()
+                                    // Narrows the list down to a reasonable size
+                                    && BlockItems.hasItemType(blockState.blockType())) {
+                                var cacheableMiningCost = node.inventory()
+                                        .getMiningCosts(tagsState, blockState);
+                                // We can mine this block, lets add costs and continue
+                                downMovement.setBlockBreakCosts(new MovementMiningCost(
+                                        absolutePositionBlock,
+                                        cacheableMiningCost.miningCost(),
+                                        cacheableMiningCost.willDrop()
+                                ));
+                            } else {
+                                // No way to break this block
+                                downMovement.setImpossible(true);
                             }
                         }
-                    } else if (action instanceof UpMovement upMovement) {
-                        switch (subscriber.type) {
-                            case MOVEMENT_FREE -> {
-                                if (!calculatedFree) {
-                                    // We can walk through blocks like air or grass
-                                    isFree = blockState.blockShapeType().hasNoCollisions()
-                                            && !BlockTypeHelper.isFluid(blockState.blockType());
-                                    calculatedFree = true;
-                                }
+                        case DOWN_SAFETY_CHECK -> {
+                            var yLevel = key.y;
 
-                                if (isFree) {
-                                    upMovement.getNoNeedToBreak()[subscriber.blockArrayIndex] = true;
-                                    continue;
-                                }
+                            if (yLevel < downMovement.getClosestBlockToFallOn()) {
+                                // We already found a block to fall on, above this one
+                                continue;
+                            }
 
-                                // Search for a way to break this block
-                                if (blockState.blockType().diggable()
-                                        && !upMovement.getUnsafeToBreak()[subscriber.blockArrayIndex]
-                                        && BlockItems.hasItemType(blockState.blockType())) {
-                                    var cacheableMiningCost = node.inventory()
-                                            .getMiningCosts(tagsState, blockState);
-                                    // We can mine this block, lets add costs and continue
-                                    upMovement.getBlockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
-                                            absolutePositionBlock,
-                                            cacheableMiningCost.miningCost(),
-                                            cacheableMiningCost.willDrop()
-                                    );
+                            if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
+                                // We found a block to fall on
+                                downMovement.setClosestBlockToFallOn(yLevel);
+                            }
+                        }
+                    }
+                } else if (action instanceof UpMovement upMovement) {
+                    switch (subscriber.type) {
+                        case MOVEMENT_FREE -> {
+                            if (!calculatedFree) {
+                                // We can walk through blocks like air or grass
+                                isFree = blockState.blockShapeType().hasNoCollisions()
+                                        && !BlockTypeHelper.isFluid(blockState.blockType());
+                                calculatedFree = true;
+                            }
+
+                            if (isFree) {
+                                upMovement.getNoNeedToBreak()[subscriber.blockArrayIndex] = true;
+                                continue;
+                            }
+
+                            // Search for a way to break this block
+                            if (blockState.blockType().diggable()
+                                    && !upMovement.getUnsafeToBreak()[subscriber.blockArrayIndex]
+                                    && BlockItems.hasItemType(blockState.blockType())) {
+                                var cacheableMiningCost = node.inventory()
+                                        .getMiningCosts(tagsState, blockState);
+                                // We can mine this block, lets add costs and continue
+                                upMovement.getBlockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
+                                        absolutePositionBlock,
+                                        cacheableMiningCost.miningCost(),
+                                        cacheableMiningCost.willDrop()
+                                );
+                            } else {
+                                // No way to break this block
+                                upMovement.setImpossible(true);
+                            }
+                        }
+                        case MOVEMENT_BREAK_SAFETY_CHECK -> {
+                            // There is no need to break this block, so there is no need for safety checks
+                            if (upMovement.getNoNeedToBreak()[subscriber.blockArrayIndex]) {
+                                continue;
+                            }
+
+                            // The block was already marked as unsafe
+                            if (upMovement.getUnsafeToBreak()[subscriber.blockArrayIndex]) {
+                                continue;
+                            }
+
+                            var unsafe = switch (subscriber.safetyType) {
+                                case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
+                                        || blockState.blockType().blockProperties().fallingBlock();
+                                case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
+                            };
+
+                            if (unsafe) {
+                                var currentValue = upMovement.getBlockBreakCosts()[subscriber.blockArrayIndex];
+
+                                if (currentValue == null) {
+                                    // Store for a later time that this is unsafe,
+                                    // so if we check this block,
+                                    // we know it's unsafe
+                                    upMovement.getUnsafeToBreak()[subscriber.blockArrayIndex] = true;
                                 } else {
-                                    // No way to break this block
+                                    // We learned that this block needs to be broken, so we need to set it as impossible
                                     upMovement.setImpossible(true);
                                 }
                             }
-                            case MOVEMENT_BREAK_SAFETY_CHECK -> {
-                                // There is no need to break this block, so there is no need for safety checks
-                                if (upMovement.getNoNeedToBreak()[subscriber.blockArrayIndex]) {
-                                    continue;
-                                }
-
-                                // The block was already marked as unsafe
-                                if (upMovement.getUnsafeToBreak()[subscriber.blockArrayIndex]) {
-                                    continue;
-                                }
-
-                                var unsafe = switch (subscriber.safetyType) {
-                                    case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
-                                            || blockState.blockType().blockProperties().fallingBlock();
-                                    case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
-                                };
-
-                                if (unsafe) {
-                                    var currentValue = upMovement.getBlockBreakCosts()[subscriber.blockArrayIndex];
-
-                                    if (currentValue == null) {
-                                        // Store for a later time that this is unsafe,
-                                        // so if we check this block,
-                                        // we know it's unsafe
-                                        upMovement.getUnsafeToBreak()[subscriber.blockArrayIndex] = true;
-                                    } else {
-                                        // We learned that this block needs to be broken, so we need to set it as impossible
-                                        upMovement.setImpossible(true);
-                                    }
-                                }
-                            }
                         }
                     }
                 }
             }
         }
+    }
 
-        var results = new GraphInstructions[ACTIONS_TEMPLATE.length];
-        {
-            var size = 0;
-            for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
-                var movement = actions[i];
-                if (movement == null) {
-                    continue;
-                }
-
-                if (movement.isImpossibleToComplete()) {
-                    continue;
-                }
-
-                results[size++] = movement.getInstructions(node);
+    private void convertToInstructions(BotEntityState node, GraphAction[] actions, GraphInstructions[] results) {
+        var size = 0;
+        for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
+            var movement = actions[i];
+            if (movement == null) {
+                continue;
             }
-        }
 
-        return results;
+            if (movement.isImpossibleToComplete()) {
+                continue;
+            }
+
+            results[size++] = movement.getInstructions(node);
+        }
     }
 
     enum SubscriptionType {
