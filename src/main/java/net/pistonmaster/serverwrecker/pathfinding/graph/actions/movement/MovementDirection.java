@@ -20,8 +20,8 @@
 package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 
 import lombok.RequiredArgsConstructor;
-import org.cloudburstmc.math.vector.Vector3d;
 import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
+import org.cloudburstmc.math.vector.Vector3d;
 
 @RequiredArgsConstructor
 public enum MovementDirection {

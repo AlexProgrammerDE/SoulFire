@@ -22,9 +22,9 @@ package net.pistonmaster.serverwrecker.pathfinding.goals;
 import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import org.cloudburstmc.math.vector.Vector3d;
-import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 // TODO: Extract into having more fine behaviour control
 public record PlaceBlockGoal(SWVec3i goal, Vector3d goal3d, BlockType blockType) implements GoalScorer {

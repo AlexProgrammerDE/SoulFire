@@ -23,6 +23,7 @@ import it.unimi.dsi.fastutil.objects.*;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.data.BlockItems;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.*;
@@ -34,7 +35,6 @@ import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
-import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {

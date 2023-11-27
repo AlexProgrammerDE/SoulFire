@@ -23,12 +23,12 @@ import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
-import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 import java.util.concurrent.TimeUnit;
 

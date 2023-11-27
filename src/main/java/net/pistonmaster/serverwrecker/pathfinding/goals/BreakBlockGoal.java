@@ -20,11 +20,10 @@
 package net.pistonmaster.serverwrecker.pathfinding.goals;
 
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
-import org.cloudburstmc.math.vector.Vector3d;
-import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 public record BreakBlockGoal(SWVec3i goal) implements GoalScorer {
     @Override

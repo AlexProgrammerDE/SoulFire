@@ -26,6 +26,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.pathfinding.execution.BlockBreakAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.BlockPlaceAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
@@ -34,7 +35,6 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
 import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
-import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 import java.util.List;
 

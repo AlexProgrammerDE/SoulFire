@@ -19,9 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.model;
 
-import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
-import org.cloudburstmc.math.vector.Vector3i;
-
 public record ChunkKey(int chunkX, int chunkZ, int calculatedHash) {
     public ChunkKey(int chunkX, int chunkZ) {
         this(chunkX, chunkZ, calculateHash(chunkX, chunkZ));

@@ -23,7 +23,6 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
-import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 /**
  * Represents the state of the bot in the level.

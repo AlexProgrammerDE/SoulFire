@@ -23,13 +23,13 @@ import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.data.BlockItems;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import net.pistonmaster.serverwrecker.util.ItemTypeHelper;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
-import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 import java.util.concurrent.TimeUnit;
 

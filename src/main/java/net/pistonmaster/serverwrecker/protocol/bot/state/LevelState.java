@@ -26,13 +26,11 @@ import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
-import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
 import net.pistonmaster.serverwrecker.protocol.bot.movement.AABB;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.MCUniform;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.UniformOrInt;
 import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
 import net.pistonmaster.serverwrecker.util.MathHelper;
-import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
