@@ -35,7 +35,6 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstruction
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.BlockDirection;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.BlockSafetyData;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.MovementMiningCost;
-import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.PlayerMovement;
 import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 
