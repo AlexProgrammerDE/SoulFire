@@ -80,6 +80,9 @@ public class RPCServer {
     }
 
     public void shutdown() throws InterruptedException {
-        server.shutdownNow().awaitTermination(30, TimeUnit.SECONDS);
+        if (!server.shutdown().awaitTermination(30, TimeUnit.SECONDS)
+                && !server.shutdownNow().awaitTermination(5, TimeUnit.SECONDS)) {
+            throw new RuntimeException("Unable to shutdown gRPC server");
+        }
     }
 }
