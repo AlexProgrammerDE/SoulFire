@@ -209,7 +209,7 @@ tasks.withType<Checkstyle> {
 
 tasks.named<Jar>("jar") {
     manifest {
-        attributes["Main-Class"] = "net.pistonmaster.launcher.ServerWreckerJava8Launcher"
+        attributes["Main-Class"] = "net.pistonmaster.serverwrecker.launcher.ServerWreckerJava8Launcher"
     }
 }
 
