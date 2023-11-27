@@ -39,7 +39,7 @@ import net.pistonmaster.serverwrecker.util.VectorHelper;
 import java.util.List;
 
 @Slf4j
-public final class PlayerMovement implements GraphAction {
+public final class PlayerMovement implements GraphAction, Cloneable {
     private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
     private final MovementDirection direction;
     private final MovementSide side;
@@ -50,11 +50,11 @@ public final class PlayerMovement implements GraphAction {
     @Getter
     private final boolean allowBlockActions;
     @Getter
-    private final MovementMiningCost[] blockBreakCosts;
+    private MovementMiningCost[] blockBreakCosts;
     @Getter
-    private final boolean[] unsafeToBreak;
+    private boolean[] unsafeToBreak;
     @Getter
-    private final boolean[] noNeedToBreak;
+    private boolean[] noNeedToBreak;
     @Setter
     @Getter
     private BotActionManager.BlockPlaceData blockPlaceData;
@@ -98,23 +98,6 @@ public final class PlayerMovement implements GraphAction {
             unsafeToBreak = null;
             noNeedToBreak = null;
         }
-    }
-
-    private PlayerMovement(PlayerMovement other) {
-        this.direction = other.direction;
-        this.side = other.side;
-        this.modifier = other.modifier;
-        this.targetFeetBlock = other.targetFeetBlock;
-        this.diagonal = other.diagonal;
-        this.cost = other.cost;
-        this.appliedCornerCost = other.appliedCornerCost;
-        this.isImpossible = other.isImpossible;
-        this.allowBlockActions = other.allowBlockActions;
-        this.blockBreakCosts = other.blockBreakCosts == null ? null : new MovementMiningCost[other.blockBreakCosts.length];
-        this.unsafeToBreak = other.unsafeToBreak == null ? null : new boolean[other.unsafeToBreak.length];
-        this.noNeedToBreak = other.noNeedToBreak == null ? null : new boolean[other.noNeedToBreak.length];
-        this.blockPlaceData = other.blockPlaceData;
-        this.requiresAgainstBlock = other.requiresAgainstBlock;
     }
 
     private int freeCapacity() {
@@ -394,6 +377,21 @@ public final class PlayerMovement implements GraphAction {
 
     @Override
     public PlayerMovement copy(BotEntityState previousEntityState) {
-        return new PlayerMovement(this);
+        return this.clone();
+    }
+
+    @Override
+    public PlayerMovement clone() {
+        try {
+            var c = (PlayerMovement) super.clone();
+
+            c.blockBreakCosts = this.blockBreakCosts == null ? null : new MovementMiningCost[this.blockBreakCosts.length];
+            c.unsafeToBreak = this.unsafeToBreak == null ? null : new boolean[this.unsafeToBreak.length];
+            c.noNeedToBreak = this.noNeedToBreak == null ? null : new boolean[this.noNeedToBreak.length];
+
+            return c;
+        } catch (CloneNotSupportedException cantHappen) {
+            throw new InternalError();
+        }
     }
 }

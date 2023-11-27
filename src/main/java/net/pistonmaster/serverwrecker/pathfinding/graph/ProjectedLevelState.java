@@ -19,8 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
@@ -45,40 +43,38 @@ public class ProjectedLevelState {
     private static final BlockStateMeta VOID_AIR_BLOCK_STATE = new BlockStateMeta(BlockType.VOID_AIR, BlockShapeType.getById(0));
 
     private final ChunkHolder chunkHolder;
-    private final Object2ObjectMap<SWVec3i, BlockStateMeta> blockChanges;
+    private final Object2ObjectOpenCustomHashMap<SWVec3i, BlockStateMeta> blockChanges;
     private final int minBuildHeight;
     private final int maxBuildHeight;
 
     public ProjectedLevelState(LevelState levelState) {
         this.chunkHolder = levelState.getChunks().immutableCopy();
-        this.blockChanges = Object2ObjectMaps.emptyMap();
+        this.blockChanges = new Object2ObjectOpenCustomHashMap<>(VectorHelper.VECTOR3I_HASH_STRATEGY);
         this.minBuildHeight = levelState.getMinBuildHeight();
         this.maxBuildHeight = levelState.getMaxBuildHeight();
     }
 
     public ProjectedLevelState withChangeToSolidBlock(SWVec3i position) {
-        var blockChanges = new Object2ObjectOpenCustomHashMap<SWVec3i, BlockStateMeta>(
-                this.blockChanges.size() + 1, VectorHelper.VECTOR3I_HASH_STRATEGY);
-        blockChanges.putAll(this.blockChanges);
+        var blockChanges = this.blockChanges.clone();
+        blockChanges.ensureCapacity(blockChanges.size() + 1);
         blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
 
         return new ProjectedLevelState(chunkHolder, blockChanges, minBuildHeight, maxBuildHeight);
     }
 
     public ProjectedLevelState withChangeToAir(SWVec3i position) {
-        var blockChanges = new Object2ObjectOpenCustomHashMap<SWVec3i, BlockStateMeta>(
-                this.blockChanges.size() + 1, VectorHelper.VECTOR3I_HASH_STRATEGY);
-        blockChanges.putAll(this.blockChanges);
+        var blockChanges = this.blockChanges.clone();
+        blockChanges.ensureCapacity(blockChanges.size() + 1);
         blockChanges.put(position, AIR_BLOCK_STATE);
 
         return new ProjectedLevelState(chunkHolder, blockChanges, minBuildHeight, maxBuildHeight);
     }
 
     public ProjectedLevelState withChanges(SWVec3i[] air, SWVec3i solid) {
-        var blockChanges = new Object2ObjectOpenCustomHashMap<SWVec3i, BlockStateMeta>(
-                this.blockChanges.size() + (air != null ? air.length : 0)
-                        + (solid != null ? 1 : 0), VectorHelper.VECTOR3I_HASH_STRATEGY);
-        blockChanges.putAll(this.blockChanges);
+        var blockChanges = this.blockChanges.clone();
+        blockChanges.ensureCapacity(blockChanges.size()
+                + (air != null ? air.length : 0)
+                + (solid != null ? 1 : 0));
 
         if (air != null) {
             for (var position : air) {

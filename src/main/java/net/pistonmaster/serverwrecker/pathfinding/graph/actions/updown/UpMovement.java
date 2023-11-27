@@ -35,42 +35,32 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstruction
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.BlockDirection;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.BlockSafetyData;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.MovementMiningCost;
+import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.PlayerMovement;
 import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 
 import java.util.List;
 
 @Slf4j
-public final class UpMovement implements GraphAction {
+public final class UpMovement implements GraphAction, Cloneable {
     private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
     private final SWVec3i targetFeetBlock;
     @Getter
-    private final MovementMiningCost[] blockBreakCosts;
+    private MovementMiningCost[] blockBreakCosts;
     @Getter
-    private final boolean[] unsafeToBreak;
+    private boolean[] unsafeToBreak;
     @Getter
-    private final boolean[] noNeedToBreak;
+    private boolean[] noNeedToBreak;
     @Setter
     @Getter
     private boolean isImpossible = false;
-    @Setter
-    private boolean requiresAgainstBlock = false;
 
     public UpMovement() {
         this.targetFeetBlock = FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0);
 
-        blockBreakCosts = new MovementMiningCost[freeCapacity()];
-        unsafeToBreak = new boolean[freeCapacity()];
-        noNeedToBreak = new boolean[freeCapacity()];
-    }
-
-    private UpMovement(UpMovement other) {
-        this.targetFeetBlock = other.targetFeetBlock;
-        this.isImpossible = other.isImpossible;
-        this.blockBreakCosts = new MovementMiningCost[other.blockBreakCosts.length];
-        this.unsafeToBreak = new boolean[other.unsafeToBreak.length];
-        this.noNeedToBreak = new boolean[other.noNeedToBreak.length];
-        this.requiresAgainstBlock = other.requiresAgainstBlock;
+        this.blockBreakCosts = new MovementMiningCost[freeCapacity()];
+        this.unsafeToBreak = new boolean[freeCapacity()];
+        this.noNeedToBreak = new boolean[freeCapacity()];
     }
 
     private int freeCapacity() {
@@ -155,8 +145,23 @@ public final class UpMovement implements GraphAction {
 
     @Override
     public UpMovement copy(BotEntityState previousEntityState) {
-        var upMovement = new UpMovement(this);
+        var upMovement = this.clone();
         upMovement.isImpossible = !previousEntityState.inventory().hasBlockToPlace();
         return upMovement;
+    }
+
+    @Override
+    public UpMovement clone() {
+        try {
+            var c = (UpMovement) super.clone();
+
+            c.blockBreakCosts = this.blockBreakCosts == null ? null : new MovementMiningCost[this.blockBreakCosts.length];
+            c.unsafeToBreak = this.unsafeToBreak == null ? null : new boolean[this.unsafeToBreak.length];
+            c.noNeedToBreak = this.noNeedToBreak == null ? null : new boolean[this.noNeedToBreak.length];
+
+            return c;
+        } catch (CloneNotSupportedException cantHappen) {
+            throw new InternalError();
+        }
     }
 }

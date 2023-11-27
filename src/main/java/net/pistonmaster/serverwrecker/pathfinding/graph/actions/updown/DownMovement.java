@@ -33,7 +33,7 @@ import net.pistonmaster.serverwrecker.util.VectorHelper;
 
 import java.util.List;
 
-public class DownMovement implements GraphAction {
+public class DownMovement implements GraphAction, Cloneable {
     private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
     private final SWVec3i targetToMineBlock;
     @Getter
@@ -48,13 +48,6 @@ public class DownMovement implements GraphAction {
 
     public DownMovement() {
         this.targetToMineBlock = FEET_POSITION_RELATIVE_BLOCK.sub(0, 1, 0);
-    }
-
-    private DownMovement(DownMovement other) {
-        this.targetToMineBlock = other.targetToMineBlock;
-        this.isImpossible = other.isImpossible;
-        this.blockBreakCosts = other.blockBreakCosts;
-        this.closestBlockToFallOn = other.closestBlockToFallOn;
     }
 
     public SWVec3i blockToBreak() {
@@ -115,6 +108,15 @@ public class DownMovement implements GraphAction {
 
     @Override
     public DownMovement copy(BotEntityState previousEntityState) {
-        return new DownMovement(this);
+        return this.clone();
+    }
+
+    @Override
+    public DownMovement clone() {
+        try {
+            return (DownMovement) super.clone();
+        } catch (CloneNotSupportedException cantHappen) {
+            throw new InternalError();
+        }
     }
 }

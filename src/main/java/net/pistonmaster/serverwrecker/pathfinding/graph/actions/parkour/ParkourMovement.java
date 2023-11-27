@@ -32,7 +32,7 @@ import net.pistonmaster.serverwrecker.util.VectorHelper;
 
 import java.util.List;
 
-public class ParkourMovement implements GraphAction {
+public class ParkourMovement implements GraphAction, Cloneable {
     private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
     private final ParkourDirection direction;
     private final SWVec3i targetFeetBlock;
@@ -43,12 +43,6 @@ public class ParkourMovement implements GraphAction {
     public ParkourMovement(ParkourDirection direction) {
         this.direction = direction;
         this.targetFeetBlock = direction.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
-    }
-
-    private ParkourMovement(ParkourMovement other) {
-        this.direction = other.direction;
-        this.targetFeetBlock = other.targetFeetBlock;
-        this.isImpossible = other.isImpossible;
     }
 
     public List<SWVec3i> listRequiredFreeBlocks() {
@@ -107,6 +101,15 @@ public class ParkourMovement implements GraphAction {
 
     @Override
     public ParkourMovement copy(BotEntityState previousEntityState) {
-        return new ParkourMovement(this);
+        return this.clone();
+    }
+
+    @Override
+    public ParkourMovement clone() {
+        try {
+            return (ParkourMovement) super.clone();
+        } catch (CloneNotSupportedException cantHappen) {
+            throw new InternalError();
+        }
     }
 }
