@@ -15,9 +15,11 @@ allprojects {
     description = "Advanced Minecraft Server-Stresser Tool."
 }
 
+var mainClassString = "net.pistonmaster.serverwrecker.launcher.ServerWreckerJava8Launcher"
+
 application {
     applicationName = "ServerWrecker"
-    mainClass.set("net.pistonmaster.serverwrecker.launcher.ServerWreckerJava8Launcher")
+    mainClass.set(mainClassString)
 }
 
 tasks {
@@ -209,7 +211,7 @@ tasks.withType<Checkstyle> {
 
 tasks.named<Jar>("jar") {
     manifest {
-        attributes["Main-Class"] = "net.pistonmaster.serverwrecker.launcher.ServerWreckerJava8Launcher"
+        attributes["Main-Class"] = mainClassString
     }
 }
 
