@@ -29,14 +29,14 @@ import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import net.pistonmaster.serverwrecker.util.ItemTypeHelper;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 import java.util.concurrent.TimeUnit;
 
 @ToString
 @RequiredArgsConstructor
 public class BlockPlaceAction implements WorldAction {
-    private final Vector3i blockPosition;
+    private final SWVec3i blockPosition;
     private final BotActionManager.BlockPlaceData blockPlaceData;
     private boolean putOnHotbar = false;
     private boolean finishedPlacing = false;

@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 
 import lombok.RequiredArgsConstructor;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 @RequiredArgsConstructor
 public enum BodyPart {
@@ -34,7 +34,7 @@ public enum BodyPart {
             BodyPart.FEET
     };
 
-    public Vector3i offset(Vector3i position) {
+    public SWVec3i offset(SWVec3i position) {
         return switch (this) {
             case FEET -> position;
             case HEAD -> position.add(0, 1, 0);

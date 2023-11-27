@@ -29,6 +29,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.movement.AABB;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -99,7 +100,7 @@ public class BotActionManager {
     }
 
     public void placeBlock(Hand hand, BlockPlaceData blockPlaceData) {
-        placeBlock(hand, blockPlaceData.againstPos(), blockPlaceData.blockFace());
+        placeBlock(hand, blockPlaceData.againstPos().toVector3i(), blockPlaceData.blockFace());
     }
 
     public void placeBlock(Hand hand, Vector3i againstBlock, Direction againstFace) {
@@ -191,6 +192,6 @@ public class BotActionManager {
         }
     }
 
-    public record BlockPlaceData(Vector3i againstPos, Direction blockFace) {
+    public record BlockPlaceData(SWVec3i againstPos, Direction blockFace) {
     }
 }

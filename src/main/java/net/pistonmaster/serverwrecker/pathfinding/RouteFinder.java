@@ -33,7 +33,6 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.pathfinding.graph.OutOfLevelException;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
-import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Collections;
 import java.util.List;
@@ -62,7 +61,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         var stopwatch = Stopwatch.createStarted();
 
         // Store block positions and the best route to them
-        var routeIndex = new Object2ObjectOpenCustomHashMap<Vector3i, MinecraftRouteNode>(VectorHelper.VECTOR3I_HASH_STRATEGY);
+        var routeIndex = new Object2ObjectOpenCustomHashMap<SWVec3i, MinecraftRouteNode>(VectorHelper.VECTOR3I_HASH_STRATEGY);
 
         // Store block positions that we need to look at
         var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>(1);

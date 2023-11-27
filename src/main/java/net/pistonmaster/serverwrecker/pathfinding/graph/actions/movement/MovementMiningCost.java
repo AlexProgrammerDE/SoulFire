@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
-public record MovementMiningCost(Vector3i block, double miningCost, boolean willDrop) {
+public record MovementMiningCost(SWVec3i block, double miningCost, boolean willDrop) {
 }

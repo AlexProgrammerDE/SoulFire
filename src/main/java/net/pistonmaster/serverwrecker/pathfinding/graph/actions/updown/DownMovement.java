@@ -29,13 +29,13 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.MovementMiningCost;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 import java.util.List;
 
 public class DownMovement implements GraphAction {
-    private static final Vector3i FEET_POSITION_RELATIVE_BLOCK = Vector3i.ZERO;
-    private final Vector3i targetToMineBlock;
+    private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
+    private final SWVec3i targetToMineBlock;
     @Getter
     @Setter
     private MovementMiningCost blockBreakCosts;
@@ -57,12 +57,12 @@ public class DownMovement implements GraphAction {
         this.closestBlockToFallOn = other.closestBlockToFallOn;
     }
 
-    public Vector3i blockToBreak() {
+    public SWVec3i blockToBreak() {
         return targetToMineBlock;
     }
 
-    public List<Vector3i> listSafetyCheckBlocks() {
-        List<Vector3i> requiredFreeBlocks = new ObjectArrayList<>();
+    public List<SWVec3i> listSafetyCheckBlocks() {
+        List<SWVec3i> requiredFreeBlocks = new ObjectArrayList<>();
 
         // Falls one block
         requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0));
@@ -103,7 +103,7 @@ public class DownMovement implements GraphAction {
 
         var absoluteMinedBlock = previousEntityState.positionBlock().add(targetToMineBlock);
         var absoluteTargetFeetBlock = previousEntityState.positionBlock().add(0, closestBlockToFallOn + 1, 0);
-        var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toDouble());
+        var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toVector3d());
 
         return new GraphInstructions(new BotEntityState(
                 targetFeetDoublePosition,

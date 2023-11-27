@@ -27,10 +27,6 @@ public record ChunkKey(int chunkX, int chunkZ, int calculatedHash) {
         this(chunkX, chunkZ, calculateHash(chunkX, chunkZ));
     }
 
-    public static int calculateHash(Vector3i block) {
-        return calculateHash(SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
-    }
-
     public static int calculateHash(int chunkX, int chunkZ) {
         return (chunkX << 16) | (chunkZ & 0xFFFF);
     }

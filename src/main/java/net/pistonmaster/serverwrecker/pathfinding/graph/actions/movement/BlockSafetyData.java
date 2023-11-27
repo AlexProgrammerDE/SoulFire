@@ -19,9 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
-public record BlockSafetyData(Vector3i position, BlockSafetyType type) {
+public record BlockSafetyData(SWVec3i position, BlockSafetyType type) {
     public enum BlockSafetyType {
         FALLING_AND_FLUIDS,
         FLUIDS

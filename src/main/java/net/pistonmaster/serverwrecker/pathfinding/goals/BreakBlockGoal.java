@@ -24,22 +24,13 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
-public record BreakBlockGoal(Vector3i goal, Vector3d goal3d) implements GoalScorer {
-    public BreakBlockGoal(int x, int y, int z) {
-        this(Vector3i.from(x, y, z));
-    }
-
-    public BreakBlockGoal(Vector3i goal) {
-        this(goal, goal.toDouble());
-    }
-
+public record BreakBlockGoal(SWVec3i goal) implements GoalScorer {
     @Override
     public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-        var distance = entityState.position().distance(goal3d);
-        var levelState = entityState.levelState();
-        var blockStateMeta = levelState.getBlockStateAt(goal);
+        var distance = entityState.position().distance(goal.x, goal.y, goal.z);
+        var blockStateMeta = entityState.levelState().getBlockStateAt(goal);
 
         // Instead of failing when the block is not in render distance, we just return the distance.
         if (blockStateMeta.isEmpty()) {

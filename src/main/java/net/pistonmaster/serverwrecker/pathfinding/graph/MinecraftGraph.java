@@ -34,18 +34,18 @@ import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {
-    private static final Object2ObjectFunction<? super Vector3i, ? extends ObjectList<BlockSubscription>> CREATE_MISSING_FUNCTION =
+    private static final Object2ObjectFunction<? super SWVec3i, ? extends ObjectList<BlockSubscription>> CREATE_MISSING_FUNCTION =
             k -> new ObjectArrayList<>();
     private static final GraphAction[] ACTIONS_TEMPLATE;
-    private static final Vector3i[] SUBSCRIPTION_KEYS;
+    private static final SWVec3i[] SUBSCRIPTION_KEYS;
     private static final BlockSubscription[][] SUBSCRIPTION_VALUES;
 
     static {
-        var blockSubscribers = new Object2ObjectArrayMap<Vector3i, ObjectList<BlockSubscription>>();
+        var blockSubscribers = new Object2ObjectArrayMap<SWVec3i, ObjectList<BlockSubscription>>();
 
         var actions = new ObjectArrayList<GraphAction>();
         for (var direction : MovementDirection.VALUES) {
@@ -90,7 +90,7 @@ public record MinecraftGraph(TagsState tagsState) {
         ));
 
         ACTIONS_TEMPLATE = actions.toArray(new GraphAction[0]);
-        SUBSCRIPTION_KEYS = new Vector3i[blockSubscribers.size()];
+        SUBSCRIPTION_KEYS = new SWVec3i[blockSubscribers.size()];
         SUBSCRIPTION_VALUES = new BlockSubscription[blockSubscribers.size()][];
 
         var entrySetDescending = blockSubscribers.object2ObjectEntrySet().stream()
@@ -103,7 +103,7 @@ public record MinecraftGraph(TagsState tagsState) {
         }
     }
 
-    private static PlayerMovement registerMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
+    private static PlayerMovement registerMovement(Object2ObjectMap<SWVec3i, ObjectList<BlockSubscription>> blockSubscribers,
                                                    PlayerMovement movement, int movementIndex) {
         {
             var blockId = 0;
@@ -150,7 +150,7 @@ public record MinecraftGraph(TagsState tagsState) {
         return movement;
     }
 
-    private static ParkourMovement registerParkourMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
+    private static ParkourMovement registerParkourMovement(Object2ObjectMap<SWVec3i, ObjectList<BlockSubscription>> blockSubscribers,
                                                            ParkourMovement movement, int movementIndex) {
         {
             var blockId = 0;
@@ -173,7 +173,7 @@ public record MinecraftGraph(TagsState tagsState) {
         return movement;
     }
 
-    private static DownMovement registerDownMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
+    private static DownMovement registerDownMovement(Object2ObjectMap<SWVec3i, ObjectList<BlockSubscription>> blockSubscribers,
                                                      DownMovement movement, int movementIndex) {
         {
             for (var safetyBlock : movement.listSafetyCheckBlocks()) {
@@ -190,7 +190,7 @@ public record MinecraftGraph(TagsState tagsState) {
         return movement;
     }
 
-    private static UpMovement registerUpMovement(Object2ObjectMap<Vector3i, ObjectList<BlockSubscription>> blockSubscribers,
+    private static UpMovement registerUpMovement(Object2ObjectMap<SWVec3i, ObjectList<BlockSubscription>> blockSubscribers,
                                                  UpMovement movement, int movementIndex) {
         {
             var blockId = 0;
@@ -231,7 +231,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 var value = SUBSCRIPTION_VALUES[i];
 
                 BlockStateMeta blockState = null;
-                Vector3i absolutePositionBlock = null;
+                SWVec3i absolutePositionBlock = null;
 
                 // We cache only this, but not solid because solid will only occur a single time
                 var calculatedFree = false;
@@ -426,7 +426,7 @@ public record MinecraftGraph(TagsState tagsState) {
                                 }
                             }
                             case DOWN_SAFETY_CHECK -> {
-                                var yLevel = key.getY();
+                                var yLevel = key.y;
 
                                 if (yLevel < downMovement.getClosestBlockToFallOn()) {
                                     // We already found a block to fall on, above this one

@@ -24,6 +24,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
+import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
 import net.pistonmaster.serverwrecker.util.NoopLock;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -52,19 +53,18 @@ public class ChunkHolder {
         this.writeLock = new NoopLock();
     }
 
-    public ChunkData getChunk(int x, int z) {
-        readLock.lock();
-        try {
-            return chunks.get(ChunkKey.calculateHash(x, z));
-        } finally {
-            readLock.unlock();
-        }
+    public ChunkData getChunk(int chunkX, int chunkZ) {
+        return getChunkFromSection(ChunkKey.calculateHash(chunkX, chunkZ));
     }
 
     public ChunkData getChunk(Vector3i block) {
+        return getChunk(SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
+    }
+
+    private ChunkData getChunkFromSection(int sectionIndex) {
         readLock.lock();
         try {
-            return chunks.get(ChunkKey.calculateHash(block));
+            return chunks.get(sectionIndex);
         } finally {
             readLock.unlock();
         }
@@ -80,12 +80,7 @@ public class ChunkHolder {
     }
 
     public boolean isChunkLoaded(Vector3i block) {
-        readLock.lock();
-        try {
-            return chunks.containsKey(ChunkKey.calculateHash(block));
-        } finally {
-            readLock.unlock();
-        }
+        return isChunkLoaded(SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
     }
 
     public void removeChunk(int x, int z) {
@@ -107,8 +102,8 @@ public class ChunkHolder {
         }
     }
 
-    public Optional<BlockStateMeta> getBlockStateAt(Vector3i block) {
-        var chunkData = getChunk(block);
+    public Optional<BlockStateMeta> getBlockStateAt(int x, int y, int z) {
+        var chunkData = getChunk(SectionUtils.blockToSection(x), SectionUtils.blockToSection(z));
 
         // Out of world
         if (chunkData == null) {
@@ -116,7 +111,7 @@ public class ChunkHolder {
         }
 
         return Optional.of(ResourceData.GLOBAL_BLOCK_PALETTE
-                .getBlockStateForStateId(chunkData.getBlock(block)));
+                .getBlockStateForStateId(chunkData.getBlock(x, y, z)));
     }
 
     public ChunkHolder immutableCopy() {

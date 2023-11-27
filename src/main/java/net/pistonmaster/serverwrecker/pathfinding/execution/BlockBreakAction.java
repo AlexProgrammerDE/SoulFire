@@ -24,17 +24,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
+import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 import java.util.concurrent.TimeUnit;
 
 @ToString
 @RequiredArgsConstructor
 public class BlockBreakAction implements WorldAction {
-    private final Vector3i blockPosition;
+    private final SWVec3i blockPosition;
     boolean finishedDigging = false;
     private boolean didLook = false;
     private boolean putOnHotbar = false;
@@ -49,8 +50,8 @@ public class BlockBreakAction implements WorldAction {
             return false;
         }
 
-        return levelState.getBlockTypeAt(blockPosition)
-                .map(blockType -> blockType.blockShapeTypes().isEmpty())
+        return levelState.getBlockStateAt(blockPosition)
+                .map(blockState -> blockState.blockType().blockShapeTypes().isEmpty())
                 .orElse(false);
     }
 
@@ -72,7 +73,7 @@ public class BlockBreakAction implements WorldAction {
             didLook = true;
             var previousYaw = movementManager.getYaw();
             var previousPitch = movementManager.getPitch();
-            movementManager.lookAt(RotationOrigin.EYES, VectorHelper.middleOfBlockNormalize(blockPosition.toDouble()));
+            movementManager.lookAt(RotationOrigin.EYES, VectorHelper.middleOfBlockNormalize(blockPosition.toVector3d()));
             if (previousPitch != movementManager.getPitch() || previousYaw != movementManager.getYaw()) {
                 movementManager.sendRot();
             }
@@ -97,7 +98,7 @@ public class BlockBreakAction implements WorldAction {
                         sessionDataManager.getSelfEffectState(),
                         sessionDataManager.getBotMovementManager().getEntity().isOnGround(),
                         item,
-                        levelState.getBlockTypeAt(blockPosition).orElseThrow()
+                        levelState.getBlockStateAt(blockPosition).map(BlockStateMeta::blockType).orElseThrow()
                 ).ticks();
 
                 if (cost < bestCost || (item == null && cost == bestCost)) {
@@ -183,11 +184,11 @@ public class BlockBreakAction implements WorldAction {
                     sessionDataManager.getInventoryManager().getPlayerInventory()
                             .getHotbarSlot(sessionDataManager.getInventoryManager().getHeldItemSlot())
                             .item(),
-                    levelState.getBlockTypeAt(blockPosition).orElseThrow()
+                    levelState.getBlockStateAt(blockPosition).map(BlockStateMeta::blockType).orElseThrow()
             ).ticks();
-            sessionDataManager.getBotActionManager().sendStartBreakBlock(blockPosition);
+            sessionDataManager.getBotActionManager().sendStartBreakBlock(blockPosition.toVector3i());
         } else if (--remainingTicks == 0) {
-            sessionDataManager.getBotActionManager().sendEndBreakBlock(blockPosition);
+            sessionDataManager.getBotActionManager().sendEndBreakBlock(blockPosition.toVector3i());
             finishedDigging = true;
         }
     }

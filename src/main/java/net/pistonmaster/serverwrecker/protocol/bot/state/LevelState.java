@@ -23,8 +23,10 @@ import com.github.steveice10.opennbt.tag.builtin.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.data.BlockType;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
 import net.pistonmaster.serverwrecker.protocol.bot.movement.AABB;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.MCUniform;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.UniformOrInt;
@@ -134,12 +136,12 @@ public class LevelState {
         return chunks.isChunkLoaded(block);
     }
 
-    public Optional<BlockStateMeta> getBlockStateAt(Vector3d block) {
-        return getBlockStateAt(block.toInt());
+    public Optional<BlockStateMeta> getBlockStateAt(Vector3i block) {
+        return chunks.getBlockStateAt(block.getX(), block.getY(), block.getZ());
     }
 
-    public Optional<BlockStateMeta> getBlockStateAt(Vector3i block) {
-        return chunks.getBlockStateAt(block);
+    public Optional<BlockStateMeta> getBlockStateAt(SWVec3i block) {
+        return chunks.getBlockStateAt(block.x, block.y, block.z);
     }
 
     public Optional<BlockType> getBlockTypeAt(Vector3i block) {

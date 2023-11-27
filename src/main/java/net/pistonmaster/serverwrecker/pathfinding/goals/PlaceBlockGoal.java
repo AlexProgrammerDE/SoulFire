@@ -24,16 +24,16 @@ import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 // TODO: Extract into having more fine behaviour control
-public record PlaceBlockGoal(Vector3i goal, Vector3d goal3d, BlockType blockType) implements GoalScorer {
+public record PlaceBlockGoal(SWVec3i goal, Vector3d goal3d, BlockType blockType) implements GoalScorer {
     public PlaceBlockGoal(int x, int y, int z, BlockType blockType) {
         this(Vector3d.from(x, y, z), blockType);
     }
 
     public PlaceBlockGoal(Vector3d goalBlock, BlockType blockType) {
-        this(goalBlock.toInt(), goalBlock, blockType);
+        this(SWVec3i.fromDouble(goalBlock), goalBlock, blockType);
     }
 
     @Override

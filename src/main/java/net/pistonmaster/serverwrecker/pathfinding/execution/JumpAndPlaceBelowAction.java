@@ -29,14 +29,14 @@ import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 import net.pistonmaster.serverwrecker.util.ItemTypeHelper;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 import java.util.concurrent.TimeUnit;
 
 @ToString
 @RequiredArgsConstructor
 public class JumpAndPlaceBelowAction implements WorldAction {
-    private final Vector3i blockPosition;
+    private final SWVec3i blockPosition;
     private final BotActionManager.BlockPlaceData blockPlaceData;
     private boolean putOnHotbar = false;
     private boolean finishedPlacing = false;
@@ -146,7 +146,7 @@ public class JumpAndPlaceBelowAction implements WorldAction {
             return;
         }
 
-        if (movementManager.getEntity().getPos().getY() <= blockPosition.getY() + 1) {
+        if (movementManager.getEntity().getPos().getY() <= blockPosition.y + 1) {
             // Make sure we are so high that we can place the block
             movementManager.getControlState().setJumping(true);
             return;

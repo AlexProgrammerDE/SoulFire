@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.graph.actions.parkour;
 
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 public enum ParkourDirection {
     NORTH,
@@ -30,7 +30,7 @@ public enum ParkourDirection {
     public static final ParkourDirection[] VALUES = values();
 
     @SuppressWarnings("DuplicatedCode")
-    public Vector3i offset(Vector3i vector) {
+    public SWVec3i offset(SWVec3i vector) {
         return switch (this) {
             case NORTH -> vector.add(0, 0, -1);
             case SOUTH -> vector.add(0, 0, 1);

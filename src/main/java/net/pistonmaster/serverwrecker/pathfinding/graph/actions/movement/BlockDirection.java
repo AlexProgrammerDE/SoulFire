@@ -22,7 +22,7 @@ package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 @Getter
 @RequiredArgsConstructor
@@ -36,7 +36,7 @@ public enum BlockDirection {
     private final Direction direction;
 
     @SuppressWarnings("DuplicatedCode")
-    public Vector3i offset(Vector3i vector) {
+    public SWVec3i offset(SWVec3i vector) {
         return switch (this) {
             case NORTH -> vector.add(0, 0, -1);
             case SOUTH -> vector.add(0, 0, 1);

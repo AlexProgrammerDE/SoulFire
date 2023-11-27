@@ -36,14 +36,14 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.BlockSa
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.MovementMiningCost;
 import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 import java.util.List;
 
 @Slf4j
 public final class UpMovement implements GraphAction {
-    private static final Vector3i FEET_POSITION_RELATIVE_BLOCK = Vector3i.ZERO;
-    private final Vector3i targetFeetBlock;
+    private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
+    private final SWVec3i targetFeetBlock;
     @Getter
     private final MovementMiningCost[] blockBreakCosts;
     @Getter
@@ -77,8 +77,8 @@ public final class UpMovement implements GraphAction {
         return 1;
     }
 
-    public List<Vector3i> listRequiredFreeBlocks() {
-        List<Vector3i> requiredFreeBlocks = new ObjectArrayList<>(freeCapacity());
+    public List<SWVec3i> listRequiredFreeBlocks() {
+        List<SWVec3i> requiredFreeBlocks = new ObjectArrayList<>(freeCapacity());
 
         // The one above the head to jump
         requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0));
@@ -137,7 +137,7 @@ public final class UpMovement implements GraphAction {
         levelState = levelState.withChangeToSolidBlock(previousEntityState.positionBlock());
 
         var absoluteTargetFeetBlock = previousEntityState.positionBlock().add(targetFeetBlock);
-        var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toDouble());
+        var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toVector3d());
 
         // Where we are standing right now, we'll place the target block below us after jumping
         actions.add(new JumpAndPlaceBelowAction(previousEntityState.positionBlock(), new BotActionManager.BlockPlaceData(

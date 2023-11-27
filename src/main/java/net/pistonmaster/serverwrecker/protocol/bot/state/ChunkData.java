@@ -42,13 +42,12 @@ public class ChunkData {
         return (int) Math.ceil(Math.log(num) / Math.log(2));
     }
 
-    public int getBlock(Vector3i block) {
-        var y = block.getY();
+    public int getBlock(int x, int y, int z) {
         return getSection(getSectionIndexByBlockY(y))
                 .getBlock(
-                        block.getX() & 0xF,
+                        x & 0xF,
                         y & 0xF,
-                        block.getZ() & 0xF
+                        z & 0xF
                 );
     }
 

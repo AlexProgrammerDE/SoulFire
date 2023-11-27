@@ -26,11 +26,11 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkHolder;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
-import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Optional;
 
@@ -45,7 +45,7 @@ public class ProjectedLevelState {
     private static final BlockStateMeta VOID_AIR_BLOCK_STATE = new BlockStateMeta(BlockType.VOID_AIR, BlockShapeType.getById(0));
 
     private final ChunkHolder chunkHolder;
-    private final Object2ObjectMap<Vector3i, BlockStateMeta> blockChanges;
+    private final Object2ObjectMap<SWVec3i, BlockStateMeta> blockChanges;
     private final int blockChangesHash;
     private final int minBuildHeight;
     private final int maxBuildHeight;
@@ -58,8 +58,8 @@ public class ProjectedLevelState {
         this.maxBuildHeight = levelState.getMaxBuildHeight();
     }
 
-    public ProjectedLevelState withChangeToSolidBlock(Vector3i position) {
-        var blockChanges = new Object2ObjectOpenCustomHashMap<Vector3i, BlockStateMeta>(
+    public ProjectedLevelState withChangeToSolidBlock(SWVec3i position) {
+        var blockChanges = new Object2ObjectOpenCustomHashMap<SWVec3i, BlockStateMeta>(
                 this.blockChanges.size() + 1, VectorHelper.VECTOR3I_HASH_STRATEGY);
         blockChanges.putAll(this.blockChanges);
         blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
@@ -67,8 +67,8 @@ public class ProjectedLevelState {
         return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode(), minBuildHeight, maxBuildHeight);
     }
 
-    public ProjectedLevelState withChangeToAir(Vector3i position) {
-        var blockChanges = new Object2ObjectOpenCustomHashMap<Vector3i, BlockStateMeta>(
+    public ProjectedLevelState withChangeToAir(SWVec3i position) {
+        var blockChanges = new Object2ObjectOpenCustomHashMap<SWVec3i, BlockStateMeta>(
                 this.blockChanges.size() + 1, VectorHelper.VECTOR3I_HASH_STRATEGY);
         blockChanges.putAll(this.blockChanges);
         blockChanges.put(position, AIR_BLOCK_STATE);
@@ -76,8 +76,8 @@ public class ProjectedLevelState {
         return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode(), minBuildHeight, maxBuildHeight);
     }
 
-    public ProjectedLevelState withChanges(Vector3i[] air, Vector3i solid) {
-        var blockChanges = new Object2ObjectOpenCustomHashMap<Vector3i, BlockStateMeta>(
+    public ProjectedLevelState withChanges(SWVec3i[] air, SWVec3i solid) {
+        var blockChanges = new Object2ObjectOpenCustomHashMap<SWVec3i, BlockStateMeta>(
                 this.blockChanges.size() + (air != null ? air.length : 0)
                         + (solid != null ? 1 : 0), VectorHelper.VECTOR3I_HASH_STRATEGY);
         blockChanges.putAll(this.blockChanges);
@@ -99,10 +99,10 @@ public class ProjectedLevelState {
         return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode(), minBuildHeight, maxBuildHeight);
     }
 
-    public Optional<BlockStateMeta> getBlockStateAt(Vector3i position) {
+    public Optional<BlockStateMeta> getBlockStateAt(SWVec3i position) {
         // So that we don't throw OutOfLevelException when we are in the void,
         // OutOfLevelException should be only thrown when we are outside the render distance
-        var y = position.getY();
+        var y = position.y;
         if (y < minBuildHeight) {
             return Optional.of(VOID_AIR_BLOCK_STATE);
         } else if (y >= maxBuildHeight) {
@@ -114,10 +114,10 @@ public class ProjectedLevelState {
             return Optional.of(blockChange);
         }
 
-        return chunkHolder.getBlockStateAt(position);
+        return chunkHolder.getBlockStateAt(position.x, position.y, position.z);
     }
 
-    public boolean isChanged(Vector3i position) {
+    public boolean isChanged(SWVec3i position) {
         return blockChanges.containsKey(position);
     }
 

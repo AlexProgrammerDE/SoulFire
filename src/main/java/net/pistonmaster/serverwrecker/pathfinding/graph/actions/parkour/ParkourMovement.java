@@ -28,14 +28,14 @@ import net.pistonmaster.serverwrecker.pathfinding.execution.GapJumpAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 import java.util.List;
 
 public class ParkourMovement implements GraphAction {
-    private static final Vector3i FEET_POSITION_RELATIVE_BLOCK = Vector3i.ZERO;
+    private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
     private final ParkourDirection direction;
-    private final Vector3i targetFeetBlock;
+    private final SWVec3i targetFeetBlock;
     @Setter
     @Getter
     private boolean isImpossible = false;
@@ -51,8 +51,8 @@ public class ParkourMovement implements GraphAction {
         this.isImpossible = other.isImpossible;
     }
 
-    public List<Vector3i> listRequiredFreeBlocks() {
-        List<Vector3i> requiredFreeBlocks = new ObjectArrayList<>();
+    public List<SWVec3i> listRequiredFreeBlocks() {
+        List<SWVec3i> requiredFreeBlocks = new ObjectArrayList<>();
 
         // Make head block free (maybe head block is a slab)
         requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0));
@@ -77,12 +77,12 @@ public class ParkourMovement implements GraphAction {
         return requiredFreeBlocks;
     }
 
-    public Vector3i requiredUnsafeBlock() {
+    public SWVec3i requiredUnsafeBlock() {
         // The gap to jump over, needs to be unsafe for this movement to be possible
         return direction.offset(FEET_POSITION_RELATIVE_BLOCK).sub(0, 1, 0);
     }
 
-    public Vector3i requiredSolidBlock() {
+    public SWVec3i requiredSolidBlock() {
         // Floor block
         return targetFeetBlock.sub(0, 1, 0);
     }
@@ -95,7 +95,7 @@ public class ParkourMovement implements GraphAction {
     @Override
     public GraphInstructions getInstructions(BotEntityState previousEntityState) {
         var absoluteTargetFeetBlock = previousEntityState.positionBlock().add(targetFeetBlock);
-        var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toDouble());
+        var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toVector3d());
 
         return new GraphInstructions(new BotEntityState(
                 targetFeetDoublePosition,

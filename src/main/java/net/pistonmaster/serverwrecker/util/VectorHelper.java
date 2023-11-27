@@ -20,19 +20,19 @@
 package net.pistonmaster.serverwrecker.util;
 
 import it.unimi.dsi.fastutil.Hash;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import org.cloudburstmc.math.vector.Vector2d;
 import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.math.vector.Vector3i;
 
 public class VectorHelper {
-    public static final Hash.Strategy<Vector3i> VECTOR3I_HASH_STRATEGY = new Hash.Strategy<>() {
+    public static final Hash.Strategy<SWVec3i> VECTOR3I_HASH_STRATEGY = new Hash.Strategy<>() {
         @Override
-        public int hashCode(Vector3i o) {
+        public int hashCode(SWVec3i o) {
             return o.hashCode();
         }
 
         @Override
-        public boolean equals(Vector3i a, Vector3i b) {
+        public boolean equals(SWVec3i a, SWVec3i b) {
             if (b == null) {
                 return false;
             }
@@ -41,9 +41,9 @@ public class VectorHelper {
                 return true;
             }
 
-            return a.getX() == b.getX()
-                    && a.getY() == b.getY()
-                    && a.getZ() == b.getZ();
+            return a.x == b.x
+                    && a.y == b.y
+                    && a.z == b.z;
         }
     };
 

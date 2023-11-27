@@ -23,7 +23,7 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 
 /**
  * Represents the state of the bot in the level.
@@ -35,10 +35,10 @@ import org.cloudburstmc.math.vector.Vector3i;
  * @param levelState    The level state of the world the bot is in.
  * @param inventory     The inventory state of the bot.
  */
-public record BotEntityState(Vector3d position, Vector3i positionBlock, ProjectedLevelState levelState,
+public record BotEntityState(Vector3d position, SWVec3i positionBlock, ProjectedLevelState levelState,
                              ProjectedInventory inventory) {
     public BotEntityState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory) {
-        this(position, position.toInt(), levelState, inventory);
+        this(position, SWVec3i.fromDouble(position), levelState, inventory);
     }
 
     public static BotEntityState initialState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory) {
