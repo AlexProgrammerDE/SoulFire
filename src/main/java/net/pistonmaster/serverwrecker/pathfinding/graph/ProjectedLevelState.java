@@ -46,14 +46,12 @@ public class ProjectedLevelState {
 
     private final ChunkHolder chunkHolder;
     private final Object2ObjectMap<SWVec3i, BlockStateMeta> blockChanges;
-    private final int blockChangesHash;
     private final int minBuildHeight;
     private final int maxBuildHeight;
 
     public ProjectedLevelState(LevelState levelState) {
         this.chunkHolder = levelState.getChunks().immutableCopy();
         this.blockChanges = Object2ObjectMaps.emptyMap();
-        this.blockChangesHash = blockChanges.hashCode();
         this.minBuildHeight = levelState.getMinBuildHeight();
         this.maxBuildHeight = levelState.getMaxBuildHeight();
     }
@@ -64,7 +62,7 @@ public class ProjectedLevelState {
         blockChanges.putAll(this.blockChanges);
         blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
 
-        return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode(), minBuildHeight, maxBuildHeight);
+        return new ProjectedLevelState(chunkHolder, blockChanges, minBuildHeight, maxBuildHeight);
     }
 
     public ProjectedLevelState withChangeToAir(SWVec3i position) {
@@ -73,7 +71,7 @@ public class ProjectedLevelState {
         blockChanges.putAll(this.blockChanges);
         blockChanges.put(position, AIR_BLOCK_STATE);
 
-        return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode(), minBuildHeight, maxBuildHeight);
+        return new ProjectedLevelState(chunkHolder, blockChanges, minBuildHeight, maxBuildHeight);
     }
 
     public ProjectedLevelState withChanges(SWVec3i[] air, SWVec3i solid) {
@@ -96,7 +94,7 @@ public class ProjectedLevelState {
             blockChanges.put(solid, Costs.SOLID_PLACED_BLOCK_STATE);
         }
 
-        return new ProjectedLevelState(chunkHolder, blockChanges, blockChanges.hashCode(), minBuildHeight, maxBuildHeight);
+        return new ProjectedLevelState(chunkHolder, blockChanges, minBuildHeight, maxBuildHeight);
     }
 
     public Optional<BlockStateMeta> getBlockStateAt(SWVec3i position) {
@@ -119,14 +117,5 @@ public class ProjectedLevelState {
 
     public boolean isChanged(SWVec3i position) {
         return blockChanges.containsKey(position);
-    }
-
-    public boolean equals(ProjectedLevelState that) {
-        return blockChanges.equals(that.blockChanges);
-    }
-
-    @Override
-    public int hashCode() {
-        return blockChangesHash;
     }
 }

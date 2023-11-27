@@ -87,13 +87,4 @@ public class ProjectedInventory {
         return sharedMiningCosts.computeIfAbsent(blockStateMeta.blockType(), type ->
                 Costs.calculateBlockBreakCost(tagsState, this, type));
     }
-
-    public boolean equals(ProjectedInventory that) {
-        return usableBlockItems == that.usableBlockItems;
-    }
-
-    @Override
-    public int hashCode() {
-        return usableBlockItems;
-    }
 }
