@@ -55,7 +55,7 @@ Thanks to a built-in implementation of [ViaVersion](https://github.com/ViaVersio
 [ViaLegacy](https://github.com/RaphiMC/ViaLegacy), [ViaBedrock](https://github.com/RaphiMC/ViaBedrock) and many others,
 a ServerWrecker bot can connect to all these versions even without the server having ViaVersion installed.
 The packet translation happens "client/bot side".
-This feature takes inspiration from services like [ViAaaS](https://github.com/ViaVersion/VIAaaS)
+This feature takes inspiration from services like [VIAaaS](https://github.com/ViaVersion/VIAaaS)
 and [ViaProxy](https://github.com/RaphiMC/ViaProxy),
 which include client-side translation externally.
 

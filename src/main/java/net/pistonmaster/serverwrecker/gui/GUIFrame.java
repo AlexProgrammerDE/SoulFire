@@ -94,13 +94,17 @@ public class GUIFrame extends JFrame {
 
         pack();
 
-        // Calculate 16:9 width from height
-        var height = getHeight();
-        var aspectRatio = 16.0 / 9.0;
-        var width = (int) (height * aspectRatio);
+        // Get screen height
+        var gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        var displayHeight = gd.getDisplayMode().getHeight();
 
-        setSize(width, height);
-        setMinimumSize(new Dimension(width, height));
+        // Calculate 16:9 width from height
+        var minFrameHeight = displayHeight / 2;
+        var aspectRatio = 16.0 / 9.0;
+        var minFrameWidth = (int) (minFrameHeight * aspectRatio);
+
+        setSize(minFrameWidth, minFrameHeight);
+        setMinimumSize(new Dimension(minFrameWidth, minFrameHeight));
     }
 
     public void open(Injector injector) {
