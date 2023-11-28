@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.pathfinding.execution;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
@@ -32,6 +33,7 @@ import net.pistonmaster.serverwrecker.util.VectorHelper;
 
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @ToString
 @RequiredArgsConstructor
 public class BlockBreakAction implements WorldAction {
@@ -93,12 +95,20 @@ public class BlockBreakAction implements WorldAction {
                     sawEmpty = true;
                 }
 
+                var optionalBlockType = levelState.getBlockStateAt(blockPosition)
+                        .map(BlockStateMeta::blockType);
+
+                if (optionalBlockType.isEmpty()) {
+                    log.warn("Block at {} is not in view range!", blockPosition);
+                    return;
+                }
+
                 var cost = Costs.getRequiredMiningTicks(
                         sessionDataManager.getTagsState(),
                         sessionDataManager.getSelfEffectState(),
                         sessionDataManager.getBotMovementManager().getEntity().isOnGround(),
                         item,
-                        levelState.getBlockStateAt(blockPosition).map(BlockStateMeta::blockType).orElseThrow()
+                        optionalBlockType.get()
                 ).ticks();
 
                 if (cost < bestCost || (item == null && cost == bestCost)) {
@@ -177,6 +187,14 @@ public class BlockBreakAction implements WorldAction {
         }
 
         if (remainingTicks == -1) {
+            var optionalBlockType = levelState.getBlockStateAt(blockPosition)
+                    .map(BlockStateMeta::blockType);
+
+            if (optionalBlockType.isEmpty()) {
+                log.warn("Block at {} is not in view range!", blockPosition);
+                return;
+            }
+
             remainingTicks = Costs.getRequiredMiningTicks(
                     sessionDataManager.getTagsState(),
                     sessionDataManager.getSelfEffectState(),
@@ -184,12 +202,14 @@ public class BlockBreakAction implements WorldAction {
                     sessionDataManager.getInventoryManager().getPlayerInventory()
                             .getHotbarSlot(sessionDataManager.getInventoryManager().getHeldItemSlot())
                             .item(),
-                    levelState.getBlockStateAt(blockPosition).map(BlockStateMeta::blockType).orElseThrow()
+                    optionalBlockType.get()
             ).ticks();
             sessionDataManager.getBotActionManager().sendStartBreakBlock(blockPosition.toVector3i());
         } else if (--remainingTicks == 0) {
             sessionDataManager.getBotActionManager().sendEndBreakBlock(blockPosition.toVector3i());
             finishedDigging = true;
+        } else {
+            sessionDataManager.getBotActionManager().sendBreakBlockAnimation();
         }
     }
 

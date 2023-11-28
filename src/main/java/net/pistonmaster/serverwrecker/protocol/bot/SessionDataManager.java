@@ -553,7 +553,7 @@ public final class SessionDataManager {
         var data = packet.getChunkData();
         var buf = Unpooled.wrappedBuffer(data);
 
-        var chunkData = level.getChunks().getOrCreateChunk(packet.getX(), packet.getZ());
+        var chunkData = level.getChunks().getOrCreateChunk(packet.getX(), packet.getZ(), level);
 
         try {
             for (var i = 0; i < chunkData.getSectionCount(); i++) {

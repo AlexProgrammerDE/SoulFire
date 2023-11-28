@@ -24,6 +24,7 @@ import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerAction;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerActionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundSwingPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundUseItemOnPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundUseItemPacket;
 import lombok.Data;
@@ -190,6 +191,10 @@ public class BotActionManager {
         } else {
             return intersectionFloat.getZ() > blockPosFloat.getZ() ? Direction.SOUTH : Direction.NORTH;
         }
+    }
+
+    public void sendBreakBlockAnimation() {
+        dataManager.getSession().send(new ServerboundSwingPacket(Hand.MAIN_HAND));
     }
 
     public record BlockPlaceData(SWVec3i againstPos, Direction blockFace) {

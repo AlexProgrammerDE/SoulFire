@@ -41,7 +41,7 @@ import java.util.Optional;
 @Getter
 public class LevelState {
     private final SessionDataManager sessionDataManager;
-    private final ChunkHolder chunks = new ChunkHolder(this);
+    private final ChunkHolder chunks = new ChunkHolder();
     private final String dimensionName;
     private final int dimensionId;
     private final UniformOrInt monsterSpawnLightLevel;

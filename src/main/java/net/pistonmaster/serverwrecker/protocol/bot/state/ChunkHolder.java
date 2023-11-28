@@ -19,8 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
@@ -34,20 +34,17 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ChunkHolder {
-    private final Int2ObjectMap<ChunkData> chunks = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<ChunkData> chunks = new Int2ObjectAVLTreeMap<>();
     private final Lock readLock;
     private final Lock writeLock;
-    private final LevelState levelState;
 
-    public ChunkHolder(LevelState levelState) {
+    public ChunkHolder() {
         ReadWriteLock lock = new ReentrantReadWriteLock();
         this.readLock = lock.readLock();
         this.writeLock = lock.writeLock();
-        this.levelState = levelState;
     }
 
     private ChunkHolder(ChunkHolder chunkHolder) {
-        this.levelState = chunkHolder.levelState;
         this.chunks.putAll(chunkHolder.chunks);
         this.readLock = new NoopLock();
         this.writeLock = new NoopLock();
@@ -92,7 +89,7 @@ public class ChunkHolder {
         }
     }
 
-    public ChunkData getOrCreateChunk(int x, int z) {
+    public ChunkData getOrCreateChunk(int x, int z, LevelState levelState) {
         writeLock.lock();
         try {
             return chunks.computeIfAbsent(ChunkKey.calculateHash(x, z), (key) ->

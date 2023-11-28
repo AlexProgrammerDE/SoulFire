@@ -101,6 +101,12 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
                 return;
             }
 
+            if (worldAction instanceof RecalculatePathAction) {
+                connection.logger().info("Recalculating path...");
+                recalculatePath();
+                return;
+            }
+
             connection.logger().debug("Next goal: {}", worldAction);
         }
 
