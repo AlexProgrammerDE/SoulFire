@@ -66,16 +66,12 @@ public class MovementAction implements WorldAction {
         var movementManager = connection.sessionDataManager().getBotMovementManager();
         var botPosition = movementManager.getPlayerPos();
 
-        var previousYaw = movementManager.getYaw();
         movementManager.lookAt(RotationOrigin.EYES, position);
         movementManager.getEntity().setPitch(0);
-        var newYaw = movementManager.getYaw();
-
-        var yawDifference = Math.abs(previousYaw - newYaw);
 
         // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
-        if (didLook && yawDifference > 5) {
-            movementManager.getEntity().setYaw(movementManager.getYaw());
+        if (didLook) {
+            movementManager.setLastYaw(movementManager.getYaw());
         } else {
             didLook = true;
         }
