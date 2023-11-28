@@ -23,6 +23,7 @@ import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.event.EventExceptionHandler;
+import net.pistonmaster.serverwrecker.api.event.EventUtil;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerGlobalEvent;
 
 import java.util.ArrayList;
@@ -75,11 +76,11 @@ public class ServerWreckerAPI {
     }
 
     public static <T extends ServerWreckerGlobalEvent> void registerListener(Class<T> clazz, Consumer<? super T> subscriber) {
-        eventBus.register(subscriber, clazz);
+        EventUtil.runAndCompareChanges(eventBus, () -> eventBus.registerConsumer(subscriber, clazz));
     }
 
     public static void registerListeners(Class<?> listenerClass) {
-        eventBus.register(listenerClass);
+        EventUtil.runAndCompareChanges(eventBus, () -> eventBus.register(listenerClass));
     }
 
     public static void unregisterListener(Object listener) {

@@ -21,23 +21,9 @@ package net.pistonmaster.serverwrecker.gui.libs;
 
 import javax.swing.*;
 
-public class JEnumComboBox<E extends Enum<?>> extends JComboBox<E> {
+public class JEnumComboBox<E extends Enum<E>> extends JComboBox<E> {
     public JEnumComboBox(Class<E> enumClass) {
         super(enumClass.getEnumConstants());
-    }
-
-    public JEnumComboBox(Class<E> enumClass, E selected) {
-        this(enumClass);
-        setSelectedItem(selected);
-    }
-
-    @SuppressWarnings("unchecked")
-    public E getSelectedEnum() {
-        return (E) super.getSelectedItem();
-    }
-
-    public void setSelectedEnum(E enumValue) {
-        setSelectedItem(enumValue);
     }
 
     @Deprecated

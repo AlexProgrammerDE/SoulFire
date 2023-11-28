@@ -892,7 +892,7 @@ public final class SessionDataManager {
             log.error("Disconnected: {}", reason);
         }
 
-        cause.printStackTrace();
+        log.error("Cause: {}", cause.getMessage());
     }
 
     private String toPlainText(Component component) {

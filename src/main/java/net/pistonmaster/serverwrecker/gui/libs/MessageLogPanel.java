@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.gui.libs;
 
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -28,6 +29,7 @@ import java.awt.*;
 /**
  * Modified version of: <a href="https://github.com/SKCraft/Launcher/blob/master/launcher/src/main/java/com/skcraft/launcher/swing/MessageLog.java">SKCraft/Launcher Log Panel</a>
  */
+@Slf4j
 public class MessageLogPanel extends JPanel {
     private final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();
     private final int numLines;
@@ -88,7 +90,7 @@ public class MessageLogPanel extends JPanel {
                             SwingTextUtils.createPane("Uploaded to: <a href='" + url + "'>" + url + "</a>"),
                             "Success", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    log.error("Failed to upload!", ex);
                     JOptionPane.showMessageDialog(this, "Failed to upload!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             });

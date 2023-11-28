@@ -20,6 +20,7 @@
 package net.pistonmaster.serverwrecker.pathfinding.execution;
 
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
+import net.pistonmaster.serverwrecker.api.event.EventUtil;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
@@ -115,11 +116,23 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     }
 
     public void register() {
-        connection.eventBus().register(this, BotPreTickEvent.class);
+        EventUtil.runAndCompareChanges(connection.eventBus(), () ->
+                connection.eventBus().registerConsumer(this, BotPreTickEvent.class));
     }
 
     public void unregister() {
-        connection.eventBus().unregister(this, BotPreTickEvent.class);
+        connection.eventBus().unregisterAll(BotPreTickEvent.class, (c, o) -> {
+            if (c == PathExecutor.class && o.isPresent()) {
+                var executor = (PathExecutor) o.get();
+
+                if (executor == this) {
+                    executor.cancel();
+                    return true;
+                }
+            }
+
+            return false;
+        });
     }
 
     public void cancel() {

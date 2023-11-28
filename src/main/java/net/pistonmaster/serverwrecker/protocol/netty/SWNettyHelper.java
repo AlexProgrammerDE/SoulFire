@@ -97,12 +97,8 @@ public class SWNettyHelper {
                     pipeline.addFirst("proxy", new HttpProxyHandler(address));
                 }
             }
-            case SOCKS4 -> {
-                pipeline.addFirst("proxy", new Socks4ProxyHandler(address, proxy.username()));
-            }
-            case SOCKS5 -> {
-                pipeline.addFirst("proxy", new Socks5ProxyHandler(address, proxy.username(), proxy.password()));
-            }
+            case SOCKS4 -> pipeline.addFirst("proxy", new Socks4ProxyHandler(address, proxy.username()));
+            case SOCKS5 -> pipeline.addFirst("proxy", new Socks5ProxyHandler(address, proxy.username(), proxy.password()));
             default -> throw new UnsupportedOperationException("Unsupported proxy type: " + proxy.type());
         }
     }

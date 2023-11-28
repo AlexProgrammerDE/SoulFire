@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.api;
 
+import net.pistonmaster.serverwrecker.api.event.EventUtil;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerAttackEvent;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerBotEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackInitEvent;
@@ -46,7 +47,8 @@ public class PluginHelper {
      */
     public static <T extends ServerWreckerBotEvent> void registerBotEventConsumer(Class<T> clazz, Consumer<T> consumer) {
         registerAttackEventConsumer(BotConnectionInitEvent.class, event ->
-                event.connection().eventBus().register(consumer, clazz));
+                EventUtil.runAndCompareChanges(event.connection().eventBus(), () ->
+                        event.connection().eventBus().registerConsumer(consumer, clazz)));
     }
 
     /**
@@ -58,6 +60,7 @@ public class PluginHelper {
      */
     public static <T extends ServerWreckerAttackEvent> void registerAttackEventConsumer(Class<T> clazz, Consumer<T> consumer) {
         ServerWreckerAPI.registerListener(AttackInitEvent.class, event ->
-                event.attackManager().getEventBus().register(consumer, clazz));
+                EventUtil.runAndCompareChanges(event.attackManager().getEventBus(), () ->
+                        event.attackManager().getEventBus().registerConsumer(consumer, clazz)));
     }
 }

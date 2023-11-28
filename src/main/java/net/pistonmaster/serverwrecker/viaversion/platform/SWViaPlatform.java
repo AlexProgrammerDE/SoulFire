@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RequiredArgsConstructor
@@ -140,7 +141,7 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
         return new FutureTaskId(CompletableFuture.runAsync(runnable, asyncService)
                 .exceptionally(throwable -> {
                     if (!(throwable instanceof CancellationException)) {
-                        throwable.printStackTrace();
+                        logger.log(Level.SEVERE, "An error occurred whilst executing async task", throwable);
                     }
                     return null;
                 }));
@@ -228,7 +229,7 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
     protected <T extends Future<?>> GenericFutureListener<T> errorLogger() {
         return future -> {
             if (!future.isCancelled() && future.cause() != null) {
-                future.cause().printStackTrace();
+                logger.log(Level.SEVERE, "An error occurred whilst executing a task", future.cause());
             }
         };
     }

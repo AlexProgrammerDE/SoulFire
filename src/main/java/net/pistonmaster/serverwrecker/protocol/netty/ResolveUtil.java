@@ -45,25 +45,25 @@ public class ResolveUtil {
         var port = settingsHolder.get(BotSettings.PORT);
 
         if (!isBedrock && settingsHolder.get(BotSettings.TRY_SRV)) {
-            var resolved = resolveSrv(host, port, eventLoopGroup);
+            var resolved = resolveSrv(host, eventLoopGroup);
             if (resolved.isPresent()) {
                 return resolved.get();
             }
         } else {
-            LOGGER.debug("[PacketLib] Not resolving SRV record for {}", host);
+            LOGGER.debug("Not resolving SRV record for {}", host);
         }
 
         return resolveByHost(host, port);
     }
 
-    private static Optional<InetSocketAddress> resolveSrv(String host, int port, EventLoopGroup eventLoopGroup) {
+    private static Optional<InetSocketAddress> resolveSrv(String host, EventLoopGroup eventLoopGroup) {
         if (IP_REGEX.matcher(host).matches() || host.equalsIgnoreCase("localhost")) {
-            LOGGER.debug("[PacketLib] Not a valid domain: {}", host);
+            LOGGER.debug("Not a valid domain: {}", host);
             return Optional.empty();
         }
 
         var name = "_minecraft._tcp." + host;
-        LOGGER.debug("[PacketLib] Attempting SRV lookup for \"{}\".", name);
+        LOGGER.debug("Attempting SRV lookup for \"{}\".", name);
 
         try (var resolver = new DnsNameResolverBuilder(eventLoopGroup.next())
                 .channelType(SWNettyHelper.DATAGRAM_CHANNEL_CLASS)
@@ -72,30 +72,30 @@ public class ResolveUtil {
 
             var response = envelope.content();
             if (response.count(DnsSection.ANSWER) == 0) {
-                LOGGER.debug("[PacketLib] No SRV record found.");
+                LOGGER.debug("No SRV record found.");
                 return Optional.empty();
             }
 
             DefaultDnsRawRecord record = response.recordAt(DnsSection.ANSWER, 0);
             if (record.type() != DnsRecordType.SRV) {
-                LOGGER.debug("[PacketLib] Received non-SRV record in response.");
+                LOGGER.debug("Received non-SRV record in response.");
                 return Optional.empty();
             }
 
             var buf = record.content();
             buf.skipBytes(4); // Skip priority and weight.
 
-            port = buf.readUnsignedShort();
+            var port = buf.readUnsignedShort();
             host = DefaultDnsRecordDecoder.decodeName(buf);
             if (host.endsWith(".")) {
                 host = host.substring(0, host.length() - 1);
             }
 
-            LOGGER.debug("[PacketLib] Found SRV record containing \"{}:{}}\".", host, port);
+            LOGGER.debug("Found SRV record containing \"{}:{}}\".", host, port);
 
             return Optional.of(new InetSocketAddress(host, port));
         } catch (Exception e) {
-            LOGGER.debug("[PacketLib] Failed to resolve SRV record.", e);
+            LOGGER.debug("Failed to resolve SRV record.", e);
             return Optional.empty();
         }
     }
@@ -103,10 +103,10 @@ public class ResolveUtil {
     private static InetSocketAddress resolveByHost(String host, int port) {
         try {
             var resolved = InetAddress.getByName(host);
-            LOGGER.debug("[PacketLib] Resolved {} -> {}", host, resolved.getHostAddress());
+            LOGGER.debug("Resolved {} -> {}", host, resolved.getHostAddress());
             return new InetSocketAddress(resolved, port);
         } catch (UnknownHostException e) {
-            LOGGER.debug("[PacketLib] Failed to resolve host, letting Netty do it instead.", e);
+            LOGGER.debug("Failed to resolve host, letting Netty do it instead.", e);
             return InetSocketAddress.createUnresolved(host, port);
         }
     }

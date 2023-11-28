@@ -85,8 +85,8 @@ public class SettingsRegistry {
         for (var entry : namespaceMap.entrySet()) {
             var entries = new ArrayList<ClientPluginSettingEntry>();
             for (var property : entry.getValue().properties) {
-                if (property instanceof BooleanProperty booleanProperty) {
-                    entries.add(ClientPluginSettingEntry.newBuilder()
+                switch (property) {
+                    case BooleanProperty booleanProperty -> entries.add(ClientPluginSettingEntry.newBuilder()
                             .setSingle(ClientPluginSettingEntrySingle.newBuilder()
                                     .setKey(property.key())
                                     .setUiDescription(booleanProperty.uiDescription())
@@ -99,8 +99,7 @@ public class SettingsRegistry {
                                             .build())
                                     .build())
                             .build());
-                } else if (property instanceof IntProperty intProperty) {
-                    entries.add(ClientPluginSettingEntry.newBuilder()
+                    case IntProperty intProperty -> entries.add(ClientPluginSettingEntry.newBuilder()
                             .setSingle(ClientPluginSettingEntrySingle.newBuilder()
                                     .setKey(property.key())
                                     .setUiDescription(intProperty.uiDescription())
@@ -111,29 +110,29 @@ public class SettingsRegistry {
                                             .build())
                                     .build())
                             .build());
-                } else if (property instanceof MinMaxPropertyLink minMaxPropertyLink) {
-                    var minProperty = minMaxPropertyLink.min();
-                    var maxProperty = minMaxPropertyLink.max();
-                    entries.add(ClientPluginSettingEntry.newBuilder()
-                            .setMinMaxPair(ClientPluginSettingEntryMinMaxPair.newBuilder()
-                                    .setMin(ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
-                                            .setKey(minProperty.key())
-                                            .setUiDescription(minProperty.uiDescription())
-                                            .setCliDescription(minProperty.cliDescription())
-                                            .addAllCliNames(List.of(minProperty.cliNames()))
-                                            .setIntSetting(createIntSetting(minProperty))
-                                            .build())
-                                    .setMax(ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
-                                            .setKey(maxProperty.key())
-                                            .setUiDescription(maxProperty.uiDescription())
-                                            .setCliDescription(maxProperty.cliDescription())
-                                            .addAllCliNames(List.of(maxProperty.cliNames()))
-                                            .setIntSetting(createIntSetting(maxProperty))
-                                            .build())
-                                    .build())
-                            .build());
-                } else if (property instanceof StringProperty stringProperty) {
-                    entries.add(ClientPluginSettingEntry.newBuilder()
+                    case MinMaxPropertyLink minMaxPropertyLink -> {
+                        var minProperty = minMaxPropertyLink.min();
+                        var maxProperty = minMaxPropertyLink.max();
+                        entries.add(ClientPluginSettingEntry.newBuilder()
+                                .setMinMaxPair(ClientPluginSettingEntryMinMaxPair.newBuilder()
+                                        .setMin(ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
+                                                .setKey(minProperty.key())
+                                                .setUiDescription(minProperty.uiDescription())
+                                                .setCliDescription(minProperty.cliDescription())
+                                                .addAllCliNames(List.of(minProperty.cliNames()))
+                                                .setIntSetting(createIntSetting(minProperty))
+                                                .build())
+                                        .setMax(ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
+                                                .setKey(maxProperty.key())
+                                                .setUiDescription(maxProperty.uiDescription())
+                                                .setCliDescription(maxProperty.cliDescription())
+                                                .addAllCliNames(List.of(maxProperty.cliNames()))
+                                                .setIntSetting(createIntSetting(maxProperty))
+                                                .build())
+                                        .build())
+                                .build());
+                    }
+                    case StringProperty stringProperty -> entries.add(ClientPluginSettingEntry.newBuilder()
                             .setSingle(ClientPluginSettingEntrySingle.newBuilder()
                                     .setKey(property.key())
                                     .setUiDescription(stringProperty.uiDescription())
@@ -146,31 +145,30 @@ public class SettingsRegistry {
                                             .build())
                                     .build())
                             .build());
-                } else if (property instanceof ComboProperty comboProperty) {
-                    var options = new ArrayList<ComboOption>();
-                    for (var option : comboProperty.options()) {
-                        options.add(ComboOption.newBuilder()
-                                .setId(option.id())
-                                .setDisplayName(option.displayName())
+                    case ComboProperty comboProperty -> {
+                        var options = new ArrayList<ComboOption>();
+                        for (var option : comboProperty.options()) {
+                            options.add(ComboOption.newBuilder()
+                                    .setId(option.id())
+                                    .setDisplayName(option.displayName())
+                                    .build());
+                        }
+                        entries.add(ClientPluginSettingEntry.newBuilder()
+                                .setSingle(ClientPluginSettingEntrySingle.newBuilder()
+                                        .setKey(property.key())
+                                        .setUiDescription(comboProperty.uiDescription())
+                                        .setCliDescription(comboProperty.cliDescription())
+                                        .addAllCliNames(List.of(comboProperty.cliNames()))
+                                        .setType(ClientPluginSettingType.newBuilder()
+                                                .setCombo(ComboSetting.newBuilder()
+                                                        .setDef(comboProperty.defaultValue())
+                                                        .addAllOptions(options)
+                                                        .build())
+                                                .build())
+                                        .build())
                                 .build());
                     }
-
-                    entries.add(ClientPluginSettingEntry.newBuilder()
-                            .setSingle(ClientPluginSettingEntrySingle.newBuilder()
-                                    .setKey(property.key())
-                                    .setUiDescription(comboProperty.uiDescription())
-                                    .setCliDescription(comboProperty.cliDescription())
-                                    .addAllCliNames(List.of(comboProperty.cliNames()))
-                                    .setType(ClientPluginSettingType.newBuilder()
-                                            .setCombo(ComboSetting.newBuilder()
-                                                    .setDef(comboProperty.defaultValue())
-                                                    .addAllOptions(options)
-                                                    .build())
-                                            .build())
-                                    .build())
-                            .build());
-                } else {
-                    throw new IllegalStateException("Unknown property type!");
+                    case null, default -> throw new IllegalStateException("Unknown property type!");
                 }
             }
 

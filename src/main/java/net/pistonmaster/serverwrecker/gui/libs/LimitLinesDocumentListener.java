@@ -19,6 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.gui.libs;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -31,6 +33,7 @@ import javax.swing.text.Element;
  *
  * @author Rob Camick
  */
+@Slf4j
 public class LimitLinesDocumentListener implements DocumentListener {
     private final boolean isRemoveFromStart;
     private int maximumLines;
@@ -71,12 +74,7 @@ public class LimitLinesDocumentListener implements DocumentListener {
 
         if (!this.isRemoving) {
             this.isRemoving = true;
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    removeLines(e);
-                }
-            });
+            SwingUtilities.invokeLater(() -> removeLines(e));
         }
     }
 
@@ -116,7 +114,7 @@ public class LimitLinesDocumentListener implements DocumentListener {
         try {
             document.remove(0, end);
         } catch (BadLocationException ble) {
-            ble.printStackTrace();
+            log.error("{}", ble.getMessage(), ble);
         }
     }
 
@@ -131,7 +129,7 @@ public class LimitLinesDocumentListener implements DocumentListener {
         try {
             document.remove(start - 1, end - start);
         } catch (BadLocationException ble) {
-            ble.printStackTrace();
+            log.error("{}", ble.getMessage(), ble);
         }
     }
 }
