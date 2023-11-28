@@ -20,11 +20,12 @@
 package net.pistonmaster.serverwrecker.pathfinding.graph.actions;
 
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
+import net.pistonmaster.serverwrecker.pathfinding.graph.GraphInstructions;
 
 /**
  * A calculated action that the bot can take on a graph world representation.
  */
-public interface GraphAction {
+public sealed interface GraphAction permits PlayerMovement, ParkourMovement, UpMovement, DownMovement {
     boolean isImpossible();
 
     // A step further than isImpossible, for block placing this also considers no block

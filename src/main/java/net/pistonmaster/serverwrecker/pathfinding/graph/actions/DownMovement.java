@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.graph.actions.updown;
+package net.pistonmaster.serverwrecker.pathfinding.graph.actions;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
@@ -26,14 +26,13 @@ import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.pathfinding.execution.BlockBreakAction;
-import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphAction;
-import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
+import net.pistonmaster.serverwrecker.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.MovementMiningCost;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 
 import java.util.List;
 
-public class DownMovement implements GraphAction, Cloneable {
+public final class DownMovement implements GraphAction, Cloneable {
     private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
     private final SWVec3i targetToMineBlock;
     @Getter

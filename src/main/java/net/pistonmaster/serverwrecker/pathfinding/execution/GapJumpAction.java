@@ -28,7 +28,7 @@ import org.cloudburstmc.math.vector.Vector3d;
 
 @ToString
 @RequiredArgsConstructor
-public class GapJumpAction implements WorldAction {
+public final class GapJumpAction implements WorldAction {
     private final Vector3d position;
     private boolean didLook = false;
     private int noJumpTicks = 0;

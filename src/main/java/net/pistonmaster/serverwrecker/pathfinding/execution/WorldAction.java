@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.pathfinding.execution;
 
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
-public interface WorldAction {
+public sealed interface WorldAction permits BlockBreakAction, BlockPlaceAction, GapJumpAction, JumpAndPlaceBelowAction, MovementAction, RecalculatePathAction {
     boolean isCompleted(BotConnection connection);
 
     void tick(BotConnection connection);

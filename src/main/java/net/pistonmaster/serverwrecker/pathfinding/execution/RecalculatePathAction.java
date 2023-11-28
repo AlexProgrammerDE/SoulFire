@@ -23,7 +23,7 @@ import lombok.ToString;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 
 @ToString
-public class RecalculatePathAction implements WorldAction {
+public final class RecalculatePathAction implements WorldAction {
     @Override
     public boolean isCompleted(BotConnection connection) {
         throw new UnsupportedOperationException("Should be handled separately!");

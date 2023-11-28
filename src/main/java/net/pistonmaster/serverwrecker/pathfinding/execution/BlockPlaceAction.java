@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 @ToString
 @RequiredArgsConstructor
-public class BlockPlaceAction implements WorldAction {
+public final class BlockPlaceAction implements WorldAction {
     private final SWVec3i blockPosition;
     private final BotActionManager.BlockPlaceData blockPlaceData;
     private boolean putOnHotbar = false;

@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @ToString
 @RequiredArgsConstructor
-public class BlockBreakAction implements WorldAction {
+public final class BlockBreakAction implements WorldAction {
     private final SWVec3i blockPosition;
     boolean finishedDigging = false;
     private boolean didLook = false;

@@ -28,7 +28,7 @@ import org.cloudburstmc.math.vector.Vector3d;
 
 @ToString
 @RequiredArgsConstructor
-public class MovementAction implements WorldAction {
+public final class MovementAction implements WorldAction {
     private final Vector3d position;
     // Corner jumps normally require you to stand closer to the block to jump
     private final boolean walkFewTicksNoJump;

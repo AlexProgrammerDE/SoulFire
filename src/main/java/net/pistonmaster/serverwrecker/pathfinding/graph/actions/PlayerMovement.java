@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
+package net.pistonmaster.serverwrecker.pathfinding.graph.actions;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -31,8 +31,8 @@ import net.pistonmaster.serverwrecker.pathfinding.execution.BlockBreakAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.BlockPlaceAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.MovementAction;
 import net.pistonmaster.serverwrecker.pathfinding.execution.WorldAction;
-import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphAction;
-import net.pistonmaster.serverwrecker.pathfinding.graph.actions.GraphInstructions;
+import net.pistonmaster.serverwrecker.pathfinding.graph.GraphInstructions;
+import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.*;
 import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 
