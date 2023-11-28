@@ -26,7 +26,6 @@ import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.*;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.*;
-import net.pistonmaster.serverwrecker.pathfinding.graph.actions.parkour.ParkourDirection;
 import net.pistonmaster.serverwrecker.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
@@ -245,7 +244,7 @@ public record MinecraftGraph(TagsState tagsState) {
             var calculatedFree = false;
             var isFree = false;
             for (var subscriber : value) {
-                var action = actions[subscriber.movementIndex];
+                var action = actions[subscriber.actionIndex];
                 if (action == null) {
                     continue;
                 }
@@ -253,7 +252,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 if (action.isImpossible()) {
                     // Calling isImpossible can waste seconds of execution time
                     // Calling an interface method is expensive!
-                    actions[subscriber.movementIndex] = null;
+                    actions[subscriber.actionIndex] = null;
                     continue;
                 }
 
@@ -547,7 +546,7 @@ public record MinecraftGraph(TagsState tagsState) {
         PARKOUR_UNSAFE_TO_STAND_ON
     }
 
-    record BlockSubscription(int movementIndex, SubscriptionType type, int blockArrayIndex,
+    record BlockSubscription(int actionIndex, SubscriptionType type, int blockArrayIndex,
                              BotActionManager.BlockPlaceData blockToPlaceAgainst,
                              BlockSafetyData.BlockSafetyType safetyType) {
         BlockSubscription(int movementIndex, SubscriptionType type) {

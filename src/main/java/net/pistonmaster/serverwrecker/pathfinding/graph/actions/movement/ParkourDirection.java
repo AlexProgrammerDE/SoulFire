@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.graph.actions.parkour;
+package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 
 import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 

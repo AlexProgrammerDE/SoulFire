@@ -27,7 +27,7 @@ import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.pathfinding.execution.GapJumpAction;
 import net.pistonmaster.serverwrecker.pathfinding.graph.GraphInstructions;
-import net.pistonmaster.serverwrecker.pathfinding.graph.actions.parkour.ParkourDirection;
+import net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement.ParkourDirection;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 
 import java.util.List;
