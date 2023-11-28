@@ -70,8 +70,8 @@ public class RPCClient {
     }
 
     public void shutdown() throws InterruptedException {
-        if (!channel.shutdown().awaitTermination(30, TimeUnit.SECONDS)
-                && !channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS)) {
+        if (!channel.shutdown().awaitTermination(3, TimeUnit.SECONDS)
+                && !channel.shutdownNow().awaitTermination(3, TimeUnit.SECONDS)) {
             throw new RuntimeException("Unable to shutdown gRPC client");
         }
     }
