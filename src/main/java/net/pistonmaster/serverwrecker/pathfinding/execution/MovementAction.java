@@ -64,7 +64,7 @@ public class MovementAction implements WorldAction {
     @Override
     public void tick(BotConnection connection) {
         var movementManager = connection.sessionDataManager().getBotMovementManager();
-        var botPosition = movementManager.getPlayerPos();
+        movementManager.getControlState().resetAll();
 
         var previousYaw = movementManager.getYaw();
         movementManager.lookAt(RotationOrigin.EYES, position);
@@ -80,10 +80,9 @@ public class MovementAction implements WorldAction {
             didLook = true;
         }
 
-        // Don't let the bot look up or down (makes it look weird)
-        movementManager.getControlState().resetAll();
         movementManager.getControlState().setForward(true);
 
+        var botPosition = movementManager.getPlayerPos();
         if (position.getY() > botPosition.getY() && shouldJump()) {
             movementManager.getControlState().setJumping(true);
         }

@@ -61,7 +61,7 @@ public class GapJumpAction implements WorldAction {
     @Override
     public void tick(BotConnection connection) {
         var movementManager = connection.sessionDataManager().getBotMovementManager();
-        var botPosition = movementManager.getPlayerPos();
+        movementManager.getControlState().resetAll();
 
         var previousYaw = movementManager.getYaw();
         movementManager.lookAt(RotationOrigin.EYES, position);
@@ -77,8 +77,6 @@ public class GapJumpAction implements WorldAction {
             didLook = true;
         }
 
-        // Don't let the bot look up or down (makes it look weird)
-        movementManager.getControlState().resetAll();
         movementManager.getControlState().setForward(true);
 
         if (shouldJump()) {

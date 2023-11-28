@@ -61,6 +61,8 @@ public class BlockBreakAction implements WorldAction {
     public void tick(BotConnection connection) {
         var sessionDataManager = connection.sessionDataManager();
         var movementManager = sessionDataManager.getBotMovementManager();
+        movementManager.getControlState().resetAll();
+
         var levelState = sessionDataManager.getCurrentLevel();
         var inventoryManager = sessionDataManager.getInventoryManager();
         var playerInventory = inventoryManager.getPlayerInventory();
@@ -68,8 +70,6 @@ public class BlockBreakAction implements WorldAction {
         if (levelState == null) {
             return;
         }
-
-        movementManager.getControlState().resetAll();
 
         if (!didLook) {
             didLook = true;
