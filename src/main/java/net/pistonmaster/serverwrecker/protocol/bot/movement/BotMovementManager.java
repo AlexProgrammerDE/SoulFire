@@ -30,6 +30,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.Getter;
+import lombok.Setter;
 import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
@@ -48,19 +49,19 @@ import java.util.function.BiConsumer;
 /**
  * Java port of prismarine-physics
  */
+@Getter
+@Setter
 public class BotMovementManager {
-    @Getter
-    private final ControlState controlState = new ControlState();
-    private final PhysicsData physics = new PhysicsData();
-    @Getter
-    private final PlayerMovementState entity;
-    private final SessionDataManager dataManager;
-    private final List<BlockType> WATER_TYPES = List.of(BlockType.WATER);
-    private final List<BlockType> LAVA_TYPES = List.of(BlockType.WATER);
-    private final List<BlockType> WATER_LIKE_TYPES = List.of(
+    private static final List<BlockType> WATER_TYPES = List.of(BlockType.WATER);
+    private static final List<BlockType> LAVA_TYPES = List.of(BlockType.WATER);
+    private static final List<BlockType> WATER_LIKE_TYPES = List.of(
             BlockType.WATER, BlockType.SEAGRASS, BlockType.TALL_SEAGRASS,
             BlockType.KELP, BlockType.KELP_PLANT, BlockType.BUBBLE_COLUMN
     );
+    private final ControlState controlState = new ControlState();
+    private final PhysicsData physics = new PhysicsData();
+    private final PlayerMovementState entity;
+    private final SessionDataManager dataManager;
     private double lastX = 0;
     private double lastY = 0;
     private double lastZ = 0;
