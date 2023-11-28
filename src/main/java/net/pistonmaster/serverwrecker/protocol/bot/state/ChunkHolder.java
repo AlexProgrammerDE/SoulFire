@@ -19,8 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.state;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
@@ -34,7 +34,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ChunkHolder {
-    private final Int2ObjectMap<ChunkData> chunks = new Int2ObjectAVLTreeMap<>();
+    private final Int2ObjectMap<ChunkData> chunks = new Int2ObjectOpenHashMap<>();
     private final Lock readLock;
     private final Lock writeLock;
 
