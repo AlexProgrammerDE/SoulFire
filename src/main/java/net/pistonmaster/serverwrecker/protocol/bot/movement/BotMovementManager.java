@@ -30,7 +30,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.Getter;
-import lombok.Setter;
 import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
@@ -62,20 +61,10 @@ public class BotMovementManager {
             BlockType.WATER, BlockType.SEAGRASS, BlockType.TALL_SEAGRASS,
             BlockType.KELP, BlockType.KELP_PLANT, BlockType.BUBBLE_COLUMN
     );
-    @Getter
-    @Setter
     private double lastX = 0;
-    @Getter
-    @Setter
     private double lastY = 0;
-    @Getter
-    @Setter
     private double lastZ = 0;
-    @Getter
-    @Setter
     private float lastYaw = 0;
-    @Getter
-    @Setter
     private float lastPitch = 0;
     private boolean lastOnGround = false;
     private int positionReminder = 0;
