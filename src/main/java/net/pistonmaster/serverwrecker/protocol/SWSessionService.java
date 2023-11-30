@@ -48,11 +48,6 @@ public class SWSessionService {
     private final SWProxy proxyData;
     private final Gson gson = new Gson();
 
-    /**
-     * Creates a new SessionService instance.
-     *
-     * @param authType Authentication type to use.
-     */
     public SWSessionService(AuthType authType, SWProxy proxyData) {
         this.JOIN_ENDPOINT = switch (authType) {
             case MICROSOFT_JAVA -> MOJANG_JOIN_URI;
