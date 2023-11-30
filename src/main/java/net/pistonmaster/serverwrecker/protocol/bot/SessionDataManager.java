@@ -62,6 +62,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.ToString;
 import net.kyori.adventure.text.Component;
+import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.BotPostTickEvent;
@@ -80,7 +81,6 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.entity.ExperienceOrbSta
 import net.pistonmaster.serverwrecker.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
-import net.pistonmaster.serverwrecker.util.BusHandler;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -141,12 +141,12 @@ public final class SessionDataManager {
         this.connection = connection;
     }
 
-    @BusHandler
+    @EventHandler
     public void onLoginSuccess(ClientboundGameProfilePacket packet) {
         botProfile = packet.getProfile();
     }
 
-    @BusHandler
+    @EventHandler
     public void onRegistry(ClientboundRegistryDataPacket packet) {
         var registry = packet.getRegistry();
         CompoundTag dimensionRegistry = registry.get("minecraft:dimension_type");
@@ -167,7 +167,7 @@ public final class SessionDataManager {
         biomesEntryBitsSize = ChunkData.log2RoundUp(biomes.size());
     }
 
-    @BusHandler
+    @EventHandler
     public void onJoin(ClientboundLoginPacket packet) {
         loginData = new LoginPacketData(
                 packet.getEntityId(),
@@ -198,7 +198,7 @@ public final class SessionDataManager {
         lastDeathPos = spawnInfo.getLastDeathPos();
     }
 
-    @BusHandler
+    @EventHandler
     public void onPosition(ClientboundPlayerPositionPacket packet) {
         var isInitial = botMovementManager == null;
         var posData = isInitial ? null : botMovementManager.getEntity().getPos();
@@ -239,7 +239,7 @@ public final class SessionDataManager {
         log.debug("Position updated: {}", botMovementManager);
     }
 
-    @BusHandler
+    @EventHandler
     public void onLookAt(ClientboundPlayerLookAtPacket packet) {
         botMovementManager.lookAt(packet.getOrigin(),
                 Vector3d.from(packet.getX(), packet.getY(), packet.getZ()));
@@ -248,14 +248,14 @@ public final class SessionDataManager {
         // TODO: Implement entity look at
     }
 
-    @BusHandler
+    @EventHandler
     public void onRespawn(ClientboundRespawnPacket packet) {
         processSpawnInfo(packet.getCommonPlayerSpawnInfo());
 
         log.info("Respawned");
     }
 
-    @BusHandler
+    @EventHandler
     public void onDeath(ClientboundPlayerCombatKillPacket packet) {
         if (packet.getPlayerId() != loginData.entityId()) {
             log.warn("Received death packet for another player");
@@ -265,7 +265,7 @@ public final class SessionDataManager {
         this.isDead = true;
     }
 
-    @BusHandler
+    @EventHandler
     public void onServerPlayData(ClientboundServerDataPacket packet) {
         serverPlayData = new ServerPlayData(
                 packet.getMotd(),
@@ -278,7 +278,7 @@ public final class SessionDataManager {
     // Chat packets
     //
 
-    @BusHandler
+    @EventHandler
     public void onPlayerChat(ClientboundPlayerChatPacket packet) {
         var message = packet.getUnsignedContent();
         if (message != null) {
@@ -289,12 +289,12 @@ public final class SessionDataManager {
         onChat(Component.text(packet.getContent()));
     }
 
-    @BusHandler
+    @EventHandler
     public void onServerChat(ClientboundSystemChatPacket packet) {
         onChat(packet.getContent());
     }
 
-    @BusHandler
+    @EventHandler
     public void onDisguisedChat(ClientboundDisguisedChatPacket packet) {
     }
 
@@ -306,13 +306,13 @@ public final class SessionDataManager {
     // Player list packets
     //
 
-    @BusHandler
+    @EventHandler
     public void onPlayerListHeaderFooter(ClientboundTabListPacket packet) {
         playerListState.setHeader(packet.getHeader());
         playerListState.setFooter(packet.getFooter());
     }
 
-    @BusHandler
+    @EventHandler
     public void onPlayerListUpdate(ClientboundPlayerInfoUpdatePacket packet) {
         for (var update : packet.getEntries()) {
             var entry = playerListState.getEntries().computeIfAbsent(update.getProfileId(), k -> update);
@@ -334,7 +334,7 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
+    @EventHandler
     public void onPlayerListRemove(ClientboundPlayerInfoRemovePacket packet) {
         for (var profileId : packet.getProfileIds()) {
             playerListState.getEntries().remove(profileId);
@@ -345,22 +345,22 @@ public final class SessionDataManager {
     // Player data packets
     //
 
-    @BusHandler
+    @EventHandler
     public void onSetSimulationDistance(ClientboundSetSimulationDistancePacket packet) {
         serverSimulationDistance = packet.getSimulationDistance();
     }
 
-    @BusHandler
+    @EventHandler
     public void onSetViewDistance(ClientboundSetChunkCacheRadiusPacket packet) {
         serverViewDistance = packet.getViewDistance();
     }
 
-    @BusHandler
+    @EventHandler
     public void onSetDifficulty(ClientboundChangeDifficultyPacket packet) {
         difficultyData = new DifficultyData(packet.getDifficulty(), packet.isDifficultyLocked());
     }
 
-    @BusHandler
+    @EventHandler
     public void onAbilities(ClientboundPlayerAbilitiesPacket packet) {
         abilitiesData = new AbilitiesData(
                 packet.isInvincible(),
@@ -378,17 +378,17 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
+    @EventHandler
     public void onUpdateTags(ClientboundUpdateTagsPacket packet) {
         tagsState.handleTagData(packet.getTags());
     }
 
-    @BusHandler
+    @EventHandler
     public void onCompassTarget(ClientboundSetDefaultSpawnPositionPacket packet) {
         defaultSpawnData = new DefaultSpawnData(packet.getPosition(), packet.getAngle());
     }
 
-    @BusHandler
+    @EventHandler
     public void onHealth(ClientboundSetHealthPacket packet) {
         this.healthData = new HealthData(packet.getHealth(), packet.getFood(), packet.getSaturation());
 
@@ -399,12 +399,12 @@ public final class SessionDataManager {
         log.debug("Health updated: {}", healthData);
     }
 
-    @BusHandler
+    @EventHandler
     public void onExperience(ClientboundSetExperiencePacket packet) {
         experienceData = new ExperienceData(packet.getExperience(), packet.getLevel(), packet.getTotalExperience());
     }
 
-    @BusHandler
+    @EventHandler
     public void onLevelTime(ClientboundSetTimePacket packet) {
         var level = getCurrentLevel();
 
@@ -421,7 +421,7 @@ public final class SessionDataManager {
     // Inventory packets
     //
 
-    @BusHandler
+    @EventHandler
     public void onSetContainerContent(ClientboundContainerSetContentPacket packet) {
         inventoryManager.setLastStateId(packet.getStateId());
         var container = inventoryManager.getContainer(packet.getContainerId());
@@ -436,7 +436,7 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
+    @EventHandler
     public void onSetContainerSlot(ClientboundContainerSetSlotPacket packet) {
         inventoryManager.setLastStateId(packet.getStateId());
         if (packet.getContainerId() == -1 && packet.getSlot() == -1) {
@@ -454,7 +454,7 @@ public final class SessionDataManager {
         container.setSlot(packet.getSlot(), SWItemStack.from(packet.getItem()));
     }
 
-    @BusHandler
+    @EventHandler
     public void onSetContainerData(ClientboundContainerSetDataPacket packet) {
         var container = inventoryManager.getContainer(packet.getContainerId());
 
@@ -466,37 +466,37 @@ public final class SessionDataManager {
         container.setProperty(packet.getRawProperty(), packet.getValue());
     }
 
-    @BusHandler
+    @EventHandler
     public void onSetSlot(ClientboundSetCarriedItemPacket packet) {
         inventoryManager.setHeldItemSlot(packet.getSlot());
     }
 
-    @BusHandler
+    @EventHandler
     public void onOpenScreen(ClientboundOpenScreenPacket packet) {
         var container = new WindowContainer(packet.getType(), packet.getTitle(), packet.getContainerId());
         inventoryManager.setContainer(packet.getContainerId(), container);
         inventoryManager.setOpenContainer(container);
     }
 
-    @BusHandler
+    @EventHandler
     public void onOpenBookScreen(ClientboundOpenBookPacket packet) {
     }
 
-    @BusHandler
+    @EventHandler
     public void onOpenHorseScreen(ClientboundHorseScreenOpenPacket packet) {
     }
 
-    @BusHandler
+    @EventHandler
     public void onCloseContainer(ClientboundContainerClosePacket packet) {
         inventoryManager.setOpenContainer(null);
     }
 
-    @BusHandler
+    @EventHandler
     public void onMapData(ClientboundMapItemDataPacket packet) {
         mapDataStates.computeIfAbsent(packet.getMapId(), k -> new MapDataState()).update(packet);
     }
 
-    @BusHandler
+    @EventHandler
     public void onExperience(ClientboundCooldownPacket packet) {
         if (packet.getCooldownTicks() == 0) {
             itemCoolDowns.remove(packet.getItemId());
@@ -505,7 +505,7 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
+    @EventHandler
     public void onGameEvent(ClientboundGameEventPacket packet) {
         switch (packet.getNotification()) {
             case INVALID_BED -> log.info("Bot had no bed/respawn anchor to respawn at (was maybe obstructed)");
@@ -531,7 +531,7 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
+    @EventHandler
     public void onSetCenterChunk(ClientboundSetChunkCacheCenterPacket packet) {
         centerChunk = new ChunkKey(packet.getChunkX(), packet.getChunkZ());
     }
@@ -540,7 +540,7 @@ public final class SessionDataManager {
     // Chunk packets
     //
 
-    @BusHandler
+    @EventHandler
     public void onChunkData(ClientboundLevelChunkWithLightPacket packet) {
         var helper = session.getCodecHelper();
         var level = getCurrentLevel();
@@ -564,7 +564,7 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
+    @EventHandler
     public void onChunkData(ClientboundChunksBiomesPacket packet) {
         var level = getCurrentLevel();
 
@@ -596,7 +596,7 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
+    @EventHandler
     public void onChunkForget(ClientboundForgetLevelChunkPacket packet) {
         var level = getCurrentLevel();
 
@@ -612,7 +612,7 @@ public final class SessionDataManager {
     // Block packets
     //
 
-    @BusHandler
+    @EventHandler
     public void onSectionBlockUpdate(ClientboundSectionBlocksUpdatePacket packet) {
         var level = getCurrentLevel();
 
@@ -637,7 +637,7 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
+    @EventHandler
     public void onBlockUpdate(ClientboundBlockUpdatePacket packet) {
         var level = getCurrentLevel();
 
@@ -656,7 +656,7 @@ public final class SessionDataManager {
         log.debug("Updated block at {} to {}", vector3i, newId);
     }
 
-    @BusHandler
+    @EventHandler
     public void onBlockChangedAck(ClientboundBlockChangedAckPacket packet) {
         // TODO: Implement block break
     }
@@ -665,37 +665,37 @@ public final class SessionDataManager {
     // World border packets
     //
 
-    @BusHandler
+    @EventHandler
     public void onBorderInit(ClientboundInitializeBorderPacket packet) {
         borderState = new BorderState(packet.getNewCenterX(), packet.getNewCenterZ(), packet.getOldSize(), packet.getNewSize(),
                 packet.getLerpTime(), packet.getNewAbsoluteMaxSize(), packet.getWarningBlocks(), packet.getWarningTime());
     }
 
-    @BusHandler
+    @EventHandler
     public void onBorderCenter(ClientboundSetBorderCenterPacket packet) {
         borderState.setCenterX(packet.getNewCenterX());
         borderState.setCenterZ(packet.getNewCenterZ());
     }
 
-    @BusHandler
+    @EventHandler
     public void onBorderLerpSize(ClientboundSetBorderLerpSizePacket packet) {
         borderState.setOldSize(packet.getOldSize());
         borderState.setNewSize(packet.getNewSize());
         borderState.setLerpTime(packet.getLerpTime());
     }
 
-    @BusHandler
+    @EventHandler
     public void onBorderSize(ClientboundSetBorderSizePacket packet) {
         borderState.setOldSize(borderState.getNewSize());
         borderState.setNewSize(packet.getSize());
     }
 
-    @BusHandler
+    @EventHandler
     public void onBorderWarningTime(ClientboundSetBorderWarningDelayPacket packet) {
         borderState.setWarningTime(packet.getWarningDelay());
     }
 
-    @BusHandler
+    @EventHandler
     public void onBorderWarningBlocks(ClientboundSetBorderWarningDistancePacket packet) {
         borderState.setWarningBlocks(packet.getWarningBlocks());
     }
@@ -704,7 +704,7 @@ public final class SessionDataManager {
     // Entity packets
     //
 
-    @BusHandler
+    @EventHandler
     public void onEntitySpawn(ClientboundAddEntityPacket packet) {
         var entityState = new EntityState(packet.getEntityId(), packet.getUuid(), packet.getType(), packet.getData());
 
@@ -716,7 +716,7 @@ public final class SessionDataManager {
         entityTrackerState.addEntity(packet.getEntityId(), entityState);
     }
 
-    @BusHandler
+    @EventHandler
     public void onExperienceOrbSpawn(ClientboundAddExperienceOrbPacket packet) {
         var experienceOrbState = new ExperienceOrbState(packet.getEntityId(), packet.getExp());
 
@@ -725,14 +725,14 @@ public final class SessionDataManager {
         entityTrackerState.addEntity(packet.getEntityId(), experienceOrbState);
     }
 
-    @BusHandler
+    @EventHandler
     public void onEntityRemove(ClientboundRemoveEntitiesPacket packet) {
         for (var entityId : packet.getEntityIds()) {
             entityTrackerState.removeEntity(entityId);
         }
     }
 
-    @BusHandler
+    @EventHandler
     public void onEntityMetadata(ClientboundSetEntityDataPacket packet) {
         var state = packet.getEntityId() == loginData.entityId() ?
                 selfMetadata : entityTrackerState.getEntity(packet.getEntityId()).getMetadataState();
@@ -742,7 +742,7 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
+    @EventHandler
     public void onEntityAttributes(ClientboundUpdateAttributesPacket packet) {
         var state = packet.getEntityId() == loginData.entityId() ?
                 selfAttributeState : entityTrackerState.getEntity(packet.getEntityId()).getAttributesState();
@@ -752,7 +752,7 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
+    @EventHandler
     public void onEntityEvent(ClientboundEntityEventPacket packet) {
         if (packet.getEntityId() == loginData.entityId()) {
             playerMetaState.handleEntityEvent(packet.getEvent());
@@ -764,7 +764,7 @@ public final class SessionDataManager {
         state.handleEntityEvent(packet.getEvent());
     }
 
-    @BusHandler
+    @EventHandler
     public void onUpdateEffect(ClientboundUpdateMobEffectPacket packet) {
         var state = packet.getEntityId() == loginData.entityId() ?
                 selfEffectState : entityTrackerState.getEntity(packet.getEntityId()).getEffectState();
@@ -772,7 +772,7 @@ public final class SessionDataManager {
         state.updateEffect(packet.getEffect(), packet.getAmplifier(), packet.getDuration(), packet.isAmbient(), packet.isShowParticles());
     }
 
-    @BusHandler
+    @EventHandler
     public void onRemoveEffect(ClientboundRemoveMobEffectPacket packet) {
         var state = packet.getEntityId() == loginData.entityId() ?
                 selfEffectState : entityTrackerState.getEntity(packet.getEntityId()).getEffectState();
@@ -780,7 +780,7 @@ public final class SessionDataManager {
         state.removeEffect(packet.getEffect());
     }
 
-    @BusHandler
+    @EventHandler
     public void onEntityMotion(ClientboundSetEntityMotionPacket packet) {
         if (loginData.entityId() == packet.getEntityId()) {
             var motionX = packet.getMotionX();
@@ -795,7 +795,7 @@ public final class SessionDataManager {
         }
     }
 
-    @BusHandler
+    @EventHandler
     public void onEntityPos(ClientboundMoveEntityPosPacket packet) {
         if (packet.getEntityId() == loginData.entityId()) {
             log.info("Received entity position packet for bot, notify the developers!");
@@ -808,7 +808,7 @@ public final class SessionDataManager {
         state.setOnGround(packet.isOnGround());
     }
 
-    @BusHandler
+    @EventHandler
     public void onEntityRot(ClientboundMoveEntityRotPacket packet) {
         if (packet.getEntityId() == loginData.entityId()) {
             log.info("Received entity rotation packet for bot, notify the developers!");
@@ -821,7 +821,7 @@ public final class SessionDataManager {
         state.setOnGround(packet.isOnGround());
     }
 
-    @BusHandler
+    @EventHandler
     public void onEntityRot(ClientboundRotateHeadPacket packet) {
         if (packet.getEntityId() == loginData.entityId()) {
             log.info("Received entity rotation packet for bot, notify the developers!");
@@ -833,7 +833,7 @@ public final class SessionDataManager {
         state.setHeadRotation(packet.getHeadYaw());
     }
 
-    @BusHandler
+    @EventHandler
     public void onEntityPosRot(ClientboundMoveEntityPosRotPacket packet) {
         if (packet.getEntityId() == loginData.entityId()) {
             log.info("Received entity position rotation packet for bot, notify the developers!");
@@ -847,7 +847,7 @@ public final class SessionDataManager {
         state.setOnGround(packet.isOnGround());
     }
 
-    @BusHandler
+    @EventHandler
     public void onEntityTeleport(ClientboundTeleportEntityPacket packet) {
         if (packet.getEntityId() == loginData.entityId()) {
             log.info("Received entity teleport packet for bot, notify the developers!");
@@ -861,18 +861,18 @@ public final class SessionDataManager {
         state.setOnGround(packet.isOnGround());
     }
 
-    @BusHandler
+    @EventHandler
     public void onResourcePack(ClientboundResourcePackPacket packet) {
         // TODO: Implement resource pack
         connection.session().send(new ServerboundResourcePackPacket(ResourcePackStatus.DECLINED));
     }
 
-    @BusHandler
+    @EventHandler
     public void onLoginDisconnectPacket(ClientboundLoginDisconnectPacket packet) {
         log.error("Login failed: {}", toPlainText(packet.getReason()));
     }
 
-    @BusHandler
+    @EventHandler
     public void onDisconnectPacket(ClientboundDisconnectPacket packet) {
         log.error("Disconnected: {}", toPlainText(packet.getReason()));
     }

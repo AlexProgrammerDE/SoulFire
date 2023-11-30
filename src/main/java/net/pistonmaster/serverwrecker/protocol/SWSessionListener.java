@@ -25,22 +25,24 @@ import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.github.steveice10.packetlib.event.session.PacketSendingEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import com.github.steveice10.packetlib.packet.Packet;
+import net.lenni0451.lambdaevents.LambdaManager;
+import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import net.pistonmaster.serverwrecker.api.event.bot.BotDisconnectedEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSendingEvent;
 import net.pistonmaster.serverwrecker.api.event.bot.SWPacketSentEvent;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
-import net.pistonmaster.serverwrecker.util.BusInvoker;
 
 public class SWSessionListener extends SessionAdapter {
     private final SessionDataManager bus;
     private final BotConnection botConnection;
-    private final BusInvoker busInvoker;
+    private final LambdaManager busInvoker;
 
     public SWSessionListener(SessionDataManager bus, BotConnection botConnection) {
         this.bus = bus;
         this.botConnection = botConnection;
-        this.busInvoker = new BusInvoker(bus);
+        this.busInvoker = LambdaManager.basic(new ASMGenerator());
+        busInvoker.register(bus);
     }
 
     @Override
@@ -54,7 +56,7 @@ public class SWSessionListener extends SessionAdapter {
         botConnection.logger().trace("Received packet: {}", packet.getClass().getSimpleName());
 
         try {
-            busInvoker.handlePacket(event.getPacket());
+            busInvoker.call(event.getPacket());
         } catch (Throwable t) {
             botConnection.logger().error("Error while handling packet!", t);
         }
