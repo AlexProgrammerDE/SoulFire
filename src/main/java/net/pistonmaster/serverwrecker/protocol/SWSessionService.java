@@ -19,13 +19,18 @@
  */
 package net.pistonmaster.serverwrecker.protocol;
 
-import com.github.steveice10.mc.auth.exception.request.RequestException;
-import com.github.steveice10.mc.auth.service.Service;
-import com.github.steveice10.mc.auth.util.HTTP;
+import com.google.gson.Gson;
 import lombok.AllArgsConstructor;
 import net.pistonmaster.serverwrecker.auth.AuthType;
+import net.pistonmaster.serverwrecker.auth.HttpHelper;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
+import net.pistonmaster.serverwrecker.util.UUIDHelper;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 
 import javax.crypto.SecretKey;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -34,36 +39,30 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.UUID;
 
-public class SWSessionService extends Service {
-    private static final URI DEFAULT_MOJANG_BASE_URI = URI.create("https://sessionserver.mojang.com/session/minecraft/");
+public class SWSessionService {
+    private static final URI MOJANG_JOIN_URI = URI.create("https://sessionserver.mojang.com/session/minecraft/join");
     @SuppressWarnings("HttpUrlsUsage")
-    private static final URI DEFAULT_THE_ALTENING_BASE_URI = URI.create("http://sessionserver.thealtening.com/session/minecraft/");
-    private static final URI DEFAULT_EASYMC_BASE_URI = URI.create("https://sessionserver.easymc.io/session/minecraft/");
-    private static final String JOIN_ENDPOINT = "join";
+    private static final URI THE_ALTENING_JOIN_URI = URI.create("http://sessionserver.thealtening.com/session/minecraft/join");
+    private static final URI EASYMC_JOIN_URI = URI.create("https://sessionserver.easymc.io/session/minecraft/join");
+    private final URI JOIN_ENDPOINT;
+    private final SWProxy proxyData;
+    private final Gson gson = new Gson();
 
     /**
      * Creates a new SessionService instance.
      *
      * @param authType Authentication type to use.
      */
-    public SWSessionService(AuthType authType) {
-        super(switch (authType) {
-            case MICROSOFT_JAVA -> DEFAULT_MOJANG_BASE_URI;
-            case THE_ALTENING -> DEFAULT_THE_ALTENING_BASE_URI;
-            case EASYMC -> DEFAULT_EASYMC_BASE_URI;
+    public SWSessionService(AuthType authType, SWProxy proxyData) {
+        this.JOIN_ENDPOINT = switch (authType) {
+            case MICROSOFT_JAVA -> MOJANG_JOIN_URI;
+            case THE_ALTENING -> THE_ALTENING_JOIN_URI;
+            case EASYMC -> EASYMC_JOIN_URI;
             default -> throw new IllegalStateException("Unexpected value: " + authType);
-        });
+        };
+        this.proxyData = proxyData;
     }
 
-    /**
-     * Calculates the server ID from a base string, public key, and secret key.
-     *
-     * @param base      Base server ID to use.
-     * @param publicKey Public key to use.
-     * @param secretKey Secret key to use.
-     * @return The calculated server ID.
-     * @throws IllegalStateException If the server ID hash algorithm is unavailable.
-     */
     public String getServerId(String base, PublicKey publicKey, SecretKey secretKey) {
         try {
             var digest = MessageDigest.getInstance("SHA-1");
@@ -76,22 +75,20 @@ public class SWSessionService extends Service {
         }
     }
 
-    /**
-     * Joins a server.
-     *
-     * @param profileId           ID of the profile to join the server with.
-     * @param authenticationToken Authentication token to join the server with.
-     * @param serverId            ID of the server to join.
-     * @throws RequestException If an error occurs while making the request.
-     */
-    public void joinServer(UUID profileId, String authenticationToken, String serverId) throws RequestException {
-        var request = new SWSessionService.JoinServerRequest(
-                authenticationToken,
-                profileId.toString().replace("-", ""), // Remove dashes from UUID
-                serverId
-        );
+    public void joinServer(UUID profileId, String authenticationToken, String serverId) throws IOException {
+        try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
+            var request = new SWSessionService.JoinServerRequest(
+                    authenticationToken,
+                    UUIDHelper.convertToNoDashes(profileId),
+                    serverId
+            );
 
-        HTTP.makeRequest(this.getProxy(), this.getEndpointUri(JOIN_ENDPOINT), request, null);
+            var httpPost = new HttpPost(JOIN_ENDPOINT);
+            httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
+            httpClient.execute(httpPost);
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
     }
 
     @SuppressWarnings("unused") // Used by GSON

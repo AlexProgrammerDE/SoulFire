@@ -25,21 +25,15 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.auth.HttpHelper;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
-import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.util.UUIDHelper;
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.UUID;
 
 public class SWTheAlteningAuthService implements MCAuthService {
@@ -48,17 +42,8 @@ public class SWTheAlteningAuthService implements MCAuthService {
     private static final String PASSWORD = "ServerWreckerIsCool"; // Password doesn't matter for The Altening
     private final Gson gson = new Gson();
 
-    private static CloseableHttpClient createHttpClient(SWProxy proxyData) {
-        var headers = new ArrayList<Header>();
-        headers.add(new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType()));
-        headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en"));
-        headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "ServerWrecker/" + BuildData.VERSION));
-
-        return HttpHelper.createHttpClient(headers, proxyData);
-    }
-
     public MinecraftAccount login(String altToken, SWProxy proxyData) throws IOException {
-        try (var httpClient = createHttpClient(proxyData)) {
+        try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
             var request = new AuthenticationRequest(altToken, PASSWORD, UUID.randomUUID().toString());
             var httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
             httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
@@ -83,6 +68,7 @@ public class SWTheAlteningAuthService implements MCAuthService {
     private record Agent(String name, int version) {
     }
 
+    @SuppressWarnings("unused") // Used by GSON
     @RequiredArgsConstructor
     private static class AuthenticationRequest {
         private final Agent agent = new Agent("Minecraft", 1);
@@ -92,12 +78,14 @@ public class SWTheAlteningAuthService implements MCAuthService {
         private final boolean requestUser = true;
     }
 
+    @SuppressWarnings("unused") // Used by GSON
     @Getter
     private static class AuthenticateRefreshResponse {
         private String accessToken;
         private ResponseGameProfile selectedProfile;
     }
 
+    @SuppressWarnings("unused") // Used by GSON
     @Getter
     private static class ResponseGameProfile {
         private String id;

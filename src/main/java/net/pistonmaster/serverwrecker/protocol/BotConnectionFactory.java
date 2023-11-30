@@ -49,7 +49,7 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
     }
 
     public BotConnection prepareConnectionInternal(ProtocolState targetState) {
-        var meta = new BotConnectionMeta(minecraftAccount, targetState);
+        var meta = new BotConnectionMeta(minecraftAccount, targetState, proxyData);
         var session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
         var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.getServerWreckerServer(),
                 settingsHolder, logger, protocol, session, new ExecutorManager("ServerWrecker-Attack-" + attackManager.getId()), meta,

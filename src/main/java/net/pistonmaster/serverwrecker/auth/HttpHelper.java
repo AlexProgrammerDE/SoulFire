@@ -19,11 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.auth;
 
-import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.raphimc.minecraftauth.util.MicrosoftConstants;
 import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -32,7 +30,6 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicHeader;
 
 import java.util.List;
 
@@ -41,10 +38,7 @@ public class HttpHelper {
     }
 
     public static CloseableHttpClient createMCAuthHttpClient(SWProxy proxyData) {
-        var headers = MicrosoftConstants.getDefaultHeaders();
-        headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "ServerWrecker/" + BuildData.VERSION));
-
-        return HttpHelper.createHttpClient(headers, proxyData);
+        return createHttpClient(MicrosoftConstants.getDefaultHeaders(), proxyData);
     }
 
     public static CloseableHttpClient createHttpClient(List<Header> headers, SWProxy proxyData) {

@@ -25,7 +25,7 @@ import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 
-public record BreakBlockGoal(SWVec3i goal) implements GoalScorer {
+public record BreakBlockPosGoal(SWVec3i goal) implements GoalScorer {
     @Override
     public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
         var distance = entityState.position().distance(goal.x, goal.y, goal.z);
