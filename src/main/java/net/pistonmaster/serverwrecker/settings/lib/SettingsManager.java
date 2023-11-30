@@ -27,7 +27,9 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.auth.AccountRegistry;
+import net.pistonmaster.serverwrecker.auth.AuthType;
 import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.auth.service.AccountData;
 import net.pistonmaster.serverwrecker.proxy.ProxyRegistry;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.lib.property.PropertyKey;
@@ -57,6 +59,7 @@ public class SettingsManager {
     private static final Gson baseGson = new GsonBuilder()
             .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
             .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
+            .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
             .create();
     private final Multimap<PropertyKey, Consumer<JsonElement>> listeners = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
     private final Map<PropertyKey, Provider<JsonElement>> providers = new HashMap<>();
@@ -222,5 +225,24 @@ public class SettingsManager {
         }
 
         protected abstract T createKey(byte[] bytes) throws JsonParseException;
+    }
+
+    private static class MinecraftAccountAdapter implements JsonDeserializer<MinecraftAccount> {
+        @Override
+        public MinecraftAccount deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            var authType = context.<AuthType>deserialize(json.getAsJsonObject().get("authType"), AuthType.class);
+
+            return new GsonBuilder()
+                    .registerTypeAdapter(AccountData.class, new AccountDataAdapter(authType))
+                    .create()
+                    .fromJson(json, MinecraftAccount.class);
+        }
+
+        private record AccountDataAdapter(AuthType authType) implements JsonDeserializer<AccountData> {
+            @Override
+            public AccountData deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                return context.deserialize(json, authType.getAccountDataClass());
+            }
+        }
     }
 }

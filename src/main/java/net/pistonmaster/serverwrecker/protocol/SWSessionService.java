@@ -58,7 +58,7 @@ public class SWSessionService {
         this.proxyData = proxyData;
     }
 
-    public String getServerId(String base, PublicKey publicKey, SecretKey secretKey) {
+    public static String getServerId(String base, PublicKey publicKey, SecretKey secretKey) {
         try {
             var digest = MessageDigest.getInstance("SHA-1");
             digest.update(base.getBytes(StandardCharsets.ISO_8859_1));

@@ -101,8 +101,7 @@ public class SWBaseListener extends SessionAdapter {
                 }
 
                 if (auth) {
-                    var serverId = botConnection.meta().getSessionService()
-                            .getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
+                    var serverId = SWSessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
                     botConnection.meta().joinServerId(serverId, viaSession);
                 }
 

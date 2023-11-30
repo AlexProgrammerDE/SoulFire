@@ -54,7 +54,7 @@ public class ServerWreckerAPI {
      * @return The current ServerWrecker instance.
      */
     public static ServerWreckerServer getServerWrecker() {
-        Objects.requireNonNull(serverWreckerServer, "ServerWreckerAPI not initialized! (Wait for ServerWreckerEnableEvent to fire)");
+        Objects.requireNonNull(serverWreckerServer, "ServerWreckerAPI not initialized yet!");
         return serverWreckerServer;
     }
 
