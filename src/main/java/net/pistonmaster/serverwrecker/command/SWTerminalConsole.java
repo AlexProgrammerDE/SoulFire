@@ -22,8 +22,6 @@ package net.pistonmaster.serverwrecker.command;
 import lombok.RequiredArgsConstructor;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
-import net.pistonmaster.serverwrecker.grpc.generated.CommandCompletionRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.CommandRequest;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +29,7 @@ import org.apache.logging.log4j.io.IoBuilder;
 import org.jline.reader.Candidate;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.impl.history.DefaultHistory;
 
 import java.util.concurrent.ExecutorService;
 
@@ -38,7 +37,7 @@ import java.util.concurrent.ExecutorService;
 public class SWTerminalConsole extends SimpleTerminalConsole {
     private static final Logger logger = LogManager.getLogger("ServerWrecker");
     private final ShutdownManager shutdownManager;
-    private final RPCClient rpcClient;
+    private final ClientCommandManager clientCommandManager;
 
     /**
      * Sets up {@code System.out} and {@code System.err} to redirect to log4j.
@@ -50,7 +49,7 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
 
     public static void setupTerminalConsole(ExecutorService threadPool, ShutdownManager shutdownManager, RPCClient rpcClient) {
         SWTerminalConsole.setupStreams();
-        threadPool.execute(new SWTerminalConsole(shutdownManager, rpcClient)::start);
+        threadPool.execute(new SWTerminalConsole(shutdownManager, new ClientCommandManager(rpcClient))::start);
     }
 
     @Override
@@ -60,9 +59,7 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
 
     @Override
     protected void runCommand(String command) {
-        rpcClient.getCommandStubBlocking().executeCommand(
-                CommandRequest.newBuilder().setCommand(command).build()
-        );
+        clientCommandManager.execute(command);
     }
 
     @Override
@@ -72,20 +69,19 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
 
     @Override
     protected LineReader buildReader(LineReaderBuilder builder) {
+        var history = new DefaultHistory();
+        for (var command : clientCommandManager.getCommandHistory()) {
+            history.add(command.getKey(), command.getValue());
+        }
+
         return super.buildReader(builder
                 .appName("ServerWrecker")
                 .completer((reader, parsedLine, list) -> {
-                    try {
-                        var offers = rpcClient.getCommandStubBlocking().tabCompleteCommand(
-                                CommandCompletionRequest.newBuilder().setCommand(parsedLine.line()).build()
-                        ).getSuggestionsList(); // Console doesn't get harmed much by this...
-                        for (var offer : offers) {
-                            list.add(new Candidate(offer));
-                        }
-                    } catch (Exception e) {
-                        logger.error("An error occurred while trying to perform tab completion.", e);
+                    for (String suggestion : clientCommandManager.getCompletionSuggestions(parsedLine.line())) {
+                        list.add(new Candidate(suggestion));
                     }
                 })
+                .history(history)
         );
     }
 }

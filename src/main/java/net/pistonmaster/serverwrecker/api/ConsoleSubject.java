@@ -19,15 +19,12 @@
  */
 package net.pistonmaster.serverwrecker.api;
 
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-
-@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConsoleSubject {
     private static final Logger LOGGER = LoggerFactory.getLogger("Console");
+    public static final ConsoleSubject INSTANCE = new ConsoleSubject();
 
     public void sendMessage(String message) {
         LOGGER.info(message);

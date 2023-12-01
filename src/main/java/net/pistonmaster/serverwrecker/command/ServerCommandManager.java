@@ -62,23 +62,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.ToIntFunction;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 import static net.pistonmaster.serverwrecker.command.BrigadierHelper.*;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class CommandManager {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommandManager.class);
+public class ServerCommandManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerCommandManager.class);
     @Getter
     private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
     private final ServerWreckerServer serverWreckerServer;
-    private final ConsoleSubject consoleSubject;
-    private final List<String> commandHistory = Collections.synchronizedList(new ArrayList<>());
+    private final List<Map.Entry<Instant, String>> commandHistory = Collections.synchronizedList(new ArrayList<>());
     private final Path targetFile = ServerWreckerBootstrap.DATA_FOLDER.resolve(".command_history");
 
     @PostConstruct
@@ -367,7 +363,7 @@ public class CommandManager {
         });
     }
 
-    public List<String> getCommandHistory() {
+    public List<Map.Entry<Instant, String>> getCommandHistory() {
         synchronized (commandHistory) {
             return List.copyOf(commandHistory);
         }
@@ -377,8 +373,8 @@ public class CommandManager {
         command = command.strip();
 
         try {
-            var result = dispatcher.execute(command, consoleSubject);
-            commandHistory.add(command);
+            var result = dispatcher.execute(command, ConsoleSubject.INSTANCE);
+            commandHistory.add(Map.entry(Instant.now(), command));
 
             // Only save successful commands
             if (result == Command.SINGLE_SUCCESS) {
@@ -407,7 +403,10 @@ public class CommandManager {
                         continue;
                     }
 
-                    commandHistory.add(line.substring(firstColon + 1));
+                    var seconds = Long.parseLong(line.substring(0, firstColon));
+                    var command = line.substring(firstColon + 1);
+
+                    commandHistory.add(Map.entry(Instant.ofEpochSecond(seconds), command));
                 }
             } catch (IOException e) {
                 LOGGER.error("Failed to create command history file!", e);
@@ -439,8 +438,12 @@ public class CommandManager {
     }
 
     public List<String> getCompletionSuggestions(String command) {
-        return dispatcher.getCompletionSuggestions(dispatcher.parse(command, consoleSubject)).join().getList()
-                .stream().map(Suggestion::getText).toList();
+        return dispatcher.getCompletionSuggestions(dispatcher.parse(command, ConsoleSubject.INSTANCE))
+                .join()
+                .getList()
+                .stream()
+                .map(Suggestion::getText)
+                .toList();
     }
 
     private HelpData[] getAllUsage(final CommandNode<ConsoleSubject> node, final ConsoleSubject source, final boolean restricted) {

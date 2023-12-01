@@ -23,7 +23,9 @@ import io.grpc.stub.StreamObserver;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.pistonmaster.serverwrecker.grpc.generated.*;
+import net.pistonmaster.serverwrecker.command.ClientCommandManager;
+import net.pistonmaster.serverwrecker.grpc.generated.LogRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.LogResponse;
 import net.pistonmaster.serverwrecker.gui.libs.MessageLogPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,16 +38,19 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 public class LogPanel extends JPanel {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogPanel.class);
     private final MessageLogPanel messageLogPanel = new MessageLogPanel(3000);
     private final GUIManager guiManager;
+    private final ClientCommandManager clientCommandManager;
 
     @Inject
     public LogPanel(GUIManager guiManager) {
         this.guiManager = guiManager;
+        this.clientCommandManager = new ClientCommandManager(guiManager.getRpcClient());
 
         var request = LogRequest.newBuilder().setPrevious(300).build();
         guiManager.getRpcClient().getLogStub().subscribe(request, new StreamObserver<>() {
@@ -91,8 +96,8 @@ public class LogPanel extends JPanel {
         private int pointer = -1;
 
         public void initHistory() {
-            var response = guiManager.getRpcClient().getCommandStubBlocking().getCommandHistory(CommandHistoryRequest.newBuilder().build());
-            commandHistory.addAll(response.getCommandList());
+            commandHistory.addAll(clientCommandManager.getCommandHistory()
+                    .stream().map(Map.Entry::getValue).toList());
         }
 
         @Override
@@ -109,20 +114,7 @@ public class LogPanel extends JPanel {
             ((JTextField) e.getSource()).setText(null);
 
             commandHistory.add(command);
-            guiManager.getRpcClient().getCommandStub().executeCommand(CommandRequest.newBuilder().setCommand(command).build(), new StreamObserver<>() {
-                @Override
-                public void onNext(CommandResponse value) {
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    LOGGER.error("Error while executing command!", t);
-                }
-
-                @Override
-                public void onCompleted() {
-                }
-            });
+            clientCommandManager.execute(command);
         }
     }
 

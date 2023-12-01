@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 option java_multiple_files = true;
 
 package net.pistonmaster.serverwrecker.grpc.generated;
@@ -9,12 +11,7 @@ message CommandRequest {
 }
 
 message CommandResponse {
-  enum CommandCode {
-    SUCCESS = 0;
-    FAILURE = 1;
-  }
-
-  CommandCode code = 1;
+  int32 code = 1;
 }
 
 message CommandCompletionRequest {
@@ -28,8 +25,13 @@ message CommandCompletionResponse {
   repeated string suggestions = 1;
 }
 
+message CommandHistoryEntry {
+  int64 timestamp = 1;
+  string command = 2;
+}
+
 message CommandHistoryResponse {
-  repeated string command = 1;
+  repeated CommandHistoryEntry entries = 1;
 }
 
 service CommandService {

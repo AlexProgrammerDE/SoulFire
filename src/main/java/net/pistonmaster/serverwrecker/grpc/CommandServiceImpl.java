@@ -21,26 +21,26 @@ package net.pistonmaster.serverwrecker.grpc;
 
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.command.CommandManager;
+import net.pistonmaster.serverwrecker.command.ServerCommandManager;
 import net.pistonmaster.serverwrecker.grpc.generated.*;
 
 import javax.inject.Inject;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBase {
-    private final CommandManager commandManager;
+    private final ServerCommandManager serverCommandManager;
 
     @Override
     public void executeCommand(CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
-        var code = commandManager.execute(request.getCommand());
+        var code = serverCommandManager.execute(request.getCommand());
 
-        responseObserver.onNext(CommandResponse.newBuilder().setCodeValue(code).build());
+        responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());
         responseObserver.onCompleted();
     }
 
     @Override
     public void tabCompleteCommand(CommandCompletionRequest request, StreamObserver<CommandCompletionResponse> responseObserver) {
-        var suggestions = commandManager.getCompletionSuggestions(request.getCommand());
+        var suggestions = serverCommandManager.getCompletionSuggestions(request.getCommand());
 
         responseObserver.onNext(CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());
         responseObserver.onCompleted();
@@ -48,9 +48,16 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
 
     @Override
     public void getCommandHistory(CommandHistoryRequest request, StreamObserver<CommandHistoryResponse> responseObserver) {
-        var history = commandManager.getCommandHistory();
+        var history = serverCommandManager.getCommandHistory();
+        var builder = CommandHistoryResponse.newBuilder();
+        for (var entry : history) {
+            builder.addEntriesBuilder()
+                    .setTimestamp(entry.getKey().getEpochSecond())
+                    .setCommand(entry.getValue())
+                    .build();
+        }
 
-        responseObserver.onNext(CommandHistoryResponse.newBuilder().addAllCommand(history).build());
+        responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
 }
