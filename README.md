@@ -167,8 +167,6 @@ To run ServerWrecker from the command line without a GUI, enter:
 
 > **Note:** Some features are not available in CLI mode, we recommend using the GUI.
 
-### CLI Flags
-
 For a list of all available CLI flags, look at [CLI_FLAGS.md](./CLI_FLAGS.md)
 or run `java -jar serverwrecker.jar --help`.
 
