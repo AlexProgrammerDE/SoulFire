@@ -38,7 +38,7 @@ public record MinecraftAccount(AuthType authType, String username, AccountData a
 
     @Override
     public String toString() {
-        return String.format("JavaAccount(username=%s)", username);
+        return String.format("MinecraftAccount(authType=%s, username=%s, enabled=%s)", authType, username, enabled);
     }
 
     public boolean isPremiumJava() {
@@ -49,7 +49,7 @@ public record MinecraftAccount(AuthType authType, String username, AccountData a
         return accountData != null && accountData instanceof BedrockData;
     }
 
-    public UUID getUUID() {
+    public UUID getUniqueId() {
         if (accountData instanceof JavaData javaData) {
             return javaData.profileId();
         } else {
