@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.protocol.bot.state;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.data.ResourceData;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.model.ChunkKey;
@@ -34,20 +35,28 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ChunkHolder {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // Cache optional object
+    private static final Optional<BlockStateMeta> VOID_AIR_BLOCK_STATE = Optional.of(BlockStateMeta.forDefaultBlockType(BlockType.VOID_AIR));
     private final Int2ObjectMap<ChunkData> chunks = new Int2ObjectOpenHashMap<>();
     private final Lock readLock;
     private final Lock writeLock;
+    private final int minBuildHeight;
+    private final int maxBuildHeight;
 
-    public ChunkHolder() {
+    public ChunkHolder(LevelState levelState) {
         ReadWriteLock lock = new ReentrantReadWriteLock();
         this.readLock = lock.readLock();
         this.writeLock = lock.writeLock();
+        this.minBuildHeight = levelState.getMinBuildHeight();
+        this.maxBuildHeight = levelState.getMaxBuildHeight();
     }
 
     private ChunkHolder(ChunkHolder chunkHolder) {
         this.chunks.putAll(chunkHolder.chunks);
         this.readLock = new NoopLock();
         this.writeLock = new NoopLock();
+        this.minBuildHeight = chunkHolder.minBuildHeight;
+        this.maxBuildHeight = chunkHolder.maxBuildHeight;
     }
 
     public ChunkData getChunk(int chunkX, int chunkZ) {
@@ -100,6 +109,12 @@ public class ChunkHolder {
     }
 
     public Optional<BlockStateMeta> getBlockStateAt(int x, int y, int z) {
+        if (y < minBuildHeight) {
+            return VOID_AIR_BLOCK_STATE;
+        } else if (y >= maxBuildHeight) {
+            return VOID_AIR_BLOCK_STATE;
+        }
+
         var chunkData = getChunk(SectionUtils.blockToSection(x), SectionUtils.blockToSection(z));
 
         // Out of world

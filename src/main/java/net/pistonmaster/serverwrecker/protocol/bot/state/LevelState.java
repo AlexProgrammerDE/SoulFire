@@ -41,7 +41,7 @@ import java.util.Optional;
 @Getter
 public class LevelState {
     private final SessionDataManager sessionDataManager;
-    private final ChunkHolder chunks = new ChunkHolder();
+    private final ChunkHolder chunks;
     private final String dimensionName;
     private final int dimensionId;
     private final UniformOrInt monsterSpawnLightLevel;
@@ -104,6 +104,8 @@ public class LevelState {
         this.monsterSpawnBlockLightLimit = levelRegistry.<IntTag>get("monster_spawn_block_light_limit").getValue();
         this.hasRaids = levelRegistry.<ByteTag>get("has_raids").getValue();
         this.respawnAnchorWorks = levelRegistry.<ByteTag>get("respawn_anchor_works").getValue();
+
+        this.chunks = new ChunkHolder(this);
 
         // Precalculate min section
         this.minSection = SectionUtils.blockToSection(this.getMinBuildHeight());

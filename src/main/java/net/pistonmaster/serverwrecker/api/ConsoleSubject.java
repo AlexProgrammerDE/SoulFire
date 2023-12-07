@@ -23,8 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConsoleSubject {
-    private static final Logger LOGGER = LoggerFactory.getLogger("Console");
     public static final ConsoleSubject INSTANCE = new ConsoleSubject();
+    private static final Logger LOGGER = LoggerFactory.getLogger("Console");
 
     public void sendMessage(String message) {
         LOGGER.info(message);
