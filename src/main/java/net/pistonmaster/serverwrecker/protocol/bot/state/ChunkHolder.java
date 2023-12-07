@@ -29,14 +29,12 @@ import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
 import net.pistonmaster.serverwrecker.util.NoopLock;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ChunkHolder {
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // Cache optional object
-    private static final Optional<BlockStateMeta> VOID_AIR_BLOCK_STATE = Optional.of(BlockStateMeta.forDefaultBlockType(BlockType.VOID_AIR));
+    private static final BlockStateMeta VOID_AIR_BLOCK_STATE = BlockStateMeta.forDefaultBlockType(BlockType.VOID_AIR);
     private final Int2ObjectMap<ChunkData> chunks = new Int2ObjectOpenHashMap<>();
     private final Lock readLock;
     private final Lock writeLock;
@@ -108,7 +106,7 @@ public class ChunkHolder {
         }
     }
 
-    public Optional<BlockStateMeta> getBlockStateAt(int x, int y, int z) {
+    public BlockStateMeta getBlockStateAt(int x, int y, int z) {
         if (y < minBuildHeight) {
             return VOID_AIR_BLOCK_STATE;
         } else if (y >= maxBuildHeight) {
@@ -119,11 +117,10 @@ public class ChunkHolder {
 
         // Out of world
         if (chunkData == null) {
-            return Optional.empty();
+            return VOID_AIR_BLOCK_STATE;
         }
 
-        return Optional.of(ResourceData.GLOBAL_BLOCK_PALETTE
-                .getBlockStateForStateId(chunkData.getBlock(x, y, z)));
+        return ResourceData.GLOBAL_BLOCK_PALETTE.getBlockStateForStateId(chunkData.getBlock(x, y, z));
     }
 
     public ChunkHolder immutableCopy() {

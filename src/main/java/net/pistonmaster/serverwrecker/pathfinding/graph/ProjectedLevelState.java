@@ -30,8 +30,6 @@ import net.pistonmaster.serverwrecker.protocol.bot.state.ChunkHolder;
 import net.pistonmaster.serverwrecker.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
 
-import java.util.Optional;
-
 /**
  * An immutable representation of the world state.
  * This takes a world state and projects changes onto it.
@@ -88,10 +86,10 @@ public class ProjectedLevelState {
         return new ProjectedLevelState(chunkHolder, blockChanges);
     }
 
-    public Optional<BlockStateMeta> getBlockStateAt(SWVec3i position) {
+    public BlockStateMeta getBlockStateAt(SWVec3i position) {
         var blockChange = blockChanges.get(position);
         if (blockChange != null) {
-            return Optional.of(blockChange);
+            return blockChange;
         }
 
         return chunkHolder.getBlockStateAt(position.x, position.y, position.z);

@@ -43,7 +43,7 @@ public final class GapJumpAction implements WorldAction {
         }
 
         var blockMeta = levelState.getBlockStateAt(position.toInt());
-        var insideBlock = blockMeta.isPresent() && !BlockTypeHelper.isEmpty(blockMeta.get());
+        var insideBlock = !BlockTypeHelper.isEmpty(blockMeta);
 
         if (insideBlock) {
             // We are inside a block, so being close is good enough

@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.pathfinding.graph;
 import it.unimi.dsi.fastutil.objects.*;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.data.BlockItems;
+import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.pathfinding.graph.actions.*;
@@ -260,8 +261,11 @@ public record MinecraftGraph(TagsState tagsState) {
                     // Lazy calculation to avoid unnecessary calls
                     absolutePositionBlock = node.positionBlock().add(key);
                     blockState = node.levelState()
-                            .getBlockStateAt(absolutePositionBlock)
-                            .orElseThrow(OutOfLevelException::new);
+                            .getBlockStateAt(absolutePositionBlock);
+
+                    if (blockState.blockType() == BlockType.VOID_AIR) {
+                        throw new OutOfLevelException();
+                    }
                 }
 
                 switch (action) {

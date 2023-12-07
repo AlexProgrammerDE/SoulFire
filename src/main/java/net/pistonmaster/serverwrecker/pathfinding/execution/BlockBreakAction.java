@@ -23,10 +23,10 @@ import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
 import net.pistonmaster.serverwrecker.util.VectorHelper;
@@ -53,8 +53,7 @@ public final class BlockBreakAction implements WorldAction {
         }
 
         return levelState.getBlockStateAt(blockPosition)
-                .map(blockState -> blockState.blockType().blockShapeTypes().isEmpty())
-                .orElse(false);
+                .blockType().blockShapeTypes().isEmpty();
     }
 
     @Override
@@ -95,10 +94,8 @@ public final class BlockBreakAction implements WorldAction {
                     sawEmpty = true;
                 }
 
-                var optionalBlockType = levelState.getBlockStateAt(blockPosition)
-                        .map(BlockStateMeta::blockType);
-
-                if (optionalBlockType.isEmpty()) {
+                var optionalBlockType = levelState.getBlockStateAt(blockPosition).blockType();
+                if (optionalBlockType == BlockType.VOID_AIR) {
                     log.warn("Block at {} is not in view range!", blockPosition);
                     return;
                 }
@@ -108,7 +105,7 @@ public final class BlockBreakAction implements WorldAction {
                         sessionDataManager.getSelfEffectState(),
                         sessionDataManager.getBotMovementManager().getEntity().isOnGround(),
                         item,
-                        optionalBlockType.get()
+                        optionalBlockType
                 ).ticks();
 
                 if (cost < bestCost || (item == null && cost == bestCost)) {
@@ -187,10 +184,8 @@ public final class BlockBreakAction implements WorldAction {
         }
 
         if (remainingTicks == -1) {
-            var optionalBlockType = levelState.getBlockStateAt(blockPosition)
-                    .map(BlockStateMeta::blockType);
-
-            if (optionalBlockType.isEmpty()) {
+            var optionalBlockType = levelState.getBlockStateAt(blockPosition).blockType();
+            if (optionalBlockType == BlockType.VOID_AIR) {
                 log.warn("Block at {} is not in view range!", blockPosition);
                 return;
             }
@@ -202,7 +197,7 @@ public final class BlockBreakAction implements WorldAction {
                     sessionDataManager.getInventoryManager().getPlayerInventory()
                             .getHotbarSlot(sessionDataManager.getInventoryManager().getHeldItemSlot())
                             .item(),
-                    optionalBlockType.get()
+                    optionalBlockType
             ).ticks();
             sessionDataManager.getBotActionManager().sendStartBreakBlock(blockPosition.toVector3i());
         } else if (--remainingTicks == 0) {

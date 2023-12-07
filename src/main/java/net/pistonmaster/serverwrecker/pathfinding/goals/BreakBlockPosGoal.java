@@ -19,10 +19,10 @@
  */
 package net.pistonmaster.serverwrecker.pathfinding.goals;
 
+import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.pathfinding.graph.MinecraftGraph;
-import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
 
 public record BreakBlockPosGoal(SWVec3i goal) implements GoalScorer {
@@ -32,23 +32,23 @@ public record BreakBlockPosGoal(SWVec3i goal) implements GoalScorer {
         var blockStateMeta = entityState.levelState().getBlockStateAt(goal);
 
         // Instead of failing when the block is not in render distance, we just return the distance.
-        if (blockStateMeta.isEmpty()) {
+        if (blockStateMeta.blockType() == BlockType.VOID_AIR) {
             return distance;
         }
 
         // Don't try to find a way to dig bedrock
-        if (!blockStateMeta.get().blockType().diggable()) {
+        if (!blockStateMeta.blockType().diggable()) {
             throw new IllegalStateException("Block is not diggable!");
         }
 
         // We only want to dig full blocks (not slabs, stairs, etc.), removes a lot of edge cases
-        if (!blockStateMeta.get().blockShapeType().isFullBlock()) {
+        if (!blockStateMeta.blockShapeType().isFullBlock()) {
             throw new IllegalStateException("Block is not a full block!");
         }
 
         var breakCost = entityState.inventory().getMiningCosts(
                 graph.tagsState(),
-                blockStateMeta.get()
+                blockStateMeta
         ).miningCost();
 
         return distance + breakCost;
@@ -56,10 +56,8 @@ public record BreakBlockPosGoal(SWVec3i goal) implements GoalScorer {
 
     @Override
     public boolean isFinished(BotEntityState entityState) {
-        return entityState.levelState()
+        return BlockTypeHelper.isAir(entityState.levelState()
                 .getBlockStateAt(goal)
-                .map(BlockStateMeta::blockType)
-                .map(BlockTypeHelper::isAir)
-                .orElse(false);
+                .blockType());
     }
 }

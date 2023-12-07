@@ -22,7 +22,6 @@ package net.pistonmaster.serverwrecker.protocol.bot.state;
 import com.github.steveice10.opennbt.tag.builtin.*;
 import lombok.Getter;
 import lombok.Setter;
-import net.pistonmaster.serverwrecker.data.BlockType;
 import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
@@ -36,7 +35,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Getter
 public class LevelState {
@@ -136,16 +134,12 @@ public class LevelState {
         return chunks.isChunkLoaded(block);
     }
 
-    public Optional<BlockStateMeta> getBlockStateAt(Vector3i block) {
+    public BlockStateMeta getBlockStateAt(Vector3i block) {
         return chunks.getBlockStateAt(block.getX(), block.getY(), block.getZ());
     }
 
-    public Optional<BlockStateMeta> getBlockStateAt(SWVec3i block) {
+    public BlockStateMeta getBlockStateAt(SWVec3i block) {
         return chunks.getBlockStateAt(block.x, block.y, block.z);
-    }
-
-    public Optional<BlockType> getBlockTypeAt(Vector3i block) {
-        return getBlockStateAt(block).map(BlockStateMeta::blockType);
     }
 
     public boolean isOutOfWorld(Vector3i block) {
@@ -168,11 +162,8 @@ public class LevelState {
                 for (var z = startZ; z <= endZ; z++) {
                     var cursor = Vector3i.from(x, y, z);
                     var blockState = getBlockStateAt(cursor);
-                    if (blockState.isEmpty()) {
-                        continue;
-                    }
 
-                    for (var collisionBox : blockState.get().getCollisionBoxes(cursor)) {
+                    for (var collisionBox : blockState.getCollisionBoxes(cursor)) {
                         if (collisionBox.intersects(aabb)) {
                             surroundingBBs.add(collisionBox);
                         }

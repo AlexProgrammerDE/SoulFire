@@ -48,9 +48,7 @@ public final class BlockPlaceAction implements WorldAction {
             return false;
         }
 
-        return levelState.getBlockStateAt(blockPosition)
-                .map(BlockTypeHelper::isFullBlock)
-                .orElse(false);
+        return BlockTypeHelper.isFullBlock(levelState.getBlockStateAt(blockPosition));
     }
 
     @Override

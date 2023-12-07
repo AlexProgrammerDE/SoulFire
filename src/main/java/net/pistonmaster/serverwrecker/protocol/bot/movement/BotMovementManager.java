@@ -96,13 +96,10 @@ public class BotMovementManager {
                 for (var z = startZ; z <= endZ; z++) {
                     var cursor = Vector3i.from(x, y, z);
                     var block = world.getBlockStateAt(cursor);
-                    if (block.isEmpty()) {
-                        continue;
-                    }
 
-                    for (var collisionBox : block.get().getCollisionBoxes(cursor)) {
+                    for (var collisionBox : block.getCollisionBoxes(cursor)) {
                         if (collisionBox.intersects(queryBB)) {
-                            consumer.accept(block.get(), cursor);
+                            consumer.accept(block, cursor);
                             break;
                         }
                     }
@@ -222,12 +219,7 @@ public class BotMovementManager {
     }
 
     public static boolean isOnLadder(LevelState world, Vector3i pos) {
-        var block = world.getBlockStateAt(pos);
-        if (block.isEmpty()) {
-            return false;
-        }
-
-        var blockType = block.get().blockType();
+        var blockType = world.getBlockStateAt(pos).blockType();
         return blockType == BlockType.LADDER || blockType == BlockType.VINE;
     }
 
@@ -244,12 +236,7 @@ public class BotMovementManager {
             for (var y = minY; y <= maxY; y++) {
                 for (var z = minZ; z <= maxZ; z++) {
                     var block = world.getBlockStateAt(Vector3i.from(x, y, z));
-
-                    if (block.isEmpty()) {
-                        continue;
-                    }
-
-                    if (types.contains(block.get().blockType())) {
+                    if (types.contains(block.blockType())) {
                         return true;
                     }
                 }
@@ -298,7 +285,7 @@ public class BotMovementManager {
                 vel.y += 0.04;
             } else if (entity.onGround && entity.jumpTicks == 0) {
                 var blockBelow = world.getBlockStateAt(entity.pos.floored().offset(0, -0.5, 0).toImmutableInt());
-                vel.y = (float) (0.42) * ((blockBelow.isPresent() && blockBelow.get().blockType() == BlockType.HONEY_BLOCK) ? physics.honeyblockJumpSpeed : 1);
+                vel.y = (float) (0.42) * ((blockBelow.blockType() == BlockType.HONEY_BLOCK) ? physics.honeyblockJumpSpeed : 1);
                 if (entity.jumpBoost > 0) {
                     vel.y += 0.1 * entity.jumpBoost;
                 }
@@ -535,8 +522,8 @@ public class BotMovementManager {
             float frictionInfluencedSpeed;
 
             var blockUnder = world.getBlockStateAt(pos.offset(0, -0.500001F, 0).toImmutableInt());
-            if (entity.onGround && blockUnder.isPresent()) {
-                var friction = getBlockFriction(blockUnder.get().blockType());
+            if (entity.onGround) {
+                var friction = getBlockFriction(blockUnder.blockType());
                 xzMultiplier *= friction;
                 frictionInfluencedSpeed = speed * (0.21600002F / (friction * friction * friction));
             } else {
@@ -684,8 +671,7 @@ public class BotMovementManager {
 
         if (dy != oldVelY) {
             var blockAtFeet = world.getBlockStateAt(pos.offset(0, -0.2, 0).toImmutableInt());
-            if (blockAtFeet.isPresent()
-                    && blockAtFeet.get().blockType() == BlockType.SLIME_BLOCK
+            if (blockAtFeet.blockType() == BlockType.SLIME_BLOCK
                     && !controlState.isSneaking()) {
                 vel.y = -vel.y;
             } else {
@@ -700,7 +686,7 @@ public class BotMovementManager {
             } else if (block.blockType() == BlockType.BUBBLE_COLUMN) {
                 var down = !block.blockShapeType().properties().getBoolean("drag");
                 var aboveBlock = world.getBlockStateAt(cursor.add(0, 1, 0));
-                var bubbleDrag = (aboveBlock.isPresent() && aboveBlock.get().blockType() == BlockType.AIR) ?
+                var bubbleDrag = aboveBlock.blockType() == BlockType.AIR ?
                         physics.bubbleColumnSurfaceDrag : physics.bubbleColumnDrag;
                 if (down) {
                     vel.y = Math.max(bubbleDrag.maxDown(), vel.y - bubbleDrag.down());
@@ -711,15 +697,13 @@ public class BotMovementManager {
         });
 
         var blockBelow = world.getBlockStateAt(entity.pos.floored().offset(0, -0.5, 0).toImmutableInt());
-        if (blockBelow.isPresent()) {
-            if (blockBelow.get().blockType() == BlockType.SOUL_SAND) {
+            if (blockBelow.blockType() == BlockType.SOUL_SAND) {
                 vel.x *= physics.soulsandSpeed;
                 vel.z *= physics.soulsandSpeed;
-            } else if (blockBelow.get().blockType() == BlockType.HONEY_BLOCK) {
+            } else if (blockBelow.blockType() == BlockType.HONEY_BLOCK) {
                 vel.x *= physics.honeyblockSpeed;
                 vel.z *= physics.honeyblockSpeed;
             }
-        }
     }
 
     private Vector3d collide(LevelState world, AABB playerBB, Vector3d targetVec) {
@@ -844,11 +828,11 @@ public class BotMovementManager {
             var dz = combination[1];
             var adjBlockVec = block.add(dx, 0, dz);
             var adjBlock = world.getBlockStateAt(adjBlockVec);
-            var adjLevel = getRenderedDepth(adjBlock.orElse(null));
+            var adjLevel = getRenderedDepth(adjBlock);
             if (adjLevel < 0) {
-                if (adjBlock.isPresent() && adjBlock.get().blockShapeType().isEmpty()) {
+                if (adjBlock.blockShapeType().isEmpty()) {
                     var adjLevel2Vec = block.add(dx, -1, dz);
-                    var adjLevel2 = getRenderedDepth(world.getBlockStateAt(adjLevel2Vec).orElse(null));
+                    var adjLevel2 = getRenderedDepth(world.getBlockStateAt(adjLevel2Vec));
                     if (adjLevel2 >= 0) {
                         var f = adjLevel2 - (curlevel - 8);
                         flow.x += dx * f;
@@ -868,8 +852,8 @@ public class BotMovementManager {
                 var dz = combination[1];
                 var adjBlock = world.getBlockStateAt(block.add(dx, 0, dz));
                 var adjUpBlock = world.getBlockStateAt(block.add(dx, 1, dz));
-                if ((adjBlock.isPresent() && adjBlock.get().blockShapeType().isEmpty())
-                        || (adjUpBlock.isPresent() && adjUpBlock.get().blockShapeType().isEmpty())) {
+                if ((adjBlock.blockShapeType().isEmpty())
+                        || (adjUpBlock.blockShapeType().isEmpty())) {
                     flow.normalize().translate(0, -6, 0);
                 }
             }

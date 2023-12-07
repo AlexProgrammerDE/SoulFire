@@ -123,12 +123,7 @@ public class BotActionManager {
             movementManager.sendRot();
         }
 
-        var blockState = levelState.getBlockStateAt(againstBlock);
-        if (blockState.isEmpty()) {
-            return;
-        }
-
-        var rayCast = rayCastToBlock(blockState.get(), eyePosition, movementManager.getRotationVector(), againstBlock);
+        var rayCast = rayCastToBlock(levelState.getBlockStateAt(againstBlock), eyePosition, movementManager.getRotationVector(), againstBlock);
         if (rayCast.isEmpty()) {
             return;
         }
