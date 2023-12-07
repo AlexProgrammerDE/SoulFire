@@ -19,5 +19,5 @@
  */
 package net.pistonmaster.serverwrecker.auth.service;
 
-public interface AccountData {
+public sealed interface AccountData permits JavaData, BedrockData {
 }

@@ -36,14 +36,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
 
-public class SWEasyMCAuthService implements MCAuthService {
+public final class SWEasyMCAuthService implements MCAuthService<SWEasyMCAuthService.EasyMCAuthData> {
     private static final URI AUTHENTICATE_ENDPOINT = URI.create("https://api.easymc.io/v1/token/redeem");
     private static final Logger LOGGER = LoggerFactory.getLogger(SWEasyMCAuthService.class);
     private final Gson gson = new Gson();
 
-    public MinecraftAccount login(String altToken, SWProxy proxyData) throws IOException {
+    @Override
+    public MinecraftAccount login(EasyMCAuthData data, SWProxy proxyData) throws IOException {
         try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-            var request = new AuthenticationRequest(altToken);
+            var request = new AuthenticationRequest(data.altToken);
             var httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
             httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
             var response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
@@ -66,6 +67,20 @@ public class SWEasyMCAuthService implements MCAuthService {
         } catch (Exception e) {
             throw new IOException(e);
         }
+    }
+
+    @Override
+    public EasyMCAuthData createData(String data) {
+        var split = data.split(":");
+
+        if (split.length != 1) {
+            throw new IllegalArgumentException("Invalid data!");
+        }
+
+        return new EasyMCAuthData(split[0].trim());
+    }
+
+    public record EasyMCAuthData(String altToken) {
     }
 
     private record AuthenticationRequest(String token) {

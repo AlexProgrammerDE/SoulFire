@@ -36,15 +36,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
 
-public class SWTheAlteningAuthService implements MCAuthService {
+public final class SWTheAlteningAuthService implements MCAuthService<SWTheAlteningAuthService.TheAlteningAuthData> {
     @SuppressWarnings("HttpUrlsUsage") // The Altening doesn't support encrypted HTTPS
     private static final URI AUTHENTICATE_ENDPOINT = URI.create("http://authserver.thealtening.com/authenticate");
     private static final String PASSWORD = "ServerWreckerIsCool"; // Password doesn't matter for The Altening
     private final Gson gson = new Gson();
 
-    public MinecraftAccount login(String altToken, SWProxy proxyData) throws IOException {
+    @Override
+    public MinecraftAccount login(TheAlteningAuthData data, SWProxy proxyData) throws IOException {
         try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-            var request = new AuthenticationRequest(altToken, PASSWORD, UUID.randomUUID().toString());
+            var request = new AuthenticationRequest(data.altToken, PASSWORD, UUID.randomUUID().toString());
             var httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
             httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
             var response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
@@ -63,6 +64,14 @@ public class SWTheAlteningAuthService implements MCAuthService {
         } catch (Exception e) {
             throw new IOException(e);
         }
+    }
+
+    @Override
+    public TheAlteningAuthData createData(String data) {
+        return new TheAlteningAuthData(data);
+    }
+
+    public record TheAlteningAuthData(String altToken) {
     }
 
     private record Agent(String name, int version) {

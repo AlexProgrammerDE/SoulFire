@@ -17,16 +17,24 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.proxy;
+package net.pistonmaster.serverwrecker.auth.service;
 
-import java.net.InetSocketAddress;
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
 
-public record SWProxy(ProxyType type, String host, int port, String username, String password, boolean enabled) {
-    public boolean hasCredentials() {
-        return username != null && password != null;
+import java.io.IOException;
+
+public final class SWOfflineAuthService implements MCAuthService<SWOfflineAuthService.OfflineAuthData> {
+    @Override
+    public MinecraftAccount login(OfflineAuthData data, SWProxy proxyData) throws IOException {
+        return new MinecraftAccount(data.username);
     }
 
-    public InetSocketAddress getInetSocketAddress() {
-        return new InetSocketAddress(host, port);
+    @Override
+    public OfflineAuthData createData(String data) {
+        return new OfflineAuthData(data);
+    }
+
+    public record OfflineAuthData(String username) {
     }
 }

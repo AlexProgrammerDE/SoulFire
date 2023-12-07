@@ -19,5 +19,17 @@
  */
 package net.pistonmaster.serverwrecker.auth.service;
 
-public interface MCAuthService {
+import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
+
+import java.io.IOException;
+
+public sealed interface MCAuthService<T> permits SWBedrockMicrosoftAuthService, SWEasyMCAuthService, SWJavaMicrosoftAuthService, SWOfflineAuthService, SWTheAlteningAuthService {
+    MinecraftAccount login(T data, SWProxy proxyData) throws IOException;
+
+    T createData(String data);
+
+    default MinecraftAccount createDataAndLogin(String data, SWProxy proxyData) throws IOException {
+        return login(createData(data), proxyData);
+    }
 }

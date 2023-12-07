@@ -21,21 +21,20 @@ package net.pistonmaster.serverwrecker.auth;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.auth.service.AccountData;
-import net.pistonmaster.serverwrecker.auth.service.BedrockData;
-import net.pistonmaster.serverwrecker.auth.service.JavaData;
+import net.pistonmaster.serverwrecker.auth.service.*;
 
 @Getter
 @RequiredArgsConstructor
 public enum AuthType {
-    MICROSOFT_JAVA("Microsoft Java", JavaData.class),
-    MICROSOFT_BEDROCK("Microsoft Bedrock", BedrockData.class),
-    THE_ALTENING("The Altening", JavaData.class),
-    EASYMC("EasyMC", JavaData.class),
-    OFFLINE("Offline", JavaData.class);
+    MICROSOFT_JAVA("Microsoft Java", JavaData.class, new SWJavaMicrosoftAuthService()),
+    MICROSOFT_BEDROCK("Microsoft Bedrock", BedrockData.class, new SWBedrockMicrosoftAuthService()),
+    THE_ALTENING("The Altening", JavaData.class, new SWTheAlteningAuthService()),
+    EASYMC("EasyMC", JavaData.class, new SWEasyMCAuthService()),
+    OFFLINE("Offline", JavaData.class, new SWOfflineAuthService());
 
     private final String displayName;
     private final Class<? extends AccountData> accountDataClass;
+    private final MCAuthService<?> authService;
 
     @Override
     public String toString() {

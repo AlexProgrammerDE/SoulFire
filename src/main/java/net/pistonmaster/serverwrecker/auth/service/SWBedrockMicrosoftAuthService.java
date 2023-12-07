@@ -25,14 +25,16 @@ import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
+import org.apache.commons.validator.routines.EmailValidator;
 
 import java.io.IOException;
 
-public class SWBedrockMicrosoftAuthService implements MCAuthService {
-    public MinecraftAccount login(String email, String password, SWProxy proxyData) throws IOException {
+public final class SWBedrockMicrosoftAuthService implements MCAuthService<SWBedrockMicrosoftAuthService.BedrockMicrosoftAuthData> {
+    @Override
+    public MinecraftAccount login(BedrockMicrosoftAuthData data, SWProxy proxyData) throws IOException {
         try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
             var fullBedrockSession = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(httpClient,
-                    new StepCredentialsMsaCode.MsaCredentials(email, password));
+                    new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
 
             var mcChain = fullBedrockSession.getMcChain();
             var xblXsts = mcChain.getXblXsts();
@@ -51,5 +53,25 @@ public class SWBedrockMicrosoftAuthService implements MCAuthService {
         } catch (Exception e) {
             throw new IOException(e);
         }
+    }
+
+    @Override
+    public BedrockMicrosoftAuthData createData(String data) {
+        var split = data.split(":");
+
+        if (split.length != 2) {
+            throw new IllegalArgumentException("Invalid data!");
+        }
+
+        var email = split[0].trim();
+        var password = split[1].trim();
+        if (!EmailValidator.getInstance().isValid(email)) {
+            throw new IllegalArgumentException("Invalid email!");
+        }
+
+        return new BedrockMicrosoftAuthData(email, password);
+    }
+
+    public record BedrockMicrosoftAuthData(String email, String password) {
     }
 }
