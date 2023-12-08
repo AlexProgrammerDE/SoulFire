@@ -1,8 +1,8 @@
 # Supported Versions
 
-ServerWrecker supports a wide range of Minecraft versions thanks to ViaVersion as many extensions.
+ServerWrecker supports a wide range of Minecraft versions thanks to ViaVersion and many extensions.
 All versions that are supported by ViaVersion are supported by ServerWrecker, such
-as releases, april fools versions, beta, alpha and bedrock.
+as releases, april fools snapshots, beta, alpha and bedrock.
 ServerWrecker itself is always coded for the latest stable release of Minecraft, and all connections are
 downgraded/translated by ViaVersion.
 Below is a list of all versions that are supported by ServerWrecker.
