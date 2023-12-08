@@ -26,9 +26,9 @@ performance.
 * Load and save profiles for quick access
 * Support for online and offline mode servers
 * Supports [almost every Minecraft version](#-version-support)
-* Use [Microsoft, The Altening, EasyMC or Offline accounts](#-import-accounts--proxies)
-* Use [HTTP/SOCKS4/SOCKS5 proxies](#-import-accounts--proxies)
-* Multiple [plugins](#-built-in-plugins) like AutoRespawn, AutoJump, ClientSettings and more
+* Use Microsoft, The Altening, EasyMC or Offline accounts
+* Use HTTP/SOCKS4/SOCKS5 proxies
+* Multiple [built-in plugins](#-built-in-plugins) like AutoRespawn, AutoJump, ClientSettings and more
 * Console command support
 * A* Pathfinding (Diagonal moves, parkour, mining blocks, placing blocks)
 
