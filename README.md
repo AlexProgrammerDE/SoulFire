@@ -25,10 +25,10 @@ performance.
 * Configurable options for every attack like the number of bots, join delay and more
 * Load and save profiles for quick access
 * Support for online and offline mode servers
-* Supports almost every Minecraft version (Release, April Fools Snapshots, Beta, Alpha, Classic and even Bedrock Edition)
-* Use Microsoft, The Altening, EasyMC or Offline accounts
-* Use HTTP/SOCKS4/SOCKS5 proxies
-* Multiple modules like AutoRespawn and also AutoRegister for cracked servers
+* Supports [almost every Minecraft version](#-version-support)
+* Use [Microsoft, The Altening, EasyMC or Offline accounts](#-import-accounts--proxies)
+* Use [HTTP/SOCKS4/SOCKS5 proxies](#-import-accounts--proxies)
+* Multiple [plugins](#-built-in-plugins) like AutoRespawn, AutoJump, ClientSettings and more
 * Console command support
 * A* Pathfinding (Diagonal moves, parkour, mining blocks, placing blocks)
 
@@ -183,7 +183,7 @@ or run `java -jar serverwrecker.jar --help`.
 ServerWrecker offers a Developer API to create your own plugins using the plugin API and mixins.
 The software may regularly have breaking changes, so you'll have to stick to a verson of ServerWrecker or update your plugin regularly.
 
-To learn more about the Dveloper API, take a look at the official [plugin example](https://github.com/AlexProgrammerDE/ServerWreckerPluginExample).
+To learn more about the Developer API, take a look at the official [plugin example](https://github.com/AlexProgrammerDE/ServerWreckerPluginExample).
 
 ## 🌈 Community
 
