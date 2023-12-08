@@ -44,7 +44,7 @@ through [nightly.link](https://nightly.link/AlexProgrammerDE/ServerWrecker/workf
 
 ## 🍿 Version support
 
-ServerWrecker supports many version of Minecraft, including releases, beta, alpha, classic (including [CPE](https://wiki.vg/Classic_Protocol_Extension)) and even Minecraft Bedrock edition,
+ServerWrecker supports many version of Minecraft, including releases, beta, alpha, classic (including [CPE](https://wiki.vg/Classic_Protocol_Extension)), April Fools Snapshots and even Minecraft Bedrock edition,
 and that includes every single subversion, not just a few specific versions.
 
 You can find a up-to-date list of supported versions in [VERSIONS.md](./VERSIONS.md).
