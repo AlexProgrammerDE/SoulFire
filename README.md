@@ -172,16 +172,15 @@ or run `java -jar serverwrecker.jar --help`.
 
 ## 🔧 Build from source
 
-1. Install Java 17
-2. Download Gradle
-3. Download the latest version of ServerWrecker
-4. Run `./gradlew build` in the ServerWrecker directory
-5. Get the jar file from `build/libs`
+1. Install Java 21+
+2. Download the latest source code from GitHub
+3. Run `./gradlew build` in the project directory
+4. Get the jar file from `build/libs`
 
 ## 👨‍💻 Developer API
 
 ServerWrecker offers a Developer API to create your own plugins using the plugin API and mixins.
-The software may regularly have breaking changes, so you'll have to stick to a verson of ServerWrecker or update your plugin regularly.
+The software may regularly have breaking changes, so you'll have to stick to a version of ServerWrecker or update your plugin regularly.
 
 To learn more about the Developer API, take a look at the official [plugin example](https://github.com/AlexProgrammerDE/ServerWreckerPluginExample).
 
@@ -193,7 +192,6 @@ Feel free to join our Discord community server:
 
 This project is in active development, so if you have any feature requests or issues, please submit them here on GitHub.
 PRs are welcome, too.
-:octocat:
 
 ## 🌟 Star History
 
