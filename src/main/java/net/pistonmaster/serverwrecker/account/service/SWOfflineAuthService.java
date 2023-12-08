@@ -17,12 +17,24 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.auth.service;
+package net.pistonmaster.serverwrecker.account.service;
 
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.util.UUID;
+import net.pistonmaster.serverwrecker.account.MinecraftAccount;
+import net.pistonmaster.serverwrecker.proxy.SWProxy;
 
-public record BedrockData(String mojangJwt, String identityJwt, ECPublicKey publicKey, ECPrivateKey privateKey,
-                          UUID deviceId, String playFabId) implements AccountData {
+import java.io.IOException;
+
+public final class SWOfflineAuthService implements MCAuthService<SWOfflineAuthService.OfflineAuthData> {
+    @Override
+    public MinecraftAccount login(OfflineAuthData data, SWProxy proxyData) throws IOException {
+        return new MinecraftAccount(data.username);
+    }
+
+    @Override
+    public OfflineAuthData createData(String data) {
+        return new OfflineAuthData(data);
+    }
+
+    public record OfflineAuthData(String username) {
+    }
 }

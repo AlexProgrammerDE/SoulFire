@@ -21,8 +21,8 @@ package net.pistonmaster.serverwrecker.protocol;
 
 import com.google.gson.Gson;
 import lombok.AllArgsConstructor;
-import net.pistonmaster.serverwrecker.auth.AuthType;
-import net.pistonmaster.serverwrecker.auth.HttpHelper;
+import net.pistonmaster.serverwrecker.account.AuthType;
+import net.pistonmaster.serverwrecker.account.HttpHelper;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.util.UUIDHelper;
 import org.apache.http.client.methods.HttpPost;

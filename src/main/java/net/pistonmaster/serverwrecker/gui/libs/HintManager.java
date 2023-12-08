@@ -64,8 +64,7 @@ public class HintManager {
     }
 
     public static void hideAllHints() {
-        var hintPanels2 = hintPanels.toArray(new HintPanel[0]);
-        for (var hintPanel : hintPanels2) {
+        for (var hintPanel : List.copyOf(hintPanels)) {
             hintPanel.hideHint();
         }
     }

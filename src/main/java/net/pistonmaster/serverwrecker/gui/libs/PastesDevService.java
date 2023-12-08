@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.gui.libs;
 
 import com.google.gson.Gson;
-import net.pistonmaster.serverwrecker.auth.HttpHelper;
+import net.pistonmaster.serverwrecker.account.HttpHelper;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;

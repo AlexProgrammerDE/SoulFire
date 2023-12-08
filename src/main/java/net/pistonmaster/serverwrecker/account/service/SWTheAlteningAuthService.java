@@ -17,14 +17,14 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.auth.service;
+package net.pistonmaster.serverwrecker.account.service;
 
 import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.auth.AuthType;
-import net.pistonmaster.serverwrecker.auth.HttpHelper;
-import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.account.AuthType;
+import net.pistonmaster.serverwrecker.account.HttpHelper;
+import net.pistonmaster.serverwrecker.account.MinecraftAccount;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.util.UUIDHelper;
 import org.apache.http.client.methods.HttpPost;

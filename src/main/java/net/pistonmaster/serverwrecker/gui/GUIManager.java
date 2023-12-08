@@ -28,6 +28,7 @@ import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.command.ShutdownManager;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsManager;
+import net.pistonmaster.serverwrecker.util.SWPathConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,14 +38,11 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Getter
 public class GUIManager {
-    public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
-    public static final Path PROFILES_FOLDER = DATA_FOLDER.resolve("profiles");
     private final RPCClient rpcClient;
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
@@ -61,7 +59,7 @@ public class GUIManager {
 
     public void initGUI() {
         try {
-            Files.createDirectories(PROFILES_FOLDER);
+            Files.createDirectories(SWPathConstants.PROFILES_FOLDER);
         } catch (IOException e) {
             logger.error("Failed to create profiles folder!", e);
         }

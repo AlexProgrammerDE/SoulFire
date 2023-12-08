@@ -33,30 +33,28 @@ public class ProxyRegistry {
     private final List<SWProxy> proxies = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
 
-    public void loadFromString(String file, ProxyType proxyType) {
-        var newProxies = new ArrayList<SWProxy>();
-
-        file.lines()
+    public void loadFromString(String data, ProxyType proxyType) {
+        var newProxies = data.lines()
                 .filter(line -> !line.isBlank())
                 .distinct()
-                .map(line -> fromString(line, proxyType))
-                .forEach(newProxies::add);
+                .map(line -> fromStringSingle(line, proxyType))
+                .toList();
 
         if (newProxies.isEmpty()) {
-            LOGGER.warn("No accounts found in the provided file!");
+            LOGGER.warn("No proxies found in the provided data!");
             return;
         }
 
         this.proxies.addAll(newProxies);
-        LOGGER.info("Loaded {} proxies!", newProxies.size());
-
         callLoadHooks();
+
+        LOGGER.info("Loaded {} proxies!", newProxies.size());
     }
 
-    private SWProxy fromString(String proxy, ProxyType proxyType) {
-        proxy = proxy.trim();
+    private SWProxy fromStringSingle(String data, ProxyType proxyType) {
+        data = data.trim();
 
-        var split = proxy.split(":");
+        var split = data.split(":");
 
         var host = split[0];
         var port = Integer.parseInt(split[1]);
@@ -66,7 +64,7 @@ public class ProxyRegistry {
         return new SWProxy(proxyType, host, port, username, password, true);
     }
 
-    private <T> T getIndexOrNull(T[] array, int index) {
+    private static <T> T getIndexOrNull(T[] array, int index) {
         if (index < array.length) {
             return array[index];
         } else {

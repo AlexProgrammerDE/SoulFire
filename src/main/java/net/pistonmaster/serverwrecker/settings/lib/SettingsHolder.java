@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.settings.lib;
 
 import it.unimi.dsi.fastutil.objects.*;
-import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.account.MinecraftAccount;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.lib.property.*;
 

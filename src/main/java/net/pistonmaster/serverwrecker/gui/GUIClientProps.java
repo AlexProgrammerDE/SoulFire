@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.gui;
 
+import net.pistonmaster.serverwrecker.util.SWPathConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ import java.util.Properties;
 
 public class GUIClientProps {
     private static final Logger LOGGER = LoggerFactory.getLogger(GUIClientProps.class);
-    private static final Path SETTINGS_PATH = GUIManager.DATA_FOLDER.resolve("gui-data.properties");
+    private static final Path SETTINGS_PATH = SWPathConstants.DATA_FOLDER.resolve("gui-data.properties");
     private static final Properties SETTINGS = new Properties();
 
     private GUIClientProps() {

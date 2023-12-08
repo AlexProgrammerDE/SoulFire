@@ -17,11 +17,11 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.auth.service;
+package net.pistonmaster.serverwrecker.account.service;
 
-import net.pistonmaster.serverwrecker.auth.AuthType;
-import net.pistonmaster.serverwrecker.auth.HttpHelper;
-import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.account.AuthType;
+import net.pistonmaster.serverwrecker.account.HttpHelper;
+import net.pistonmaster.serverwrecker.account.MinecraftAccount;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
@@ -29,22 +29,34 @@ import org.apache.commons.validator.routines.EmailValidator;
 
 import java.io.IOException;
 
-public final class SWJavaMicrosoftAuthService implements MCAuthService<SWJavaMicrosoftAuthService.JavaMicrosoftAuthData> {
+public final class SWBedrockMicrosoftAuthService implements MCAuthService<SWBedrockMicrosoftAuthService.BedrockMicrosoftAuthData> {
     @Override
-    public MinecraftAccount login(JavaMicrosoftAuthData data, SWProxy proxyData) throws IOException {
+    public MinecraftAccount login(BedrockMicrosoftAuthData data, SWProxy proxyData) throws IOException {
         try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-            var fullJavaSession = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient,
+            var fullBedrockSession = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(httpClient,
                     new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
-            var mcProfile = fullJavaSession.getMcProfile();
-            var mcToken = mcProfile.getMcToken();
-            return new MinecraftAccount(AuthType.MICROSOFT_JAVA, mcProfile.getName(), new JavaData(mcProfile.getId(), mcToken.getAccessToken(), mcToken.getExpireTimeMs()), true);
+
+            var mcChain = fullBedrockSession.getMcChain();
+            var xblXsts = mcChain.getXblXsts();
+            var deviceId = xblXsts.getInitialXblSession().getXblDeviceToken().getId();
+            var playFabId = fullBedrockSession.getPlayFabToken().getPlayFabId();
+            return new MinecraftAccount(AuthType.MICROSOFT_BEDROCK, mcChain.getDisplayName(),
+                    new BedrockData(
+                            mcChain.getMojangJwt(),
+                            mcChain.getIdentityJwt(),
+                            mcChain.getPublicKey(),
+                            mcChain.getPrivateKey(),
+                            deviceId,
+                            playFabId
+                    ),
+                    true);
         } catch (Exception e) {
             throw new IOException(e);
         }
     }
 
     @Override
-    public JavaMicrosoftAuthData createData(String data) {
+    public BedrockMicrosoftAuthData createData(String data) {
         var split = data.split(":");
 
         if (split.length != 2) {
@@ -57,9 +69,9 @@ public final class SWJavaMicrosoftAuthService implements MCAuthService<SWJavaMic
             throw new IllegalArgumentException("Invalid email!");
         }
 
-        return new JavaMicrosoftAuthData(email, password);
+        return new BedrockMicrosoftAuthData(email, password);
     }
 
-    public record JavaMicrosoftAuthData(String email, String password) {
+    public record BedrockMicrosoftAuthData(String email, String password) {
     }
 }

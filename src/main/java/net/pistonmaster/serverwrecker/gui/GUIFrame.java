@@ -27,10 +27,13 @@ import net.pistonmaster.serverwrecker.gui.navigation.ControlPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.util.Objects;
 
 public class GUIFrame extends JFrame {
     public static final String MAIN_MENU = "MainMenu";
+    private Runnable hintFocusListener;
 
     public GUIFrame() {
         super("ServerWrecker");
@@ -105,6 +108,20 @@ public class GUIFrame extends JFrame {
 
         setSize(minFrameWidth, minFrameHeight);
         setMinimumSize(new Dimension(minFrameWidth, minFrameHeight));
+
+        addWindowFocusListener(new WindowFocusListener() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                if (hintFocusListener != null) {
+                    hintFocusListener.run();
+                    hintFocusListener = null;
+                }
+            }
+
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+            }
+        });
     }
 
     public void open(Injector injector) {
@@ -130,8 +147,9 @@ public class GUIFrame extends JFrame {
                 GUIClientProps.setBoolean("firstTimeUser", true);
                 GUIClientProps.setBoolean("firstRun", false);
 
+                // Wait for focus, then show hints or else the hints sometime glitch
+                hintFocusListener = () -> showHints(injector);
                 requestFocusInWindow();
-                SwingUtilities.invokeLater(() -> showHints(injector));
             } else if (result == JOptionPane.NO_OPTION || result == JOptionPane.CLOSED_OPTION) {
                 GUIClientProps.setBoolean("firstTimeUser", false);
                 GUIClientProps.setBoolean("firstRun", false);

@@ -17,24 +17,20 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.auth.service;
+package net.pistonmaster.serverwrecker.util;
 
-import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
-import net.pistonmaster.serverwrecker.proxy.SWProxy;
+import net.harawata.appdirs.AppDirsFactory;
 
-import java.io.IOException;
+import java.nio.file.Path;
 
-public final class SWOfflineAuthService implements MCAuthService<SWOfflineAuthService.OfflineAuthData> {
-    @Override
-    public MinecraftAccount login(OfflineAuthData data, SWProxy proxyData) throws IOException {
-        return new MinecraftAccount(data.username);
-    }
+public class SWPathConstants {
+    public static final Path WORKING_DIRECTORY = Path.of(System.getProperty("user.dir"));
+    public static final Path DATA_FOLDER = getApplicationDataFolder();
+    public static final Path PLUGINS_FOLDER = DATA_FOLDER.resolve("plugins");
+    public static final Path CONFIG_FOLDER = DATA_FOLDER.resolve("config");
+    public static final Path PROFILES_FOLDER = DATA_FOLDER.resolve("profiles");
 
-    @Override
-    public OfflineAuthData createData(String data) {
-        return new OfflineAuthData(data);
-    }
-
-    public record OfflineAuthData(String username) {
+    private static Path getApplicationDataFolder() {
+        return Path.of(AppDirsFactory.getInstance().getUserDataDir("ServerWrecker", null, null));
     }
 }

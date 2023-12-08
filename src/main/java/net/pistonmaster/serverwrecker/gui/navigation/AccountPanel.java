@@ -19,19 +19,19 @@
  */
 package net.pistonmaster.serverwrecker.gui.navigation;
 
-import net.pistonmaster.serverwrecker.auth.AuthType;
-import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
+import net.pistonmaster.serverwrecker.account.AuthType;
+import net.pistonmaster.serverwrecker.account.MinecraftAccount;
 import net.pistonmaster.serverwrecker.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 import net.pistonmaster.serverwrecker.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.gui.popups.ImportTextDialog;
+import net.pistonmaster.serverwrecker.util.SWPathConstants;
 
 import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class AccountPanel extends NavigationItem {
@@ -136,7 +136,7 @@ public class AccountPanel extends NavigationItem {
         var button = new JButton(SwingTextUtils.htmlCenterText(String.format("Load %s accounts", type)));
 
         button.addActionListener(e -> new ImportTextDialog(
-                Path.of(System.getProperty("user.dir")),
+                SWPathConstants.WORKING_DIRECTORY,
                 String.format("Load %s accounts", type),
                 String.format("%s list file", type),
                 guiManager,

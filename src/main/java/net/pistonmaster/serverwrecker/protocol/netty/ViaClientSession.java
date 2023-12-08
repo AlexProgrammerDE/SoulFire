@@ -38,13 +38,13 @@ import io.netty.handler.codec.haproxy.*;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
-import net.pistonmaster.serverwrecker.SWConstants;
-import net.pistonmaster.serverwrecker.auth.service.BedrockData;
+import net.pistonmaster.serverwrecker.account.service.BedrockData;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionMeta;
 import net.pistonmaster.serverwrecker.protocol.SWProtocolConstants;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
+import net.pistonmaster.serverwrecker.util.SWVersionConstants;
 import net.pistonmaster.serverwrecker.viaversion.FrameCodec;
 import net.pistonmaster.serverwrecker.viaversion.StorableSession;
 import net.pistonmaster.serverwrecker.viaversion.StorableSettingsHolder;
@@ -111,8 +111,8 @@ public class ViaClientSession extends TcpSession {
 
         try {
             var version = settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
-            var isLegacy = SWConstants.isLegacy(version);
-            var isBedrock = SWConstants.isBedrock(version);
+            var isLegacy = SWVersionConstants.isLegacy(version);
+            var isBedrock = SWVersionConstants.isBedrock(version);
             var bootstrap = new Bootstrap();
 
             bootstrap.group(eventLoopGroup);

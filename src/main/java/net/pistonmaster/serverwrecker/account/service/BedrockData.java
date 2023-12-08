@@ -17,7 +17,12 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.auth.service;
+package net.pistonmaster.serverwrecker.account.service;
 
-public sealed interface AccountData permits JavaData, BedrockData {
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.util.UUID;
+
+public record BedrockData(String mojangJwt, String identityJwt, ECPublicKey publicKey, ECPrivateKey privateKey,
+                          UUID deviceId, String playFabId) implements AccountData {
 }

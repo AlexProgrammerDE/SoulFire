@@ -21,11 +21,11 @@ package net.pistonmaster.serverwrecker.cli;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.pistonmaster.serverwrecker.SWConstants;
-import net.pistonmaster.serverwrecker.auth.AuthType;
+import net.pistonmaster.serverwrecker.account.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
+import net.pistonmaster.serverwrecker.util.SWVersionConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -89,12 +89,12 @@ public class SWCommandDefinition implements Callable<Integer> {
             var yesEmoji = "✅";
             var noEmoji = "❌";
 
-            SWConstants.getVersionsSorted().forEach(version -> {
-                var nativeVersion = SWConstants.CURRENT_PROTOCOL_VERSION == version ? yesEmoji : noEmoji;
-                var bedrockVersion = SWConstants.isBedrock(version) ? yesEmoji : noEmoji;
-                var javaVersion = !SWConstants.isBedrock(version) ? yesEmoji : noEmoji;
-                var snapshotVersion = SWConstants.isAprilFools(version) ? yesEmoji : noEmoji;
-                var legacyVersion = SWConstants.isLegacy(version) ? yesEmoji : noEmoji;
+            SWVersionConstants.getVersionsSorted().forEach(version -> {
+                var nativeVersion = SWVersionConstants.CURRENT_PROTOCOL_VERSION == version ? yesEmoji : noEmoji;
+                var bedrockVersion = SWVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
+                var javaVersion = !SWVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
+                var snapshotVersion = SWVersionConstants.isAprilFools(version) ? yesEmoji : noEmoji;
+                var legacyVersion = SWVersionConstants.isLegacy(version) ? yesEmoji : noEmoji;
 
                 System.out.printf("| %s | %s | %s | %s | %s | %s |%n", version.getName(), nativeVersion, javaVersion, snapshotVersion, legacyVersion, bedrockVersion);
             });

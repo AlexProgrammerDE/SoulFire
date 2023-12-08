@@ -28,6 +28,7 @@ import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.util.CustomClassProvider;
+import net.pistonmaster.serverwrecker.util.SWPathConstants;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.fusesource.jansi.AnsiConsole;
@@ -40,7 +41,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,9 +50,7 @@ import java.util.List;
  * setting up logging.
  */
 public class ServerWreckerBootstrap {
-    public static final Path DATA_FOLDER = Path.of(System.getProperty("user.home"), ".serverwrecker");
-    public static final Path PLUGINS_FOLDER = DATA_FOLDER.resolve("plugins");
-    public static final PluginManager PLUGIN_MANAGER = new JarPluginManager(PLUGINS_FOLDER);
+    public static final PluginManager PLUGIN_MANAGER = new JarPluginManager(SWPathConstants.PLUGINS_FOLDER);
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerBootstrap.class);
 
     static {
@@ -146,7 +144,7 @@ public class ServerWreckerBootstrap {
 
     private static void initPlugins(List<ClassLoader> classLoaders) {
         try {
-            Files.createDirectories(PLUGINS_FOLDER);
+            Files.createDirectories(SWPathConstants.PLUGINS_FOLDER);
         } catch (IOException e) {
             LOGGER.error("Failed to create plugin directory", e);
         }

@@ -38,11 +38,11 @@ import lombok.Getter;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.pistonmaster.serverwrecker.account.AccountSettings;
 import net.pistonmaster.serverwrecker.api.ServerExtension;
 import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackInitEvent;
 import net.pistonmaster.serverwrecker.api.event.lifecycle.SettingsRegistryInitEvent;
-import net.pistonmaster.serverwrecker.auth.AccountSettings;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.command.ShutdownManager;
 import net.pistonmaster.serverwrecker.common.AttackState;
@@ -58,6 +58,7 @@ import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.DevSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsRegistry;
+import net.pistonmaster.serverwrecker.util.SWPathConstants;
 import net.pistonmaster.serverwrecker.util.VersionComparator;
 import net.pistonmaster.serverwrecker.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.viaversion.platform.*;
@@ -152,7 +153,7 @@ public class ServerWreckerServer {
                         new MinecraftPacketSerializer<>(SWClientboundStatusResponsePacket::new)));
 
         // Init via
-        var viaPath = ServerWreckerBootstrap.DATA_FOLDER.resolve("ViaVersion");
+        var viaPath = SWPathConstants.CONFIG_FOLDER.resolve("ViaVersion");
         var platform = new SWViaPlatform(viaPath);
 
         Via.init(ViaManagerImpl.builder()
@@ -169,11 +170,11 @@ public class ServerWreckerServer {
         ((ProtocolManagerImpl) Via.getManager().getProtocolManager()).refreshVersions();
 
         Via.getManager().addEnableListener(() -> {
-            new SWViaRewind(ServerWreckerBootstrap.DATA_FOLDER.resolve("ViaRewind")).init();
-            new SWViaBackwards(ServerWreckerBootstrap.DATA_FOLDER.resolve("ViaBackwards")).init();
-            new SWViaAprilFools(ServerWreckerBootstrap.DATA_FOLDER.resolve("ViaAprilFools")).init();
-            new SWViaLegacy(ServerWreckerBootstrap.DATA_FOLDER.resolve("ViaLegacy")).init();
-            new SWViaBedrock(ServerWreckerBootstrap.DATA_FOLDER.resolve("ViaBedrock")).init();
+            new SWViaRewind(SWPathConstants.CONFIG_FOLDER.resolve("ViaRewind")).init();
+            new SWViaBackwards(SWPathConstants.CONFIG_FOLDER.resolve("ViaBackwards")).init();
+            new SWViaAprilFools(SWPathConstants.CONFIG_FOLDER.resolve("ViaAprilFools")).init();
+            new SWViaLegacy(SWPathConstants.CONFIG_FOLDER.resolve("ViaLegacy")).init();
+            new SWViaBedrock(SWPathConstants.CONFIG_FOLDER.resolve("ViaBedrock")).init();
         });
 
         var manager = (ViaManagerImpl) Via.getManager();

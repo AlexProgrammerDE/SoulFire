@@ -30,12 +30,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
+import net.pistonmaster.serverwrecker.account.AccountSettings;
+import net.pistonmaster.serverwrecker.account.MinecraftAccount;
 import net.pistonmaster.serverwrecker.api.event.EventExceptionHandler;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerAttackEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackEndedEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackStartEvent;
-import net.pistonmaster.serverwrecker.auth.AccountSettings;
-import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
 import net.pistonmaster.serverwrecker.common.AttackState;
 import net.pistonmaster.serverwrecker.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.protocol.BotConnectionFactory;
@@ -46,6 +46,7 @@ import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.util.RandomUtil;
+import net.pistonmaster.serverwrecker.util.SWVersionConstants;
 import net.pistonmaster.serverwrecker.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,7 +157,7 @@ public class AttackManager {
         var attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(threads, String.format("Attack-%d", id));
 
         var protocolVersion = settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
-        var isBedrock = SWConstants.isBedrock(protocolVersion);
+        var isBedrock = SWVersionConstants.isBedrock(protocolVersion);
         var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder, attackEventLoopGroup);
 
         var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);

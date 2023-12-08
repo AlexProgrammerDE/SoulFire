@@ -141,6 +141,9 @@ dependencies {
     api(libs.reflect)
     api(libs.lambdaevents)
 
+    // For detecting the dir to put data in
+    implementation(libs.appdirs)
+
     // For microsoft account authentication
     api(libs.minecraftauth) {
         exclude("com.google.code.gson", "gson")

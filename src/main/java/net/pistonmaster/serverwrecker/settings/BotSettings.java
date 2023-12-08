@@ -21,9 +21,9 @@ package net.pistonmaster.serverwrecker.settings;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.settings.lib.property.*;
+import net.pistonmaster.serverwrecker.util.SWVersionConstants;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BotSettings implements SettingsObject {
@@ -135,11 +135,11 @@ public class BotSettings implements SettingsObject {
     );
 
     private static ComboProperty.ComboOption[] getProtocolVersionOptions() {
-        return SWConstants.getVersionsSorted().stream().map(version -> {
+        return SWVersionConstants.getVersionsSorted().stream().map(version -> {
             String displayName;
-            if (SWConstants.isBedrock(version)) {
+            if (SWVersionConstants.isBedrock(version)) {
                 displayName = String.format("%s (%s)", version.getName(), version.getVersion() - 1_000_000);
-            } else if (SWConstants.isLegacy(version)) {
+            } else if (SWVersionConstants.isLegacy(version)) {
                 displayName = String.format("%s (%s)", version.getName(), Math.abs(version.getVersion()) >> 2);
             } else {
                 displayName = version.toString();

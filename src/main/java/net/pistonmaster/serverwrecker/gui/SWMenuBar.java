@@ -33,6 +33,7 @@ import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.api.event.gui.WindowCloseEvent;
 import net.pistonmaster.serverwrecker.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.gui.popups.AboutPopup;
+import net.pistonmaster.serverwrecker.util.SWPathConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +76,7 @@ public class SWMenuBar extends JMenuBar {
         var loadProfile = new JMenuItem("Load Profile");
         loadProfile.addActionListener(e -> {
             var chooser = new FileChooser();
-            chooser.setInitialDirectory(GUIManager.PROFILES_FOLDER.toFile());
+            chooser.setInitialDirectory(SWPathConstants.PROFILES_FOLDER.toFile());
             chooser.setTitle("Load Profile");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ServerWrecker profile", "*.json"));
             JFXFileHelper.showOpenDialog(chooser).thenAcceptAsync(file -> {
@@ -96,7 +97,7 @@ public class SWMenuBar extends JMenuBar {
         var saveProfile = new JMenuItem("Save Profile");
         saveProfile.addActionListener(e -> {
             var chooser = new FileChooser();
-            chooser.setInitialDirectory(GUIManager.PROFILES_FOLDER.toFile());
+            chooser.setInitialDirectory(SWPathConstants.PROFILES_FOLDER.toFile());
             chooser.setTitle("Save Profile");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ServerWrecker profile", "*.json"));
             JFXFileHelper.showSaveDialog(chooser).thenAcceptAsync(file -> {

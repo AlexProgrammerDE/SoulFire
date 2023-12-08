@@ -17,19 +17,16 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.auth.service;
+package net.pistonmaster.serverwrecker.account.service;
 
-import net.pistonmaster.serverwrecker.auth.MinecraftAccount;
-import net.pistonmaster.serverwrecker.proxy.SWProxy;
+import java.util.UUID;
 
-import java.io.IOException;
+public record JavaData(UUID profileId, String authToken, long tokenExpireAt) implements AccountData {
+    public boolean isPremium() {
+        return profileId != null && authToken != null;
+    }
 
-public sealed interface MCAuthService<T> permits SWBedrockMicrosoftAuthService, SWEasyMCAuthService, SWJavaMicrosoftAuthService, SWOfflineAuthService, SWTheAlteningAuthService {
-    MinecraftAccount login(T data, SWProxy proxyData) throws IOException;
-
-    T createData(String data);
-
-    default MinecraftAccount createDataAndLogin(String data, SWProxy proxyData) throws IOException {
-        return login(createData(data), proxyData);
+    public boolean isTokenExpired() {
+        return tokenExpireAt != -1 && System.currentTimeMillis() > tokenExpireAt;
     }
 }

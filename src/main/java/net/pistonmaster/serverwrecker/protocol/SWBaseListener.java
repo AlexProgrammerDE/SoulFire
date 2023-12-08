@@ -51,9 +51,9 @@ import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.SWConstants;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.settings.BotSettings;
+import net.pistonmaster.serverwrecker.util.SWVersionConstants;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 
 import javax.crypto.KeyGenerator;
@@ -84,7 +84,7 @@ public class SWBaseListener extends SessionAdapter {
                 }
 
                 var auth = authSupport;
-                var isLegacy = SWConstants.isLegacy(botConnection.settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest));
+                var isLegacy = SWVersionConstants.isLegacy(botConnection.settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest));
                 if (auth && isLegacy) {
                     auth = Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
                 }

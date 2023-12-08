@@ -26,12 +26,12 @@ import net.pistonmaster.serverwrecker.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.gui.popups.ImportTextDialog;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
+import net.pistonmaster.serverwrecker.util.SWPathConstants;
 
 import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class ProxyPanel extends NavigationItem {
@@ -140,7 +140,7 @@ public class ProxyPanel extends NavigationItem {
         var button = new JButton(SwingTextUtils.htmlCenterText(String.format("Load %s proxies", type)));
 
         button.addActionListener(e -> new ImportTextDialog(
-                Path.of(System.getProperty("user.dir")),
+                SWPathConstants.WORKING_DIRECTORY,
                 String.format("Load %s proxies", type),
                 String.format("%s list file", type),
                 guiManager,

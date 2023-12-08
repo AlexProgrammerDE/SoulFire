@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker;
+package net.pistonmaster.serverwrecker.util;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.raphimc.viaaprilfools.api.AprilFoolsProtocolVersion;
@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class SWConstants {
+public class SWVersionConstants {
     public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.v1_20_2;
 
     static {
@@ -42,7 +42,7 @@ public class SWConstants {
         );
     }
 
-    private SWConstants() {
+    private SWVersionConstants() {
     }
 
     @SuppressWarnings("unused")

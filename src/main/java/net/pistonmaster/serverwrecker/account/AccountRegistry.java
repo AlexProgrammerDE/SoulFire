@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.auth;
+package net.pistonmaster.serverwrecker.account;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -37,35 +37,33 @@ public class AccountRegistry {
     private final List<MinecraftAccount> accounts = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
 
-    public void loadFromString(String file, AuthType authType) {
-        var newAccounts = new ArrayList<MinecraftAccount>();
-
-        file.lines()
+    public void loadFromString(String data, AuthType authType) {
+        var newAccounts = data.lines()
                 .filter(line -> !line.isBlank())
                 .distinct()
-                .map(account -> fromString(account, authType))
-                .forEach(newAccounts::add);
+                .map(account -> fromStringSingle(account, authType))
+                .toList();
 
         if (newAccounts.isEmpty()) {
-            LOGGER.warn("No accounts found in the provided file!");
+            LOGGER.warn("No accounts found in the provided data!");
             return;
         }
 
         this.accounts.addAll(newAccounts);
-        LOGGER.info("Loaded {} accounts!", newAccounts.size());
-
         callLoadHooks();
+
+        LOGGER.info("Loaded {} accounts!", newAccounts.size());
     }
 
-    private MinecraftAccount fromString(String account, AuthType authType) {
-        account = account.trim();
+    private MinecraftAccount fromStringSingle(String data, AuthType authType) {
+        data = data.trim();
 
-        if (account.isBlank()) {
+        if (data.isBlank()) {
             throw new IllegalArgumentException("Account cannot be empty!");
         }
 
         try {
-            return authType.getAuthService().createDataAndLogin(account, null);
+            return authType.getAuthService().createDataAndLogin(data, null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
