@@ -53,10 +53,10 @@ public final class SWTheAlteningAuthService implements MCAuthService<SWTheAlteni
 
             return new MinecraftAccount(
                     AuthType.THE_ALTENING,
-                    response.getSelectedProfile().getName(),
+                    response.selectedProfile().name(),
                     new JavaData(
-                            UUIDHelper.convertToDashed(response.getSelectedProfile().getId()),
-                            response.getAccessToken(),
+                            UUIDHelper.convertToDashed(response.selectedProfile().id()),
+                            response.accessToken(),
                             -1
                     ),
                     true

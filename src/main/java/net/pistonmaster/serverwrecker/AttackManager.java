@@ -243,7 +243,7 @@ public class AttackManager {
             var disconnectFuture = new ArrayList<CompletableFuture<Void>>();
             for (var botConnection : List.copyOf(botConnections)) {
                 disconnectFuture.add(botConnection.gracefulDisconnect());
-                eventLoopGroups.add(botConnection.session().getEventLoopGroup());
+                eventLoopGroups.add(botConnection.session().eventLoopGroup());
                 botConnections.remove(botConnection);
             }
 

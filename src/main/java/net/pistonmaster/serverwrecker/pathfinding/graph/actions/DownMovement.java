@@ -40,7 +40,7 @@ public final class DownMovement implements GraphAction, Cloneable {
     private MovementMiningCost blockBreakCosts;
     @Setter
     @Getter
-    private boolean isImpossible = false;
+    private boolean impossible = false;
     @Getter
     @Setter
     private int closestBlockToFallOn = Integer.MIN_VALUE;
@@ -69,8 +69,8 @@ public final class DownMovement implements GraphAction, Cloneable {
     }
 
     @Override
-    public boolean isImpossibleToComplete() {
-        return isImpossible || closestBlockToFallOn == Integer.MIN_VALUE;
+    public boolean impossibleToComplete() {
+        return impossible || closestBlockToFallOn == Integer.MIN_VALUE;
     }
 
     @Override

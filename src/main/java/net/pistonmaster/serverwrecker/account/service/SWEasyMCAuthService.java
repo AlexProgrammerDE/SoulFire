@@ -50,16 +50,16 @@ public final class SWEasyMCAuthService implements MCAuthService<SWEasyMCAuthServ
             var response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
                     TokenRedeemResponse.class);
 
-            if (response.getMessage() != null) {
-                LOGGER.info("EasyMC has a message for you (This is not a error): {}", response.getMessage());
+            if (response.message() != null) {
+                LOGGER.info("EasyMC has a message for you (This is not a error): {}", response.message());
             }
 
             return new MinecraftAccount(
                     AuthType.EASYMC,
-                    response.getMcName(),
+                    response.mcName(),
                     new JavaData(
-                            UUID.fromString(response.getUuid()),
-                            response.getSession(),
+                            UUID.fromString(response.uuid()),
+                            response.session(),
                             -1
                     ),
                     true

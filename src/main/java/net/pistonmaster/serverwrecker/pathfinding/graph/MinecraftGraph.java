@@ -250,7 +250,7 @@ public record MinecraftGraph(TagsState tagsState) {
                     continue;
                 }
 
-                if (action.isImpossible()) {
+                if (action.impossible()) {
                     // Calling isImpossible can waste seconds of execution time
                     // Calling an interface method is expensive!
                     actions[subscriber.actionIndex] = null;
@@ -280,42 +280,42 @@ public record MinecraftGraph(TagsState tagsState) {
                                 }
 
                                 if (isFree) {
-                                    if (playerMovement.isAllowBlockActions()) {
-                                        playerMovement.getNoNeedToBreak()[subscriber.blockArrayIndex] = true;
+                                    if (playerMovement.allowBlockActions()) {
+                                        playerMovement.noNeedToBreak()[subscriber.blockArrayIndex] = true;
                                     }
 
                                     continue;
                                 }
 
                                 // Search for a way to break this block
-                                if (playerMovement.isAllowBlockActions()
+                                if (playerMovement.allowBlockActions()
                                         // Narrow this down to blocks that can be broken
                                         && blockState.blockType().diggable()
                                         // Check if we previously found out this block is unsafe to break
-                                        && !playerMovement.getUnsafeToBreak()[subscriber.blockArrayIndex]
+                                        && !playerMovement.unsafeToBreak()[subscriber.blockArrayIndex]
                                         // Narrows the list down to a reasonable size
                                         && BlockItems.hasItemType(blockState.blockType())) {
                                     var cacheableMiningCost = node.inventory()
                                             .getMiningCosts(tagsState, blockState);
                                     // We can mine this block, lets add costs and continue
-                                    playerMovement.getBlockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
+                                    playerMovement.blockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
                                             absolutePositionBlock,
                                             cacheableMiningCost.miningCost(),
                                             cacheableMiningCost.willDrop()
                                     );
                                 } else {
                                     // No way to break this block
-                                    playerMovement.setImpossible(true);
+                                    playerMovement.impossible(true);
                                 }
                             }
                             case MOVEMENT_BREAK_SAFETY_CHECK -> {
                                 // There is no need to break this block, so there is no need for safety checks
-                                if (playerMovement.getNoNeedToBreak()[subscriber.blockArrayIndex]) {
+                                if (playerMovement.noNeedToBreak()[subscriber.blockArrayIndex]) {
                                     continue;
                                 }
 
                                 // The block was already marked as unsafe
-                                if (playerMovement.getUnsafeToBreak()[subscriber.blockArrayIndex]) {
+                                if (playerMovement.unsafeToBreak()[subscriber.blockArrayIndex]) {
                                     continue;
                                 }
 
@@ -326,16 +326,16 @@ public record MinecraftGraph(TagsState tagsState) {
                                 };
 
                                 if (unsafe) {
-                                    var currentValue = playerMovement.getBlockBreakCosts()[subscriber.blockArrayIndex];
+                                    var currentValue = playerMovement.blockBreakCosts()[subscriber.blockArrayIndex];
 
                                     if (currentValue == null) {
                                         // Store for a later time that this is unsafe,
                                         // so if we check this block,
                                         // we know it's unsafe
-                                        playerMovement.getUnsafeToBreak()[subscriber.blockArrayIndex] = true;
+                                        playerMovement.unsafeToBreak()[subscriber.blockArrayIndex] = true;
                                     } else {
                                         // We learned that this block needs to be broken, so we need to set it as impossible
-                                        playerMovement.setImpossible(true);
+                                        playerMovement.impossible(true);
                                     }
                                 }
                             }
@@ -345,18 +345,18 @@ public record MinecraftGraph(TagsState tagsState) {
                                     continue;
                                 }
 
-                                if (playerMovement.isAllowBlockActions()
+                                if (playerMovement.allowBlockActions()
                                         && node.inventory().hasBlockToPlace()
                                         && blockState.blockType().blockProperties().replaceable()) {
                                     // We can place a block here, but we need to find a block to place against
-                                    playerMovement.setRequiresAgainstBlock(true);
+                                    playerMovement.requiresAgainstBlock(true);
                                 } else {
-                                    playerMovement.setImpossible(true);
+                                    playerMovement.impossible(true);
                                 }
                             }
                             case MOVEMENT_AGAINST_PLACE_SOLID -> {
                                 // We already found one, no need to check for more
-                                if (playerMovement.getBlockPlaceData() != null) {
+                                if (playerMovement.blockPlaceData() != null) {
                                     continue;
                                 }
 
@@ -366,14 +366,14 @@ public record MinecraftGraph(TagsState tagsState) {
                                 }
 
                                 // Fixup the position to be the block we are placing against instead of relative
-                                playerMovement.setBlockPlaceData(new BotActionManager.BlockPlaceData(
+                                playerMovement.blockPlaceData(new BotActionManager.BlockPlaceData(
                                         absolutePositionBlock,
                                         subscriber.blockToPlaceAgainst.blockFace()
                                 ));
                             }
                             case MOVEMENT_ADD_CORNER_COST_IF_SOLID -> {
                                 // No need to apply the cost multiple times.
-                                if (playerMovement.isAppliedCornerCost()) {
+                                if (playerMovement.appliedCornerCost()) {
                                     continue;
                                 }
 
@@ -381,7 +381,7 @@ public record MinecraftGraph(TagsState tagsState) {
                                     playerMovement.addCornerCost();
                                 } else if (BlockTypeHelper.isHurtOnTouchSide(blockState.blockType())) {
                                     // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
-                                    playerMovement.setImpossible(true);
+                                    playerMovement.impossible(true);
                                 }
                             }
                         }
@@ -400,14 +400,14 @@ public record MinecraftGraph(TagsState tagsState) {
                                     continue;
                                 }
 
-                                parkourMovement.setImpossible(true);
+                                parkourMovement.impossible(true);
                             }
                             // We only want to jump over dangerous blocks/gaps
                             // So either a non-full-block like water or lava or magma
                             // since it hurts to stand on.
                             case PARKOUR_UNSAFE_TO_STAND_ON -> {
                                 if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
-                                    parkourMovement.setImpossible(true);
+                                    parkourMovement.impossible(true);
                                 }
                             }
                             case MOVEMENT_SOLID -> {
@@ -416,7 +416,7 @@ public record MinecraftGraph(TagsState tagsState) {
                                     continue;
                                 }
 
-                                parkourMovement.setImpossible(true);
+                                parkourMovement.impossible(true);
                             }
                         }
                     }
@@ -429,27 +429,27 @@ public record MinecraftGraph(TagsState tagsState) {
                                     var cacheableMiningCost = node.inventory()
                                             .getMiningCosts(tagsState, blockState);
                                     // We can mine this block, lets add costs and continue
-                                    downMovement.setBlockBreakCosts(new MovementMiningCost(
+                                    downMovement.blockBreakCosts(new MovementMiningCost(
                                             absolutePositionBlock,
                                             cacheableMiningCost.miningCost(),
                                             cacheableMiningCost.willDrop()
                                     ));
                                 } else {
                                     // No way to break this block
-                                    downMovement.setImpossible(true);
+                                    downMovement.impossible(true);
                                 }
                             }
                             case DOWN_SAFETY_CHECK -> {
                                 var yLevel = key.y;
 
-                                if (yLevel < downMovement.getClosestBlockToFallOn()) {
+                                if (yLevel < downMovement.closestBlockToFallOn()) {
                                     // We already found a block to fall on, above this one
                                     continue;
                                 }
 
                                 if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
                                     // We found a block to fall on
-                                    downMovement.setClosestBlockToFallOn(yLevel);
+                                    downMovement.closestBlockToFallOn(yLevel);
                                 }
                             }
                         }
@@ -465,35 +465,35 @@ public record MinecraftGraph(TagsState tagsState) {
                                 }
 
                                 if (isFree) {
-                                    upMovement.getNoNeedToBreak()[subscriber.blockArrayIndex] = true;
+                                    upMovement.noNeedToBreak()[subscriber.blockArrayIndex] = true;
                                     continue;
                                 }
 
                                 // Search for a way to break this block
                                 if (blockState.blockType().diggable()
-                                        && !upMovement.getUnsafeToBreak()[subscriber.blockArrayIndex]
+                                        && !upMovement.unsafeToBreak()[subscriber.blockArrayIndex]
                                         && BlockItems.hasItemType(blockState.blockType())) {
                                     var cacheableMiningCost = node.inventory()
                                             .getMiningCosts(tagsState, blockState);
                                     // We can mine this block, lets add costs and continue
-                                    upMovement.getBlockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
+                                    upMovement.blockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
                                             absolutePositionBlock,
                                             cacheableMiningCost.miningCost(),
                                             cacheableMiningCost.willDrop()
                                     );
                                 } else {
                                     // No way to break this block
-                                    upMovement.setImpossible(true);
+                                    upMovement.impossible(true);
                                 }
                             }
                             case MOVEMENT_BREAK_SAFETY_CHECK -> {
                                 // There is no need to break this block, so there is no need for safety checks
-                                if (upMovement.getNoNeedToBreak()[subscriber.blockArrayIndex]) {
+                                if (upMovement.noNeedToBreak()[subscriber.blockArrayIndex]) {
                                     continue;
                                 }
 
                                 // The block was already marked as unsafe
-                                if (upMovement.getUnsafeToBreak()[subscriber.blockArrayIndex]) {
+                                if (upMovement.unsafeToBreak()[subscriber.blockArrayIndex]) {
                                     continue;
                                 }
 
@@ -504,16 +504,16 @@ public record MinecraftGraph(TagsState tagsState) {
                                 };
 
                                 if (unsafe) {
-                                    var currentValue = upMovement.getBlockBreakCosts()[subscriber.blockArrayIndex];
+                                    var currentValue = upMovement.blockBreakCosts()[subscriber.blockArrayIndex];
 
                                     if (currentValue == null) {
                                         // Store for a later time that this is unsafe,
                                         // so if we check this block,
                                         // we know it's unsafe
-                                        upMovement.getUnsafeToBreak()[subscriber.blockArrayIndex] = true;
+                                        upMovement.unsafeToBreak()[subscriber.blockArrayIndex] = true;
                                     } else {
                                         // We learned that this block needs to be broken, so we need to set it as impossible
-                                        upMovement.setImpossible(true);
+                                        upMovement.impossible(true);
                                     }
                                 }
                             }
@@ -532,7 +532,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 continue;
             }
 
-            if (movement.isImpossibleToComplete()) {
+            if (movement.impossibleToComplete()) {
                 continue;
             }
 

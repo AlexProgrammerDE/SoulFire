@@ -65,7 +65,7 @@ public class Costs {
         var lowestMiningTicks = Integer.MAX_VALUE;
         SWItemStack bestItem = null;
         var correctToolUsed = false;
-        for (var slot : inventory.getUsableToolsAndNull()) {
+        for (var slot : inventory.usableToolsAndNull()) {
             var miningTicks = getRequiredMiningTicks(tagsState, null, true, slot, blockType);
             if (miningTicks.ticks() < lowestMiningTicks) {
                 lowestMiningTicks = miningTicks.ticks();
@@ -96,11 +96,11 @@ public class Costs {
         if (itemStack == null) {
             speedMultiplier = 1;
         } else {
-            speedMultiplier = ToolSpeedType.getBlockToolSpeed(tagsState, itemStack.getType(), blockType);
+            speedMultiplier = ToolSpeedType.getBlockToolSpeed(tagsState, itemStack.type(), blockType);
         }
 
         if (itemStack != null && speedMultiplier > 1) {
-            var efficiency = itemStack.getEnchantments().getOrDefault("minecraft:efficiency", (short) 0);
+            var efficiency = itemStack.enchantments().getOrDefault("minecraft:efficiency", (short) 0);
 
             if (efficiency > 0) {
                 // Efficiency is capped at 255
@@ -134,7 +134,7 @@ public class Costs {
 
         var damage = speedMultiplier / blockType.hardness();
 
-        var correctToolUsed = isCorrectToolUsed(tagsState, itemStack == null ? null : itemStack.getType(), blockType);
+        var correctToolUsed = isCorrectToolUsed(tagsState, itemStack == null ? null : itemStack.type(), blockType);
         damage /= correctToolUsed ? 30 : 100;
 
         // Insta mine

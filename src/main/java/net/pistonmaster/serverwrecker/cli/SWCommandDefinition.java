@@ -103,11 +103,11 @@ public class SWCommandDefinition implements Callable<Integer> {
         }
 
         // Delayed to here, so help and version do not get cut off
-        SWTerminalConsole.setupTerminalConsole(cliManager.getThreadPool(), cliManager.getShutdownManager(), cliManager.getRpcClient());
+        SWTerminalConsole.setupTerminalConsole(cliManager.threadPool(), cliManager.shutdownManager(), cliManager.rpcClient());
 
         if (accountFile != null && authType != null) {
             try {
-                cliManager.getSettingsManager().getAccountRegistry().loadFromString(Files.readString(accountFile), authType);
+                cliManager.settingsManager().accountRegistry().loadFromString(Files.readString(accountFile), authType);
             } catch (IOException e) {
                 LOGGER.error("Failed to load accounts!", e);
                 return 1;
@@ -116,7 +116,7 @@ public class SWCommandDefinition implements Callable<Integer> {
 
         if (proxyFile != null && proxyType != null) {
             try {
-                cliManager.getSettingsManager().getProxyRegistry().loadFromString(Files.readString(proxyFile), proxyType);
+                cliManager.settingsManager().proxyRegistry().loadFromString(Files.readString(proxyFile), proxyType);
             } catch (IOException e) {
                 LOGGER.error("Failed to load proxies!", e);
                 return 1;
@@ -125,7 +125,7 @@ public class SWCommandDefinition implements Callable<Integer> {
 
         if (profileFile != null) {
             try {
-                cliManager.getSettingsManager().loadProfile(profileFile);
+                cliManager.settingsManager().loadProfile(profileFile);
             } catch (IOException e) {
                 LOGGER.error("Failed to load profile!", e);
                 return 1;

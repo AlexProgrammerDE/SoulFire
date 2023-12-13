@@ -53,12 +53,12 @@ public class AutoReconnect implements InternalExtension {
     public void onDisconnect(BotDisconnectedEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
-        if (!settingsHolder.get(AutoReconnectSettings.AUTO_RECONNECT) || connection.attackManager().getAttackState().isInactive()) {
+        if (!settingsHolder.get(AutoReconnectSettings.AUTO_RECONNECT) || connection.attackManager().attackState().isInactive()) {
             return;
         }
 
         scheduler.schedule(() -> {
-            var eventLoopGroup = connection.session().getEventLoopGroup();
+            var eventLoopGroup = connection.session().eventLoopGroup();
             if (eventLoopGroup.isShuttingDown() || eventLoopGroup.isShutdown() || eventLoopGroup.isTerminated()) {
                 return;
             }
@@ -66,7 +66,7 @@ public class AutoReconnect implements InternalExtension {
             connection.gracefulDisconnect().join();
             var newConnection = connection.factory().prepareConnection();
 
-            connection.attackManager().getBotConnections()
+            connection.attackManager().botConnections()
                     .replaceAll(connectionEntry -> connectionEntry == connection ? newConnection : connectionEntry);
 
             newConnection.connect();

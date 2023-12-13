@@ -45,12 +45,12 @@ public class CardsContainer extends JPanel {
     public void create() {
         setLayout(cardLayout);
 
-        pluginPages.addAll(guiManager.getRpcClient().getConfigStubBlocking()
+        pluginPages.addAll(guiManager.rpcClient().configStubBlocking()
                 .getUIClientData(ClientDataRequest.getDefaultInstance())
                 .getPluginSettingsList());
 
         // Add bot settings
-        panels.add(new GeneratedPanel(guiManager.getSettingsManager(), getByNamespace("bot")));
+        panels.add(new GeneratedPanel(guiManager.settingsManager(), getByNamespace("bot")));
         panels.add(injector.getSingleton(PluginListPanel.class));
         panels.add(injector.getSingleton(AccountPanel.class));
         panels.add(injector.getSingleton(ProxyPanel.class));
@@ -72,7 +72,7 @@ public class CardsContainer extends JPanel {
             }
 
             add(NavigationWrapper.createBackWrapper(this, PluginListPanel.NAVIGATION_ID,
-                            new GeneratedPanel(guiManager.getSettingsManager(), item)),
+                            new GeneratedPanel(guiManager.settingsManager(), item)),
                     item.getNamespace()
             );
         }

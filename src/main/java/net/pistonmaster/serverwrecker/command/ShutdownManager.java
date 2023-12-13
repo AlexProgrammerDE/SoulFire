@@ -40,7 +40,7 @@ public class ShutdownManager {
      *
      * @param explicitExit whether the user explicitly shut down the software
      */
-    public void shutdown(boolean explicitExit) {
+    public void shutdownSoftware(boolean explicitExit) {
         if (!shutdownInProgress.compareAndSet(false, true)) {
             return;
         }

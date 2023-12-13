@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 public class ServerListBypass implements InternalExtension {
     public static void onPreConnect(PreBotConnectEvent event) {
         var connection = event.connection();
-        if (connection.meta().getTargetState() == ProtocolState.STATUS) {
+        if (connection.meta().targetState() == ProtocolState.STATUS) {
             return;
         }
 

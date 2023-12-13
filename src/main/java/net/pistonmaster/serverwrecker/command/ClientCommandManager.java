@@ -71,7 +71,7 @@ public class ClientCommandManager {
     public List<String> getCompletionSuggestions(String command) {
         var suggestions = new ArrayList<String>();
         try {
-            var offers = rpcClient.getCommandStubBlocking().tabCompleteCommand(
+            var offers = rpcClient.commandStubBlocking().tabCompleteCommand(
                     CommandCompletionRequest.newBuilder().setCommand(command).build()
             ).getSuggestionsList();
             suggestions.addAll(offers);
@@ -84,7 +84,7 @@ public class ClientCommandManager {
 
     public List<Map.Entry<Instant, String>> getCommandHistory() {
         List<Map.Entry<Instant, String>> history = new ArrayList<>();
-        for (var entry : rpcClient.getCommandStubBlocking()
+        for (var entry : rpcClient.commandStubBlocking()
                 .getCommandHistory(CommandHistoryRequest.newBuilder().build())
                 .getEntriesList()) {
             history.add(Map.entry(Instant.ofEpochSecond(entry.getTimestamp()), entry.getCommand()));

@@ -51,7 +51,7 @@ public final class UpMovement implements GraphAction, Cloneable {
     private boolean[] noNeedToBreak;
     @Setter
     @Getter
-    private boolean isImpossible = false;
+    private boolean impossible = false;
 
     public UpMovement() {
         this.targetFeetBlock = FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0);
@@ -95,8 +95,8 @@ public final class UpMovement implements GraphAction, Cloneable {
     }
 
     @Override
-    public boolean isImpossibleToComplete() {
-        return isImpossible;
+    public boolean impossibleToComplete() {
+        return impossible;
     }
 
     @Override
@@ -144,7 +144,7 @@ public final class UpMovement implements GraphAction, Cloneable {
     @Override
     public UpMovement copy(BotEntityState previousEntityState) {
         var upMovement = this.clone();
-        upMovement.isImpossible = !previousEntityState.inventory().hasBlockToPlace();
+        upMovement.impossible = !previousEntityState.inventory().hasBlockToPlace();
         return upMovement;
     }
 

@@ -38,7 +38,7 @@ public final class ParkourMovement implements GraphAction, Cloneable {
     private final SWVec3i targetFeetBlock;
     @Setter
     @Getter
-    private boolean isImpossible = false;
+    private boolean impossible = false;
 
     public ParkourMovement(ParkourDirection direction) {
         this.direction = direction;
@@ -82,8 +82,8 @@ public final class ParkourMovement implements GraphAction, Cloneable {
     }
 
     @Override
-    public boolean isImpossibleToComplete() {
-        return isImpossible;
+    public boolean impossibleToComplete() {
+        return impossible;
     }
 
     @Override

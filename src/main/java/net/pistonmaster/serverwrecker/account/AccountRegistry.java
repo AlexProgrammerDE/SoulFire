@@ -63,7 +63,7 @@ public class AccountRegistry {
         }
 
         try {
-            return authType.getAuthService().createDataAndLogin(data, null);
+            return authType.authService().createDataAndLogin(data, null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

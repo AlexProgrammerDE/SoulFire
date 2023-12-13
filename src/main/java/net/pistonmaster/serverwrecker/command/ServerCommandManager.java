@@ -112,9 +112,9 @@ public class ServerCommandManager {
             return Command.SINGLE_SUCCESS;
         })));
         dispatcher.register(literal("clear-console").executes(help("Clears the GUIs log panel", c -> {
-            var logPanel = serverWreckerServer.getInjector().getIfAvailable(LogPanel.class);
+            var logPanel = serverWreckerServer.injector().getIfAvailable(LogPanel.class);
             if (logPanel != null) {
-                logPanel.getMessageLogPanel().clear();
+                logPanel.messageLogPanel().clear();
             }
 
             return Command.SINGLE_SUCCESS;
@@ -151,7 +151,7 @@ public class ServerCommandManager {
                 .executes(help("Makes all connected bots stop pathfinding", c -> forEveryBot(bot -> {
                     bot.eventBus().unregisterAll(BotPreTickEvent.class, PathExecutor.class::isAssignableFrom);
 
-                    bot.sessionDataManager().getBotMovementManager().getControlState().resetAll();
+                    bot.sessionDataManager().botMovementManager().controlState().resetAll();
                     return Command.SINGLE_SUCCESS;
                 }))));
 
@@ -167,7 +167,7 @@ public class ServerCommandManager {
 
                                             return forEveryBot(bot -> {
                                                 var sessionDataManager = bot.sessionDataManager();
-                                                var botMovementManager = sessionDataManager.getBotMovementManager();
+                                                var botMovementManager = sessionDataManager.botMovementManager();
 
                                                 botMovementManager.lookAt(RotationOrigin.FEET, Vector3d.from(x, y, z));
                                                 return Command.SINGLE_SUCCESS;
@@ -175,57 +175,57 @@ public class ServerCommandManager {
                                         }))))));
         dispatcher.register(literal("forward")
                 .executes(help("Makes all connected bots start walking forward", c -> forEveryBot(bot -> {
-                    bot.sessionDataManager().getBotMovementManager().getControlState().setForward(true);
+                    bot.sessionDataManager().botMovementManager().controlState().forward(true);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("backward")
                 .executes(help("Makes all connected bots start walking backwards", c -> forEveryBot(bot -> {
-                    bot.sessionDataManager().getBotMovementManager().getControlState().setBackward(true);
+                    bot.sessionDataManager().botMovementManager().controlState().backward(true);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("left")
                 .executes(help("Makes all connected bots start walking left", c -> forEveryBot(bot -> {
-                    bot.sessionDataManager().getBotMovementManager().getControlState().setLeft(true);
+                    bot.sessionDataManager().botMovementManager().controlState().left(true);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("right")
                 .executes(help("Makes all connected bots start walking right", c -> forEveryBot(bot -> {
-                    bot.sessionDataManager().getBotMovementManager().getControlState().setRight(true);
+                    bot.sessionDataManager().botMovementManager().controlState().right(true);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("jump")
                 .executes(help("Makes all connected bots jump up repeatedly", c -> forEveryBot(bot -> {
                     var sessionDataManager = bot.sessionDataManager();
-                    var botMovementManager = sessionDataManager.getBotMovementManager();
+                    var botMovementManager = sessionDataManager.botMovementManager();
 
-                    botMovementManager.getControlState().setJumping(true);
+                    botMovementManager.controlState().jumping(true);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("reset")
                 .executes(help("Resets the movement of all connected bots", c -> forEveryBot(bot -> {
                     var sessionDataManager = bot.sessionDataManager();
-                    var botMovementManager = sessionDataManager.getBotMovementManager();
+                    var botMovementManager = sessionDataManager.botMovementManager();
 
-                    botMovementManager.getControlState().resetAll();
+                    botMovementManager.controlState().resetAll();
                     return Command.SINGLE_SUCCESS;
                 }))));
 
         // Attack controls
         dispatcher.register(literal("stop-attack")
                 .executes(help("Stops the ongoing attacks", c -> forEveryAttack(attackManager -> {
-                    serverWreckerServer.stopAttack(attackManager.getId());
+                    serverWreckerServer.stopAttack(attackManager.id());
                     return Command.SINGLE_SUCCESS;
                 }))));
 
         // Utility commands
         dispatcher.register(literal("online").executes(help("Shows connected bots from all attacks", c -> forEveryAttackEnsureHasBots(attackManager -> {
             var online = new ArrayList<String>();
-            for (var bot : attackManager.getBotConnections()) {
+            for (var bot : attackManager.botConnections()) {
                 if (!bot.isOnline()) {
                     continue;
                 }
 
-                online.add(bot.meta().getMinecraftAccount().username());
+                online.add(bot.meta().minecraftAccount().username());
             }
 
             c.getSource().sendMessage(online.size() + " bots online: " + String.join(", ", online));
@@ -247,10 +247,10 @@ public class ServerCommandManager {
                             });
                         }))));
         dispatcher.register(literal("stats").executes(help("Shows network stats", c -> forEveryAttackEnsureHasBots(attackManager -> {
-            LOGGER.info("Total bots: {}", attackManager.getBotConnections().size());
+            LOGGER.info("Total bots: {}", attackManager.botConnections().size());
             long readTraffic = 0;
             long writeTraffic = 0;
-            for (var bot : attackManager.getBotConnections()) {
+            for (var bot : attackManager.botConnections()) {
                 var trafficShapingHandler = bot.getTrafficHandler();
 
                 if (trafficShapingHandler == null) {
@@ -266,7 +266,7 @@ public class ServerCommandManager {
 
             long currentReadTraffic = 0;
             long currentWriteTraffic = 0;
-            for (var bot : attackManager.getBotConnections()) {
+            for (var bot : attackManager.botConnections()) {
                 var trafficShapingHandler = bot.getTrafficHandler();
 
                 if (trafficShapingHandler == null) {
@@ -287,14 +287,14 @@ public class ServerCommandManager {
     }
 
     private int forEveryAttack(ToIntFunction<AttackManager> consumer) {
-        if (serverWreckerServer.getAttacks().isEmpty()) {
+        if (serverWreckerServer.attacks().isEmpty()) {
             LOGGER.warn("No attacks found!");
             return 2;
         }
 
         var resultCode = Command.SINGLE_SUCCESS;
-        for (var attackManager : serverWreckerServer.getAttacks().values()) {
-            LOGGER.info("Running command for attack {}", attackManager.getId());
+        for (var attackManager : serverWreckerServer.attacks().values()) {
+            LOGGER.info("Running command for attack {}", attackManager.id());
             var result = consumer.applyAsInt(attackManager);
             if (result != Command.SINGLE_SUCCESS) {
                 resultCode = result;
@@ -306,7 +306,7 @@ public class ServerCommandManager {
 
     private int forEveryAttackEnsureHasBots(ToIntFunction<AttackManager> consumer) {
         return forEveryAttack(attackManager -> {
-            if (attackManager.getBotConnections().isEmpty()) {
+            if (attackManager.botConnections().isEmpty()) {
                 LOGGER.info("No bots connected!");
                 return 3;
             }
@@ -318,8 +318,8 @@ public class ServerCommandManager {
     private int forEveryBot(ToIntFunction<BotConnection> consumer) {
         return forEveryAttackEnsureHasBots(attackManager -> {
             var resultCode = Command.SINGLE_SUCCESS;
-            for (var bot : attackManager.getBotConnections()) {
-                LOGGER.info("Running command for bot {}", bot.meta().getMinecraftAccount().username());
+            for (var bot : attackManager.botConnections()) {
+                LOGGER.info("Running command for bot {}", bot.meta().minecraftAccount().username());
                 var result = consumer.applyAsInt(bot);
                 if (result != Command.SINGLE_SUCCESS) {
                     resultCode = result;
@@ -336,8 +336,8 @@ public class ServerCommandManager {
             var executorService = bot.executorManager().newExecutorService(bot, "Pathfinding");
             executorService.execute(() -> {
                 var sessionDataManager = bot.sessionDataManager();
-                var botMovementManager = sessionDataManager.getBotMovementManager();
-                var routeFinder = new RouteFinder(new MinecraftGraph(sessionDataManager.getTagsState()), goalScorer);
+                var botMovementManager = sessionDataManager.botMovementManager();
+                var routeFinder = new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState()), goalScorer);
 
                 Boolean2ObjectFunction<List<WorldAction>> findPath = requiresRepositioning -> {
                     var start = BotEntityState.initialState(
@@ -346,7 +346,7 @@ public class ServerCommandManager {
                                     Objects.requireNonNull(sessionDataManager.getCurrentLevel(), "Level is null!")
                             ),
                             new ProjectedInventory(
-                                    sessionDataManager.getInventoryManager().getPlayerInventory()
+                                    sessionDataManager.inventoryManager().getPlayerInventory()
                             )
                     );
                     logger.info("Starting calculations at: {}", start);

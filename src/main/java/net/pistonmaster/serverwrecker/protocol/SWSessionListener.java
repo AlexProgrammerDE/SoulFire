@@ -56,7 +56,7 @@ public class SWSessionListener extends SessionAdapter {
         botConnection.logger().trace("Received packet: {}", packet.getClass().getSimpleName());
 
         try {
-            busInvoker.call(event.getPacket());
+            busInvoker.call(event.packet());
         } catch (Throwable t) {
             botConnection.logger().error("Error while handling packet!", t);
         }
@@ -66,7 +66,7 @@ public class SWSessionListener extends SessionAdapter {
     public void packetSending(PacketSendingEvent event) {
         var event1 = new SWPacketSendingEvent(botConnection, event.getPacket());
         botConnection.eventBus().call(event1);
-        event.setPacket(event1.getPacket());
+        event.setPacket(event1.packet());
         event.setCancelled(event1.isCancelled());
 
         if (event1.isCancelled()) {

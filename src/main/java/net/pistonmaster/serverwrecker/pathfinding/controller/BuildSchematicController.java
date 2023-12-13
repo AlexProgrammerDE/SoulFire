@@ -17,22 +17,24 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.pathfinding.graph.actions;
+package net.pistonmaster.serverwrecker.pathfinding.controller;
 
-import net.pistonmaster.serverwrecker.pathfinding.BotEntityState;
-import net.pistonmaster.serverwrecker.pathfinding.graph.GraphInstructions;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.data.BlockType;
+import org.cloudburstmc.math.vector.Vector3i;
 
-/**
- * A calculated action that the bot can take on a graph world representation.
- */
-public sealed interface GraphAction permits PlayerMovement, ParkourMovement, UpMovement, DownMovement {
-    boolean impossible();
+import java.util.Map;
 
-    // A step further than isImpossible, for block placing this also considers no block
-    // to place against found.
-    boolean impossibleToComplete();
+@RequiredArgsConstructor
+public class BuildSchematicController {
+    private final Map<Vector3i, BlockType> blocks;
 
-    GraphInstructions getInstructions(BotEntityState previousEntityState);
+    public BuildSchematicController(Map<Vector3i, BlockType> relativeBlocks, Vector3i base) {
+        this(new Object2ObjectOpenHashMap<>());
 
-    GraphAction copy(BotEntityState previousEntityState);
+        for (Map.Entry<Vector3i, BlockType> entry : relativeBlocks.entrySet()) {
+            this.blocks.put(entry.getKey().add(base), entry.getValue());
+        }
+    }
 }

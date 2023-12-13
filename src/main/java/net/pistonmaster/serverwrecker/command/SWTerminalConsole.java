@@ -54,7 +54,7 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
 
     @Override
     protected boolean isRunning() {
-        return !shutdownManager.isShutdown();
+        return !shutdownManager.shutdown();
     }
 
     @Override
@@ -64,7 +64,7 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
 
     @Override
     protected void shutdown() {
-        shutdownManager.shutdown(true);
+        shutdownManager.shutdownSoftware(true);
     }
 
     @Override

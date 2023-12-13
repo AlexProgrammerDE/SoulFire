@@ -35,7 +35,7 @@ public final class GapJumpAction implements WorldAction {
 
     @Override
     public boolean isCompleted(BotConnection connection) {
-        var movementManager = connection.sessionDataManager().getBotMovementManager();
+        var movementManager = connection.sessionDataManager().botMovementManager();
         var botPosition = movementManager.getPlayerPos();
         var levelState = connection.sessionDataManager().getCurrentLevel();
         if (levelState == null) {
@@ -60,27 +60,27 @@ public final class GapJumpAction implements WorldAction {
 
     @Override
     public void tick(BotConnection connection) {
-        var movementManager = connection.sessionDataManager().getBotMovementManager();
-        movementManager.getControlState().resetAll();
+        var movementManager = connection.sessionDataManager().botMovementManager();
+        movementManager.controlState().resetAll();
 
         var previousYaw = movementManager.getYaw();
         movementManager.lookAt(RotationOrigin.EYES, position);
-        movementManager.getEntity().setPitch(0);
+        movementManager.entity().pitch(0);
         var newYaw = movementManager.getYaw();
 
         var yawDifference = Math.abs(previousYaw - newYaw);
 
         // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
         if (didLook && yawDifference > 5) {
-            movementManager.setLastYaw(newYaw);
+            movementManager.lastYaw(newYaw);
         } else {
             didLook = true;
         }
 
-        movementManager.getControlState().setForward(true);
+        movementManager.controlState().forward(true);
 
         if (shouldJump()) {
-            movementManager.getControlState().setJumping(true);
+            movementManager.controlState().jumping(true);
         }
     }
 

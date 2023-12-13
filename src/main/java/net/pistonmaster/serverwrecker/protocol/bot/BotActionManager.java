@@ -97,7 +97,7 @@ public class BotActionManager {
 
     public void useItemInHand(Hand hand) {
         incrementSequenceNumber();
-        dataManager.getSession().send(new ServerboundUseItemPacket(hand, sequenceNumber));
+        dataManager.session().send(new ServerboundUseItemPacket(hand, sequenceNumber));
     }
 
     public void placeBlock(Hand hand, BlockPlaceData blockPlaceData) {
@@ -106,7 +106,7 @@ public class BotActionManager {
 
     public void placeBlock(Hand hand, Vector3i againstBlock, Direction againstFace) {
         incrementSequenceNumber();
-        var movementManager = dataManager.getBotMovementManager();
+        var movementManager = dataManager.botMovementManager();
         var levelState = dataManager.getCurrentLevel();
         if (levelState == null) {
             return;
@@ -130,7 +130,7 @@ public class BotActionManager {
 
         var rayCastPosition = rayCast.get().sub(againstBlock.toFloat());
 
-        dataManager.getSession().send(new ServerboundUseItemOnPacket(
+        dataManager.session().send(new ServerboundUseItemOnPacket(
                 againstBlock,
                 againstFace,
                 hand,
@@ -145,7 +145,7 @@ public class BotActionManager {
     public void sendStartBreakBlock(Vector3i blockPos) {
         incrementSequenceNumber();
         var blockFace = getBlockFaceLookedAt(blockPos);
-        dataManager.getSession().send(new ServerboundPlayerActionPacket(
+        dataManager.session().send(new ServerboundPlayerActionPacket(
                 PlayerAction.START_DIGGING,
                 blockPos,
                 blockFace,
@@ -156,7 +156,7 @@ public class BotActionManager {
     public void sendEndBreakBlock(Vector3i blockPos) {
         incrementSequenceNumber();
         var blockFace = getBlockFaceLookedAt(blockPos);
-        dataManager.getSession().send(new ServerboundPlayerActionPacket(
+        dataManager.session().send(new ServerboundPlayerActionPacket(
                 PlayerAction.FINISH_DIGGING,
                 blockPos,
                 blockFace,
@@ -165,8 +165,8 @@ public class BotActionManager {
     }
 
     public Direction getBlockFaceLookedAt(Vector3i blockPos) {
-        var eyePosition = dataManager.getBotMovementManager().getEyePosition();
-        var headRotation = dataManager.getBotMovementManager().getRotationVector();
+        var eyePosition = dataManager.botMovementManager().getEyePosition();
+        var headRotation = dataManager.botMovementManager().getRotationVector();
         var blockPosDouble = blockPos.toDouble();
         var blockBoundingBox = new AABB(blockPosDouble, blockPosDouble.add(1, 1, 1));
         var intersection = blockBoundingBox.getIntersection(eyePosition, headRotation).map(Vector3d::toFloat);
@@ -189,7 +189,7 @@ public class BotActionManager {
     }
 
     public void sendBreakBlockAnimation() {
-        dataManager.getSession().send(new ServerboundSwingPacket(Hand.MAIN_HAND));
+        dataManager.session().send(new ServerboundSwingPacket(Hand.MAIN_HAND));
     }
 
     public record BlockPlaceData(SWVec3i againstPos, Direction blockFace) {

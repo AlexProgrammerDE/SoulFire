@@ -51,8 +51,8 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
     public BotConnection prepareConnectionInternal(ProtocolState targetState) {
         var meta = new BotConnectionMeta(minecraftAccount, targetState, proxyData);
         var session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
-        var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.getServerWreckerServer(),
-                settingsHolder, logger, protocol, session, new ExecutorManager("ServerWrecker-Attack-" + attackManager.getId()), meta,
+        var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.serverWreckerServer(),
+                settingsHolder, logger, protocol, session, new ExecutorManager("ServerWrecker-Attack-" + attackManager.id()), meta,
                 LambdaManager.basic(new ASMGenerator())
                         .setExceptionHandler(EventExceptionHandler.INSTANCE)
                         .setEventFilter((c, h) -> {
@@ -64,8 +64,8 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
                         }));
 
         var sessionDataManager = new SessionDataManager(botConnection);
-        session.getMeta().setSessionDataManager(sessionDataManager);
-        session.getMeta().setBotControlAPI(new BotControlAPI(sessionDataManager, sessionDataManager.getBotMovementManager()));
+        session.meta().sessionDataManager(sessionDataManager);
+        session.meta().botControlAPI(new BotControlAPI(sessionDataManager, sessionDataManager.botMovementManager()));
 
         session.setConnectTimeout(settingsHolder.get(BotSettings.CONNECT_TIMEOUT));
         session.setReadTimeout(settingsHolder.get(BotSettings.READ_TIMEOUT));
@@ -74,7 +74,7 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
         session.addListener(new SWBaseListener(botConnection, targetState));
         session.addListener(new SWSessionListener(sessionDataManager, botConnection));
 
-        attackManager.getEventBus().call(new BotConnectionInitEvent(botConnection));
+        attackManager.eventBus().call(new BotConnectionInitEvent(botConnection));
 
         return botConnection;
     }

@@ -85,12 +85,12 @@ public class SWMenuBar extends JMenuBar {
                 }
 
                 try {
-                    guiManager.getSettingsManager().loadProfile(file);
+                    guiManager.settingsManager().loadProfile(file);
                     LOGGER.info("Loaded profile!");
                 } catch (IOException ex) {
                     LOGGER.warn("Failed to load profile!", ex);
                 }
-            }, guiManager.getThreadPool());
+            }, guiManager.threadPool());
         });
 
         fileMenu.add(loadProfile);
@@ -112,12 +112,12 @@ public class SWMenuBar extends JMenuBar {
                 }
 
                 try {
-                    guiManager.getSettingsManager().saveProfile(Path.of(path));
+                    guiManager.settingsManager().saveProfile(Path.of(path));
                     LOGGER.info("Saved profile!");
                 } catch (IOException ex) {
                     LOGGER.warn("Failed to save profile!", ex);
                 }
-            }, guiManager.getThreadPool());
+            }, guiManager.threadPool());
         });
 
         fileMenu.add(saveProfile);

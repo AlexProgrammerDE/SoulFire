@@ -47,7 +47,7 @@ public class AutoTotem implements InternalExtension {
         var executor = connection.executorManager().newScheduledExecutorService(connection, "AutoTotem");
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
             var sessionDataManager = connection.sessionDataManager();
-            var inventoryManager = sessionDataManager.getInventoryManager();
+            var inventoryManager = sessionDataManager.inventoryManager();
             var playerInventory = inventoryManager.getPlayerInventory();
             var offhandSlot = playerInventory.getOffhand();
 
@@ -56,13 +56,13 @@ public class AutoTotem implements InternalExtension {
                 return;
             }
 
-            for (var slot : playerInventory.getStorage()) {
+            for (var slot : playerInventory.storage()) {
                 if (slot.item() == null) {
                     continue;
                 }
 
                 var item = slot.item();
-                if (item.getType() == ItemType.TOTEM_OF_UNDYING) {
+                if (item.type() == ItemType.TOTEM_OF_UNDYING) {
                     if (!inventoryManager.tryInventoryControl()) {
                         return;
                     }

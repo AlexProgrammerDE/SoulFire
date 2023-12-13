@@ -60,7 +60,7 @@ public class PluginHelper {
      */
     public static <T extends ServerWreckerAttackEvent> void registerAttackEventConsumer(Class<T> clazz, Consumer<T> consumer) {
         ServerWreckerAPI.registerListener(AttackInitEvent.class, event ->
-                EventUtil.runAndCompareChanges(event.attackManager().getEventBus(), () ->
-                        event.attackManager().getEventBus().registerConsumer(consumer, clazz)));
+                EventUtil.runAndCompareChanges(event.attackManager().eventBus(), () ->
+                        event.attackManager().eventBus().registerConsumer(consumer, clazz)));
     }
 }

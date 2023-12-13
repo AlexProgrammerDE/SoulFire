@@ -43,7 +43,7 @@ public record BotConnection(UUID connectionId, BotConnectionFactory factory, Att
                             LambdaManager eventBus) {
     public CompletableFuture<Void> connect() {
         return CompletableFuture.runAsync(() -> {
-            attackManager.getEventBus().call(new PreBotConnectEvent(this));
+            attackManager.eventBus().call(new PreBotConnectEvent(this));
             session.connect(true);
         });
     }
@@ -53,11 +53,11 @@ public record BotConnection(UUID connectionId, BotConnectionFactory factory, Att
     }
 
     public SessionDataManager sessionDataManager() {
-        return meta.getSessionDataManager();
+        return meta.sessionDataManager();
     }
 
     public BotControlAPI botControl() {
-        return meta.getBotControlAPI();
+        return meta.botControlAPI();
     }
 
     public void tick(long ticks, float partialTicks) {

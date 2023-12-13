@@ -55,17 +55,17 @@ public class ControlPanel extends JPanel {
 
             stopButton.setEnabled(true);
 
-            guiManager.getRpcClient().getAttackStub().startAttack(AttackStartRequest.newBuilder()
-                    .setSettings(guiManager.getSettingsManager().exportSettings()).build(), new StreamObserver<>() {
+            guiManager.rpcClient().attackStub().startAttack(AttackStartRequest.newBuilder()
+                    .setSettings(guiManager.settingsManager().exportSettings()).build(), new StreamObserver<>() {
                 @Override
                 public void onNext(AttackStartResponse value) {
-                    guiManager.getLogger().debug("Started bot attack with id {}", value.getId());
+                    guiManager.logger().debug("Started bot attack with id {}", value.getId());
                     attackId.set(value.getId());
                 }
 
                 @Override
                 public void onError(Throwable t) {
-                    guiManager.getLogger().error("Error while starting bot attack!", t);
+                    guiManager.logger().error("Error while starting bot attack!", t);
                 }
 
                 @Override
@@ -78,25 +78,25 @@ public class ControlPanel extends JPanel {
             var pauseText = pauseButton.getText().equals("Pause");
 
             if (pauseText) {
-                guiManager.getLogger().info("Paused bot attack");
+                guiManager.logger().info("Paused bot attack");
                 pauseButton.setText("Resume");
             } else {
-                guiManager.getLogger().info("Resumed bot attack");
+                guiManager.logger().info("Resumed bot attack");
                 pauseButton.setText("Pause");
             }
 
             var stateTarget = pauseText ? AttackStateToggleRequest.State.PAUSE : AttackStateToggleRequest.State.RESUME;
 
-            guiManager.getRpcClient().getAttackStub().toggleAttackState(AttackStateToggleRequest.newBuilder()
+            guiManager.rpcClient().attackStub().toggleAttackState(AttackStateToggleRequest.newBuilder()
                     .setId(attackId.get()).setNewState(stateTarget).build(), new StreamObserver<>() {
                 @Override
                 public void onNext(AttackStateToggleResponse value) {
-                    guiManager.getLogger().debug("Toggled bot attack state to {}", stateTarget.name());
+                    guiManager.logger().debug("Toggled bot attack state to {}", stateTarget.name());
                 }
 
                 @Override
                 public void onError(Throwable t) {
-                    guiManager.getLogger().error("Error while toggling bot attack!", t);
+                    guiManager.logger().error("Error while toggling bot attack!", t);
                 }
 
                 @Override
@@ -113,16 +113,16 @@ public class ControlPanel extends JPanel {
 
             stopButton.setEnabled(false);
 
-            guiManager.getRpcClient().getAttackStub().stopAttack(AttackStopRequest.newBuilder()
+            guiManager.rpcClient().attackStub().stopAttack(AttackStopRequest.newBuilder()
                     .setId(attackId.get()).build(), new StreamObserver<>() {
                 @Override
                 public void onNext(AttackStopResponse value) {
-                    guiManager.getLogger().info("Stop of attack {} has been scheduled, follow logs for progress", attackId.get());
+                    guiManager.logger().info("Stop of attack {} has been scheduled, follow logs for progress", attackId.get());
                 }
 
                 @Override
                 public void onError(Throwable t) {
-                    guiManager.getLogger().error("Error while stopping bot attack!", t);
+                    guiManager.logger().error("Error while stopping bot attack!", t);
                 }
 
                 @Override

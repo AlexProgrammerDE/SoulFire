@@ -36,7 +36,7 @@ public class DeveloperPanel extends NavigationItem {
     public DeveloperPanel(GUIManager guiManager, LogPanel logPanel, CardsContainer cardsContainer) {
         setLayout(new GridLayout(0, 2));
 
-        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace("dev"), guiManager.getSettingsManager());
+        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace("dev"), guiManager.settingsManager());
 
         add(new JLabel("Save Log:"));
         var saveLog = new JButton("Save Log");
@@ -53,12 +53,12 @@ public class DeveloperPanel extends NavigationItem {
                 }
 
                 try (var writer = Files.newBufferedWriter(file)) {
-                    writer.write(logPanel.getMessageLogPanel().getLogs());
-                    guiManager.getLogger().info("Saved log to: {}", file);
+                    writer.write(logPanel.messageLogPanel().getLogs());
+                    guiManager.logger().info("Saved log to: {}", file);
                 } catch (IOException e) {
-                    guiManager.getLogger().error("Failed to save log!", e);
+                    guiManager.logger().error("Failed to save log!", e);
                 }
-            }, guiManager.getThreadPool());
+            }, guiManager.threadPool());
         });
     }
 

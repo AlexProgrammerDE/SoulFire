@@ -63,7 +63,7 @@ public final class PlayerMovement implements GraphAction, Cloneable {
     private boolean appliedCornerCost = false;
     @Setter
     @Getter
-    private boolean isImpossible = false;
+    private boolean impossible = false;
     @Setter
     private boolean requiresAgainstBlock = false;
 
@@ -287,24 +287,24 @@ public final class PlayerMovement implements GraphAction, Cloneable {
                             // Below
                             new BotActionManager.BlockPlaceData(floorBlock.sub(0, 1, 0), Direction.UP),
                             // In front
-                            new BotActionManager.BlockPlaceData(blockDirection.offset(floorBlock), oppositeDirection.getDirection()),
+                            new BotActionManager.BlockPlaceData(blockDirection.offset(floorBlock), oppositeDirection.direction()),
                             // Scaffolding
-                            new BotActionManager.BlockPlaceData(oppositeDirection.offset(floorBlock), blockDirection.getDirection()),
+                            new BotActionManager.BlockPlaceData(oppositeDirection.offset(floorBlock), blockDirection.direction()),
                             // Left side
-                            new BotActionManager.BlockPlaceData(leftDirectionSide.offset(floorBlock), rightDirectionSide.getDirection()),
+                            new BotActionManager.BlockPlaceData(leftDirectionSide.offset(floorBlock), rightDirectionSide.direction()),
                             // Right side
-                            new BotActionManager.BlockPlaceData(rightDirectionSide.offset(floorBlock), leftDirectionSide.getDirection())
+                            new BotActionManager.BlockPlaceData(rightDirectionSide.offset(floorBlock), leftDirectionSide.direction())
                     );
             case JUMP, FALL_1 -> // 4 - no scaffolding
                     List.of(
                             // Below
                             new BotActionManager.BlockPlaceData(floorBlock.sub(0, 1, 0), Direction.UP),
                             // In front
-                            new BotActionManager.BlockPlaceData(blockDirection.offset(floorBlock), oppositeDirection.getDirection()),
+                            new BotActionManager.BlockPlaceData(blockDirection.offset(floorBlock), oppositeDirection.direction()),
                             // Left side
-                            new BotActionManager.BlockPlaceData(leftDirectionSide.offset(floorBlock), rightDirectionSide.getDirection()),
+                            new BotActionManager.BlockPlaceData(leftDirectionSide.offset(floorBlock), rightDirectionSide.direction()),
                             // Right side
-                            new BotActionManager.BlockPlaceData(rightDirectionSide.offset(floorBlock), leftDirectionSide.getDirection())
+                            new BotActionManager.BlockPlaceData(rightDirectionSide.offset(floorBlock), leftDirectionSide.direction())
                     );
             default -> throw new IllegalStateException("Unexpected value: " + modifier);
         };
@@ -316,8 +316,8 @@ public final class PlayerMovement implements GraphAction, Cloneable {
     }
 
     @Override
-    public boolean isImpossibleToComplete() {
-        return isImpossible || (requiresAgainstBlock && blockPlaceData == null);
+    public boolean impossibleToComplete() {
+        return impossible || (requiresAgainstBlock && blockPlaceData == null);
     }
 
     @Override

@@ -59,11 +59,11 @@ public final class BlockBreakAction implements WorldAction {
     @Override
     public void tick(BotConnection connection) {
         var sessionDataManager = connection.sessionDataManager();
-        var movementManager = sessionDataManager.getBotMovementManager();
-        movementManager.getControlState().resetAll();
+        var movementManager = sessionDataManager.botMovementManager();
+        movementManager.controlState().resetAll();
 
         var levelState = sessionDataManager.getCurrentLevel();
-        var inventoryManager = sessionDataManager.getInventoryManager();
+        var inventoryManager = sessionDataManager.inventoryManager();
         var playerInventory = inventoryManager.getPlayerInventory();
 
         if (levelState == null) {
@@ -84,7 +84,7 @@ public final class BlockBreakAction implements WorldAction {
             SWItemStack itemStack = null;
             var bestCost = Integer.MAX_VALUE;
             var sawEmpty = false;
-            for (var slot : playerInventory.getStorage()) {
+            for (var slot : playerInventory.storage()) {
                 var item = slot.item();
                 if (item == null) {
                     if (sawEmpty) {
@@ -101,9 +101,9 @@ public final class BlockBreakAction implements WorldAction {
                 }
 
                 var cost = Costs.getRequiredMiningTicks(
-                        sessionDataManager.getTagsState(),
-                        sessionDataManager.getSelfEffectState(),
-                        sessionDataManager.getBotMovementManager().getEntity().isOnGround(),
+                        sessionDataManager.tagsState(),
+                        sessionDataManager.selfEffectState(),
+                        sessionDataManager.botMovementManager().entity().onGround(),
                         item,
                         optionalBlockType
                 ).ticks();
@@ -119,7 +119,7 @@ public final class BlockBreakAction implements WorldAction {
         }
 
         if (!putOnHotbar && bestItemStack != null) {
-            var heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
+            var heldSlot = playerInventory.hotbarSlot(inventoryManager.heldItemSlot());
             if (heldSlot.item() != null) {
                 var item = heldSlot.item();
                 if (item.equalsShape(bestItemStack)) {
@@ -128,7 +128,7 @@ public final class BlockBreakAction implements WorldAction {
                 }
             }
 
-            for (var hotbarSlot : playerInventory.getHotbar()) {
+            for (var hotbarSlot : playerInventory.hotbar()) {
                 if (hotbarSlot.item() == null) {
                     continue;
                 }
@@ -138,13 +138,13 @@ public final class BlockBreakAction implements WorldAction {
                     continue;
                 }
 
-                inventoryManager.setHeldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
+                inventoryManager.heldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
                 inventoryManager.sendHeldItemChange();
                 putOnHotbar = true;
                 return;
             }
 
-            for (var slot : playerInventory.getMainInventory()) {
+            for (var slot : playerInventory.mainInventory()) {
                 if (slot.item() == null) {
                     continue;
                 }
@@ -161,10 +161,10 @@ public final class BlockBreakAction implements WorldAction {
                 try {
                     inventoryManager.leftClickSlot(slot.slot());
                     TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-                    inventoryManager.leftClickSlot(playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot()).slot());
+                    inventoryManager.leftClickSlot(playerInventory.hotbarSlot(inventoryManager.heldItemSlot()).slot());
                     TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
 
-                    if (inventoryManager.getCursorItem() != null) {
+                    if (inventoryManager.cursorItem() != null) {
                         inventoryManager.leftClickSlot(slot.slot());
                         TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
                     }
@@ -191,20 +191,20 @@ public final class BlockBreakAction implements WorldAction {
             }
 
             remainingTicks = Costs.getRequiredMiningTicks(
-                    sessionDataManager.getTagsState(),
-                    sessionDataManager.getSelfEffectState(),
-                    sessionDataManager.getBotMovementManager().getEntity().isOnGround(),
-                    sessionDataManager.getInventoryManager().getPlayerInventory()
-                            .getHotbarSlot(sessionDataManager.getInventoryManager().getHeldItemSlot())
+                    sessionDataManager.tagsState(),
+                    sessionDataManager.selfEffectState(),
+                    sessionDataManager.botMovementManager().entity().onGround(),
+                    sessionDataManager.inventoryManager().getPlayerInventory()
+                            .hotbarSlot(sessionDataManager.inventoryManager().heldItemSlot())
                             .item(),
                     optionalBlockType
             ).ticks();
-            sessionDataManager.getBotActionManager().sendStartBreakBlock(blockPosition.toVector3i());
+            sessionDataManager.botActionManager().sendStartBreakBlock(blockPosition.toVector3i());
         } else if (--remainingTicks == 0) {
-            sessionDataManager.getBotActionManager().sendEndBreakBlock(blockPosition.toVector3i());
+            sessionDataManager.botActionManager().sendEndBreakBlock(blockPosition.toVector3i());
             finishedDigging = true;
         } else {
-            sessionDataManager.getBotActionManager().sendBreakBlockAnimation();
+            sessionDataManager.botActionManager().sendBreakBlockAnimation();
         }
     }
 

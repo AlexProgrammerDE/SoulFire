@@ -88,6 +88,6 @@ public class PlayerMovementState {
         depthStrider = bootsItem == null ? 0 : bootsItem.getEnchantmentLevel("minecraft:depth_strider");
 
         var chestItem = inventoryContainer.getChestplate().item();
-        elytraEquipped = chestItem != null && chestItem.getType() == ItemType.ELYTRA;
+        elytraEquipped = chestItem != null && chestItem.type() == ItemType.ELYTRA;
     }
 }

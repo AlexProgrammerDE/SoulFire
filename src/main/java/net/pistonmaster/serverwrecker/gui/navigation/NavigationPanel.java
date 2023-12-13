@@ -33,7 +33,7 @@ public class NavigationPanel extends JPanel {
     public NavigationPanel(CardsContainer container, Injector injector) {
         setLayout(new GridLayout(0, 2, 10, 10));
 
-        for (var item : container.getPanels()) {
+        for (var item : container.panels()) {
             var button = new JButton(SwingTextUtils.htmlCenterText(item.getNavigationName()));
 
             button.addActionListener(action -> container.show(item.getNavigationId()));

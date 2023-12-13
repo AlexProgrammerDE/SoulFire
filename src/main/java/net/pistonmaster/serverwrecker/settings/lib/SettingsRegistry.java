@@ -23,10 +23,7 @@ import net.pistonmaster.serverwrecker.grpc.generated.*;
 import net.pistonmaster.serverwrecker.settings.lib.property.*;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SettingsRegistry {
     private final Map<String, NamespaceRegistry> namespaceMap = new LinkedHashMap<>();
@@ -82,16 +79,17 @@ public class SettingsRegistry {
     public List<ClientPluginSettingsPage> exportSettingsMeta() {
         var list = new ArrayList<ClientPluginSettingsPage>();
 
-        for (var entry : namespaceMap.entrySet()) {
+        for (var namespaceEntry : namespaceMap.entrySet()) {
+            var namespaceRegistry = namespaceEntry.getValue();
             var entries = new ArrayList<ClientPluginSettingEntry>();
-            for (var property : entry.getValue().properties) {
+            for (var property : namespaceRegistry.properties) {
                 switch (property) {
                     case BooleanProperty booleanProperty -> entries.add(ClientPluginSettingEntry.newBuilder()
                             .setSingle(ClientPluginSettingEntrySingle.newBuilder()
                                     .setKey(property.key())
                                     .setUiDescription(booleanProperty.uiDescription())
                                     .setCliDescription(booleanProperty.cliDescription())
-                                    .addAllCliNames(List.of(booleanProperty.cliNames()))
+                                    .addAllCliNames(Arrays.asList(booleanProperty.cliNames()))
                                     .setType(ClientPluginSettingType.newBuilder()
                                             .setBool(BoolSetting.newBuilder()
                                                     .setDef(booleanProperty.defaultValue())
@@ -104,7 +102,7 @@ public class SettingsRegistry {
                                     .setKey(property.key())
                                     .setUiDescription(intProperty.uiDescription())
                                     .setCliDescription(intProperty.cliDescription())
-                                    .addAllCliNames(List.of(intProperty.cliNames()))
+                                    .addAllCliNames(Arrays.asList(intProperty.cliNames()))
                                     .setType(ClientPluginSettingType.newBuilder()
                                             .setInt(createIntSetting(intProperty))
                                             .build())
@@ -119,14 +117,14 @@ public class SettingsRegistry {
                                                 .setKey(minProperty.key())
                                                 .setUiDescription(minProperty.uiDescription())
                                                 .setCliDescription(minProperty.cliDescription())
-                                                .addAllCliNames(List.of(minProperty.cliNames()))
+                                                .addAllCliNames(Arrays.asList(minProperty.cliNames()))
                                                 .setIntSetting(createIntSetting(minProperty))
                                                 .build())
                                         .setMax(ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
                                                 .setKey(maxProperty.key())
                                                 .setUiDescription(maxProperty.uiDescription())
                                                 .setCliDescription(maxProperty.cliDescription())
-                                                .addAllCliNames(List.of(maxProperty.cliNames()))
+                                                .addAllCliNames(Arrays.asList(maxProperty.cliNames()))
                                                 .setIntSetting(createIntSetting(maxProperty))
                                                 .build())
                                         .build())
@@ -137,7 +135,7 @@ public class SettingsRegistry {
                                     .setKey(property.key())
                                     .setUiDescription(stringProperty.uiDescription())
                                     .setCliDescription(stringProperty.cliDescription())
-                                    .addAllCliNames(List.of(stringProperty.cliNames()))
+                                    .addAllCliNames(Arrays.asList(stringProperty.cliNames()))
                                     .setType(ClientPluginSettingType.newBuilder()
                                             .setString(StringSetting.newBuilder()
                                                     .setDef(stringProperty.defaultValue())
@@ -158,7 +156,7 @@ public class SettingsRegistry {
                                         .setKey(property.key())
                                         .setUiDescription(comboProperty.uiDescription())
                                         .setCliDescription(comboProperty.cliDescription())
-                                        .addAllCliNames(List.of(comboProperty.cliNames()))
+                                        .addAllCliNames(Arrays.asList(comboProperty.cliNames()))
                                         .setType(ClientPluginSettingType.newBuilder()
                                                 .setCombo(ComboSetting.newBuilder()
                                                         .setDef(comboProperty.defaultValue())
@@ -168,14 +166,14 @@ public class SettingsRegistry {
                                         .build())
                                 .build());
                     }
-                    case null, default -> throw new IllegalStateException("Unknown property type!");
+                    default -> throw new IllegalStateException("Unknown property type!");
                 }
             }
 
             list.add(ClientPluginSettingsPage.newBuilder()
-                    .setPageName(entry.getValue().pageName)
-                    .setHidden(entry.getValue().hidden)
-                    .setNamespace(entry.getKey())
+                    .setPageName(namespaceRegistry.pageName)
+                    .setHidden(namespaceRegistry.hidden)
+                    .setNamespace(namespaceEntry.getKey())
                     .addAllEntries(entries)
                     .build());
         }

@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AutoRespawn implements InternalExtension {
     public static void onPacket(SWPacketReceiveEvent event) {
-        if (event.getPacket() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
+        if (event.packet() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
             var connection = event.connection();
             var settingsHolder = connection.settingsHolder();
             if (!settingsHolder.get(AutoRespawnSettings.AUTO_RESPAWN)) {

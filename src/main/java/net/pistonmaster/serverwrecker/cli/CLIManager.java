@@ -59,7 +59,7 @@ public class CLIManager {
     public void initCLI(String[] args) {
         var serverWreckerCommand = new SWCommandDefinition(this);
         var commandLine = new CommandLine(serverWreckerCommand);
-        serverWreckerCommand.setCommandLine(commandLine);
+        serverWreckerCommand.commandLine(commandLine);
         commandLine.setCaseInsensitiveEnumValuesAllowed(true);
         commandLine.setUsageHelpAutoWidth(true);
         commandLine.setUsageHelpLongOptionsMaxWidth(30);
@@ -69,7 +69,7 @@ public class CLIManager {
         });
 
         var targetCommandSpec = commandLine.getCommandSpec();
-        for (var page : rpcClient.getConfigStubBlocking()
+        for (var page : rpcClient.configStubBlocking()
                 .getUIClientData(ClientDataRequest.getDefaultInstance())
                 .getPluginSettingsList()) {
             for (var entry : page.getEntriesList()) {
@@ -211,7 +211,7 @@ public class CLIManager {
     }
 
     public void shutdown() {
-        shutdownManager.shutdown(true);
+        shutdownManager.shutdownSoftware(true);
     }
 
     private record ComboTypeInfo(ComboSetting comboSetting) implements CommandLine.Model.ITypeInfo {

@@ -117,7 +117,7 @@ public class ViaClientSession extends TcpSession {
 
             bootstrap.group(eventLoopGroup);
             if (isBedrock) {
-                if (proxy != null && !proxy.type().isUdp()) {
+                if (proxy != null && !proxy.type().udp()) {
                     throw new IllegalStateException("Proxy must support UDP! (Only SOCKS5 is supported)");
                 }
 
@@ -170,8 +170,8 @@ public class ViaClientSession extends TcpSession {
                     userConnection.put(new StorableSettingsHolder(settingsHolder));
                     userConnection.put(new StorableSession(ViaClientSession.this));
 
-                    if (isBedrock && meta.getMinecraftAccount().isPremiumBedrock()) {
-                        var bedrockData = (BedrockData) meta.getMinecraftAccount().accountData();
+                    if (isBedrock && meta.minecraftAccount().isPremiumBedrock()) {
+                        var bedrockData = (BedrockData) meta.minecraftAccount().accountData();
                         userConnection.put(new AuthChainData(
                                 bedrockData.mojangJwt(),
                                 bedrockData.identityJwt(),
@@ -248,7 +248,7 @@ public class ViaClientSession extends TcpSession {
             if (handler == null) {
                 channel.pipeline().addBefore("via-codec", COMPRESSION_NAME, new CompressionCodec(threshold));
             } else {
-                ((CompressionCodec) handler).setThreshold(threshold);
+                ((CompressionCodec) handler).threshold(threshold);
             }
         } else if (channel.pipeline().get(COMPRESSION_NAME) != null) {
             channel.pipeline().remove(COMPRESSION_NAME);

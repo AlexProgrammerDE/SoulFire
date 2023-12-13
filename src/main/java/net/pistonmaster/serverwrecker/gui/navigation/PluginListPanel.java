@@ -34,7 +34,7 @@ public class PluginListPanel extends NavigationItem {
     public PluginListPanel(CardsContainer container) {
         setLayout(new GridLayout(0, 3, 10, 10));
 
-        for (var item : container.getPluginPages()) {
+        for (var item : container.pluginPages()) {
             if (item.getHidden()) {
                 continue;
             }

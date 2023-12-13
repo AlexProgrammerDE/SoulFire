@@ -111,6 +111,6 @@ public class GUIManager {
     }
 
     public void shutdown() {
-        shutdownManager.shutdown(true);
+        shutdownManager.shutdownSoftware(true);
     }
 }

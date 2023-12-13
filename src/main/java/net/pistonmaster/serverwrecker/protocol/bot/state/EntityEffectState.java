@@ -51,16 +51,16 @@ public class EntityEffectState {
 
         return Optional.of(new EffectData(
                 effect,
-                state.getAmplifier(),
-                state.getDuration(),
-                state.isAmbient(),
-                state.isShowParticles()
+                state.amplifier(),
+                state.duration(),
+                state.ambient(),
+                state.showParticles()
         ));
     }
 
     public void tick() {
-        effects.values().forEach(effect -> effect.setDuration(effect.getDuration() - 1));
-        effects.values().removeIf(effect -> effect.getDuration() <= 0);
+        effects.values().forEach(effect -> effect.duration(effect.duration() - 1));
+        effects.values().removeIf(effect -> effect.duration() <= 0);
     }
 
     @Getter

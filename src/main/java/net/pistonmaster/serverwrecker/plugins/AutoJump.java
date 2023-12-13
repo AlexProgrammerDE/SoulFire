@@ -44,10 +44,10 @@ public class AutoJump implements InternalExtension {
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
             var sessionDataManager = connection.sessionDataManager();
             var level = sessionDataManager.getCurrentLevel();
-            var movementManager = sessionDataManager.getBotMovementManager();
+            var movementManager = sessionDataManager.botMovementManager();
             if (level != null && movementManager != null
                     && level.isChunkLoaded(movementManager.getBlockPos())
-                    && movementManager.getEntity().isOnGround()) {
+                    && movementManager.entity().onGround()) {
                 connection.logger().debug("[AutoJump] Jumping!");
                 movementManager.jump();
             }

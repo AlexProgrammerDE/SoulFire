@@ -50,23 +50,23 @@ public class AutoEat implements InternalExtension {
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
             var sessionDataManager = connection.sessionDataManager();
 
-            var healthData = sessionDataManager.getHealthData();
+            var healthData = sessionDataManager.healthData();
             if (healthData == null || healthData.food() >= 20) {
                 return;
             }
 
-            var inventoryManager = sessionDataManager.getInventoryManager();
+            var inventoryManager = sessionDataManager.inventoryManager();
             var playerInventory = inventoryManager.getPlayerInventory();
 
             var i = 0;
-            for (var slot : playerInventory.getHotbar()) {
+            for (var slot : playerInventory.hotbar()) {
                 var hotbarSlot = i++;
 
                 if (slot.item() == null) {
                     continue;
                 }
 
-                var itemType = slot.item().getType();
+                var itemType = slot.item().type();
                 var foodType = FoodType.VALUES.stream()
                         .filter(type -> type.itemType() == itemType)
                         .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
@@ -81,9 +81,9 @@ public class AutoEat implements InternalExtension {
                 }
 
                 try {
-                    inventoryManager.setHeldItemSlot(hotbarSlot);
+                    inventoryManager.heldItemSlot(hotbarSlot);
                     inventoryManager.sendHeldItemChange();
-                    sessionDataManager.getBotActionManager().useItemInHand(Hand.MAIN_HAND);
+                    sessionDataManager.botActionManager().useItemInHand(Hand.MAIN_HAND);
 
                     // Wait before eating again
                     TimeUtil.waitTime(2, TimeUnit.SECONDS);
@@ -93,12 +93,12 @@ public class AutoEat implements InternalExtension {
                 }
             }
 
-            for (var slot : playerInventory.getMainInventory()) {
+            for (var slot : playerInventory.mainInventory()) {
                 if (slot.item() == null) {
                     continue;
                 }
 
-                var itemType = slot.item().getType();
+                var itemType = slot.item().type();
                 var foodType = FoodType.VALUES.stream()
                         .filter(type -> type.itemType() == itemType)
                         .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
@@ -114,14 +114,14 @@ public class AutoEat implements InternalExtension {
 
                 try {
                     inventoryManager.leftClickSlot(slot.slot());
-                    inventoryManager.leftClickSlot(playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot()).slot());
-                    if (inventoryManager.getCursorItem() != null) {
+                    inventoryManager.leftClickSlot(playerInventory.hotbarSlot(inventoryManager.heldItemSlot()).slot());
+                    if (inventoryManager.cursorItem() != null) {
                         inventoryManager.leftClickSlot(slot.slot());
                     }
 
                     // Wait before eating again
                     TimeUtil.waitTime(2, TimeUnit.SECONDS);
-                    sessionDataManager.getBotActionManager().useItemInHand(Hand.MAIN_HAND);
+                    sessionDataManager.botActionManager().useItemInHand(Hand.MAIN_HAND);
                     return;
                 } finally {
                     inventoryManager.unlockInventoryControl();

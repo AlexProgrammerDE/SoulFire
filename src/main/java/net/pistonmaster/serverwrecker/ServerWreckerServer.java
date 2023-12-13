@@ -158,7 +158,7 @@ public class ServerWreckerServer {
 
         Via.init(ViaManagerImpl.builder()
                 .platform(platform)
-                .injector(platform.getInjector())
+                .injector(platform.injector())
                 .loader(new SWViaLoader())
                 .build());
 
@@ -287,17 +287,17 @@ public class ServerWreckerServer {
         var attackManager = injector.newInstance(AttackManager.class);
         ServerWreckerAPI.postEvent(new AttackInitEvent(attackManager));
 
-        attacks.put(attackManager.getId(), attackManager);
+        attacks.put(attackManager.id(), attackManager);
 
         attackManager.start(settingsHolder);
 
-        LOGGER.debug("Started attack with id {}", attackManager.getId());
+        LOGGER.debug("Started attack with id {}", attackManager.id());
 
-        return attackManager.getId();
+        return attackManager.id();
     }
 
     public void toggleAttackState(int id, boolean pause) {
-        attacks.get(id).setAttackState(pause ? AttackState.PAUSED : AttackState.RUNNING);
+        attacks.get(id).attackState(pause ? AttackState.PAUSED : AttackState.RUNNING);
     }
 
     public CompletableFuture<Void> stopAllAttacks() {
@@ -310,6 +310,6 @@ public class ServerWreckerServer {
     }
 
     public void shutdown() {
-        shutdownManager.shutdown(true);
+        shutdownManager.shutdownSoftware(true);
     }
 }

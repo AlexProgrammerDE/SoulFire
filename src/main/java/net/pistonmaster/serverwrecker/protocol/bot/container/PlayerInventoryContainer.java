@@ -39,7 +39,7 @@ public class PlayerInventoryContainer extends Container {
         super(46, 0);
     }
 
-    public ContainerSlot getHotbarSlot(int slot) {
+    public ContainerSlot hotbarSlot(int slot) {
         return getSlot(36 + slot);
     }
 

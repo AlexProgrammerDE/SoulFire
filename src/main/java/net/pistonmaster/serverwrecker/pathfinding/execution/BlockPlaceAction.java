@@ -54,22 +54,22 @@ public final class BlockPlaceAction implements WorldAction {
     @Override
     public void tick(BotConnection connection) {
         var sessionDataManager = connection.sessionDataManager();
-        var movementManager = sessionDataManager.getBotMovementManager();
-        movementManager.getControlState().resetAll();
+        var movementManager = sessionDataManager.botMovementManager();
+        movementManager.controlState().resetAll();
 
         if (!putOnHotbar) {
-            var inventoryManager = sessionDataManager.getInventoryManager();
+            var inventoryManager = sessionDataManager.inventoryManager();
             var playerInventory = inventoryManager.getPlayerInventory();
 
             SWItemStack leastHardItem = null;
             var leastHardness = 0F;
-            for (var slot : playerInventory.getStorage()) {
+            for (var slot : playerInventory.storage()) {
                 if (slot.item() == null) {
                     continue;
                 }
 
                 var item = slot.item();
-                var blockType = BlockItems.getBlockType(item.getType());
+                var blockType = BlockItems.getBlockType(item.type());
                 if (blockType.isEmpty()) {
                     continue;
                 }
@@ -80,38 +80,38 @@ public final class BlockPlaceAction implements WorldAction {
                 }
             }
 
-            var heldSlot = playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot());
+            var heldSlot = playerInventory.hotbarSlot(inventoryManager.heldItemSlot());
             if (heldSlot.item() != null) {
                 var item = heldSlot.item();
-                if (ItemTypeHelper.isSafeFullBlockItem(item.getType())) {
+                if (ItemTypeHelper.isSafeFullBlockItem(item.type())) {
                     putOnHotbar = true;
                     return;
                 }
             }
 
-            for (var hotbarSlot : playerInventory.getHotbar()) {
+            for (var hotbarSlot : playerInventory.hotbar()) {
                 if (hotbarSlot.item() == null) {
                     continue;
                 }
 
                 var item = hotbarSlot.item();
-                if (!ItemTypeHelper.isSafeFullBlockItem(item.getType())) {
+                if (!ItemTypeHelper.isSafeFullBlockItem(item.type())) {
                     continue;
                 }
 
-                inventoryManager.setHeldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
+                inventoryManager.heldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
                 inventoryManager.sendHeldItemChange();
                 putOnHotbar = true;
                 return;
             }
 
-            for (var slot : playerInventory.getMainInventory()) {
+            for (var slot : playerInventory.mainInventory()) {
                 if (slot.item() == null) {
                     continue;
                 }
 
                 var item = slot.item();
-                if (!ItemTypeHelper.isSafeFullBlockItem(item.getType())) {
+                if (!ItemTypeHelper.isSafeFullBlockItem(item.type())) {
                     continue;
                 }
 
@@ -122,10 +122,10 @@ public final class BlockPlaceAction implements WorldAction {
                 try {
                     inventoryManager.leftClickSlot(slot.slot());
                     TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-                    inventoryManager.leftClickSlot(playerInventory.getHotbarSlot(inventoryManager.getHeldItemSlot()).slot());
+                    inventoryManager.leftClickSlot(playerInventory.hotbarSlot(inventoryManager.heldItemSlot()).slot());
                     TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
 
-                    if (inventoryManager.getCursorItem() != null) {
+                    if (inventoryManager.cursorItem() != null) {
                         inventoryManager.leftClickSlot(slot.slot());
                         TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
                     }
@@ -144,7 +144,7 @@ public final class BlockPlaceAction implements WorldAction {
             return;
         }
 
-        connection.sessionDataManager().getBotActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceData);
+        connection.sessionDataManager().botActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceData);
         finishedPlacing = true;
     }
 

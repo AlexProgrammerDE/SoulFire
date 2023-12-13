@@ -43,7 +43,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         var actions = new ObjectArrayList<WorldAction>();
         var previousElement = current;
         do {
-            var previousActions = new ObjectArrayList<>(previousElement.getPreviousActions());
+            var previousActions = new ObjectArrayList<>(previousElement.previousActions());
 
             // So they get executed in the right order
             Collections.reverse(previousActions);
@@ -51,7 +51,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 actions.add(0, action);
             }
 
-            previousElement = previousElement.getPrevious();
+            previousElement = previousElement.previous();
         } while (previousElement != null);
 
         return actions;
@@ -83,10 +83,10 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
         while (!openSet.isEmpty()) {
             var current = openSet.dequeue();
-            log.debug("Looking at node: {}", current.getEntityState().position());
+            log.debug("Looking at node: {}", current.entityState().position());
 
             // If we found our destination, we can stop looking
-            if (scorer.isFinished(current.getEntityState())) {
+            if (scorer.isFinished(current.entityState())) {
                 stopwatch.stop();
                 log.info("Success! Took {}ms to find route", stopwatch.elapsed().toMillis());
 
@@ -95,9 +95,9 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
             GraphInstructions[] instructionsList;
             try {
-                instructionsList = graph.getActions(current.getEntityState());
+                instructionsList = graph.getActions(current.entityState());
             } catch (OutOfLevelException e) {
-                log.debug("Found a node out of the level: {}", current.getEntityState().positionBlock());
+                log.debug("Found a node out of the level: {}", current.entityState().positionBlock());
                 stopwatch.stop();
                 log.info("Took {}ms to find route to reach the edge of view distance", stopwatch.elapsed().toMillis());
 
@@ -107,10 +107,11 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 // This is the best node we found so far
                 // We will add a recalculating action and return the best route
                 var recalculateTrace = getActionTrace(new MinecraftRouteNode(
-                        bestNode.getEntityState(),
+                        bestNode.entityState(),
                         bestNode,
                         List.of(new RecalculatePathAction()),
-                        bestNode.getSourceCost(), bestNode.getTotalRouteScore()
+                        bestNode.sourceCost(),
+                        bestNode.totalRouteScore()
                 ));
 
                 if (recalculateTrace.size() <= 2) {
@@ -133,7 +134,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                     // Calculate new distance from start to this connection,
                     // Get distance from the current element
                     // and add the distance from the current element to the next element
-                    var newSourceCost = current.getSourceCost() + actionCost;
+                    var newSourceCost = current.sourceCost() + actionCost;
                     var newTotalRouteScore = newSourceCost + scorer.computeScore(graph, actionTargetState);
 
                     // The first time we see this node
@@ -146,11 +147,11 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                     }
 
                     // If we found a better route to this node, update it
-                    if (newSourceCost < v.getSourceCost()) {
-                        v.setPrevious(current);
-                        v.setPreviousActions(worldActions);
-                        v.setSourceCost(newSourceCost);
-                        v.setTotalRouteScore(newTotalRouteScore);
+                    if (newSourceCost < v.sourceCost()) {
+                        v.previous(current);
+                        v.previousActions(worldActions);
+                        v.sourceCost(newSourceCost);
+                        v.totalRouteScore(newTotalRouteScore);
 
                         log.debug("Found a better route to node: {}", actionTargetState.positionBlock());
                         openSet.enqueue(v);
@@ -173,7 +174,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         for (var node : values) {
             // Our implementation calculates the score from this node to the start,
             // so we need to get it by subtracting the source cost
-            var targetScore = node.getTotalRouteScore() - node.getSourceCost();
+            var targetScore = node.totalRouteScore() - node.sourceCost();
 
             if (targetScore < smallestScore) {
                 smallestScore = targetScore;

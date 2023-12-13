@@ -96,8 +96,8 @@ public class ForwardingBypass implements InternalExtension {
             var codecHelper = player.session().getCodecHelper();
             codecHelper.writeVarInt(forwarded, actualVersion);
             codecHelper.writeString(forwarded, address);
-            codecHelper.writeUUID(forwarded, player.meta().getMinecraftAccount().getUniqueId());
-            codecHelper.writeString(forwarded, player.meta().getMinecraftAccount().username());
+            codecHelper.writeUUID(forwarded, player.meta().minecraftAccount().getUniqueId());
+            codecHelper.writeString(forwarded, player.meta().minecraftAccount().username());
 
             // TODO: Fix this
             /*
@@ -155,25 +155,25 @@ public class ForwardingBypass implements InternalExtension {
     }
 
     public void onPacket(SWPacketSendingEvent event) {
-        if (!(event.getPacket() instanceof ClientIntentionPacket handshake)) {
+        if (!(event.packet() instanceof ClientIntentionPacket handshake)) {
             return;
         }
 
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
         var hostname = handshake.getHostname();
-        var uuid = connection.meta().getMinecraftAccount().getUniqueId();
+        var uuid = connection.meta().minecraftAccount().getUniqueId();
 
         switch (settingsHolder.get(ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)) {
-            case LEGACY -> event.setPacket(handshake
+            case LEGACY -> event.packet(handshake
                     .withHostname(createLegacyForwardingAddress(uuid, getForwardedIp(), hostname)));
-            case BUNGEE_GUARD -> event.setPacket(handshake
+            case BUNGEE_GUARD -> event.packet(handshake
                     .withHostname(createBungeeGuardForwardingAddress(uuid, getForwardedIp(), hostname, settingsHolder.get(ForwardingBypassSettings.SECRET))));
         }
     }
 
     public void onPacketReceive(SWPacketReceiveEvent event) {
-        if (!(event.getPacket() instanceof ClientboundCustomQueryPacket loginPluginMessage)) {
+        if (!(event.packet() instanceof ClientboundCustomQueryPacket loginPluginMessage)) {
             return;
         }
 

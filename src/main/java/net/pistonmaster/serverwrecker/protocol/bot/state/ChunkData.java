@@ -34,8 +34,8 @@ public class ChunkData {
     private final ChunkSection[] sections;
 
     public ChunkData(LevelState level) {
-        this.minSection = level.getMinSection();
-        this.sections = new ChunkSection[level.getSectionsCount()];
+        this.minSection = level.minSection();
+        this.sections = new ChunkSection[level.sectionsCount()];
     }
 
     public static int log2RoundUp(int num) {

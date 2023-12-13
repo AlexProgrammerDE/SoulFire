@@ -72,9 +72,9 @@ public class BotMovementManager {
 
     public BotMovementManager(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
         this.entity = new PlayerMovementState(
-                dataManager.getSelfAttributeState(),
-                dataManager.getSelfEffectState(),
-                dataManager.getInventoryManager().getPlayerInventory()
+                dataManager.selfAttributeState(),
+                dataManager.selfEffectState(),
+                dataManager.inventoryManager().getPlayerInventory()
         );
         entity.pos = new MutableVector3d(x, y, z);
 
@@ -276,7 +276,7 @@ public class BotMovementManager {
         if (Math.abs(vel.z) < physics.negligeableVelocity) vel.z = 0;
 
         // Handle inputs
-        if (controlState.isJumping() || entity.jumpQueued) {
+        if (controlState.jumping() || entity.jumpQueued) {
             if (entity.jumpTicks > 0) {
                 entity.jumpTicks--;
             }
@@ -290,7 +290,7 @@ public class BotMovementManager {
                     vel.y += 0.1 * entity.jumpBoost;
                 }
 
-                if (controlState.isSprinting()) {
+                if (controlState.sprinting()) {
                     var yaw = Math.PI - entity.yaw;
                     vel.x -= Math.sin(yaw) * 0.2;
                     vel.z += Math.cos(yaw) * 0.2;
@@ -305,27 +305,27 @@ public class BotMovementManager {
         entity.jumpQueued = false;
 
         var forward = 0.0F;
-        if (controlState.isForward()) {
+        if (controlState.forward()) {
             forward++;
         }
 
-        if (controlState.isBackward()) {
+        if (controlState.backward()) {
             forward--;
         }
 
         var strafe = 0.0F;
-        if (controlState.isRight()) {
+        if (controlState.right()) {
             strafe++;
         }
 
-        if (controlState.isLeft()) {
+        if (controlState.left()) {
             strafe--;
         }
 
         strafe *= 0.98F;
         forward *= 0.98F;
 
-        if (controlState.isSneaking()) {
+        if (controlState.sneaking()) {
             strafe *= (float) ((double) strafe * physics.sneakSpeed);
             forward *= (float) ((double) forward * physics.sneakSpeed);
         }
@@ -389,7 +389,7 @@ public class BotMovementManager {
         lastYaw = yaw;
         lastPitch = pitch;
 
-        dataManager.getSession().send(new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
+        dataManager.session().send(new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
     }
 
     public void sendPos() {
@@ -406,7 +406,7 @@ public class BotMovementManager {
         lastZ = z;
         positionReminder = 0;
 
-        dataManager.getSession().send(new ServerboundMovePlayerPosPacket(onGround, x, y, z));
+        dataManager.session().send(new ServerboundMovePlayerPosPacket(onGround, x, y, z));
     }
 
     public void sendRot() {
@@ -420,7 +420,7 @@ public class BotMovementManager {
         lastYaw = yaw;
         lastPitch = pitch;
 
-        dataManager.getSession().send(new ServerboundMovePlayerRotPacket(onGround, yaw, pitch));
+        dataManager.session().send(new ServerboundMovePlayerRotPacket(onGround, yaw, pitch));
     }
 
     public void sendOnGround() {
@@ -428,7 +428,7 @@ public class BotMovementManager {
 
         lastOnGround = onGround;
 
-        dataManager.getSession().send(new ServerboundMovePlayerStatusOnlyPacket(onGround));
+        dataManager.session().send(new ServerboundMovePlayerStatusOnlyPacket(onGround));
     }
 
     public void moveEntityWithHeading(LevelState world, float strafe, float forward) {
@@ -535,12 +535,12 @@ public class BotMovementManager {
             if (isOnLadder(world, pos.toImmutableInt())) {
                 vel.x = GenericMath.clamp(vel.x, -physics.ladderMaxSpeed, physics.ladderMaxSpeed);
                 vel.z = GenericMath.clamp(vel.z, -physics.ladderMaxSpeed, physics.ladderMaxSpeed);
-                vel.y = Math.max(vel.y, controlState.isSneaking() ? 0 : -physics.ladderMaxSpeed);
+                vel.y = Math.max(vel.y, controlState.sneaking() ? 0 : -physics.ladderMaxSpeed);
             }
 
             moveEntity(world, vel.x, vel.y, vel.z);
 
-            if ((entity.isCollidedHorizontally || controlState.isJumping()) && isOnLadder(world, pos.toImmutableInt())) {
+            if ((entity.isCollidedHorizontally || controlState.jumping()) && isOnLadder(world, pos.toImmutableInt())) {
                 vel.y = physics.ladderClimbSpeed; // climb ladder
             }
 
@@ -559,16 +559,16 @@ public class BotMovementManager {
 
     private float getFlyingSpeed() {
         if (entity.flying) {
-            var abilitiesData = dataManager.getAbilitiesData();
+            var abilitiesData = dataManager.abilitiesData();
             var flySpeed = abilitiesData == null ? 0.05F : abilitiesData.flySpeed();
-            return controlState.isSprinting() ? flySpeed * 2.0F : flySpeed;
+            return controlState.sprinting() ? flySpeed * 2.0F : flySpeed;
         } else {
-            return controlState.isSprinting() ? 0.025999999F : 0.02F;
+            return controlState.sprinting() ? 0.025999999F : 0.02F;
         }
     }
 
     public float getSpeed() {
-        var attribute = entity.getAttributesState();
+        var attribute = entity.attributesState();
         Attribute playerSpeedAttribute;
         if (attribute.hasAttribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED)) {
             // Use server-side player attributes
@@ -578,7 +578,7 @@ public class BotMovementManager {
             playerSpeedAttribute = new Attribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED, physics.playerSpeed);
         }
 
-        if (controlState.isSprinting()) {
+        if (controlState.sprinting()) {
             if (playerSpeedAttribute.getModifiers().stream().noneMatch(modifier ->
                     modifier.getUuid().equals(physics.sprintingUUID))) {
                 playerSpeedAttribute.getModifiers().add(new AttributeModifier(
@@ -617,7 +617,7 @@ public class BotMovementManager {
         var oldVelY = dy;
         var oldVelZ = dz;
 
-        if (controlState.isSneaking() && entity.onGround) {
+        if (controlState.sneaking() && entity.onGround) {
             var step = 0.05;
 
             // In the 3 loops bellow, y offset should be -1, but that doesnt reproduce vanilla behavior.
@@ -672,7 +672,7 @@ public class BotMovementManager {
         if (dy != oldVelY) {
             var blockAtFeet = world.getBlockStateAt(pos.offset(0, -0.2, 0).toImmutableInt());
             if (blockAtFeet.blockType() == BlockType.SLIME_BLOCK
-                    && !controlState.isSneaking()) {
+                    && !controlState.sneaking()) {
                 vel.y = -vel.y;
             } else {
                 vel.y = 0;
@@ -933,7 +933,7 @@ public class BotMovementManager {
     }
 
     public float getBoundingBoxHeight() {
-        return this.controlState.isSneaking() ? physics.playerSneakHeight : physics.playerHeight;
+        return this.controlState.sneaking() ? physics.playerSneakHeight : physics.playerHeight;
     }
 
     public Vector3d getEyePosition() {
@@ -941,7 +941,7 @@ public class BotMovementManager {
     }
 
     public float getEyeHeight() {
-        return this.controlState.isSneaking() ? 1.50F : 1.62F;
+        return this.controlState.sneaking() ? 1.50F : 1.62F;
     }
 
     private float getBlockFriction(BlockType blockType) {

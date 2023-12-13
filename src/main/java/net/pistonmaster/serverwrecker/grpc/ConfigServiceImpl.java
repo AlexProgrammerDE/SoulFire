@@ -64,7 +64,7 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
                 UIClientDataResponse.newBuilder()
                         .setUsername(username)
                         .addAllPlugins(getExtensions())
-                        .addAllPluginSettings(serverWreckerServer.getSettingsRegistry().exportSettingsMeta())
+                        .addAllPluginSettings(serverWreckerServer.settingsRegistry().exportSettingsMeta())
                         .build()
         );
         responseObserver.onCompleted();

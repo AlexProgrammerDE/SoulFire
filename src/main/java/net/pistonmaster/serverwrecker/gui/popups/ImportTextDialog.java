@@ -131,7 +131,7 @@ public class ImportTextDialog extends JDialog {
                 } catch (Throwable e) {
                     LOGGER.error("Failed to import text!", e);
                 }
-            }, guiManager.getThreadPool());
+            }, guiManager.threadPool());
         }
     }
 
@@ -142,7 +142,7 @@ public class ImportTextDialog extends JDialog {
         public void actionPerformed(ActionEvent actionEvent) {
             dialog.dispose();
 
-            guiManager.getThreadPool().submit(() -> {
+            guiManager.threadPool().submit(() -> {
                 try {
                     getClipboard().ifPresent(consumer);
                 } catch (Throwable e) {
@@ -159,7 +159,7 @@ public class ImportTextDialog extends JDialog {
         public void actionPerformed(ActionEvent actionEvent) {
             dialog.dispose();
 
-            guiManager.getThreadPool().submit(() -> {
+            guiManager.threadPool().submit(() -> {
                 try {
                     consumer.accept(textArea.getText());
                 } catch (Throwable e) {

@@ -110,9 +110,9 @@ public class MessageLogPanel extends JPanel {
 
     public void clear() {
         SwingUtilities.invokeLater(() -> {
-            noopDocumentFilter.setFilter(false);
+            noopDocumentFilter.filter(false);
             textComponent.setText("");
-            noopDocumentFilter.setFilter(true);
+            noopDocumentFilter.filter(true);
         });
     }
 
@@ -124,10 +124,10 @@ public class MessageLogPanel extends JPanel {
     public void log(final String line) {
         SwingUtilities.invokeLater(() -> {
             try {
-                noopDocumentFilter.setFilter(false);
+                noopDocumentFilter.filter(false);
                 var offset = document.getLength();
                 document.insertString(offset, line, defaultAttributes);
-                noopDocumentFilter.setFilter(true);
+                noopDocumentFilter.filter(true);
             } catch (BadLocationException ignored) {
             }
         });

@@ -201,12 +201,12 @@ public final class SessionDataManager {
     @EventHandler
     public void onPosition(ClientboundPlayerPositionPacket packet) {
         var isInitial = botMovementManager == null;
-        var posData = isInitial ? null : botMovementManager.getEntity().getPos();
-        var currentX = isInitial ? 0 : posData.getX();
-        var currentY = isInitial ? 0 : posData.getY();
-        var currentZ = isInitial ? 0 : posData.getZ();
-        var currentYaw = isInitial ? 0 : botMovementManager.getEntity().getYaw();
-        var currentPitch = isInitial ? 0 : botMovementManager.getEntity().getPitch();
+        var posData = isInitial ? null : botMovementManager.entity().pos();
+        var currentX = isInitial ? 0 : posData.x();
+        var currentY = isInitial ? 0 : posData.y();
+        var currentZ = isInitial ? 0 : posData.z();
+        var currentYaw = isInitial ? 0 : botMovementManager.entity().yaw();
+        var currentPitch = isInitial ? 0 : botMovementManager.entity().pitch();
 
         var xRelative = packet.getRelative().contains(PositionElement.X);
         var yRelative = packet.getRelative().contains(PositionElement.Y);
@@ -308,14 +308,14 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onPlayerListHeaderFooter(ClientboundTabListPacket packet) {
-        playerListState.setHeader(packet.getHeader());
-        playerListState.setFooter(packet.getFooter());
+        playerListState.header(packet.getHeader());
+        playerListState.footer(packet.getFooter());
     }
 
     @EventHandler
     public void onPlayerListUpdate(ClientboundPlayerInfoUpdatePacket packet) {
         for (var update : packet.getEntries()) {
-            var entry = playerListState.getEntries().computeIfAbsent(update.getProfileId(), k -> update);
+            var entry = playerListState.entries().computeIfAbsent(update.getProfileId(), k -> update);
             for (var action : packet.getActions()) {
                 switch (action) {
                     case ADD_PLAYER -> entry.setProfile(update.getProfile());
@@ -337,7 +337,7 @@ public final class SessionDataManager {
     @EventHandler
     public void onPlayerListRemove(ClientboundPlayerInfoRemovePacket packet) {
         for (var profileId : packet.getProfileIds()) {
-            playerListState.getEntries().remove(profileId);
+            playerListState.entries().remove(profileId);
         }
     }
 
@@ -374,7 +374,7 @@ public final class SessionDataManager {
         selfAttributeState.setAbilities(abilitiesData);
 
         if (botMovementManager != null) {
-            botMovementManager.getControlState().setFlying(abilitiesData.flying());
+            botMovementManager.controlState().flying(abilitiesData.flying());
         }
     }
 
@@ -413,8 +413,8 @@ public final class SessionDataManager {
             return;
         }
 
-        level.setWorldAge(packet.getWorldAge());
-        level.setTime(packet.getTime());
+        level.worldAge(packet.getWorldAge());
+        level.time(packet.getTime());
     }
 
     //
@@ -423,7 +423,7 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onSetContainerContent(ClientboundContainerSetContentPacket packet) {
-        inventoryManager.setLastStateId(packet.getStateId());
+        inventoryManager.lastStateId(packet.getStateId());
         var container = inventoryManager.getContainer(packet.getContainerId());
 
         if (container == null) {
@@ -438,9 +438,9 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onSetContainerSlot(ClientboundContainerSetSlotPacket packet) {
-        inventoryManager.setLastStateId(packet.getStateId());
+        inventoryManager.lastStateId(packet.getStateId());
         if (packet.getContainerId() == -1 && packet.getSlot() == -1) {
-            inventoryManager.setCursorItem(SWItemStack.from(packet.getItem()));
+            inventoryManager.cursorItem(SWItemStack.from(packet.getItem()));
             return;
         }
 
@@ -468,14 +468,14 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onSetSlot(ClientboundSetCarriedItemPacket packet) {
-        inventoryManager.setHeldItemSlot(packet.getSlot());
+        inventoryManager.heldItemSlot(packet.getSlot());
     }
 
     @EventHandler
     public void onOpenScreen(ClientboundOpenScreenPacket packet) {
         var container = new WindowContainer(packet.getType(), packet.getTitle(), packet.getContainerId());
         inventoryManager.setContainer(packet.getContainerId(), container);
-        inventoryManager.setOpenContainer(container);
+        inventoryManager.openContainer(container);
     }
 
     @EventHandler
@@ -488,7 +488,7 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onCloseContainer(ClientboundContainerClosePacket packet) {
-        inventoryManager.setOpenContainer(null);
+        inventoryManager.openContainer(null);
     }
 
     @EventHandler
@@ -509,8 +509,8 @@ public final class SessionDataManager {
     public void onGameEvent(ClientboundGameEventPacket packet) {
         switch (packet.getNotification()) {
             case INVALID_BED -> log.info("Bot had no bed/respawn anchor to respawn at (was maybe obstructed)");
-            case START_RAIN -> weatherState.setRaining(true);
-            case STOP_RAIN -> weatherState.setRaining(false);
+            case START_RAIN -> weatherState.raining(true);
+            case STOP_RAIN -> weatherState.raining(false);
             case CHANGE_GAMEMODE -> {
                 previousGameMode = gameMode;
                 gameMode = (GameMode) packet.getValue();
@@ -521,9 +521,9 @@ public final class SessionDataManager {
             }
             case DEMO_MESSAGE -> log.debug("Demo event: {}", packet.getValue());
             case ARROW_HIT_PLAYER -> log.debug("Arrow hit player");
-            case RAIN_STRENGTH -> weatherState.setRainStrength(((RainStrengthValue) packet.getValue()).getStrength());
+            case RAIN_STRENGTH -> weatherState.rainStrength(((RainStrengthValue) packet.getValue()).getStrength());
             case THUNDER_STRENGTH ->
-                    weatherState.setThunderStrength(((ThunderStrengthValue) packet.getValue()).getStrength());
+                    weatherState.thunderStrength(((ThunderStrengthValue) packet.getValue()).getStrength());
             case PUFFERFISH_STING_SOUND -> log.debug("Pufferfish sting sound");
             case AFFECTED_BY_ELDER_GUARDIAN -> log.debug("Affected by elder guardian");
             case ENABLE_RESPAWN_SCREEN ->
@@ -553,7 +553,7 @@ public final class SessionDataManager {
         var data = packet.getChunkData();
         var buf = Unpooled.wrappedBuffer(data);
 
-        var chunkData = level.getChunks().getOrCreateChunk(packet.getX(), packet.getZ(), level);
+        var chunkData = level.chunks().getOrCreateChunk(packet.getX(), packet.getZ(), level);
 
         try {
             for (var i = 0; i < chunkData.getSectionCount(); i++) {
@@ -576,7 +576,7 @@ public final class SessionDataManager {
         var codec = session.getCodecHelper();
 
         for (var biomeData : packet.getChunkBiomeData()) {
-            var chunkData = level.getChunks().getChunk(biomeData.getX(), biomeData.getZ());
+            var chunkData = level.chunks().getChunk(biomeData.getX(), biomeData.getZ());
 
             if (chunkData == null) {
                 log.warn("Received biome update for unknown chunk: {} {}", biomeData.getX(), biomeData.getZ());
@@ -605,7 +605,7 @@ public final class SessionDataManager {
             return;
         }
 
-        level.getChunks().removeChunk(packet.getX(), packet.getZ());
+        level.chunks().removeChunk(packet.getX(), packet.getZ());
     }
 
     //
@@ -621,7 +621,7 @@ public final class SessionDataManager {
             return;
         }
 
-        var chunkData = level.getChunks().getChunk(packet.getChunkX(), packet.getChunkZ());
+        var chunkData = level.chunks().getChunk(packet.getChunkX(), packet.getChunkZ());
 
         if (chunkData == null) {
             log.warn("Received section blocks update for unknown chunk: {} {}", packet.getChunkX(), packet.getChunkZ());
@@ -673,31 +673,31 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onBorderCenter(ClientboundSetBorderCenterPacket packet) {
-        borderState.setCenterX(packet.getNewCenterX());
-        borderState.setCenterZ(packet.getNewCenterZ());
+        borderState.centerX(packet.getNewCenterX());
+        borderState.centerZ(packet.getNewCenterZ());
     }
 
     @EventHandler
     public void onBorderLerpSize(ClientboundSetBorderLerpSizePacket packet) {
-        borderState.setOldSize(packet.getOldSize());
-        borderState.setNewSize(packet.getNewSize());
-        borderState.setLerpTime(packet.getLerpTime());
+        borderState.oldSize(packet.getOldSize());
+        borderState.newSize(packet.getNewSize());
+        borderState.lerpTime(packet.getLerpTime());
     }
 
     @EventHandler
     public void onBorderSize(ClientboundSetBorderSizePacket packet) {
-        borderState.setOldSize(borderState.getNewSize());
-        borderState.setNewSize(packet.getSize());
+        borderState.oldSize(borderState.newSize());
+        borderState.newSize(packet.getSize());
     }
 
     @EventHandler
     public void onBorderWarningTime(ClientboundSetBorderWarningDelayPacket packet) {
-        borderState.setWarningTime(packet.getWarningDelay());
+        borderState.warningTime(packet.getWarningDelay());
     }
 
     @EventHandler
     public void onBorderWarningBlocks(ClientboundSetBorderWarningDistancePacket packet) {
-        borderState.setWarningBlocks(packet.getWarningBlocks());
+        borderState.warningBlocks(packet.getWarningBlocks());
     }
 
     //
@@ -735,7 +735,7 @@ public final class SessionDataManager {
     @EventHandler
     public void onEntityMetadata(ClientboundSetEntityDataPacket packet) {
         var state = packet.getEntityId() == loginData.entityId() ?
-                selfMetadata : entityTrackerState.getEntity(packet.getEntityId()).getMetadataState();
+                selfMetadata : entityTrackerState.getEntity(packet.getEntityId()).metadataState();
 
         for (var entry : packet.getMetadata()) {
             state.setMetadata(entry);
@@ -745,7 +745,7 @@ public final class SessionDataManager {
     @EventHandler
     public void onEntityAttributes(ClientboundUpdateAttributesPacket packet) {
         var state = packet.getEntityId() == loginData.entityId() ?
-                selfAttributeState : entityTrackerState.getEntity(packet.getEntityId()).getAttributesState();
+                selfAttributeState : entityTrackerState.getEntity(packet.getEntityId()).attributesState();
 
         for (var entry : packet.getAttributes()) {
             state.setAttribute(entry);
@@ -767,7 +767,7 @@ public final class SessionDataManager {
     @EventHandler
     public void onUpdateEffect(ClientboundUpdateMobEffectPacket packet) {
         var state = packet.getEntityId() == loginData.entityId() ?
-                selfEffectState : entityTrackerState.getEntity(packet.getEntityId()).getEffectState();
+                selfEffectState : entityTrackerState.getEntity(packet.getEntityId()).effectState();
 
         state.updateEffect(packet.getEffect(), packet.getAmplifier(), packet.getDuration(), packet.isAmbient(), packet.isShowParticles());
     }
@@ -775,7 +775,7 @@ public final class SessionDataManager {
     @EventHandler
     public void onRemoveEffect(ClientboundRemoveMobEffectPacket packet) {
         var state = packet.getEntityId() == loginData.entityId() ?
-                selfEffectState : entityTrackerState.getEntity(packet.getEntityId()).getEffectState();
+                selfEffectState : entityTrackerState.getEntity(packet.getEntityId()).effectState();
 
         state.removeEffect(packet.getEffect());
     }
@@ -805,7 +805,7 @@ public final class SessionDataManager {
         var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.addPosition(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
-        state.setOnGround(packet.isOnGround());
+        state.onGround(packet.isOnGround());
     }
 
     @EventHandler
@@ -818,7 +818,7 @@ public final class SessionDataManager {
         var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.setRotation(packet.getYaw(), packet.getPitch());
-        state.setOnGround(packet.isOnGround());
+        state.onGround(packet.isOnGround());
     }
 
     @EventHandler
@@ -844,7 +844,7 @@ public final class SessionDataManager {
 
         state.addPosition(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
         state.setRotation(packet.getYaw(), packet.getPitch());
-        state.setOnGround(packet.isOnGround());
+        state.onGround(packet.isOnGround());
     }
 
     @EventHandler
@@ -858,7 +858,7 @@ public final class SessionDataManager {
 
         state.setPosition(packet.getX(), packet.getY(), packet.getZ());
         state.setRotation(packet.getYaw(), packet.getPitch());
-        state.setOnGround(packet.isOnGround());
+        state.onGround(packet.isOnGround());
     }
 
     @EventHandler
@@ -907,7 +907,7 @@ public final class SessionDataManager {
         int blockCount = buf.readShort();
 
         var chunkPalette = codec.readDataPalette(buf, PaletteType.CHUNK,
-                ResourceData.GLOBAL_BLOCK_PALETTE.getBlockBitsPerEntry());
+                ResourceData.GLOBAL_BLOCK_PALETTE.blockBitsPerEntry());
         var biomePalette = codec.readDataPalette(buf, PaletteType.BIOME,
                 biomesEntryBitsSize);
         return new ChunkSection(blockCount, chunkPalette, biomePalette);

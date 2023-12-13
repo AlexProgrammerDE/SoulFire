@@ -56,13 +56,13 @@ public class ToolSpeedType {
 
     private static float getEnumToolSpeed(TagsState tagsState, ItemType itemType, BlockType blockType) {
         for (var toolSpeedType : TierType.values()) {
-            if (!toolSpeedType.getTools().contains(itemType)) {
+            if (!toolSpeedType.tools().contains(itemType)) {
                 continue;
             }
 
-            var tagName = MineableType.getFromTool(itemType).orElseThrow().getTagName();
+            var tagName = MineableType.getFromTool(itemType).orElseThrow().tagName();
             if (tagsState.isBlockInTag(blockType, tagName)) {
-                return toolSpeedType.getMiningSpeed();
+                return toolSpeedType.miningSpeed();
             } else {
                 return 1;
             }
@@ -93,7 +93,7 @@ public class ToolSpeedType {
             }
 
             return MineableType.getFromTool(itemType).filter(type ->
-                    tagsState.isBlockInTag(blockType, type.getTagName())).isPresent();
+                    tagsState.isBlockInTag(blockType, type.tagName())).isPresent();
         }
     }
 }

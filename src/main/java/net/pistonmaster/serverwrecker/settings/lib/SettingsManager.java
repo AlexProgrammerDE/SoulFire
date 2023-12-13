@@ -241,7 +241,7 @@ public class SettingsManager {
         private record AccountDataAdapter(AuthType authType) implements JsonDeserializer<AccountData> {
             @Override
             public AccountData deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                return context.deserialize(json, authType.getAccountDataClass());
+                return context.deserialize(json, authType.accountDataClass());
             }
         }
     }

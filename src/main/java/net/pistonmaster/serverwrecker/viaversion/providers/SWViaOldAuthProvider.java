@@ -30,6 +30,6 @@ public class SWViaOldAuthProvider extends OldAuthProvider {
     @Override
     public void sendAuthRequest(UserConnection user, String serverId) {
         ViaClientSession session = Objects.requireNonNull(user.get(StorableSession.class)).session();
-        session.getMeta().joinServerId(serverId, session);
+        session.meta().joinServerId(serverId, session);
     }
 }

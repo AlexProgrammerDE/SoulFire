@@ -52,14 +52,14 @@ public class ProjectedInventory {
         // Empty slot
         usableToolsAndNull.add(null);
 
-        for (var slot : playerInventory.getStorage()) {
+        for (var slot : playerInventory.storage()) {
             if (slot.item() == null) {
                 continue;
             }
 
-            if (ItemTypeHelper.isSafeFullBlockItem(slot.item().getType())) {
+            if (ItemTypeHelper.isSafeFullBlockItem(slot.item().type())) {
                 blockItems += slot.item().getAmount();
-            } else if (ItemTypeHelper.isTool(slot.item().getType())) {
+            } else if (ItemTypeHelper.isTool(slot.item().type())) {
                 usableToolsAndNull.add(slot.item());
             }
         }

@@ -48,27 +48,27 @@ public class BotControlAPI {
     private int sequenceNumber = 0;
 
     public boolean toggleFlight() {
-        var abilitiesData = sessionDataManager.getAbilitiesData();
+        var abilitiesData = sessionDataManager.abilitiesData();
         if (abilitiesData != null && !abilitiesData.allowFlying()) {
             throw new IllegalStateException("You can't fly! (Server said so)");
         }
 
-        var newFly = !botMovementManager.getControlState().isFlying();
-        botMovementManager.getControlState().setFlying(newFly);
+        var newFly = !botMovementManager.controlState().flying();
+        botMovementManager.controlState().flying(newFly);
 
         // Let the server know we are flying
-        sessionDataManager.getSession().send(new ServerboundPlayerAbilitiesPacket(newFly));
+        sessionDataManager.session().send(new ServerboundPlayerAbilitiesPacket(newFly));
 
         return newFly;
     }
 
     public boolean toggleSprint() {
-        var newSprint = !botMovementManager.getControlState().isSprinting();
-        botMovementManager.getControlState().setSprinting(newSprint);
+        var newSprint = !botMovementManager.controlState().sprinting();
+        botMovementManager.controlState().sprinting(newSprint);
 
         // Let the server know we are sprinting
-        sessionDataManager.getSession().send(new ServerboundPlayerCommandPacket(
-                sessionDataManager.getLoginData().entityId(),
+        sessionDataManager.session().send(new ServerboundPlayerCommandPacket(
+                sessionDataManager.loginData().entityId(),
                 newSprint ? PlayerState.START_SPRINTING : PlayerState.STOP_SPRINTING
         ));
 
@@ -76,12 +76,12 @@ public class BotControlAPI {
     }
 
     public boolean toggleSneak() {
-        var newSneak = !botMovementManager.getControlState().isSneaking();
-        botMovementManager.getControlState().setSneaking(newSneak);
+        var newSneak = !botMovementManager.controlState().sneaking();
+        botMovementManager.controlState().sneaking(newSneak);
 
         // Let the server know we are sneaking
-        sessionDataManager.getSession().send(new ServerboundPlayerCommandPacket(
-                sessionDataManager.getLoginData().entityId(),
+        sessionDataManager.session().send(new ServerboundPlayerCommandPacket(
+                sessionDataManager.loginData().entityId(),
                 newSneak ? PlayerState.START_SNEAKING : PlayerState.STOP_SNEAKING
         ));
 
@@ -94,7 +94,7 @@ public class BotControlAPI {
             var command = message.substring(1);
             // We only sign chat at the moment because commands require the entire command tree to be handled
             // Command signing is signing every string parameter in the command because of reporting /msg
-            sessionDataManager.getSession().send(new ServerboundChatCommandPacket(
+            sessionDataManager.session().send(new ServerboundChatCommandPacket(
                     command,
                     now.toEpochMilli(),
                     0L,
@@ -104,7 +104,7 @@ public class BotControlAPI {
             ));
         } else {
             var salt = secureRandom.nextLong();
-            sessionDataManager.getSession().send(new ServerboundChatPacket(
+            sessionDataManager.session().send(new ServerboundChatPacket(
                     message,
                     now.toEpochMilli(),
                     salt,

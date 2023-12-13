@@ -50,10 +50,10 @@ public class LogPanel extends JPanel {
     @Inject
     public LogPanel(GUIManager guiManager) {
         this.guiManager = guiManager;
-        this.clientCommandManager = new ClientCommandManager(guiManager.getRpcClient());
+        this.clientCommandManager = new ClientCommandManager(guiManager.rpcClient());
 
         var request = LogRequest.newBuilder().setPrevious(300).build();
-        guiManager.getRpcClient().getLogStub().subscribe(request, new StreamObserver<>() {
+        guiManager.rpcClient().logStub().subscribe(request, new StreamObserver<>() {
             @Override
             public void onNext(LogResponse value) {
                 messageLogPanel.log(value.getMessage() + "\n");
@@ -127,22 +127,22 @@ public class LogPanel extends JPanel {
         @Override
         public void keyPressed(KeyEvent e) {
             // Cache the written text so we can restore it later
-            if (commandShellAction.getPointer() == -1) {
+            if (commandShellAction.pointer() == -1) {
                 cachedText = commands.getText();
             }
 
-            var commandHistory = commandShellAction.getCommandHistory();
-            var pointer = commandShellAction.getPointer();
+            var commandHistory = commandShellAction.commandHistory();
+            var pointer = commandShellAction.pointer();
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_UP -> {
                     if (pointer < commandHistory.size() - 1) {
-                        commandShellAction.setPointer(pointer + 1);
+                        commandShellAction.pointer(pointer + 1);
                         commands.setText(getTextAtPointer());
                     }
                 }
                 case KeyEvent.VK_DOWN -> {
                     if (pointer > -1) {
-                        commandShellAction.setPointer(pointer - 1);
+                        commandShellAction.pointer(pointer - 1);
                         commands.setText(getTextAtPointer());
                     }
                 }
@@ -160,8 +160,8 @@ public class LogPanel extends JPanel {
         }
 
         private String getTextAtPointer() {
-            var commandHistory = commandShellAction.getCommandHistory();
-            var pointer = commandShellAction.getPointer();
+            var commandHistory = commandShellAction.commandHistory();
+            var pointer = commandShellAction.pointer();
             if (pointer == -1) {
                 return cachedText;
             } else {

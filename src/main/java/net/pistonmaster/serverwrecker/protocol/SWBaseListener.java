@@ -75,7 +75,7 @@ public class SWBaseListener extends SessionAdapter {
         var protocol = (MinecraftProtocol) session.getPacketProtocol();
         if (protocol.getState() == ProtocolState.LOGIN) {
             if (packet instanceof ClientboundHelloPacket helloPacket) {
-                var minecraftAccount = botConnection.meta().getMinecraftAccount();
+                var minecraftAccount = botConnection.meta().minecraftAccount();
                 UserConnection viaUserConnection = session.getFlag(SWProtocolConstants.VIA_USER_CONNECTION);
 
                 var authSupport = minecraftAccount.isPremiumJava();
@@ -151,7 +151,7 @@ public class SWBaseListener extends SessionAdapter {
             protocol.setState(this.targetState);
 
             if (this.targetState == ProtocolState.LOGIN) {
-                var minecraftAccount = botConnection.meta().getMinecraftAccount();
+                var minecraftAccount = botConnection.meta().minecraftAccount();
 
                 session.send(new ServerboundHelloPacket(minecraftAccount.username(), minecraftAccount.getUniqueId()));
             } else {

@@ -43,7 +43,7 @@ public class ProjectedLevelState {
     private final Object2ObjectOpenCustomHashMap<SWVec3i, BlockStateMeta> blockChanges;
 
     public ProjectedLevelState(LevelState levelState) {
-        this.chunkHolder = levelState.getChunks().immutableCopy();
+        this.chunkHolder = levelState.chunks().immutableCopy();
         this.blockChanges = new Object2ObjectOpenCustomHashMap<>(VectorHelper.VECTOR3I_HASH_STRATEGY);
     }
 

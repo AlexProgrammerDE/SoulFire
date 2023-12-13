@@ -43,17 +43,17 @@ import java.util.concurrent.TimeUnit;
 
 public class AutoArmor implements InternalExtension {
     private static void putOn(InventoryManager inventoryManager, PlayerInventoryContainer inventory, ContainerSlot targetSlot, ArmorType armorType) {
-        var bestItem = Arrays.stream(inventory.getStorage()).filter(s -> {
+        var bestItem = Arrays.stream(inventory.storage()).filter(s -> {
             if (s.item() == null) {
                 return false;
             }
 
-            return armorType.getItemTypes().contains(s.item().getType());
+            return armorType.itemTypes().contains(s.item().type());
         }).reduce((first, second) -> {
             assert first.item() != null;
 
-            var firstIndex = armorType.getItemTypes().indexOf(first.item().getType());
-            var secondIndex = armorType.getItemTypes().indexOf(second.item().getType());
+            var firstIndex = armorType.itemTypes().indexOf(first.item().type());
+            var secondIndex = armorType.itemTypes().indexOf(second.item().type());
 
             return firstIndex > secondIndex ? first : second;
         });
@@ -63,8 +63,8 @@ public class AutoArmor implements InternalExtension {
         }
 
         if (targetSlot.item() != null) {
-            var targetIndex = armorType.getItemTypes().indexOf(targetSlot.item().getType());
-            var bestIndex = armorType.getItemTypes().indexOf(bestItem.get().item().getType());
+            var targetIndex = armorType.itemTypes().indexOf(targetSlot.item().type());
+            var bestIndex = armorType.itemTypes().indexOf(bestItem.get().item().type());
 
             if (targetIndex >= bestIndex) {
                 return;
@@ -82,7 +82,7 @@ public class AutoArmor implements InternalExtension {
                 inventoryManager.leftClickSlot(targetSlot.slot());
                 TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
 
-                if (inventoryManager.getCursorItem() != null) {
+                if (inventoryManager.cursorItem() != null) {
                     inventoryManager.leftClickSlot(bestItemSlot.slot());
                     TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
                 }
@@ -102,7 +102,7 @@ public class AutoArmor implements InternalExtension {
         var executor = connection.executorManager().newScheduledExecutorService(connection, "AutoJump");
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
             var sessionDataManager = connection.sessionDataManager();
-            var inventoryManager = sessionDataManager.getInventoryManager();
+            var inventoryManager = sessionDataManager.inventoryManager();
             var playerInventory = inventoryManager.getPlayerInventory();
 
             var armorTypes = Map.of(
