@@ -114,10 +114,6 @@ dependencies {
         exclude("io.netty", "netty-codec-http")
     }
 
-    // For code generation
-    compileOnly(libs.lombok)
-    annotationProcessor(libs.lombok)
-
     // For YAML support (ViaVersion)
     api(libs.snakeyaml)
 
