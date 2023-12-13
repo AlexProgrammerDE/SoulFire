@@ -19,8 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.util;
 
-import org.cloudburstmc.math.vector.Vector3i;
-
 public class MathHelper {
     private MathHelper() {
     }
@@ -36,20 +34,6 @@ public class MathHelper {
         return value < (double) i ? i - 1 : i;
     }
 
-    public static float wrapDegrees(float v) {
-        v %= 360.0F;
-
-        if (v >= 180.0F) {
-            v -= 360.0F;
-        }
-
-        if (v < -180.0F) {
-            v += 360.0F;
-        }
-
-        return v;
-    }
-
     public static short shortClamp(short value, short min, short max) {
         return value < min ? min : (value > max ? max : value);
     }
@@ -60,10 +44,6 @@ public class MathHelper {
 
     public static double square(double x) {
         return x * x;
-    }
-
-    public static long getSeed(Vector3i vec3i) {
-        return getSeed(vec3i.getX(), vec3i.getY(), vec3i.getZ());
     }
 
     public static long getSeed(int i, int j, int k) {

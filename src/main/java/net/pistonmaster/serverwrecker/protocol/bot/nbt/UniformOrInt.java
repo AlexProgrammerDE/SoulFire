@@ -19,5 +19,5 @@
  */
 package net.pistonmaster.serverwrecker.protocol.bot.nbt;
 
-public interface UniformOrInt {
+public sealed interface UniformOrInt permits MCUniform, MCUniformInt {
 }

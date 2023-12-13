@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
-import org.cloudburstmc.math.vector.Vector3d;
 
 @RequiredArgsConstructor
 public enum MovementDirection {
@@ -36,22 +35,7 @@ public enum MovementDirection {
 
     public static final MovementDirection[] VALUES = values();
 
-    @SuppressWarnings("DuplicatedCode")
     public SWVec3i offset(SWVec3i vector) {
-        return switch (this) {
-            case NORTH -> vector.add(0, 0, -1);
-            case SOUTH -> vector.add(0, 0, 1);
-            case EAST -> vector.add(1, 0, 0);
-            case WEST -> vector.add(-1, 0, 0);
-            case NORTH_EAST -> vector.add(1, 0, -1);
-            case NORTH_WEST -> vector.add(-1, 0, -1);
-            case SOUTH_EAST -> vector.add(1, 0, 1);
-            case SOUTH_WEST -> vector.add(-1, 0, 1);
-        };
-    }
-
-    @SuppressWarnings("DuplicatedCode")
-    public Vector3d offset(Vector3d vector) {
         return switch (this) {
             case NORTH -> vector.add(0, 0, -1);
             case SOUTH -> vector.add(0, 0, 1);

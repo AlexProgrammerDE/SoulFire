@@ -34,7 +34,7 @@ public class BlockItems {
                 if (blockType.diggable()
                         && blockShapeTypes.size() == 1
                         && itemType.name().equals(blockType.name())
-                        && blockShapeTypes.get(0).isFullBlock()) {
+                        && blockShapeTypes.getFirst().isFullBlock()) {
                     VALUES[itemType.id()] = blockType;
                     VALUES_REVERSE[blockType.id()] = itemType;
                 }

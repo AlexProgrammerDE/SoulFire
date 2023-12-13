@@ -27,6 +27,7 @@ import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.protocol.bot.movement.AABB;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.MCUniform;
+import net.pistonmaster.serverwrecker.protocol.bot.nbt.MCUniformInt;
 import net.pistonmaster.serverwrecker.protocol.bot.nbt.UniformOrInt;
 import net.pistonmaster.serverwrecker.protocol.bot.utils.SectionUtils;
 import net.pistonmaster.serverwrecker.util.MathHelper;
@@ -79,7 +80,7 @@ public class LevelState {
         if (lightLevel instanceof CompoundTag lightCompound) {
             this.monsterSpawnLightLevel = new MCUniform(lightCompound.get("value"));
         } else if (lightLevel instanceof IntTag lightInt) {
-            this.monsterSpawnLightLevel = new MCUniform(lightInt.getValue(), lightInt.getValue());
+            this.monsterSpawnLightLevel = new MCUniformInt(lightInt.getValue());
         } else {
             throw new IllegalArgumentException("Invalid monster_spawn_light_level: " + lightLevel);
         }
@@ -140,10 +141,6 @@ public class LevelState {
 
     public BlockStateMeta getBlockStateAt(SWVec3i block) {
         return chunks.getBlockStateAt(block.x, block.y, block.z);
-    }
-
-    public boolean isOutOfWorld(Vector3i block) {
-        return block.getY() < this.getMinBuildHeight() || block.getY() >= this.getMaxBuildHeight();
     }
 
     public List<AABB> getCollisionBoxes(AABB aabb) {

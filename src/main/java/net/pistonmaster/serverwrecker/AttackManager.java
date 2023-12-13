@@ -83,7 +83,7 @@ public class AttackManager {
             return new MinecraftAccount(String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), botId));
         }
 
-        return accounts.remove(0);
+        return accounts.removeFirst();
     }
 
     private static Optional<SWProxy> getProxy(int accountsPerProxy, Object2IntMap<SWProxy> proxyUseMap) {

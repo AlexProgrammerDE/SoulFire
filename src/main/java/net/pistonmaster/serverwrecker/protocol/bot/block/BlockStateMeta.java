@@ -53,7 +53,7 @@ public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType,
             // This block has no shape stored, this is for example for air or grass
             return EMPTY_SHAPE;
         } else if (size == 1) {
-            return blockType.blockShapeTypes().get(0);
+            return blockType.blockShapeTypes().getFirst();
         } else {
             return blockType.blockShapeTypes().get(stateIndex);
         }

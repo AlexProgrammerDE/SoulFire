@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.pathfinding.graph.actions.movement;
 
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
-import org.cloudburstmc.math.vector.Vector3d;
 
 @RequiredArgsConstructor
 public enum MovementModifier {
@@ -33,19 +32,7 @@ public enum MovementModifier {
 
     public static final MovementModifier[] VALUES = values();
 
-    @SuppressWarnings("DuplicatedCode")
     public SWVec3i offset(SWVec3i vector) {
-        return switch (this) {
-            case NORMAL -> vector;
-            case FALL_1 -> vector.add(0, -1, 0);
-            case FALL_2 -> vector.add(0, -2, 0);
-            case FALL_3 -> vector.add(0, -3, 0);
-            case JUMP -> vector.add(0, 1, 0);
-        };
-    }
-
-    @SuppressWarnings("DuplicatedCode")
-    public Vector3d offset(Vector3d vector) {
         return switch (this) {
             case NORMAL -> vector;
             case FALL_1 -> vector.add(0, -1, 0);

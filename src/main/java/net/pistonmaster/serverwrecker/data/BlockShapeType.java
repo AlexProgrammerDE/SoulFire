@@ -89,7 +89,7 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes, boolean defau
             return false;
         }
 
-        return blockShapes.get(0).isFullBlock();
+        return blockShapes.getFirst().isFullBlock();
     }
 
     public boolean hasNoCollisions() {

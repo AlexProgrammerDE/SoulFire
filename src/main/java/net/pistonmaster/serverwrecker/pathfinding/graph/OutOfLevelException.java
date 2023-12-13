@@ -27,8 +27,4 @@ public class OutOfLevelException extends RuntimeException {
     public OutOfLevelException() {
         super();
     }
-
-    public OutOfLevelException(Exception e) {
-        super(e);
-    }
 }

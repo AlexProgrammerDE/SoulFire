@@ -19,8 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.account;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +31,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AccountRegistry {
     public static final Logger LOGGER = LoggerFactory.getLogger(AccountRegistry.class);
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final List<MinecraftAccount> accounts = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
 

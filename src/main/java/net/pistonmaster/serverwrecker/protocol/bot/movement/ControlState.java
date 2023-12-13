@@ -23,24 +23,17 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+@Setter
 @Getter
 @ToString
 public class ControlState {
-    @Setter
     private boolean forward;
-    @Setter
     private boolean backward;
-    @Setter
     private boolean left;
-    @Setter
     private boolean right;
-    @Setter
     private boolean sprinting;
-    @Setter
     private boolean jumping;
-    @Setter
     private boolean sneaking;
-    @Setter
     private boolean flying;
 
     public void resetWasd() {
