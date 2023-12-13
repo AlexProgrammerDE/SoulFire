@@ -23,7 +23,7 @@ import com.github.steveice10.mc.protocol.data.ProtocolState;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.account.MinecraftAccount;
-import net.pistonmaster.serverwrecker.account.service.JavaData;
+import net.pistonmaster.serverwrecker.account.service.OnlineJavaData;
 import net.pistonmaster.serverwrecker.protocol.bot.BotControlAPI;
 import net.pistonmaster.serverwrecker.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.protocol.netty.ViaClientSession;
@@ -49,7 +49,7 @@ public class BotConnectionMeta {
 
     public void joinServerId(String serverId, ViaClientSession session) {
         try {
-            var javaData = (JavaData) minecraftAccount.accountData();
+            var javaData = (OnlineJavaData) minecraftAccount.accountData();
             sessionService.joinServer(javaData.profileId(), javaData.authToken(), serverId);
             session.logger().info("Successfully sent mojang join request!");
         } catch (IOException e) {

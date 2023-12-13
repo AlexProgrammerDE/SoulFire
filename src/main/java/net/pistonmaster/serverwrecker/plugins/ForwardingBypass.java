@@ -96,7 +96,7 @@ public class ForwardingBypass implements InternalExtension {
             var codecHelper = player.session().getCodecHelper();
             codecHelper.writeVarInt(forwarded, actualVersion);
             codecHelper.writeString(forwarded, address);
-            codecHelper.writeUUID(forwarded, player.meta().minecraftAccount().getUniqueId());
+            codecHelper.writeUUID(forwarded, player.meta().minecraftAccount().uniqueId());
             codecHelper.writeString(forwarded, player.meta().minecraftAccount().username());
 
             // TODO: Fix this
@@ -162,7 +162,7 @@ public class ForwardingBypass implements InternalExtension {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
         var hostname = handshake.getHostname();
-        var uuid = connection.meta().minecraftAccount().getUniqueId();
+        var uuid = connection.meta().minecraftAccount().uniqueId();
 
         switch (settingsHolder.get(ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)) {
             case LEGACY -> event.packet(handshake

@@ -19,41 +19,28 @@
  */
 package net.pistonmaster.serverwrecker.account;
 
+import lombok.NonNull;
 import net.pistonmaster.serverwrecker.account.service.AccountData;
 import net.pistonmaster.serverwrecker.account.service.BedrockData;
-import net.pistonmaster.serverwrecker.account.service.JavaData;
+import net.pistonmaster.serverwrecker.account.service.OnlineJavaData;
 
 import java.util.UUID;
 
-public record MinecraftAccount(AuthType authType, String username, AccountData accountData, boolean enabled) {
-    public MinecraftAccount {
-        if (username == null) {
-            throw new IllegalArgumentException("Username cannot be null!");
-        }
-    }
-
-    public MinecraftAccount(String username) {
-        this(AuthType.OFFLINE, username, null, true);
-    }
-
+public record MinecraftAccount(@NonNull AuthType authType, @NonNull String username, @NonNull AccountData accountData, boolean enabled) {
     @Override
     public String toString() {
         return String.format("MinecraftAccount(authType=%s, username=%s, enabled=%s)", authType, username, enabled);
     }
 
     public boolean isPremiumJava() {
-        return accountData != null && accountData instanceof JavaData;
+        return accountData instanceof OnlineJavaData;
     }
 
     public boolean isPremiumBedrock() {
-        return accountData != null && accountData instanceof BedrockData;
+        return accountData instanceof BedrockData;
     }
 
-    public UUID getUniqueId() {
-        if (accountData instanceof JavaData javaData) {
-            return javaData.profileId();
-        } else {
-            return UUID.randomUUID(); // We are using a bedrock account, the uuid doesn't matter.
-        }
+    public UUID uniqueId() {
+        return accountData.profileId();
     }
 }

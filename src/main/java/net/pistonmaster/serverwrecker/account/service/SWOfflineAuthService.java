@@ -19,6 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.account.service;
 
+import net.pistonmaster.serverwrecker.account.AuthType;
 import net.pistonmaster.serverwrecker.account.MinecraftAccount;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 
@@ -27,7 +28,7 @@ import java.io.IOException;
 public final class SWOfflineAuthService implements MCAuthService<SWOfflineAuthService.OfflineAuthData> {
     @Override
     public MinecraftAccount login(OfflineAuthData data, SWProxy proxyData) throws IOException {
-        return new MinecraftAccount(data.username);
+        return new MinecraftAccount(AuthType.OFFLINE, data.username, new OfflineJavaData(data.username), true);
     }
 
     @Override

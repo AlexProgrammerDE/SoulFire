@@ -37,7 +37,7 @@ public final class SWJavaMicrosoftAuthService implements MCAuthService<SWJavaMic
                     new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
             var mcProfile = fullJavaSession.getMcProfile();
             var mcToken = mcProfile.getMcToken();
-            return new MinecraftAccount(AuthType.MICROSOFT_JAVA, mcProfile.getName(), new JavaData(mcProfile.getId(), mcToken.getAccessToken(), mcToken.getExpireTimeMs()), true);
+            return new MinecraftAccount(AuthType.MICROSOFT_JAVA, mcProfile.getName(), new OnlineJavaData(mcProfile.getId(), mcToken.getAccessToken(), mcToken.getExpireTimeMs()), true);
         } catch (Exception e) {
             throw new IOException(e);
         }

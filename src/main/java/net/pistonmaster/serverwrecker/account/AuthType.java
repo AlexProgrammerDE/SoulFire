@@ -26,11 +26,11 @@ import net.pistonmaster.serverwrecker.account.service.*;
 @Getter
 @RequiredArgsConstructor
 public enum AuthType {
-    MICROSOFT_JAVA("Microsoft Java", JavaData.class, new SWJavaMicrosoftAuthService()),
+    MICROSOFT_JAVA("Microsoft Java", OnlineJavaData.class, new SWJavaMicrosoftAuthService()),
     MICROSOFT_BEDROCK("Microsoft Bedrock", BedrockData.class, new SWBedrockMicrosoftAuthService()),
-    THE_ALTENING("The Altening", JavaData.class, new SWTheAlteningAuthService()),
-    EASYMC("EasyMC", JavaData.class, new SWEasyMCAuthService()),
-    OFFLINE("Offline", JavaData.class, new SWOfflineAuthService());
+    THE_ALTENING("The Altening", OnlineJavaData.class, new SWTheAlteningAuthService()),
+    EASYMC("EasyMC", OnlineJavaData.class, new SWEasyMCAuthService()),
+    OFFLINE("Offline", OfflineJavaData.class, new SWOfflineAuthService());
 
     private final String displayName;
     private final Class<? extends AccountData> accountDataClass;

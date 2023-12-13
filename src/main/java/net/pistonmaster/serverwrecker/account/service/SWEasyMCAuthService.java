@@ -57,7 +57,7 @@ public final class SWEasyMCAuthService implements MCAuthService<SWEasyMCAuthServ
             return new MinecraftAccount(
                     AuthType.EASYMC,
                     response.mcName(),
-                    new JavaData(
+                    new OnlineJavaData(
                             UUID.fromString(response.uuid()),
                             response.session(),
                             -1

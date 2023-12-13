@@ -19,5 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.account.service;
 
-public sealed interface AccountData permits JavaData, BedrockData {
+import java.util.UUID;
+
+public sealed interface AccountData permits BedrockData, OfflineJavaData, OnlineJavaData {
+    UUID profileId();
 }

@@ -19,14 +19,15 @@
  */
 package net.pistonmaster.serverwrecker.account.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-public record JavaData(UUID profileId, String authToken, long tokenExpireAt) implements AccountData {
-    public boolean isPremium() {
-        return profileId != null && authToken != null;
+public record OfflineJavaData(UUID profileId) implements AccountData {
+    public OfflineJavaData(String username) {
+        this(getOfflineUUID(username));
     }
 
-    public boolean isTokenExpired() {
-        return tokenExpireAt != -1 && System.currentTimeMillis() > tokenExpireAt;
+    public static UUID getOfflineUUID(String username) {
+        return UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8));
     }
 }
