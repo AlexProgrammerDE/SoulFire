@@ -55,8 +55,12 @@ import java.util.function.Consumer;
 public class SettingsManager {
     public static final Logger LOGGER = LoggerFactory.getLogger(SettingsManager.class);
     // Used to read & write the settings file
-    private static final Gson dumpGson = new GsonBuilder().setPrettyPrinting().create();
-    private static final Gson baseGson = new GsonBuilder()
+    private static final Gson serializeGson = new GsonBuilder()
+            .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
+            .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
+            .setPrettyPrinting()
+            .create();
+    private static final Gson deserializeGson = new GsonBuilder()
             .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
             .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
             .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
@@ -70,7 +74,7 @@ public class SettingsManager {
 
     public static SettingsHolder createSettingsHolder(String json, @Nullable SettingsManager settingsManager) {
         try {
-            var settingsSerialized = baseGson.fromJson(json, RootDataStructure.class);
+            var settingsSerialized = deserializeGson.fromJson(json, RootDataStructure.class);
             var settingsData = settingsSerialized.settings();
             var intProperties = new Object2IntArrayMap<PropertyKey>();
             var booleanProperties = new Object2BooleanArrayMap<PropertyKey>();
@@ -179,7 +183,7 @@ public class SettingsManager {
                 proxyRegistry.getProxies()
         );
 
-        return dumpGson.toJson(settingsSerialized);
+        return serializeGson.toJson(settingsSerialized);
     }
 
     private record RootDataStructure(

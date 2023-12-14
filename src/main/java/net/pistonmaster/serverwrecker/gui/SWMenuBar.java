@@ -143,6 +143,9 @@ public class SWMenuBar extends JMenuBar {
         add(window);
 
         var helpMenu = new JMenu("Help");
+        var openHome = new JMenuItem("Open home");
+        openHome.addActionListener(e -> openHome());
+        helpMenu.add(openHome);
         var about = new JMenuItem("About");
         about.addActionListener(e -> showAboutDialog());
         helpMenu.add(about);
@@ -170,5 +173,13 @@ public class SWMenuBar extends JMenuBar {
     private void showAboutDialog() {
         JPopupMenu popupMenu = new AboutPopup();
         popupMenu.show(this, 0, 0);
+    }
+
+    private void openHome() {
+        try {
+            Desktop.getDesktop().browse(SWPathConstants.DATA_FOLDER.toUri());
+        } catch (IOException e) {
+            LOGGER.warn("Failed to open home page!", e);
+        }
     }
 }

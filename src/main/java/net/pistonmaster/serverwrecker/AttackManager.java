@@ -32,6 +32,7 @@ import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import net.pistonmaster.serverwrecker.account.AccountSettings;
 import net.pistonmaster.serverwrecker.account.MinecraftAccount;
+import net.pistonmaster.serverwrecker.account.service.SWOfflineAuthService;
 import net.pistonmaster.serverwrecker.api.event.EventExceptionHandler;
 import net.pistonmaster.serverwrecker.api.event.ServerWreckerAttackEvent;
 import net.pistonmaster.serverwrecker.api.event.attack.AttackEndedEvent;
@@ -80,7 +81,7 @@ public class AttackManager {
 
     private static MinecraftAccount getAccount(SettingsHolder settingsHolder, List<MinecraftAccount> accounts, int botId) {
         if (accounts.isEmpty()) {
-            return new MinecraftAccount(String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), botId));
+            return SWOfflineAuthService.createAccount(String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), botId));
         }
 
         return accounts.removeFirst();

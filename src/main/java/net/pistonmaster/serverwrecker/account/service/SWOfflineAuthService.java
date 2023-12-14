@@ -28,7 +28,11 @@ import java.io.IOException;
 public final class SWOfflineAuthService implements MCAuthService<SWOfflineAuthService.OfflineAuthData> {
     @Override
     public MinecraftAccount login(OfflineAuthData data, SWProxy proxyData) throws IOException {
-        return new MinecraftAccount(AuthType.OFFLINE, data.username, new OfflineJavaData(data.username), true);
+        return createAccount(data.username());
+    }
+
+    public static MinecraftAccount createAccount(String username) {
+        return new MinecraftAccount(AuthType.OFFLINE, username, new OfflineJavaData(username), true);
     }
 
     @Override
