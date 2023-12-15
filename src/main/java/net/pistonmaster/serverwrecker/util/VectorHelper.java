@@ -20,7 +20,7 @@
 package net.pistonmaster.serverwrecker.util;
 
 import it.unimi.dsi.fastutil.Hash;
-import net.pistonmaster.serverwrecker.pathfinding.SWVec3i;
+import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import org.cloudburstmc.math.vector.Vector2d;
 import org.cloudburstmc.math.vector.Vector3d;
 

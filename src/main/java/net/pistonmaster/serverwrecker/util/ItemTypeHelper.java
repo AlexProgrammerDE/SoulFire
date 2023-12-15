@@ -19,9 +19,9 @@
  */
 package net.pistonmaster.serverwrecker.util;
 
-import net.pistonmaster.serverwrecker.data.BlockItems;
-import net.pistonmaster.serverwrecker.data.ItemType;
-import net.pistonmaster.serverwrecker.data.TierType;
+import net.pistonmaster.serverwrecker.server.data.BlockItems;
+import net.pistonmaster.serverwrecker.server.data.ItemType;
+import net.pistonmaster.serverwrecker.server.data.TierType;
 
 public class ItemTypeHelper {
     private ItemTypeHelper() {

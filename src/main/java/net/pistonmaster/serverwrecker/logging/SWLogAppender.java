@@ -19,8 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.logging;
 
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.system.SystemLogEvent;
+import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.event.system.SystemLogEvent;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.Property;

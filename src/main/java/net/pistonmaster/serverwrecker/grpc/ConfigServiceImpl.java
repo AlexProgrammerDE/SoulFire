@@ -22,11 +22,11 @@ package net.pistonmaster.serverwrecker.grpc;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
-import net.pistonmaster.serverwrecker.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientPlugin;
 import net.pistonmaster.serverwrecker.grpc.generated.ConfigServiceGrpc;
 import net.pistonmaster.serverwrecker.grpc.generated.UIClientDataResponse;
+import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
 
 import javax.inject.Inject;
 import java.util.ArrayList;

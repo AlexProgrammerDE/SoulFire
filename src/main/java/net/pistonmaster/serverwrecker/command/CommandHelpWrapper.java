@@ -22,7 +22,7 @@ package net.pistonmaster.serverwrecker.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.pistonmaster.serverwrecker.api.ConsoleSubject;
+import net.pistonmaster.serverwrecker.server.api.ConsoleSubject;
 
 record CommandHelpWrapper(Command<ConsoleSubject> command, String help,
                           boolean privateCommand) implements Command<ConsoleSubject> {

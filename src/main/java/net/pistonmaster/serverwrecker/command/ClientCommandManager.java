@@ -23,12 +23,12 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.api.ConsoleSubject;
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.lifecycle.DispatcherInitEvent;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandCompletionRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandHistoryRequest;
+import net.pistonmaster.serverwrecker.server.api.ConsoleSubject;
+import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.event.lifecycle.DispatcherInitEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

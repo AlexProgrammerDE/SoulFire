@@ -21,10 +21,10 @@ package net.pistonmaster.serverwrecker.account;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.pistonmaster.serverwrecker.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.settings.lib.property.BooleanProperty;
-import net.pistonmaster.serverwrecker.settings.lib.property.Property;
-import net.pistonmaster.serverwrecker.settings.lib.property.StringProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.StringProperty;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class AccountSettings implements SettingsObject {

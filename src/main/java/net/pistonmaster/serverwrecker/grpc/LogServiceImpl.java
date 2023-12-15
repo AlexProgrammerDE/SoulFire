@@ -20,11 +20,11 @@
 package net.pistonmaster.serverwrecker.grpc;
 
 import io.grpc.stub.StreamObserver;
-import net.pistonmaster.serverwrecker.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.api.event.system.SystemLogEvent;
 import net.pistonmaster.serverwrecker.grpc.generated.LogRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.LogResponse;
 import net.pistonmaster.serverwrecker.grpc.generated.LogsServiceGrpc;
+import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.event.system.SystemLogEvent;
 
 import java.util.ArrayList;
 import java.util.List;

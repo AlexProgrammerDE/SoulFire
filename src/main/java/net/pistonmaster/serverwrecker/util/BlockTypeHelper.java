@@ -19,8 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.util;
 
-import net.pistonmaster.serverwrecker.data.BlockType;
-import net.pistonmaster.serverwrecker.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.data.BlockType;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
 
 public class BlockTypeHelper {
     private BlockTypeHelper() {

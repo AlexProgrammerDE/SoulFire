@@ -19,12 +19,13 @@
  */
 package net.pistonmaster.serverwrecker;
 
-import net.pistonmaster.serverwrecker.cli.CLIManager;
-import net.pistonmaster.serverwrecker.common.OperationMode;
+import net.pistonmaster.serverwrecker.client.cli.CLIManager;
+import net.pistonmaster.serverwrecker.client.gui.GUIClientProps;
+import net.pistonmaster.serverwrecker.client.gui.GUIManager;
+import net.pistonmaster.serverwrecker.client.gui.ThemeUtil;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
-import net.pistonmaster.serverwrecker.gui.GUIClientProps;
-import net.pistonmaster.serverwrecker.gui.GUIManager;
-import net.pistonmaster.serverwrecker.gui.ThemeUtil;
+import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.server.api.OperationMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
