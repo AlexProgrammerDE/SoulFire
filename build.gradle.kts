@@ -52,7 +52,7 @@ dependencies {
     implementation(projects.buildData)
 
     // The java 8 launcher takes care of notifiying the user if they are using an unsupported java version
-    implementation(projects.launcher)
+    implementation(projects.j8Launcher)
 
     // Log/Console libraries
     implementation(libs.bundles.log4j)

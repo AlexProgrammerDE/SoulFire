@@ -67,6 +67,6 @@ gradleEnterprise {
     }
 }
 
-include("build-data", "launcher")
+include("build-data", "j8-launcher")
 
 rootProject.name = "serverwrecker"
