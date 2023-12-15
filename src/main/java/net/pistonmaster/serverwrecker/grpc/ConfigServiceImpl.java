@@ -59,7 +59,7 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
 
     @Override
     public void getUIClientData(ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
-        var username = Constant.CLIENT_ID_CONTEXT_KEY.get();
+        var username = RPCConstants.CLIENT_ID_CONTEXT_KEY.get();
         responseObserver.onNext(
                 UIClientDataResponse.newBuilder()
                         .setUsername(username)

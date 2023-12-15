@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker;
 
-import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
@@ -62,7 +61,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class AttackManager {
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
-    private static final GameProfile EMPTY_GAME_PROFILE = new GameProfile((UUID) null, "DoNotUseGameProfile");
     private final int id = ID_COUNTER.getAndIncrement();
     private final Logger logger = LoggerFactory.getLogger("AttackManager-" + id);
     private final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator())
@@ -167,7 +165,7 @@ public class AttackManager {
             var minecraftAccount = getAccount(settingsHolder, accounts, botId);
 
             // AuthData will be used internally instead of the MCProtocol data
-            var protocol = new MinecraftProtocol(EMPTY_GAME_PROFILE, null);
+            var protocol = new MinecraftProtocol();
 
             // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
             protocol.setUseDefaultListeners(false);

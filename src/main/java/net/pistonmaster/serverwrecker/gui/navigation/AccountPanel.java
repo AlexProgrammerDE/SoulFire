@@ -133,11 +133,11 @@ public class AccountPanel extends NavigationItem {
     }
 
     private static JButton createAccountLoadButton(GUIManager guiManager, GUIFrame parent, AuthType type) {
-        var button = new JButton(SwingTextUtils.htmlCenterText(String.format("Load %s accounts", type)));
+        var button = new JButton(SwingTextUtils.htmlCenterText(String.format("Add %s accounts", type)));
 
         button.addActionListener(e -> new ImportTextDialog(
                 SWPathConstants.WORKING_DIRECTORY,
-                String.format("Load %s accounts", type),
+                String.format("Add %s accounts", type),
                 String.format("%s list file", type),
                 guiManager,
                 parent,
