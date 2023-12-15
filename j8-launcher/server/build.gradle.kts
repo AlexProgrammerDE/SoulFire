@@ -7,5 +7,5 @@ java {
 }
 
 dependencies {
-    implementation(projects.launcher.common)
+    implementation(projects.j8Launcher.common)
 }

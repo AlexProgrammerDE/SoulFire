@@ -69,8 +69,14 @@ gradleEnterprise {
 
 include("build-data")
 
+// Java 8 launcher
 setOf("common", "server", "client").forEach {
-    include(":launcher:$it")
+    include(":j8-launcher:$it")
+}
+
+// Server and client modules
+setOf("server").forEach {
+    include(":$it")
 }
 
 rootProject.name = "serverwrecker"

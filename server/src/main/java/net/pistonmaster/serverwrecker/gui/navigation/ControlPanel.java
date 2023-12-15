@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.gui.navigation;
 
 import io.grpc.stub.StreamObserver;
-import net.pistonmaster.serverwrecker.grpc.generated.*;
 import net.pistonmaster.serverwrecker.gui.GUIManager;
 
 import javax.inject.Inject;

@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.settings.lib;
 
-import net.pistonmaster.serverwrecker.grpc.generated.*;
 import net.pistonmaster.serverwrecker.settings.lib.property.*;
 
 import java.lang.reflect.Modifier;
@@ -89,7 +88,7 @@ public class SettingsRegistry {
                                     .setKey(property.key())
                                     .setUiDescription(booleanProperty.uiDescription())
                                     .setCliDescription(booleanProperty.cliDescription())
-                                    .addAllCliNames(Arrays.asList(booleanProperty.cliNames()))
+                                    .addAllCliNames(Collections.singletonList(booleanProperty.cliNames()))
                                     .setType(ClientPluginSettingType.newBuilder()
                                             .setBool(BoolSetting.newBuilder()
                                                     .setDef(booleanProperty.defaultValue())
@@ -102,7 +101,7 @@ public class SettingsRegistry {
                                     .setKey(property.key())
                                     .setUiDescription(intProperty.uiDescription())
                                     .setCliDescription(intProperty.cliDescription())
-                                    .addAllCliNames(Arrays.asList(intProperty.cliNames()))
+                                    .addAllCliNames(Collections.singletonList(intProperty.cliNames()))
                                     .setType(ClientPluginSettingType.newBuilder()
                                             .setInt(createIntSetting(intProperty))
                                             .build())
@@ -117,14 +116,14 @@ public class SettingsRegistry {
                                                 .setKey(minProperty.key())
                                                 .setUiDescription(minProperty.uiDescription())
                                                 .setCliDescription(minProperty.cliDescription())
-                                                .addAllCliNames(Arrays.asList(minProperty.cliNames()))
+                                                .addAllCliNames(Collections.singletonList(minProperty.cliNames()))
                                                 .setIntSetting(createIntSetting(minProperty))
                                                 .build())
                                         .setMax(ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
                                                 .setKey(maxProperty.key())
                                                 .setUiDescription(maxProperty.uiDescription())
                                                 .setCliDescription(maxProperty.cliDescription())
-                                                .addAllCliNames(Arrays.asList(maxProperty.cliNames()))
+                                                .addAllCliNames(Collections.singletonList(maxProperty.cliNames()))
                                                 .setIntSetting(createIntSetting(maxProperty))
                                                 .build())
                                         .build())
@@ -135,7 +134,7 @@ public class SettingsRegistry {
                                     .setKey(property.key())
                                     .setUiDescription(stringProperty.uiDescription())
                                     .setCliDescription(stringProperty.cliDescription())
-                                    .addAllCliNames(Arrays.asList(stringProperty.cliNames()))
+                                    .addAllCliNames(Collections.singletonList(stringProperty.cliNames()))
                                     .setType(ClientPluginSettingType.newBuilder()
                                             .setString(StringSetting.newBuilder()
                                                     .setDef(stringProperty.defaultValue())
@@ -156,7 +155,7 @@ public class SettingsRegistry {
                                         .setKey(property.key())
                                         .setUiDescription(comboProperty.uiDescription())
                                         .setCliDescription(comboProperty.cliDescription())
-                                        .addAllCliNames(Arrays.asList(comboProperty.cliNames()))
+                                        .addAllCliNames(Collections.singletonList(comboProperty.cliNames()))
                                         .setType(ClientPluginSettingType.newBuilder()
                                                 .setCombo(ComboSetting.newBuilder()
                                                         .setDef(comboProperty.defaultValue())
