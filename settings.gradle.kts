@@ -67,10 +67,6 @@ gradleEnterprise {
     }
 }
 
-include("build-data")
-
-setOf("common", "server", "client").forEach {
-    include(":launcher:$it")
-}
+include("build-data", "launcher")
 
 rootProject.name = "serverwrecker"
