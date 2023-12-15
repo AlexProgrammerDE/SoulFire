@@ -13,6 +13,8 @@ allprojects {
     group = "net.pistonmaster"
     version = "1.4.0-SNAPSHOT"
     description = "Advanced Minecraft Server-Stresser Tool."
+
+    plugins.apply("sw.license-conventions")
 }
 
 var mainClassString = "net.pistonmaster.serverwrecker.launcher.ServerWreckerJava8Launcher"
@@ -51,8 +53,8 @@ tasks.run.get().apply {
 dependencies {
     implementation(projects.buildData)
 
-    // The java 8 launcher takes care of notifiying the user if they are using an unsupported java version
-    implementation(projects.launcher)
+    // TODO: Split into client and server distributions
+    implementation(projects.launcher.client)
 
     // Log/Console libraries
     implementation(libs.bundles.log4j)
