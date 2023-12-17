@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.util;
+package net.pistonmaster.serverwrecker.server.util;
 
 /**
  * Various useful constants.

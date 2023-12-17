@@ -28,7 +28,7 @@ import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.ChunkHolder;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.LevelState;
-import net.pistonmaster.serverwrecker.util.VectorHelper;
+import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 /**
  * An immutable representation of the world state.

@@ -23,7 +23,7 @@ import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
-import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
+import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
 
 public record BreakBlockPosGoal(SWVec3i goal) implements GoalScorer {
     @Override

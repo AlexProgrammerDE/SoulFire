@@ -17,33 +17,40 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.util;
+package net.pistonmaster.serverwrecker.server.util;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
-import java.util.function.BooleanSupplier;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 
-/**
- * Simple class to make waiting easier and less verbose.
- */
-public class TimeUtil {
-    private TimeUtil() {
+public class NoopLock implements Lock {
+    @Override
+    public void lock() {
     }
 
-    public static void waitTime(long time, TimeUnit unit) {
-        try {
-            unit.sleep(time);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+    @Override
+    public void lockInterruptibly() {
     }
 
-    public static void waitCondition(BooleanSupplier condition) {
-        while (condition.getAsBoolean()) {
-            try {
-                TimeUnit.MILLISECONDS.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
+    @Override
+    public boolean tryLock() {
+        return true;
+    }
+
+    @Override
+    public boolean tryLock(long time, @NotNull TimeUnit unit) {
+        return true;
+    }
+
+    @Override
+    public void unlock() {
+    }
+
+    @NotNull
+    @Override
+    public Condition newCondition() {
+        throw new UnsupportedOperationException();
     }
 }

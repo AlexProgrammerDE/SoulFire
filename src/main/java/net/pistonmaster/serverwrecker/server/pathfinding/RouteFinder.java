@@ -32,7 +32,7 @@ import net.pistonmaster.serverwrecker.server.pathfinding.goals.GoalScorer;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.OutOfLevelException;
-import net.pistonmaster.serverwrecker.util.VectorHelper;
+import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 import java.util.Collections;
 import java.util.List;

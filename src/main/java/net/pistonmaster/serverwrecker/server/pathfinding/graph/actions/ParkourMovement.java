@@ -28,7 +28,7 @@ import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.pathfinding.execution.GapJumpAction;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.ParkourDirection;
-import net.pistonmaster.serverwrecker.util.VectorHelper;
+import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 import java.util.List;
 

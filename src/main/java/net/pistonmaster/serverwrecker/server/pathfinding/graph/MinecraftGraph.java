@@ -30,7 +30,7 @@ import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.
 import net.pistonmaster.serverwrecker.server.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.tag.TagsState;
-import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
+import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {

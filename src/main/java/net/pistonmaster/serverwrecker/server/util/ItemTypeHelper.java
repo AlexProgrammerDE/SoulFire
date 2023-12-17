@@ -17,40 +17,26 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.util;
+package net.pistonmaster.serverwrecker.server.util;
 
-import org.jetbrains.annotations.NotNull;
+import net.pistonmaster.serverwrecker.server.data.BlockItems;
+import net.pistonmaster.serverwrecker.server.data.ItemType;
+import net.pistonmaster.serverwrecker.server.data.TierType;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-
-public class NoopLock implements Lock {
-    @Override
-    public void lock() {
+public class ItemTypeHelper {
+    private ItemTypeHelper() {
     }
 
-    @Override
-    public void lockInterruptibly() {
+    public static boolean isSafeFullBlockItem(ItemType type) {
+        return BlockItems.getBlockType(type).isPresent() && !isUnsafeToPlace(type);
     }
 
-    @Override
-    public boolean tryLock() {
-        return true;
+    public static boolean isTool(ItemType type) {
+        return TierType.getTier(type).isPresent() || type == ItemType.SHEARS;
     }
 
-    @Override
-    public boolean tryLock(long time, @NotNull TimeUnit unit) {
-        return true;
-    }
-
-    @Override
-    public void unlock() {
-    }
-
-    @NotNull
-    @Override
-    public Condition newCondition() {
-        throw new UnsupportedOperationException();
+    public static boolean isUnsafeToPlace(ItemType type) {
+        return type == ItemType.SAND
+                || type == ItemType.GRAVEL;
     }
 }

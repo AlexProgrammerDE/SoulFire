@@ -27,9 +27,9 @@ import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.server.protocol.bot.BotActionManager;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.SWItemStack;
-import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
-import net.pistonmaster.serverwrecker.util.ItemTypeHelper;
-import net.pistonmaster.serverwrecker.util.TimeUtil;
+import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
+import net.pistonmaster.serverwrecker.server.util.ItemTypeHelper;
+import net.pistonmaster.serverwrecker.server.util.TimeUtil;
 
 import java.util.concurrent.TimeUnit;
 

@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.server.pathfinding;
 
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedLevelState;
-import net.pistonmaster.serverwrecker.util.VectorHelper;
+import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 
 /**

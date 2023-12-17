@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.server.data;
 
-import net.pistonmaster.serverwrecker.util.MathHelper;
+import net.pistonmaster.serverwrecker.server.util.MathHelper;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;

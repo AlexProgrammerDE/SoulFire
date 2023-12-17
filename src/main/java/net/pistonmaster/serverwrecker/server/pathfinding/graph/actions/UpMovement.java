@@ -35,7 +35,7 @@ import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import net.pistonmaster.serverwrecker.server.protocol.bot.BotActionManager;
-import net.pistonmaster.serverwrecker.util.VectorHelper;
+import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 import java.util.List;
 

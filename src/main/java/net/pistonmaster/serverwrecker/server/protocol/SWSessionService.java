@@ -24,7 +24,7 @@ import lombok.AllArgsConstructor;
 import net.pistonmaster.serverwrecker.account.AuthType;
 import net.pistonmaster.serverwrecker.account.HttpHelper;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
-import net.pistonmaster.serverwrecker.util.UUIDHelper;
+import net.pistonmaster.serverwrecker.server.util.UUIDHelper;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;

@@ -22,7 +22,7 @@ package net.pistonmaster.serverwrecker.server.plugins;
 import net.pistonmaster.serverwrecker.server.api.PluginHelper;
 import net.pistonmaster.serverwrecker.server.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.util.TickTimer;
+import net.pistonmaster.serverwrecker.server.util.TickTimer;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;

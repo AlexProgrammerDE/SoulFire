@@ -30,7 +30,7 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.nbt.MCUniform;
 import net.pistonmaster.serverwrecker.server.protocol.bot.nbt.MCUniformInt;
 import net.pistonmaster.serverwrecker.server.protocol.bot.nbt.UniformOrInt;
 import net.pistonmaster.serverwrecker.server.protocol.bot.utils.SectionUtils;
-import net.pistonmaster.serverwrecker.util.MathHelper;
+import net.pistonmaster.serverwrecker.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 

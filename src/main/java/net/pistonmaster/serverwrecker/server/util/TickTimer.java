@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.util;
+package net.pistonmaster.serverwrecker.server.util;
 
 /**
  * Taken from: <a href="https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/util/Timer.java">LabyStudio/java-minecraft</a>

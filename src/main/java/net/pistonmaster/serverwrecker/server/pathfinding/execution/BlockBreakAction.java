@@ -28,8 +28,8 @@ import net.pistonmaster.serverwrecker.server.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.SWItemStack;
-import net.pistonmaster.serverwrecker.util.TimeUtil;
-import net.pistonmaster.serverwrecker.util.VectorHelper;
+import net.pistonmaster.serverwrecker.server.util.TimeUtil;
+import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 import java.util.concurrent.TimeUnit;
 

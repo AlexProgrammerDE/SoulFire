@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.server.api;
 
-import net.pistonmaster.serverwrecker.util.RandomUtil;
+import net.pistonmaster.serverwrecker.server.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

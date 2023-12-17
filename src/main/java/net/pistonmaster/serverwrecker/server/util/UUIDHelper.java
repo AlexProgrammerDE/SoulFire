@@ -17,26 +17,24 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.util;
+package net.pistonmaster.serverwrecker.server.util;
 
-import net.pistonmaster.serverwrecker.server.data.BlockItems;
-import net.pistonmaster.serverwrecker.server.data.ItemType;
-import net.pistonmaster.serverwrecker.server.data.TierType;
+import java.util.UUID;
 
-public class ItemTypeHelper {
-    private ItemTypeHelper() {
+public class UUIDHelper {
+    private UUIDHelper() {
     }
 
-    public static boolean isSafeFullBlockItem(ItemType type) {
-        return BlockItems.getBlockType(type).isPresent() && !isUnsafeToPlace(type);
+    public static UUID convertToDashed(String noDashes) {
+        var idBuff = new StringBuilder(noDashes);
+        idBuff.insert(20, '-');
+        idBuff.insert(16, '-');
+        idBuff.insert(12, '-');
+        idBuff.insert(8, '-');
+        return UUID.fromString(idBuff.toString());
     }
 
-    public static boolean isTool(ItemType type) {
-        return TierType.getTier(type).isPresent() || type == ItemType.SHEARS;
-    }
-
-    public static boolean isUnsafeToPlace(ItemType type) {
-        return type == ItemType.SAND
-                || type == ItemType.GRAVEL;
+    public static String convertToNoDashes(UUID uuid) {
+        return uuid.toString().replace("-", "");
     }
 }

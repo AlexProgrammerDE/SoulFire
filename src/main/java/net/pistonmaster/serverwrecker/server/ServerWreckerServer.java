@@ -62,7 +62,7 @@ import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.server.viaversion.SWViaLoader;
 import net.pistonmaster.serverwrecker.server.viaversion.platform.*;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
-import net.pistonmaster.serverwrecker.util.VersionComparator;
+import net.pistonmaster.serverwrecker.server.util.VersionComparator;
 import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

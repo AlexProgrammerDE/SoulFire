@@ -17,24 +17,23 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.util;
+package net.pistonmaster.serverwrecker.server.util;
 
-import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
-public class UUIDHelper {
-    private UUIDHelper() {
+public class RandomUtil {
+    private RandomUtil() {
     }
 
-    public static UUID convertToDashed(String noDashes) {
-        var idBuff = new StringBuilder(noDashes);
-        idBuff.insert(20, '-');
-        idBuff.insert(16, '-');
-        idBuff.insert(12, '-');
-        idBuff.insert(8, '-');
-        return UUID.fromString(idBuff.toString());
-    }
+    public static int getRandomInt(int min, int max) {
+        if (min > max) {
+            throw new IllegalArgumentException("max must be greater than min");
+        }
 
-    public static String convertToNoDashes(UUID uuid) {
-        return uuid.toString().replace("-", "");
+        if (min == max) {
+            return min;
+        }
+
+        return ThreadLocalRandom.current().nextInt(min, max);
     }
 }

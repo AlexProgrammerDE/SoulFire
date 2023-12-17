@@ -26,7 +26,7 @@ import net.pistonmaster.serverwrecker.server.data.ResourceData;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.server.protocol.bot.model.ChunkKey;
 import net.pistonmaster.serverwrecker.server.protocol.bot.utils.SectionUtils;
-import net.pistonmaster.serverwrecker.util.NoopLock;
+import net.pistonmaster.serverwrecker.server.util.NoopLock;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.concurrent.locks.Lock;

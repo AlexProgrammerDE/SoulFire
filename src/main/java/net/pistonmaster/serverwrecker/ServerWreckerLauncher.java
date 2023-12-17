@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker;
 
-import net.pistonmaster.serverwrecker.util.SWContextClassLoader;
+import net.pistonmaster.serverwrecker.server.util.SWContextClassLoader;
 
 import java.util.List;
 

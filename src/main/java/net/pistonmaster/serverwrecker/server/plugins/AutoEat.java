@@ -34,7 +34,7 @@ import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.MinMaxPropertyLink;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
-import net.pistonmaster.serverwrecker.util.TimeUtil;
+import net.pistonmaster.serverwrecker.server.util.TimeUtil;
 
 import java.util.concurrent.TimeUnit;
 

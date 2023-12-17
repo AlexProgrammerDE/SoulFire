@@ -36,7 +36,7 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributesState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.LevelState;
-import net.pistonmaster.serverwrecker.util.MathHelper;
+import net.pistonmaster.serverwrecker.server.util.MathHelper;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;

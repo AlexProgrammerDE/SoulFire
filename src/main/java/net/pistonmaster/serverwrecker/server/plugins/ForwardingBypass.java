@@ -42,8 +42,8 @@ import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.ComboProperty;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.StringProperty;
-import net.pistonmaster.serverwrecker.util.UUIDHelper;
-import net.pistonmaster.serverwrecker.util.VelocityConstants;
+import net.pistonmaster.serverwrecker.server.util.UUIDHelper;
+import net.pistonmaster.serverwrecker.server.util.VelocityConstants;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;

@@ -23,7 +23,7 @@ import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.util.BlockTypeHelper;
+import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 
 @ToString

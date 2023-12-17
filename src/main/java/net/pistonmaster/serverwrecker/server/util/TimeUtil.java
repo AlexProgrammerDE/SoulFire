@@ -17,23 +17,33 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.util;
+package net.pistonmaster.serverwrecker.server.util;
 
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 
-public class RandomUtil {
-    private RandomUtil() {
+/**
+ * Simple class to make waiting easier and less verbose.
+ */
+public class TimeUtil {
+    private TimeUtil() {
     }
 
-    public static int getRandomInt(int min, int max) {
-        if (min > max) {
-            throw new IllegalArgumentException("max must be greater than min");
+    public static void waitTime(long time, TimeUnit unit) {
+        try {
+            unit.sleep(time);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+    }
 
-        if (min == max) {
-            return min;
+    public static void waitCondition(BooleanSupplier condition) {
+        while (condition.getAsBoolean()) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
-
-        return ThreadLocalRandom.current().nextInt(min, max);
     }
 }

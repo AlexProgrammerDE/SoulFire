@@ -23,7 +23,7 @@ import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import net.pistonmaster.serverwrecker.server.api.event.EventUtil;
 import net.pistonmaster.serverwrecker.server.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.util.TimeUtil;
+import net.pistonmaster.serverwrecker.server.util.TimeUtil;
 
 import java.util.List;
 import java.util.Queue;

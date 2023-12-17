@@ -24,16 +24,16 @@ application {
 
 tasks {
     distTar {
-        enabled = false
+        onlyIf { false }
     }
     distZip {
-        enabled = false
+        onlyIf { false }
     }
     shadowDistTar {
-        archiveBaseName.set("ServerWrecker")
+        onlyIf { false }
     }
     shadowDistZip {
-        archiveBaseName.set("ServerWrecker")
+        onlyIf { false }
     }
     withType<ShadowJar> {
         archiveBaseName.set("ServerWrecker")

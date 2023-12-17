@@ -21,7 +21,7 @@ package net.pistonmaster.serverwrecker.server.pathfinding.goals;
 
 import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
-import net.pistonmaster.serverwrecker.util.VectorHelper;
+import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 
 public record PosGoal(Vector3d goal) implements GoalScorer {

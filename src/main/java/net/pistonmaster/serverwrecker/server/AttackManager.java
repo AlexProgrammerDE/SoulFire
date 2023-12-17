@@ -46,8 +46,8 @@ import net.pistonmaster.serverwrecker.server.protocol.netty.SWNettyHelper;
 import net.pistonmaster.serverwrecker.server.settings.BotSettings;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.server.viaversion.SWVersionConstants;
-import net.pistonmaster.serverwrecker.util.RandomUtil;
-import net.pistonmaster.serverwrecker.util.TimeUtil;
+import net.pistonmaster.serverwrecker.server.util.RandomUtil;
+import net.pistonmaster.serverwrecker.server.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -29,7 +29,7 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.BotControlAPI;
 import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;
-import net.pistonmaster.serverwrecker.util.TimeUtil;
+import net.pistonmaster.serverwrecker.server.util.TimeUtil;
 import org.slf4j.Logger;
 
 import java.util.UUID;

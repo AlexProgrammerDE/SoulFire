@@ -27,7 +27,7 @@ import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.server.api.MixinExtension;
 import net.pistonmaster.serverwrecker.server.settings.DevSettings;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;
-import net.pistonmaster.serverwrecker.util.CustomClassProvider;
+import net.pistonmaster.serverwrecker.server.util.CustomClassProvider;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
