@@ -26,7 +26,8 @@ import net.pistonmaster.serverwrecker.account.service.OnlineJavaData;
 
 import java.util.UUID;
 
-public record MinecraftAccount(@NonNull AuthType authType, @NonNull String username, @NonNull AccountData accountData, boolean enabled) {
+public record MinecraftAccount(@NonNull AuthType authType, @NonNull String username, @NonNull AccountData accountData,
+                               boolean enabled) {
     @Override
     public String toString() {
         return String.format("MinecraftAccount(authType=%s, username=%s, enabled=%s)", authType, username, enabled);

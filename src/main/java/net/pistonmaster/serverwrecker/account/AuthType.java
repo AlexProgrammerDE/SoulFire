@@ -21,16 +21,7 @@ package net.pistonmaster.serverwrecker.account;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.account.service.AccountData;
-import net.pistonmaster.serverwrecker.account.service.BedrockData;
-import net.pistonmaster.serverwrecker.account.service.MCAuthService;
-import net.pistonmaster.serverwrecker.account.service.OfflineJavaData;
-import net.pistonmaster.serverwrecker.account.service.OnlineJavaData;
-import net.pistonmaster.serverwrecker.account.service.SWBedrockMicrosoftAuthService;
-import net.pistonmaster.serverwrecker.account.service.SWEasyMCAuthService;
-import net.pistonmaster.serverwrecker.account.service.SWJavaMicrosoftAuthService;
-import net.pistonmaster.serverwrecker.account.service.SWOfflineAuthService;
-import net.pistonmaster.serverwrecker.account.service.SWTheAlteningAuthService;
+import net.pistonmaster.serverwrecker.account.service.*;
 
 @Getter
 @RequiredArgsConstructor

@@ -20,11 +20,7 @@
 package net.pistonmaster.serverwrecker.server.protocol.netty;
 
 import io.netty.channel.EventLoopGroup;
-import io.netty.handler.codec.dns.DefaultDnsQuestion;
-import io.netty.handler.codec.dns.DefaultDnsRawRecord;
-import io.netty.handler.codec.dns.DefaultDnsRecordDecoder;
-import io.netty.handler.codec.dns.DnsRecordType;
-import io.netty.handler.codec.dns.DnsSection;
+import io.netty.handler.codec.dns.*;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
 import net.pistonmaster.serverwrecker.server.settings.BotSettings;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;

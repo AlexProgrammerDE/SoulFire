@@ -20,12 +20,7 @@
 package net.pistonmaster.serverwrecker.server.protocol.bot.block;
 
 import com.google.gson.JsonObject;
-import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.*;
 
 public class BlockStateProperties {
     private final Object2BooleanMap<String> booleanProperties;

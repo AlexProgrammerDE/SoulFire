@@ -35,6 +35,14 @@ public class ProxyRegistry {
     private final List<SWProxy> proxies = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
 
+    private static <T> T getIndexOrNull(T[] array, int index) {
+        if (index < array.length) {
+            return array[index];
+        } else {
+            return null;
+        }
+    }
+
     public void loadFromString(String data, ProxyType proxyType) {
         var newProxies = data.lines()
                 .filter(line -> !line.isBlank())
@@ -64,14 +72,6 @@ public class ProxyRegistry {
         var password = getIndexOrNull(split, 3);
 
         return new SWProxy(proxyType, host, port, username, password, true);
-    }
-
-    private static <T> T getIndexOrNull(T[] array, int index) {
-        if (index < array.length) {
-            return array[index];
-        } else {
-            return null;
-        }
     }
 
     public List<SWProxy> getProxies() {

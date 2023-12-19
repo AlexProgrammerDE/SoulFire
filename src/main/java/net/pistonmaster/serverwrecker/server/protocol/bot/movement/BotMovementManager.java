@@ -707,13 +707,13 @@ public class BotMovementManager {
         });
 
         var blockBelow = world.getBlockStateAt(movementState.pos.floored().offset(0, -0.5, 0).toImmutableInt());
-            if (blockBelow.blockType() == BlockType.SOUL_SAND) {
-                vel.x *= physics.soulsandSpeed;
-                vel.z *= physics.soulsandSpeed;
-            } else if (blockBelow.blockType() == BlockType.HONEY_BLOCK) {
-                vel.x *= physics.honeyblockSpeed;
-                vel.z *= physics.honeyblockSpeed;
-            }
+        if (blockBelow.blockType() == BlockType.SOUL_SAND) {
+            vel.x *= physics.soulsandSpeed;
+            vel.z *= physics.soulsandSpeed;
+        } else if (blockBelow.blockType() == BlockType.HONEY_BLOCK) {
+            vel.x *= physics.honeyblockSpeed;
+            vel.z *= physics.honeyblockSpeed;
+        }
     }
 
     private Vector3d collide(LevelState world, AABB playerBB, Vector3d targetVec) {

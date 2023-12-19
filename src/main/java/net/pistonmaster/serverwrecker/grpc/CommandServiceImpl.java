@@ -22,13 +22,7 @@ package net.pistonmaster.serverwrecker.grpc;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.command.ServerCommandManager;
-import net.pistonmaster.serverwrecker.grpc.generated.CommandCompletionRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.CommandCompletionResponse;
-import net.pistonmaster.serverwrecker.grpc.generated.CommandHistoryRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.CommandHistoryResponse;
-import net.pistonmaster.serverwrecker.grpc.generated.CommandRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.CommandResponse;
-import net.pistonmaster.serverwrecker.grpc.generated.CommandServiceGrpc;
+import net.pistonmaster.serverwrecker.grpc.generated.*;
 
 import javax.inject.Inject;
 
