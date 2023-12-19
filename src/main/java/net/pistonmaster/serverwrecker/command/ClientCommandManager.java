@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandCompletionRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandHistoryRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.CommandRequest;
 import net.pistonmaster.serverwrecker.server.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.server.api.event.lifecycle.DispatcherInitEvent;
@@ -54,13 +55,14 @@ public class ClientCommandManager {
     public int execute(String command) {
         try {
             var parsed = dispatcher.parse(command, ConsoleSubject.INSTANCE);
-            System.out.println(parsed);
 
-            /*
-                return rpcClient.getCommandStubBlocking().executeCommand(
+            // We found no registered command, so forward to server.
+            if (parsed.getExceptions().isEmpty()) {
+                return rpcClient.commandStubBlocking().executeCommand(
                         CommandRequest.newBuilder().setCommand(command).build()
                 ).getCode();
-             */
+            }
+
             return dispatcher.execute(parsed);
         } catch (CommandSyntaxException e) {
             LOGGER.error("An error occurred while trying to execute a command.", e);
