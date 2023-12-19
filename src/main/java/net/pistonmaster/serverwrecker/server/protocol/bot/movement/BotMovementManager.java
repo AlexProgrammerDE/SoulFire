@@ -377,6 +377,8 @@ public class BotMovementManager {
         } else if (sendOnGround) {
             sendOnGround();
         }
+
+        movementState.applyData();
     }
 
     public void sendPosRot() {

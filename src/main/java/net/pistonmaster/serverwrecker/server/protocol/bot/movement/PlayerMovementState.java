@@ -43,7 +43,7 @@ public class PlayerMovementState {
     public float pitch;
 
     // Motion
-    public MutableVector3d vel = new MutableVector3d(0, 0, 0);
+    public MutableVector3d vel;
 
     // Collision
     public boolean onGround;
@@ -75,6 +75,21 @@ public class PlayerMovementState {
     public boolean flying;
 
     public void updateData() {
+        pos = new MutableVector3d(
+                entity.x(),
+                entity.y(),
+                entity.z()
+        );
+
+        yaw = entity.yaw();
+        pitch = entity.pitch();
+
+        vel = new MutableVector3d(
+                entity.motionX(),
+                entity.motionY(),
+                entity.motionZ()
+        );
+
         var effectState = entity.effectState();
         jumpBoost = effectState.getEffect(Effect.JUMP_BOOST).map(EffectData::amplifier).orElse(0);
         speed = effectState.getEffect(Effect.SPEED).map(EffectData::amplifier).orElse(0);
@@ -88,5 +103,18 @@ public class PlayerMovementState {
 
         var chestItem = inventoryContainer.getChestplate().item();
         elytraEquipped = chestItem != null && chestItem.type() == ItemType.ELYTRA;
+    }
+
+    public void applyData() {
+        entity.x(pos.x);
+        entity.y(pos.y);
+        entity.z(pos.z);
+
+        entity.yaw(yaw);
+        entity.pitch(pitch);
+
+        entity.motionX(vel.x);
+        entity.motionY(vel.y);
+        entity.motionZ(vel.z);
     }
 }
