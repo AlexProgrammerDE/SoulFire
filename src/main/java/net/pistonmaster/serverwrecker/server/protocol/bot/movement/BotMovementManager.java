@@ -233,7 +233,7 @@ public class BotMovementManager {
 
     public boolean isClimbable(LevelState world, Vector3i pos) {
         var blockType = world.getBlockStateAt(pos).blockType();
-        return tagsState.isBlockInTag(blockType, "climbable");
+        return tagsState.isBlockInTag(blockType, "climbable") || blockType == BlockType.POWDER_SNOW;
     }
 
     public static boolean isMaterialInBB(LevelState world, AABB queryBB, List<BlockType> types) {
@@ -548,15 +548,15 @@ public class BotMovementManager {
             applyHeading(strafe, forward, frictionInfluencedSpeed);
 
             if (isClimbable(world, pos.toImmutableInt())) {
-                vel.x = GenericMath.clamp(vel.x, -physics.ladderMaxSpeed, physics.ladderMaxSpeed);
-                vel.z = GenericMath.clamp(vel.z, -physics.ladderMaxSpeed, physics.ladderMaxSpeed);
-                vel.y = Math.max(vel.y, controlState.sneaking() ? 0 : -physics.ladderMaxSpeed);
+                vel.x = GenericMath.clamp(vel.x, -physics.climbMaxSpeed, physics.climbMaxSpeed);
+                vel.z = GenericMath.clamp(vel.z, -physics.climbMaxSpeed, physics.climbMaxSpeed);
+                vel.y = Math.max(vel.y, controlState.sneaking() ? 0 : -physics.climbMaxSpeed);
             }
 
             moveEntity(world, vel.x, vel.y, vel.z);
 
             if ((movementState.isCollidedHorizontally || controlState.jumping()) && isClimbable(world, pos.toImmutableInt())) {
-                vel.y = physics.ladderClimbSpeed; // climb ladder
+                vel.y = physics.climbSpeed; // climb ladder
             }
 
             // Apply friction and gravity

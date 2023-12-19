@@ -34,8 +34,8 @@ public class PhysicsData {
     public double soulsandSpeed = 0.4;
     public double honeyblockSpeed = 0.4;
     public double honeyblockJumpSpeed = 0.4;
-    public double ladderMaxSpeed = 0.15;
-    public double ladderClimbSpeed = 0.2;
+    public double climbMaxSpeed = 0.15;
+    public double climbSpeed = 0.2;
     public float playerWidth = 0.6F;
     public float playerHeight = 1.8F;
     public float playerSneakHeight = 1.5F;
