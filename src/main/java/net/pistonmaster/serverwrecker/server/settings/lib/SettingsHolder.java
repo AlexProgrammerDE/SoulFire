@@ -19,10 +19,19 @@
  */
 package net.pistonmaster.serverwrecker.server.settings.lib;
 
-import it.unimi.dsi.fastutil.objects.*;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMaps;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMaps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import net.pistonmaster.serverwrecker.account.MinecraftAccount;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.*;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.ComboProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.PropertyKey;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.StringProperty;
 
 import java.util.List;
 import java.util.function.Function;

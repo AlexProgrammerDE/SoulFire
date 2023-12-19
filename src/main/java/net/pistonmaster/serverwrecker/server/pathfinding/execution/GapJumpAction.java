@@ -35,8 +35,8 @@ public final class GapJumpAction implements WorldAction {
 
     @Override
     public boolean isCompleted(BotConnection connection) {
-        var movementManager = connection.sessionDataManager().botMovementManager();
-        var botPosition = movementManager.getPlayerPos();
+        var clientEntity = connection.sessionDataManager().clientEntity();
+        var botPosition = clientEntity.pos();
         var levelState = connection.sessionDataManager().getCurrentLevel();
         if (levelState == null) {
             return false;
@@ -60,27 +60,28 @@ public final class GapJumpAction implements WorldAction {
 
     @Override
     public void tick(BotConnection connection) {
-        var movementManager = connection.sessionDataManager().botMovementManager();
-        movementManager.controlState().resetAll();
+        var clientEntity = connection.sessionDataManager().clientEntity();
+        var botMovementManager = connection.sessionDataManager().botMovementManager();
+        clientEntity.controlState().resetAll();
 
-        var previousYaw = movementManager.getYaw();
-        movementManager.lookAt(RotationOrigin.EYES, position);
-        movementManager.entity().pitch(0);
-        var newYaw = movementManager.getYaw();
+        var previousYaw = clientEntity.yaw();
+        clientEntity.lookAt(RotationOrigin.EYES, position);
+        botMovementManager.movementState().pitch(0);
+        var newYaw = clientEntity.yaw();
 
         var yawDifference = Math.abs(previousYaw - newYaw);
 
         // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
         if (didLook && yawDifference > 5) {
-            movementManager.lastYaw(newYaw);
+            botMovementManager.lastYaw(newYaw);
         } else {
             didLook = true;
         }
 
-        movementManager.controlState().forward(true);
+        clientEntity.controlState().forward(true);
 
         if (shouldJump()) {
-            movementManager.controlState().jumping(true);
+            clientEntity.controlState().jumping(true);
         }
     }
 

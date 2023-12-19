@@ -26,10 +26,13 @@ import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.data.game.ResourcePackStatus;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
+import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
+import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.GlobalPos;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerSpawnInfo;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PositionElement;
+import com.github.steveice10.mc.protocol.data.game.level.notify.LimitedCraftingValue;
 import com.github.steveice10.mc.protocol.data.game.level.notify.RainStrengthValue;
 import com.github.steveice10.mc.protocol.data.game.level.notify.RespawnScreenValue;
 import com.github.steveice10.mc.protocol.data.game.level.notify.ThunderStrengthValue;
@@ -38,14 +41,64 @@ import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundRe
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundResourcePackPacket;
 import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.*;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.*;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.*;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundCooldownPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDisguisedChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerInfoRemovePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerInfoUpdatePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundRespawnPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundServerDataPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundTabListPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosRotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityRotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundRemoveEntitiesPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundRemoveMobEffectPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundRotateHeadPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityMotionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundTeleportEntityPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateMobEffectPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundBlockChangedAckPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerLookAtPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetCarriedItemPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetExperiencePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.*;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.*;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.*;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerClosePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetDataPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetSlotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundHorseScreenOpenPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundOpenBookPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundOpenScreenPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundBlockUpdatePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundChunksBiomesPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundForgetLevelChunkPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundLevelChunkWithLightPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundMapItemDataPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSectionBlocksUpdatePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheCenterPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheRadiusPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetDefaultSpawnPositionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetSimulationDistancePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetTimePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderCenterPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderLerpSizePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderSizePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderWarningDelayPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderWarningDistancePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
@@ -73,11 +126,28 @@ import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.InventoryManager;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.WindowContainer;
-import net.pistonmaster.serverwrecker.server.protocol.bot.model.*;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.AbilitiesData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.BiomeData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.ChunkKey;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.DefaultSpawnData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.DifficultyData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.DimensionData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.ExperienceData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.HealthData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.LoginPacketData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.ServerPlayData;
 import net.pistonmaster.serverwrecker.server.protocol.bot.movement.BotMovementManager;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.*;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.EntityState;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ExperienceOrbState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.movement.ControlState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.BorderState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.ChunkData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityTrackerState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.LevelState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.MapDataState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.PlayerListState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.WeatherState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ClientEntity;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ExperienceOrbEntity;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.RawEntity;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;
@@ -105,13 +175,11 @@ public final class SessionDataManager {
     private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
     private final EntityTrackerState entityTrackerState = new EntityTrackerState();
-    private final EntityMetadataState selfMetadata = new EntityMetadataState();
-    private final EntityAttributesState selfAttributeState = new EntityAttributesState();
-    private final EntityEffectState selfEffectState = new EntityEffectState();
-    private final PlayerMetaState playerMetaState = new PlayerMetaState();
     private final InventoryManager inventoryManager = new InventoryManager(this);
     private final BotActionManager botActionManager = new BotActionManager(this);
+    private final ControlState controlState = new ControlState();
     private final TagsState tagsState = new TagsState();
+    private ClientEntity clientEntity;
     private @Nullable ServerPlayData serverPlayData;
     private BorderState borderState;
     private BotMovementManager botMovementManager;
@@ -120,7 +188,8 @@ public final class SessionDataManager {
     private @Nullable GameMode previousGameMode = null;
     private GameProfile botProfile;
     private LoginPacketData loginData;
-    private boolean doImmediateRespawn;
+    private boolean enableRespawnScreen;
+    private boolean doLimitedCrafting;
     private DimensionData currentDimension;
     private int serverViewDistance = -1;
     private int serverSimulationDistance = -1;
@@ -169,15 +238,18 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onJoin(ClientboundLoginPacket packet) {
+        clientEntity = new ClientEntity(packet.getEntityId(), controlState);
+        clientEntity.showReducedDebug(packet.isReducedDebugInfo());
+        entityTrackerState.addEntity(clientEntity);
+
         loginData = new LoginPacketData(
-                packet.getEntityId(),
                 packet.isHardcore(),
                 packet.getWorldNames(),
-                packet.getMaxPlayers(),
-                packet.isReducedDebugInfo()
+                packet.getMaxPlayers()
         );
 
-        doImmediateRespawn = !packet.isEnableRespawnScreen();
+        enableRespawnScreen = packet.isEnableRespawnScreen();
+        doLimitedCrafting = packet.isDoLimitedCrafting();
         serverViewDistance = packet.getViewDistance();
         serverSimulationDistance = packet.getSimulationDistance();
 
@@ -201,12 +273,12 @@ public final class SessionDataManager {
     @EventHandler
     public void onPosition(ClientboundPlayerPositionPacket packet) {
         var isInitial = botMovementManager == null;
-        var posData = isInitial ? null : botMovementManager.entity().pos();
-        var currentX = isInitial ? 0 : posData.x();
-        var currentY = isInitial ? 0 : posData.y();
-        var currentZ = isInitial ? 0 : posData.z();
-        var currentYaw = isInitial ? 0 : botMovementManager.entity().yaw();
-        var currentPitch = isInitial ? 0 : botMovementManager.entity().pitch();
+
+        var currentX = isInitial ? 0 : clientEntity.x();
+        var currentY = isInitial ? 0 : clientEntity.y();
+        var currentZ = isInitial ? 0 : clientEntity.z();
+        var currentYaw = isInitial ? 0 : clientEntity.yaw();
+        var currentPitch = isInitial ? 0 : clientEntity.pitch();
 
         var xRelative = packet.getRelative().contains(PositionElement.X);
         var yRelative = packet.getRelative().contains(PositionElement.Y);
@@ -220,15 +292,15 @@ public final class SessionDataManager {
         var yaw = yawRelative ? currentYaw + packet.getYaw() : packet.getYaw();
         var pitch = pitchRelative ? currentPitch + packet.getPitch() : packet.getPitch();
 
+        clientEntity.setPosition(x, y, z);
+        clientEntity.setRotation(yaw, pitch);
+
         if (isInitial) {
-            botMovementManager = new BotMovementManager(this, x, y, z, yaw, pitch);
-            var position = botMovementManager.getBlockPos();
+            botMovementManager = new BotMovementManager(this, clientEntity);
+            var position = clientEntity.blockPos();
             log.info("Joined server at position: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
 
             connection.eventBus().call(new BotJoinedEvent(connection));
-        } else {
-            botMovementManager.setPosition(x, y, z);
-            botMovementManager.setRotation(yaw, pitch);
         }
 
         session.send(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
@@ -241,7 +313,7 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onLookAt(ClientboundPlayerLookAtPacket packet) {
-        botMovementManager.lookAt(packet.getOrigin(),
+        clientEntity.lookAt(packet.getOrigin(),
                 Vector3d.from(packet.getX(), packet.getY(), packet.getZ()));
         botMovementManager.sendRot();
 
@@ -257,12 +329,20 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onDeath(ClientboundPlayerCombatKillPacket packet) {
-        if (packet.getPlayerId() != loginData.entityId()) {
-            log.warn("Received death packet for another player");
+        var state = entityTrackerState.getEntity(packet.getPlayerId());
+
+        if (state == null || state != clientEntity) {
+            log.warn("Received death for unknown or invalid entity {}", packet.getPlayerId());
             return;
         }
 
-        this.isDead = true;
+        if (enableRespawnScreen) {
+            log.info("Died");
+            isDead = true;
+        } else {
+            log.info("Died, respawning due to game rule");
+            session.send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN));
+        }
     }
 
     @EventHandler
@@ -371,11 +451,11 @@ public final class SessionDataManager {
                 packet.getWalkSpeed()
         );
 
-        selfAttributeState.setAbilities(abilitiesData);
+        var attributeState = clientEntity.attributeState();
+        attributeState.setAttribute(new Attribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED, abilitiesData.walkSpeed()));
+        attributeState.setAttribute(new Attribute(AttributeType.Builtin.GENERIC_FLYING_SPEED, abilitiesData.flySpeed()));
 
-        if (botMovementManager != null) {
-            botMovementManager.controlState().flying(abilitiesData.flying());
-        }
+        controlState.flying(abilitiesData.flying());
     }
 
     @EventHandler
@@ -527,7 +607,8 @@ public final class SessionDataManager {
             case PUFFERFISH_STING_SOUND -> log.debug("Pufferfish sting sound");
             case AFFECTED_BY_ELDER_GUARDIAN -> log.debug("Affected by elder guardian");
             case ENABLE_RESPAWN_SCREEN ->
-                    doImmediateRespawn = packet.getValue() == RespawnScreenValue.IMMEDIATE_RESPAWN;
+                    enableRespawnScreen = packet.getValue() == RespawnScreenValue.ENABLE_RESPAWN_SCREEN;
+            case LIMITED_CRAFTING -> doLimitedCrafting = packet.getValue() == LimitedCraftingValue.LIMITED_CRAFTING;
         }
     }
 
@@ -706,23 +787,23 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onEntitySpawn(ClientboundAddEntityPacket packet) {
-        var entityState = new EntityState(packet.getEntityId(), packet.getUuid(), packet.getType(), packet.getData());
+        var entityState = new RawEntity(packet.getEntityId(), packet.getUuid(), packet.getType(), packet.getData());
 
         entityState.setPosition(packet.getX(), packet.getY(), packet.getZ());
         entityState.setRotation(packet.getYaw(), packet.getPitch());
         entityState.setHeadRotation(packet.getHeadYaw());
         entityState.setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
 
-        entityTrackerState.addEntity(packet.getEntityId(), entityState);
+        entityTrackerState.addEntity(entityState);
     }
 
     @EventHandler
     public void onExperienceOrbSpawn(ClientboundAddExperienceOrbPacket packet) {
-        var experienceOrbState = new ExperienceOrbState(packet.getEntityId(), packet.getExp());
+        var experienceOrbState = new ExperienceOrbEntity(packet.getEntityId(), packet.getExp());
 
         experienceOrbState.setPosition(packet.getX(), packet.getY(), packet.getZ());
 
-        entityTrackerState.addEntity(packet.getEntityId(), experienceOrbState);
+        entityTrackerState.addEntity(experienceOrbState);
     }
 
     @EventHandler
@@ -734,8 +815,12 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onEntityMetadata(ClientboundSetEntityDataPacket packet) {
-        var state = packet.getEntityId() == loginData.entityId() ?
-                selfMetadata : entityTrackerState.getEntity(packet.getEntityId()).metadataState();
+        var state = entityTrackerState.getEntity(packet.getEntityId()).metadataState();
+
+        if (state == null) {
+            log.warn("Received entity metadata packet for unknown entity {}", packet.getEntityId());
+            return;
+        }
 
         for (var entry : packet.getMetadata()) {
             state.setMetadata(entry);
@@ -744,8 +829,12 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onEntityAttributes(ClientboundUpdateAttributesPacket packet) {
-        var state = packet.getEntityId() == loginData.entityId() ?
-                selfAttributeState : entityTrackerState.getEntity(packet.getEntityId()).attributesState();
+        var state = entityTrackerState.getEntity(packet.getEntityId()).attributeState();
+
+        if (state == null) {
+            log.warn("Received entity attributes packet for unknown entity {}", packet.getEntityId());
+            return;
+        }
 
         for (var entry : packet.getAttributes()) {
             state.setAttribute(entry);
@@ -754,55 +843,60 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onEntityEvent(ClientboundEntityEventPacket packet) {
-        if (packet.getEntityId() == loginData.entityId()) {
-            playerMetaState.handleEntityEvent(packet.getEvent());
+        var state = entityTrackerState.getEntity(packet.getEntityId());
+
+        if (state == null) {
+            log.warn("Received entity event packet for unknown entity {}", packet.getEntityId());
             return;
         }
-
-        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.handleEntityEvent(packet.getEvent());
     }
 
     @EventHandler
     public void onUpdateEffect(ClientboundUpdateMobEffectPacket packet) {
-        var state = packet.getEntityId() == loginData.entityId() ?
-                selfEffectState : entityTrackerState.getEntity(packet.getEntityId()).effectState();
+        var state = entityTrackerState.getEntity(packet.getEntityId()).effectState();
+
+        if (state == null) {
+            log.warn("Received update effect packet for unknown entity {}", packet.getEntityId());
+            return;
+        }
 
         state.updateEffect(packet.getEffect(), packet.getAmplifier(), packet.getDuration(), packet.isAmbient(), packet.isShowParticles());
     }
 
     @EventHandler
     public void onRemoveEffect(ClientboundRemoveMobEffectPacket packet) {
-        var state = packet.getEntityId() == loginData.entityId() ?
-                selfEffectState : entityTrackerState.getEntity(packet.getEntityId()).effectState();
+        var state = entityTrackerState.getEntity(packet.getEntityId()).effectState();
+
+        if (state == null) {
+            log.warn("Received remove effect packet for unknown entity {}", packet.getEntityId());
+            return;
+        }
 
         state.removeEffect(packet.getEffect());
     }
 
     @EventHandler
     public void onEntityMotion(ClientboundSetEntityMotionPacket packet) {
-        if (loginData.entityId() == packet.getEntityId()) {
-            var motionX = packet.getMotionX();
-            var motionY = packet.getMotionY();
-            var motionZ = packet.getMotionZ();
-            botMovementManager.setMotion(motionX, motionY, motionZ);
-            log.debug("Bot forced to motion: {} {} {}", motionX, motionY, motionZ);
-        } else {
-            var state = entityTrackerState.getEntity(packet.getEntityId());
+        var state = entityTrackerState.getEntity(packet.getEntityId());
 
-            state.setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
+        if (state == null) {
+            log.warn("Received entity motion packet for unknown entity {}", packet.getEntityId());
+            return;
         }
+
+        state.setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
     }
 
     @EventHandler
     public void onEntityPos(ClientboundMoveEntityPosPacket packet) {
-        if (packet.getEntityId() == loginData.entityId()) {
-            log.info("Received entity position packet for bot, notify the developers!");
+        var state = entityTrackerState.getEntity(packet.getEntityId());
+
+        if (state == null) {
+            log.warn("Received entity position packet for unknown entity {}", packet.getEntityId());
             return;
         }
-
-        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.addPosition(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
         state.onGround(packet.isOnGround());
@@ -810,12 +904,12 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onEntityRot(ClientboundMoveEntityRotPacket packet) {
-        if (packet.getEntityId() == loginData.entityId()) {
-            log.info("Received entity rotation packet for bot, notify the developers!");
+        var state = entityTrackerState.getEntity(packet.getEntityId());
+
+        if (state == null) {
+            log.warn("Received entity rotation packet for unknown entity {}", packet.getEntityId());
             return;
         }
-
-        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.setRotation(packet.getYaw(), packet.getPitch());
         state.onGround(packet.isOnGround());
@@ -823,24 +917,24 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onEntityRot(ClientboundRotateHeadPacket packet) {
-        if (packet.getEntityId() == loginData.entityId()) {
-            log.info("Received entity rotation packet for bot, notify the developers!");
+        var state = entityTrackerState.getEntity(packet.getEntityId());
+
+        if (state == null) {
+            log.warn("Received entity head rotation packet for unknown entity {}", packet.getEntityId());
             return;
         }
-
-        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.setHeadRotation(packet.getHeadYaw());
     }
 
     @EventHandler
     public void onEntityPosRot(ClientboundMoveEntityPosRotPacket packet) {
-        if (packet.getEntityId() == loginData.entityId()) {
-            log.info("Received entity position rotation packet for bot, notify the developers!");
+        var state = entityTrackerState.getEntity(packet.getEntityId());
+
+        if (state == null) {
+            log.warn("Received entity position rotation packet for unknown entity {}", packet.getEntityId());
             return;
         }
-
-        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.addPosition(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
         state.setRotation(packet.getYaw(), packet.getPitch());
@@ -849,12 +943,12 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onEntityTeleport(ClientboundTeleportEntityPacket packet) {
-        if (packet.getEntityId() == loginData.entityId()) {
-            log.info("Received entity teleport packet for bot, notify the developers!");
+        var state = entityTrackerState.getEntity(packet.getEntityId());
+
+        if (state == null) {
+            log.warn("Received entity teleport packet for unknown entity {}", packet.getEntityId());
             return;
         }
-
-        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         state.setPosition(packet.getX(), packet.getY(), packet.getZ());
         state.setRotation(packet.getYaw(), packet.getPitch());
@@ -928,12 +1022,11 @@ public final class SessionDataManager {
             borderState.tick();
         }
 
-        selfEffectState.tick();
         entityTrackerState.tick();
 
         var level = getCurrentLevel();
         if (level != null && botMovementManager != null
-                && level.isChunkLoaded(botMovementManager.getBlockPos())) {
+                && level.isChunkLoaded(clientEntity.blockPos())) {
             botMovementManager.tick();
         }
 

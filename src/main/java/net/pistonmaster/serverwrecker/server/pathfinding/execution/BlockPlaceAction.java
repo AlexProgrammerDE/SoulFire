@@ -54,8 +54,7 @@ public final class BlockPlaceAction implements WorldAction {
     @Override
     public void tick(BotConnection connection) {
         var sessionDataManager = connection.sessionDataManager();
-        var movementManager = sessionDataManager.botMovementManager();
-        movementManager.controlState().resetAll();
+        sessionDataManager.controlState().resetAll();
 
         if (!putOnHotbar) {
             var inventoryManager = sessionDataManager.inventoryManager();

@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.server.protocol.bot.movement;
 
-import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeModifier;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
@@ -34,8 +33,9 @@ import lombok.Setter;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributesState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributeState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.LevelState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ClientEntity;
 import net.pistonmaster.serverwrecker.server.util.MathHelper;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -49,8 +49,6 @@ import java.util.function.BiConsumer;
 /**
  * Java port of prismarine-physics
  */
-@Getter
-@Setter
 public class BotMovementManager {
     private static final List<BlockType> WATER_TYPES = List.of(BlockType.WATER);
     private static final List<BlockType> LAVA_TYPES = List.of(BlockType.WATER);
@@ -58,29 +56,41 @@ public class BotMovementManager {
             BlockType.WATER, BlockType.SEAGRASS, BlockType.TALL_SEAGRASS,
             BlockType.KELP, BlockType.KELP_PLANT, BlockType.BUBBLE_COLUMN
     );
-    private final ControlState controlState = new ControlState();
     private final PhysicsData physics = new PhysicsData();
-    private final PlayerMovementState entity;
+    @Getter
+    private final PlayerMovementState movementState;
     private final SessionDataManager dataManager;
+    private final ControlState controlState;
+    @Getter
+    @Setter
     private double lastX = 0;
+    @Getter
+    @Setter
     private double lastY = 0;
+    @Getter
+    @Setter
     private double lastZ = 0;
+    @Getter
+    @Setter
     private float lastYaw = 0;
+    @Getter
+    @Setter
     private float lastPitch = 0;
+    @Getter
+    @Setter
     private boolean lastOnGround = false;
+    @Getter
+    @Setter
     private int positionReminder = 0;
 
-    public BotMovementManager(SessionDataManager dataManager, double x, double y, double z, float yaw, float pitch) {
-        this.entity = new PlayerMovementState(
-                dataManager.selfAttributeState(),
-                dataManager.selfEffectState(),
+    public BotMovementManager(SessionDataManager dataManager, ClientEntity clientEntity) {
+        this.movementState = new PlayerMovementState(
+                clientEntity,
                 dataManager.inventoryManager().getPlayerInventory()
         );
-        entity.pos = new MutableVector3d(x, y, z);
 
-        entity.yaw = yaw;
-        entity.pitch = pitch;
         this.dataManager = dataManager;
+        this.controlState = dataManager.controlState();
     }
 
     private static void consumeIntersectedBlocks(LevelState world, AABB queryBB, BiConsumer<BlockStateMeta, Vector3i> consumer) {
@@ -256,18 +266,18 @@ public class BotMovementManager {
         var world = dataManager.getCurrentLevel();
         if (world == null) return;
 
-        entity.updateData();
+        movementState.updateData();
 
-        var vel = entity.vel;
-        var pos = entity.pos;
+        var vel = movementState.vel;
+        var pos = movementState.pos;
 
         {
             var playerBB = getPlayerBB(pos);
             var waterBB = playerBB.deflate(0.001, 0.401, 0.001);
             var lavaBB = playerBB.deflate(0.1, 0.4, 0.1);
 
-            entity.isInWater = isInWaterApplyCurrent(world, waterBB, vel);
-            entity.isInLava = isMaterialInBB(world, lavaBB, LAVA_TYPES);
+            movementState.isInWater = isInWaterApplyCurrent(world, waterBB, vel);
+            movementState.isInLava = isMaterialInBB(world, lavaBB, LAVA_TYPES);
         }
 
         // Reset velocity component if it falls under the threshold
@@ -276,33 +286,33 @@ public class BotMovementManager {
         if (Math.abs(vel.z) < physics.negligeableVelocity) vel.z = 0;
 
         // Handle inputs
-        if (controlState.jumping() || entity.jumpQueued) {
-            if (entity.jumpTicks > 0) {
-                entity.jumpTicks--;
+        if (controlState.jumping() || movementState.jumpQueued) {
+            if (movementState.jumpTicks > 0) {
+                movementState.jumpTicks--;
             }
 
-            if (entity.isInWater || entity.isInLava) {
+            if (movementState.isInWater || movementState.isInLava) {
                 vel.y += 0.04;
-            } else if (entity.onGround && entity.jumpTicks == 0) {
-                var blockBelow = world.getBlockStateAt(entity.pos.floored().offset(0, -0.5, 0).toImmutableInt());
+            } else if (movementState.onGround && movementState.jumpTicks == 0) {
+                var blockBelow = world.getBlockStateAt(movementState.pos.floored().offset(0, -0.5, 0).toImmutableInt());
                 vel.y = (float) (0.42) * ((blockBelow.blockType() == BlockType.HONEY_BLOCK) ? physics.honeyblockJumpSpeed : 1);
-                if (entity.jumpBoost > 0) {
-                    vel.y += 0.1 * entity.jumpBoost;
+                if (movementState.jumpBoost > 0) {
+                    vel.y += 0.1 * movementState.jumpBoost;
                 }
 
                 if (controlState.sprinting()) {
-                    var yaw = Math.PI - entity.yaw;
+                    var yaw = Math.PI - movementState.yaw;
                     vel.x -= Math.sin(yaw) * 0.2;
                     vel.z += Math.cos(yaw) * 0.2;
                 }
 
-                entity.jumpTicks = physics.autojumpCooldown;
+                movementState.jumpTicks = physics.autojumpCooldown;
             }
         } else {
-            entity.jumpTicks = 0; // reset autojump cooldown
+            movementState.jumpTicks = 0; // reset autojump cooldown
         }
 
-        entity.jumpQueued = false;
+        movementState.jumpQueued = false;
 
         var forward = 0.0F;
         if (controlState.forward()) {
@@ -330,32 +340,32 @@ public class BotMovementManager {
             forward *= (float) ((double) forward * physics.sneakSpeed);
         }
 
-        entity.elytraFlying = entity.elytraFlying && entity.elytraEquipped && !entity.onGround && entity.levitation == 0;
+        movementState.elytraFlying = movementState.elytraFlying && movementState.elytraEquipped && !movementState.onGround && movementState.levitation == 0;
 
-        if (entity.fireworkRocketDuration > 0) {
-            if (!entity.elytraFlying) {
-                entity.fireworkRocketDuration = 0;
+        if (movementState.fireworkRocketDuration > 0) {
+            if (!movementState.elytraFlying) {
+                movementState.fireworkRocketDuration = 0;
             } else {
-                var lookingVector = getLookingVector(entity);
+                var lookingVector = getLookingVector(movementState);
                 var lookDir = lookingVector.lookDir;
                 vel.x += lookDir.x * 0.1 + (lookDir.x * 1.5 - vel.x) * 0.5;
                 vel.y += lookDir.y * 0.1 + (lookDir.y * 1.5 - vel.y) * 0.5;
                 vel.z += lookDir.z * 0.1 + (lookDir.z * 1.5 - vel.z) * 0.5;
-                --entity.fireworkRocketDuration;
+                --movementState.fireworkRocketDuration;
             }
         }
 
         moveEntityWithHeading(world, strafe, forward);
 
         // Detect whether anything changed
-        var xDiff = entity.pos.x - lastX;
-        var yDiff = entity.pos.y - lastY;
-        var zDiff = entity.pos.z - lastZ;
-        var yawDiff = (double) (entity.yaw - lastYaw);
-        var pitchDiff = (double) (entity.pitch - lastPitch);
+        var xDiff = movementState.pos.x - lastX;
+        var yDiff = movementState.pos.y - lastY;
+        var zDiff = movementState.pos.z - lastZ;
+        var yawDiff = (double) (movementState.yaw - lastYaw);
+        var pitchDiff = (double) (movementState.pitch - lastPitch);
         var sendPos = MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4) || ++positionReminder >= 20;
         var sendRot = pitchDiff != 0.0 || yawDiff != 0.0;
-        var sendOnGround = entity.onGround != lastOnGround;
+        var sendOnGround = movementState.onGround != lastOnGround;
 
         // Send position packets if changed
         if (sendPos && sendRot) {
@@ -370,21 +380,21 @@ public class BotMovementManager {
     }
 
     public void sendPosRot() {
-        var onGround = entity.onGround;
+        var onGround = movementState.onGround;
 
         lastOnGround = onGround;
 
-        var x = entity.pos.x;
-        var y = entity.pos.y;
-        var z = entity.pos.z;
+        var x = movementState.pos.x;
+        var y = movementState.pos.y;
+        var z = movementState.pos.z;
 
         lastX = x;
         lastY = y;
         lastZ = z;
         positionReminder = 0;
 
-        var yaw = entity.yaw;
-        var pitch = entity.pitch;
+        var yaw = movementState.yaw;
+        var pitch = movementState.pitch;
 
         lastYaw = yaw;
         lastPitch = pitch;
@@ -393,13 +403,13 @@ public class BotMovementManager {
     }
 
     public void sendPos() {
-        var onGround = entity.onGround;
+        var onGround = movementState.onGround;
 
         lastOnGround = onGround;
 
-        var x = entity.pos.x;
-        var y = entity.pos.y;
-        var z = entity.pos.z;
+        var x = movementState.pos.x;
+        var y = movementState.pos.y;
+        var z = movementState.pos.z;
 
         lastX = x;
         lastY = y;
@@ -410,12 +420,12 @@ public class BotMovementManager {
     }
 
     public void sendRot() {
-        var onGround = entity.onGround;
+        var onGround = movementState.onGround;
 
         lastOnGround = onGround;
 
-        var yaw = entity.yaw;
-        var pitch = entity.pitch;
+        var yaw = movementState.yaw;
+        var pitch = movementState.pitch;
 
         lastYaw = yaw;
         lastPitch = pitch;
@@ -424,7 +434,7 @@ public class BotMovementManager {
     }
 
     public void sendOnGround() {
-        var onGround = entity.onGround;
+        var onGround = movementState.onGround;
 
         lastOnGround = onGround;
 
@@ -432,27 +442,27 @@ public class BotMovementManager {
     }
 
     public void moveEntityWithHeading(LevelState world, float strafe, float forward) {
-        var vel = entity.vel;
-        var pos = entity.pos;
+        var vel = movementState.vel;
+        var pos = movementState.pos;
 
-        var gravityMultiplier = (vel.y <= 0 && entity.slowFalling > 0) ? physics.slowFalling : 1;
+        var gravityMultiplier = (vel.y <= 0 && movementState.slowFalling > 0) ? physics.slowFalling : 1;
         var speed = getSpeed();
 
-        if (entity.isInWater || entity.isInLava) {
+        if (movementState.isInWater || movementState.isInLava) {
             // Water / Lava movement
             var lastY = pos.y;
             var liquidSpeed = physics.liquidSpeed;
-            var typeSpeed = entity.isInWater ? physics.waterSpeed : physics.lavaSpeed;
+            var typeSpeed = movementState.isInWater ? physics.waterSpeed : physics.lavaSpeed;
             var horizontalInertia = typeSpeed;
 
-            if (entity.isInWater) {
-                var depthStrider = (float) entity.depthStrider;
+            if (movementState.isInWater) {
+                var depthStrider = (float) movementState.depthStrider;
 
                 if (depthStrider > 3) {
                     depthStrider = 3;
                 }
 
-                if (!entity.onGround) {
+                if (!movementState.onGround) {
                     depthStrider *= 0.5F;
                 }
 
@@ -461,7 +471,7 @@ public class BotMovementManager {
                     liquidSpeed += (speed - liquidSpeed) * depthStrider / 3;
                 }
 
-                if (entity.dolphinsGrace > 0) {
+                if (movementState.dolphinsGrace > 0) {
                     horizontalInertia = 0.96F;
                 }
             }
@@ -470,15 +480,15 @@ public class BotMovementManager {
 
             moveEntity(world, vel.x, vel.y, vel.z);
             vel.y *= typeSpeed;
-            vel.y -= (entity.isInWater ? physics.waterGravity : physics.lavaGravity) * gravityMultiplier;
+            vel.y -= (movementState.isInWater ? physics.waterGravity : physics.lavaGravity) * gravityMultiplier;
             vel.x *= horizontalInertia;
             vel.z *= horizontalInertia;
 
-            if (entity.isCollidedHorizontally && doesNotCollide(world, pos.offset(vel.x, vel.y + 0.6 - pos.y + lastY, vel.z))) {
+            if (movementState.isCollidedHorizontally && doesNotCollide(world, pos.offset(vel.x, vel.y + 0.6 - pos.y + lastY, vel.z))) {
                 vel.y = physics.outOfLiquidImpulse; // jump out of liquid
             }
-        } else if (entity.elytraFlying) {
-            var lookingData = getLookingVector(entity);
+        } else if (movementState.elytraFlying) {
+            var lookingData = getLookingVector(movementState);
             var pitch = lookingData.pitch;
             var sinPitch = lookingData.sinPitch;
             var cosPitch = lookingData.cosPitch;
@@ -513,8 +523,8 @@ public class BotMovementManager {
             vel.z *= 0.99;
             moveEntity(world, vel.x, vel.y, vel.z);
 
-            if (entity.onGround) {
-                entity.elytraFlying = false;
+            if (movementState.onGround) {
+                movementState.elytraFlying = false;
             }
         } else {
             // Normal movement
@@ -522,7 +532,7 @@ public class BotMovementManager {
             float frictionInfluencedSpeed;
 
             var blockUnder = world.getBlockStateAt(pos.offset(0, -0.500001F, 0).toImmutableInt());
-            if (entity.onGround) {
+            if (movementState.onGround) {
                 var friction = getBlockFriction(blockUnder.blockType());
                 xzMultiplier *= friction;
                 frictionInfluencedSpeed = speed * (0.21600002F / (friction * friction * friction));
@@ -540,13 +550,13 @@ public class BotMovementManager {
 
             moveEntity(world, vel.x, vel.y, vel.z);
 
-            if ((entity.isCollidedHorizontally || controlState.jumping()) && isOnLadder(world, pos.toImmutableInt())) {
+            if ((movementState.isCollidedHorizontally || controlState.jumping()) && isOnLadder(world, pos.toImmutableInt())) {
                 vel.y = physics.ladderClimbSpeed; // climb ladder
             }
 
             // Apply friction and gravity
-            if (entity.levitation > 0) {
-                vel.y += (0.05 * entity.levitation - vel.y) * 0.2;
+            if (movementState.levitation > 0) {
+                vel.y += (0.05 * movementState.levitation - vel.y) * 0.2;
             } else {
                 vel.y -= physics.gravity * gravityMultiplier;
             }
@@ -558,7 +568,7 @@ public class BotMovementManager {
     }
 
     private float getFlyingSpeed() {
-        if (entity.flying) {
+        if (movementState.flying) {
             var abilitiesData = dataManager.abilitiesData();
             var flySpeed = abilitiesData == null ? 0.05F : abilitiesData.flySpeed();
             return controlState.sprinting() ? flySpeed * 2.0F : flySpeed;
@@ -568,7 +578,7 @@ public class BotMovementManager {
     }
 
     public float getSpeed() {
-        var attribute = entity.attributesState();
+        var attribute = movementState.entity().attributeState();
         Attribute playerSpeedAttribute;
         if (attribute.hasAttribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED)) {
             // Use server-side player attributes
@@ -594,30 +604,30 @@ public class BotMovementManager {
                     modifier.getUuid().equals(physics.sprintingUUID));
         }
 
-        return (float) EntityAttributesState.getAttributeValue(playerSpeedAttribute);
+        return (float) EntityAttributeState.getAttributeValue(playerSpeedAttribute);
     }
 
     public void moveEntity(LevelState world, double dx, double dy, double dz) {
-        var vel = entity.vel;
-        var pos = entity.pos;
+        var vel = movementState.vel;
+        var pos = movementState.pos;
 
         var playerBB = getPlayerBB(pos);
 
-        if (entity.isInWeb) {
+        if (movementState.isInWeb) {
             dx *= 0.25;
             dy *= 0.05;
             dz *= 0.25;
             vel.x = 0;
             vel.y = 0;
             vel.z = 0;
-            entity.isInWeb = false;
+            movementState.isInWeb = false;
         }
 
         var oldVelX = dx;
         var oldVelY = dy;
         var oldVelZ = dz;
 
-        if (controlState.sneaking() && entity.onGround) {
+        if (controlState.sneaking() && movementState.onGround) {
             var step = 0.05;
 
             // In the 3 loops bellow, y offset should be -1, but that doesnt reproduce vanilla behavior.
@@ -656,9 +666,9 @@ public class BotMovementManager {
 
         // Update flags
         setPositionToBB(resultingBB, pos);
-        entity.isCollidedHorizontally = dx != oldVelX || dz != oldVelZ;
-        entity.isCollidedVertically = dy != oldVelY;
-        entity.onGround = entity.isCollidedVertically && oldVelY < 0;
+        movementState.isCollidedHorizontally = dx != oldVelX || dz != oldVelZ;
+        movementState.isCollidedVertically = dy != oldVelY;
+        movementState.onGround = movementState.isCollidedVertically && oldVelY < 0;
 
         // We collided, so we block the motion
         if (dx != oldVelX) {
@@ -682,7 +692,7 @@ public class BotMovementManager {
         // Finally, apply block collisions (web, soulsand...)
         consumeIntersectedBlocks(world, resultingBB.deflate(0.001, 0.001, 0.001), (block, cursor) -> {
             if (block.blockType() == BlockType.COBWEB) {
-                entity.isInWeb = true;
+                movementState.isInWeb = true;
             } else if (block.blockType() == BlockType.BUBBLE_COLUMN) {
                 var down = !block.blockShapeType().properties().getBoolean("drag");
                 var aboveBlock = world.getBlockStateAt(cursor.add(0, 1, 0));
@@ -696,7 +706,7 @@ public class BotMovementManager {
             }
         });
 
-        var blockBelow = world.getBlockStateAt(entity.pos.floored().offset(0, -0.5, 0).toImmutableInt());
+        var blockBelow = world.getBlockStateAt(movementState.pos.floored().offset(0, -0.5, 0).toImmutableInt());
             if (blockBelow.blockType() == BlockType.SOUL_SAND) {
                 vel.x *= physics.soulsandSpeed;
                 vel.z *= physics.soulsandSpeed;
@@ -711,7 +721,7 @@ public class BotMovementManager {
         var xChanged = targetVec.getX() != initialCollisionVec.getY();
         var yChanged = targetVec.getY() != initialCollisionVec.getY();
         var zChanged = targetVec.getZ() != initialCollisionVec.getZ();
-        var collidedY = entity.onGround || yChanged && targetVec.getY() < 0;
+        var collidedY = movementState.onGround || yChanged && targetVec.getY() < 0;
 
         // Step on block if height < stepHeight
         if (physics.stepHeight > 0 && collidedY && (xChanged || zChanged)) {
@@ -747,55 +757,13 @@ public class BotMovementManager {
         strafe *= speed;
         forward *= speed;
 
-        var yawRadians = Math.toRadians(entity.yaw);
+        var yawRadians = Math.toRadians(movementState.yaw);
         var sin = Math.sin(yawRadians);
         var cos = Math.cos(yawRadians);
 
-        var vel = entity.vel;
+        var vel = movementState.vel;
         vel.x += strafe * cos - forward * sin;
         vel.z += forward * cos + strafe * sin;
-    }
-
-    public void setMotion(double motionX, double motionY, double motionZ) {
-        entity.vel.x = motionX;
-        entity.vel.y = motionY;
-        entity.vel.z = motionZ;
-    }
-
-    public Vector3i getBlockPos() {
-        return entity.pos.toImmutableInt();
-    }
-
-    public void setPosition(double x, double y, double z) {
-        entity.pos.x = x;
-        entity.pos.y = y;
-        entity.pos.z = z;
-    }
-
-    public void setRotation(float yaw, float pitch) {
-        entity.yaw = yaw;
-        entity.pitch = pitch;
-    }
-
-    public Vector3d getPlayerPos() {
-        return entity.pos.toImmutable();
-    }
-
-    public float getYaw() {
-        return entity.yaw;
-    }
-
-    public float getPitch() {
-        return entity.pitch;
-    }
-
-    public Vector3d getRotationVector() {
-        var yawRadians = (float) Math.toRadians(entity.yaw);
-        var pitchRadians = (float) Math.toRadians(entity.pitch);
-        var x = -Math.sin(yawRadians) * Math.cos(pitchRadians);
-        var y = -Math.sin(pitchRadians);
-        var z = Math.cos(yawRadians) * Math.cos(pitchRadians);
-        return Vector3d.from(x, y, z);
     }
 
     public boolean doesNotCollide(LevelState world, MutableVector3d pos) {
@@ -904,44 +872,11 @@ public class BotMovementManager {
     }
 
     public void jump() {
-        entity.jumpQueued = true;
-    }
-
-    /**
-     * Updates the rotation to look at a given block or location.
-     *
-     * @param origin The rotation origin, either EYES or FEET.
-     * @param block  The block or location to look at.
-     */
-    public void lookAt(RotationOrigin origin, Vector3d block) {
-        var eyes = origin == RotationOrigin.EYES;
-
-        var dx = block.getX() - entity.pos.x;
-        var dy = block.getY() - (eyes ? entity.pos.y + getEyeHeight() : entity.pos.y);
-        var dz = block.getZ() - entity.pos.z;
-
-        var r = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        var yaw = -Math.atan2(dx, dz) / Math.PI * 180;
-        if (yaw < 0) {
-            yaw = 360 + yaw;
-        }
-
-        var pitch = -Math.asin(dy / r) / Math.PI * 180;
-
-        entity.yaw = (float) yaw;
-        entity.pitch = (float) pitch;
+        movementState.jumpQueued = true;
     }
 
     public float getBoundingBoxHeight() {
         return this.controlState.sneaking() ? physics.playerSneakHeight : physics.playerHeight;
-    }
-
-    public Vector3d getEyePosition() {
-        return Vector3d.from(entity.pos.x, entity.pos.y + getEyeHeight(), entity.pos.z);
-    }
-
-    public float getEyeHeight() {
-        return this.controlState.sneaking() ? 1.50F : 1.62F;
     }
 
     private float getBlockFriction(BlockType blockType) {

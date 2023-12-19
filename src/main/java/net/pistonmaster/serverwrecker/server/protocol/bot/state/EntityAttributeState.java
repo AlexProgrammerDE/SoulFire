@@ -23,12 +23,11 @@ import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Data;
-import net.pistonmaster.serverwrecker.server.protocol.bot.model.AbilitiesData;
 
 import java.util.Map;
 
 @Data
-public class EntityAttributesState {
+public class EntityAttributeState {
     private final Map<AttributeType, Attribute> attributeStore = new Object2ObjectOpenHashMap<>();
 
     public static double getAttributeValue(Attribute attribute) {
@@ -64,10 +63,5 @@ public class EntityAttributesState {
 
     public void setAttribute(Attribute attribute) {
         this.attributeStore.put(attribute.getType(), attribute);
-    }
-
-    public void setAbilities(AbilitiesData abilitiesData) {
-        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED, abilitiesData.walkSpeed()));
-        setAttribute(new Attribute(AttributeType.Builtin.GENERIC_FLYING_SPEED, abilitiesData.flySpeed()));
     }
 }

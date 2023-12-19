@@ -21,6 +21,5 @@ package net.pistonmaster.serverwrecker.server.protocol.bot.model;
 
 import lombok.NonNull;
 
-public record LoginPacketData(int entityId, boolean hardcore, @NonNull String[] worldNames,
-                              int maxPlayers, boolean reducedDebugInfo) {
+public record LoginPacketData(boolean hardcore, @NonNull String[] worldNames, int maxPlayers) {
 }

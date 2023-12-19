@@ -20,18 +20,21 @@
 package net.pistonmaster.serverwrecker.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
+import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.Data;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributesState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributeState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityEffectState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityMetadataState;
+import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Data
-public abstract class EntityLikeState {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EntityLikeState.class);
+public abstract class Entity {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Entity.class);
     private final EntityMetadataState metadataState = new EntityMetadataState();
-    private final EntityAttributesState attributesState = new EntityAttributesState();
+    private final EntityAttributeState attributeState = new EntityAttributeState();
     private final EntityEffectState effectState = new EntityEffectState();
     private final int entityId;
     private double x;
@@ -77,6 +80,56 @@ public abstract class EntityLikeState {
     }
 
     public void handleEntityEvent(EntityEvent event) {
-        LOGGER.debug("Entity event for entity {}: {}", entityId, event.name());
+        LOGGER.debug("Unhandled entity event for entity {}: {}", entityId, event.name());
+    }
+
+    /**
+     * Updates the rotation to look at a given block or location.
+     *
+     * @param origin The rotation origin, either EYES or FEET.
+     * @param block  The block or location to look at.
+     */
+    public void lookAt(RotationOrigin origin, Vector3d block) {
+        var eyes = origin == RotationOrigin.EYES;
+
+        var dx = block.getX() - x;
+        var dy = block.getY() - (eyes ? y + getEyeHeight() : y);
+        var dz = block.getZ() - z;
+
+        var r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        var yaw = -Math.atan2(dx, dz) / Math.PI * 180;
+        if (yaw < 0) {
+            yaw = 360 + yaw;
+        }
+
+        var pitch = -Math.asin(dy / r) / Math.PI * 180;
+
+        this.yaw = (float) yaw;
+        this.pitch = (float) pitch;
+    }
+
+    public double getEyeHeight() {
+        return 1.62F;
+    }
+
+    public Vector3d getEyePosition() {
+        return Vector3d.from(x, y + getEyeHeight(), z);
+    }
+
+    public Vector3d getRotationVector() {
+        var yawRadians = (float) Math.toRadians(yaw);
+        var pitchRadians = (float) Math.toRadians(pitch);
+        var x = -Math.sin(yawRadians) * Math.cos(pitchRadians);
+        var y = -Math.sin(pitchRadians);
+        var z = Math.cos(yawRadians) * Math.cos(pitchRadians);
+        return Vector3d.from(x, y, z);
+    }
+
+    public Vector3i blockPos() {
+        return Vector3i.from(x, y, z);
+    }
+
+    public Vector3d pos() {
+        return Vector3d.from(x, y, z);
     }
 }

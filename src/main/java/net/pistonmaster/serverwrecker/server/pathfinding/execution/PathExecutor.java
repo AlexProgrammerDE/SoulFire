@@ -96,8 +96,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
             // If there are no more goals, stop
             if (worldAction == null) {
                 connection.logger().info("Finished all goals!");
-                var movementManager = connection.sessionDataManager().botMovementManager();
-                movementManager.controlState().resetAll();
+                connection.sessionDataManager().controlState().resetAll();
                 unregister();
                 return;
             }
@@ -141,7 +140,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
     private void recalculatePath() {
         this.unregister();
-        connection.sessionDataManager().botMovementManager().controlState().resetAll();
+        connection.sessionDataManager().controlState().resetAll();
 
         executorService.submit(() -> {
             try {

@@ -17,29 +17,46 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.server.protocol.bot.state;
+package net.pistonmaster.serverwrecker.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
-import lombok.Data;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import net.pistonmaster.serverwrecker.server.protocol.bot.movement.ControlState;
 
-@Data
-public class PlayerMetaState {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PlayerMetaState.class);
-    private boolean showDebug;
+/**
+ * Represents the bot itself as an entity.
+ */
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = true)
+public class ClientEntity extends Entity {
+    private final ControlState controlState;
+    private boolean showReducedDebug;
     private int opPermissionLevel;
+
+    public ClientEntity(int entityId, ControlState controlState) {
+        super(entityId);
+        this.controlState = controlState;
+        yaw(-180);
+    }
 
     public void handleEntityEvent(EntityEvent event) {
         switch (event) {
-            case PLAYER_ENABLE_REDUCED_DEBUG -> showDebug = true;
-            case PLAYER_DISABLE_REDUCED_DEBUG -> showDebug = false;
+            case PLAYER_ENABLE_REDUCED_DEBUG -> showReducedDebug = true;
+            case PLAYER_DISABLE_REDUCED_DEBUG -> showReducedDebug = false;
             case PLAYER_OP_PERMISSION_LEVEL_0 -> opPermissionLevel = 0;
             case PLAYER_OP_PERMISSION_LEVEL_1 -> opPermissionLevel = 1;
             case PLAYER_OP_PERMISSION_LEVEL_2 -> opPermissionLevel = 2;
             case PLAYER_OP_PERMISSION_LEVEL_3 -> opPermissionLevel = 3;
             case PLAYER_OP_PERMISSION_LEVEL_4 -> opPermissionLevel = 4;
-            default -> LOGGER.warn("Unhandled entity event for bot: {}", event.name());
+            default -> super.handleEntityEvent(event);
         }
+    }
+
+    @Override
+    public double getEyeHeight() {
+        return this.controlState.sneaking() ? 1.50F : 1.62F;
     }
 }

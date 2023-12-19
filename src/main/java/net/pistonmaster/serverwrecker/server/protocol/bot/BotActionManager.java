@@ -106,24 +106,26 @@ public class BotActionManager {
 
     public void placeBlock(Hand hand, Vector3i againstBlock, Direction againstFace) {
         incrementSequenceNumber();
+        var clientEntity = dataManager.clientEntity();
         var movementManager = dataManager.botMovementManager();
         var levelState = dataManager.getCurrentLevel();
         if (levelState == null) {
             return;
         }
 
-        var eyePosition = movementManager.getEyePosition();
+        var eyePosition = clientEntity.getEyePosition();
         var insideBlock = !levelState.getCollisionBoxes(new AABB(eyePosition, eyePosition)).isEmpty();
 
         var againstPlacePosition = getMiddleBlockFace(againstBlock, againstFace);
-        var previousYaw = movementManager.getYaw();
-        var previousPitch = movementManager.getPitch();
-        movementManager.lookAt(RotationOrigin.EYES, againstPlacePosition);
-        if (previousPitch != movementManager.getPitch() || previousYaw != movementManager.getYaw()) {
+
+        var previousYaw = clientEntity.yaw();
+        var previousPitch = clientEntity.pitch();
+        clientEntity.lookAt(RotationOrigin.EYES, againstPlacePosition);
+        if (previousPitch != clientEntity.pitch() || previousYaw != clientEntity.yaw()) {
             movementManager.sendRot();
         }
 
-        var rayCast = rayCastToBlock(levelState.getBlockStateAt(againstBlock), eyePosition, movementManager.getRotationVector(), againstBlock);
+        var rayCast = rayCastToBlock(levelState.getBlockStateAt(againstBlock), eyePosition, clientEntity.getRotationVector(), againstBlock);
         if (rayCast.isEmpty()) {
             return;
         }
@@ -165,8 +167,9 @@ public class BotActionManager {
     }
 
     public Direction getBlockFaceLookedAt(Vector3i blockPos) {
-        var eyePosition = dataManager.botMovementManager().getEyePosition();
-        var headRotation = dataManager.botMovementManager().getRotationVector();
+        var clientEntity = dataManager.clientEntity();
+        var eyePosition = clientEntity.getEyePosition();
+        var headRotation = clientEntity.getRotationVector();
         var blockPosDouble = blockPos.toDouble();
         var blockBoundingBox = new AABB(blockPosDouble, blockPosDouble.add(1, 1, 1));
         var intersection = blockBoundingBox.getIntersection(eyePosition, headRotation).map(Vector3d::toFloat);

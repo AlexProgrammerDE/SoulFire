@@ -59,8 +59,9 @@ public final class BlockBreakAction implements WorldAction {
     @Override
     public void tick(BotConnection connection) {
         var sessionDataManager = connection.sessionDataManager();
+        var clientEntity = sessionDataManager.clientEntity();
         var movementManager = sessionDataManager.botMovementManager();
-        movementManager.controlState().resetAll();
+        sessionDataManager.controlState().resetAll();
 
         var levelState = sessionDataManager.getCurrentLevel();
         var inventoryManager = sessionDataManager.inventoryManager();
@@ -72,10 +73,10 @@ public final class BlockBreakAction implements WorldAction {
 
         if (!didLook) {
             didLook = true;
-            var previousYaw = movementManager.getYaw();
-            var previousPitch = movementManager.getPitch();
-            movementManager.lookAt(RotationOrigin.EYES, VectorHelper.middleOfBlockNormalize(blockPosition.toVector3d()));
-            if (previousPitch != movementManager.getPitch() || previousYaw != movementManager.getYaw()) {
+            var previousYaw = clientEntity.yaw();
+            var previousPitch = clientEntity.pitch();
+            clientEntity.lookAt(RotationOrigin.EYES, VectorHelper.middleOfBlockNormalize(blockPosition.toVector3d()));
+            if (previousPitch != clientEntity.pitch() || previousYaw != clientEntity.yaw()) {
                 movementManager.sendRot();
             }
         }
@@ -102,8 +103,8 @@ public final class BlockBreakAction implements WorldAction {
 
                 var cost = Costs.getRequiredMiningTicks(
                         sessionDataManager.tagsState(),
-                        sessionDataManager.selfEffectState(),
-                        sessionDataManager.botMovementManager().entity().onGround(),
+                        sessionDataManager.clientEntity().effectState(),
+                        sessionDataManager.botMovementManager().movementState().onGround(),
                         item,
                         optionalBlockType
                 ).ticks();
@@ -192,8 +193,8 @@ public final class BlockBreakAction implements WorldAction {
 
             remainingTicks = Costs.getRequiredMiningTicks(
                     sessionDataManager.tagsState(),
-                    sessionDataManager.selfEffectState(),
-                    sessionDataManager.botMovementManager().entity().onGround(),
+                    sessionDataManager.clientEntity().effectState(),
+                    sessionDataManager.botMovementManager().movementState().onGround(),
                     sessionDataManager.inventoryManager().getPlayerInventory()
                             .hotbarSlot(sessionDataManager.inventoryManager().heldItemSlot())
                             .item(),

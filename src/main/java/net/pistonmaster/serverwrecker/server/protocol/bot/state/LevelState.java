@@ -19,7 +19,13 @@
  */
 package net.pistonmaster.serverwrecker.server.protocol.bot.state;
 
-import com.github.steveice10.opennbt.tag.builtin.*;
+import com.github.steveice10.opennbt.tag.builtin.ByteTag;
+import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
+import com.github.steveice10.opennbt.tag.builtin.DoubleTag;
+import com.github.steveice10.opennbt.tag.builtin.FloatTag;
+import com.github.steveice10.opennbt.tag.builtin.IntTag;
+import com.github.steveice10.opennbt.tag.builtin.LongTag;
+import com.github.steveice10.opennbt.tag.builtin.StringTag;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
@@ -118,6 +124,10 @@ public class LevelState {
 
     public int getMaxBuildHeight() {
         return this.getMinBuildHeight() + this.height;
+    }
+
+    public boolean isOutsideBuildHeight(int y) {
+        return y < this.getMinBuildHeight() || y >= this.getMaxBuildHeight();
     }
 
     public void setBlockId(Vector3i block, int state) {

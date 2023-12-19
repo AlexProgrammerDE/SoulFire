@@ -53,8 +53,8 @@ public class BotControlAPI {
             throw new IllegalStateException("You can't fly! (Server said so)");
         }
 
-        var newFly = !botMovementManager.controlState().flying();
-        botMovementManager.controlState().flying(newFly);
+        var newFly = !sessionDataManager.controlState().flying();
+        sessionDataManager.controlState().flying(newFly);
 
         // Let the server know we are flying
         sessionDataManager.session().send(new ServerboundPlayerAbilitiesPacket(newFly));
@@ -63,12 +63,12 @@ public class BotControlAPI {
     }
 
     public boolean toggleSprint() {
-        var newSprint = !botMovementManager.controlState().sprinting();
-        botMovementManager.controlState().sprinting(newSprint);
+        var newSprint = !sessionDataManager.controlState().sprinting();
+        sessionDataManager.controlState().sprinting(newSprint);
 
         // Let the server know we are sprinting
         sessionDataManager.session().send(new ServerboundPlayerCommandPacket(
-                sessionDataManager.loginData().entityId(),
+                sessionDataManager.clientEntity().entityId(),
                 newSprint ? PlayerState.START_SPRINTING : PlayerState.STOP_SPRINTING
         ));
 
@@ -76,12 +76,12 @@ public class BotControlAPI {
     }
 
     public boolean toggleSneak() {
-        var newSneak = !botMovementManager.controlState().sneaking();
-        botMovementManager.controlState().sneaking(newSneak);
+        var newSneak = !sessionDataManager.controlState().sneaking();
+        sessionDataManager.controlState().sneaking(newSneak);
 
         // Let the server know we are sneaking
         sessionDataManager.session().send(new ServerboundPlayerCommandPacket(
-                sessionDataManager.loginData().entityId(),
+                sessionDataManager.clientEntity().entityId(),
                 newSneak ? PlayerState.START_SNEAKING : PlayerState.STOP_SNEAKING
         ));
 

@@ -37,8 +37,8 @@ public final class MovementAction implements WorldAction {
 
     @Override
     public boolean isCompleted(BotConnection connection) {
-        var movementManager = connection.sessionDataManager().botMovementManager();
-        var botPosition = movementManager.getPlayerPos();
+        var clientEntity = connection.sessionDataManager().clientEntity();
+        var botPosition = clientEntity.pos();
         var levelState = connection.sessionDataManager().getCurrentLevel();
         if (levelState == null) {
             return false;
@@ -64,12 +64,13 @@ public final class MovementAction implements WorldAction {
     @Override
     public void tick(BotConnection connection) {
         var movementManager = connection.sessionDataManager().botMovementManager();
-        movementManager.controlState().resetAll();
+        var clientEntity = connection.sessionDataManager().clientEntity();
+        clientEntity.controlState().resetAll();
 
-        var previousYaw = movementManager.getYaw();
-        movementManager.lookAt(RotationOrigin.EYES, position);
-        movementManager.entity().pitch(0);
-        var newYaw = movementManager.getYaw();
+        var previousYaw = clientEntity.yaw();
+        clientEntity.lookAt(RotationOrigin.EYES, position);
+        movementManager.movementState().pitch(0);
+        var newYaw = clientEntity.yaw();
 
         var yawDifference = Math.abs(previousYaw - newYaw);
 
@@ -80,11 +81,11 @@ public final class MovementAction implements WorldAction {
             didLook = true;
         }
 
-        movementManager.controlState().forward(true);
+        clientEntity.controlState().forward(true);
 
-        var botPosition = movementManager.getPlayerPos();
+        var botPosition = clientEntity.pos();
         if (position.getY() > botPosition.getY() && shouldJump()) {
-            movementManager.controlState().jumping(true);
+            clientEntity.controlState().jumping(true);
         }
     }
 

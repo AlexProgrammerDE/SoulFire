@@ -19,16 +19,29 @@
  */
 package net.pistonmaster.serverwrecker.server.protocol.bot.state.entity;
 
+import com.github.steveice10.mc.protocol.data.game.entity.object.ObjectData;
+import com.github.steveice10.mc.protocol.data.game.entity.type.EntityType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
+
+import java.util.UUID;
 
 @Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
-public class ExperienceOrbState extends EntityLikeState {
-    private final int expValue;
+public class RawEntity extends Entity {
+    private final UUID uuid;
+    private final EntityType type;
+    private final ObjectData data;
+    private float yaw;
+    private float headYaw;
+    private float pitch;
 
-    public ExperienceOrbState(int entityId, int expValue) {
+    public RawEntity(int entityId, UUID uuid, EntityType type, ObjectData data) {
         super(entityId);
-        this.expValue = expValue;
+        this.uuid = uuid;
+        this.type = type;
+        this.data = data;
     }
 }

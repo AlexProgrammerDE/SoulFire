@@ -21,7 +21,12 @@ package net.pistonmaster.serverwrecker.client.gui.navigation;
 
 import io.grpc.stub.StreamObserver;
 import net.pistonmaster.serverwrecker.client.gui.GUIManager;
-import net.pistonmaster.serverwrecker.grpc.generated.*;
+import net.pistonmaster.serverwrecker.grpc.generated.AttackStartRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.AttackStartResponse;
+import net.pistonmaster.serverwrecker.grpc.generated.AttackStateToggleRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.AttackStateToggleResponse;
+import net.pistonmaster.serverwrecker.grpc.generated.AttackStopRequest;
+import net.pistonmaster.serverwrecker.grpc.generated.AttackStopResponse;
 
 import javax.inject.Inject;
 import javax.swing.*;

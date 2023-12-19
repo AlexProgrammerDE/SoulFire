@@ -55,7 +55,7 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
     public void tick(BotConnection connection) {
         var sessionDataManager = connection.sessionDataManager();
         var movementManager = sessionDataManager.botMovementManager();
-        movementManager.controlState().resetAll();
+        sessionDataManager.controlState().resetAll();
 
         if (!putOnHotbar) {
             var inventoryManager = sessionDataManager.inventoryManager();
@@ -144,12 +144,12 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
             return;
         }
 
-        if (movementManager.entity().pos().y() <= blockPosition.y + 1) {
+        if (movementManager.movementState().pos().y() <= blockPosition.y + 1) {
             // Make sure we are so high that we can place the block
-            movementManager.controlState().jumping(true);
+            sessionDataManager.controlState().jumping(true);
             return;
         } else {
-            movementManager.controlState().jumping(false);
+            sessionDataManager.controlState().jumping(false);
         }
 
         connection.sessionDataManager().botActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceData);

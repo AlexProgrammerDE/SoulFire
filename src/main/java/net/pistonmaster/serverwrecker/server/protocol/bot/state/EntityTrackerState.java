@@ -21,27 +21,27 @@ package net.pistonmaster.serverwrecker.server.protocol.bot.state;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Data;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.EntityLikeState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.Entity;
 
 import java.util.Map;
 
 @Data
 public class EntityTrackerState {
-    private final Map<Integer, EntityLikeState> entities = new Int2ObjectOpenHashMap<>();
+    private final Map<Integer, Entity> entities = new Int2ObjectOpenHashMap<>();
 
-    public void addEntity(int entityId, EntityLikeState entity) {
-        entities.put(entityId, entity);
+    public void addEntity(Entity entity) {
+        entities.put(entity.entityId(), entity);
     }
 
     public void removeEntity(int entityId) {
         entities.remove(entityId);
     }
 
-    public EntityLikeState getEntity(int entityId) {
+    public Entity getEntity(int entityId) {
         return entities.get(entityId);
     }
 
     public void tick() {
-        entities.values().forEach(EntityLikeState::tick);
+        entities.values().forEach(Entity::tick);
     }
 }

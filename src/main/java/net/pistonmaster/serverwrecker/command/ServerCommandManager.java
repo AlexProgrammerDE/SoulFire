@@ -62,7 +62,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.ToIntFunction;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
@@ -151,7 +155,7 @@ public class ServerCommandManager {
                 .executes(help("Makes all connected bots stop pathfinding", c -> forEveryBot(bot -> {
                     bot.eventBus().unregisterAll(BotPreTickEvent.class, PathExecutor.class::isAssignableFrom);
 
-                    bot.sessionDataManager().botMovementManager().controlState().resetAll();
+                    bot.sessionDataManager().controlState().resetAll();
                     return Command.SINGLE_SUCCESS;
                 }))));
 
@@ -167,46 +171,42 @@ public class ServerCommandManager {
 
                                             return forEveryBot(bot -> {
                                                 var sessionDataManager = bot.sessionDataManager();
-                                                var botMovementManager = sessionDataManager.botMovementManager();
+                                                var clientEntity = sessionDataManager.clientEntity();
 
-                                                botMovementManager.lookAt(RotationOrigin.FEET, Vector3d.from(x, y, z));
+                                                clientEntity.lookAt(RotationOrigin.FEET, Vector3d.from(x, y, z));
                                                 return Command.SINGLE_SUCCESS;
                                             });
                                         }))))));
         dispatcher.register(literal("forward")
                 .executes(help("Makes all connected bots start walking forward", c -> forEveryBot(bot -> {
-                    bot.sessionDataManager().botMovementManager().controlState().forward(true);
+                    bot.sessionDataManager().controlState().forward(true);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("backward")
                 .executes(help("Makes all connected bots start walking backwards", c -> forEveryBot(bot -> {
-                    bot.sessionDataManager().botMovementManager().controlState().backward(true);
+                    bot.sessionDataManager().controlState().backward(true);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("left")
                 .executes(help("Makes all connected bots start walking left", c -> forEveryBot(bot -> {
-                    bot.sessionDataManager().botMovementManager().controlState().left(true);
+                    bot.sessionDataManager().controlState().left(true);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("right")
                 .executes(help("Makes all connected bots start walking right", c -> forEveryBot(bot -> {
-                    bot.sessionDataManager().botMovementManager().controlState().right(true);
+                    bot.sessionDataManager().controlState().right(true);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("jump")
                 .executes(help("Makes all connected bots jump up repeatedly", c -> forEveryBot(bot -> {
                     var sessionDataManager = bot.sessionDataManager();
-                    var botMovementManager = sessionDataManager.botMovementManager();
 
-                    botMovementManager.controlState().jumping(true);
+                    sessionDataManager.controlState().jumping(true);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("reset")
                 .executes(help("Resets the movement of all connected bots", c -> forEveryBot(bot -> {
-                    var sessionDataManager = bot.sessionDataManager();
-                    var botMovementManager = sessionDataManager.botMovementManager();
-
-                    botMovementManager.controlState().resetAll();
+                    bot.sessionDataManager().controlState().resetAll();
                     return Command.SINGLE_SUCCESS;
                 }))));
 
@@ -336,12 +336,12 @@ public class ServerCommandManager {
             var executorService = bot.executorManager().newExecutorService(bot, "Pathfinding");
             executorService.execute(() -> {
                 var sessionDataManager = bot.sessionDataManager();
-                var botMovementManager = sessionDataManager.botMovementManager();
+                var clientEntity = sessionDataManager.clientEntity();
                 var routeFinder = new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState()), goalScorer);
 
                 Boolean2ObjectFunction<List<WorldAction>> findPath = requiresRepositioning -> {
                     var start = BotEntityState.initialState(
-                            botMovementManager.getPlayerPos(),
+                            clientEntity.pos(),
                             new ProjectedLevelState(
                                     Objects.requireNonNull(sessionDataManager.getCurrentLevel(), "Level is null!")
                             ),

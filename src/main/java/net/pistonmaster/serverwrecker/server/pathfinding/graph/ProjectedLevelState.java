@@ -39,10 +39,12 @@ import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 public class ProjectedLevelState {
     private static final BlockStateMeta AIR_BLOCK_STATE = new BlockStateMeta(BlockType.AIR, BlockShapeType.getById(0));
 
+    private final LevelState levelState;
     private final ChunkHolder chunkHolder;
     private final Object2ObjectOpenCustomHashMap<SWVec3i, BlockStateMeta> blockChanges;
 
     public ProjectedLevelState(LevelState levelState) {
+        this.levelState = levelState;
         this.chunkHolder = levelState.chunks().immutableCopy();
         this.blockChanges = new Object2ObjectOpenCustomHashMap<>(VectorHelper.VECTOR3I_HASH_STRATEGY);
     }
@@ -52,7 +54,7 @@ public class ProjectedLevelState {
         blockChanges.ensureCapacity(blockChanges.size() + 1);
         blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
 
-        return new ProjectedLevelState(chunkHolder, blockChanges);
+        return new ProjectedLevelState(levelState, chunkHolder, blockChanges);
     }
 
     public ProjectedLevelState withChangeToAir(SWVec3i position) {
@@ -60,7 +62,7 @@ public class ProjectedLevelState {
         blockChanges.ensureCapacity(blockChanges.size() + 1);
         blockChanges.put(position, AIR_BLOCK_STATE);
 
-        return new ProjectedLevelState(chunkHolder, blockChanges);
+        return new ProjectedLevelState(levelState, chunkHolder, blockChanges);
     }
 
     public ProjectedLevelState withChanges(SWVec3i[] air, SWVec3i solid) {
@@ -83,7 +85,11 @@ public class ProjectedLevelState {
             blockChanges.put(solid, Costs.SOLID_PLACED_BLOCK_STATE);
         }
 
-        return new ProjectedLevelState(chunkHolder, blockChanges);
+        return new ProjectedLevelState(levelState, chunkHolder, blockChanges);
+    }
+
+    public boolean isOutsideBuildHeight(SWVec3i position) {
+        return levelState.isOutsideBuildHeight(position.y);
     }
 
     public BlockStateMeta getBlockStateAt(SWVec3i position) {

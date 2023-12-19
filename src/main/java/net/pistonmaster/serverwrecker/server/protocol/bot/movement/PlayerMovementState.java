@@ -26,15 +26,13 @@ import lombok.Setter;
 import net.pistonmaster.serverwrecker.server.data.ItemType;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.server.protocol.bot.model.EffectData;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributesState;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityEffectState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ClientEntity;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 public class PlayerMovementState {
-    private final EntityAttributesState attributesState;
-    private final EntityEffectState effectState;
+    private final ClientEntity entity;
     private final PlayerInventoryContainer inventoryContainer;
 
     // Position
@@ -77,6 +75,7 @@ public class PlayerMovementState {
     public boolean flying;
 
     public void updateData() {
+        var effectState = entity.effectState();
         jumpBoost = effectState.getEffect(Effect.JUMP_BOOST).map(EffectData::amplifier).orElse(0);
         speed = effectState.getEffect(Effect.SPEED).map(EffectData::amplifier).orElse(0);
         slowness = effectState.getEffect(Effect.SLOWNESS).map(EffectData::amplifier).orElse(0);
