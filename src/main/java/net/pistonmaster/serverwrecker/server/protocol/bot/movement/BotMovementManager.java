@@ -36,6 +36,7 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributeState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ClientEntity;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.server.util.MathHelper;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -59,6 +60,7 @@ public class BotMovementManager {
     private final PhysicsData physics = new PhysicsData();
     @Getter
     private final PlayerMovementState movementState;
+    private final TagsState tagsState;
     private final SessionDataManager dataManager;
     private final ControlState controlState;
     @Getter
@@ -90,6 +92,7 @@ public class BotMovementManager {
         );
 
         this.dataManager = dataManager;
+        this.tagsState = dataManager.tagsState();
         this.controlState = dataManager.controlState();
     }
 
@@ -228,9 +231,9 @@ public class BotMovementManager {
         );
     }
 
-    public static boolean isOnLadder(LevelState world, Vector3i pos) {
+    public boolean isClimbable(LevelState world, Vector3i pos) {
         var blockType = world.getBlockStateAt(pos).blockType();
-        return blockType == BlockType.LADDER || blockType == BlockType.VINE;
+        return tagsState.isBlockInTag(blockType, "climbable");
     }
 
     public static boolean isMaterialInBB(LevelState world, AABB queryBB, List<BlockType> types) {
@@ -544,7 +547,7 @@ public class BotMovementManager {
 
             applyHeading(strafe, forward, frictionInfluencedSpeed);
 
-            if (isOnLadder(world, pos.toImmutableInt())) {
+            if (isClimbable(world, pos.toImmutableInt())) {
                 vel.x = GenericMath.clamp(vel.x, -physics.ladderMaxSpeed, physics.ladderMaxSpeed);
                 vel.z = GenericMath.clamp(vel.z, -physics.ladderMaxSpeed, physics.ladderMaxSpeed);
                 vel.y = Math.max(vel.y, controlState.sneaking() ? 0 : -physics.ladderMaxSpeed);
@@ -552,7 +555,7 @@ public class BotMovementManager {
 
             moveEntity(world, vel.x, vel.y, vel.z);
 
-            if ((movementState.isCollidedHorizontally || controlState.jumping()) && isOnLadder(world, pos.toImmutableInt())) {
+            if ((movementState.isCollidedHorizontally || controlState.jumping()) && isClimbable(world, pos.toImmutableInt())) {
                 vel.y = physics.ladderClimbSpeed; // climb ladder
             }
 
