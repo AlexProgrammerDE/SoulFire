@@ -23,7 +23,10 @@ import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
+import net.pistonmaster.serverwrecker.server.protocol.bot.movement.BotMovementManager;
 import net.pistonmaster.serverwrecker.server.protocol.bot.movement.ControlState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.movement.PlayerMovementState;
 
 /**
  * Represents the bot itself as an entity.
@@ -32,14 +35,35 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.movement.ControlState;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 public class ClientEntity extends Entity {
+    private final SessionDataManager sessionDataManager;
     private final ControlState controlState;
+    private final PlayerMovementState movementState;
+    private final BotMovementManager botMovementManager;
     private boolean showReducedDebug;
     private int opPermissionLevel;
 
-    public ClientEntity(int entityId, ControlState controlState) {
+    public ClientEntity(int entityId, SessionDataManager sessionDataManager, ControlState controlState) {
         super(entityId);
+        this.sessionDataManager = sessionDataManager;
         this.controlState = controlState;
+        this.movementState = new PlayerMovementState(this, sessionDataManager.inventoryManager().getPlayerInventory());
+        this.botMovementManager = new BotMovementManager(sessionDataManager, movementState, this);
         yaw(-180);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        movementState.updateData();
+
+        // Tick physics movement
+        var level = sessionDataManager.getCurrentLevel();
+        if (level != null && level.isChunkLoaded(this.blockPos())) {
+            botMovementManager.tick();
+        }
+
+        movementState.applyData();
     }
 
     public void handleEntityEvent(EntityEvent event) {

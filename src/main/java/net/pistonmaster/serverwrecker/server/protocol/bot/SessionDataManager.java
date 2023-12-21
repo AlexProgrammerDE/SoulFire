@@ -41,14 +41,64 @@ import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundRe
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundResourcePackPacket;
 import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.*;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.*;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.*;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundCooldownPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDisguisedChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerInfoRemovePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerInfoUpdatePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundRespawnPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundServerDataPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundTabListPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosRotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityRotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundRemoveEntitiesPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundRemoveMobEffectPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundRotateHeadPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityMotionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundTeleportEntityPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateMobEffectPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundBlockChangedAckPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerLookAtPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetCarriedItemPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetExperiencePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.*;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.*;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.*;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerClosePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetDataPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetSlotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundHorseScreenOpenPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundOpenBookPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundOpenScreenPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundBlockUpdatePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundChunksBiomesPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundForgetLevelChunkPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundLevelChunkWithLightPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundMapItemDataPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSectionBlocksUpdatePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheCenterPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheRadiusPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetDefaultSpawnPositionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetSimulationDistancePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetTimePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderCenterPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderLerpSizePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderSizePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderWarningDelayPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderWarningDistancePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
@@ -76,10 +126,24 @@ import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.InventoryManager;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.WindowContainer;
-import net.pistonmaster.serverwrecker.server.protocol.bot.model.*;
-import net.pistonmaster.serverwrecker.server.protocol.bot.movement.BotMovementManager;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.AbilitiesData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.BiomeData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.ChunkKey;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.DefaultSpawnData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.DifficultyData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.DimensionData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.ExperienceData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.HealthData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.LoginPacketData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.model.ServerPlayData;
 import net.pistonmaster.serverwrecker.server.protocol.bot.movement.ControlState;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.*;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.BorderState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.ChunkData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityTrackerState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.LevelState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.MapDataState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.PlayerListState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.WeatherState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ClientEntity;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.RawEntity;
@@ -117,7 +181,6 @@ public final class SessionDataManager {
     private ClientEntity clientEntity;
     private @Nullable ServerPlayData serverPlayData;
     private BorderState borderState;
-    private BotMovementManager botMovementManager;
     private HealthData healthData;
     private GameMode gameMode = null;
     private @Nullable GameMode previousGameMode = null;
@@ -136,6 +199,7 @@ public final class SessionDataManager {
     private int biomesEntryBitsSize = -1;
     private @Nullable ChunkKey centerChunk;
     private boolean isDead = false;
+    private boolean joinedWorld = false;
 
     public SessionDataManager(BotConnection connection) {
         this.settingsHolder = connection.settingsHolder();
@@ -173,7 +237,7 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onJoin(ClientboundLoginPacket packet) {
-        clientEntity = new ClientEntity(packet.getEntityId(), controlState);
+        clientEntity = new ClientEntity(packet.getEntityId(), this, controlState);
         clientEntity.showReducedDebug(packet.isReducedDebugInfo());
         entityTrackerState.addEntity(clientEntity);
 
@@ -207,7 +271,7 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onPosition(ClientboundPlayerPositionPacket packet) {
-        var isInitial = botMovementManager == null;
+        var isInitial = !joinedWorld;
 
         var currentX = isInitial ? 0 : clientEntity.x();
         var currentY = isInitial ? 0 : clientEntity.y();
@@ -231,7 +295,8 @@ public final class SessionDataManager {
         clientEntity.setRotation(yaw, pitch);
 
         if (isInitial) {
-            botMovementManager = new BotMovementManager(this, clientEntity);
+            joinedWorld = true;
+
             var position = clientEntity.blockPos();
             log.info("Joined server at position: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
 
@@ -240,17 +305,16 @@ public final class SessionDataManager {
 
         session.send(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
         if (isInitial) {
-            botMovementManager.sendOnGround();
+            clientEntity.botMovementManager().sendOnGround();
         }
 
-        log.debug("Position updated: {}", botMovementManager);
+        log.debug("Position updated: {}", clientEntity.botMovementManager());
     }
 
     @EventHandler
     public void onLookAt(ClientboundPlayerLookAtPacket packet) {
         clientEntity.lookAt(packet.getOrigin(),
                 Vector3d.from(packet.getX(), packet.getY(), packet.getZ()));
-        botMovementManager.sendRot();
 
         // TODO: Implement entity look at
     }
@@ -958,12 +1022,6 @@ public final class SessionDataManager {
         }
 
         entityTrackerState.tick();
-
-        var level = getCurrentLevel();
-        if (level != null && botMovementManager != null
-                && level.isChunkLoaded(clientEntity.blockPos())) {
-            botMovementManager.tick();
-        }
 
         connection.eventBus().call(new BotPostTickEvent(connection));
     }

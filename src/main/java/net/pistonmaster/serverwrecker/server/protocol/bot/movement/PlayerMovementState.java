@@ -38,10 +38,6 @@ public class PlayerMovementState {
     // Position
     public MutableVector3d pos;
 
-    // Rotation
-    public float yaw;
-    public float pitch;
-
     // Motion
     public MutableVector3d vel;
 
@@ -81,9 +77,6 @@ public class PlayerMovementState {
                 entity.z()
         );
 
-        yaw = entity.yaw();
-        pitch = entity.pitch();
-
         vel = new MutableVector3d(
                 entity.motionX(),
                 entity.motionY(),
@@ -109,9 +102,6 @@ public class PlayerMovementState {
         entity.x(pos.x);
         entity.y(pos.y);
         entity.z(pos.z);
-
-        entity.yaw(yaw);
-        entity.pitch(pitch);
 
         entity.motionX(vel.x);
         entity.motionY(vel.y);

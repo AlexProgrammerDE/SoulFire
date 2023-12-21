@@ -36,6 +36,7 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributeState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ClientEntity;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.Entity;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.server.util.MathHelper;
 import org.cloudburstmc.math.GenericMath;
@@ -58,6 +59,7 @@ public class BotMovementManager {
             BlockType.KELP, BlockType.KELP_PLANT, BlockType.BUBBLE_COLUMN
     );
     private final PhysicsData physics = new PhysicsData();
+    private final ClientEntity clientEntity;
     @Getter
     private final PlayerMovementState movementState;
     private final TagsState tagsState;
@@ -85,12 +87,9 @@ public class BotMovementManager {
     @Setter
     private int positionReminder = 0;
 
-    public BotMovementManager(SessionDataManager dataManager, ClientEntity clientEntity) {
-        this.movementState = new PlayerMovementState(
-                clientEntity,
-                dataManager.inventoryManager().getPlayerInventory()
-        );
-
+    public BotMovementManager(SessionDataManager dataManager, PlayerMovementState movementState, ClientEntity clientEntity) {
+        this.clientEntity = clientEntity;
+        this.movementState = movementState;
         this.dataManager = dataManager;
         this.tagsState = dataManager.tagsState();
         this.controlState = dataManager.controlState();
@@ -174,7 +173,7 @@ public class BotMovementManager {
         return Vector3d.from(dx, dy, dz);
     }
 
-    private static LookingVectorData getLookingVector(PlayerMovementState entity) {
+    private static LookingVectorData getLookingVector(Entity clientEntity) {
         // given a yaw pitch, we need the looking vector
 
         // yaw is right handed rotation about y (up) starting from -z (north)
@@ -208,8 +207,8 @@ public class BotMovementManager {
         // y = tan(pitch) * cos(pitch) = sin(pitch)
         // z = -cos(yaw) * cos(pitch)
 
-        var yaw = entity.yaw;
-        var pitch = entity.pitch;
+        var yaw = clientEntity.yaw();
+        var pitch = clientEntity.pitch();
         var sinYaw = Math.sin(yaw);
         var cosYaw = Math.cos(yaw);
         var sinPitch = Math.sin(pitch);
@@ -269,8 +268,6 @@ public class BotMovementManager {
         var world = dataManager.getCurrentLevel();
         if (world == null) return;
 
-        movementState.updateData();
-
         var vel = movementState.vel;
         var pos = movementState.pos;
 
@@ -304,7 +301,7 @@ public class BotMovementManager {
                 }
 
                 if (controlState.sprinting()) {
-                    var yaw = Math.PI - movementState.yaw;
+                    var yaw = Math.PI - clientEntity.yaw();
                     vel.x -= Math.sin(yaw) * 0.2;
                     vel.z += Math.cos(yaw) * 0.2;
                 }
@@ -349,7 +346,7 @@ public class BotMovementManager {
             if (!movementState.elytraFlying) {
                 movementState.fireworkRocketDuration = 0;
             } else {
-                var lookingVector = getLookingVector(movementState);
+                var lookingVector = getLookingVector(clientEntity);
                 var lookDir = lookingVector.lookDir;
                 vel.x += lookDir.x * 0.1 + (lookDir.x * 1.5 - vel.x) * 0.5;
                 vel.y += lookDir.y * 0.1 + (lookDir.y * 1.5 - vel.y) * 0.5;
@@ -364,8 +361,8 @@ public class BotMovementManager {
         var xDiff = movementState.pos.x - lastX;
         var yDiff = movementState.pos.y - lastY;
         var zDiff = movementState.pos.z - lastZ;
-        var yawDiff = (double) (movementState.yaw - lastYaw);
-        var pitchDiff = (double) (movementState.pitch - lastPitch);
+        var yawDiff = (double) (clientEntity.yaw() - lastYaw);
+        var pitchDiff = (double) (clientEntity.pitch() - lastPitch);
         var sendPos = MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4) || ++positionReminder >= 20;
         var sendRot = pitchDiff != 0.0 || yawDiff != 0.0;
         var sendOnGround = movementState.onGround != lastOnGround;
@@ -380,8 +377,6 @@ public class BotMovementManager {
         } else if (sendOnGround) {
             sendOnGround();
         }
-
-        movementState.applyData();
     }
 
     public void sendPosRot() {
@@ -398,8 +393,8 @@ public class BotMovementManager {
         lastZ = z;
         positionReminder = 0;
 
-        var yaw = movementState.yaw;
-        var pitch = movementState.pitch;
+        var yaw = clientEntity.yaw();
+        var pitch = clientEntity.pitch();
 
         lastYaw = yaw;
         lastPitch = pitch;
@@ -429,8 +424,8 @@ public class BotMovementManager {
 
         lastOnGround = onGround;
 
-        var yaw = movementState.yaw;
-        var pitch = movementState.pitch;
+        var yaw = clientEntity.yaw();
+        var pitch = clientEntity.pitch();
 
         lastYaw = yaw;
         lastPitch = pitch;
@@ -493,7 +488,7 @@ public class BotMovementManager {
                 vel.y = physics.outOfLiquidImpulse; // jump out of liquid
             }
         } else if (movementState.elytraFlying) {
-            var lookingData = getLookingVector(movementState);
+            var lookingData = getLookingVector(clientEntity);
             var pitch = lookingData.pitch;
             var sinPitch = lookingData.sinPitch;
             var cosPitch = lookingData.cosPitch;
@@ -762,7 +757,7 @@ public class BotMovementManager {
         strafe *= speed;
         forward *= speed;
 
-        var yawRadians = Math.toRadians(movementState.yaw);
+        var yawRadians = Math.toRadians(clientEntity.yaw());
         var sin = Math.sin(yawRadians);
         var cos = Math.cos(yawRadians);
 
