@@ -239,6 +239,8 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onJoin(ClientboundLoginPacket packet) {
+        inventoryManager.initPlayerInventory();
+
         clientEntity = new ClientEntity(packet.getEntityId(), this, controlState);
         clientEntity.showReducedDebug(packet.isReducedDebugInfo());
         entityTrackerState.addEntity(clientEntity);
@@ -255,7 +257,6 @@ public final class SessionDataManager {
         serverSimulationDistance = packet.getSimulationDistance();
 
         processSpawnInfo(packet.getCommonPlayerSpawnInfo());
-        inventoryManager.initPlayerInventory();
     }
 
     private void processSpawnInfo(PlayerSpawnInfo spawnInfo) {

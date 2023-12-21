@@ -183,7 +183,7 @@ public class AttackManager {
 
             factories.add(new BotConnectionFactory(
                     this,
-                    targetAddress,
+                    targetAddress.orElseThrow(() -> new IllegalStateException("Could not resolve address")),
                     settingsHolder,
                     LoggerFactory.getLogger(minecraftAccount.username()),
                     protocol,
