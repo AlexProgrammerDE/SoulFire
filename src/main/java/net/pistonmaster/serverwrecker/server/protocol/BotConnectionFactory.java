@@ -32,15 +32,15 @@ import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerBotEvent;
 import net.pistonmaster.serverwrecker.server.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.serverwrecker.server.protocol.bot.BotControlAPI;
 import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
+import net.pistonmaster.serverwrecker.server.protocol.netty.ResolveUtil;
 import net.pistonmaster.serverwrecker.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.server.settings.BotSettings;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;
 import org.slf4j.Logger;
 
-import java.net.InetSocketAddress;
 import java.util.UUID;
 
-public record BotConnectionFactory(AttackManager attackManager, InetSocketAddress targetAddress,
+public record BotConnectionFactory(AttackManager attackManager, ResolveUtil.ResolvedAddress resolvedAddress,
                                    SettingsHolder settingsHolder, Logger logger,
                                    MinecraftProtocol protocol, MinecraftAccount minecraftAccount,
                                    SWProxy proxyData, EventLoopGroup eventLoopGroup) {
@@ -50,9 +50,9 @@ public record BotConnectionFactory(AttackManager attackManager, InetSocketAddres
 
     public BotConnection prepareConnectionInternal(ProtocolState targetState) {
         var meta = new BotConnectionMeta(minecraftAccount, targetState, proxyData);
-        var session = new ViaClientSession(targetAddress, logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
+        var session = new ViaClientSession(resolvedAddress.resolvedAddress(), logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
         var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.serverWreckerServer(),
-                settingsHolder, logger, protocol, session, new ExecutorManager("ServerWrecker-Attack-" + attackManager.id()), meta,
+                settingsHolder, logger, protocol, session, resolvedAddress, new ExecutorManager("ServerWrecker-Attack-" + attackManager.id()), meta,
                 LambdaManager.basic(new ASMGenerator())
                         .setExceptionHandler(EventExceptionHandler.INSTANCE)
                         .setEventFilter((c, h) -> {

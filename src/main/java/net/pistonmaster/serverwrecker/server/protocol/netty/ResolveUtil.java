@@ -19,50 +19,49 @@
  */
 package net.pistonmaster.serverwrecker.server.protocol.netty;
 
+import com.google.common.net.HostAndPort;
 import io.netty.channel.EventLoopGroup;
-import io.netty.handler.codec.dns.*;
+import io.netty.handler.codec.dns.DefaultDnsQuestion;
+import io.netty.handler.codec.dns.DefaultDnsRawRecord;
+import io.netty.handler.codec.dns.DefaultDnsRecordDecoder;
+import io.netty.handler.codec.dns.DnsRecordType;
+import io.netty.handler.codec.dns.DnsSection;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
 import net.pistonmaster.serverwrecker.server.settings.BotSettings;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.IDN;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 public class ResolveUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResolveUtil.class);
-    private static final Pattern IP_REGEX = Pattern.compile("\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b");
 
     private ResolveUtil() {
     }
 
-    public static InetSocketAddress resolveAddress(boolean isBedrock, SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup) {
-        var host = settingsHolder.get(BotSettings.HOST);
-        var port = settingsHolder.get(BotSettings.PORT);
+    public static ResolvedAddress resolveAddress(boolean isBedrock, SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup) {
+        var serverAddress = new ServerAddress(settingsHolder.get(BotSettings.ADDRESS));
 
-        if (!isBedrock && settingsHolder.get(BotSettings.TRY_SRV)) {
-            var resolved = resolveSrv(host, eventLoopGroup);
+        if (settingsHolder.get(BotSettings.TRY_SRV) && serverAddress.port() == 25565 && !isBedrock) {
+            // SRVs can override address on Java, but not Bedrock.
+            var resolved = resolveSrv(serverAddress, eventLoopGroup);
             if (resolved.isPresent()) {
                 return resolved.get();
             }
         } else {
-            LOGGER.debug("Not resolving SRV record for {}", host);
+            LOGGER.debug("Not resolving SRV record for {}", serverAddress.host());
         }
 
-        return resolveByHost(host, port);
+        return resolveByHost(serverAddress);
     }
 
-    private static Optional<InetSocketAddress> resolveSrv(String host, EventLoopGroup eventLoopGroup) {
-        if (IP_REGEX.matcher(host).matches() || host.equalsIgnoreCase("localhost")) {
-            LOGGER.debug("Not a valid domain: {}", host);
-            return Optional.empty();
-        }
-
-        var name = "_minecraft._tcp." + host;
+    private static Optional<ResolvedAddress> resolveSrv(ServerAddress serverAddress, EventLoopGroup eventLoopGroup) {
+        var name = "_minecraft._tcp." + serverAddress.host();
         LOGGER.debug("Attempting SRV lookup for \"{}\".", name);
 
         try (var resolver = new DnsNameResolverBuilder(eventLoopGroup.next())
@@ -86,28 +85,50 @@ public class ResolveUtil {
             buf.skipBytes(4); // Skip priority and weight.
 
             var port = buf.readUnsignedShort();
-            host = DefaultDnsRecordDecoder.decodeName(buf);
+            var host = DefaultDnsRecordDecoder.decodeName(buf);
             if (host.endsWith(".")) {
                 host = host.substring(0, host.length() - 1);
             }
 
             LOGGER.debug("Found SRV record containing \"{}:{}}\".", host, port);
 
-            return Optional.of(new InetSocketAddress(host, port));
+            return Optional.of(new ResolvedAddress(serverAddress, new InetSocketAddress(host, port)));
         } catch (Exception e) {
             LOGGER.debug("Failed to resolve SRV record.", e);
             return Optional.empty();
         }
     }
 
-    private static InetSocketAddress resolveByHost(String host, int port) {
+    private static ResolvedAddress resolveByHost(ServerAddress serverAddress) {
         try {
+            var host = serverAddress.host();
             var resolved = InetAddress.getByName(host);
             LOGGER.debug("Resolved {} -> {}", host, resolved.getHostAddress());
-            return new InetSocketAddress(resolved, port);
+            return new ResolvedAddress(serverAddress, new InetSocketAddress(resolved, serverAddress.port()))  ;
         } catch (UnknownHostException e) {
             LOGGER.debug("Failed to resolve host, letting Netty do it instead.", e);
-            return InetSocketAddress.createUnresolved(host, port);
+            return new ResolvedAddress(serverAddress, InetSocketAddress.createUnresolved(serverAddress.host(), serverAddress.port()));
         }
+    }
+
+    public record ServerAddress(HostAndPort hostAndPort) {
+        public ServerAddress(String address) {
+            this(HostAndPort.fromString(address).withDefaultPort(25565));
+        }
+
+        public String host() {
+            try {
+                return IDN.toASCII(hostAndPort.getHost());
+            } catch (IllegalArgumentException e) {
+                return "";
+            }
+        }
+
+        public int port() {
+            return hostAndPort.getPort();
+        }
+    }
+
+    public record ResolvedAddress(ServerAddress originalAddress, InetSocketAddress resolvedAddress) {
     }
 }

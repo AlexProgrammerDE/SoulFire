@@ -52,8 +52,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -117,8 +128,8 @@ public class AttackManager {
 
         this.attackState = AttackState.RUNNING;
 
-        String host = settingsHolder.get(BotSettings.HOST);
-        logger.info("Preparing bot attack at {}", host);
+        var address = settingsHolder.get(BotSettings.ADDRESS);
+        logger.info("Preparing bot attack at {}", address);
 
         var botAmount = settingsHolder.get(BotSettings.AMOUNT); // How many bots to connect
         var botsPerProxy = settingsHolder.get(ProxySettings.BOTS_PER_PROXY); // How many bots per proxy are allowed
@@ -183,9 +194,9 @@ public class AttackManager {
         }
 
         if (availableProxiesCount == 0) {
-            logger.info("Starting attack at {} with {} bots", host, factories.size());
+            logger.info("Starting attack at {} with {} bots", address, factories.size());
         } else {
-            logger.info("Starting attack at {} with {} bots and {} proxies", host, factories.size(), availableProxiesCount);
+            logger.info("Starting attack at {} with {} bots and {} proxies", address, factories.size(), availableProxiesCount);
         }
 
         eventBus.call(new AttackStartEvent(this));

@@ -22,29 +22,23 @@ package net.pistonmaster.serverwrecker.server.settings;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.*;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.ComboProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.MinMaxPropertyLink;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.StringProperty;
 import net.pistonmaster.serverwrecker.server.viaversion.SWVersionConstants;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BotSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("bot");
-    public static final StringProperty HOST = BUILDER.ofString(
-            "host",
-            "Host",
-            "Host to connect to",
-            new String[]{"--host"},
-            "127.0.0.1"
-    );
-    public static final IntProperty PORT = BUILDER.ofInt(
-            "port",
-            "Port",
-            "Port to connect to",
-            new String[]{"--port"},
-            25565,
-            1,
-            65535,
-            1,
-            "#"
+    public static final StringProperty ADDRESS = BUILDER.ofString(
+            "address",
+            "Address",
+            "Address to connect to",
+            new String[]{"--address"},
+            "127.0.0.1:25565"
     );
     public static final IntProperty AMOUNT = BUILDER.ofInt(
             "amount",

@@ -27,6 +27,7 @@ import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.server.api.event.attack.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.server.protocol.bot.BotControlAPI;
 import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
+import net.pistonmaster.serverwrecker.server.protocol.netty.ResolveUtil;
 import net.pistonmaster.serverwrecker.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.server.util.TimeUtil;
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 public record BotConnection(UUID connectionId, BotConnectionFactory factory, AttackManager attackManager,
                             ServerWreckerServer serverWreckerServer, SettingsHolder settingsHolder,
                             Logger logger, MinecraftProtocol protocol, ViaClientSession session,
+                            ResolveUtil.ResolvedAddress resolvedAddress,
                             ExecutorManager executorManager, BotConnectionMeta meta,
                             LambdaManager eventBus) {
     public CompletableFuture<Void> connect() {
