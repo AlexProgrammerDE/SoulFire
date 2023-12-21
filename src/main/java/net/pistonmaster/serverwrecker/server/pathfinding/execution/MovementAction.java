@@ -75,7 +75,7 @@ public final class MovementAction implements WorldAction {
 
         // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
         if (didLook && yawDifference > 5) {
-            clientEntity.botMovementManager().lastYaw(newYaw);
+            clientEntity.lastYaw(newYaw);
         } else {
             didLook = true;
         }

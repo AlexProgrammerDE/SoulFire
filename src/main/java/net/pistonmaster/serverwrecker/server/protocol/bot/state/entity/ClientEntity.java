@@ -20,6 +20,10 @@
 package net.pistonmaster.serverwrecker.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +31,9 @@ import net.pistonmaster.serverwrecker.server.data.EntityType;
 import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.server.protocol.bot.movement.BotMovementManager;
 import net.pistonmaster.serverwrecker.server.protocol.bot.movement.ControlState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.movement.PhysicsData;
 import net.pistonmaster.serverwrecker.server.protocol.bot.movement.PlayerMovementState;
+import net.pistonmaster.serverwrecker.server.util.MathHelper;
 
 /**
  * Represents the bot itself as an entity.
@@ -36,12 +42,20 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.movement.PlayerMovemen
 @Setter
 @EqualsAndHashCode(callSuper = true)
 public class ClientEntity extends Entity {
+    private final PhysicsData physics = new PhysicsData();
     private final SessionDataManager sessionDataManager;
     private final ControlState controlState;
     private final PlayerMovementState movementState;
     private final BotMovementManager botMovementManager;
     private boolean showReducedDebug;
     private int opPermissionLevel;
+    private double lastX = 0;
+    private double lastY = 0;
+    private double lastZ = 0;
+    private float lastYaw = 0;
+    private float lastPitch = 0;
+    private boolean lastOnGround = false;
+    private int positionReminder = 0;
 
     public ClientEntity(int entityId, SessionDataManager sessionDataManager, ControlState controlState) {
         super(entityId, EntityType.PLAYER);
@@ -49,13 +63,14 @@ public class ClientEntity extends Entity {
         this.controlState = controlState;
         this.movementState = new PlayerMovementState(this, sessionDataManager.inventoryManager().getPlayerInventory());
         this.botMovementManager = new BotMovementManager(sessionDataManager, movementState, this);
-        yaw(-180);
+        this.yaw = -180;
     }
 
     @Override
     public void tick() {
         super.tick();
 
+        // Collect data for calculations
         movementState.updateData();
 
         // Tick physics movement
@@ -64,7 +79,34 @@ public class ClientEntity extends Entity {
             botMovementManager.tick();
         }
 
+        // Apply calculated state
         movementState.applyData();
+
+        // Send position changes
+        sendPositionChanges();
+    }
+
+    public void sendPositionChanges() {
+        // Detect whether anything changed
+        var xDiff = x - lastX;
+        var yDiff = y - lastY;
+        var zDiff = z - lastZ;
+        var yawDiff = (double) (yaw - lastYaw);
+        var pitchDiff = (double) (pitch - lastPitch);
+        var sendPos = MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4) || ++positionReminder >= 20;
+        var sendRot = pitchDiff != 0.0 || yawDiff != 0.0;
+        var sendOnGround = onGround != lastOnGround;
+
+        // Send position packets if changed
+        if (sendPos && sendRot) {
+            sendPosRot();
+        } else if (sendPos) {
+            sendPos();
+        } else if (sendRot) {
+            sendRot();
+        } else if (sendOnGround) {
+            sendOnGround();
+        }
     }
 
     public void handleEntityEvent(EntityEvent event) {
@@ -83,5 +125,62 @@ public class ClientEntity extends Entity {
     @Override
     public double getEyeHeight() {
         return this.controlState.sneaking() ? 1.50F : 1.62F;
+    }
+
+    public void sendPosRot() {
+        var onGround = movementState.onGround;
+
+        lastOnGround = onGround;
+
+        lastX = x;
+        lastY = y;
+        lastZ = z;
+        positionReminder = 0;
+
+        lastYaw = yaw;
+        lastPitch = pitch;
+
+        sessionDataManager.sendPacket(new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
+    }
+
+    public void sendPos() {
+        var onGround = movementState.onGround;
+
+        lastOnGround = onGround;
+
+        lastX = x;
+        lastY = y;
+        lastZ = z;
+        positionReminder = 0;
+
+        sessionDataManager.sendPacket(new ServerboundMovePlayerPosPacket(onGround, x, y, z));
+    }
+
+    public void sendRot() {
+        var onGround = movementState.onGround;
+
+        lastOnGround = onGround;
+
+        lastYaw = yaw;
+        lastPitch = pitch;
+
+        sessionDataManager.sendPacket(new ServerboundMovePlayerRotPacket(onGround, yaw, pitch));
+    }
+
+    public void sendOnGround() {
+        var onGround = movementState.onGround;
+
+        lastOnGround = onGround;
+
+        sessionDataManager.sendPacket(new ServerboundMovePlayerStatusOnlyPacket(onGround));
+    }
+
+    public void jump() {
+        movementState.jumpQueued = true;
+    }
+
+    @Override
+    public float height() {
+        return this.controlState.sneaking() ? physics.playerSneakHeight : physics.playerHeight;
     }
 }

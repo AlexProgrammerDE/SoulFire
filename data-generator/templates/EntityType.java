@@ -5,7 +5,7 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public record EntityType(int id, String name, String displayName, String type,
-                         double width, double height, String category) {
+                         float width, float height, String category) {
     public static final List<EntityType> VALUES = new ArrayList<>();
 
     // VALUES REPLACE

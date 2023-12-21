@@ -23,13 +23,8 @@ import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeModifier;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.ModifierOperation;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.Getter;
-import lombok.Setter;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
@@ -58,38 +53,18 @@ public class BotMovementManager {
             BlockType.WATER, BlockType.SEAGRASS, BlockType.TALL_SEAGRASS,
             BlockType.KELP, BlockType.KELP_PLANT, BlockType.BUBBLE_COLUMN
     );
-    private final PhysicsData physics = new PhysicsData();
     private final ClientEntity clientEntity;
     @Getter
     private final PlayerMovementState movementState;
+    private final PhysicsData physics;
     private final TagsState tagsState;
     private final SessionDataManager dataManager;
     private final ControlState controlState;
-    @Getter
-    @Setter
-    private double lastX = 0;
-    @Getter
-    @Setter
-    private double lastY = 0;
-    @Getter
-    @Setter
-    private double lastZ = 0;
-    @Getter
-    @Setter
-    private float lastYaw = 0;
-    @Getter
-    @Setter
-    private float lastPitch = 0;
-    @Getter
-    @Setter
-    private boolean lastOnGround = false;
-    @Getter
-    @Setter
-    private int positionReminder = 0;
 
     public BotMovementManager(SessionDataManager dataManager, PlayerMovementState movementState, ClientEntity clientEntity) {
         this.clientEntity = clientEntity;
         this.movementState = movementState;
+        this.physics = clientEntity.physics();
         this.dataManager = dataManager;
         this.tagsState = dataManager.tagsState();
         this.controlState = dataManager.controlState();
@@ -272,7 +247,7 @@ public class BotMovementManager {
         var pos = movementState.pos;
 
         {
-            var playerBB = getPlayerBB(pos);
+            var playerBB = clientEntity.boundingBox(pos.toImmutable());
             var waterBB = playerBB.deflate(0.001, 0.401, 0.001);
             var lavaBB = playerBB.deflate(0.1, 0.4, 0.1);
 
@@ -356,89 +331,6 @@ public class BotMovementManager {
         }
 
         moveEntityWithHeading(world, strafe, forward);
-
-        // Detect whether anything changed
-        var xDiff = movementState.pos.x - lastX;
-        var yDiff = movementState.pos.y - lastY;
-        var zDiff = movementState.pos.z - lastZ;
-        var yawDiff = (double) (clientEntity.yaw() - lastYaw);
-        var pitchDiff = (double) (clientEntity.pitch() - lastPitch);
-        var sendPos = MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4) || ++positionReminder >= 20;
-        var sendRot = pitchDiff != 0.0 || yawDiff != 0.0;
-        var sendOnGround = movementState.onGround != lastOnGround;
-
-        // Send position packets if changed
-        if (sendPos && sendRot) {
-            sendPosRot();
-        } else if (sendPos) {
-            sendPos();
-        } else if (sendRot) {
-            sendRot();
-        } else if (sendOnGround) {
-            sendOnGround();
-        }
-    }
-
-    public void sendPosRot() {
-        var onGround = movementState.onGround;
-
-        lastOnGround = onGround;
-
-        var x = movementState.pos.x;
-        var y = movementState.pos.y;
-        var z = movementState.pos.z;
-
-        lastX = x;
-        lastY = y;
-        lastZ = z;
-        positionReminder = 0;
-
-        var yaw = clientEntity.yaw();
-        var pitch = clientEntity.pitch();
-
-        lastYaw = yaw;
-        lastPitch = pitch;
-
-        dataManager.session().send(new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
-    }
-
-    public void sendPos() {
-        var onGround = movementState.onGround;
-
-        lastOnGround = onGround;
-
-        var x = movementState.pos.x;
-        var y = movementState.pos.y;
-        var z = movementState.pos.z;
-
-        lastX = x;
-        lastY = y;
-        lastZ = z;
-        positionReminder = 0;
-
-        dataManager.session().send(new ServerboundMovePlayerPosPacket(onGround, x, y, z));
-    }
-
-    public void sendRot() {
-        var onGround = movementState.onGround;
-
-        lastOnGround = onGround;
-
-        var yaw = clientEntity.yaw();
-        var pitch = clientEntity.pitch();
-
-        lastYaw = yaw;
-        lastPitch = pitch;
-
-        dataManager.session().send(new ServerboundMovePlayerRotPacket(onGround, yaw, pitch));
-    }
-
-    public void sendOnGround() {
-        var onGround = movementState.onGround;
-
-        lastOnGround = onGround;
-
-        dataManager.session().send(new ServerboundMovePlayerStatusOnlyPacket(onGround));
     }
 
     public void moveEntityWithHeading(LevelState world, float strafe, float forward) {
@@ -611,7 +503,7 @@ public class BotMovementManager {
         var vel = movementState.vel;
         var pos = movementState.pos;
 
-        var playerBB = getPlayerBB(pos);
+        var playerBB = clientEntity.boundingBox(pos.toImmutable());
 
         if (movementState.isInWeb) {
             dx *= 0.25;
@@ -767,7 +659,7 @@ public class BotMovementManager {
     }
 
     public boolean doesNotCollide(LevelState world, MutableVector3d pos) {
-        var pBB = getPlayerBB(pos);
+        var pBB = clientEntity.boundingBox(pos.toImmutable());
         return world.getCollisionBoxes(pBB).isEmpty() && getWaterInBB(world, pBB).isEmpty();
     }
 
@@ -863,20 +755,6 @@ public class BotMovementManager {
             vel.z += acceleration.z / len * 0.014;
         }
         return isInWater;
-    }
-
-    public AABB getPlayerBB(MutableVector3d pos) {
-        var w = physics.playerWidth / 2F;
-        var h = getBoundingBoxHeight();
-        return new AABB(pos.x - w, pos.y, pos.z - w, pos.x + w, pos.y + h, pos.z + w);
-    }
-
-    public void jump() {
-        movementState.jumpQueued = true;
-    }
-
-    public float getBoundingBoxHeight() {
-        return this.controlState.sneaking() ? physics.playerSneakHeight : physics.playerHeight;
     }
 
     private float getBlockFriction(BlockType blockType) {

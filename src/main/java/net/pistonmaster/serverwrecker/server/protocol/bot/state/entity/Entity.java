@@ -23,6 +23,7 @@ import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.Data;
 import net.pistonmaster.serverwrecker.server.data.EntityType;
+import net.pistonmaster.serverwrecker.server.protocol.bot.movement.AABB;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributeState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityEffectState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityMetadataState;
@@ -39,16 +40,16 @@ public abstract class Entity {
     private final EntityEffectState effectState = new EntityEffectState();
     private final int entityId;
     private final EntityType entityType;
-    private double x;
-    private double y;
-    private double z;
-    private float yaw;
-    private float headYaw;
-    private float pitch;
-    private double motionX;
-    private double motionY;
-    private double motionZ;
-    private boolean onGround;
+    protected double x;
+    protected double y;
+    protected double z;
+    protected float yaw;
+    protected float headYaw;
+    protected float pitch;
+    protected double motionX;
+    protected double motionY;
+    protected double motionZ;
+    protected boolean onGround;
 
     public void setPosition(double x, double y, double z) {
         this.x = x;
@@ -133,5 +134,27 @@ public abstract class Entity {
 
     public Vector3d pos() {
         return Vector3d.from(x, y, z);
+    }
+
+    public float width() {
+        return entityType.width();
+    }
+
+    public float height() {
+        return entityType.height();
+    }
+
+    public AABB boundingBox() {
+        return boundingBox(x, y, z);
+    }
+
+    public AABB boundingBox(Vector3d pos) {
+        return boundingBox(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    public AABB boundingBox(double x, double y, double z) {
+        var w = width() / 2F;
+        var h = height();
+        return new AABB(x - w, y, z - w, x + w, y + h, z + w);
     }
 }

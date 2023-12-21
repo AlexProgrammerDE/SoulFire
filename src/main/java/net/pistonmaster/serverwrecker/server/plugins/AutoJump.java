@@ -49,7 +49,7 @@ public class AutoJump implements InternalExtension {
                     && level.isChunkLoaded(clientEntity.blockPos())
                     && clientEntity.movementState().onGround()) {
                 connection.logger().debug("[AutoJump] Jumping!");
-                clientEntity.botMovementManager().jump();
+                clientEntity.jump();
             }
         }, settingsHolder.get(AutoJumpSettings.DELAY.min()), settingsHolder.get(AutoJumpSettings.DELAY.max()));
     }

@@ -97,7 +97,7 @@ public class BotActionManager {
 
     public void useItemInHand(Hand hand) {
         incrementSequenceNumber();
-        dataManager.session().send(new ServerboundUseItemPacket(hand, sequenceNumber));
+        dataManager.sendPacket(new ServerboundUseItemPacket(hand, sequenceNumber));
     }
 
     public void placeBlock(Hand hand, BlockPlaceData blockPlaceData) {
@@ -121,7 +121,7 @@ public class BotActionManager {
         var previousPitch = clientEntity.pitch();
         clientEntity.lookAt(RotationOrigin.EYES, againstPlacePosition);
         if (previousPitch != clientEntity.pitch() || previousYaw != clientEntity.yaw()) {
-            clientEntity.botMovementManager().sendRot();
+            clientEntity.sendRot();
         }
 
         var rayCast = rayCastToBlock(levelState.getBlockStateAt(againstBlock), eyePosition, clientEntity.getRotationVector(), againstBlock);
@@ -131,7 +131,7 @@ public class BotActionManager {
 
         var rayCastPosition = rayCast.get().sub(againstBlock.toFloat());
 
-        dataManager.session().send(new ServerboundUseItemOnPacket(
+        dataManager.sendPacket(new ServerboundUseItemOnPacket(
                 againstBlock,
                 againstFace,
                 hand,
@@ -146,7 +146,7 @@ public class BotActionManager {
     public void sendStartBreakBlock(Vector3i blockPos) {
         incrementSequenceNumber();
         var blockFace = getBlockFaceLookedAt(blockPos);
-        dataManager.session().send(new ServerboundPlayerActionPacket(
+        dataManager.sendPacket(new ServerboundPlayerActionPacket(
                 PlayerAction.START_DIGGING,
                 blockPos,
                 blockFace,
@@ -157,7 +157,7 @@ public class BotActionManager {
     public void sendEndBreakBlock(Vector3i blockPos) {
         incrementSequenceNumber();
         var blockFace = getBlockFaceLookedAt(blockPos);
-        dataManager.session().send(new ServerboundPlayerActionPacket(
+        dataManager.sendPacket(new ServerboundPlayerActionPacket(
                 PlayerAction.FINISH_DIGGING,
                 blockPos,
                 blockFace,
@@ -191,7 +191,7 @@ public class BotActionManager {
     }
 
     public void sendBreakBlockAnimation() {
-        dataManager.session().send(new ServerboundSwingPacket(Hand.MAIN_HAND));
+        dataManager.sendPacket(new ServerboundSwingPacket(Hand.MAIN_HAND));
     }
 
     public record BlockPlaceData(SWVec3i againstPos, Direction blockFace) {

@@ -91,7 +91,7 @@ if (mcData == null) {
     let result = fs.readFileSync("templates/EntityType.java", "utf-8");
     let enumValues: string[] = []
     for (const item of mcData.entitiesArray) {
-      enumValues.push(`public static final EntityType ${item.name.toUpperCase()} = register(new EntityType(${item.id}, "${item.name}", "${item.displayName}", "${item.type}", ${item.width}, ${item.height}, "${item.category}"));`)
+      enumValues.push(`public static final EntityType ${item.name.toUpperCase()} = register(new EntityType(${item.id}, "${item.name}", "${item.displayName}", "${item.type}", ${item.width}F, ${item.height}F, "${item.category}"));`)
     }
 
     result = result.replace(enumReplace, enumValues.join("\n    "))

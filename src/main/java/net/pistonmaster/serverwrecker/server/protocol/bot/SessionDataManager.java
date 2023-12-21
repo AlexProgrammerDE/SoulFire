@@ -108,6 +108,7 @@ import com.github.steveice10.opennbt.tag.builtin.IntTag;
 import com.github.steveice10.opennbt.tag.builtin.ListTag;
 import com.github.steveice10.opennbt.tag.builtin.StringTag;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
+import com.github.steveice10.packetlib.packet.Packet;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -306,7 +307,7 @@ public final class SessionDataManager {
 
         session.send(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
         if (isInitial) {
-            clientEntity.botMovementManager().sendOnGround();
+            clientEntity.sendOnGround();
         }
 
         log.debug("Position updated: {}", clientEntity.botMovementManager());
@@ -958,7 +959,7 @@ public final class SessionDataManager {
     @EventHandler
     public void onResourcePack(ClientboundResourcePackPacket packet) {
         // TODO: Implement resource pack
-        connection.session().send(new ServerboundResourcePackPacket(ResourcePackStatus.DECLINED));
+        sendPacket(new ServerboundResourcePackPacket(ResourcePackStatus.DECLINED));
     }
 
     @EventHandler
@@ -1025,5 +1026,9 @@ public final class SessionDataManager {
         entityTrackerState.tick();
 
         connection.eventBus().call(new BotPostTickEvent(connection));
+    }
+
+    public void sendPacket(Packet packet) {
+        session.send(packet);
     }
 }

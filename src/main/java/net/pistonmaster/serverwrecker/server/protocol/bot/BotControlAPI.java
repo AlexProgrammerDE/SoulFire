@@ -55,7 +55,7 @@ public class BotControlAPI {
         sessionDataManager.controlState().flying(newFly);
 
         // Let the server know we are flying
-        sessionDataManager.session().send(new ServerboundPlayerAbilitiesPacket(newFly));
+        sessionDataManager.sendPacket(new ServerboundPlayerAbilitiesPacket(newFly));
 
         return newFly;
     }
@@ -65,7 +65,7 @@ public class BotControlAPI {
         sessionDataManager.controlState().sprinting(newSprint);
 
         // Let the server know we are sprinting
-        sessionDataManager.session().send(new ServerboundPlayerCommandPacket(
+        sessionDataManager.sendPacket(new ServerboundPlayerCommandPacket(
                 sessionDataManager.clientEntity().entityId(),
                 newSprint ? PlayerState.START_SPRINTING : PlayerState.STOP_SPRINTING
         ));
@@ -78,7 +78,7 @@ public class BotControlAPI {
         sessionDataManager.controlState().sneaking(newSneak);
 
         // Let the server know we are sneaking
-        sessionDataManager.session().send(new ServerboundPlayerCommandPacket(
+        sessionDataManager.sendPacket(new ServerboundPlayerCommandPacket(
                 sessionDataManager.clientEntity().entityId(),
                 newSneak ? PlayerState.START_SNEAKING : PlayerState.STOP_SNEAKING
         ));
@@ -92,7 +92,7 @@ public class BotControlAPI {
             var command = message.substring(1);
             // We only sign chat at the moment because commands require the entire command tree to be handled
             // Command signing is signing every string parameter in the command because of reporting /msg
-            sessionDataManager.session().send(new ServerboundChatCommandPacket(
+            sessionDataManager.sendPacket(new ServerboundChatCommandPacket(
                     command,
                     now.toEpochMilli(),
                     0L,
@@ -102,7 +102,7 @@ public class BotControlAPI {
             ));
         } else {
             var salt = secureRandom.nextLong();
-            sessionDataManager.session().send(new ServerboundChatPacket(
+            sessionDataManager.sendPacket(new ServerboundChatPacket(
                     message,
                     now.toEpochMilli(),
                     salt,

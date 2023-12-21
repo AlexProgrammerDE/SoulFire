@@ -82,15 +82,15 @@ public class InventoryManager {
     }
 
     public void sendHeldItemChange() {
-        dataManager.session().send(new ServerboundSetCarriedItemPacket(heldItemSlot));
+        dataManager.sendPacket(new ServerboundSetCarriedItemPacket(heldItemSlot));
     }
 
     public void closeInventory() {
         if (openContainer != null) {
-            dataManager.session().send(new ServerboundContainerClosePacket(openContainer.id()));
+            dataManager.sendPacket(new ServerboundContainerClosePacket(openContainer.id()));
             openContainer = null;
         } else {
-            dataManager.session().send(new ServerboundContainerClosePacket(0));
+            dataManager.sendPacket(new ServerboundContainerClosePacket(0));
         }
     }
 
@@ -135,7 +135,7 @@ public class InventoryManager {
         Int2ObjectMap<ItemStack> changes = new Int2ObjectArrayMap<>(1);
         changes.put(slot, slotItem);
 
-        dataManager.session().send(new ServerboundContainerClickPacket(openContainer.id(),
+        dataManager.sendPacket(new ServerboundContainerClickPacket(openContainer.id(),
                 lastStateId,
                 slot,
                 ContainerActionType.CLICK_ITEM,
