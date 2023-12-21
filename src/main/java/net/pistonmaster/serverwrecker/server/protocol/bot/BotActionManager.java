@@ -107,7 +107,6 @@ public class BotActionManager {
     public void placeBlock(Hand hand, Vector3i againstBlock, Direction againstFace) {
         incrementSequenceNumber();
         var clientEntity = dataManager.clientEntity();
-        var movementManager = dataManager.botMovementManager();
         var levelState = dataManager.getCurrentLevel();
         if (levelState == null) {
             return;
@@ -122,7 +121,7 @@ public class BotActionManager {
         var previousPitch = clientEntity.pitch();
         clientEntity.lookAt(RotationOrigin.EYES, againstPlacePosition);
         if (previousPitch != clientEntity.pitch() || previousYaw != clientEntity.yaw()) {
-            movementManager.sendRot();
+            clientEntity.botMovementManager().sendRot();
         }
 
         var rayCast = rayCastToBlock(levelState.getBlockStateAt(againstBlock), eyePosition, clientEntity.getRotationVector(), againstBlock);

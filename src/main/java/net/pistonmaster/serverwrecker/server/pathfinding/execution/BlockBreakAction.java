@@ -60,7 +60,6 @@ public final class BlockBreakAction implements WorldAction {
     public void tick(BotConnection connection) {
         var sessionDataManager = connection.sessionDataManager();
         var clientEntity = sessionDataManager.clientEntity();
-        var movementManager = sessionDataManager.botMovementManager();
         sessionDataManager.controlState().resetAll();
 
         var levelState = sessionDataManager.getCurrentLevel();
@@ -77,7 +76,7 @@ public final class BlockBreakAction implements WorldAction {
             var previousPitch = clientEntity.pitch();
             clientEntity.lookAt(RotationOrigin.EYES, VectorHelper.middleOfBlockNormalize(blockPosition.toVector3d()));
             if (previousPitch != clientEntity.pitch() || previousYaw != clientEntity.yaw()) {
-                movementManager.sendRot();
+                clientEntity.botMovementManager().sendRot();
             }
         }
 
@@ -104,7 +103,7 @@ public final class BlockBreakAction implements WorldAction {
                 var cost = Costs.getRequiredMiningTicks(
                         sessionDataManager.tagsState(),
                         sessionDataManager.clientEntity().effectState(),
-                        sessionDataManager.botMovementManager().movementState().onGround(),
+                        clientEntity.movementState().onGround(),
                         item,
                         optionalBlockType
                 ).ticks();
@@ -194,7 +193,7 @@ public final class BlockBreakAction implements WorldAction {
             remainingTicks = Costs.getRequiredMiningTicks(
                     sessionDataManager.tagsState(),
                     sessionDataManager.clientEntity().effectState(),
-                    sessionDataManager.botMovementManager().movementState().onGround(),
+                    clientEntity.movementState().onGround(),
                     sessionDataManager.inventoryManager().getPlayerInventory()
                             .hotbarSlot(sessionDataManager.inventoryManager().heldItemSlot())
                             .item(),

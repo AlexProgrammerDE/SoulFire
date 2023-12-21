@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.server.protocol.bot.state.entity;
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.Data;
+import net.pistonmaster.serverwrecker.server.data.EntityType;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributeState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityEffectState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityMetadataState;
@@ -37,6 +38,7 @@ public abstract class Entity {
     private final EntityAttributeState attributeState = new EntityAttributeState();
     private final EntityEffectState effectState = new EntityEffectState();
     private final int entityId;
+    private final EntityType entityType;
     private double x;
     private double y;
     private double z;

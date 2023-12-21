@@ -23,6 +23,7 @@ import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import net.pistonmaster.serverwrecker.server.data.EntityType;
 import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.server.protocol.bot.movement.BotMovementManager;
 import net.pistonmaster.serverwrecker.server.protocol.bot.movement.ControlState;
@@ -43,7 +44,7 @@ public class ClientEntity extends Entity {
     private int opPermissionLevel;
 
     public ClientEntity(int entityId, SessionDataManager sessionDataManager, ControlState controlState) {
-        super(entityId);
+        super(entityId, EntityType.PLAYER);
         this.sessionDataManager = sessionDataManager;
         this.controlState = controlState;
         this.movementState = new PlayerMovementState(this, sessionDataManager.inventoryManager().getPlayerInventory());

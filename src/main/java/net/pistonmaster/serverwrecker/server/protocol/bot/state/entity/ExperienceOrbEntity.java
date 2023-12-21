@@ -21,6 +21,7 @@ package net.pistonmaster.serverwrecker.server.protocol.bot.state.entity;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import net.pistonmaster.serverwrecker.server.data.EntityType;
 
 @Getter
 @EqualsAndHashCode(callSuper = true)
@@ -28,7 +29,7 @@ public class ExperienceOrbEntity extends Entity {
     private final int expValue;
 
     public ExperienceOrbEntity(int entityId, int expValue) {
-        super(entityId);
+        super(entityId, EntityType.EXPERIENCE_ORB);
         this.expValue = expValue;
     }
 }

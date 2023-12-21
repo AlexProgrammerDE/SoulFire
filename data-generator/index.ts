@@ -40,28 +40,6 @@ if (mcData == null) {
 
   {
     let enumValues: string[] = []
-    for (const item of Object.keys(mcData.blockCollisionShapes.shapes)) {
-      const id = Number(item)
-      const shape = mcData.blockCollisionShapes.shapes[item as any]
-
-      let shapeData = item
-      const shapeList: string[] = []
-      for (const shapePart of shape) {
-        shapeList.push(`${shapePart[0]},${shapePart[1]},${shapePart[2]},${shapePart[3]},${shapePart[4]},${shapePart[5]}`)
-      }
-      if (shapeList.length > 0) {
-        shapeData += "|"
-      }
-      shapeData += shapeList.join("|")
-
-      enumValues.push(shapeData)
-    }
-
-    fs.writeFileSync("output/blockshapes.txt", enumValues.join("\n"))
-  }
-
-  {
-    let enumValues: string[] = []
     for (const block of mcData.blocksArray) {
       let shapes = block.name
       const collisionShapes = mcData.blockCollisionShapes.blocks[block.name]
@@ -113,7 +91,7 @@ if (mcData == null) {
     let result = fs.readFileSync("templates/EntityType.java", "utf-8");
     let enumValues: string[] = []
     for (const item of mcData.entitiesArray) {
-      enumValues.push(`public static final EntityType ${item.name.toUpperCase()} = register(new EntityType(${item.id}, ${item.internalId}, "${item.name}", "${item.displayName}", "${item.type}", ${item.width}, ${item.height}, ${valueToNullStringFallback(-1, item.length)}, ${valueToNullStringFallback(-1, item.offset)}, "${item.category}"));`)
+      enumValues.push(`public static final EntityType ${item.name.toUpperCase()} = register(new EntityType(${item.id}, "${item.name}", "${item.displayName}", "${item.type}", ${item.width}, ${item.height}, "${item.category}"));`)
     }
 
     result = result.replace(enumReplace, enumValues.join("\n    "))
@@ -140,12 +118,4 @@ function stringArrayToJavaList(array?: string[]): string {
   }
 
   return `List.of(${array.map(data => `"${data}"`).join(", ")})`
-}
-
-function valueToNullStringFallback(fallback: any, array?: any): string {
-  if (array == null) {
-    return fallback
-  }
-
-  return `"${array}"`
 }

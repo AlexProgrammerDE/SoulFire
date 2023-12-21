@@ -121,6 +121,7 @@ import net.pistonmaster.serverwrecker.server.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.server.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.server.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.server.api.event.bot.ChatMessageReceiveEvent;
+import net.pistonmaster.serverwrecker.server.data.EntityType;
 import net.pistonmaster.serverwrecker.server.data.ResourceData;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.InventoryManager;
@@ -786,7 +787,7 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onEntitySpawn(ClientboundAddEntityPacket packet) {
-        var entityState = new RawEntity(packet.getEntityId(), packet.getUuid(), packet.getType(), packet.getData());
+        var entityState = new RawEntity(packet.getEntityId(), packet.getUuid(), EntityType.getById(packet.getType().ordinal()), packet.getData());
 
         entityState.setPosition(packet.getX(), packet.getY(), packet.getZ());
         entityState.setRotation(packet.getYaw(), packet.getPitch());

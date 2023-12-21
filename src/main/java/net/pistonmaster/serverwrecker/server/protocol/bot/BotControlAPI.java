@@ -27,7 +27,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.pistonmaster.serverwrecker.server.protocol.bot.movement.BotMovementManager;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -41,7 +40,6 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class BotControlAPI {
     private final SessionDataManager sessionDataManager;
-    private final BotMovementManager botMovementManager;
     private final SecureRandom secureRandom = new SecureRandom();
     @Getter
     @Setter
