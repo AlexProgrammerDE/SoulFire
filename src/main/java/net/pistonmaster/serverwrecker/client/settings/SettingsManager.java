@@ -64,8 +64,8 @@ public class SettingsManager {
             .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
             .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
             .create();
-    private final Multimap<PropertyKey, Consumer<JsonElement>> listeners = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
-    private final Map<PropertyKey, Provider<JsonElement>> providers = new HashMap<>();
+    private final Multimap<PropertyKey, Consumer<JsonElement>> listeners = Multimaps.newListMultimap(new LinkedHashMap<>(), ArrayList::new);
+    private final Map<PropertyKey, Provider<JsonElement>> providers = new LinkedHashMap<>();
     @Getter
     private final AccountRegistry accountRegistry = new AccountRegistry();
     @Getter

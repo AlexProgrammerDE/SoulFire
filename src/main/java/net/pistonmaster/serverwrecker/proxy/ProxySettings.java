@@ -29,7 +29,7 @@ import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
 public class ProxySettings implements SettingsObject {
     private static final Property.Builder builder = Property.builder("proxy");
     public static final IntProperty BOTS_PER_PROXY = builder.ofInt(
-            "botsPerProxy",
+            "bots-per-proxy",
             "Bots Per Proxy",
             new String[]{"--bots-per-proxy"},
             "Amount of bots that can be on a single proxy",

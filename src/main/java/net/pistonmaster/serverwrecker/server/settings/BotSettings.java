@@ -47,9 +47,9 @@ public class BotSettings implements SettingsObject {
     );
     public static final MinMaxPropertyLink JOIN_DELAY_MS = new MinMaxPropertyLink(
             BUILDER.ofInt(
-                    "minJoinDelayMs",
+                    "min-join-delay",
                     "Min Join Delay",
-                    new String[]{"--min-join-delay-ms"},
+                    new String[]{"--join-min-delay"},
                     "Minimum delay between joins in milliseconds",
                     1000,
                     0,
@@ -57,9 +57,9 @@ public class BotSettings implements SettingsObject {
                     1
             ),
             BUILDER.ofInt(
-                    "maxJoinDelayMs",
+                    "max-join-delay",
                     "Max Join Delay",
-                    new String[]{"--max-join-delay-ms"},
+                    new String[]{"--join-max-delay"},
                     "Maximum delay between joins in milliseconds",
                     3000,
                     0,
@@ -68,7 +68,7 @@ public class BotSettings implements SettingsObject {
             )
     );
     public static final ComboProperty PROTOCOL_VERSION = BUILDER.ofCombo(
-            "protocolVersion",
+            "protocol-version",
             "Protocol Version",
             new String[]{"--protocol-version"},
             "Minecraft protocol version to use",
@@ -76,7 +76,7 @@ public class BotSettings implements SettingsObject {
             0
     );
     public static final IntProperty READ_TIMEOUT = BUILDER.ofInt(
-            "readTimeout",
+            "read-timeout",
             "Read Timeout",
             new String[]{"--read-timeout"},
             "Read timeout in seconds",
@@ -86,7 +86,7 @@ public class BotSettings implements SettingsObject {
             1
     );
     public static final IntProperty WRITE_TIMEOUT = BUILDER.ofInt(
-            "writeTimeout",
+            "write-timeout",
             "Write Timeout",
             new String[]{"--write-timeout"},
             "Write timeout in seconds",
@@ -96,7 +96,7 @@ public class BotSettings implements SettingsObject {
             1
     );
     public static final IntProperty CONNECT_TIMEOUT = BUILDER.ofInt(
-            "connectTimeout",
+            "connect-timeout",
             "Connect Timeout",
             new String[]{"--connect-timeout"},
             "Connect timeout in seconds",
@@ -105,15 +105,15 @@ public class BotSettings implements SettingsObject {
             Integer.MAX_VALUE,
             1
     );
-    public static final BooleanProperty TRY_SRV = BUILDER.ofBoolean(
-            "trySrv",
-            "Try SRV",
-            new String[]{"--try-srv"},
+    public static final BooleanProperty RESOLVE_SRV = BUILDER.ofBoolean(
+            "resolve-srv",
+            "Resolve SRV",
+            new String[]{"--resolve-srv"},
             "Try to resolve SRV records from the address",
             true
     );
     public static final IntProperty CONCURRENT_CONNECTS = BUILDER.ofInt(
-            "concurrentConnects",
+            "concurrent-connects",
             "Concurrent Connects",
             new String[]{"--concurrent-connects"},
             "Max amount of bots attempting to connect at once",

@@ -77,7 +77,7 @@ public class AutoRegister implements InternalExtension {
         private static final Property.Builder BUILDER = Property.builder("auto-register");
         public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
                 "enabled",
-                "Auto Register",
+                "Enable Auto Register",
                 new String[]{"--auto-register"},
                 "Make bots run the /register and /login command after joining",
                 false

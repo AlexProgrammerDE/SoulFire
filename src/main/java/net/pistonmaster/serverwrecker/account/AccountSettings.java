@@ -30,14 +30,14 @@ import net.pistonmaster.serverwrecker.server.settings.lib.property.StringPropert
 public class AccountSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("account");
     public static final StringProperty NAME_FORMAT = BUILDER.ofString(
-            "nameFormat",
+            "name-format",
             "Name format",
             new String[]{"--name-format"},
             "The format of the bot names. %d will be replaced with the bot number.",
             "Bot_%d"
     );
     public static final BooleanProperty SHUFFLE_ACCOUNTS = BUILDER.ofBoolean(
-            "shuffleAccounts",
+            "shuffle-accounts",
             "Shuffle accounts",
             new String[]{"--shuffle-accounts"},
             "Should the accounts order be random when connecting bots?",

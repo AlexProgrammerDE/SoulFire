@@ -60,7 +60,7 @@ public class ResolveUtil {
     public static Optional<ResolvedAddress> resolveAddress(boolean isBedrock, SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup) {
         var serverAddress = new ServerAddress(settingsHolder.get(BotSettings.ADDRESS));
 
-        if (settingsHolder.get(BotSettings.TRY_SRV) && serverAddress.port() == 25565 && !isBedrock) {
+        if (settingsHolder.get(BotSettings.RESOLVE_SRV) && serverAddress.port() == 25565 && !isBedrock) {
             // SRVs can override address on Java, but not Bedrock.
             var resolved = resolveSrv(serverAddress, eventLoopGroup);
             if (resolved.isPresent()) {
