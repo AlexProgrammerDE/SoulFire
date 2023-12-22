@@ -22,7 +22,12 @@ package net.pistonmaster.serverwrecker.server.settings;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.*;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.ComboProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.MinMaxPropertyLink;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.StringProperty;
 import net.pistonmaster.serverwrecker.server.viaversion.SWVersionConstants;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -45,10 +50,10 @@ public class BotSettings implements SettingsObject {
             Integer.MAX_VALUE,
             1
     );
-    public static final MinMaxPropertyLink JOIN_DELAY_MS = new MinMaxPropertyLink(
+    public static final MinMaxPropertyLink JOIN_DELAY = new MinMaxPropertyLink(
             BUILDER.ofInt(
-                    "min-join-delay",
-                    "Min Join Delay",
+                    "join-min-delay",
+                    "Min Join Delay (ms)",
                     new String[]{"--join-min-delay"},
                     "Minimum delay between joins in milliseconds",
                     1000,
@@ -57,8 +62,8 @@ public class BotSettings implements SettingsObject {
                     1
             ),
             BUILDER.ofInt(
-                    "max-join-delay",
-                    "Max Join Delay",
+                    "join-max-delay",
+                    "Max Join Delay (ms)",
                     new String[]{"--join-max-delay"},
                     "Maximum delay between joins in milliseconds",
                     3000,

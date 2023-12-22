@@ -30,7 +30,7 @@ public class ProxySettings implements SettingsObject {
     private static final Property.Builder builder = Property.builder("proxy");
     public static final IntProperty BOTS_PER_PROXY = builder.ofInt(
             "bots-per-proxy",
-            "Bots Per Proxy",
+            "Bots per proxy",
             new String[]{"--bots-per-proxy"},
             "Amount of bots that can be on a single proxy",
             -1,

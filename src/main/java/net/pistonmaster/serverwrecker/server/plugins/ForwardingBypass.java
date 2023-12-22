@@ -58,6 +58,8 @@ import java.util.function.UnaryOperator;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ForwardingBypass implements InternalExtension {
+    private static final char LEGACY_FORWARDING_SEPARATOR = '\0';
+
     private static int findForwardingVersion(int requested, BotConnection player) {
         // TODO: Fix this
         /*
@@ -219,11 +221,11 @@ public class ForwardingBypass implements InternalExtension {
         // separated by \0 (the null byte). In order, you send the original host, the player's IP, their
         // UUID (undashed), and if you are in online-mode, their login properties (from Mojang).
         var data = new StringBuilder().append(initialHostname)
-                .append('\0')
+                .append(LEGACY_FORWARDING_SEPARATOR)
                 .append(selfIp)
-                .append('\0')
+                .append(LEGACY_FORWARDING_SEPARATOR)
                 .append(UUIDHelper.convertToNoDashes(botUniqueId))
-                .append('\0');
+                .append(LEGACY_FORWARDING_SEPARATOR);
         ServerWreckerServer.GENERAL_GSON
                 .toJson(propertiesTransform.apply(List.of()), data);
         return data.toString();
