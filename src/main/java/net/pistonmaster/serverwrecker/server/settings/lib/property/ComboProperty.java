@@ -22,12 +22,12 @@ package net.pistonmaster.serverwrecker.server.settings.lib.property;
 public record ComboProperty(
         String namespace,
         String key,
-        String uiDescription,
-        String cliDescription,
-        String[] cliNames,
+        String uiName,
+        String[] cliFlags,
+        String description,
         ComboOption[] options,
         int defaultValue
-) implements Property {
+) implements SingleProperty {
     public record ComboOption(
             String id,
             String displayName

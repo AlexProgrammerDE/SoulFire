@@ -78,15 +78,15 @@ public class AutoReconnect implements InternalExtension {
         private static final Property.Builder BUILDER = Property.builder("auto-reconnect");
         public static final BooleanProperty AUTO_RECONNECT = BUILDER.ofBoolean("auto-reconnect",
                 "Do Auto Reconnect?",
-                "Do Auto Reconnect?",
                 new String[]{"--auto-reconnect"},
+                "Do Auto Reconnect?",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
                 BUILDER.ofInt("reconnect-min-delay",
                         "Min delay (seconds)",
-                        "Minimum delay between reconnects",
                         new String[]{"--reconnect-min-delay"},
+                        "Minimum delay between reconnects",
                         1,
                         0,
                         Integer.MAX_VALUE,
@@ -94,8 +94,8 @@ public class AutoReconnect implements InternalExtension {
                 ),
                 BUILDER.ofInt("reconnect-max-delay",
                         "Max delay (seconds)",
-                        "Maximum delay between reconnects",
                         new String[]{"--reconnect-max-delay"},
+                        "Maximum delay between reconnects",
                         5,
                         0,
                         Integer.MAX_VALUE,

@@ -101,15 +101,15 @@ public class ChatMessageLogger implements InternalExtension {
         public static final BooleanProperty LOG_CHAT = BUILDER.ofBoolean(
                 "log-chat",
                 "Log chat to terminal",
-                "If this is enabled, all chat messages will be logged to the terminal",
                 new String[]{"--log-chat"},
+                "If this is enabled, all chat messages will be logged to the terminal",
                 true
         );
         public static IntProperty INTERVAL = BUILDER.ofInt(
                 "chat-interval",
                 "Minimum delay between logging chat",
-                "This is the minimum delay between logging chat messages",
                 new String[]{"--chat-interval"},
+                "This is the minimum delay between logging chat messages",
                 2,
                 0,
                 Integer.MAX_VALUE,

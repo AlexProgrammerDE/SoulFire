@@ -73,15 +73,15 @@ public class AutoRespawn implements InternalExtension {
         private static final Property.Builder BUILDER = Property.builder("auto-respawn");
         public static final BooleanProperty AUTO_RESPAWN = BUILDER.ofBoolean("auto-respawn",
                 "Do Auto Respawn?",
-                "Do Auto Respawn?",
                 new String[]{"--auto-respawn"},
+                "Do Auto Respawn?",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
                 BUILDER.ofInt("respawn-min-delay",
                         "Min delay (seconds)",
-                        "Minimum delay between respawns",
                         new String[]{"--respawn-min-delay"},
+                        "Minimum delay between respawns",
                         1,
                         0,
                         Integer.MAX_VALUE,
@@ -89,8 +89,8 @@ public class AutoRespawn implements InternalExtension {
                 ),
                 BUILDER.ofInt("respawn-max-delay",
                         "Max delay (seconds)",
-                        "Maximum delay between respawns",
                         new String[]{"--respawn-max-delay"},
+                        "Maximum delay between respawns",
                         3,
                         0,
                         Integer.MAX_VALUE,

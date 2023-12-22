@@ -134,15 +134,15 @@ public class AutoArmor implements InternalExtension {
         private static final Property.Builder BUILDER = Property.builder("auto-armor");
         public static final BooleanProperty AUTO_ARMOR = BUILDER.ofBoolean("auto-armor",
                 "Do Auto Armor?",
-                "Do Auto Armor?",
                 new String[]{"--auto-armor"},
+                "Do Auto Armor?",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
                 BUILDER.ofInt("armor-min-delay",
                         "Min delay (seconds)",
-                        "Minimum delay between putting on armor",
                         new String[]{"--armor-min-delay"},
+                        "Minimum delay between putting on armor",
                         1,
                         0,
                         Integer.MAX_VALUE,
@@ -150,8 +150,8 @@ public class AutoArmor implements InternalExtension {
                 ),
                 BUILDER.ofInt("armor-max-delay",
                         "Max delay (seconds)",
-                        "Maximum delay between putting on armor",
                         new String[]{"--armor-max-delay"},
+                        "Maximum delay between putting on armor",
                         2,
                         0,
                         Integer.MAX_VALUE,

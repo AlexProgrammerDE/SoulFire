@@ -70,15 +70,15 @@ public class AutoJump implements InternalExtension {
         private static final Property.Builder BUILDER = Property.builder("auto-jump");
         public static final BooleanProperty AUTO_JUMP = BUILDER.ofBoolean("auto-jump",
                 "Do Auto Jump?",
-                "Do Auto Jump?",
                 new String[]{"--auto-jump"},
+                "Do Auto Jump?",
                 false
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
                 BUILDER.ofInt("jump-min-delay",
                         "Min delay (seconds)",
-                        "Minimum delay between jumps",
                         new String[]{"--jump-min-delay"},
+                        "Minimum delay between jumps",
                         2,
                         0,
                         Integer.MAX_VALUE,
@@ -86,8 +86,8 @@ public class AutoJump implements InternalExtension {
                 ),
                 BUILDER.ofInt("jump-max-delay",
                         "Max delay (seconds)",
-                        "Maximum delay between jumps",
                         new String[]{"--jump-max-delay"},
+                        "Maximum delay between jumps",
                         5,
                         0,
                         Integer.MAX_VALUE,

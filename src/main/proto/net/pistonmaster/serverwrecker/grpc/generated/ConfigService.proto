@@ -50,9 +50,9 @@ message ClientPluginSettingType {
 message ClientPluginSettingEntrySingle {
   // Basically we only send a kv map to the server with every setting entry
   string key = 1;
-  string uiDescription = 2;
-  string cliDescription = 3;
-  repeated string cliNames = 4;
+  string uiName = 2;
+  repeated string cliFlags = 3;
+  string description = 4;
   optional string hint = 5;
   ClientPluginSettingType type = 6;
 }
@@ -60,9 +60,9 @@ message ClientPluginSettingEntrySingle {
 message ClientPluginSettingEntryMinMaxPairSingle {
   // Basically we only send a kv map to the server with every setting entry
   string key = 1;
-  string uiDescription = 2;
-  string cliDescription = 3;
-  repeated string cliNames = 4;
+  string uiName = 2;
+  repeated string cliFlags = 3;
+  string description = 4;
   optional string hint = 5;
   IntSetting intSetting = 6;
 }

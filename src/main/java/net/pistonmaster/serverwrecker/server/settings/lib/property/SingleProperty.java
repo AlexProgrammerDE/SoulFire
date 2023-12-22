@@ -19,17 +19,10 @@
  */
 package net.pistonmaster.serverwrecker.server.settings.lib.property;
 
-import javax.annotation.Nullable;
+public sealed interface SingleProperty extends Property permits BooleanProperty, ComboProperty, IntProperty, StringProperty {
+    String uiName();
 
-public record IntProperty(String namespace,
-                          String key,
-                          String uiName,
-                          String[] cliFlags,
-                          String description,
-                          int defaultValue,
-                          int minValue,
-                          int maxValue,
-                          int stepValue,
-                          @Nullable String format
-) implements SingleProperty {
+    String[] cliFlags();
+
+    String description();
 }

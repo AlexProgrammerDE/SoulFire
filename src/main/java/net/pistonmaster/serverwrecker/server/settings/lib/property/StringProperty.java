@@ -22,9 +22,9 @@ package net.pistonmaster.serverwrecker.server.settings.lib.property;
 public record StringProperty(
         String namespace,
         String key,
-        String uiDescription,
-        String cliDescription,
-        String[] cliNames,
+        String uiName,
+        String[] cliFlags,
+        String description,
         String defaultValue
-) implements Property {
+) implements SingleProperty {
 }

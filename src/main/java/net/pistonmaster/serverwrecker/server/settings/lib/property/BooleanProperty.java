@@ -21,9 +21,9 @@ package net.pistonmaster.serverwrecker.server.settings.lib.property;
 
 public record BooleanProperty(String namespace,
                               String key,
-                              String uiDescription,
-                              String cliDescription,
-                              String[] cliNames,
+                              String uiName,
+                              String[] cliFlags,
+                              String description,
                               boolean defaultValue
-) implements Property {
+) implements SingleProperty {
 }

@@ -76,7 +76,7 @@ public class CLIManager {
                 switch (entry.getValueCase()) {
                     case SINGLE -> {
                         var singleEntry = entry.getSingle();
-                        var description = escapeFormatSpecifiers(singleEntry.getCliDescription());
+                        var description = escapeFormatSpecifiers(singleEntry.getDescription());
 
                         var propertyKey = new PropertyKey(page.getNamespace(), singleEntry.getKey());
 
@@ -85,7 +85,7 @@ public class CLIManager {
                             case STRING -> {
                                 var stringEntry = settingType.getString();
                                 AtomicReference<String> reference = new AtomicReference<>();
-                                var optionSpec = CommandLine.Model.OptionSpec.builder(singleEntry.getCliNamesList().toArray(new String[0]))
+                                var optionSpec = CommandLine.Model.OptionSpec.builder(singleEntry.getCliFlagsList().toArray(new String[0]))
                                         .description(description)
                                         .type(String.class)
                                         .initialValue(stringEntry.getDef())
@@ -107,12 +107,12 @@ public class CLIManager {
                                 var intEntry = settingType.getInt();
 
                                 addIntSetting(targetCommandSpec, propertyKey, settingsManager, description,
-                                        singleEntry.getCliNamesList().toArray(new String[0]), intEntry);
+                                        singleEntry.getCliFlagsList().toArray(new String[0]), intEntry);
                             }
                             case BOOL -> {
                                 var boolEntry = settingType.getBool();
                                 AtomicReference<Boolean> reference = new AtomicReference<>();
-                                var optionSpec = CommandLine.Model.OptionSpec.builder(singleEntry.getCliNamesList().toArray(new String[0]))
+                                var optionSpec = CommandLine.Model.OptionSpec.builder(singleEntry.getCliFlagsList().toArray(new String[0]))
                                         .description(description)
                                         .type(boolean.class)
                                         .initialValue(boolEntry.getDef())
@@ -134,7 +134,7 @@ public class CLIManager {
                                 var comboEntry = settingType.getCombo();
                                 AtomicReference<String> reference = new AtomicReference<>();
 
-                                var optionSpec = CommandLine.Model.OptionSpec.builder(singleEntry.getCliNamesList().toArray(new String[0]))
+                                var optionSpec = CommandLine.Model.OptionSpec.builder(singleEntry.getCliFlagsList().toArray(new String[0]))
                                         .description(description)
                                         .typeInfo(new ComboTypeInfo(comboEntry))
                                         .initialValue(comboEntry.getOptionsList().get(comboEntry.getDef()).getId())
@@ -166,16 +166,16 @@ public class CLIManager {
                         var minMaxEntry = entry.getMinMaxPair();
 
                         var min = minMaxEntry.getMin();
-                        var minDescription = escapeFormatSpecifiers(min.getCliDescription());
+                        var minDescription = escapeFormatSpecifiers(min.getDescription());
                         var minPropertyKey = new PropertyKey(page.getNamespace(), min.getKey());
                         addIntSetting(targetCommandSpec, minPropertyKey, settingsManager, minDescription,
-                                min.getCliNamesList().toArray(new String[0]), min.getIntSetting());
+                                min.getCliFlagsList().toArray(new String[0]), min.getIntSetting());
 
                         var max = minMaxEntry.getMax();
-                        var maxDescription = escapeFormatSpecifiers(max.getCliDescription());
+                        var maxDescription = escapeFormatSpecifiers(max.getDescription());
                         var maxPropertyKey = new PropertyKey(page.getNamespace(), max.getKey());
                         addIntSetting(targetCommandSpec, maxPropertyKey, settingsManager, maxDescription,
-                                max.getCliNamesList().toArray(new String[0]), max.getIntSetting());
+                                max.getCliFlagsList().toArray(new String[0]), max.getIntSetting());
                     }
                     case VALUE_NOT_SET -> throw new IllegalStateException("Unexpected value: " + entry.getValueCase());
                 }

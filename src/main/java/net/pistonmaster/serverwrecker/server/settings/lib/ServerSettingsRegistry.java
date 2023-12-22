@@ -19,11 +19,31 @@
  */
 package net.pistonmaster.serverwrecker.server.settings.lib;
 
-import net.pistonmaster.serverwrecker.grpc.generated.*;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.*;
+import net.pistonmaster.serverwrecker.grpc.generated.BoolSetting;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingEntry;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingEntryMinMaxPair;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingEntryMinMaxPairSingle;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingEntrySingle;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingType;
+import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingsPage;
+import net.pistonmaster.serverwrecker.grpc.generated.ComboOption;
+import net.pistonmaster.serverwrecker.grpc.generated.ComboSetting;
+import net.pistonmaster.serverwrecker.grpc.generated.IntSetting;
+import net.pistonmaster.serverwrecker.grpc.generated.StringSetting;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.ComboProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.MinMaxPropertyLink;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.SingleProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.StringProperty;
 
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ServerSettingsRegistry {
     private final Map<String, NamespaceRegistry> namespaceMap = new LinkedHashMap<>();
@@ -85,11 +105,8 @@ public class ServerSettingsRegistry {
             for (var property : namespaceRegistry.properties) {
                 switch (property) {
                     case BooleanProperty booleanProperty -> entries.add(ClientPluginSettingEntry.newBuilder()
-                            .setSingle(ClientPluginSettingEntrySingle.newBuilder()
-                                    .setKey(property.key())
-                                    .setUiDescription(booleanProperty.uiDescription())
-                                    .setCliDescription(booleanProperty.cliDescription())
-                                    .addAllCliNames(Arrays.asList(booleanProperty.cliNames()))
+                            .setSingle(
+                                    fillSingleProperties(booleanProperty)
                                     .setType(ClientPluginSettingType.newBuilder()
                                             .setBool(BoolSetting.newBuilder()
                                                     .setDef(booleanProperty.defaultValue())
@@ -98,11 +115,8 @@ public class ServerSettingsRegistry {
                                     .build())
                             .build());
                     case IntProperty intProperty -> entries.add(ClientPluginSettingEntry.newBuilder()
-                            .setSingle(ClientPluginSettingEntrySingle.newBuilder()
-                                    .setKey(property.key())
-                                    .setUiDescription(intProperty.uiDescription())
-                                    .setCliDescription(intProperty.cliDescription())
-                                    .addAllCliNames(Arrays.asList(intProperty.cliNames()))
+                            .setSingle(
+                                    fillSingleProperties(intProperty)
                                     .setType(ClientPluginSettingType.newBuilder()
                                             .setInt(createIntSetting(intProperty))
                                             .build())
@@ -113,29 +127,20 @@ public class ServerSettingsRegistry {
                         var maxProperty = minMaxPropertyLink.max();
                         entries.add(ClientPluginSettingEntry.newBuilder()
                                 .setMinMaxPair(ClientPluginSettingEntryMinMaxPair.newBuilder()
-                                        .setMin(ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
-                                                .setKey(minProperty.key())
-                                                .setUiDescription(minProperty.uiDescription())
-                                                .setCliDescription(minProperty.cliDescription())
-                                                .addAllCliNames(Arrays.asList(minProperty.cliNames()))
+                                        .setMin(
+                                                fillMultiProperties(minProperty)
                                                 .setIntSetting(createIntSetting(minProperty))
                                                 .build())
-                                        .setMax(ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
-                                                .setKey(maxProperty.key())
-                                                .setUiDescription(maxProperty.uiDescription())
-                                                .setCliDescription(maxProperty.cliDescription())
-                                                .addAllCliNames(Arrays.asList(maxProperty.cliNames()))
+                                        .setMax(
+                                                fillMultiProperties(maxProperty)
                                                 .setIntSetting(createIntSetting(maxProperty))
                                                 .build())
                                         .build())
                                 .build());
                     }
                     case StringProperty stringProperty -> entries.add(ClientPluginSettingEntry.newBuilder()
-                            .setSingle(ClientPluginSettingEntrySingle.newBuilder()
-                                    .setKey(property.key())
-                                    .setUiDescription(stringProperty.uiDescription())
-                                    .setCliDescription(stringProperty.cliDescription())
-                                    .addAllCliNames(Arrays.asList(stringProperty.cliNames()))
+                            .setSingle(
+                                    fillSingleProperties(stringProperty)
                                     .setType(ClientPluginSettingType.newBuilder()
                                             .setString(StringSetting.newBuilder()
                                                     .setDef(stringProperty.defaultValue())
@@ -152,11 +157,8 @@ public class ServerSettingsRegistry {
                                     .build());
                         }
                         entries.add(ClientPluginSettingEntry.newBuilder()
-                                .setSingle(ClientPluginSettingEntrySingle.newBuilder()
-                                        .setKey(property.key())
-                                        .setUiDescription(comboProperty.uiDescription())
-                                        .setCliDescription(comboProperty.cliDescription())
-                                        .addAllCliNames(Arrays.asList(comboProperty.cliNames()))
+                                .setSingle(
+                                        fillSingleProperties(comboProperty)
                                         .setType(ClientPluginSettingType.newBuilder()
                                                 .setCombo(ComboSetting.newBuilder()
                                                         .setDef(comboProperty.defaultValue())
@@ -179,6 +181,22 @@ public class ServerSettingsRegistry {
         }
 
         return list;
+    }
+
+    private ClientPluginSettingEntrySingle.Builder fillSingleProperties(SingleProperty property) {
+        return ClientPluginSettingEntrySingle.newBuilder()
+                .setKey(property.key())
+                .setUiName(property.uiName())
+                .addAllCliFlags(Arrays.asList(property.cliFlags()))
+                .setDescription(property.description());
+    }
+
+    private ClientPluginSettingEntryMinMaxPairSingle.Builder fillMultiProperties(SingleProperty property) {
+        return ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
+                .setKey(property.key())
+                .setUiName(property.uiName())
+                .addAllCliFlags(Arrays.asList(property.cliFlags()))
+                .setDescription(property.description());
     }
 
     private record NamespaceRegistry(String pageName, boolean hidden, List<Property> properties) {

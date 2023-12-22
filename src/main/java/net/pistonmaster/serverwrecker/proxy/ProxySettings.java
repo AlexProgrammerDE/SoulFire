@@ -31,8 +31,8 @@ public class ProxySettings implements SettingsObject {
     public static final IntProperty BOTS_PER_PROXY = builder.ofInt(
             "botsPerProxy",
             "Bots Per Proxy",
-            "Amount of bots that can be on a single proxy",
             new String[]{"--bots-per-proxy"},
+            "Amount of bots that can be on a single proxy",
             -1,
             -1,
             Integer.MAX_VALUE,

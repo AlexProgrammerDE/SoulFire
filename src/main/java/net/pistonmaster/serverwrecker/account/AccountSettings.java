@@ -32,15 +32,15 @@ public class AccountSettings implements SettingsObject {
     public static final StringProperty NAME_FORMAT = BUILDER.ofString(
             "nameFormat",
             "Name format",
-            "The format of the bot names. %d will be replaced with the bot number.",
             new String[]{"--name-format"},
+            "The format of the bot names. %d will be replaced with the bot number.",
             "Bot_%d"
     );
     public static final BooleanProperty SHUFFLE_ACCOUNTS = BUILDER.ofBoolean(
             "shuffleAccounts",
             "Shuffle accounts",
-            "Should the accounts be shuffled?",
             new String[]{"--shuffle-accounts"},
+            "Should the accounts be shuffled?",
             false
     );
 }

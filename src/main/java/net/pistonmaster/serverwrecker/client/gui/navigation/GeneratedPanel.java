@@ -63,7 +63,9 @@ public class GeneratedPanel extends NavigationItem {
                     var singleEntry = settingEntry.getSingle();
                     var propertyKey = new PropertyKey(settingsPage.getNamespace(), singleEntry.getKey());
 
-                    panel.add(new JLabel(singleEntry.getUiDescription()));
+                    var label = new JLabel(singleEntry.getUiName());
+                    label.setToolTipText(singleEntry.getDescription());
+                    panel.add(label);
                     var settingType = singleEntry.getType();
                     panel.add(switch (settingType.getValueCase()) {
                         case STRING -> {
@@ -113,13 +115,17 @@ public class GeneratedPanel extends NavigationItem {
 
                     var minPropertyKey = new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMin().getKey());
                     var min = minMaxEntry.getMin();
-                    panel.add(new JLabel(min.getUiDescription()));
+                    var minLabel = new JLabel(min.getUiName());
+                    minLabel.setToolTipText(min.getDescription());
+                    panel.add(minLabel);
                     var minSpinner = createIntObject(minPropertyKey, settingsManager, min.getIntSetting());
                     panel.add(minSpinner);
 
                     var maxPropertyKey = new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMax().getKey());
                     var max = minMaxEntry.getMax();
-                    panel.add(new JLabel(max.getUiDescription()));
+                    var maxLabel = new JLabel(max.getUiName());
+                    maxLabel.setToolTipText(max.getDescription());
+                    panel.add(maxLabel);
                     var maxSpinner = createIntObject(maxPropertyKey, settingsManager, max.getIntSetting());
                     panel.add(maxSpinner);
 

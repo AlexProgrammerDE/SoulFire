@@ -96,15 +96,15 @@ public class AutoTotem implements InternalExtension {
         private static final Property.Builder BUILDER = Property.builder("auto-totem");
         public static final BooleanProperty AUTO_TOTEM = BUILDER.ofBoolean("auto-totem",
                 "Do Auto Totem?",
-                "Do Auto Totem?",
                 new String[]{"--auto-totem"},
+                "Do Auto Totem?",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
                 BUILDER.ofInt("totem-min-delay",
                         "Min delay (seconds)",
-                        "Minimum delay between using totems",
                         new String[]{"--totem-min-delay"},
+                        "Minimum delay between using totems",
                         1,
                         0,
                         Integer.MAX_VALUE,
@@ -112,8 +112,8 @@ public class AutoTotem implements InternalExtension {
                 ),
                 BUILDER.ofInt("totem-max-delay",
                         "Max delay (seconds)",
-                        "Maximum delay between using totems",
                         new String[]{"--totem-max-delay"},
+                        "Maximum delay between using totems",
                         2,
                         0,
                         Integer.MAX_VALUE,

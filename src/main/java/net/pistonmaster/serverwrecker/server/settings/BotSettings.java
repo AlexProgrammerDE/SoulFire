@@ -36,15 +36,15 @@ public class BotSettings implements SettingsObject {
     public static final StringProperty ADDRESS = BUILDER.ofString(
             "address",
             "Address",
-            "Address to connect to",
             new String[]{"--address"},
+            "Address to connect to",
             "127.0.0.1:25565"
     );
     public static final IntProperty AMOUNT = BUILDER.ofInt(
             "amount",
             "Amount",
-            "Amount of bots to connect",
             new String[]{"--amount"},
+            "Amount of bots to connect",
             1,
             1,
             Integer.MAX_VALUE,
@@ -54,8 +54,8 @@ public class BotSettings implements SettingsObject {
             BUILDER.ofInt(
                     "minJoinDelayMs",
                     "Min Join Delay",
-                    "Minimum delay between joins in milliseconds",
                     new String[]{"--min-join-delay-ms"},
+                    "Minimum delay between joins in milliseconds",
                     1000,
                     0,
                     Integer.MAX_VALUE,
@@ -64,8 +64,8 @@ public class BotSettings implements SettingsObject {
             BUILDER.ofInt(
                     "maxJoinDelayMs",
                     "Max Join Delay",
-                    "Maximum delay between joins in milliseconds",
                     new String[]{"--max-join-delay-ms"},
+                    "Maximum delay between joins in milliseconds",
                     3000,
                     0,
                     Integer.MAX_VALUE,
@@ -75,16 +75,16 @@ public class BotSettings implements SettingsObject {
     public static final ComboProperty PROTOCOL_VERSION = BUILDER.ofCombo(
             "protocolVersion",
             "Protocol Version",
-            "Protocol version to use",
             new String[]{"--protocol-version"},
+            "Protocol version to use",
             getProtocolVersionOptions(),
             0
     );
     public static final IntProperty READ_TIMEOUT = BUILDER.ofInt(
             "readTimeout",
             "Read Timeout",
-            "Read timeout in seconds",
             new String[]{"--read-timeout"},
+            "Read timeout in seconds",
             30,
             0,
             Integer.MAX_VALUE,
@@ -93,8 +93,8 @@ public class BotSettings implements SettingsObject {
     public static final IntProperty WRITE_TIMEOUT = BUILDER.ofInt(
             "writeTimeout",
             "Write Timeout",
-            "Write timeout in seconds",
             new String[]{"--write-timeout"},
+            "Write timeout in seconds",
             0,
             0,
             Integer.MAX_VALUE,
@@ -103,8 +103,8 @@ public class BotSettings implements SettingsObject {
     public static final IntProperty CONNECT_TIMEOUT = BUILDER.ofInt(
             "connectTimeout",
             "Connect Timeout",
-            "Connect timeout in seconds",
             new String[]{"--connect-timeout"},
+            "Connect timeout in seconds",
             30,
             0,
             Integer.MAX_VALUE,
@@ -113,15 +113,15 @@ public class BotSettings implements SettingsObject {
     public static final BooleanProperty TRY_SRV = BUILDER.ofBoolean(
             "trySrv",
             "Try SRV",
-            "Try to use SRV records",
             new String[]{"--try-srv"},
+            "Try to use SRV records",
             true
     );
     public static final IntProperty CONCURRENT_CONNECTS = BUILDER.ofInt(
             "concurrentConnects",
             "Concurrent Connects",
-            "Amount of concurrent connects",
             new String[]{"--concurrent-connects"},
+            "Amount of concurrent connects",
             1,
             0,
             Integer.MAX_VALUE,

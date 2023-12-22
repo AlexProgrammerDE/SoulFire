@@ -249,16 +249,16 @@ public class ForwardingBypass implements InternalExtension {
         public static final ComboProperty FORWARDING_MODE = BUILDER.ofEnum(
                 "forwarding-mode",
                 "Forwarding mode",
-                "Forwarding mode",
                 new String[]{"--forwarding-mode"},
+                "Forwarding mode",
                 ForwardingMode.values(),
                 ForwardingMode.NONE
         );
         public static final StringProperty SECRET = BUILDER.ofString(
                 "secret",
                 "Secret",
-                "Secret",
                 new String[]{"--secret"},
+                "Secret",
                 "forwarding secret"
         );
 

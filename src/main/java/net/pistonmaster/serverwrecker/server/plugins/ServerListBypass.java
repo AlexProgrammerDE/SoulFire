@@ -70,16 +70,16 @@ public class ServerListBypass implements InternalExtension {
         private static final Property.Builder BUILDER = Property.builder("server-list-bypass");
         public static final BooleanProperty SERVER_LIST_BYPASS = BUILDER.ofBoolean("server-list-bypass",
                 "Do Server List Bypass?",
-                "Do Server List Bypass?",
                 new String[]{"--server-list-bypass"},
+                "Do Server List Bypass?",
                 false
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
                 BUILDER.ofInt(
                         "server-list-bypass-min-delay",
                         "Min delay (seconds)",
-                        "Minimum delay between joining the server",
                         new String[]{"--server-list-bypass-min-delay"},
+                        "Minimum delay between joining the server",
                         1,
                         0,
                         Integer.MAX_VALUE,
@@ -88,8 +88,8 @@ public class ServerListBypass implements InternalExtension {
                 BUILDER.ofInt(
                         "server-list-bypass-max-delay",
                         "Max delay (seconds)",
-                        "Maximum delay between joining the server",
                         new String[]{"--server-list-bypass-max-delay"},
+                        "Maximum delay between joining the server",
                         3,
                         0,
                         Integer.MAX_VALUE,
