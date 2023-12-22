@@ -106,7 +106,7 @@ public class ChatMessageLogger implements InternalExtension {
                 true
         );
         public static final IntProperty INTERVAL = BUILDER.ofInt(
-                "chat-interval",
+                "interval",
                 "Minimum delay between logging chat",
                 new String[]{"--chat-interval"},
                 "This is the minimum delay between logging chat messages",

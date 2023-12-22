@@ -141,7 +141,7 @@ public class AutoArmor implements InternalExtension {
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
                 BUILDER.ofInt(
-                        "armor-min-delay",
+                        "min-delay",
                         "Min delay (seconds)",
                         new String[]{"--armor-min-delay"},
                         "Minimum delay between putting on armor",
@@ -151,7 +151,7 @@ public class AutoArmor implements InternalExtension {
                         1
                 ),
                 BUILDER.ofInt(
-                        "armor-max-delay",
+                        "max-delay",
                         "Max delay (seconds)",
                         new String[]{"--armor-max-delay"},
                         "Maximum delay between putting on armor",

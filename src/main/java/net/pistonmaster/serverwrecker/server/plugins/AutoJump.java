@@ -77,7 +77,7 @@ public class AutoJump implements InternalExtension {
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
                 BUILDER.ofInt(
-                        "jump-min-delay",
+                        "min-delay",
                         "Min delay (seconds)",
                         new String[]{"--jump-min-delay"},
                         "Minimum delay between jumps",
@@ -87,7 +87,7 @@ public class AutoJump implements InternalExtension {
                         1
                 ),
                 BUILDER.ofInt(
-                        "jump-max-delay",
+                        "max-delay",
                         "Max delay (seconds)",
                         new String[]{"--jump-max-delay"},
                         "Maximum delay between jumps",

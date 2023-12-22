@@ -85,7 +85,7 @@ public class AutoReconnect implements InternalExtension {
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
                 BUILDER.ofInt(
-                        "reconnect-min-delay",
+                        "min-delay",
                         "Min delay (seconds)",
                         new String[]{"--reconnect-min-delay"},
                         "Minimum delay between reconnects",
@@ -95,7 +95,7 @@ public class AutoReconnect implements InternalExtension {
                         1
                 ),
                 BUILDER.ofInt(
-                        "reconnect-max-delay",
+                        "max-delay",
                         "Max delay (seconds)",
                         new String[]{"--reconnect-max-delay"},
                         "Maximum delay between reconnects",

@@ -103,7 +103,7 @@ public class AutoTotem implements InternalExtension {
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
                 BUILDER.ofInt(
-                        "totem-min-delay",
+                        "min-delay",
                         "Min delay (seconds)",
                         new String[]{"--totem-min-delay"},
                         "Minimum delay between using totems",
@@ -113,7 +113,7 @@ public class AutoTotem implements InternalExtension {
                         1
                 ),
                 BUILDER.ofInt(
-                        "totem-max-delay",
+                        "max-delay",
                         "Max delay (seconds)",
                         new String[]{"--totem-max-delay"},
                         "Maximum delay between using totems",

@@ -153,7 +153,7 @@ public class AutoEat implements InternalExtension {
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
                 BUILDER.ofInt(
-                        "eat-min-delay",
+                        "min-delay",
                         "Min delay (seconds)",
                         new String[]{"--eat-min-delay"},
                         "Minimum delay between eating",
@@ -163,7 +163,7 @@ public class AutoEat implements InternalExtension {
                         1
                 ),
                 BUILDER.ofInt(
-                        "eat-max-delay",
+                        "max-delay",
                         "Max delay (seconds)",
                         new String[]{"--eat-max-delay"},
                         "Maximum delay between eating",

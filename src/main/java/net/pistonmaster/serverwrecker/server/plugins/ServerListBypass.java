@@ -76,7 +76,7 @@ public class ServerListBypass implements InternalExtension {
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
                 BUILDER.ofInt(
-                        "server-list-bypass-min-delay",
+                        "min-delay",
                         "Min delay (seconds)",
                         new String[]{"--server-list-bypass-min-delay"},
                         "Minimum delay between joining the server",
@@ -86,7 +86,7 @@ public class ServerListBypass implements InternalExtension {
                         1
                 ),
                 BUILDER.ofInt(
-                        "server-list-bypass-max-delay",
+                        "max-delay",
                         "Max delay (seconds)",
                         new String[]{"--server-list-bypass-max-delay"},
                         "Maximum delay between joining the server",

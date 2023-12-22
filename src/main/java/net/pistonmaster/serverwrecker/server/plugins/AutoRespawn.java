@@ -80,7 +80,7 @@ public class AutoRespawn implements InternalExtension {
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
                 BUILDER.ofInt(
-                        "respawn-min-delay",
+                        "min-delay",
                         "Min delay (seconds)",
                         new String[]{"--respawn-min-delay"},
                         "Minimum delay between respawns",
@@ -90,7 +90,7 @@ public class AutoRespawn implements InternalExtension {
                         1
                 ),
                 BUILDER.ofInt(
-                        "respawn-max-delay",
+                        "max-delay",
                         "Max delay (seconds)",
                         new String[]{"--respawn-max-delay"},
                         "Maximum delay between respawns",
