@@ -38,7 +38,7 @@ public class DeveloperPanel extends NavigationItem {
 
         GeneratedPanel.addComponents(this, cardsContainer.getByNamespace("dev"), guiManager.settingsManager());
 
-        add(new JLabel("Save Log:"));
+        add(new JLabel("Save Log"));
         var saveLog = new JButton("Save Log");
         add(saveLog);
 
