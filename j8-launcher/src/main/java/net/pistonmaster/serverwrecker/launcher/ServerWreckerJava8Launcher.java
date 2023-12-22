@@ -37,7 +37,6 @@ public class ServerWreckerJava8Launcher {
             setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             setSize(400, 200);
             setLocationRelativeTo(null);
-            getRootPane().setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             JTextPane pane = new JTextPane();
             pane.setContentType("text/html");
             pane.setText("<html><center><h1>Unsupported Java Version</h1><br>" +
@@ -48,7 +47,7 @@ public class ServerWreckerJava8Launcher {
             );
             pane.setEditable(false);
             pane.setBackground(null);
-            pane.setBorder(null);
+            pane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             pane.addHyperlinkListener(event -> {
                 if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED
                         && Desktop.isDesktopSupported()) {
