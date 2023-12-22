@@ -1,5 +1,7 @@
 package net.pistonmaster.serverwrecker.launcher;
 
+import com.formdev.flatlaf.FlatDarkLaf;
+
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import java.awt.*;
@@ -19,6 +21,7 @@ public class ServerWreckerJava8Launcher {
             System.out.println("[ServerWrecker] You can download the latest version of Java at https://adoptopenjdk.net/");
 
             if (!GraphicsEnvironment.isHeadless()) {
+                FlatDarkLaf.setup();
                 new UnsupportedVersionDialog();
             }
         } catch (ReflectiveOperationException e) {
