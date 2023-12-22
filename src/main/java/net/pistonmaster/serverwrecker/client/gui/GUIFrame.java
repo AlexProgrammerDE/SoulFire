@@ -61,7 +61,7 @@ public class GUIFrame extends JFrame {
         var proxyHint = new HintManager.Hint(
                 "Click to import HTTP, SOCKS4 and SOCKS5 proxies",
                 (Component) Objects.requireNonNull(cardContainer.getClientProperty("proxy-menu-button")),
-                SwingConstants.LEFT, "hint.proxyButton", pluginsHint);
+                SwingConstants.RIGHT, "hint.proxyButton", pluginsHint);
 
         var accountsHint = new HintManager.Hint(
                 "Click to configure the bot offline-mode name format or bring your own accounts.",
