@@ -20,7 +20,7 @@ public class ServerWreckerJava8Launcher {
             System.out.println("[ServerWrecker] You are currently using Java " + System.getProperty("java.version"));
             System.out.println("[ServerWrecker] You can download the latest version of Java at https://adoptopenjdk.net/");
 
-            if (!GraphicsEnvironment.isHeadless()) {
+            if (!GraphicsEnvironment.isHeadless() && args.length == 0) {
                 FlatDarkLaf.setup();
                 new UnsupportedVersionDialog();
             }
