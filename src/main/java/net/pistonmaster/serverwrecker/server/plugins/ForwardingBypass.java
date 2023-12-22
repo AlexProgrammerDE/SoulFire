@@ -250,7 +250,7 @@ public class ForwardingBypass implements InternalExtension {
                 "forwarding-mode",
                 "Forwarding mode",
                 new String[]{"--forwarding-mode"},
-                "Forwarding mode",
+                "What type of forwarding to use",
                 ForwardingMode.values(),
                 ForwardingMode.NONE
         );
@@ -258,7 +258,7 @@ public class ForwardingBypass implements InternalExtension {
                 "secret",
                 "Secret",
                 new String[]{"--secret"},
-                "Secret",
+                "Secret key used for forwarding. (Not needed for legacy mode)",
                 "forwarding secret"
         );
 

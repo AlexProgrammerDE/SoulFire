@@ -133,9 +133,9 @@ public class AutoArmor implements InternalExtension {
     private static class AutoArmorSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("auto-armor");
         public static final BooleanProperty AUTO_ARMOR = BUILDER.ofBoolean("auto-armor",
-                "Do Auto Armor?",
+                "Enable Auto Armor",
                 new String[]{"--auto-armor"},
-                "Do Auto Armor?",
+                "Put on best armor automatically",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(

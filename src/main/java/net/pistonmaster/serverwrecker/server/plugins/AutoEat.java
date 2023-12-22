@@ -145,9 +145,9 @@ public class AutoEat implements InternalExtension {
     private static class AutoEatSettings implements SettingsObject {
         public static final Property.Builder BUILDER = Property.builder("auto-eat");
         public static final BooleanProperty AUTO_EAT = BUILDER.ofBoolean("auto-eat",
-                "Do Auto Eat?",
+                "Enable Auto Eat",
                 new String[]{"--auto-eat"},
-                "Do Auto Eat?",
+                "Eat available food automatically when hungry",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(

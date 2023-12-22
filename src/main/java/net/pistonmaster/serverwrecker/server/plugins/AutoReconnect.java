@@ -77,9 +77,9 @@ public class AutoReconnect implements InternalExtension {
     private static class AutoReconnectSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("auto-reconnect");
         public static final BooleanProperty AUTO_RECONNECT = BUILDER.ofBoolean("auto-reconnect",
-                "Do Auto Reconnect?",
+                "Enable Auto Reconnect",
                 new String[]{"--auto-reconnect"},
-                "Do Auto Reconnect?",
+                "Reconnect a bot when it times out/is kicked",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(

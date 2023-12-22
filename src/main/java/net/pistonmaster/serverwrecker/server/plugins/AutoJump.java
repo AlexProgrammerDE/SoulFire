@@ -69,9 +69,9 @@ public class AutoJump implements InternalExtension {
     private static class AutoJumpSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("auto-jump");
         public static final BooleanProperty AUTO_JUMP = BUILDER.ofBoolean("auto-jump",
-                "Do Auto Jump?",
+                "Enable Auto Jump",
                 new String[]{"--auto-jump"},
-                "Do Auto Jump?",
+                "Attempt to jump automatically in random intervals",
                 false
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(

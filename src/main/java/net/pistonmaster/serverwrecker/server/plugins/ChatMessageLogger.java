@@ -102,7 +102,7 @@ public class ChatMessageLogger implements InternalExtension {
                 "log-chat",
                 "Log chat to terminal",
                 new String[]{"--log-chat"},
-                "If this is enabled, all chat messages will be logged to the terminal",
+                "Log all received chat messages to the terminal",
                 true
         );
         public static IntProperty INTERVAL = BUILDER.ofInt(

@@ -95,9 +95,9 @@ public class AutoTotem implements InternalExtension {
     private static class AutoTotemSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("auto-totem");
         public static final BooleanProperty AUTO_TOTEM = BUILDER.ofBoolean("auto-totem",
-                "Do Auto Totem?",
+                "Enable Auto Totem",
                 new String[]{"--auto-totem"},
-                "Do Auto Totem?",
+                "Always put available totems in the offhand slot",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(

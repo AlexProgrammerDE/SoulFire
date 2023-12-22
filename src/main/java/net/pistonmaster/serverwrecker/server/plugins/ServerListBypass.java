@@ -69,9 +69,9 @@ public class ServerListBypass implements InternalExtension {
     private static class ServerListBypassSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("server-list-bypass");
         public static final BooleanProperty SERVER_LIST_BYPASS = BUILDER.ofBoolean("server-list-bypass",
-                "Do Server List Bypass?",
+                "Enable Server List Bypass",
                 new String[]{"--server-list-bypass"},
-                "Do Server List Bypass?",
+                "Whether to ping the server list before connecting. (Bypasses anti-bots like EpicGuard)",
                 false
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(

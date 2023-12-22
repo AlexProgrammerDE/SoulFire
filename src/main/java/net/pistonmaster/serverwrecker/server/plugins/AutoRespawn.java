@@ -72,9 +72,9 @@ public class AutoRespawn implements InternalExtension {
     private static class AutoRespawnSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("auto-respawn");
         public static final BooleanProperty AUTO_RESPAWN = BUILDER.ofBoolean("auto-respawn",
-                "Do Auto Respawn?",
+                "Enable Auto Respawn",
                 new String[]{"--auto-respawn"},
-                "Do Auto Respawn?",
+                "Respawn automatically after death",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(

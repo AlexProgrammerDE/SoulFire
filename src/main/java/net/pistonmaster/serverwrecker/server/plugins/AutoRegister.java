@@ -77,35 +77,35 @@ public class AutoRegister implements InternalExtension {
         private static final Property.Builder BUILDER = Property.builder("auto-register");
         public static final BooleanProperty AUTO_REGISTER = BUILDER.ofBoolean(
                 "auto-register",
-                "Auto Register: ",
+                "Auto Register",
                 new String[]{"--auto-register"},
                 "Make bots run the /register and /login command after joining",
                 false
         );
         public static final StringProperty REGISTER_COMMAND = BUILDER.ofString(
                 "register-command",
-                "Register Command: ",
+                "Register Command",
                 new String[]{"--register-command"},
                 "Command to be executed to register",
                 "/register %password% %password%"
         );
         public static final StringProperty LOGIN_COMMAND = BUILDER.ofString(
                 "login-command",
-                "Login Command: ",
+                "Login Command",
                 new String[]{"--login-command"},
                 "Command to be executed to log in",
                 "/login %password%"
         );
         public static final StringProperty CAPTCHA_COMMAND = BUILDER.ofString(
                 "captcha-command",
-                "Captcha Command: ",
+                "Captcha Command",
                 new String[]{"--captcha-command"},
                 "Command to be executed to confirm a captcha",
                 "/captcha %captcha%"
         );
         public static final StringProperty PASSWORD_FORMAT = BUILDER.ofString(
                 "password-format",
-                "Password Format: ",
+                "Password Format",
                 new String[]{"--password-format"},
                 "The password for registering",
                 "ServerWrecker"

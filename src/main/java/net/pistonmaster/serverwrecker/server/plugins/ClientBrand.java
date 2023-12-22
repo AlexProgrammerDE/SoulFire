@@ -73,13 +73,13 @@ public class ClientBrand implements InternalExtension {
         public static final BooleanProperty SEND_CLIENT_BRAND = BUILDER.ofBoolean("send-client-brand",
                 "Send client brand",
                 new String[]{"--send-client-brand"},
-                "Send client brand",
+                "Send client brand to the server",
                 true
         );
         public static final StringProperty CLIENT_BRAND = BUILDER.ofString("client-brand",
                 "Client brand",
                 new String[]{"--client-brand"},
-                "Client brand",
+                "The client brand to send to the server",
                 "vanilla"
         );
     }

@@ -76,7 +76,7 @@ public class BotSettings implements SettingsObject {
             "protocolVersion",
             "Protocol Version",
             new String[]{"--protocol-version"},
-            "Protocol version to use",
+            "Minecraft protocol version to use",
             getProtocolVersionOptions(),
             0
     );
@@ -114,16 +114,16 @@ public class BotSettings implements SettingsObject {
             "trySrv",
             "Try SRV",
             new String[]{"--try-srv"},
-            "Try to use SRV records",
+            "Try to resolve SRV records from the address",
             true
     );
     public static final IntProperty CONCURRENT_CONNECTS = BUILDER.ofInt(
             "concurrentConnects",
             "Concurrent Connects",
             new String[]{"--concurrent-connects"},
-            "Amount of concurrent connects",
+            "Max amount of bots attempting to connect at once",
             1,
-            0,
+            1,
             Integer.MAX_VALUE,
             1
     );
