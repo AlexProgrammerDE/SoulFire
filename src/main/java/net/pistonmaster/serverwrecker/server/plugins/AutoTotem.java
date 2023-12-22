@@ -40,7 +40,7 @@ public class AutoTotem implements InternalExtension {
     public static void onJoined(BotJoinedEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
-        if (!settingsHolder.get(AutoTotemSettings.AUTO_TOTEM)) {
+        if (!settingsHolder.get(AutoTotemSettings.ENABLED)) {
             return;
         }
 
@@ -94,14 +94,16 @@ public class AutoTotem implements InternalExtension {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     private static class AutoTotemSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("auto-totem");
-        public static final BooleanProperty AUTO_TOTEM = BUILDER.ofBoolean("auto-totem",
+        public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
+                "enabled",
                 "Enable Auto Totem",
                 new String[]{"--auto-totem"},
                 "Always put available totems in the offhand slot",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
-                BUILDER.ofInt("totem-min-delay",
+                BUILDER.ofInt(
+                        "totem-min-delay",
                         "Min delay (seconds)",
                         new String[]{"--totem-min-delay"},
                         "Minimum delay between using totems",
@@ -110,7 +112,8 @@ public class AutoTotem implements InternalExtension {
                         Integer.MAX_VALUE,
                         1
                 ),
-                BUILDER.ofInt("totem-max-delay",
+                BUILDER.ofInt(
+                        "totem-max-delay",
                         "Max delay (seconds)",
                         new String[]{"--totem-max-delay"},
                         "Maximum delay between using totems",

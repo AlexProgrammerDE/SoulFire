@@ -53,7 +53,7 @@ public class AutoReconnect implements InternalExtension {
     public void onDisconnect(BotDisconnectedEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
-        if (!settingsHolder.get(AutoReconnectSettings.AUTO_RECONNECT) || connection.attackManager().attackState().isInactive()) {
+        if (!settingsHolder.get(AutoReconnectSettings.ENABLED) || connection.attackManager().attackState().isInactive()) {
             return;
         }
 
@@ -76,14 +76,16 @@ public class AutoReconnect implements InternalExtension {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     private static class AutoReconnectSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("auto-reconnect");
-        public static final BooleanProperty AUTO_RECONNECT = BUILDER.ofBoolean("auto-reconnect",
+        public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
+                "enabled",
                 "Enable Auto Reconnect",
                 new String[]{"--auto-reconnect"},
                 "Reconnect a bot when it times out/is kicked",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
-                BUILDER.ofInt("reconnect-min-delay",
+                BUILDER.ofInt(
+                        "reconnect-min-delay",
                         "Min delay (seconds)",
                         new String[]{"--reconnect-min-delay"},
                         "Minimum delay between reconnects",
@@ -92,7 +94,8 @@ public class AutoReconnect implements InternalExtension {
                         Integer.MAX_VALUE,
                         1
                 ),
-                BUILDER.ofInt("reconnect-max-delay",
+                BUILDER.ofInt(
+                        "reconnect-max-delay",
                         "Max delay (seconds)",
                         new String[]{"--reconnect-max-delay"},
                         "Maximum delay between reconnects",

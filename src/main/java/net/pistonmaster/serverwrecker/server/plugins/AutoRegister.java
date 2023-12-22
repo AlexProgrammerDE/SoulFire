@@ -35,7 +35,7 @@ public class AutoRegister implements InternalExtension {
     public static void onChat(ChatMessageReceiveEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
-        if (!settingsHolder.get(AutoRegisterSettings.AUTO_REGISTER)) {
+        if (!settingsHolder.get(AutoRegisterSettings.ENABLED)) {
             return;
         }
 
@@ -75,8 +75,8 @@ public class AutoRegister implements InternalExtension {
     @NoArgsConstructor(access = AccessLevel.NONE)
     private static class AutoRegisterSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("auto-register");
-        public static final BooleanProperty AUTO_REGISTER = BUILDER.ofBoolean(
-                "auto-register",
+        public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
+                "enabled",
                 "Auto Register",
                 new String[]{"--auto-register"},
                 "Make bots run the /register and /login command after joining",

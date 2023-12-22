@@ -36,7 +36,7 @@ public class AutoJump implements InternalExtension {
     public static void onJoined(BotJoinedEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
-        if (!settingsHolder.get(AutoJumpSettings.AUTO_JUMP)) {
+        if (!settingsHolder.get(AutoJumpSettings.ENABLED)) {
             return;
         }
 
@@ -68,14 +68,16 @@ public class AutoJump implements InternalExtension {
     @NoArgsConstructor(access = AccessLevel.NONE)
     private static class AutoJumpSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("auto-jump");
-        public static final BooleanProperty AUTO_JUMP = BUILDER.ofBoolean("auto-jump",
+        public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
+                "enabled",
                 "Enable Auto Jump",
                 new String[]{"--auto-jump"},
                 "Attempt to jump automatically in random intervals",
                 false
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
-                BUILDER.ofInt("jump-min-delay",
+                BUILDER.ofInt(
+                        "jump-min-delay",
                         "Min delay (seconds)",
                         new String[]{"--jump-min-delay"},
                         "Minimum delay between jumps",
@@ -84,7 +86,8 @@ public class AutoJump implements InternalExtension {
                         Integer.MAX_VALUE,
                         1
                 ),
-                BUILDER.ofInt("jump-max-delay",
+                BUILDER.ofInt(
+                        "jump-max-delay",
                         "Max delay (seconds)",
                         new String[]{"--jump-max-delay"},
                         "Maximum delay between jumps",

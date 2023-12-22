@@ -46,7 +46,7 @@ public class ChatMessageLogger implements InternalExtension {
     public static void onConnectionInit(BotConnectionInitEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
-        if (!settingsHolder.get(ChatMessageSettings.LOG_CHAT)) {
+        if (!settingsHolder.get(ChatMessageSettings.ENABLED)) {
             return;
         }
 
@@ -98,14 +98,14 @@ public class ChatMessageLogger implements InternalExtension {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     private static class ChatMessageSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("chat-message-logger");
-        public static final BooleanProperty LOG_CHAT = BUILDER.ofBoolean(
-                "log-chat",
+        public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
+                "enabled",
                 "Log chat to terminal",
                 new String[]{"--log-chat"},
                 "Log all received chat messages to the terminal",
                 true
         );
-        public static IntProperty INTERVAL = BUILDER.ofInt(
+        public static final IntProperty INTERVAL = BUILDER.ofInt(
                 "chat-interval",
                 "Minimum delay between logging chat",
                 new String[]{"--chat-interval"},

@@ -95,7 +95,7 @@ public class AutoArmor implements InternalExtension {
     public static void onJoined(BotJoinedEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
-        if (!settingsHolder.get(AutoArmorSettings.AUTO_ARMOR)) {
+        if (!settingsHolder.get(AutoArmorSettings.ENABLED)) {
             return;
         }
 
@@ -132,14 +132,16 @@ public class AutoArmor implements InternalExtension {
     @NoArgsConstructor(access = AccessLevel.NONE)
     private static class AutoArmorSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("auto-armor");
-        public static final BooleanProperty AUTO_ARMOR = BUILDER.ofBoolean("auto-armor",
+        public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
+                "enabled",
                 "Enable Auto Armor",
                 new String[]{"--auto-armor"},
                 "Put on best armor automatically",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
-                BUILDER.ofInt("armor-min-delay",
+                BUILDER.ofInt(
+                        "armor-min-delay",
                         "Min delay (seconds)",
                         new String[]{"--armor-min-delay"},
                         "Minimum delay between putting on armor",
@@ -148,7 +150,8 @@ public class AutoArmor implements InternalExtension {
                         Integer.MAX_VALUE,
                         1
                 ),
-                BUILDER.ofInt("armor-max-delay",
+                BUILDER.ofInt(
+                        "armor-max-delay",
                         "Max delay (seconds)",
                         new String[]{"--armor-max-delay"},
                         "Maximum delay between putting on armor",

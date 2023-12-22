@@ -41,7 +41,7 @@ public class ClientBrand implements InternalExtension {
             var connection = event.connection();
             var settingsHolder = connection.settingsHolder();
 
-            if (!settingsHolder.get(ClientBrandSettings.SEND_CLIENT_BRAND)) {
+            if (!settingsHolder.get(ClientBrandSettings.ENABLED)) {
                 return;
             }
 
@@ -70,13 +70,15 @@ public class ClientBrand implements InternalExtension {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     private static class ClientBrandSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("client-brand");
-        public static final BooleanProperty SEND_CLIENT_BRAND = BUILDER.ofBoolean("send-client-brand",
+        public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
+                "enabled",
                 "Send client brand",
                 new String[]{"--send-client-brand"},
                 "Send client brand to the server",
                 true
         );
-        public static final StringProperty CLIENT_BRAND = BUILDER.ofString("client-brand",
+        public static final StringProperty CLIENT_BRAND = BUILDER.ofString(
+                "client-brand",
                 "Client brand",
                 new String[]{"--client-brand"},
                 "The client brand to send to the server",

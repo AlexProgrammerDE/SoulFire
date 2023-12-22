@@ -45,7 +45,7 @@ public class ServerListBypass implements InternalExtension {
 
         var factory = connection.factory();
         var settingsHolder = connection.settingsHolder();
-        if (!settingsHolder.get(ServerListBypassSettings.SERVER_LIST_BYPASS)) {
+        if (!settingsHolder.get(ServerListBypassSettings.ENABLED)) {
             return;
         }
 
@@ -68,7 +68,7 @@ public class ServerListBypass implements InternalExtension {
     @NoArgsConstructor(access = AccessLevel.NONE)
     private static class ServerListBypassSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("server-list-bypass");
-        public static final BooleanProperty SERVER_LIST_BYPASS = BUILDER.ofBoolean("server-list-bypass",
+        public static final BooleanProperty ENABLED = BUILDER.ofBoolean("enabled",
                 "Enable Server List Bypass",
                 new String[]{"--server-list-bypass"},
                 "Whether to ping the server list before connecting. (Bypasses anti-bots like EpicGuard)",

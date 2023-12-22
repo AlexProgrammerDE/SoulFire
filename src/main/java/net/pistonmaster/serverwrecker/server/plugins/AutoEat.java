@@ -42,7 +42,7 @@ public class AutoEat implements InternalExtension {
     public static void onJoined(BotJoinedEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
-        if (!settingsHolder.get(AutoEatSettings.AUTO_EAT)) {
+        if (!settingsHolder.get(AutoEatSettings.ENABLED)) {
             return;
         }
 
@@ -144,14 +144,16 @@ public class AutoEat implements InternalExtension {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     private static class AutoEatSettings implements SettingsObject {
         public static final Property.Builder BUILDER = Property.builder("auto-eat");
-        public static final BooleanProperty AUTO_EAT = BUILDER.ofBoolean("auto-eat",
+        public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
+                "enabled",
                 "Enable Auto Eat",
                 new String[]{"--auto-eat"},
                 "Eat available food automatically when hungry",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
-                BUILDER.ofInt("eat-min-delay",
+                BUILDER.ofInt(
+                        "eat-min-delay",
                         "Min delay (seconds)",
                         new String[]{"--eat-min-delay"},
                         "Minimum delay between eating",
@@ -160,7 +162,8 @@ public class AutoEat implements InternalExtension {
                         Integer.MAX_VALUE,
                         1
                 ),
-                BUILDER.ofInt("eat-max-delay",
+                BUILDER.ofInt(
+                        "eat-max-delay",
                         "Max delay (seconds)",
                         new String[]{"--eat-max-delay"},
                         "Maximum delay between eating",

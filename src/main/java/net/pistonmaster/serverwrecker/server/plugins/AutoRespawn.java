@@ -43,7 +43,7 @@ public class AutoRespawn implements InternalExtension {
         if (event.packet() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
             var connection = event.connection();
             var settingsHolder = connection.settingsHolder();
-            if (!settingsHolder.get(AutoRespawnSettings.AUTO_RESPAWN)) {
+            if (!settingsHolder.get(AutoRespawnSettings.ENABLED)) {
                 return;
             }
 
@@ -71,14 +71,16 @@ public class AutoRespawn implements InternalExtension {
     @NoArgsConstructor(access = AccessLevel.NONE)
     private static class AutoRespawnSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("auto-respawn");
-        public static final BooleanProperty AUTO_RESPAWN = BUILDER.ofBoolean("auto-respawn",
+        public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
+                "enabled",
                 "Enable Auto Respawn",
                 new String[]{"--auto-respawn"},
                 "Respawn automatically after death",
                 true
         );
         public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
-                BUILDER.ofInt("respawn-min-delay",
+                BUILDER.ofInt(
+                        "respawn-min-delay",
                         "Min delay (seconds)",
                         new String[]{"--respawn-min-delay"},
                         "Minimum delay between respawns",
@@ -87,7 +89,8 @@ public class AutoRespawn implements InternalExtension {
                         Integer.MAX_VALUE,
                         1
                 ),
-                BUILDER.ofInt("respawn-max-delay",
+                BUILDER.ofInt(
+                        "respawn-max-delay",
                         "Max delay (seconds)",
                         new String[]{"--respawn-max-delay"},
                         "Maximum delay between respawns",
