@@ -111,6 +111,9 @@ import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.github.steveice10.packetlib.packet.Packet;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntMaps;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Getter;
@@ -159,7 +162,6 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 @ToString
@@ -171,7 +173,7 @@ public final class SessionDataManager {
     private final BotConnection connection;
     private final WeatherState weatherState = new WeatherState();
     private final PlayerListState playerListState = new PlayerListState();
-    private final Map<Integer, AtomicInteger> itemCoolDowns = new ConcurrentHashMap<>();
+    private final Int2IntMap itemCoolDowns = Int2IntMaps.synchronize(new Int2IntOpenHashMap());
     private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
     private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
@@ -239,12 +241,7 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onJoin(ClientboundLoginPacket packet) {
-        inventoryManager.initPlayerInventory();
-
-        clientEntity = new ClientEntity(packet.getEntityId(), this, controlState);
-        clientEntity.showReducedDebug(packet.isReducedDebugInfo());
-        entityTrackerState.addEntity(clientEntity);
-
+        // Set data from the packet
         loginData = new LoginPacketData(
                 packet.isHardcore(),
                 packet.getWorldNames(),
@@ -257,6 +254,13 @@ public final class SessionDataManager {
         serverSimulationDistance = packet.getSimulationDistance();
 
         processSpawnInfo(packet.getCommonPlayerSpawnInfo());
+
+        // Init client entity
+        inventoryManager.initPlayerInventory();
+
+        clientEntity = new ClientEntity(packet.getEntityId(), this, controlState);
+        clientEntity.showReducedDebug(packet.isReducedDebugInfo());
+        entityTrackerState.addEntity(clientEntity);
     }
 
     private void processSpawnInfo(PlayerSpawnInfo spawnInfo) {
@@ -579,11 +583,11 @@ public final class SessionDataManager {
     }
 
     @EventHandler
-    public void onExperience(ClientboundCooldownPacket packet) {
+    public void onCooldown(ClientboundCooldownPacket packet) {
         if (packet.getCooldownTicks() == 0) {
             itemCoolDowns.remove(packet.getItemId());
         } else {
-            itemCoolDowns.put(packet.getItemId(), new AtomicInteger(packet.getCooldownTicks()));
+            itemCoolDowns.put(packet.getItemId(), packet.getCooldownTicks());
         }
     }
 
@@ -1020,13 +1024,33 @@ public final class SessionDataManager {
     public void tick() {
         connection.eventBus().call(new BotPreTickEvent(connection));
 
+        // Tick border changes
         if (borderState != null) {
             borderState.tick();
         }
 
+        // Tick item cooldowns
+        tickCoolDowns();
+
+        // Tick entities
         entityTrackerState.tick();
 
         connection.eventBus().call(new BotPostTickEvent(connection));
+    }
+
+    private void tickCoolDowns() {
+        synchronized (itemCoolDowns) {
+            var iterator = itemCoolDowns.int2IntEntrySet().iterator();
+            while (iterator.hasNext()) {
+                var entry = iterator.next();
+                var ticks = entry.getIntValue() - 1;
+                if (ticks <= 0) {
+                    iterator.remove();
+                } else {
+                    entry.setValue(ticks);
+                }
+            }
+        }
     }
 
     public void sendPacket(Packet packet) {
