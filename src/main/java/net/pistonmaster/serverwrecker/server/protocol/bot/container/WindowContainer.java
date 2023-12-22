@@ -41,12 +41,12 @@ public class WindowContainer extends Container {
             case GENERIC_9X4 -> 36 + INVENTORY_SIZE;
             case GENERIC_9X5 -> 45 + INVENTORY_SIZE;
             case GENERIC_9X6 -> 54 + INVENTORY_SIZE;
+            case CRAFTER_3x3, CRAFTING -> 10 + INVENTORY_SIZE;
             case ANVIL, CARTOGRAPHY, FURNACE, BLAST_FURNACE,
                     GRINDSTONE, MERCHANT,
                     SMOKER -> 3 + INVENTORY_SIZE;
             case BEACON -> 1 + INVENTORY_SIZE;
             case BREWING_STAND, HOPPER -> 5 + INVENTORY_SIZE;
-            case CRAFTING -> 10 + INVENTORY_SIZE;
             case ENCHANTMENT, STONECUTTER -> 2 + INVENTORY_SIZE;
             case LECTERN -> 1; // Only one without a bottom inventory
             case LOOM, SMITHING -> 4 + INVENTORY_SIZE;

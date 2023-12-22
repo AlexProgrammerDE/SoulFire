@@ -30,7 +30,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class SWVersionConstants {
-    public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.v1_20_2;
+    public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.v1_20_3;
 
     static {
         // Initialize all classes
