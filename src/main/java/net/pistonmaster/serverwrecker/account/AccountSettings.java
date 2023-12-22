@@ -40,7 +40,7 @@ public class AccountSettings implements SettingsObject {
             "shuffleAccounts",
             "Shuffle accounts",
             new String[]{"--shuffle-accounts"},
-            "Should the accounts be shuffled?",
+            "Should the accounts order be random when connecting bots?",
             false
     );
 }
