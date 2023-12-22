@@ -22,12 +22,7 @@ package net.pistonmaster.serverwrecker.server.settings;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.BooleanProperty;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.ComboProperty;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.IntProperty;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.MinMaxPropertyLink;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.StringProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.*;
 import net.pistonmaster.serverwrecker.server.viaversion.SWVersionConstants;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

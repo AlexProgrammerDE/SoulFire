@@ -109,6 +109,14 @@ public class ResolveUtil {
         }
     }
 
+    private static int parsePort(String port) {
+        try {
+            return Integer.parseInt(port);
+        } catch (NumberFormatException e) {
+            return 25565;
+        }
+    }
+
     public record ServerAddress(HostAndPort hostAndPort) {
         public ServerAddress(String address) {
             this(HostAndPort.fromString(address).withDefaultPort(25565));
@@ -128,14 +136,6 @@ public class ResolveUtil {
 
         public int port() {
             return hostAndPort.getPort();
-        }
-    }
-
-    private static int parsePort(String port) {
-        try {
-            return Integer.parseInt(port);
-        } catch (NumberFormatException e) {
-            return 25565;
         }
     }
 

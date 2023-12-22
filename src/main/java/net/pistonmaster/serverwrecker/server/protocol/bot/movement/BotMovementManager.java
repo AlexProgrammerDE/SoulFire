@@ -205,11 +205,6 @@ public class BotMovementManager {
         );
     }
 
-    public boolean isClimbable(LevelState world, Vector3i pos) {
-        var blockType = world.getBlockStateAt(pos).blockType();
-        return tagsState.isBlockInTag(blockType, "climbable") || blockType == BlockType.POWDER_SNOW;
-    }
-
     public static boolean isMaterialInBB(LevelState world, AABB queryBB, List<BlockType> types) {
         var minX = MathHelper.floorDouble(queryBB.minX);
         var minY = MathHelper.floorDouble(queryBB.minY);
@@ -237,6 +232,11 @@ public class BotMovementManager {
         pos.x = (bb.minX + bb.maxX) / 2;
         pos.y = bb.minY;
         pos.z = (bb.minZ + bb.maxZ) / 2;
+    }
+
+    public boolean isClimbable(LevelState world, Vector3i pos) {
+        var blockType = world.getBlockStateAt(pos).blockType();
+        return tagsState.isBlockInTag(blockType, "climbable") || blockType == BlockType.POWDER_SNOW;
     }
 
     public void tick() {

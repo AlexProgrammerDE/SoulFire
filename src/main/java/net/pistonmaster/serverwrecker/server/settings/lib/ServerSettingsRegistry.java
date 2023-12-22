@@ -19,31 +19,11 @@
  */
 package net.pistonmaster.serverwrecker.server.settings.lib;
 
-import net.pistonmaster.serverwrecker.grpc.generated.BoolSetting;
-import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingEntry;
-import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingEntryMinMaxPair;
-import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingEntryMinMaxPairSingle;
-import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingEntrySingle;
-import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingType;
-import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingsPage;
-import net.pistonmaster.serverwrecker.grpc.generated.ComboOption;
-import net.pistonmaster.serverwrecker.grpc.generated.ComboSetting;
-import net.pistonmaster.serverwrecker.grpc.generated.IntSetting;
-import net.pistonmaster.serverwrecker.grpc.generated.StringSetting;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.BooleanProperty;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.ComboProperty;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.IntProperty;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.MinMaxPropertyLink;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.SingleProperty;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.StringProperty;
+import net.pistonmaster.serverwrecker.grpc.generated.*;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.*;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ServerSettingsRegistry {
     private final Map<String, NamespaceRegistry> namespaceMap = new LinkedHashMap<>();
@@ -107,20 +87,20 @@ public class ServerSettingsRegistry {
                     case BooleanProperty booleanProperty -> entries.add(ClientPluginSettingEntry.newBuilder()
                             .setSingle(
                                     fillSingleProperties(booleanProperty)
-                                    .setType(ClientPluginSettingType.newBuilder()
-                                            .setBool(BoolSetting.newBuilder()
-                                                    .setDef(booleanProperty.defaultValue())
+                                            .setType(ClientPluginSettingType.newBuilder()
+                                                    .setBool(BoolSetting.newBuilder()
+                                                            .setDef(booleanProperty.defaultValue())
+                                                            .build())
                                                     .build())
                                             .build())
-                                    .build())
                             .build());
                     case IntProperty intProperty -> entries.add(ClientPluginSettingEntry.newBuilder()
                             .setSingle(
                                     fillSingleProperties(intProperty)
-                                    .setType(ClientPluginSettingType.newBuilder()
-                                            .setInt(createIntSetting(intProperty))
+                                            .setType(ClientPluginSettingType.newBuilder()
+                                                    .setInt(createIntSetting(intProperty))
+                                                    .build())
                                             .build())
-                                    .build())
                             .build());
                     case MinMaxPropertyLink minMaxPropertyLink -> {
                         var minProperty = minMaxPropertyLink.min();
@@ -129,24 +109,24 @@ public class ServerSettingsRegistry {
                                 .setMinMaxPair(ClientPluginSettingEntryMinMaxPair.newBuilder()
                                         .setMin(
                                                 fillMultiProperties(minProperty)
-                                                .setIntSetting(createIntSetting(minProperty))
-                                                .build())
+                                                        .setIntSetting(createIntSetting(minProperty))
+                                                        .build())
                                         .setMax(
                                                 fillMultiProperties(maxProperty)
-                                                .setIntSetting(createIntSetting(maxProperty))
-                                                .build())
+                                                        .setIntSetting(createIntSetting(maxProperty))
+                                                        .build())
                                         .build())
                                 .build());
                     }
                     case StringProperty stringProperty -> entries.add(ClientPluginSettingEntry.newBuilder()
                             .setSingle(
                                     fillSingleProperties(stringProperty)
-                                    .setType(ClientPluginSettingType.newBuilder()
-                                            .setString(StringSetting.newBuilder()
-                                                    .setDef(stringProperty.defaultValue())
+                                            .setType(ClientPluginSettingType.newBuilder()
+                                                    .setString(StringSetting.newBuilder()
+                                                            .setDef(stringProperty.defaultValue())
+                                                            .build())
                                                     .build())
                                             .build())
-                                    .build())
                             .build());
                     case ComboProperty comboProperty -> {
                         var options = new ArrayList<ComboOption>();
@@ -159,13 +139,13 @@ public class ServerSettingsRegistry {
                         entries.add(ClientPluginSettingEntry.newBuilder()
                                 .setSingle(
                                         fillSingleProperties(comboProperty)
-                                        .setType(ClientPluginSettingType.newBuilder()
-                                                .setCombo(ComboSetting.newBuilder()
-                                                        .setDef(comboProperty.defaultValue())
-                                                        .addAllOptions(options)
+                                                .setType(ClientPluginSettingType.newBuilder()
+                                                        .setCombo(ComboSetting.newBuilder()
+                                                                .setDef(comboProperty.defaultValue())
+                                                                .addAllOptions(options)
+                                                                .build())
                                                         .build())
                                                 .build())
-                                        .build())
                                 .build());
                     }
                     default -> throw new IllegalStateException("Unknown property type!");
