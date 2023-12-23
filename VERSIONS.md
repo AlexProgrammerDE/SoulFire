@@ -11,7 +11,8 @@ Below is a list of all versions that are supported by ServerWrecker.
 
 | Version           | Native | Java | Snapshot | Legacy | Bedrock |
 |-------------------|--------|------|----------|--------|---------|
-| 1.20.2            | ✅      | ✅    | ❌        | ❌      | ❌       |
+| 1.20.3/1.20.4     | ✅      | ✅    | ❌        | ❌      | ❌       |
+| 1.20.2            | ❌      | ✅    | ❌        | ❌      | ❌       |
 | 1.20/1.20.1       | ❌      | ✅    | ❌        | ❌      | ❌       |
 | 1.19.4            | ❌      | ✅    | ❌        | ❌      | ❌       |
 | 1.19.3            | ❌      | ✅    | ❌        | ❌      | ❌       |
@@ -89,4 +90,4 @@ Below is a list of all versions that are supported by ServerWrecker.
 | c0.0.18a-02       | ❌      | ✅    | ❌        | ✅      | ❌       |
 | c0.0.16a-02       | ❌      | ✅    | ❌        | ✅      | ❌       |
 | c0.0.15a-1        | ❌      | ✅    | ❌        | ✅      | ❌       |
-| Bedrock 1.20.40   | ❌      | ❌    | ❌        | ❌      | ✅       |
+| Bedrock 1.20.50   | ❌      | ❌    | ❌        | ❌      | ✅       |

@@ -14,10 +14,12 @@
 | `stop-path`           | Makes all connected bots stop pathfinding                            |
 | `lookat <x> <y> <z>`  | Makes all connected bots look at the block at the xyz coordinates    |
 | `forward`             | Makes all connected bots start walking forward                       |
+| `backward`            | Makes all connected bots start walking backwards                     |
+| `left`                | Makes all connected bots start walking left                          |
+| `right`               | Makes all connected bots start walking right                         |
 | `jump`                | Makes all connected bots jump up repeatedly                          |
 | `reset`               | Resets the movement of all connected bots                            |
-| `start-attack`        | Starts an attack using the current profile                           |
-| `stop-attack`         | Stops the ongoing attack                                             |
+| `stop-attack`         | Stops the ongoing attacks                                            |
 | `online`              | Shows connected bots from all attacks                                |
 | `say <message>`       | Makes all connected bots send a message in chat or execute a command |
 | `stats`               | Shows network stats                                                  |
