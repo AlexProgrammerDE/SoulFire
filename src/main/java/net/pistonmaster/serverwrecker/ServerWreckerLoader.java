@@ -26,12 +26,8 @@ import net.pistonmaster.serverwrecker.client.gui.ThemeUtil;
 import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.server.api.OperationMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ServerWreckerLoader {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerLoader.class);
-
     private ServerWreckerLoader() {
     }
 
@@ -44,17 +40,15 @@ public class ServerWreckerLoader {
         GUIClientProps.loadSettings();
     }
 
-    public static void runHeadless(int port, String[] args) {
-        var host = "localhost";
+    public static void runHeadless(String host, int port, String[] args) {
         var serverWrecker = new ServerWreckerServer(OperationMode.CLI, host, port);
 
-        var rpcClient = new RPCClient(host, port, serverWrecker.generateAdminJWT());
+        var rpcClient = new RPCClient(host, port, serverWrecker.generateLocalCliJWT());
         var cliManager = new CLIManager(rpcClient);
         cliManager.initCLI(args);
     }
 
-    public static void runGUI(int port) {
-        var host = "localhost";
+    public static void runGUI(String host, int port) {
         var serverWrecker = new ServerWreckerServer(OperationMode.GUI, host, port);
 
         var rpcClient = new RPCClient(host, port, serverWrecker.generateAdminJWT());

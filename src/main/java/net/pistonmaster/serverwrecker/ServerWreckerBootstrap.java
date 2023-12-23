@@ -121,16 +121,17 @@ public class ServerWreckerBootstrap {
     }
 
     private static void postMixinMain(boolean runServer, String[] args) {
+        var host = getHost();
         var port = getAvailablePort();
         if (runServer) {
-            LOGGER.info("Starting server on port {}", port);
-            ServerWreckerLoader.runHeadless(port, args);
+            LOGGER.info("Starting server on {}:{}", host, port);
+            ServerWreckerLoader.runHeadless(host, port, args);
         } else {
-            LOGGER.info("Starting GUI and server on port {}", port);
+            LOGGER.info("Starting GUI and server on {}:{}", host, port);
             ServerWreckerLoader.injectTheme();
             ServerWreckerLoader.loadGUIProperties();
 
-            ServerWreckerLoader.runGUI(port);
+            ServerWreckerLoader.runGUI(host, port);
         }
     }
 
@@ -181,7 +182,16 @@ public class ServerWreckerBootstrap {
         Configurator.setLevel("io.grpc", grpcLevel);
     }
 
+    private static String getHost() {
+        return System.getProperty("sw.grpc.host", "localhost");
+    }
+
     private static int getAvailablePort() {
+        var portProperty = System.getProperty("sw.grpc.port");
+        if (portProperty != null) {
+            return Integer.parseInt(portProperty);
+        }
+
         var initialPort = 38765;
 
         while (true) {

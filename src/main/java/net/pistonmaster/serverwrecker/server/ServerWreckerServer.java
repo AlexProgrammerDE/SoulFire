@@ -74,10 +74,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -259,14 +257,18 @@ public class ServerWreckerServer {
         ServerWreckerBootstrap.setupLogging(settingsHolder);
     }
 
-    /**
-     * Generates a JWT for the admin user.
-     *
-     * @return The JWT.
-     */
     public String generateAdminJWT() {
+        return generateJWT("admin");
+    }
+
+    public String generateLocalCliJWT() {
+        return generateJWT("local-cli");
+    }
+
+    private String generateJWT(String subject) {
         return Jwts.builder()
-                .subject("admin")
+                .subject(subject)
+                .issuedAt(Date.from(Instant.now()))
                 .signWith(jwtSecretKey, Jwts.SIG.HS256)
                 .compact();
     }
