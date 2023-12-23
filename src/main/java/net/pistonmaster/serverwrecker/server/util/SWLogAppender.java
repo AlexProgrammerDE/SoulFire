@@ -17,13 +17,17 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.logging;
+package net.pistonmaster.serverwrecker.server.util;
 
+import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.event.system.SystemLogEvent;
 import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.AbstractStringLayout;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
-public class LogFormatter {
+public class SWLogAppender extends AbstractAppender {
     private final AbstractStringLayout.Serializer formatter = new PatternLayout.SerializerBuilder()
             .setAlwaysWriteExceptions(true)
             .setDisableAnsi(true)
@@ -37,15 +41,23 @@ public class LogFormatter {
             .setDefaultPattern("[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx")
             .build();
 
-    public String format(LogEvent event) {
-        var builder = new StringBuilder();
+    public SWLogAppender() {
+        super("LogPanelAppender", null, null, false, Property.EMPTY_ARRAY);
+    }
 
+    @Override
+    public void append(LogEvent event) {
+        String formatted;
         if (event.getLoggerName().startsWith("net.pistonmaster.serverwrecker")) {
-            builtInFormatter.toSerializable(event, builder);
+            formatted = builtInFormatter.toSerializable(event);
         } else {
-            formatter.toSerializable(event, builder);
+            formatted = formatter.toSerializable(event);
         }
 
-        return builder.toString();
+        if (formatted.isBlank()) {
+            return;
+        }
+
+        ServerWreckerAPI.postEvent(new SystemLogEvent(formatted));
     }
 }
