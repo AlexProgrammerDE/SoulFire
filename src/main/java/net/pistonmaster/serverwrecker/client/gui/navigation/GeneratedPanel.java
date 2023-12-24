@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.client.gui.navigation;
 import com.google.gson.JsonPrimitive;
 import net.pistonmaster.serverwrecker.client.gui.libs.JMinMaxHelper;
 import net.pistonmaster.serverwrecker.client.gui.libs.PresetJCheckBox;
+import net.pistonmaster.serverwrecker.client.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.client.settings.SettingsManager;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingsPage;
 import net.pistonmaster.serverwrecker.grpc.generated.ComboOption;
@@ -73,6 +74,8 @@ public class GeneratedPanel extends NavigationItem {
                             var textField = new JTextField(stringEntry.getDef());
                             settingsManager.registerListener(propertyKey, s -> textField.setText(s.getAsString()));
                             settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(textField.getText()));
+
+                            SwingTextUtils.addUndoRedo(textField);
 
                             yield textField;
                         }

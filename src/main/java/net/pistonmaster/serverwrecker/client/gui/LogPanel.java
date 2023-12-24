@@ -24,6 +24,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.client.gui.libs.MessageLogPanel;
+import net.pistonmaster.serverwrecker.client.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.command.ClientCommandManager;
 import net.pistonmaster.serverwrecker.grpc.generated.LogRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.LogResponse;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.swing.*;
+import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
@@ -70,17 +72,17 @@ public class LogPanel extends JPanel {
         });
 
         var commands = new JTextField();
+        commands.putClientProperty("JTextField.placeholderText", "Type ServerWrecker commands here...");
+
         putClientProperty("log-panel-command-input", commands);
 
-        // commands.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
+        var undoManager = SwingTextUtils.addUndoRedo(commands);
 
-        var commandShellAction = new CommandShellAction();
+        var commandShellAction = new CommandShellAction(undoManager);
         commandShellAction.initHistory();
 
         commands.addActionListener(commandShellAction);
-        commands.addKeyListener(new CommandShellKeyAdapter(commandShellAction, commands));
-
-        commands.putClientProperty("JTextField.placeholderText", "Type ServerWrecker commands here...");
+        commands.addKeyListener(new CommandShellKeyAdapter(undoManager, commandShellAction, commands));
 
         setLayout(new BorderLayout());
         add(messageLogPanel, BorderLayout.CENTER);
@@ -90,7 +92,9 @@ public class LogPanel extends JPanel {
     }
 
     @Getter
+    @RequiredArgsConstructor
     private class CommandShellAction extends AbstractAction {
+        private final UndoManager undoManager;
         private final List<String> commandHistory = new ArrayList<>();
         @Setter
         private int pointer = -1;
@@ -112,6 +116,7 @@ public class LogPanel extends JPanel {
             }
 
             ((JTextField) e.getSource()).setText(null);
+            undoManager.discardAllEdits();
 
             commandHistory.add(command);
             clientCommandManager.execute(command);
@@ -120,6 +125,7 @@ public class LogPanel extends JPanel {
 
     @RequiredArgsConstructor
     private class CommandShellKeyAdapter extends KeyAdapter {
+        private final UndoManager undoManager;
         private final CommandShellAction commandShellAction;
         private final JTextField commands;
         private String cachedText = null;
@@ -138,24 +144,17 @@ public class LogPanel extends JPanel {
                     if (pointer < commandHistory.size() - 1) {
                         commandShellAction.pointer(pointer + 1);
                         commands.setText(getTextAtPointer());
+                        undoManager.discardAllEdits();
                     }
                 }
                 case KeyEvent.VK_DOWN -> {
                     if (pointer > -1) {
                         commandShellAction.pointer(pointer - 1);
                         commands.setText(getTextAtPointer());
+                        undoManager.discardAllEdits();
                     }
                 }
                 case KeyEvent.VK_ENTER -> cachedText = null;
-                /*
-                    case KeyEvent.VK_TAB:
-                        e.consume();
-                        ParseResults<ShellSender> results = shellSender.getDispatcher().parse(commands.getText(), shellSender);
-
-                        System.out.println(results.getContext().findSuggestionContext(commands.getCaretPosition()).startPos);
-                        System.out.println(results.getContext().findSuggestionContext(commands.getCaretPosition()).parent.getName());
-                        break;
-                */
             }
         }
 
