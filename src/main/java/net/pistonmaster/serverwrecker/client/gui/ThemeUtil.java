@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.client.gui;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
+import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.util.SystemInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,8 @@ public class ThemeUtil {
     }
 
     public static void initFlatLaf() {
+        FlatInspector.install("ctrl shift alt X");
+
         if (SystemInfo.isMacOS) {
             // Use top screen menu bar on macOS
             System.setProperty("apple.laf.useScreenMenuBar", "true");
