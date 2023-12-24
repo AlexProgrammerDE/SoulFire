@@ -19,6 +19,13 @@
 Advanced Minecraft Server-Stresser Tool. Launch bot attacks on your own servers to stress-test them and measure
 performance.
 
+---
+
+> [!WARNING]
+> This is a very powerful tool that shall only be used to attack your own servers. Ensure your own DDoS protection provider and your host are okay with stress-tests. If you use this software to attack others, you make yourself (or your legal guardians) criminally liable, the developers of ServerWrecker are not responsible for your own actions.
+
+---
+
 ## 🚀 Features
 
 * GUI (Multiple themes) & CLI
