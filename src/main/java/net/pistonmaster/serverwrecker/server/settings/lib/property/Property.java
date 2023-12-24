@@ -19,6 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.server.settings.lib.property;
 
+import java.util.function.Function;
+
 public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
     static Builder builder(String namespace) {
         return new Builder(namespace);
@@ -59,7 +61,11 @@ public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
         }
 
         public <T extends Enum<T>> ComboProperty ofEnum(String key, String uiName, String[] cliFlags, String description, T[] values, T defaultValue) {
-            return new ComboProperty(namespace, key, uiName, cliFlags, description, ComboProperty.ComboOption.fromEnum(values), defaultValue.ordinal());
+            return ofEnumMapped(key, uiName, cliFlags, description, values, defaultValue, Object::toString);
+        }
+
+        public <T extends Enum<T>> ComboProperty ofEnumMapped(String key, String uiName, String[] cliFlags, String description, T[] values, T defaultValue, Function<T, String> mapper) {
+            return new ComboProperty(namespace, key, uiName, cliFlags, description, ComboProperty.ComboOption.fromEnum(values, mapper), defaultValue.ordinal());
         }
     }
 }

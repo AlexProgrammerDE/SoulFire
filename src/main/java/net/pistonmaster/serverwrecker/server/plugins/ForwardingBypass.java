@@ -264,11 +264,19 @@ public class ForwardingBypass implements InternalExtension {
                 "forwarding secret"
         );
 
+        @RequiredArgsConstructor
         enum ForwardingMode {
-            NONE,
-            LEGACY,
-            BUNGEE_GUARD,
-            MODERN
+            NONE("None"),
+            LEGACY("Legacy"),
+            BUNGEE_GUARD("BungeeGuard"),
+            MODERN("Modern");
+
+            private final String displayName;
+
+            @Override
+            public String toString() {
+                return displayName;
+            }
         }
     }
 }

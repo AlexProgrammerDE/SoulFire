@@ -52,7 +52,20 @@ import net.pistonmaster.serverwrecker.server.api.event.attack.AttackInitEvent;
 import net.pistonmaster.serverwrecker.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.server.data.ResourceData;
 import net.pistonmaster.serverwrecker.server.data.TranslationMapper;
-import net.pistonmaster.serverwrecker.server.plugins.*;
+import net.pistonmaster.serverwrecker.server.plugins.AutoArmor;
+import net.pistonmaster.serverwrecker.server.plugins.AutoEat;
+import net.pistonmaster.serverwrecker.server.plugins.AutoJump;
+import net.pistonmaster.serverwrecker.server.plugins.AutoReconnect;
+import net.pistonmaster.serverwrecker.server.plugins.AutoRegister;
+import net.pistonmaster.serverwrecker.server.plugins.AutoRespawn;
+import net.pistonmaster.serverwrecker.server.plugins.AutoTotem;
+import net.pistonmaster.serverwrecker.server.plugins.BotTicker;
+import net.pistonmaster.serverwrecker.server.plugins.ChatMessageLogger;
+import net.pistonmaster.serverwrecker.server.plugins.ClientBrand;
+import net.pistonmaster.serverwrecker.server.plugins.ClientSettings;
+import net.pistonmaster.serverwrecker.server.plugins.FakeVirtualHost;
+import net.pistonmaster.serverwrecker.server.plugins.ForwardingBypass;
+import net.pistonmaster.serverwrecker.server.plugins.ServerListBypass;
 import net.pistonmaster.serverwrecker.server.protocol.packet.SWClientboundStatusResponsePacket;
 import net.pistonmaster.serverwrecker.server.settings.BotSettings;
 import net.pistonmaster.serverwrecker.server.settings.DevSettings;
@@ -61,7 +74,12 @@ import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.server.util.SWLogAppender;
 import net.pistonmaster.serverwrecker.server.util.VersionComparator;
 import net.pistonmaster.serverwrecker.server.viaversion.SWViaLoader;
-import net.pistonmaster.serverwrecker.server.viaversion.platform.*;
+import net.pistonmaster.serverwrecker.server.viaversion.platform.SWViaAprilFools;
+import net.pistonmaster.serverwrecker.server.viaversion.platform.SWViaBackwards;
+import net.pistonmaster.serverwrecker.server.viaversion.platform.SWViaBedrock;
+import net.pistonmaster.serverwrecker.server.viaversion.platform.SWViaLegacy;
+import net.pistonmaster.serverwrecker.server.viaversion.platform.SWViaPlatform;
+import net.pistonmaster.serverwrecker.server.viaversion.platform.SWViaRewind;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
 import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
@@ -75,7 +93,11 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -204,7 +226,8 @@ public class ServerWreckerServer {
                 new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
                 new AutoTotem(), new AutoJump(), new AutoArmor(), new AutoEat(),
                 new ChatMessageLogger(), new ServerListBypass(),
-                new FakeVirtualHost() // Needs to be before ForwardingBypass to not break it
+                new FakeVirtualHost(), // Needs to be before ForwardingBypass to not break it
+                new ForwardingBypass()
         );
 
         plugins.forEach(ServerWreckerAPI::registerServerExtension);

@@ -33,7 +33,11 @@ import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.server.api.event.bot.SWPacketSentEvent;
 import net.pistonmaster.serverwrecker.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
-import net.pistonmaster.serverwrecker.server.settings.lib.property.*;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.BooleanProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.ComboProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.IntProperty;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
+import net.pistonmaster.serverwrecker.server.settings.lib.property.StringProperty;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -122,13 +126,14 @@ public class ClientSettings implements InternalExtension {
                 32,
                 1
         );
-        public static final ComboProperty CHAT_VISIBILITY = BUILDER.ofEnum(
+        public static final ComboProperty CHAT_VISIBILITY = BUILDER.ofEnumMapped(
                 "chat-visibility",
                 "Chat visibility",
                 new String[]{"--chat-visibility"},
                 "What type of chat messages the client will receive",
                 ChatVisibility.values(),
-                ChatVisibility.FULL
+                ChatVisibility.FULL,
+                ComboProperty::capitalizeEnum
         );
         public static final BooleanProperty USE_CHAT_COLORS = BUILDER.ofBoolean(
                 "use-chat-colors",
@@ -186,13 +191,14 @@ public class ClientSettings implements InternalExtension {
                 "Whether to render the hat overlay skin layer",
                 true
         );
-        public static final ComboProperty HAND_PREFERENCE = BUILDER.ofEnum(
+        public static final ComboProperty HAND_PREFERENCE = BUILDER.ofEnumMapped(
                 "hand-preference",
                 "Hand preference",
                 new String[]{"--hand-preference"},
                 "What hand the client prefers to use for items",
                 HandPreference.values(),
-                HandPreference.RIGHT_HAND
+                HandPreference.RIGHT_HAND,
+                ComboProperty::capitalizeEnum
         );
         public static final BooleanProperty TEXT_FILTERING_ENABLED = BUILDER.ofBoolean(
                 "text-filtering-enabled",
