@@ -41,7 +41,13 @@ public class NavigationWrapper {
         topBar.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         panel.add(topBar, BorderLayout.NORTH);
-        panel.add(item, BorderLayout.CENTER);
+
+        var scrollPane = new JScrollPane(item);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        panel.add(scrollPane, BorderLayout.CENTER);
 
         return panel;
     }

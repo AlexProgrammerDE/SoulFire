@@ -44,6 +44,7 @@ public class CardsContainer extends JPanel {
 
     public void create() {
         setLayout(cardLayout);
+        setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));
 
         pluginPages.addAll(guiManager.rpcClient().configStubBlocking()
                 .getUIClientData(ClientDataRequest.getDefaultInstance())
@@ -76,8 +77,6 @@ public class CardsContainer extends JPanel {
                     item.getNamespace()
             );
         }
-
-        setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));
     }
 
     public ClientPluginSettingsPage getByNamespace(String namespace) {

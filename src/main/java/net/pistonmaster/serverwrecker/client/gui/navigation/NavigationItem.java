@@ -20,9 +20,35 @@
 package net.pistonmaster.serverwrecker.client.gui.navigation;
 
 import javax.swing.*;
+import java.awt.*;
 
-public abstract class NavigationItem extends JPanel {
+public abstract class NavigationItem extends JPanel implements Scrollable {
     public abstract String getNavigationName();
 
     public abstract String getNavigationId();
+
+    @Override
+    public Dimension getPreferredScrollableViewportSize() {
+        return getPreferredSize();
+    }
+
+    @Override
+    public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+        return 10;
+    }
+
+    @Override
+    public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+        return 150;
+    }
+
+    @Override
+    public boolean getScrollableTracksViewportWidth() {
+        return true;
+    }
+
+    @Override
+    public boolean getScrollableTracksViewportHeight() {
+        return false;
+    }
 }
