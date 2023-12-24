@@ -67,6 +67,8 @@ public class ThemeUtil {
     public static void initFlatLaf() {
         FlatInspector.install("ctrl shift alt X");
         FlatUIDefaultsInspector.install("ctrl shift alt Y");
+        ToolTipManager.sharedInstance().setInitialDelay(100);
+        ToolTipManager.sharedInstance().setDismissDelay(10_000);
 
         if (SystemInfo.isMacOS) {
             // Use top screen menu bar on macOS
