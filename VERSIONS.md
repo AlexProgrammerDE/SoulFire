@@ -91,3 +91,9 @@ Below is a list of all versions that are supported by ServerWrecker.
 | c0.0.16a-02       | ❌      | ✅    | ❌        | ✅      | ❌       |
 | c0.0.15a-1        | ❌      | ✅    | ❌        | ✅      | ❌       |
 | Bedrock 1.20.50   | ❌      | ❌    | ❌        | ❌      | ✅       |
+
+## How to generate this list
+
+```bash
+java -jar ServerWrecker.jar --generate-versions
+```

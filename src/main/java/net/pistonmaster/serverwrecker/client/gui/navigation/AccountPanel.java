@@ -40,10 +40,17 @@ public class AccountPanel extends NavigationItem {
         setLayout(new GridLayout(0, 1, 10, 10));
 
         var accountOptionsPanel = new JPanel();
-        accountOptionsPanel.setLayout(new GridLayout(2, 1, 10, 10));
+        accountOptionsPanel.setLayout(new GridLayout(0, 1, 10, 10));
+
+        var accountSettingsPanel = new JPanel();
+        accountSettingsPanel.setLayout(new GridLayout(0, 2));
+
+        GeneratedPanel.addComponents(accountSettingsPanel, cardsContainer.getByNamespace("account"), guiManager.settingsManager());
+
+        accountOptionsPanel.add(accountSettingsPanel);
 
         var addAccountPanel = new JPanel();
-        addAccountPanel.setLayout(new GridLayout(1, 3, 10, 10));
+        addAccountPanel.setLayout(new GridLayout(0, 3, 10, 10));
 
         addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.OFFLINE));
         addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_JAVA));
@@ -53,17 +60,10 @@ public class AccountPanel extends NavigationItem {
 
         accountOptionsPanel.add(addAccountPanel);
 
-        var accountSettingsPanel = new JPanel();
-        accountSettingsPanel.setLayout(new GridLayout(0, 2));
-
-        GeneratedPanel.addComponents(accountSettingsPanel, cardsContainer.getByNamespace("account"), guiManager.settingsManager());
-
-        accountOptionsPanel.add(accountSettingsPanel);
-
         add(accountOptionsPanel);
 
         var accountListPanel = new JPanel();
-        accountListPanel.setLayout(new GridLayout(1, 1));
+        accountListPanel.setLayout(new GridLayout(0, 1));
 
         var columnNames = new String[]{"Username", "Type", "Enabled"};
         var model = new DefaultTableModel(columnNames, 0) {

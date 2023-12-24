@@ -170,12 +170,12 @@ ServerWrecker has a built-in GUI for easy usage.
 ## 💻 Command Line Usage
 
 To run ServerWrecker from the command line without a GUI, enter:
-`java -jar serverwrecker.jar <flags>`
+`java -jar ServerWrecker.jar <flags>`
 
 > **Note:** Some features are not available in CLI mode, we recommend using the GUI.
 
 For a list of all available CLI flags, look at [CLI_FLAGS.md](./CLI_FLAGS.md)
-or run `java -jar serverwrecker.jar --help`.
+or run `java -jar ServerWrecker.jar --help`.
 
 ## 🔧 Build from source
 

@@ -40,16 +40,7 @@ public class ProxyPanel extends NavigationItem {
         setLayout(new GridLayout(0, 1, 10, 10));
 
         var proxyOptionsPanel = new JPanel();
-        proxyOptionsPanel.setLayout(new GridLayout(2, 1, 10, 10));
-
-        var addProxyPanel = new JPanel();
-        addProxyPanel.setLayout(new GridLayout(1, 3, 10, 10));
-
-        addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.HTTP));
-        addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS4));
-        addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS5));
-
-        proxyOptionsPanel.add(addProxyPanel);
+        proxyOptionsPanel.setLayout(new GridLayout(0, 1, 10, 10));
 
         var proxySettingsPanel = new JPanel();
         proxySettingsPanel.setLayout(new GridLayout(0, 2));
@@ -58,10 +49,19 @@ public class ProxyPanel extends NavigationItem {
 
         proxyOptionsPanel.add(proxySettingsPanel);
 
+        var addProxyPanel = new JPanel();
+        addProxyPanel.setLayout(new GridLayout(0, 3, 10, 10));
+
+        addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.HTTP));
+        addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS4));
+        addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS5));
+
+        proxyOptionsPanel.add(addProxyPanel);
+
         add(proxyOptionsPanel);
 
         var proxyListPanel = new JPanel();
-        proxyListPanel.setLayout(new GridLayout(1, 1));
+        proxyListPanel.setLayout(new GridLayout(0, 1));
 
         var columnNames = new String[]{"IP", "Port", "Username", "Password", "Type", "Enabled"};
         var model = new DefaultTableModel(columnNames, 0) {
