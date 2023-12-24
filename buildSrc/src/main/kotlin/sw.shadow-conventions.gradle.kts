@@ -1,4 +1,4 @@
-import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer;
+import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 
 plugins {
     id("sw.java-conventions")
@@ -7,12 +7,12 @@ plugins {
 
 tasks {
     jar {
-        archiveClassifier.set("unshaded")
+        archiveClassifier = "unshaded"
         from(project.rootProject.file("LICENSE"))
     }
 
     shadowJar {
-        archiveClassifier.set("")
+        archiveClassifier = ""
         mergeServiceFiles()
         transform(Log4j2PluginsCacheFileTransformer::class.java)
     }

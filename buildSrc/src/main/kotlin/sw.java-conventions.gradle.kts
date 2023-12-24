@@ -10,7 +10,7 @@ plugins {
 java {
     javaTarget(21)
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -46,17 +46,17 @@ indra {
 
     configurePublications {
         pom {
-            name.set("ServerWrecker")
-            url.set("https://github.com/AlexProgrammerDE/ServerWrecker")
+            name = "ServerWrecker"
+            url = "https://github.com/AlexProgrammerDE/ServerWrecker"
             organization {
-                name.set("AlexProgrammerDE")
-                url.set("https://pistonmaster.net")
+                name = "AlexProgrammerDE"
+                url = "https://pistonmaster.net"
             }
             developers {
                 developer {
-                    id.set("AlexProgrammerDE")
-                    timezone.set("Europe/Berlin")
-                    url.set("https://pistonmaster.net")
+                    id = "AlexProgrammerDE"
+                    timezone = "Europe/Berlin"
+                    url = "https://pistonmaster.net"
                 }
             }
         }

@@ -23,7 +23,7 @@ plugins {
 
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
     repositories {
         maven("https://repo.opencollab.dev/maven-releases") {
             name = "OpenCollab Releases"

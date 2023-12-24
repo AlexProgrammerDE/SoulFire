@@ -19,7 +19,7 @@ var mainClassString = "net.pistonmaster.serverwrecker.launcher.ServerWreckerJava
 
 application {
     applicationName = "ServerWrecker"
-    mainClass.set(mainClassString)
+    mainClass = mainClassString
 }
 
 tasks {
@@ -36,10 +36,10 @@ tasks {
         onlyIf { false }
     }
     withType<ShadowJar> {
-        archiveBaseName.set("ServerWrecker")
+        archiveBaseName = "ServerWrecker"
     }
     jar {
-        archiveBaseName.set("ServerWrecker")
+        archiveBaseName = "ServerWrecker"
     }
 }
 
