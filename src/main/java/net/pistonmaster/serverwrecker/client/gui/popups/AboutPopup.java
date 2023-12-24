@@ -27,11 +27,11 @@ import javax.swing.border.EmptyBorder;
 
 public class AboutPopup extends JPopupMenu {
     public AboutPopup() {
-        add(SwingTextUtils.createPane("<b>ServerWrecker</b>"));
-        add(SwingTextUtils.createPane("Version: <b><code>" + BuildData.VERSION + "</code></b>"));
-        add(SwingTextUtils.createPane("Author: <b><a href='https://github.com/AlexProgrammerDE'>AlexProgrammerDE</a></b>"));
-        add(SwingTextUtils.createPane("GitHub: <b><a href='https://github.com/AlexProgrammerDE/ServerWrecker'>github.com/AlexProgrammerDE/ServerWrecker</a></b>"));
-        add(SwingTextUtils.createPane("Commit: <b><code>" + BuildData.COMMIT + "</code></b> " +
+        add(SwingTextUtils.createHtmlPane("<b>ServerWrecker</b>"));
+        add(SwingTextUtils.createHtmlPane("Version: <b><code>" + BuildData.VERSION + "</code></b>"));
+        add(SwingTextUtils.createHtmlPane("Author: <b><a href='https://github.com/AlexProgrammerDE'>AlexProgrammerDE</a></b>"));
+        add(SwingTextUtils.createHtmlPane("GitHub: <b><a href='https://github.com/AlexProgrammerDE/ServerWrecker'>github.com/AlexProgrammerDE/ServerWrecker</a></b>"));
+        add(SwingTextUtils.createHtmlPane("Commit: <b><code>" + BuildData.COMMIT + "</code></b> " +
                 "(<b><a href='https://github.com/AlexProgrammerDE/ServerWrecker/commit/" + BuildData.COMMIT + "'>Click to show</a></b>)"));
         setBorder(new EmptyBorder(10, 10, 10, 10));
     }

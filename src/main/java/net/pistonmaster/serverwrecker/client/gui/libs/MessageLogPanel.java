@@ -23,7 +23,13 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
-import javax.swing.text.*;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultCaret;
+import javax.swing.text.Document;
+import javax.swing.text.DocumentFilter;
+import javax.swing.text.SimpleAttributeSet;
 import java.awt.*;
 
 /**
@@ -63,12 +69,10 @@ public class MessageLogPanel extends JPanel {
 
         textComponent.addCaretListener(e -> updatePopup());
 
-        var scrollText = new JScrollPane();
+        var scrollText = new JScrollPane(textComponent);
         scrollText.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        scrollText.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollText.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-        scrollText.setViewportView(textComponent);
+        scrollText.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
         new SmartScroller(scrollText);
 
@@ -82,19 +86,19 @@ public class MessageLogPanel extends JPanel {
             copyItem.addActionListener(e -> textComponent.copy());
             popupMenu.add(copyItem);
 
-            var cutItem = new JMenuItem("Upload to pastes.dev");
-            cutItem.addActionListener(e -> {
+            var uploadItem = new JMenuItem("Upload to pastes.dev");
+            uploadItem.addActionListener(e -> {
                 try {
                     var url = "https://pastes.dev/" + PastesDevService.upload(textComponent.getSelectedText());
                     JOptionPane.showMessageDialog(this,
-                            SwingTextUtils.createPane("Uploaded to: <a href='" + url + "'>" + url + "</a>"),
+                            SwingTextUtils.createHtmlPane("Uploaded to: <a href='" + url + "'>" + url + "</a>"),
                             "Success", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception ex) {
                     log.error("Failed to upload!", ex);
                     JOptionPane.showMessageDialog(this, "Failed to upload!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             });
-            popupMenu.add(cutItem);
+            popupMenu.add(uploadItem);
         }
 
         // Add divider
