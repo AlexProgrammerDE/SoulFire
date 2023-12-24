@@ -77,7 +77,7 @@ dependencies {
     implementation(libs.miglayout.swing)
 
     // For JavaFX file editor in GUI
-    val javaFXVersion = "20"
+    val javaFXVersion = "21.0.1"
     val javaFXModules = listOf("base", "graphics", "controls", "swing")
     val javaFXPlatforms = listOf("linux", "linux-aarch64", "mac", "mac-aarch64", "win")
 
