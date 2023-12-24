@@ -65,8 +65,8 @@ public class ThemeUtil {
     }
 
     public static void initFlatLaf() {
-        FlatInspector.install("ctrl shift alt X");
-        FlatUIDefaultsInspector.install("ctrl shift alt Y");
+        FlatInspector.install("ctrl shift I");
+        FlatUIDefaultsInspector.install("ctrl shift O");
         ToolTipManager.sharedInstance().setInitialDelay(100);
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
 
