@@ -58,7 +58,7 @@ public class ItemsDataGenerator implements IDataGenerator {
         for (EnchantmentCategory target : enchantmentTargets) {
             enchantCategoriesArray.add(EnchantmentsDataGenerator.getEnchantmentTargetName(target));
         }
-        if (enchantCategoriesArray.size() > 0) {
+        if (!enchantCategoriesArray.isEmpty()) {
             itemDesc.add("enchantCategories", enchantCategoriesArray);
         }
 

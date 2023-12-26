@@ -7,7 +7,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -33,13 +32,8 @@ public class EffectsDataGenerator implements IDataGenerator {
         ResourceLocation registryKey = registry.getResourceKey(statusEffect).orElseThrow().location();
 
         effectDesc.addProperty("id", registry.getId(statusEffect));
-        if (statusEffect == MobEffects.UNLUCK) {
-            effectDesc.addProperty("name", "BadLuck");
-            effectDesc.addProperty("displayName", "Bad Luck");
-        } else {
-            effectDesc.addProperty("name", Arrays.stream(registryKey.getPath().split("_")).map(StringUtils::capitalize).collect(Collectors.joining()));
-            effectDesc.addProperty("displayName", DGU.translateText(statusEffect.getDescriptionId()));
-        }
+        effectDesc.addProperty("name", Arrays.stream(registryKey.getPath().split("_")).map(StringUtils::capitalize).collect(Collectors.joining()));
+        effectDesc.addProperty("displayName", DGU.translateText(statusEffect.getDescriptionId()));
 
         effectDesc.addProperty("type", statusEffect.isBeneficial() ? "good" : "bad");
         return effectDesc;

@@ -11,17 +11,22 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.List;
 
 public class DataGenerators {
 
-    private static List<IDataGenerator> GENERATORS = new ArrayList<>();
+    private static final List<IDataGenerator> GENERATORS = List.of(
+            new BlockCollisionShapesDataGenerator(),
+            new BlocksDataGenerator(),
+            new EffectsDataGenerator(),
+            new EnchantmentsDataGenerator(),
+            new EntitiesDataGenerator(),
+            new FoodsDataGenerator(),
+            new ItemsDataGenerator(),
+            new LanguageDataGenerator(),
+            new InstrumentsDataGenerator()
+    );
     private static final Logger logger = LoggerFactory.getLogger(DataGenerators.class);
-
-    public static void register(IDataGenerator generator) {
-        GENERATORS.add(generator);
-    }
 
     public static boolean runDataGenerators(Path outputDirectory) {
         try {
@@ -54,24 +59,15 @@ public class DataGenerators {
             }
         }
 
+        logger.info("Running built-in data generator");
+        try {
+            net.minecraft.data.Main.main(new String[] {"--all", "--output", outputDirectory.toString()});
+        } catch (IOException e) {
+            logger.error("Failed to run built-in data generator", e);
+            generatorsFailed++;
+        }
+
         logger.info("Finishing running data generators");
         return generatorsFailed == 0;
-    }
-
-    static {
-        register(new BiomesDataGenerator());
-        register(new BlockCollisionShapesDataGenerator());
-        register(new BlocksDataGenerator());
-        register(new EffectsDataGenerator());
-        register(new EnchantmentsDataGenerator());
-        register(new EntitiesDataGenerator());
-        register(new FoodsDataGenerator());
-        register(new ItemsDataGenerator());
-        register(new ParticlesDataGenerator());
-        register(new TintsDataGenerator());
-        register(new MaterialsDataGenerator());
-//        register(new RecipeDataGenerator()); - On hold until mcdata supports multiple materials for a recipe
-        register(new LanguageDataGenerator());
-        register(new InstrumentsDataGenerator());
     }
 }

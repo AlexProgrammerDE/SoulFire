@@ -3,7 +3,6 @@ package dev.u9g.minecraftdatagenerator.generators;
 import com.google.common.base.CaseFormat;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import dev.u9g.minecraftdatagenerator.generators.MaterialsDataGenerator.MaterialInfo;
 import dev.u9g.minecraftdatagenerator.mixin.BlockAccessor;
 import dev.u9g.minecraftdatagenerator.util.BlockSettingsAccessor;
 import dev.u9g.minecraftdatagenerator.util.DGU;
@@ -113,32 +112,12 @@ public class BlocksDataGenerator implements IDataGenerator {
     public JsonArray generateDataJson() {
         JsonArray resultBlocksArray = new JsonArray();
         Registry<Block> blockRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.BLOCK);
-        List<MaterialInfo> availableMaterials = MaterialsDataGenerator.getGlobalMaterialInfo();
 
-        blockRegistry.forEach(block -> resultBlocksArray.add(generateBlock(blockRegistry, availableMaterials, block)));
+        blockRegistry.forEach(block -> resultBlocksArray.add(generateBlock(blockRegistry, block)));
         return resultBlocksArray;
     }
 
-    private static String findMatchingBlockMaterial(BlockState blockState, List<MaterialInfo> materials) {
-        List<MaterialInfo> matchingMaterials = materials.stream()
-                .filter(material -> material.getPredicate().test(blockState))
-                .collect(Collectors.toList());
-
-        if (matchingMaterials.size() > 1) {
-            var firstMaterial = matchingMaterials.get(0);
-            var otherMaterials = matchingMaterials.subList(1, matchingMaterials.size());
-
-            if (!otherMaterials.stream().allMatch(firstMaterial::includesMaterial)) {
-                logger.error("Block {} matches multiple materials: {}", blockState.getBlock(), matchingMaterials);
-            }
-        }
-        if (matchingMaterials.isEmpty()) {
-            return "default";
-        }
-        return matchingMaterials.get(0).getMaterialName();
-    }
-
-    public static JsonObject generateBlock(Registry<Block> blockRegistry, List<MaterialInfo> materials, Block block) {
+    public static JsonObject generateBlock(Registry<Block> blockRegistry, Block block) {
         JsonObject blockDesc = new JsonObject();
 
         List<BlockState> blockStates = block.getStateDefinition().getPossibleStates();
@@ -166,7 +145,7 @@ public class BlocksDataGenerator implements IDataGenerator {
             offsetData.addProperty("verticalModelOffsetMultiplier", block.getMaxVerticalOffset());
 
             BlockBehaviour.Properties blockSettings = ((BlockAccessor) block).properties();
-            BlockBehaviour.OffsetType offsetType = ((BlockSettingsAccessor) blockSettings).getOffsetType();
+            BlockBehaviour.OffsetType offsetType = ((BlockSettingsAccessor) blockSettings).serverwrecker$getOffsetType();
             offsetData.addProperty("offsetType", offsetType.name());
 
             blockDesc.add("modelOffset", offsetData);
@@ -178,7 +157,6 @@ public class BlocksDataGenerator implements IDataGenerator {
 //                item.getMiningSpeedMultiplier(item.getDefaultStack(), defaultState) // value
 //        ));
 //        blockDesc.add("effectiveTools", effTools);
-        blockDesc.addProperty("material", findMatchingBlockMaterial(defaultState, materials));
 
         blockDesc.addProperty("transparent", !defaultState.canOcclude());
         blockDesc.addProperty("emitLight", defaultState.getLightEmission());
