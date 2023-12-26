@@ -170,21 +170,10 @@ public class HintManager {
             var gap = UIScale.scale(6);
 
             switch (hint.position) {
-                case SwingConstants.LEFT:
-                    x -= size.width + gap;
-                    break;
-
-                case SwingConstants.TOP:
-                    y -= size.height + gap;
-                    break;
-
-                case SwingConstants.RIGHT:
-                    x += hint.owner.getWidth() + gap;
-                    break;
-
-                case SwingConstants.BOTTOM:
-                    y += hint.owner.getHeight() + gap;
-                    break;
+                case SwingConstants.LEFT -> x -= size.width + gap;
+                case SwingConstants.TOP -> y -= size.height + gap;
+                case SwingConstants.RIGHT -> x += hint.owner.getWidth() + gap;
+                case SwingConstants.BOTTOM -> y += hint.owner.getHeight() + gap;
             }
 
             // set hint popup size and show it

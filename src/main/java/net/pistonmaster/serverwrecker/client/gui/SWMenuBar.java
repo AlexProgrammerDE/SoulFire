@@ -23,7 +23,12 @@ import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLightLaf;
-import com.formdev.flatlaf.intellijthemes.*;
+import com.formdev.flatlaf.intellijthemes.FlatArcDarkOrangeIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatCyanLightIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatDarkPurpleIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme;
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDarkerIJTheme;
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicIJTheme;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
@@ -129,7 +134,7 @@ public class SWMenuBar extends JMenuBar {
         fileMenu.add(exit);
         add(fileMenu);
 
-        var window = new JMenu("Options");
+        var viewMenu = new JMenu("View");
         var themeSelector = new JMenu("Theme");
         for (var theme : THEMES) {
             var themeItem = new JMenuItem(theme.getSimpleName());
@@ -139,8 +144,20 @@ public class SWMenuBar extends JMenuBar {
             });
             themeSelector.add(themeItem);
         }
-        window.add(themeSelector);
-        add(window);
+        viewMenu.add(themeSelector);
+
+        /*
+        viewMenu.addSeparator();
+
+        var windowMenu = new JMenu("Window");
+        var trafficGraph = new JMenuItem("Traffic Monitor");
+        trafficGraph.addActionListener(e -> {
+            System.out.println("TODO: Open traffic graph");
+        });
+        windowMenu.add(trafficGraph);
+        viewMenu.add(windowMenu);
+         */
+        add(viewMenu);
 
         var helpMenu = new JMenu("Help");
         var openHome = new JMenuItem("Open home");
