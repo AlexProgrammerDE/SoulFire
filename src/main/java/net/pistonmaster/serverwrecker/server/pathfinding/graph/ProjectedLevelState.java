@@ -51,7 +51,6 @@ public class ProjectedLevelState {
 
     public ProjectedLevelState withChangeToSolidBlock(SWVec3i position) {
         var blockChanges = this.blockChanges.clone();
-        blockChanges.ensureCapacity(blockChanges.size() + 1);
         blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
 
         return new ProjectedLevelState(levelState, chunkHolder, blockChanges);
@@ -59,7 +58,6 @@ public class ProjectedLevelState {
 
     public ProjectedLevelState withChangeToAir(SWVec3i position) {
         var blockChanges = this.blockChanges.clone();
-        blockChanges.ensureCapacity(blockChanges.size() + 1);
         blockChanges.put(position, AIR_BLOCK_STATE);
 
         return new ProjectedLevelState(levelState, chunkHolder, blockChanges);
