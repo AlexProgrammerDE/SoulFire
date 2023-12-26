@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.client.gui.popups;
 
-import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.client.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.client.gui.GUIManager;
 import net.pistonmaster.serverwrecker.client.gui.libs.JFXFileHelper;
@@ -35,6 +34,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -52,16 +52,13 @@ public class ImportTextDialog extends JDialog {
         var buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         var loadFromFileButton = new JButton("Load from File");
 
-        var chooser = new FileChooser();
-        chooser.setInitialDirectory(initialDirectory.toFile());
-        chooser.setTitle(loadText);
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(typeText, "*.txt"));
-
-        loadFromFileButton.addActionListener(new ImportFileListener(guiManager, frame, chooser, consumer, this));
+        loadFromFileButton.addActionListener(new ImportFileListener(guiManager, frame, initialDirectory, Map.of(
+                typeText, "txt"
+        ), consumer, this));
 
         var getFromClipboardButton = new JButton("Get from Clipboard");
 
-        getFromClipboardButton.addActionListener(new ImportClipboardListener(guiManager, frame, chooser, consumer, this));
+        getFromClipboardButton.addActionListener(new ImportClipboardListener(guiManager, frame, consumer, this));
 
         buttonPanel.add(loadFromFileButton);
         buttonPanel.add(getFromClipboardButton);
@@ -73,7 +70,7 @@ public class ImportTextDialog extends JDialog {
         var textScrollPane = new JScrollPane(textArea);
         var submitButton = new JButton("Submit");
 
-        submitButton.addActionListener(new SubmitTextListener(guiManager, frame, chooser, consumer, this, textArea));
+        submitButton.addActionListener(new SubmitTextListener(guiManager, frame, consumer, this, textArea));
 
         var inputPanel = new JPanel(new BorderLayout());
         inputPanel.add(textScrollPane, BorderLayout.CENTER);
@@ -108,17 +105,14 @@ public class ImportTextDialog extends JDialog {
     }
 
     private record ImportFileListener(GUIManager guiManager, GUIFrame frame,
-                                      FileChooser chooser, Consumer<String> consumer,
+                                      Path initialDirectory, Map<String, String> filterMap,
+                                      Consumer<String> consumer,
                                       ImportTextDialog dialog) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             dialog.dispose();
 
-            JFXFileHelper.showOpenDialog(chooser).thenAcceptAsync(file -> {
-                if (file == null) {
-                    return;
-                }
-
+            JFXFileHelper.showOpenDialog(initialDirectory, filterMap).ifPresent(file -> {
                 if (!Files.isReadable(file)) {
                     LOGGER.error("File is not readable!");
                     return;
@@ -131,12 +125,12 @@ public class ImportTextDialog extends JDialog {
                 } catch (Throwable e) {
                     LOGGER.error("Failed to import text!", e);
                 }
-            }, guiManager.threadPool());
+            });
         }
     }
 
     private record ImportClipboardListener(GUIManager guiManager, GUIFrame frame,
-                                           FileChooser chooser, Consumer<String> consumer,
+                                            Consumer<String> consumer,
                                            ImportTextDialog dialog) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
@@ -152,8 +146,7 @@ public class ImportTextDialog extends JDialog {
         }
     }
 
-    private record SubmitTextListener(GUIManager guiManager, GUIFrame frame,
-                                      FileChooser chooser, Consumer<String> consumer,
+    private record SubmitTextListener(GUIManager guiManager, GUIFrame frame, Consumer<String> consumer,
                                       ImportTextDialog dialog, JTextArea textArea) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {

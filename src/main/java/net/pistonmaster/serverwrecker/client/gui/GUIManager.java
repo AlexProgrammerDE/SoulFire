@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.client.gui;
 
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
-import javafx.embed.swing.JFXPanel;
 import lombok.Getter;
 import net.lenni0451.reflect.Modules;
 import net.pistonmaster.serverwrecker.client.settings.SettingsManager;
@@ -38,6 +37,8 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -51,6 +52,7 @@ public class GUIManager {
     private final Logger logger = LoggerFactory.getLogger(GUIManager.class);
     private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
     private final SettingsManager settingsManager = new SettingsManager();
+    public static final Queue<Runnable> MAIN_THREAD_QUEUE = new ConcurrentLinkedQueue<>();
 
     public GUIManager(RPCClient rpcClient) {
         this.rpcClient = rpcClient;
@@ -68,9 +70,6 @@ public class GUIManager {
 
         // Override the title in AWT (GNOME displays the class name otherwise)
         setAppTitle();
-
-        // Initialize the JavaFX Platform
-        new JFXPanel();
 
         // Inject and open the GUI
         var guiFrame = new GUIFrame();

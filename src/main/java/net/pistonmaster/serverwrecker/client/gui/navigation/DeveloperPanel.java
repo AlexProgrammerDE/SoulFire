@@ -19,7 +19,6 @@
  */
 package net.pistonmaster.serverwrecker.client.gui.navigation;
 
-import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.client.gui.GUIManager;
 import net.pistonmaster.serverwrecker.client.gui.LogPanel;
 import net.pistonmaster.serverwrecker.client.gui.libs.JFXFileHelper;
@@ -30,6 +29,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Map;
 
 public class DeveloperPanel extends NavigationItem {
     @Inject
@@ -43,22 +43,16 @@ public class DeveloperPanel extends NavigationItem {
         add(saveLog);
 
         saveLog.addActionListener(listener -> {
-            var chooser = new FileChooser();
-            chooser.setInitialDirectory(SWPathConstants.DATA_FOLDER.toFile());
-            chooser.setTitle("Save Log");
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log Files", "*.log"));
-            JFXFileHelper.showSaveDialog(chooser).thenAcceptAsync(file -> {
-                if (file == null) {
-                    return;
-                }
-
+            JFXFileHelper.showSaveDialog(SWPathConstants.DATA_FOLDER, Map.of(
+                    "Log Files", "log"
+            ), "log.txt").ifPresent(file -> {
                 try (var writer = Files.newBufferedWriter(file)) {
                     writer.write(logPanel.messageLogPanel().getLogs());
                     guiManager.logger().info("Saved log to: {}", file);
                 } catch (IOException e) {
                     guiManager.logger().error("Failed to save log!", e);
                 }
-            }, guiManager.threadPool());
+            });
         });
     }
 

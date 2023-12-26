@@ -33,7 +33,6 @@ import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDarker
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicIJTheme;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
-import javafx.stage.FileChooser;
 import net.pistonmaster.serverwrecker.client.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.client.gui.popups.AboutPopup;
 import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
@@ -50,6 +49,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SWMenuBar extends JMenuBar {
     private static final Logger LOGGER = LoggerFactory.getLogger(SWMenuBar.class);
@@ -80,36 +80,24 @@ public class SWMenuBar extends JMenuBar {
         var fileMenu = new JMenu("File");
         var loadProfile = new JMenuItem("Load Profile");
         loadProfile.addActionListener(e -> {
-            var chooser = new FileChooser();
-            chooser.setInitialDirectory(SWPathConstants.PROFILES_FOLDER.toFile());
-            chooser.setTitle("Load Profile");
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ServerWrecker profile", "*.json"));
-            JFXFileHelper.showOpenDialog(chooser).thenAcceptAsync(file -> {
-                if (file == null) {
-                    return;
-                }
-
+            JFXFileHelper.showOpenDialog(SWPathConstants.PROFILES_FOLDER, Map.of(
+                    "ServerWrecker profile", "json"
+            )).ifPresent(file -> {
                 try {
                     guiManager.settingsManager().loadProfile(file);
                     LOGGER.info("Loaded profile!");
                 } catch (IOException ex) {
                     LOGGER.warn("Failed to load profile!", ex);
                 }
-            }, guiManager.threadPool());
+            });
         });
 
         fileMenu.add(loadProfile);
         var saveProfile = new JMenuItem("Save Profile");
         saveProfile.addActionListener(e -> {
-            var chooser = new FileChooser();
-            chooser.setInitialDirectory(SWPathConstants.PROFILES_FOLDER.toFile());
-            chooser.setTitle("Save Profile");
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ServerWrecker profile", "*.json"));
-            JFXFileHelper.showSaveDialog(chooser).thenAcceptAsync(file -> {
-                if (file == null) {
-                    return;
-                }
-
+            JFXFileHelper.showSaveDialog(SWPathConstants.PROFILES_FOLDER, Map.of(
+                    "ServerWrecker profile", "json"
+            ), "profile.json").ifPresent(file -> {
                 // Add .json if not present
                 var path = file.toString();
                 if (!path.endsWith(".json")) {
@@ -122,7 +110,7 @@ public class SWMenuBar extends JMenuBar {
                 } catch (IOException ex) {
                     LOGGER.warn("Failed to save profile!", ex);
                 }
-            }, guiManager.threadPool());
+            });
         });
 
         fileMenu.add(saveProfile);

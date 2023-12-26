@@ -76,15 +76,14 @@ dependencies {
     implementation(libs.xchart)
     implementation(libs.miglayout.swing)
 
-    // For JavaFX file editor in GUI
-    val javaFXVersion = "21.0.1"
-    val javaFXModules = listOf("base", "graphics", "controls", "swing")
-    val javaFXPlatforms = listOf("linux", "linux-aarch64", "mac", "mac-aarch64", "win")
-
-    javaFXModules.forEach { module ->
-        javaFXPlatforms.forEach { platform ->
-            implementation("org.openjfx:javafx-$module:$javaFXVersion:$platform")
+    val lwjglVersion = "3.3.3"
+    val lwjglPlatforms = listOf("linux", "macos", "macos-arm64", "windows")
+    val lwjglModules = listOf("lwjgl", "lwjgl-nfd")
+    lwjglModules.forEach { module ->
+        lwjglPlatforms.forEach { platform ->
+            implementation("org.lwjgl:$module:$lwjglVersion:natives-$platform")
         }
+        implementation("org.lwjgl:$module:$lwjglVersion")
     }
 
     // Main protocol library
