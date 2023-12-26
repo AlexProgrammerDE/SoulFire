@@ -1,0 +1,20 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.u9g.minecraftdatagenerator.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "BlockAccessor",
+    "BlockSettingsOffsetMixin",
+    "EntityTypeAccessor",
+    "EULAMixin",
+    "MiningToolItemAccessor",
+    "ReadyMixin",
+    "TheEndBiomeDataAccessor"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

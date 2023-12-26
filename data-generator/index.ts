@@ -1,10 +1,6 @@
-import mcDataPackage from 'minecraft-data'
-import fs from 'fs'
-import process from 'process'
-
 const version = "1.20.4"
 
-const mcData = mcDataPackage(version)
+const mcData = null
 const enumReplace = "// VALUES REPLACE"
 
 if (mcData == null) {
@@ -14,8 +10,6 @@ if (mcData == null) {
   const getNameOfItemId = (id: number): string | null => {
     return mcData.items[id].name.toUpperCase();
   }
-
-  fs.mkdirSync("output", {recursive: true})
 
   {
     let enumValues: string[] = []
@@ -35,8 +29,6 @@ if (mcData == null) {
 
       enumValues.push(shapeData)
     }
-
-    fs.writeFileSync("output/blockshapes.txt", enumValues.join("\n"))
   }
 
   {
@@ -60,8 +52,6 @@ if (mcData == null) {
 
       enumValues.push(shapes)
     }
-
-    fs.writeFileSync("output/blockstates.txt", enumValues.join("\n"))
   }
 
   {
@@ -72,8 +62,6 @@ if (mcData == null) {
     }
 
     result = result.replace(enumReplace, enumValues.join("\n    "))
-
-    fs.writeFileSync("output/BlockType.java", result)
   }
 
   {
@@ -84,8 +72,6 @@ if (mcData == null) {
     }
 
     result = result.replace(enumReplace, enumValues.join("\n    "))
-
-    fs.writeFileSync("output/ItemType.java", result)
   }
 
   {
@@ -96,8 +82,6 @@ if (mcData == null) {
     }
 
     result = result.replace(enumReplace, enumValues.join("\n    "))
-
-    fs.writeFileSync("output/EntityType.java", result)
   }
 
   {
@@ -108,8 +92,6 @@ if (mcData == null) {
     }
 
     result = result.replace(enumReplace, enumValues.join("\n    "))
-
-    fs.writeFileSync("output/FoodType.java", result)
   }
 }
 
