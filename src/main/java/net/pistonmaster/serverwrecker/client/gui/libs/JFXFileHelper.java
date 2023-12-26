@@ -79,7 +79,6 @@ public class JFXFileHelper {
         }
     }
 
-
     private static Optional<Path> checkResult(int result, PointerBuffer path) {
         switch (result) {
             case NFD_OKAY -> {

@@ -78,13 +78,10 @@ dependencies {
 
     val lwjglVersion = "3.3.3"
     val lwjglPlatforms = listOf("linux", "macos", "macos-arm64", "windows")
-    val lwjglModules = listOf("lwjgl", "lwjgl-nfd")
-    lwjglModules.forEach { module ->
-        lwjglPlatforms.forEach { platform ->
-            implementation("org.lwjgl:$module:$lwjglVersion:natives-$platform")
-        }
-        implementation("org.lwjgl:$module:$lwjglVersion")
+    lwjglPlatforms.forEach { platform ->
+        implementation("org.lwjgl:lwjgl-nfd:$lwjglVersion:natives-$platform")
     }
+    implementation("org.lwjgl:lwjgl-nfd:$lwjglVersion")
 
     // Main protocol library
     api(libs.mcprotocollib)
