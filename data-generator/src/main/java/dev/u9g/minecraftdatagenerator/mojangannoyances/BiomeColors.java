@@ -2,14 +2,14 @@ package dev.u9g.minecraftdatagenerator.mojangannoyances;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockRenderView;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.ColorResolver;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.level.biome.Biome;
 
 @Environment(EnvType.CLIENT)
 public class BiomeColors {
-    public static final ColorResolver GRASS_COLOR = Biome::getGrassColorAt;
+    public static final ColorResolver GRASS_COLOR = Biome::getGrassColor;
     public static final ColorResolver FOLIAGE_COLOR = (biome, x, z) -> {
         return biome.getFoliageColor();
     };
@@ -20,19 +20,19 @@ public class BiomeColors {
     public BiomeColors() {
     }
 
-    private static int getColor(BlockRenderView world, BlockPos pos, ColorResolver resolver) {
-        return world.getColor(pos, resolver);
+    private static int getColor(BlockAndTintGetter world, BlockPos pos, ColorResolver resolver) {
+        return world.getBlockTint(pos, resolver);
     }
 
-    public static int getGrassColor(BlockRenderView world, BlockPos pos) {
+    public static int getGrassColor(BlockAndTintGetter world, BlockPos pos) {
         return getColor(world, pos, GRASS_COLOR);
     }
 
-    public static int getFoliageColor(BlockRenderView world, BlockPos pos) {
+    public static int getFoliageColor(BlockAndTintGetter world, BlockPos pos) {
         return getColor(world, pos, FOLIAGE_COLOR);
     }
 
-    public static int getWaterColor(BlockRenderView world, BlockPos pos) {
+    public static int getWaterColor(BlockAndTintGetter world, BlockPos pos) {
         return getColor(world, pos, WATER_COLOR);
     }
 }

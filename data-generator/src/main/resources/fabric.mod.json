@@ -10,7 +10,7 @@
   ],
   "contact": {},
   "license": "MIT",
-  "environment": "client",
+  "environment": "server",
   "entrypoints": {
     "main": [
       "dev.u9g.minecraftdatagenerator.Main"

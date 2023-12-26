@@ -1,25 +1,25 @@
 package dev.u9g.minecraftdatagenerator.mixin;
 
 import dev.u9g.minecraftdatagenerator.util.BlockSettingsAccessor;
-import net.minecraft.block.AbstractBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(AbstractBlock.Settings.class)
+@Mixin(BlockBehaviour.Properties.class)
 public class BlockSettingsOffsetMixin implements BlockSettingsAccessor {
     @Unique
-    private AbstractBlock.OffsetType offsetType;
+    private BlockBehaviour.OffsetType offsetType;
 
-    @Inject(method = "offset(Lnet/minecraft/block/AbstractBlock$OffsetType;)Lnet/minecraft/block/AbstractBlock$Settings;", at = @At("HEAD"))
-    public void init(AbstractBlock.OffsetType offsetType, CallbackInfoReturnable<AbstractBlock.Settings> cir) {
+    @Inject(method = "offsetType(Lnet/minecraft/world/level/block/state/BlockBehaviour$OffsetType;)Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;", at = @At("HEAD"))
+    public void init(BlockBehaviour.OffsetType offsetType, CallbackInfoReturnable<BlockBehaviour.Properties> cir) {
         this.offsetType = offsetType;
     }
 
     @Override
-    public AbstractBlock.OffsetType getOffsetType() {
+    public BlockBehaviour.OffsetType getOffsetType() {
         return offsetType;
     }
 }

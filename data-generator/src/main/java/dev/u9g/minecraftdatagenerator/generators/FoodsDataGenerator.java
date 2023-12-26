@@ -3,11 +3,11 @@ package dev.u9g.minecraftdatagenerator.generators;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.u9g.minecraftdatagenerator.util.DGU;
-import net.minecraft.item.FoodComponent;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.Item;
 
 import java.util.Objects;
 
@@ -20,25 +20,25 @@ public class FoodsDataGenerator implements IDataGenerator {
 
     public JsonArray generateDataJson() {
         JsonArray resultsArray = new JsonArray();
-        Registry<Item> itemRegistry = DGU.getWorld().getRegistryManager().get(RegistryKeys.ITEM);
+        Registry<Item> itemRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.ITEM);
         itemRegistry.stream()
-                .filter(Item::isFood)
+                .filter(Item::isEdible)
                 .forEach(food -> resultsArray.add(generateFoodDescriptor(itemRegistry, food)));
         return resultsArray;
     }
 
     public static JsonObject generateFoodDescriptor(Registry<Item> registry, Item foodItem) {
         JsonObject foodDesc = new JsonObject();
-        Identifier registryKey = registry.getKey(foodItem).orElseThrow().getValue();
+        ResourceLocation registryKey = registry.getResourceKey(foodItem).orElseThrow().location();
 
-        foodDesc.addProperty("id", registry.getRawId(foodItem));
+        foodDesc.addProperty("id", registry.getId(foodItem));
         foodDesc.addProperty("name", registryKey.getPath());
 
-        foodDesc.addProperty("stackSize", foodItem.getMaxCount());
-        foodDesc.addProperty("displayName", DGU.translateText(foodItem.getTranslationKey()));
+        foodDesc.addProperty("stackSize", foodItem.getMaxStackSize());
+        foodDesc.addProperty("displayName", DGU.translateText(foodItem.getDescriptionId()));
 
-        FoodComponent foodComponent = Objects.requireNonNull(foodItem.getFoodComponent());
-        float foodPoints = foodComponent.getHunger();
+        FoodProperties foodComponent = Objects.requireNonNull(foodItem.getFoodProperties());
+        float foodPoints = foodComponent.getNutrition();
         float saturationRatio = foodComponent.getSaturationModifier() * 2.0F;
         float saturation = foodPoints * saturationRatio;
 

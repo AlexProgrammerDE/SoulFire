@@ -5,21 +5,21 @@ import com.google.gson.JsonObject;
 import dev.u9g.minecraftdatagenerator.mixin.TheEndBiomeDataAccessor;
 import dev.u9g.minecraftdatagenerator.util.DGU;
 import net.fabricmc.fabric.api.biome.v1.NetherBiomes;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.Biome;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class BiomesDataGenerator implements IDataGenerator {
-    private static final Set<RegistryKey<Biome>> END_BIOMES = new HashSet<>();
+    private static final Set<ResourceKey<Biome>> END_BIOMES = new HashSet<>();
 
     private static String guessBiomeDimensionFromCategory(Biome biome, String biomeName) {
-        var key = DGU.getWorld().getRegistryManager().get(RegistryKeys.BIOME).getKey(biome).orElseThrow();
+        var key = DGU.getWorld().registryAccess().registryOrThrow(Registries.BIOME).getResourceKey(biome).orElseThrow();
         if (NetherBiomes.canGenerateInNether(key)) {
             return "nether";
         } else if (END_BIOMES.contains(key) || biomeName.startsWith("end_")) {
@@ -149,14 +149,14 @@ public class BiomesDataGenerator implements IDataGenerator {
 
     public static JsonObject generateBiomeInfo(Registry<Biome> registry, Biome biome) {
         JsonObject biomeDesc = new JsonObject();
-        Identifier registryKey = registry.getKey(biome).orElseThrow().getValue();
+        ResourceLocation registryKey = registry.getResourceKey(biome).orElseThrow().location();
         String localizationKey = String.format("biome.%s.%s", registryKey.getNamespace(), registryKey.getPath());
         String name = registryKey.getPath();
-        biomeDesc.addProperty("id", registry.getRawId(biome));
+        biomeDesc.addProperty("id", registry.getId(biome));
         biomeDesc.addProperty("name", name);
         String dimension = guessBiomeDimensionFromCategory(biome, name);
         biomeDesc.addProperty("category", guessCategoryBasedOnName(name, dimension));
-        biomeDesc.addProperty("temperature", biome.getTemperature());
+        biomeDesc.addProperty("temperature", biome.getBaseTemperature());
         //biomeDesc.addProperty("precipitation", biome.getPrecipitation().getName());// - removed in 1.19.4
         biomeDesc.addProperty("has_precipitation", biome.hasPrecipitation());
         //biomeDesc.addProperty("depth", biome.getDepth()); - Doesn't exist anymore in minecraft source
@@ -176,8 +176,8 @@ public class BiomesDataGenerator implements IDataGenerator {
     @Override
     public JsonArray generateDataJson() {
         JsonArray biomesArray = new JsonArray();
-        DynamicRegistryManager registryManager = DGU.getWorld().getRegistryManager();
-        Registry<Biome> biomeRegistry = registryManager.get(RegistryKeys.BIOME);
+        RegistryAccess registryManager = DGU.getWorld().registryAccess();
+        Registry<Biome> biomeRegistry = registryManager.registryOrThrow(Registries.BIOME);
 
         biomeRegistry.stream()
                 .map(biome -> generateBiomeInfo(biomeRegistry, biome))

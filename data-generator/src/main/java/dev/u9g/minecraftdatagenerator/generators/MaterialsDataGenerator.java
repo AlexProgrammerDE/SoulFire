@@ -7,19 +7,23 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.u9g.minecraftdatagenerator.mixin.MiningToolItemAccessor;
 import dev.u9g.minecraftdatagenerator.util.DGU;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.item.MiningToolItem;
-import net.minecraft.item.SwordItem;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.DiggerItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -29,11 +33,11 @@ import java.util.stream.Collectors;
 public class MaterialsDataGenerator implements IDataGenerator {
 
     private static final List<ImmutableList<String>> COMPOSITE_MATERIALS = ImmutableList.<ImmutableList<String>>builder()
-            .add(ImmutableList.of("plant", makeMaterialNameForTag(BlockTags.AXE_MINEABLE)))
-            .add(ImmutableList.of("gourd", makeMaterialNameForTag(BlockTags.AXE_MINEABLE)))
-            .add(ImmutableList.of(makeMaterialNameForTag(BlockTags.LEAVES), makeMaterialNameForTag(BlockTags.HOE_MINEABLE)))
-            .add(ImmutableList.of(makeMaterialNameForTag(BlockTags.LEAVES), makeMaterialNameForTag(BlockTags.AXE_MINEABLE), makeMaterialNameForTag(BlockTags.HOE_MINEABLE)))
-            .add(ImmutableList.of("vine_or_glow_lichen", "plant", makeMaterialNameForTag(BlockTags.AXE_MINEABLE)
+            .add(ImmutableList.of("plant", makeMaterialNameForTag(BlockTags.MINEABLE_WITH_AXE)))
+            .add(ImmutableList.of("gourd", makeMaterialNameForTag(BlockTags.MINEABLE_WITH_AXE)))
+            .add(ImmutableList.of(makeMaterialNameForTag(BlockTags.LEAVES), makeMaterialNameForTag(BlockTags.MINEABLE_WITH_HOE)))
+            .add(ImmutableList.of(makeMaterialNameForTag(BlockTags.LEAVES), makeMaterialNameForTag(BlockTags.MINEABLE_WITH_AXE), makeMaterialNameForTag(BlockTags.MINEABLE_WITH_HOE)))
+            .add(ImmutableList.of("vine_or_glow_lichen", "plant", makeMaterialNameForTag(BlockTags.MINEABLE_WITH_AXE)
             )).build();
 
     @Override
@@ -42,7 +46,7 @@ public class MaterialsDataGenerator implements IDataGenerator {
     }
 
     private static String makeMaterialNameForTag(TagKey<Block> tag) {
-        return tag.id().getPath();
+        return tag.location().getPath();
     }
 
     public static class MaterialInfo {
@@ -107,28 +111,28 @@ public class MaterialsDataGenerator implements IDataGenerator {
     public static List<MaterialInfo> getGlobalMaterialInfo() {
         ArrayList<MaterialInfo> resultList = new ArrayList<>();
 
-        resultList.add(new MaterialInfo("vine_or_glow_lichen", blockState -> blockState.isOf(Blocks.VINE) || blockState.isOf(Blocks.GLOW_LICHEN)));
-        resultList.add(new MaterialInfo("coweb", blockState -> blockState.isOf(Blocks.COBWEB)));
+        resultList.add(new MaterialInfo("vine_or_glow_lichen", blockState -> blockState.is(Blocks.VINE) || blockState.is(Blocks.GLOW_LICHEN)));
+        resultList.add(new MaterialInfo("coweb", blockState -> blockState.is(Blocks.COBWEB)));
 
-        resultList.add(new MaterialInfo("leaves", blockState -> blockState.isIn(BlockTags.LEAVES)));
-        resultList.add(new MaterialInfo("wool", blockState -> blockState.isIn(BlockTags.WOOL)));
+        resultList.add(new MaterialInfo("leaves", blockState -> blockState.is(BlockTags.LEAVES)));
+        resultList.add(new MaterialInfo("wool", blockState -> blockState.is(BlockTags.WOOL)));
 
         // Block Materials were removed in 1.20 in favor of block tags
-        resultList.add(new MaterialInfo("gourd", blockState -> blockState.isOf(Blocks.MELON) || blockState.isOf(Blocks.PUMPKIN) || blockState.isOf(Blocks.JACK_O_LANTERN)));
+        resultList.add(new MaterialInfo("gourd", blockState -> blockState.is(Blocks.MELON) || blockState.is(Blocks.PUMPKIN) || blockState.is(Blocks.JACK_O_LANTERN)));
         // 'sword_efficient' tag is for all plants, and includes everything from the old PLANT and REPLACEABLE_PLANT materials (see https://minecraft.fandom.com/wiki/Tag#Blocks)
-        resultList.add(new MaterialInfo("plant", blockState -> blockState.isIn(BlockTags.SWORD_EFFICIENT)));
+        resultList.add(new MaterialInfo("plant", blockState -> blockState.is(BlockTags.SWORD_EFFICIENT)));
 
         HashSet<String> uniqueMaterialNames = new HashSet<>();
 
-        Registry<Item> itemRegistry = DGU.getWorld().getRegistryManager().get(RegistryKeys.ITEM);
+        Registry<Item> itemRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.ITEM);
         itemRegistry.forEach(item -> {
-            if (item instanceof MiningToolItem toolItem) {
-                TagKey<Block> effectiveBlocks = ((MiningToolItemAccessor) toolItem).getEffectiveBlocks();
+            if (item instanceof DiggerItem toolItem) {
+                TagKey<Block> effectiveBlocks = ((MiningToolItemAccessor) toolItem).getBlocks();
                 String materialName = makeMaterialNameForTag(effectiveBlocks);
 
                 if (!uniqueMaterialNames.contains(materialName)) {
                     uniqueMaterialNames.add(materialName);
-                    resultList.add(new MaterialInfo(materialName, blockState -> blockState.isIn(effectiveBlocks)));
+                    resultList.add(new MaterialInfo(materialName, blockState -> blockState.is(effectiveBlocks)));
                 }
             }
         });
@@ -139,7 +143,7 @@ public class MaterialsDataGenerator implements IDataGenerator {
 
     @Override
     public JsonElement generateDataJson() {
-        Registry<Item> itemRegistry = DGU.getWorld().getRegistryManager().get(RegistryKeys.ITEM);
+        Registry<Item> itemRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.ITEM);
 
         Map<String, Map<Item, Float>> materialMiningSpeeds = new HashMap<>();
         materialMiningSpeeds.put("default", ImmutableMap.of());
@@ -163,12 +167,12 @@ public class MaterialsDataGenerator implements IDataGenerator {
 
         itemRegistry.forEach(item -> {
             //Tools are handled rather easily and do not require anything else
-            if (item instanceof MiningToolItem toolItem) {
-                TagKey<Block> effectiveBlocks = ((MiningToolItemAccessor) toolItem).getEffectiveBlocks();
+            if (item instanceof DiggerItem toolItem) {
+                TagKey<Block> effectiveBlocks = ((MiningToolItemAccessor) toolItem).getBlocks();
                 String materialName = makeMaterialNameForTag(effectiveBlocks);
 
                 Map<Item, Float> materialSpeeds = materialMiningSpeeds.computeIfAbsent(materialName, k -> new HashMap<>());
-                float miningSpeed = ((MiningToolItemAccessor) toolItem).getMiningSpeed();
+                float miningSpeed = ((MiningToolItemAccessor) toolItem).getSpeed();
                 materialSpeeds.put(item, miningSpeed);
             }
 
@@ -189,7 +193,7 @@ public class MaterialsDataGenerator implements IDataGenerator {
             JsonObject toolSpeedsObject = new JsonObject();
 
             for (var toolEntry : entry.getValue().entrySet()) {
-                int rawItemId = itemRegistry.getRawId(toolEntry.getKey());
+                int rawItemId = itemRegistry.getId(toolEntry.getKey());
                 toolSpeedsObject.addProperty(Integer.toString(rawItemId), toolEntry.getValue());
             }
             resultObject.add(entry.getKey(), toolSpeedsObject);

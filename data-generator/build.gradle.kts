@@ -14,14 +14,12 @@ repositories {
 
 dependencies {
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
-    mappings("net.fabricmc:yarn:${property("yarn_mappings")}:v2")
-    /*
+    @Suppress("UnstableApiUsage")
     mappings(loom.layered {
         officialMojangMappings()
         parchment("org.parchmentmc.data:parchment-1.20.2:2023.10.08@zip")
     })
 
-     */
     modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
 }

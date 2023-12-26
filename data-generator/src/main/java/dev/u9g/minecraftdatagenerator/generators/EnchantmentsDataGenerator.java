@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.u9g.minecraftdatagenerator.util.DGU;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentTarget;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentCategory;
 
 import java.util.List;
 import java.util.Locale;
@@ -16,31 +16,31 @@ import java.util.stream.Collectors;
 
 public class EnchantmentsDataGenerator implements IDataGenerator {
 
-    private static final ImmutableMap<EnchantmentTarget, String> ENCHANTMENT_TARGET_NAMES = ImmutableMap.<EnchantmentTarget, String>builder()
-            .put(EnchantmentTarget.ARMOR, "armor")
-            .put(EnchantmentTarget.ARMOR_FEET, "armor_feet")
-            .put(EnchantmentTarget.ARMOR_LEGS, "armor_legs")
-            .put(EnchantmentTarget.ARMOR_CHEST, "armor_chest")
-            .put(EnchantmentTarget.ARMOR_HEAD, "armor_head")
-            .put(EnchantmentTarget.WEAPON, "weapon")
-            .put(EnchantmentTarget.DIGGER, "digger")
-            .put(EnchantmentTarget.FISHING_ROD, "fishing_rod")
-            .put(EnchantmentTarget.TRIDENT, "trident")
-            .put(EnchantmentTarget.BREAKABLE, "breakable")
-            .put(EnchantmentTarget.BOW, "bow")
-            .put(EnchantmentTarget.WEARABLE, "wearable")
-            .put(EnchantmentTarget.CROSSBOW, "crossbow")
-            .put(EnchantmentTarget.VANISHABLE, "vanishable")
+    private static final ImmutableMap<EnchantmentCategory, String> ENCHANTMENT_TARGET_NAMES = ImmutableMap.<EnchantmentCategory, String>builder()
+            .put(EnchantmentCategory.ARMOR, "armor")
+            .put(EnchantmentCategory.ARMOR_FEET, "armor_feet")
+            .put(EnchantmentCategory.ARMOR_LEGS, "armor_legs")
+            .put(EnchantmentCategory.ARMOR_CHEST, "armor_chest")
+            .put(EnchantmentCategory.ARMOR_HEAD, "armor_head")
+            .put(EnchantmentCategory.WEAPON, "weapon")
+            .put(EnchantmentCategory.DIGGER, "digger")
+            .put(EnchantmentCategory.FISHING_ROD, "fishing_rod")
+            .put(EnchantmentCategory.TRIDENT, "trident")
+            .put(EnchantmentCategory.BREAKABLE, "breakable")
+            .put(EnchantmentCategory.BOW, "bow")
+            .put(EnchantmentCategory.WEARABLE, "wearable")
+            .put(EnchantmentCategory.CROSSBOW, "crossbow")
+            .put(EnchantmentCategory.VANISHABLE, "vanishable")
             .build();
 
-    public static String getEnchantmentTargetName(EnchantmentTarget target) {
+    public static String getEnchantmentTargetName(EnchantmentCategory target) {
         return ENCHANTMENT_TARGET_NAMES.getOrDefault(target, target.name().toLowerCase(Locale.ROOT));
     }
 
     //Equation enchantment costs follow is a * level + b, so we can easily retrieve a and b by passing zero level
     private static JsonObject generateEnchantmentMinPowerCoefficients(Enchantment enchantment) {
-        int b = enchantment.getMinPower(0);
-        int a = enchantment.getMinPower(1) - b;
+        int b = enchantment.getMinCost(0);
+        int a = enchantment.getMinCost(1) - b;
 
         JsonObject resultObject = new JsonObject();
         resultObject.addProperty("a", a);
@@ -49,8 +49,8 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
     }
 
     private static JsonObject generateEnchantmentMaxPowerCoefficients(Enchantment enchantment) {
-        int b = enchantment.getMaxPower(0);
-        int a = enchantment.getMaxPower(1) - b;
+        int b = enchantment.getMaxCost(0);
+        int a = enchantment.getMaxCost(1) - b;
 
         JsonObject resultObject = new JsonObject();
         resultObject.addProperty("a", a);
@@ -66,7 +66,7 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
     @Override
     public JsonArray generateDataJson() {
         JsonArray resultsArray = new JsonArray();
-        Registry<Enchantment> enchantmentRegistry = DGU.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.ENCHANTMENT);
         enchantmentRegistry.stream()
                 .forEach(enchantment -> resultsArray.add(generateEnchantment(enchantmentRegistry, enchantment)));
         return resultsArray;
@@ -74,35 +74,35 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
 
     public static JsonObject generateEnchantment(Registry<Enchantment> registry, Enchantment enchantment) {
         JsonObject enchantmentDesc = new JsonObject();
-        Identifier registryKey = registry.getKey(enchantment).orElseThrow().getValue();
+        ResourceLocation registryKey = registry.getResourceKey(enchantment).orElseThrow().location();
 
-        enchantmentDesc.addProperty("id", registry.getRawId(enchantment));
+        enchantmentDesc.addProperty("id", registry.getId(enchantment));
         enchantmentDesc.addProperty("name", registryKey.getPath());
-        enchantmentDesc.addProperty("displayName", DGU.translateText(enchantment.getTranslationKey()));
+        enchantmentDesc.addProperty("displayName", DGU.translateText(enchantment.getDescriptionId()));
 
         enchantmentDesc.addProperty("maxLevel", enchantment.getMaxLevel());
         enchantmentDesc.add("minCost", generateEnchantmentMinPowerCoefficients(enchantment));
         enchantmentDesc.add("maxCost", generateEnchantmentMaxPowerCoefficients(enchantment));
 
-        enchantmentDesc.addProperty("treasureOnly", enchantment.isTreasure());
-        enchantmentDesc.addProperty("curse", enchantment.isCursed());
+        enchantmentDesc.addProperty("treasureOnly", enchantment.isTreasureOnly());
+        enchantmentDesc.addProperty("curse", enchantment.isCurse());
 
         List<Enchantment> incompatibleEnchantments = registry.stream()
-                .filter(other -> !enchantment.canCombine(other))
+                .filter(other -> !enchantment.isCompatibleWith(other))
                 .filter(other -> other != enchantment)
                 .collect(Collectors.toList());
 
         JsonArray excludes = new JsonArray();
         for (Enchantment excludedEnchantment : incompatibleEnchantments) {
-            Identifier otherKey = registry.getKey(excludedEnchantment).orElseThrow().getValue();
+            ResourceLocation otherKey = registry.getResourceKey(excludedEnchantment).orElseThrow().location();
             excludes.add(otherKey.getPath());
         }
         enchantmentDesc.add("exclude", excludes);
 
-        enchantmentDesc.addProperty("category", getEnchantmentTargetName(enchantment.target));
+        enchantmentDesc.addProperty("category", getEnchantmentTargetName(enchantment.category));
         enchantmentDesc.addProperty("weight", enchantment.getRarity().getWeight());
-        enchantmentDesc.addProperty("tradeable", enchantment.isAvailableForEnchantedBookOffer());
-        enchantmentDesc.addProperty("discoverable", enchantment.isAvailableForRandomSelection());
+        enchantmentDesc.addProperty("tradeable", enchantment.isTradeable());
+        enchantmentDesc.addProperty("discoverable", enchantment.isDiscoverable());
 
         return enchantmentDesc;
     }

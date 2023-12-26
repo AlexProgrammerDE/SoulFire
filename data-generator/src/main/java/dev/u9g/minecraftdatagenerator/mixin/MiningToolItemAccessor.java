@@ -1,17 +1,17 @@
 package dev.u9g.minecraftdatagenerator.mixin;
 
-import net.minecraft.block.Block;
-import net.minecraft.item.MiningToolItem;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.DiggerItem;
+import net.minecraft.world.level.block.Block;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(MiningToolItem.class)
+@Mixin(DiggerItem.class)
 public interface MiningToolItemAccessor {
 
     @Accessor
-    TagKey<Block> getEffectiveBlocks();
+    TagKey<Block> getBlocks();
 
     @Accessor
-    float getMiningSpeed();
+    float getSpeed();
 }

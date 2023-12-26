@@ -1,23 +1,23 @@
 package dev.u9g.minecraftdatagenerator.util;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockRenderView;
-import net.minecraft.world.LightType;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
-import net.minecraft.world.biome.ColorResolver;
-import net.minecraft.world.chunk.light.LightingProvider;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 
-public enum EmptyRenderBlockView implements BlockRenderView {
+public enum EmptyRenderBlockView implements BlockAndTintGetter {
     INSTANCE;
 
     @Nullable
@@ -26,14 +26,14 @@ public enum EmptyRenderBlockView implements BlockRenderView {
     }
 
     public BlockState getBlockState(BlockPos pos) {
-        return Blocks.AIR.getDefaultState();
+        return Blocks.AIR.defaultBlockState();
     }
 
     public FluidState getFluidState(BlockPos pos) {
-        return Fluids.EMPTY.getDefaultState();
+        return Fluids.EMPTY.defaultFluidState();
     }
 
-    public int getBottomY() {
+    public int getMinBuildHeight() {
         return 0;
     }
 
@@ -43,30 +43,30 @@ public enum EmptyRenderBlockView implements BlockRenderView {
 
 
     @Override
-    public float getBrightness(Direction direction, boolean shaded) {
+    public float getShade(Direction direction, boolean shaded) {
         return 0.0f;
     }
 
     @Override
-    public LightingProvider getLightingProvider() {
+    public LevelLightEngine getLightEngine() {
         return null;
     }
 
     @Override
-    public int getColor(BlockPos pos, ColorResolver colorResolver) {
-        Registry<Biome> biomeRegistry = DGU.getWorld().getRegistryManager().get(RegistryKeys.BIOME);
-        Biome plainsBiome = biomeRegistry.get(BiomeKeys.PLAINS);
+    public int getBlockTint(BlockPos pos, ColorResolver colorResolver) {
+        Registry<Biome> biomeRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.BIOME);
+        Biome plainsBiome = biomeRegistry.get(Biomes.PLAINS);
 
         return colorResolver.getColor(plainsBiome, pos.getX(), pos.getY());
     }
 
     @Override
-    public int getLightLevel(LightType type, BlockPos pos) {
-        return type == LightType.SKY ? getMaxLightLevel() : 0;
+    public int getBrightness(LightLayer type, BlockPos pos) {
+        return type == LightLayer.SKY ? getMaxLightLevel() : 0;
     }
 
     @Override
-    public int getBaseLightLevel(BlockPos pos, int ambientDarkness) {
+    public int getRawBrightness(BlockPos pos, int ambientDarkness) {
         return ambientDarkness;
     }
 }

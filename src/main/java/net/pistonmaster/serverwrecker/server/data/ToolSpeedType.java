@@ -30,8 +30,6 @@ public class ToolSpeedType {
         if (SWORDS.contains(itemType)) {
             if (blockType == BlockType.COBWEB) {
                 return 15;
-                // TODO: Also handle plant, replaceable_plant and vegetable here in the future.
-                // Skipped adding it because we don't have the data of block inherits what Material.
             } else if (tagsState.isBlockInTag(blockType, "leaves")) {
                 return 1;
             } else {

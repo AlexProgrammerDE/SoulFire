@@ -1,11 +1,11 @@
 package dev.u9g.minecraftdatagenerator.mixin;
 
-import net.minecraft.block.AbstractBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(AbstractBlock.class)
+@Mixin(BlockBehaviour.class)
 public interface BlockAccessor {
-    @Accessor(value = "settings", remap = false)
-    AbstractBlock.Settings settings();
+    @Accessor(value = "properties", remap = false)
+    BlockBehaviour.Properties properties();
 }
