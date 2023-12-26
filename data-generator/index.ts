@@ -1,13 +1,14 @@
-import config from 'generator-config.json'
 import mcDataPackage from 'minecraft-data'
 import fs from 'fs'
 import process from 'process'
 
-const mcData = mcDataPackage(config.version)
+const version = "1.20.4"
+
+const mcData = mcDataPackage(version)
 const enumReplace = "// VALUES REPLACE"
 
 if (mcData == null) {
-  console.error(`Version ${config.version} not found`)
+  console.error(`Version ${version} not found`)
   process.exit(1)
 } else {
   const getNameOfItemId = (id: number): string | null => {

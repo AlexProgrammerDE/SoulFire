@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "minecraft-data": "^3.37.0",
+    "minecraft-data": "^3.51.0",
     "tsx": "^4.0.0",
     "typescript": "^5.0.4"
   },
