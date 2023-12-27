@@ -1,8 +1,6 @@
 plugins {
-    id("sw.license-conventions")
     id("sw.java-conventions")
-    id("net.kyori.blossom")
-    id("net.kyori.indra.git")
+    alias(libs.plugins.blossom)
 }
 
 sourceSets {

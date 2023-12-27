@@ -5,8 +5,7 @@ plugins {
     application
     idea
     id("sw.shadow-conventions")
-    id("com.google.protobuf")
-    id("net.kyori.indra.checkstyle")
+    alias(libs.plugins.protobuf)
 }
 
 allprojects {

@@ -4,6 +4,8 @@ plugins {
     id("sw.license-conventions")
     id("net.kyori.indra")
     id("net.kyori.indra.publishing")
+    id("net.kyori.indra.git")
+    id("net.kyori.indra.checkstyle")
     id("io.freefair.lombok")
 }
 

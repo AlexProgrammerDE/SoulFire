@@ -5,15 +5,6 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
-    plugins {
-        id("com.github.johnrengelman.shadow") version "8.1.1"
-        id("org.cadixdev.licenser") version "0.6.1"
-        id("net.kyori.indra") version "3.1.3"
-        id("net.kyori.indra.git") version "3.1.3"
-        id("net.kyori.indra.checkstyle") version "3.1.3"
-        id("net.kyori.blossom") version "2.1.0"
-        id("com.google.protobuf") version "0.9.4"
-    }
 }
 
 plugins {

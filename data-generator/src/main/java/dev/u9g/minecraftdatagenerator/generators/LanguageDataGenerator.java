@@ -12,7 +12,7 @@ import java.util.Objects;
 public class LanguageDataGenerator implements IDataGenerator {
     @Override
     public String getDataName() {
-        return "language";
+        return "en_us";
     }
 
     @Override
