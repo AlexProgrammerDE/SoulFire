@@ -15,7 +15,7 @@ public class EffectsDataGenerator implements IDataGenerator {
 
     @Override
     public String getDataName() {
-        return "effects";
+        return "effects.json";
     }
 
     @Override

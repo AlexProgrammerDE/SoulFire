@@ -26,7 +26,7 @@ import net.pistonmaster.serverwrecker.server.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.SWItemStack;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.tag.TagsState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
 import net.pistonmaster.serverwrecker.server.util.ItemTypeHelper;
 
 import java.util.HashSet;

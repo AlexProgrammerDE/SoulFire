@@ -13,7 +13,7 @@ import net.pistonmaster.serverwrecker.generator.util.DGU;
 public class BlocksDataGenerator implements IDataGenerator {
     @Override
     public String getDataName() {
-        return "blocks";
+        return "blocks.json";
     }
 
     @Override

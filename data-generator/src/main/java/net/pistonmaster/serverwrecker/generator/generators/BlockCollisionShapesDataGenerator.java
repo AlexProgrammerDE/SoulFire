@@ -98,7 +98,7 @@ public class BlockCollisionShapesDataGenerator implements IDataGenerator {
 
     @Override
     public String getDataName() {
-        return "blockCollisionShapes";
+        return "blockCollisionShapes.json";
     }
 
     @Override

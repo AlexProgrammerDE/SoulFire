@@ -149,11 +149,11 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityTrackerSta
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.MapDataState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.PlayerListState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.WeatherState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ClientEntity;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.RawEntity;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.server.settings.BotSettings;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;

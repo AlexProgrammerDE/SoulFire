@@ -19,7 +19,7 @@
  */
 package net.pistonmaster.serverwrecker.server.data;
 
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.tag.TagsState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
 
 import java.util.Set;
 
@@ -30,15 +30,15 @@ public class ToolSpeedType {
         if (SWORDS.contains(itemType)) {
             if (blockType == BlockType.COBWEB) {
                 return 15;
-            } else if (tagsState.isBlockInTag(blockType, "leaves")) {
+            } else if (tagsState.isBlockInTag(blockType, BlockTags.LEAVES)) {
                 return 1;
             } else {
                 return 1.5F;
             }
         } else if (itemType == ItemType.SHEARS) {
-            if (blockType == BlockType.COBWEB || tagsState.isBlockInTag(blockType, "leaves")) {
+            if (blockType == BlockType.COBWEB || tagsState.isBlockInTag(blockType, BlockTags.LEAVES)) {
                 return 15;
-            } else if (tagsState.isBlockInTag(blockType, "wool")) {
+            } else if (tagsState.isBlockInTag(blockType, BlockTags.WOOL)) {
                 return 5;
             } else if (blockType == BlockType.VINE || blockType == BlockType.GLOW_LICHEN) {
                 return 1;
@@ -80,11 +80,11 @@ public class ToolSpeedType {
             }
 
             var i = tier.getAsInt();
-            if (i < 3 && tagsState.isBlockInTag(blockType, "needs_diamond_tool")) {
+            if (i < 3 && tagsState.isBlockInTag(blockType, BlockTags.NEEDS_DIAMOND_TOOL)) {
                 return false;
-            } else if (i < 2 && tagsState.isBlockInTag(blockType, "needs_iron_tool")) {
+            } else if (i < 2 && tagsState.isBlockInTag(blockType, BlockTags.NEEDS_IRON_TOOL)) {
                 return false;
-            } else if (i < 1 && tagsState.isBlockInTag(blockType, "needs_stone_tool")) {
+            } else if (i < 1 && tagsState.isBlockInTag(blockType, BlockTags.NEEDS_STONE_TOOL)) {
                 return false;
             }
 

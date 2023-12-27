@@ -3,23 +3,20 @@ package net.pistonmaster.serverwrecker.generator.generators;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
+import net.pistonmaster.serverwrecker.generator.util.ResourceHelper;
 
 public class LanguageDataGenerator implements IDataGenerator {
     @Override
     public String getDataName() {
-        return "en_us";
+        return "en_us.json";
     }
 
     @Override
     public JsonElement generateDataJson() {
         try {
-            var inputStream = Objects.requireNonNull(this.getClass().getResourceAsStream("/assets/minecraft/lang/en_us.json"));
-            return new Gson().fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), JsonObject.class);
-        } catch (Exception ignored) {}
-        throw new RuntimeException("Failed to generate language file");
+            return new Gson().fromJson(ResourceHelper.getResource("/assets/minecraft/lang/en_us.json"), JsonObject.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate language file", e);
+        }
     }
 }

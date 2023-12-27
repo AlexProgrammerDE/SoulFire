@@ -25,14 +25,15 @@ import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeTyp
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.ModifierOperation;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.Getter;
+import net.pistonmaster.serverwrecker.server.data.BlockTags;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributeState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.LevelState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ClientEntity;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.Entity;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.tag.TagsState;
 import net.pistonmaster.serverwrecker.server.util.MathHelper;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -236,7 +237,7 @@ public class BotMovementManager {
 
     public boolean isClimbable(LevelState world, Vector3i pos) {
         var blockType = world.getBlockStateAt(pos).blockType();
-        return tagsState.isBlockInTag(blockType, "climbable") || blockType == BlockType.POWDER_SNOW;
+        return tagsState.isBlockInTag(blockType, BlockTags.CLIMBABLE) || blockType == BlockType.POWDER_SNOW;
     }
 
     public void tick() {

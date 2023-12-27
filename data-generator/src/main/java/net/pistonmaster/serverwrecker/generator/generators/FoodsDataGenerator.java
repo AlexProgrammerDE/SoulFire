@@ -13,7 +13,7 @@ public class FoodsDataGenerator implements IDataGenerator {
 
     @Override
     public String getDataName() {
-        return "foods";
+        return "foods.json";
     }
 
     public JsonArray generateDataJson() {

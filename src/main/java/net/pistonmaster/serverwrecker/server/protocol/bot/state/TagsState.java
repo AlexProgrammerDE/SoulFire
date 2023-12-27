@@ -17,7 +17,7 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.server.protocol.bot.state.tag;
+package net.pistonmaster.serverwrecker.server.protocol.bot.state;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
@@ -33,18 +33,14 @@ public class TagsState {
     private final Map<String, Set<ItemType>> itemTags = new Object2ObjectOpenHashMap<>();
     private final Map<String, Set<EntityType>> entityTags = new Object2ObjectOpenHashMap<>();
 
-    private static String stripMinecraft(String input) {
-        return input.replace("minecraft:", "");
-    }
-
     public void handleTagData(Map<String, Map<String, int[]>> tags) {
         for (var registry : tags.entrySet()) {
-            var registryKey = stripMinecraft(registry.getKey());
+            var registryKey = registry.getKey();
 
             switch (registryKey) {
-                case "block" -> handleBlocks(registry.getValue());
-                case "item" -> handleItems(registry.getValue());
-                case "entity_type" -> handleEntities(registry.getValue());
+                case "minecraft:block" -> handleBlocks(registry.getValue());
+                case "minecraft:item" -> handleItems(registry.getValue());
+                case "minecraft:entity_type" -> handleEntities(registry.getValue());
                 // Ignore everything else, we just need these three for now
             }
         }
@@ -52,7 +48,7 @@ public class TagsState {
 
     private void handleBlocks(Map<String, int[]> blocks) {
         for (var block : blocks.entrySet()) {
-            var blockKey = stripMinecraft(block.getKey());
+            var blockKey = block.getKey();
             var blockSet = blockTags.computeIfAbsent(blockKey, k -> new HashSet<>(block.getValue().length));
 
             for (var i : block.getValue()) {
@@ -63,7 +59,7 @@ public class TagsState {
 
     private void handleItems(Map<String, int[]> items) {
         for (var item : items.entrySet()) {
-            var itemKey = stripMinecraft(item.getKey());
+            var itemKey = item.getKey();
             var itemSet = itemTags.computeIfAbsent(itemKey, k -> new HashSet<>(item.getValue().length));
 
             for (var i : item.getValue()) {
@@ -74,7 +70,7 @@ public class TagsState {
 
     private void handleEntities(Map<String, int[]> entities) {
         for (var entity : entities.entrySet()) {
-            var entityKey = stripMinecraft(entity.getKey());
+            var entityKey = entity.getKey();
             var entitySet = entityTags.computeIfAbsent(entityKey, k -> new HashSet<>(entity.getValue().length));
 
             for (var i : entity.getValue()) {

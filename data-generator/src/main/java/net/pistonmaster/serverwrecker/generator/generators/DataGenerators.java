@@ -1,5 +1,6 @@
 package net.pistonmaster.serverwrecker.generator.generators;
 
+import com.google.gson.JsonElement;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import org.slf4j.Logger;
@@ -23,7 +24,9 @@ public class DataGenerators {
             new ItemsDataGenerator(),
             new LanguageDataGenerator(),
             new InstrumentsDataGenerator(),
-            new TagsDataGenerator()
+            new TagsDataGenerator.BlockTagsDataGenerator(),
+            new TagsDataGenerator.ItemTagsDataGenerator(),
+            new TagsDataGenerator.EntityTypeTagsDataGenerator()
     );
     private static final Logger logger = LoggerFactory.getLogger(DataGenerators.class);
 
@@ -41,17 +44,28 @@ public class DataGenerators {
         for (var dataGenerator : GENERATORS) {
             logger.info("Running generator {}", dataGenerator.getDataName());
             try {
-                var outputFileName = String.format("%s.json", dataGenerator.getDataName());
-                var outputElement = dataGenerator.generateDataJson();
+                var outputFileName = dataGenerator.getDataName();
                 var outputFilePath = outputDirectory.resolve(outputFileName);
+                var outputElement = dataGenerator.generateDataJson();
 
-                try (Writer writer = Files.newBufferedWriter(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-                    var jsonWriter = new JsonWriter(writer);
-                    jsonWriter.setIndent("  ");
-                    Streams.write(outputElement, jsonWriter);
+                if (outputElement instanceof JsonElement jsonElement) {
+                    try (Writer writer = Files.newBufferedWriter(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+                        var jsonWriter = new JsonWriter(writer);
+                        jsonWriter.setIndent("  ");
+                        Streams.write(jsonElement, jsonWriter);
+
+                    }
+                } else if (outputElement instanceof String string) {
+                    try (Writer writer = Files.newBufferedWriter(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+                        writer.write(string);
+                    }
+                } else {
+                    logger.error("Unknown output type for data generator {}", dataGenerator.getDataName());
+                    generatorsFailed++;
+                    continue;
                 }
-                logger.info("Generator: {} -> {}", dataGenerator.getDataName(), outputFileName);
 
+                logger.info("Generator: {} -> {}", dataGenerator.getDataName(), outputFileName);
             } catch (Throwable exception) {
                 logger.error("Failed to run data generator {}", dataGenerator.getDataName(), exception);
                 generatorsFailed++;
@@ -60,7 +74,7 @@ public class DataGenerators {
 
         logger.info("Running built-in data generator");
         try {
-            net.minecraft.data.Main.main(new String[] {"--all", "--output", outputDirectory.resolve("built-in-generator").toString()});
+            net.minecraft.data.Main.main(new String[]{"--all", "--output", outputDirectory.resolve("built-in-generator").toString()});
         } catch (IOException e) {
             logger.error("Failed to run built-in data generator", e);
             generatorsFailed++;

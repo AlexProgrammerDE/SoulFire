@@ -20,7 +20,7 @@ public class EntitiesDataGenerator implements IDataGenerator {
 
     @Override
     public String getDataName() {
-        return "entities";
+        return "entities.json";
     }
 
     @Override

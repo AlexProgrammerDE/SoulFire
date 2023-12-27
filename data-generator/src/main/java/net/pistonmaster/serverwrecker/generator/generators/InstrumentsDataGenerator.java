@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 public class InstrumentsDataGenerator implements IDataGenerator {
     @Override
     public String getDataName() {
-        return "instruments";
+        return "instruments.json";
     }
 
     @Override

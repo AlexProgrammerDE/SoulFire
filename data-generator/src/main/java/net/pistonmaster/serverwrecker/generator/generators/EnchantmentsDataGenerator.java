@@ -38,7 +38,7 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
 
     @Override
     public String getDataName() {
-        return "enchantments";
+        return "enchantments.json";
     }
 
     @Override
