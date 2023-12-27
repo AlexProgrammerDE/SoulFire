@@ -1,4 +1,4 @@
-package dev.u9g.minecraftdatagenerator.mixin;
+package net.pistonmaster.serverwrecker.generator.mixin;
 
 import net.minecraft.server.Eula;
 import org.spongepowered.asm.mixin.Mixin;

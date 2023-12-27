@@ -1,6 +1,6 @@
-package dev.u9g.minecraftdatagenerator.mixin;
+package net.pistonmaster.serverwrecker.generator.mixin;
 
-import dev.u9g.minecraftdatagenerator.util.BlockSettingsAccessor;
+import net.pistonmaster.serverwrecker.generator.util.BlockSettingsAccessor;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

@@ -1,4 +1,4 @@
-package dev.u9g.minecraftdatagenerator.generators;
+package net.pistonmaster.serverwrecker.generator.generators;
 
 import com.google.gson.JsonElement;
 import com.google.gson.internal.Streams;

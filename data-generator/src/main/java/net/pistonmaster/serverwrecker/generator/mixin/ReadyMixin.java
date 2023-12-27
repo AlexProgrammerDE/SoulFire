@@ -1,8 +1,8 @@
-package dev.u9g.minecraftdatagenerator.mixin;
+package net.pistonmaster.serverwrecker.generator.mixin;
 
-import dev.u9g.minecraftdatagenerator.Main;
-import dev.u9g.minecraftdatagenerator.generators.DataGenerators;
-import dev.u9g.minecraftdatagenerator.util.DGU;
+import net.pistonmaster.serverwrecker.generator.Main;
+import net.pistonmaster.serverwrecker.generator.generators.DataGenerators;
+import net.pistonmaster.serverwrecker.generator.util.DGU;
 import net.minecraft.DetectedVersion;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.asm.mixin.Mixin;

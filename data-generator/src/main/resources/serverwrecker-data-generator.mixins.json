@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "dev.u9g.minecraftdatagenerator.mixin",
+  "package": "net.pistonmaster.serverwrecker.generator.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "BlockAccessor",

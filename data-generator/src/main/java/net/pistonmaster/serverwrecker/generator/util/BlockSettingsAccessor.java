@@ -1,4 +1,4 @@
-package dev.u9g.minecraftdatagenerator.util;
+package net.pistonmaster.serverwrecker.generator.util;
 
 import net.minecraft.world.level.block.state.BlockBehaviour;
 

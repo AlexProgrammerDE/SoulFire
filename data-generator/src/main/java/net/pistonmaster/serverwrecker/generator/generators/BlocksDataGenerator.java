@@ -1,10 +1,10 @@
-package dev.u9g.minecraftdatagenerator.generators;
+package net.pistonmaster.serverwrecker.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import dev.u9g.minecraftdatagenerator.mixin.BlockAccessor;
-import dev.u9g.minecraftdatagenerator.util.BlockSettingsAccessor;
-import dev.u9g.minecraftdatagenerator.util.DGU;
+import net.pistonmaster.serverwrecker.generator.mixin.BlockAccessor;
+import net.pistonmaster.serverwrecker.generator.util.BlockSettingsAccessor;
+import net.pistonmaster.serverwrecker.generator.util.DGU;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;

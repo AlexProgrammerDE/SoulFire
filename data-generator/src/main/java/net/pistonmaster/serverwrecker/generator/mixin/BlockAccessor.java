@@ -1,4 +1,4 @@
-package dev.u9g.minecraftdatagenerator.mixin;
+package net.pistonmaster.serverwrecker.generator.mixin;
 
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.asm.mixin.Mixin;

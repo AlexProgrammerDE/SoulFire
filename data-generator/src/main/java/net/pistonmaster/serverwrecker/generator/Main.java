@@ -1,4 +1,4 @@
-package dev.u9g.minecraftdatagenerator;
+package net.pistonmaster.serverwrecker.generator;
 
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
