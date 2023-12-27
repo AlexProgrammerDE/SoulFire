@@ -3,10 +3,9 @@ package net.pistonmaster.serverwrecker.generator.generators;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
-import net.pistonmaster.serverwrecker.generator.util.DGU;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,8 +34,8 @@ public class ItemsDataGenerator implements IDataGenerator {
     @Override
     public JsonArray generateDataJson() {
         var resultArray = new JsonArray();
-        var itemRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.ITEM);
-        itemRegistry.stream().forEach(item -> resultArray.add(generateItem(itemRegistry, item)));
+        var itemRegistry = BuiltInRegistries.ITEM;
+        itemRegistry.forEach(item -> resultArray.add(generateItem(itemRegistry, item)));
         return resultArray;
     }
 
@@ -47,7 +46,6 @@ public class ItemsDataGenerator implements IDataGenerator {
         itemDesc.addProperty("id", itemRegistry.getId(item));
         itemDesc.addProperty("name", registryKey.getPath());
 
-        itemDesc.addProperty("displayName", DGU.translateText(item.getDescriptionId()));
         itemDesc.addProperty("stackSize", item.getMaxStackSize());
 
         var enchantmentTargets = getApplicableEnchantmentTargets(item);
@@ -56,6 +54,7 @@ public class ItemsDataGenerator implements IDataGenerator {
         for (var target : enchantmentTargets) {
             enchantCategoriesArray.add(EnchantmentsDataGenerator.getEnchantmentTargetName(target));
         }
+
         if (!enchantCategoriesArray.isEmpty()) {
             itemDesc.add("enchantCategories", enchantCategoriesArray);
         }
@@ -75,6 +74,7 @@ public class ItemsDataGenerator implements IDataGenerator {
             var maxDurability = item.getMaxDamage();
             itemDesc.addProperty("maxDurability", maxDurability);
         }
+
         return itemDesc;
     }
 }

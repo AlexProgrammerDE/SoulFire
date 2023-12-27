@@ -4,16 +4,18 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.pistonmaster.serverwrecker.generator.util.DGU;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,13 +23,15 @@ import java.util.Map;
 public class BlockCollisionShapesDataGenerator implements IDataGenerator {
 
     private static class BlockShapesCache {
-        public final Map<VoxelShape, Integer> uniqueBlockShapes = new HashMap<>();
-        public final Map<Block, List<Integer>> blockCollisionShapes = new HashMap<>();
+        public final Object2IntMap<VoxelShape> uniqueBlockShapes = new Object2IntOpenHashMap<>() {{
+            defaultReturnValue(-1);
+        }};
+        public final Map<Block, IntList> blockCollisionShapes = new HashMap<>();
         private int lastCollisionShapeId = 0;
 
         public void processBlock(Block block) {
             List<BlockState> blockStates = block.getStateDefinition().getPossibleStates();
-            List<Integer> blockCollisionShapes = new ArrayList<>();
+            IntList blockCollisionShapes = new IntArrayList();
 
             for (var blockState : blockStates) {
                 var blockShape = blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
@@ -37,12 +41,12 @@ public class BlockCollisionShapesDataGenerator implements IDataGenerator {
                 var inverseBlockShapeCenter = blockShapeCenter.reverse();
                 blockShape = blockShape.move(inverseBlockShapeCenter.x, inverseBlockShapeCenter.y, inverseBlockShapeCenter.z);
 
-                var blockShapeIndex = uniqueBlockShapes.get(blockShape);
-
-                if (blockShapeIndex == null) {
+                var blockShapeIndex = uniqueBlockShapes.getInt(blockShape);
+                if (blockShapeIndex == -1) {
                     blockShapeIndex = lastCollisionShapeId++;
                     uniqueBlockShapes.put(blockShape, blockShapeIndex);
                 }
+
                 blockCollisionShapes.add(blockShapeIndex);
             }
 
@@ -75,7 +79,7 @@ public class BlockCollisionShapesDataGenerator implements IDataGenerator {
         public JsonObject dumpShapesObject() {
             var shapesObject = new JsonObject();
 
-            for (var entry : uniqueBlockShapes.entrySet()) {
+            for (var entry : uniqueBlockShapes.object2IntEntrySet()) {
                 var boxesArray = new JsonArray();
                 entry.getKey().forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
                     var oneBoxJsonArray = new JsonArray();
@@ -90,7 +94,7 @@ public class BlockCollisionShapesDataGenerator implements IDataGenerator {
 
                     boxesArray.add(oneBoxJsonArray);
                 });
-                shapesObject.add(Integer.toString(entry.getValue()), boxesArray);
+                shapesObject.add(Integer.toString(entry.getIntValue()), boxesArray);
             }
             return shapesObject;
         }
@@ -103,7 +107,7 @@ public class BlockCollisionShapesDataGenerator implements IDataGenerator {
 
     @Override
     public JsonObject generateDataJson() {
-        var blockRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.BLOCK);
+        var blockRegistry = BuiltInRegistries.BLOCK;
         var blockShapesCache = new BlockShapesCache();
 
         blockRegistry.forEach(blockShapesCache::processBlock);

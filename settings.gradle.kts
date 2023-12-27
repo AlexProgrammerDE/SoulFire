@@ -2,6 +2,9 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {
+        maven("https://maven.fabricmc.net/") {
+            name = "Fabric"
+        }
         mavenCentral()
         gradlePluginPortal()
     }
@@ -14,7 +17,6 @@ plugins {
 
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
-    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
     repositories {
         maven("https://repo.opencollab.dev/maven-releases") {
             name = "OpenCollab Releases"
@@ -58,6 +60,7 @@ gradleEnterprise {
     }
 }
 
+include("data-generator")
 include("build-data", "j8-launcher")
 
 rootProject.name = "serverwrecker"

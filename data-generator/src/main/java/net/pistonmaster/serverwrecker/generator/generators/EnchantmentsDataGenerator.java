@@ -3,10 +3,9 @@ package net.pistonmaster.serverwrecker.generator.generators;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
-import net.pistonmaster.serverwrecker.generator.util.DGU;
 
 import java.util.Locale;
 
@@ -44,7 +43,7 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
     @Override
     public JsonArray generateDataJson() {
         var resultsArray = new JsonArray();
-        var enchantmentRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        var enchantmentRegistry = BuiltInRegistries.ENCHANTMENT;
         enchantmentRegistry.stream()
                 .forEach(enchantment -> resultsArray.add(generateEnchantment(enchantmentRegistry, enchantment)));
         return resultsArray;
@@ -56,7 +55,6 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
 
         enchantmentDesc.addProperty("id", registry.getId(enchantment));
         enchantmentDesc.addProperty("name", registryKey.getPath());
-        enchantmentDesc.addProperty("displayName", DGU.translateText(enchantment.getDescriptionId()));
 
         enchantmentDesc.addProperty("maxLevel", enchantment.getMaxLevel());
         enchantmentDesc.add("minCost", generateEnchantmentMinPowerCoefficients(enchantment));

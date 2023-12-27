@@ -3,9 +3,8 @@ package net.pistonmaster.serverwrecker.generator.generators;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
-import net.pistonmaster.serverwrecker.generator.util.DGU;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -21,7 +20,7 @@ public class EffectsDataGenerator implements IDataGenerator {
     @Override
     public JsonArray generateDataJson() {
         var resultsArray = new JsonArray();
-        var statusEffectRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.MOB_EFFECT);
+        var statusEffectRegistry = BuiltInRegistries.MOB_EFFECT;
         statusEffectRegistry.forEach(effect -> resultsArray.add(generateEffect(statusEffectRegistry, effect)));
         return resultsArray;
     }
@@ -32,7 +31,6 @@ public class EffectsDataGenerator implements IDataGenerator {
 
         effectDesc.addProperty("id", registry.getId(statusEffect));
         effectDesc.addProperty("name", Arrays.stream(registryKey.getPath().split("_")).map(StringUtils::capitalize).collect(Collectors.joining()));
-        effectDesc.addProperty("displayName", DGU.translateText(statusEffect.getDescriptionId()));
 
         effectDesc.addProperty("type", statusEffect.isBeneficial() ? "good" : "bad");
         return effectDesc;

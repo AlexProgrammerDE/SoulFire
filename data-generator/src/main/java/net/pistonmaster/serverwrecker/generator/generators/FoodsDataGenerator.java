@@ -3,9 +3,8 @@ package net.pistonmaster.serverwrecker.generator.generators;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
-import net.pistonmaster.serverwrecker.generator.util.DGU;
 
 import java.util.Objects;
 
@@ -18,7 +17,7 @@ public class FoodsDataGenerator implements IDataGenerator {
 
     public JsonArray generateDataJson() {
         var resultsArray = new JsonArray();
-        var itemRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.ITEM);
+        var itemRegistry = BuiltInRegistries.ITEM;
         itemRegistry.stream()
                 .filter(Item::isEdible)
                 .forEach(food -> resultsArray.add(generateFoodDescriptor(itemRegistry, food)));
@@ -33,7 +32,6 @@ public class FoodsDataGenerator implements IDataGenerator {
         foodDesc.addProperty("name", registryKey.getPath());
 
         foodDesc.addProperty("stackSize", foodItem.getMaxStackSize());
-        foodDesc.addProperty("displayName", DGU.translateText(foodItem.getDescriptionId()));
 
         var foodComponent = Objects.requireNonNull(foodItem.getFoodProperties());
         float foodPoints = foodComponent.getNutrition();

@@ -3,12 +3,11 @@ package net.pistonmaster.serverwrecker.generator.generators;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FallingBlock;
 import net.pistonmaster.serverwrecker.generator.mixin.BlockAccessor;
 import net.pistonmaster.serverwrecker.generator.util.BlockSettingsAccessor;
-import net.pistonmaster.serverwrecker.generator.util.DGU;
 
 public class BlocksDataGenerator implements IDataGenerator {
     @Override
@@ -19,7 +18,7 @@ public class BlocksDataGenerator implements IDataGenerator {
     @Override
     public JsonArray generateDataJson() {
         var resultBlocksArray = new JsonArray();
-        var blockRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.BLOCK);
+        var blockRegistry = BuiltInRegistries.BLOCK;
 
         blockRegistry.forEach(block -> resultBlocksArray.add(generateBlock(blockRegistry, block)));
         return resultBlocksArray;
@@ -30,30 +29,34 @@ public class BlocksDataGenerator implements IDataGenerator {
 
         var defaultState = block.defaultBlockState();
         var registryKey = blockRegistry.getResourceKey(block).orElseThrow().location();
-        var localizationKey = block.getDescriptionId();
 
         blockDesc.addProperty("id", blockRegistry.getId(block));
         blockDesc.addProperty("name", registryKey.getPath());
-        blockDesc.addProperty("displayName", DGU.translateText(localizationKey));
 
         blockDesc.addProperty("hardness", block.defaultDestroyTime());
         blockDesc.addProperty("resistance", block.getExplosionResistance());
         blockDesc.addProperty("stackSize", block.asItem().getMaxStackSize());
-        blockDesc.addProperty("air", defaultState.isAir());
-        blockDesc.addProperty("fallingBlock", block instanceof FallingBlock);
-        blockDesc.addProperty("replaceable", defaultState.canBeReplaced());
+        if (defaultState.isAir()) {
+            blockDesc.addProperty("air",  true);
+        }
+        if (block instanceof FallingBlock) {
+            blockDesc.addProperty("fallingBlock", true);
+        }
+        if (defaultState.canBeReplaced()) {
+            blockDesc.addProperty("replaceable", true);
+        }
 
         if (defaultState.hasOffsetFunction()) {
             var offsetData = new JsonObject();
 
             offsetData.addProperty("maxHorizontalOffset", block.getMaxHorizontalOffset());
-            offsetData.addProperty("verticalModelOffsetMultiplier", block.getMaxVerticalOffset());
+            offsetData.addProperty("maxVerticalOffset", block.getMaxVerticalOffset());
 
             var blockSettings = ((BlockAccessor) block).properties();
             var offsetType = ((BlockSettingsAccessor) blockSettings).serverwrecker$getOffsetType();
             offsetData.addProperty("offsetType", offsetType.name());
 
-            blockDesc.add("modelOffset", offsetData);
+            blockDesc.add("offsetData", offsetData);
         }
 
         return blockDesc;

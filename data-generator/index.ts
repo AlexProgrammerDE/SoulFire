@@ -5,7 +5,6 @@ const enumReplace = "// VALUES REPLACE"
 
 if (mcData == null) {
   console.error(`Version ${version} not found`)
-  process.exit(1)
 } else {
   const getNameOfItemId = (id: number): string | null => {
     return mcData.items[id].name.toUpperCase();
