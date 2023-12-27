@@ -1001,7 +1001,7 @@ public final class SessionDataManager {
 
     private boolean isValidResourcePackUrl(String url) {
         try {
-            String protocol = URI.create(url).toURL().getProtocol();
+            var protocol = URI.create(url).toURL().getProtocol();
             return "http".equals(protocol) || "https".equals(protocol);
         } catch (MalformedURLException var3) {
             return false;

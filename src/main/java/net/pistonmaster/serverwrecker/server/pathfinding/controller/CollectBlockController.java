@@ -32,11 +32,11 @@ public class CollectBlockController {
     }
 
     public void searchBlockWithinRadiusAndY(BotConnection botConnection, BlockType blockType, int radius, int minY, int maxY) {
-        int radiusSquared = radius * radius;
+        var radiusSquared = radius * radius;
 
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = -radius; y <= radius; y++) {
-                for (int z = -radius; z <= radius; z++) {
+        for (var x = -radius; x <= radius; x++) {
+            for (var y = -radius; y <= radius; y++) {
+                for (var z = -radius; z <= radius; z++) {
                     if (x * x + y * y + z * z <= radiusSquared) {
                         /*
                         Vector3i loc = playerLocation.clone().add(x, y, z);

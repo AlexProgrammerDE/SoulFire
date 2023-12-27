@@ -77,7 +77,7 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
         return super.buildReader(builder
                 .appName("ServerWrecker")
                 .completer((reader, parsedLine, list) -> {
-                    for (String suggestion : clientCommandManager.getCompletionSuggestions(parsedLine.line())) {
+                    for (var suggestion : clientCommandManager.getCompletionSuggestions(parsedLine.line())) {
                         list.add(new Candidate(suggestion));
                     }
                 })

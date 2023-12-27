@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.server.viaversion.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
-import net.pistonmaster.serverwrecker.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.server.viaversion.StorableSession;
 import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.providers.OldAuthProvider;
 
@@ -29,7 +28,7 @@ import java.util.Objects;
 public class SWViaOldAuthProvider extends OldAuthProvider {
     @Override
     public void sendAuthRequest(UserConnection user, String serverId) {
-        ViaClientSession session = Objects.requireNonNull(user.get(StorableSession.class)).session();
+        var session = Objects.requireNonNull(user.get(StorableSession.class)).session();
         session.meta().joinServerId(serverId, session);
     }
 }

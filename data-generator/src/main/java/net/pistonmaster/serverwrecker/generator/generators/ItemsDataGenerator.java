@@ -2,13 +2,11 @@ package net.pistonmaster.serverwrecker.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.pistonmaster.serverwrecker.generator.util.DGU;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
+import net.pistonmaster.serverwrecker.generator.util.DGU;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +15,7 @@ import java.util.stream.Collectors;
 public class ItemsDataGenerator implements IDataGenerator {
 
     private static List<Item> calculateItemsToRepairWith(Registry<Item> itemRegistry, Item sourceItem) {
-        ItemStack sourceItemStack = sourceItem.getDefaultInstance();
+        var sourceItemStack = sourceItem.getDefaultInstance();
         return itemRegistry.stream()
                 .filter(otherItem -> sourceItem.isValidRepairItem(sourceItemStack, otherItem.getDefaultInstance()))
                 .collect(Collectors.toList());
@@ -36,15 +34,15 @@ public class ItemsDataGenerator implements IDataGenerator {
 
     @Override
     public JsonArray generateDataJson() {
-        JsonArray resultArray = new JsonArray();
-        Registry<Item> itemRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.ITEM);
+        var resultArray = new JsonArray();
+        var itemRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.ITEM);
         itemRegistry.stream().forEach(item -> resultArray.add(generateItem(itemRegistry, item)));
         return resultArray;
     }
 
     public static JsonObject generateItem(Registry<Item> itemRegistry, Item item) {
-        JsonObject itemDesc = new JsonObject();
-        ResourceLocation registryKey = itemRegistry.getResourceKey(item).orElseThrow().location();
+        var itemDesc = new JsonObject();
+        var registryKey = itemRegistry.getResourceKey(item).orElseThrow().location();
 
         itemDesc.addProperty("id", itemRegistry.getId(item));
         itemDesc.addProperty("name", registryKey.getPath());
@@ -52,10 +50,10 @@ public class ItemsDataGenerator implements IDataGenerator {
         itemDesc.addProperty("displayName", DGU.translateText(item.getDescriptionId()));
         itemDesc.addProperty("stackSize", item.getMaxStackSize());
 
-        List<EnchantmentCategory> enchantmentTargets = getApplicableEnchantmentTargets(item);
+        var enchantmentTargets = getApplicableEnchantmentTargets(item);
 
-        JsonArray enchantCategoriesArray = new JsonArray();
-        for (EnchantmentCategory target : enchantmentTargets) {
+        var enchantCategoriesArray = new JsonArray();
+        for (var target : enchantmentTargets) {
             enchantCategoriesArray.add(EnchantmentsDataGenerator.getEnchantmentTargetName(target));
         }
         if (!enchantCategoriesArray.isEmpty()) {
@@ -63,18 +61,18 @@ public class ItemsDataGenerator implements IDataGenerator {
         }
 
         if (item.canBeDepleted()) {
-            List<Item> repairWithItems = calculateItemsToRepairWith(itemRegistry, item);
+            var repairWithItems = calculateItemsToRepairWith(itemRegistry, item);
 
-            JsonArray fixedWithArray = new JsonArray();
-            for (Item repairWithItem : repairWithItems) {
-                ResourceLocation repairWithName = itemRegistry.getResourceKey(repairWithItem).orElseThrow().location();
+            var fixedWithArray = new JsonArray();
+            for (var repairWithItem : repairWithItems) {
+                var repairWithName = itemRegistry.getResourceKey(repairWithItem).orElseThrow().location();
                 fixedWithArray.add(repairWithName.getPath());
             }
             if (!fixedWithArray.isEmpty()) {
                 itemDesc.add("repairWith", fixedWithArray);
             }
 
-            int maxDurability = item.getMaxDamage();
+            var maxDurability = item.getMaxDamage();
             itemDesc.addProperty("maxDurability", maxDurability);
         }
         return itemDesc;

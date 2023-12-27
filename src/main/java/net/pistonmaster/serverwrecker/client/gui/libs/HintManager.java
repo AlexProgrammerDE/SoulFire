@@ -87,7 +87,6 @@ public class HintManager {
         private JPanel popup;
         // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
         private JLabel hintLabel;
-        private JButton gotItButton;
         // JFormDesigner - End of variables declaration  //GEN-END:variables
 
         private HintPanel(Hint hint) {
@@ -208,7 +207,7 @@ public class HintManager {
         private void initComponents() {
             // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
             hintLabel = new JLabel();
-            gotItButton = new JButton();
+            JButton gotItButton = new JButton();
 
             //======== this ========
             setLayout(new MigLayout(

@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,7 @@ public class CustomClassProvider implements IClassProvider {
 
         try {
             this.classPaths = new ClassPath[classLoaders.size()];
-            for (int i = 0; i < classLoaders.size(); i++) {
+            for (var i = 0; i < classLoaders.size(); i++) {
                 this.classPaths[i] = ClassPath.from(classLoaders.get(i));
             }
         } catch (Throwable t) {
@@ -54,8 +53,8 @@ public class CustomClassProvider implements IClassProvider {
 
     @Override
     public byte @NotNull [] getClass(@NotNull String name) throws ClassNotFoundException {
-        for (ClassLoader classLoader : this.classLoaders) {
-            byte[] bytes = this.getClassFromLoader(classLoader, name);
+        for (var classLoader : this.classLoaders) {
+            var bytes = this.getClassFromLoader(classLoader, name);
             if (bytes != null) return bytes;
         }
 
@@ -63,10 +62,10 @@ public class CustomClassProvider implements IClassProvider {
     }
 
     private byte[] getClassFromLoader(ClassLoader classLoader, String name) {
-        try (InputStream is = classLoader.getResourceAsStream(slash(name) + ".class")) {
+        try (var is = classLoader.getResourceAsStream(slash(name) + ".class")) {
             Objects.requireNonNull(is, "Class input stream is null");
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte[] buf = new byte[1024];
+            var baos = new ByteArrayOutputStream();
+            var buf = new byte[1024];
             int len;
             while ((len = is.read(buf)) > 0) baos.write(buf, 0, len);
             return baos.toByteArray();
@@ -79,8 +78,8 @@ public class CustomClassProvider implements IClassProvider {
     @Nonnull
     public Map<String, Supplier<byte[]>> getAllClasses() {
         Map<String, Supplier<byte[]>> map = new HashMap<>();
-        for (ClassPath classPath : this.classPaths) {
-            for (ClassPath.ClassInfo classInfo : classPath.getAllClasses()) {
+        for (var classPath : this.classPaths) {
+            for (var classInfo : classPath.getAllClasses()) {
                 map.put(classInfo.getName(), sneakySupply(() -> this.getClass(classInfo.getName())));
             }
         }

@@ -34,7 +34,7 @@ public class TickTimer {
     /**
      * Scale the tick speed
      */
-    public float timeScale = 1.0F;
+    public final float timeScale = 1.0F;
     /**
      * Framerate of the advanceTime update
      */

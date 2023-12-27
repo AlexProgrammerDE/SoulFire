@@ -24,7 +24,6 @@ import net.lenni0451.reflect.Methods;
 import net.lenni0451.reflect.exceptions.MethodInvocationException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +49,7 @@ public class SWContextClassLoader extends ClassLoader {
     public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         synchronized (getClassLoadingLock(name)) {
             // First, check if the class has already been loaded
-            Class<?> c = findLoadedClass(name);
+            var c = findLoadedClass(name);
             if (c == null) {
                 try {
                     return Methods.invoke(platformClassLoader, findLoadedClassMethod, name, resolve);
@@ -60,7 +59,7 @@ public class SWContextClassLoader extends ClassLoader {
                 var classData = loadClassData(parent, name);
                 if (classData == null) {
                     // Check if child class loaders can load the class
-                    for (ClassLoader childClassLoader : childClassLoaders) {
+                    for (var childClassLoader : childClassLoaders) {
                         try {
                             var pluginClass = (Class<?>) Methods.invoke(childClassLoader, findLoadedClassMethod, name, resolve);
                             if (pluginClass != null) {
@@ -87,7 +86,7 @@ public class SWContextClassLoader extends ClassLoader {
     private byte[] loadClassData(ClassLoader classLoader, String className) {
         var classPath = className.replace('.', '/') + ".class";
 
-        try (InputStream inputStream = classLoader.getResourceAsStream(classPath)) {
+        try (var inputStream = classLoader.getResourceAsStream(classPath)) {
             if (inputStream == null) {
                 return null;
             }

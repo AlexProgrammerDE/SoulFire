@@ -31,7 +31,7 @@ public class SWViaVersionProvider implements VersionProvider {
 
     @Override
     public int getClosestServerProtocol(UserConnection connection) {
-        StorableSettingsHolder settingsHolder = connection.get(StorableSettingsHolder.class);
+        var settingsHolder = connection.get(StorableSettingsHolder.class);
         Objects.requireNonNull(settingsHolder, "StorableOptions is null");
 
         return settingsHolder.settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest).getVersion();

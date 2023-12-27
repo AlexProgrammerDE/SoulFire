@@ -21,7 +21,6 @@ package net.pistonmaster.serverwrecker.client.gui.libs;
 
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.PointerBuffer;
-import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.nfd.NFDFilterItem;
 
 import java.nio.ByteBuffer;
@@ -38,10 +37,10 @@ public class JFXFileHelper {
 
     public static Optional<Path> showOpenDialog(@Nullable Path initialDirectory, Map<String, String> filterMap) {
         NFD_Init();
-        try (MemoryStack stack = stackPush()) {
-            NFDFilterItem.Buffer filters = NFDFilterItem.malloc(filterMap.size());
-            int i = 0;
-            for (Map.Entry<String, String> entry : filterMap.entrySet()) {
+        try (var stack = stackPush()) {
+            var filters = NFDFilterItem.malloc(filterMap.size());
+            var i = 0;
+            for (var entry : filterMap.entrySet()) {
                 filters.get(i)
                         .name(stack.UTF8(entry.getKey()))
                         .spec(stack.UTF8(entry.getValue()));
@@ -53,7 +52,7 @@ public class JFXFileHelper {
                 initialPathBuf = stack.UTF8(initialDirectory.toString());
             }
 
-            PointerBuffer pp = stack.mallocPointer(1);
+            var pp = stack.mallocPointer(1);
             return checkResult(NFD_OpenDialog(pp, filters, initialPathBuf), pp);
         } finally {
             NFD_Quit();
@@ -62,17 +61,17 @@ public class JFXFileHelper {
 
     public static Optional<Path> showSaveDialog(Path initialDirectory, Map<String, String> filterMap, String defaultName) {
         NFD_Init();
-        try (MemoryStack stack = stackPush()) {
-            NFDFilterItem.Buffer filters = NFDFilterItem.malloc(filterMap.size());
-            int i = 0;
-            for (Map.Entry<String, String> entry : filterMap.entrySet()) {
+        try (var stack = stackPush()) {
+            var filters = NFDFilterItem.malloc(filterMap.size());
+            var i = 0;
+            for (var entry : filterMap.entrySet()) {
                 filters.get(i)
                         .name(stack.UTF8(entry.getKey()))
                         .spec(stack.UTF8(entry.getValue()));
                 i++;
             }
 
-            PointerBuffer pp = stack.mallocPointer(1);
+            var pp = stack.mallocPointer(1);
             return checkResult(NFD_SaveDialog(pp, filters, initialDirectory.toString(), defaultName), pp);
         } finally {
             NFD_Quit();
@@ -89,9 +88,7 @@ public class JFXFileHelper {
             case NFD_CANCEL -> {
                 return Optional.empty();
             }
-            default -> {
-                throw new IllegalStateException("Unexpected value: " + result);
-            }
+            default -> throw new IllegalStateException("Unexpected value: " + result);
         }
     }
 }

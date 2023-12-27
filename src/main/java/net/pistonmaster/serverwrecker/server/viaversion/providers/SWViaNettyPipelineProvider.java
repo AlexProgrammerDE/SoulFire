@@ -20,7 +20,6 @@
 package net.pistonmaster.serverwrecker.server.viaversion.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
-import io.netty.channel.Channel;
 import net.pistonmaster.serverwrecker.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.serverwrecker.server.viaversion.StorableSession;
 import net.raphimc.viabedrock.netty.AesEncryption;
@@ -34,8 +33,8 @@ import java.util.Objects;
 public class SWViaNettyPipelineProvider extends NettyPipelineProvider {
     @Override
     public void enableCompression(UserConnection user, int threshold, int algorithm) {
-        ViaClientSession clientSession = Objects.requireNonNull(user.get(StorableSession.class)).session();
-        Channel channel = clientSession.getChannel();
+        var clientSession = Objects.requireNonNull(user.get(StorableSession.class)).session();
+        var channel = clientSession.getChannel();
 
         try {
             if (channel.pipeline().get(ViaClientSession.COMPRESSION_NAME) != null) {
@@ -56,8 +55,8 @@ public class SWViaNettyPipelineProvider extends NettyPipelineProvider {
 
     @Override
     public void enableEncryption(UserConnection user, SecretKey key) {
-        ViaClientSession clientSession = Objects.requireNonNull(user.get(StorableSession.class)).session();
-        final Channel channel = clientSession.getChannel();
+        var clientSession = Objects.requireNonNull(user.get(StorableSession.class)).session();
+        final var channel = clientSession.getChannel();
 
         try {
             if (channel.pipeline().get(ViaClientSession.ENCRYPTION_NAME) != null) {

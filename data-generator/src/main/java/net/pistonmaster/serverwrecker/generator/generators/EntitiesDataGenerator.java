@@ -2,11 +2,8 @@ package net.pistonmaster.serverwrecker.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.pistonmaster.serverwrecker.generator.util.DGU;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -17,6 +14,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.pistonmaster.serverwrecker.generator.util.DGU;
 
 public class EntitiesDataGenerator implements IDataGenerator {
 
@@ -27,16 +25,16 @@ public class EntitiesDataGenerator implements IDataGenerator {
 
     @Override
     public JsonArray generateDataJson() {
-        JsonArray resultArray = new JsonArray();
-        Registry<EntityType<?>> entityTypeRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.ENTITY_TYPE);
+        var resultArray = new JsonArray();
+        var entityTypeRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.ENTITY_TYPE);
         entityTypeRegistry.forEach(entity -> resultArray.add(generateEntity(entityTypeRegistry, entity)));
         return resultArray;
     }
 
     public static JsonObject generateEntity(Registry<EntityType<?>> entityRegistry, EntityType<?> entityType) {
-        JsonObject entityDesc = new JsonObject();
-        ResourceLocation registryKey = entityRegistry.getResourceKey(entityType).orElseThrow().location();
-        int entityRawId = entityRegistry.getId(entityType);
+        var entityDesc = new JsonObject();
+        var registryKey = entityRegistry.getResourceKey(entityType).orElseThrow().location();
+        var entityRawId = entityRegistry.getId(entityType);
 
         entityDesc.addProperty("id", entityRawId);
         entityDesc.addProperty("internalId", entityRawId);
@@ -46,11 +44,11 @@ public class EntitiesDataGenerator implements IDataGenerator {
         entityDesc.addProperty("width", entityType.getDimensions().width);
         entityDesc.addProperty("height", entityType.getDimensions().height);
 
-        String entityTypeString = "UNKNOWN";
-        MinecraftServer minecraftServer = DGU.getCurrentlyRunningServer();
+        var entityTypeString = "UNKNOWN";
+        var minecraftServer = DGU.getCurrentlyRunningServer();
 
         if (minecraftServer != null) {
-            Entity entityObject = entityType.create(minecraftServer.overworld());
+            var entityObject = entityType.create(minecraftServer.overworld());
             entityTypeString = entityObject != null ? getEntityTypeForClass(entityObject.getClass()) : "player";
         }
         entityDesc.addProperty("type", entityTypeString);

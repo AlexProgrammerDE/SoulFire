@@ -2,14 +2,12 @@ package net.pistonmaster.serverwrecker.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.pistonmaster.serverwrecker.generator.util.DGU;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
+import net.pistonmaster.serverwrecker.generator.util.DGU;
 
-import java.util.List;
 import java.util.Locale;
 
 public class EnchantmentsDataGenerator implements IDataGenerator {
@@ -19,20 +17,20 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
 
     //Equation enchantment costs follow is a * level + b, so we can easily retrieve a and b by passing zero level
     private static JsonObject generateEnchantmentMinPowerCoefficients(Enchantment enchantment) {
-        int b = enchantment.getMinCost(0);
-        int a = enchantment.getMinCost(1) - b;
+        var b = enchantment.getMinCost(0);
+        var a = enchantment.getMinCost(1) - b;
 
-        JsonObject resultObject = new JsonObject();
+        var resultObject = new JsonObject();
         resultObject.addProperty("a", a);
         resultObject.addProperty("b", b);
         return resultObject;
     }
 
     private static JsonObject generateEnchantmentMaxPowerCoefficients(Enchantment enchantment) {
-        int b = enchantment.getMaxCost(0);
-        int a = enchantment.getMaxCost(1) - b;
+        var b = enchantment.getMaxCost(0);
+        var a = enchantment.getMaxCost(1) - b;
 
-        JsonObject resultObject = new JsonObject();
+        var resultObject = new JsonObject();
         resultObject.addProperty("a", a);
         resultObject.addProperty("b", b);
         return resultObject;
@@ -45,16 +43,16 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
 
     @Override
     public JsonArray generateDataJson() {
-        JsonArray resultsArray = new JsonArray();
-        Registry<Enchantment> enchantmentRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        var resultsArray = new JsonArray();
+        var enchantmentRegistry = DGU.getWorld().registryAccess().registryOrThrow(Registries.ENCHANTMENT);
         enchantmentRegistry.stream()
                 .forEach(enchantment -> resultsArray.add(generateEnchantment(enchantmentRegistry, enchantment)));
         return resultsArray;
     }
 
     public static JsonObject generateEnchantment(Registry<Enchantment> registry, Enchantment enchantment) {
-        JsonObject enchantmentDesc = new JsonObject();
-        ResourceLocation registryKey = registry.getResourceKey(enchantment).orElseThrow().location();
+        var enchantmentDesc = new JsonObject();
+        var registryKey = registry.getResourceKey(enchantment).orElseThrow().location();
 
         enchantmentDesc.addProperty("id", registry.getId(enchantment));
         enchantmentDesc.addProperty("name", registryKey.getPath());
@@ -67,14 +65,14 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
         enchantmentDesc.addProperty("treasureOnly", enchantment.isTreasureOnly());
         enchantmentDesc.addProperty("curse", enchantment.isCurse());
 
-        List<Enchantment> incompatibleEnchantments = registry.stream()
+        var incompatibleEnchantments = registry.stream()
                 .filter(other -> !enchantment.isCompatibleWith(other))
                 .filter(other -> other != enchantment)
                 .toList();
 
-        JsonArray excludes = new JsonArray();
-        for (Enchantment excludedEnchantment : incompatibleEnchantments) {
-            ResourceLocation otherKey = registry.getResourceKey(excludedEnchantment).orElseThrow().location();
+        var excludes = new JsonArray();
+        for (var excludedEnchantment : incompatibleEnchantments) {
+            var otherKey = registry.getResourceKey(excludedEnchantment).orElseThrow().location();
             excludes.add(otherKey.getPath());
         }
         enchantmentDesc.add("exclude", excludes);

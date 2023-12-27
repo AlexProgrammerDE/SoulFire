@@ -42,18 +42,16 @@ public class DeveloperPanel extends NavigationItem {
         var saveLog = new JButton("Click to save");
         add(saveLog);
 
-        saveLog.addActionListener(listener -> {
-            JFXFileHelper.showSaveDialog(SWPathConstants.DATA_FOLDER, Map.of(
-                    "Log Files", "log"
-            ), "log.txt").ifPresent(file -> {
-                try (var writer = Files.newBufferedWriter(file)) {
-                    writer.write(logPanel.messageLogPanel().getLogs());
-                    guiManager.logger().info("Saved log to: {}", file);
-                } catch (IOException e) {
-                    guiManager.logger().error("Failed to save log!", e);
-                }
-            });
-        });
+        saveLog.addActionListener(listener -> JFXFileHelper.showSaveDialog(SWPathConstants.DATA_FOLDER, Map.of(
+                "Log Files", "log"
+        ), "log.txt").ifPresent(file -> {
+            try (var writer = Files.newBufferedWriter(file)) {
+                writer.write(logPanel.messageLogPanel().getLogs());
+                guiManager.logger().info("Saved log to: {}", file);
+            } catch (IOException e) {
+                guiManager.logger().error("Failed to save log!", e);
+            }
+        }));
     }
 
     @Override

@@ -15,7 +15,7 @@ public class TagsDataGenerator implements IDataGenerator {
 
     @Override
     public JsonObject generateDataJson() {
-        JsonObject resultObject = new JsonObject();
+        var resultObject = new JsonObject();
         resultObject.add("block", generateTag(BlockTags.class));
         resultObject.add("item", generateTag(ItemTags.class));
         resultObject.add("entity_type", generateTag(EntityTypeTags.class));
@@ -24,7 +24,7 @@ public class TagsDataGenerator implements IDataGenerator {
     }
 
     public static JsonArray generateTag(Class<?> tagClass) {
-        JsonArray resultArray = new JsonArray();
+        var resultArray = new JsonArray();
         for (var field : tagClass.getDeclaredFields()) {
             try {
                 var tag = (TagKey<?>)field.get(null);

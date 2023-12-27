@@ -55,7 +55,6 @@ public class SmartScroller implements AdjustmentListener {
 
     private final int viewportPosition;
 
-    private final JScrollBar scrollBar;
     private boolean adjustScrollBar = true;
 
     private int previousValue = -1;
@@ -103,6 +102,7 @@ public class SmartScroller implements AdjustmentListener {
 
         this.viewportPosition = viewportPosition;
 
+        JScrollBar scrollBar;
         if (scrollDirection == HORIZONTAL)
             scrollBar = scrollPane.getHorizontalScrollBar();
         else

@@ -26,7 +26,6 @@ import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.naming.directory.Attribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import java.net.IDN;
@@ -42,9 +41,9 @@ public class ResolveUtil {
 
     static {
         try {
-            String contextFactory = "com.sun.jndi.dns.DnsContextFactory";
+            var contextFactory = "com.sun.jndi.dns.DnsContextFactory";
             Class.forName(contextFactory);
-            Hashtable<String, String> environment = new Hashtable<>();
+            var environment = new Hashtable<String, String>();
             environment.put("java.naming.factory.initial", contextFactory);
             environment.put("java.naming.provider.url", "dns:");
             environment.put("com.sun.jndi.dns.timeout.retries", "1");
@@ -79,10 +78,10 @@ public class ResolveUtil {
         LOGGER.debug("Attempting SRV lookup for \"{}\".", name);
 
         try {
-            Attribute srvAttribute = DIR_CONTEXT.getAttributes(name, new String[]{"SRV"})
+            var srvAttribute = DIR_CONTEXT.getAttributes(name, new String[]{"SRV"})
                     .get("srv");
             if (srvAttribute != null) {
-                String[] attributeSplit = srvAttribute.get().toString().split(" ", 4);
+                var attributeSplit = srvAttribute.get().toString().split(" ", 4);
                 LOGGER.debug("SRV lookup resolved \"{}\" to \"{}\".", name, srvAttribute.get().toString());
 
                 return resolveByHost(new ServerAddress(attributeSplit[3], parsePort(attributeSplit[2])))

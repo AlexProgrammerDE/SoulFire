@@ -37,9 +37,9 @@ public record ComboProperty(
             String displayName
     ) {
         public static <T extends Enum<T>> ComboOption[] fromEnum(T[] values, Function<T, String> mapper) {
-            ComboOption[] options = new ComboOption[values.length];
+            var options = new ComboOption[values.length];
 
-            for (int i = 0; i < values.length; i++) {
+            for (var i = 0; i < values.length; i++) {
                 options[i] = new ComboOption(values[i].name(), mapper.apply(values[i]));
             }
 

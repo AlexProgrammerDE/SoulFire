@@ -84,7 +84,7 @@ public class CLIManager {
                         switch (settingType.getValueCase()) {
                             case STRING -> {
                                 var stringEntry = settingType.getString();
-                                AtomicReference<String> reference = new AtomicReference<>();
+                                var reference = new AtomicReference<String>();
                                 var optionSpec = CommandLine.Model.OptionSpec.builder(singleEntry.getCliFlagsList().toArray(new String[0]))
                                         .description(description)
                                         .type(String.class)
@@ -111,7 +111,7 @@ public class CLIManager {
                             }
                             case BOOL -> {
                                 var boolEntry = settingType.getBool();
-                                AtomicReference<Boolean> reference = new AtomicReference<>();
+                                var reference = new AtomicReference<Boolean>();
                                 var optionSpec = CommandLine.Model.OptionSpec.builder(singleEntry.getCliFlagsList().toArray(new String[0]))
                                         .description(description)
                                         .type(boolean.class)
@@ -132,7 +132,7 @@ public class CLIManager {
                             }
                             case COMBO -> {
                                 var comboEntry = settingType.getCombo();
-                                AtomicReference<String> reference = new AtomicReference<>();
+                                var reference = new AtomicReference<String>();
 
                                 var optionSpec = CommandLine.Model.OptionSpec.builder(singleEntry.getCliFlagsList().toArray(new String[0]))
                                         .description(description)
@@ -186,7 +186,7 @@ public class CLIManager {
     }
 
     private void addIntSetting(CommandLine.Model.CommandSpec commandSpec, PropertyKey propertyKey, SettingsManager settingsManager, String cliDescription, String[] cliNames, IntSetting intEntry) {
-        AtomicInteger reference = new AtomicInteger();
+        var reference = new AtomicInteger();
         var optionSpec = CommandLine.Model.OptionSpec.builder(cliNames)
                 .description(cliDescription)
                 .type(int.class)

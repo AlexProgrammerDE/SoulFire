@@ -79,39 +79,35 @@ public class SWMenuBar extends JMenuBar {
     public SWMenuBar(GUIManager guiManager) {
         var fileMenu = new JMenu("File");
         var loadProfile = new JMenuItem("Load Profile");
-        loadProfile.addActionListener(e -> {
-            JFXFileHelper.showOpenDialog(SWPathConstants.PROFILES_FOLDER, Map.of(
-                    "ServerWrecker profile", "json"
-            )).ifPresent(file -> {
-                try {
-                    guiManager.settingsManager().loadProfile(file);
-                    LOGGER.info("Loaded profile!");
-                } catch (IOException ex) {
-                    LOGGER.warn("Failed to load profile!", ex);
-                }
-            });
-        });
+        loadProfile.addActionListener(e -> JFXFileHelper.showOpenDialog(SWPathConstants.PROFILES_FOLDER, Map.of(
+                "ServerWrecker profile", "json"
+        )).ifPresent(file -> {
+            try {
+                guiManager.settingsManager().loadProfile(file);
+                LOGGER.info("Loaded profile!");
+            } catch (IOException ex) {
+                LOGGER.warn("Failed to load profile!", ex);
+            }
+        }));
 
         fileMenu.add(loadProfile);
         var saveProfile = new JMenuItem("Save Profile");
-        saveProfile.addActionListener(e -> {
-            JFXFileHelper.showSaveDialog(SWPathConstants.PROFILES_FOLDER, Map.of(
-                    "ServerWrecker profile", "json"
-            ), "profile.json").ifPresent(file -> {
-                // Add .json if not present
-                var path = file.toString();
-                if (!path.endsWith(".json")) {
-                    path += ".json";
-                }
+        saveProfile.addActionListener(e -> JFXFileHelper.showSaveDialog(SWPathConstants.PROFILES_FOLDER, Map.of(
+                "ServerWrecker profile", "json"
+        ), "profile.json").ifPresent(file -> {
+            // Add .json if not present
+            var path = file.toString();
+            if (!path.endsWith(".json")) {
+                path += ".json";
+            }
 
-                try {
-                    guiManager.settingsManager().saveProfile(Path.of(path));
-                    LOGGER.info("Saved profile!");
-                } catch (IOException ex) {
-                    LOGGER.warn("Failed to save profile!", ex);
-                }
-            });
-        });
+            try {
+                guiManager.settingsManager().saveProfile(Path.of(path));
+                LOGGER.info("Saved profile!");
+            } catch (IOException ex) {
+                LOGGER.warn("Failed to save profile!", ex);
+            }
+        }));
 
         fileMenu.add(saveProfile);
 

@@ -33,7 +33,7 @@ public class BuildSchematicController {
     public BuildSchematicController(Map<Vector3i, BlockType> relativeBlocks, Vector3i base) {
         this(new Object2ObjectOpenHashMap<>());
 
-        for (Map.Entry<Vector3i, BlockType> entry : relativeBlocks.entrySet()) {
+        for (var entry : relativeBlocks.entrySet()) {
             this.blocks.put(entry.getKey().add(base), entry.getValue());
         }
     }

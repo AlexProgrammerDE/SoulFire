@@ -13,9 +13,9 @@ public class InstrumentsDataGenerator implements IDataGenerator {
 
     @Override
     public JsonElement generateDataJson() {
-        JsonArray array = new JsonArray();
-        for (NoteBlockInstrument instrument : NoteBlockInstrument.values()) {
-            JsonObject object = new JsonObject();
+        var array = new JsonArray();
+        for (var instrument : NoteBlockInstrument.values()) {
+            var object = new JsonObject();
             object.addProperty("id", instrument.ordinal());
             object.addProperty("name", instrument.getSerializedName());
             array.add(object);

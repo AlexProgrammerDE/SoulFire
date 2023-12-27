@@ -1,6 +1,5 @@
 package net.pistonmaster.serverwrecker.generator.generators;
 
-import com.google.gson.JsonElement;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import org.slf4j.Logger;
@@ -36,18 +35,18 @@ public class DataGenerators {
             return false;
         }
 
-        int generatorsFailed = 0;
+        var generatorsFailed = 0;
         logger.info("Running minecraft data generators, output at {}", outputDirectory);
 
-        for (IDataGenerator dataGenerator : GENERATORS) {
+        for (var dataGenerator : GENERATORS) {
             logger.info("Running generator {}", dataGenerator.getDataName());
             try {
-                String outputFileName = String.format("%s.json", dataGenerator.getDataName());
-                JsonElement outputElement = dataGenerator.generateDataJson();
-                Path outputFilePath = outputDirectory.resolve(outputFileName);
+                var outputFileName = String.format("%s.json", dataGenerator.getDataName());
+                var outputElement = dataGenerator.generateDataJson();
+                var outputFilePath = outputDirectory.resolve(outputFileName);
 
                 try (Writer writer = Files.newBufferedWriter(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-                    JsonWriter jsonWriter = new JsonWriter(writer);
+                    var jsonWriter = new JsonWriter(writer);
                     jsonWriter.setIndent("  ");
                     Streams.write(outputElement, jsonWriter);
                 }
