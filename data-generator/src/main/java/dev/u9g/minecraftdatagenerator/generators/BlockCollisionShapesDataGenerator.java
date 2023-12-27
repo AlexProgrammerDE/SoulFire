@@ -56,15 +56,15 @@ public class BlockCollisionShapesDataGenerator implements IDataGenerator {
 
             for (var entry : blockCollisionShapes.entrySet()) {
                 List<Integer> blockCollisions = entry.getValue();
-                long distinctShapesCount = blockCollisions.stream().distinct().count();
                 JsonElement blockCollision;
-                if (distinctShapesCount == 1L) {
-                    blockCollision = new JsonPrimitive(blockCollisions.get(0));
+                if (blockCollisions.size() == 1) {
+                    blockCollision = new JsonPrimitive(blockCollisions.getFirst());
                 } else {
-                    blockCollision = new JsonArray();
+                    var blockCollisionArray = new JsonArray();
                     for (int collisionId : blockCollisions) {
-                        ((JsonArray) blockCollision).add(collisionId);
+                        blockCollisionArray.add(collisionId);
                     }
+                    blockCollision = blockCollisionArray;
                 }
 
                 ResourceLocation registryKey = blockRegistry.getResourceKey(entry.getKey()).orElseThrow().location();

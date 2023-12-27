@@ -14,7 +14,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 public class DataGenerators {
-
     private static final List<IDataGenerator> GENERATORS = List.of(
             new BlockCollisionShapesDataGenerator(),
             new BlocksDataGenerator(),
@@ -61,7 +60,7 @@ public class DataGenerators {
 
         logger.info("Running built-in data generator");
         try {
-            net.minecraft.data.Main.main(new String[] {"--all", "--output", outputDirectory.toString()});
+            net.minecraft.data.Main.main(new String[] {"--all", "--output", outputDirectory.resolve("built-in-generator").toString()});
         } catch (IOException e) {
             logger.error("Failed to run built-in data generator", e);
             generatorsFailed++;

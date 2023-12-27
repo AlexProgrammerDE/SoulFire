@@ -6,11 +6,8 @@
   "mixins": [
     "BlockAccessor",
     "BlockSettingsOffsetMixin",
-    "EntityTypeAccessor",
     "EULAMixin",
-    "MiningToolItemAccessor",
-    "ReadyMixin",
-    "TheEndBiomeDataAccessor"
+    "ReadyMixin"
   ],
   "client": [
   ],

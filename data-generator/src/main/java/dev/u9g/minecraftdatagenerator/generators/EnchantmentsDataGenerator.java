@@ -1,6 +1,5 @@
 package dev.u9g.minecraftdatagenerator.generators;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.u9g.minecraftdatagenerator.util.DGU;
@@ -12,29 +11,10 @@ import net.minecraft.world.item.enchantment.EnchantmentCategory;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 public class EnchantmentsDataGenerator implements IDataGenerator {
-
-    private static final ImmutableMap<EnchantmentCategory, String> ENCHANTMENT_TARGET_NAMES = ImmutableMap.<EnchantmentCategory, String>builder()
-            .put(EnchantmentCategory.ARMOR, "armor")
-            .put(EnchantmentCategory.ARMOR_FEET, "armor_feet")
-            .put(EnchantmentCategory.ARMOR_LEGS, "armor_legs")
-            .put(EnchantmentCategory.ARMOR_CHEST, "armor_chest")
-            .put(EnchantmentCategory.ARMOR_HEAD, "armor_head")
-            .put(EnchantmentCategory.WEAPON, "weapon")
-            .put(EnchantmentCategory.DIGGER, "digger")
-            .put(EnchantmentCategory.FISHING_ROD, "fishing_rod")
-            .put(EnchantmentCategory.TRIDENT, "trident")
-            .put(EnchantmentCategory.BREAKABLE, "breakable")
-            .put(EnchantmentCategory.BOW, "bow")
-            .put(EnchantmentCategory.WEARABLE, "wearable")
-            .put(EnchantmentCategory.CROSSBOW, "crossbow")
-            .put(EnchantmentCategory.VANISHABLE, "vanishable")
-            .build();
-
     public static String getEnchantmentTargetName(EnchantmentCategory target) {
-        return ENCHANTMENT_TARGET_NAMES.getOrDefault(target, target.name().toLowerCase(Locale.ROOT));
+        return target.name().toLowerCase(Locale.ROOT);
     }
 
     //Equation enchantment costs follow is a * level + b, so we can easily retrieve a and b by passing zero level
@@ -90,7 +70,7 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
         List<Enchantment> incompatibleEnchantments = registry.stream()
                 .filter(other -> !enchantment.isCompatibleWith(other))
                 .filter(other -> other != enchantment)
-                .collect(Collectors.toList());
+                .toList();
 
         JsonArray excludes = new JsonArray();
         for (Enchantment excludedEnchantment : incompatibleEnchantments) {

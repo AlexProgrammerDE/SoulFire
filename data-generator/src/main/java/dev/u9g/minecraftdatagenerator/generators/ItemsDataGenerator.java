@@ -70,7 +70,7 @@ public class ItemsDataGenerator implements IDataGenerator {
                 ResourceLocation repairWithName = itemRegistry.getResourceKey(repairWithItem).orElseThrow().location();
                 fixedWithArray.add(repairWithName.getPath());
             }
-            if (fixedWithArray.size() > 0) {
+            if (!fixedWithArray.isEmpty()) {
                 itemDesc.add("repairWith", fixedWithArray);
             }
 
