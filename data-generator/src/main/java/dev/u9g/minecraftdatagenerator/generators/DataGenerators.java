@@ -47,7 +47,7 @@ public class DataGenerators {
 
                 try (Writer writer = Files.newBufferedWriter(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
                     JsonWriter jsonWriter = new JsonWriter(writer);
-                    jsonWriter.setIndent("  ");
+                    jsonWriter.setIndent(" ");
                     Streams.write(outputElement, jsonWriter);
                 }
                 logger.info("Generator: {} -> {}", dataGenerator.getDataName(), outputFileName);
