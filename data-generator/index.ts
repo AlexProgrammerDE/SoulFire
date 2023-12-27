@@ -11,49 +11,6 @@ if (mcData == null) {
   }
 
   {
-    let enumValues: string[] = []
-    for (const item of Object.keys(mcData.blockCollisionShapes.shapes)) {
-      const id = Number(item)
-      const shape = mcData.blockCollisionShapes.shapes[item as any]
-
-      let shapeData = item
-      const shapeList: string[] = []
-      for (const shapePart of shape) {
-        shapeList.push(`${shapePart[0]},${shapePart[1]},${shapePart[2]},${shapePart[3]},${shapePart[4]},${shapePart[5]}`)
-      }
-      if (shapeList.length > 0) {
-        shapeData += "|"
-      }
-      shapeData += shapeList.join("|")
-
-      enumValues.push(shapeData)
-    }
-  }
-
-  {
-    let enumValues: string[] = []
-    for (const block of mcData.blocksArray) {
-      let shapes = block.name
-      const collisionShapes = mcData.blockCollisionShapes.blocks[block.name]
-      if (collisionShapes) {
-        shapes += "|"
-        // noinspection SuspiciousTypeOfGuard
-        if (typeof collisionShapes === "number") {
-          shapes += collisionShapes
-        } else {
-          let shapeList: string[] = []
-          for (const shape of collisionShapes) {
-            shapeList.push(`${shape}`)
-          }
-          shapes += shapeList.join(",")
-        }
-      }
-
-      enumValues.push(shapes)
-    }
-  }
-
-  {
     let result = fs.readFileSync("templates/BlockType.java", "utf-8");
     let enumValues: string[] = []
     for (const block of mcData.blocksArray) {

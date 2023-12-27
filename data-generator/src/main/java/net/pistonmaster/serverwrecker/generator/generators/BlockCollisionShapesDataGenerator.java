@@ -1,122 +1,151 @@
 package net.pistonmaster.serverwrecker.generator.generators;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class BlockCollisionShapesDataGenerator implements IDataGenerator {
+public class BlockCollisionShapesDataGenerator {
+    private static final BlockShapesCache BLOCK_SHAPES_CACHE = new BlockShapesCache();
+
+    private static boolean isAllTheSame(IntList list) {
+        if (list.isEmpty()) {
+            return true;
+        }
+
+        var first = list.getInt(0);
+        for (var i = 1; i < list.size(); i++) {
+            if (list.getInt(i) != first) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static String formatDouble(double d) {
+        return "" + d;
+    }
+
+    private static String voxelShapeToString(VoxelShape voxelShape) {
+        var list = new ArrayList<String>();
+        voxelShape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
+            list.add(String.join(",", formatDouble(x1), formatDouble(y1), formatDouble(z1),
+                    formatDouble(x2), formatDouble(y2), formatDouble(z2)));
+        });
+
+        return String.join("|", list);
+    }
 
     private static class BlockShapesCache {
-        public final Object2IntMap<VoxelShape> uniqueBlockShapes = new Object2IntOpenHashMap<>() {{
-            defaultReturnValue(-1);
-        }};
-        public final Map<Block, IntList> blockCollisionShapes = new HashMap<>();
+        public final Object2IntMap<VoxelShape> uniqueBlockShapes = new Object2IntLinkedOpenCustomHashMap<>(new Hash.Strategy<VoxelShape>() {
+            @Override
+            public int hashCode(VoxelShape voxelShape) {
+                return voxelShapeToString(voxelShape).hashCode();
+            }
+
+            @Override
+            public boolean equals(VoxelShape voxelShape, VoxelShape k1) {
+                if (voxelShape == k1) {
+                    return true;
+                } else if (voxelShape == null || k1 == null) {
+                    return false;
+                }
+
+                return voxelShapeToString(voxelShape).equals(voxelShapeToString(k1));
+            }
+        });
+        public final Map<Block, IntList> blockCollisionShapes = new LinkedHashMap<>();
         private int lastCollisionShapeId = 0;
 
-        public void processBlock(Block block) {
-            List<BlockState> blockStates = block.getStateDefinition().getPossibleStates();
-            IntList blockCollisionShapes = new IntArrayList();
+         {
+             BuiltInRegistries.BLOCK.forEach(block -> {
+                 IntList blockCollisionShapes = new IntArrayList();
 
-            for (var blockState : blockStates) {
-                var blockShape = blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+                 for (var blockState : block.getStateDefinition().getPossibleStates()) {
+                     var blockShape = blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
 
-                // Replace block offset
-                var blockShapeCenter = blockState.getOffset(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
-                var inverseBlockShapeCenter = blockShapeCenter.reverse();
-                blockShape = blockShape.move(inverseBlockShapeCenter.x, inverseBlockShapeCenter.y, inverseBlockShapeCenter.z);
+                     // Revert block offset
+                     var blockShapeCenter = blockState.getOffset(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+                     var inverseBlockShapeCenter = blockShapeCenter.reverse();
+                     blockShape = blockShape.move(inverseBlockShapeCenter.x, inverseBlockShapeCenter.y, inverseBlockShapeCenter.z);
 
-                var blockShapeIndex = uniqueBlockShapes.getInt(blockShape);
-                if (blockShapeIndex == -1) {
-                    blockShapeIndex = lastCollisionShapeId++;
-                    uniqueBlockShapes.put(blockShape, blockShapeIndex);
-                }
+                     blockCollisionShapes.add(uniqueBlockShapes.computeIfAbsent(blockShape, k -> lastCollisionShapeId++));
+                 }
 
-                blockCollisionShapes.add(blockShapeIndex);
-            }
-
-            this.blockCollisionShapes.put(block, blockCollisionShapes);
+                 this.blockCollisionShapes.put(block, blockCollisionShapes);
+             });
         }
 
-        public JsonObject dumpBlockShapeIndices(Registry<Block> blockRegistry) {
-            var resultObject = new JsonObject();
+        public String dumpBlockShapeIndices() {
+            var resultBuilder = new StringBuilder();
 
             for (var entry : blockCollisionShapes.entrySet()) {
+                resultBuilder.append(BuiltInRegistries.BLOCK.getKey(entry.getKey()).getPath());
                 var blockCollisions = entry.getValue();
-                JsonElement blockCollision;
-                if (blockCollisions.size() == 1) {
-                    blockCollision = new JsonPrimitive(blockCollisions.getFirst());
-                } else {
-                    var blockCollisionArray = new JsonArray();
-                    for (int collisionId : blockCollisions) {
-                        blockCollisionArray.add(collisionId);
+                if (!blockCollisions.isEmpty()) {
+                    resultBuilder.append("|");
+
+                    if (isAllTheSame(blockCollisions)) {
+                        resultBuilder.append(blockCollisions.getInt(0));
+                    } else {
+                        resultBuilder.append(String.join(",", blockCollisions.intStream().mapToObj(String::valueOf).toArray(String[]::new)));
                     }
-                    blockCollision = blockCollisionArray;
                 }
 
-                var registryKey = blockRegistry.getResourceKey(entry.getKey()).orElseThrow().location();
-                resultObject.add(registryKey.getPath(), blockCollision);
+                resultBuilder.append("\n");
             }
 
-            return resultObject;
+            return resultBuilder.toString();
         }
 
-        public JsonObject dumpShapesObject() {
-            var shapesObject = new JsonObject();
+        public String dumpShapesObject() {
+            var resultBuilder = new StringBuilder();
 
             for (var entry : uniqueBlockShapes.object2IntEntrySet()) {
-                var boxesArray = new JsonArray();
-                entry.getKey().forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
-                    var oneBoxJsonArray = new JsonArray();
-
-                    oneBoxJsonArray.add(x1);
-                    oneBoxJsonArray.add(y1);
-                    oneBoxJsonArray.add(z1);
-
-                    oneBoxJsonArray.add(x2);
-                    oneBoxJsonArray.add(y2);
-                    oneBoxJsonArray.add(z2);
-
-                    boxesArray.add(oneBoxJsonArray);
-                });
-                shapesObject.add(Integer.toString(entry.getIntValue()), boxesArray);
+                resultBuilder.append(entry.getIntValue());
+                var voxelShapeString = voxelShapeToString(entry.getKey());
+                if (!voxelShapeString.isEmpty()) {
+                    resultBuilder.append("|").append(voxelShapeString);
+                }
+                resultBuilder.append("\n");
             }
-            return shapesObject;
+
+            return resultBuilder.toString();
         }
     }
 
-    @Override
-    public String getDataName() {
-        return "blockCollisionShapes.json";
+    public static final class BlockShapesGenerator implements IDataGenerator {
+        @Override
+        public String getDataName() {
+            return "blockshapes.txt";
+        }
+
+        @Override
+        public String generateDataJson() {
+            return BLOCK_SHAPES_CACHE.dumpShapesObject();
+        }
     }
 
-    @Override
-    public JsonObject generateDataJson() {
-        var blockRegistry = BuiltInRegistries.BLOCK;
-        var blockShapesCache = new BlockShapesCache();
+    public static final class BlockStatesGenerator implements IDataGenerator {
+        @Override
+        public String getDataName() {
+            return "blockstates.txt";
+        }
 
-        blockRegistry.forEach(blockShapesCache::processBlock);
-
-        var resultObject = new JsonObject();
-
-        resultObject.add("blocks", blockShapesCache.dumpBlockShapeIndices(blockRegistry));
-        resultObject.add("shapes", blockShapesCache.dumpShapesObject());
-
-        return resultObject;
+        @Override
+        public String generateDataJson() {
+            return BLOCK_SHAPES_CACHE.dumpBlockShapeIndices();
+        }
     }
 }

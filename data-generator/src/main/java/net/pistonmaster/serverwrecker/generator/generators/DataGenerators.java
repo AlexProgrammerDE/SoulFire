@@ -15,7 +15,8 @@ import java.util.List;
 
 public class DataGenerators {
     private static final List<IDataGenerator> GENERATORS = List.of(
-            new BlockCollisionShapesDataGenerator(),
+            new BlockCollisionShapesDataGenerator.BlockShapesGenerator(),
+            new BlockCollisionShapesDataGenerator.BlockStatesGenerator(),
             new BlocksDataGenerator(),
             new EffectsDataGenerator(),
             new EnchantmentsDataGenerator(),
@@ -53,7 +54,6 @@ public class DataGenerators {
                         var jsonWriter = new JsonWriter(writer);
                         jsonWriter.setIndent("  ");
                         Streams.write(jsonElement, jsonWriter);
-
                     }
                 } else if (outputElement instanceof String string) {
                     try (Writer writer = Files.newBufferedWriter(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {

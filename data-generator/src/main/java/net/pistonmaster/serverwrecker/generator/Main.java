@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 public class Main implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("mc-data-gen-serv");
 
-    @Override
     public void onInitialize() {
     }
 }

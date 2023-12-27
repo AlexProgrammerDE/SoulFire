@@ -45,6 +45,9 @@ public class BlocksDataGenerator implements IDataGenerator {
         if (defaultState.canBeReplaced()) {
             blockDesc.addProperty("replaceable", true);
         }
+        if (defaultState.requiresCorrectToolForDrops()) {
+            blockDesc.addProperty("requiresCorrectToolForDrops", true);
+        }
 
         if (defaultState.hasOffsetFunction()) {
             var offsetData = new JsonObject();
