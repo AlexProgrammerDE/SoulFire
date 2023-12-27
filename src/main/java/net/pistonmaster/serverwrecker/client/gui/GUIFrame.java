@@ -122,6 +122,8 @@ public class GUIFrame extends JFrame {
             public void windowLostFocus(WindowEvent e) {
             }
         });
+
+        setLocationRelativeTo(null);
     }
 
     public void open(Injector injector) {
