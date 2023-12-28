@@ -1,0 +1,1010 @@
+[
+  {
+    "id": 0,
+    "name": "allay",
+    "width": 0.35,
+    "height": 0.6,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 1,
+    "name": "area_effect_cloud",
+    "width": 6.0,
+    "height": 0.5,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 2,
+    "name": "armor_stand",
+    "width": 0.5,
+    "height": 1.975,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 3,
+    "name": "arrow",
+    "width": 0.5,
+    "height": 0.5,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 4,
+    "name": "axolotl",
+    "width": 0.75,
+    "height": 0.42,
+    "category": "axolotls",
+    "friendly": true
+  },
+  {
+    "id": 5,
+    "name": "bat",
+    "width": 0.5,
+    "height": 0.9,
+    "category": "ambient",
+    "friendly": true
+  },
+  {
+    "id": 6,
+    "name": "bee",
+    "width": 0.7,
+    "height": 0.6,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 7,
+    "name": "blaze",
+    "width": 0.6,
+    "height": 1.8,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 8,
+    "name": "block_display",
+    "width": 0.0,
+    "height": 0.0,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 9,
+    "name": "boat",
+    "width": 1.375,
+    "height": 0.5625,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 10,
+    "name": "breeze",
+    "width": 0.6,
+    "height": 1.7,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 11,
+    "name": "camel",
+    "width": 1.7,
+    "height": 2.375,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 12,
+    "name": "cat",
+    "width": 0.6,
+    "height": 0.7,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 13,
+    "name": "cave_spider",
+    "width": 0.7,
+    "height": 0.5,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 14,
+    "name": "chest_boat",
+    "width": 1.375,
+    "height": 0.5625,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 15,
+    "name": "chest_minecart",
+    "width": 0.98,
+    "height": 0.7,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 16,
+    "name": "chicken",
+    "width": 0.4,
+    "height": 0.7,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 17,
+    "name": "cod",
+    "width": 0.5,
+    "height": 0.3,
+    "category": "water_ambient",
+    "friendly": true
+  },
+  {
+    "id": 18,
+    "name": "command_block_minecart",
+    "width": 0.98,
+    "height": 0.7,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 19,
+    "name": "cow",
+    "width": 0.9,
+    "height": 1.4,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 20,
+    "name": "creeper",
+    "width": 0.6,
+    "height": 1.7,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 21,
+    "name": "dolphin",
+    "width": 0.9,
+    "height": 0.6,
+    "category": "water_creature",
+    "friendly": true
+  },
+  {
+    "id": 22,
+    "name": "donkey",
+    "width": 1.3964844,
+    "height": 1.5,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 23,
+    "name": "dragon_fireball",
+    "width": 1.0,
+    "height": 1.0,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 24,
+    "name": "drowned",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 25,
+    "name": "egg",
+    "width": 0.25,
+    "height": 0.25,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 26,
+    "name": "elder_guardian",
+    "width": 1.9975,
+    "height": 1.9975,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 27,
+    "name": "end_crystal",
+    "width": 2.0,
+    "height": 2.0,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 28,
+    "name": "ender_dragon",
+    "width": 16.0,
+    "height": 8.0,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 29,
+    "name": "ender_pearl",
+    "width": 0.25,
+    "height": 0.25,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 30,
+    "name": "enderman",
+    "width": 0.6,
+    "height": 2.9,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 31,
+    "name": "endermite",
+    "width": 0.4,
+    "height": 0.3,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 32,
+    "name": "evoker",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 33,
+    "name": "evoker_fangs",
+    "width": 0.5,
+    "height": 0.8,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 34,
+    "name": "experience_bottle",
+    "width": 0.25,
+    "height": 0.25,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 35,
+    "name": "experience_orb",
+    "width": 0.5,
+    "height": 0.5,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 36,
+    "name": "eye_of_ender",
+    "width": 0.25,
+    "height": 0.25,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 37,
+    "name": "falling_block",
+    "width": 0.98,
+    "height": 0.98,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 38,
+    "name": "firework_rocket",
+    "width": 0.25,
+    "height": 0.25,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 39,
+    "name": "fox",
+    "width": 0.6,
+    "height": 0.7,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 40,
+    "name": "frog",
+    "width": 0.5,
+    "height": 0.5,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 41,
+    "name": "furnace_minecart",
+    "width": 0.98,
+    "height": 0.7,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 42,
+    "name": "ghast",
+    "width": 4.0,
+    "height": 4.0,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 43,
+    "name": "giant",
+    "width": 3.6,
+    "height": 12.0,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 44,
+    "name": "glow_item_frame",
+    "width": 0.5,
+    "height": 0.5,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 45,
+    "name": "glow_squid",
+    "width": 0.8,
+    "height": 0.8,
+    "category": "underground_water_creature",
+    "friendly": true
+  },
+  {
+    "id": 46,
+    "name": "goat",
+    "width": 0.9,
+    "height": 1.3,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 47,
+    "name": "guardian",
+    "width": 0.85,
+    "height": 0.85,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 48,
+    "name": "hoglin",
+    "width": 1.3964844,
+    "height": 1.4,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 49,
+    "name": "hopper_minecart",
+    "width": 0.98,
+    "height": 0.7,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 50,
+    "name": "horse",
+    "width": 1.3964844,
+    "height": 1.6,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 51,
+    "name": "husk",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 52,
+    "name": "illusioner",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 53,
+    "name": "interaction",
+    "width": 0.0,
+    "height": 0.0,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 54,
+    "name": "iron_golem",
+    "width": 1.4,
+    "height": 2.7,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 55,
+    "name": "item",
+    "width": 0.25,
+    "height": 0.25,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 56,
+    "name": "item_display",
+    "width": 0.0,
+    "height": 0.0,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 57,
+    "name": "item_frame",
+    "width": 0.5,
+    "height": 0.5,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 58,
+    "name": "fireball",
+    "width": 1.0,
+    "height": 1.0,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 59,
+    "name": "leash_knot",
+    "width": 0.375,
+    "height": 0.5,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 60,
+    "name": "lightning_bolt",
+    "width": 0.0,
+    "height": 0.0,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 61,
+    "name": "llama",
+    "width": 0.9,
+    "height": 1.87,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 62,
+    "name": "llama_spit",
+    "width": 0.25,
+    "height": 0.25,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 63,
+    "name": "magma_cube",
+    "width": 2.04,
+    "height": 2.04,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 64,
+    "name": "marker",
+    "width": 0.0,
+    "height": 0.0,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 65,
+    "name": "minecart",
+    "width": 0.98,
+    "height": 0.7,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 66,
+    "name": "mooshroom",
+    "width": 0.9,
+    "height": 1.4,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 67,
+    "name": "mule",
+    "width": 1.3964844,
+    "height": 1.6,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 68,
+    "name": "ocelot",
+    "width": 0.6,
+    "height": 0.7,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 69,
+    "name": "painting",
+    "width": 0.5,
+    "height": 0.5,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 70,
+    "name": "panda",
+    "width": 1.3,
+    "height": 1.25,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 71,
+    "name": "parrot",
+    "width": 0.5,
+    "height": 0.9,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 72,
+    "name": "phantom",
+    "width": 0.9,
+    "height": 0.5,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 73,
+    "name": "pig",
+    "width": 0.9,
+    "height": 0.9,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 74,
+    "name": "piglin",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 75,
+    "name": "piglin_brute",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 76,
+    "name": "pillager",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 77,
+    "name": "polar_bear",
+    "width": 1.4,
+    "height": 1.4,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 78,
+    "name": "potion",
+    "width": 0.25,
+    "height": 0.25,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 79,
+    "name": "pufferfish",
+    "width": 0.7,
+    "height": 0.7,
+    "category": "water_ambient",
+    "friendly": true
+  },
+  {
+    "id": 80,
+    "name": "rabbit",
+    "width": 0.4,
+    "height": 0.5,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 81,
+    "name": "ravager",
+    "width": 1.95,
+    "height": 2.2,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 82,
+    "name": "salmon",
+    "width": 0.7,
+    "height": 0.4,
+    "category": "water_ambient",
+    "friendly": true
+  },
+  {
+    "id": 83,
+    "name": "sheep",
+    "width": 0.9,
+    "height": 1.3,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 84,
+    "name": "shulker",
+    "width": 1.0,
+    "height": 1.0,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 85,
+    "name": "shulker_bullet",
+    "width": 0.3125,
+    "height": 0.3125,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 86,
+    "name": "silverfish",
+    "width": 0.4,
+    "height": 0.3,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 87,
+    "name": "skeleton",
+    "width": 0.6,
+    "height": 1.99,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 88,
+    "name": "skeleton_horse",
+    "width": 1.3964844,
+    "height": 1.6,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 89,
+    "name": "slime",
+    "width": 2.04,
+    "height": 2.04,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 90,
+    "name": "small_fireball",
+    "width": 0.3125,
+    "height": 0.3125,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 91,
+    "name": "sniffer",
+    "width": 1.9,
+    "height": 1.75,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 92,
+    "name": "snow_golem",
+    "width": 0.7,
+    "height": 1.9,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 93,
+    "name": "snowball",
+    "width": 0.25,
+    "height": 0.25,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 94,
+    "name": "spawner_minecart",
+    "width": 0.98,
+    "height": 0.7,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 95,
+    "name": "spectral_arrow",
+    "width": 0.5,
+    "height": 0.5,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 96,
+    "name": "spider",
+    "width": 1.4,
+    "height": 0.9,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 97,
+    "name": "squid",
+    "width": 0.8,
+    "height": 0.8,
+    "category": "water_creature",
+    "friendly": true
+  },
+  {
+    "id": 98,
+    "name": "stray",
+    "width": 0.6,
+    "height": 1.99,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 99,
+    "name": "strider",
+    "width": 0.9,
+    "height": 1.7,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 100,
+    "name": "tadpole",
+    "width": 0.4,
+    "height": 0.3,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 101,
+    "name": "text_display",
+    "width": 0.0,
+    "height": 0.0,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 102,
+    "name": "tnt",
+    "width": 0.98,
+    "height": 0.98,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 103,
+    "name": "tnt_minecart",
+    "width": 0.98,
+    "height": 0.7,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 104,
+    "name": "trader_llama",
+    "width": 0.9,
+    "height": 1.87,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 105,
+    "name": "trident",
+    "width": 0.5,
+    "height": 0.5,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 106,
+    "name": "tropical_fish",
+    "width": 0.5,
+    "height": 0.4,
+    "category": "water_ambient",
+    "friendly": true
+  },
+  {
+    "id": 107,
+    "name": "turtle",
+    "width": 1.2,
+    "height": 0.4,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 108,
+    "name": "vex",
+    "width": 0.4,
+    "height": 0.8,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 109,
+    "name": "villager",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 110,
+    "name": "vindicator",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 111,
+    "name": "wandering_trader",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 112,
+    "name": "warden",
+    "width": 0.9,
+    "height": 2.9,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 113,
+    "name": "wind_charge",
+    "width": 0.3125,
+    "height": 0.3125,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 114,
+    "name": "witch",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 115,
+    "name": "wither",
+    "width": 0.9,
+    "height": 3.5,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 116,
+    "name": "wither_skeleton",
+    "width": 0.7,
+    "height": 2.4,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 117,
+    "name": "wither_skull",
+    "width": 0.3125,
+    "height": 0.3125,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 118,
+    "name": "wolf",
+    "width": 0.6,
+    "height": 0.85,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 119,
+    "name": "zoglin",
+    "width": 1.3964844,
+    "height": 1.4,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 120,
+    "name": "zombie",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 121,
+    "name": "zombie_horse",
+    "width": 1.3964844,
+    "height": 1.6,
+    "category": "creature",
+    "friendly": true
+  },
+  {
+    "id": 122,
+    "name": "zombie_villager",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 123,
+    "name": "zombified_piglin",
+    "width": 0.6,
+    "height": 1.95,
+    "category": "monster",
+    "friendly": false
+  },
+  {
+    "id": 124,
+    "name": "player",
+    "width": 0.6,
+    "height": 1.8,
+    "category": "misc",
+    "friendly": true
+  },
+  {
+    "id": 125,
+    "name": "fishing_bobber",
+    "width": 0.25,
+    "height": 0.25,
+    "category": "misc",
+    "friendly": true
+  }
+]

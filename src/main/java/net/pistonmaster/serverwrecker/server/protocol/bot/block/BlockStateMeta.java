@@ -22,6 +22,7 @@ package net.pistonmaster.serverwrecker.server.protocol.bot.block;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.pistonmaster.serverwrecker.server.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
+import net.pistonmaster.serverwrecker.server.data.OffsetHelper;
 import net.pistonmaster.serverwrecker.server.protocol.bot.movement.AABB;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -53,6 +54,7 @@ public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType,
             // This block has no shape stored, this is for example for air or grass
             return EMPTY_SHAPE;
         } else if (size == 1) {
+            // This block shares a shape for all states
             return blockType.blockShapeTypes().getFirst();
         } else {
             return blockType.blockShapeTypes().get(stateIndex);
@@ -86,7 +88,7 @@ public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType,
             );
 
             // Apply random offset if needed
-            shapeBB = shapeBB.move(blockType.blockProperties().getOffsetForBlock(block));
+            shapeBB = shapeBB.move(OffsetHelper.getOffsetForBlock(blockType, block));
 
             // Apply block offset
             shapeBB = shapeBB.move(block.getX(), block.getY(), block.getZ());

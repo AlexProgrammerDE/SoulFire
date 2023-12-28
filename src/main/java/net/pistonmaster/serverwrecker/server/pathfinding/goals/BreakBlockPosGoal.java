@@ -37,7 +37,7 @@ public record BreakBlockPosGoal(SWVec3i goal) implements GoalScorer {
         }
 
         // Don't try to find a way to dig bedrock
-        if (!blockStateMeta.blockType().diggable()) {
+        if (!BlockTypeHelper.isDiggable(blockStateMeta.blockType())) {
             throw new IllegalStateException("Block is not diggable!");
         }
 

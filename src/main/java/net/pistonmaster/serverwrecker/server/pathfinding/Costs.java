@@ -132,7 +132,7 @@ public class Costs {
             speedMultiplier /= 5.0F;
         }
 
-        var damage = speedMultiplier / blockType.hardness();
+        var damage = speedMultiplier / blockType.destroyTime();
 
         var correctToolUsed = isCorrectToolUsed(tagsState, itemStack == null ? null : itemStack.type(), blockType);
         damage /= correctToolUsed ? 30 : 100;
@@ -146,7 +146,7 @@ public class Costs {
     }
 
     private static boolean isCorrectToolUsed(TagsState tagsState, ItemType itemType, BlockType blockType) {
-        if (!blockType.blockProperties().requiresCorrectToolForDrops()) {
+        if (!blockType.requiresCorrectToolForDrops()) {
             return true;
         }
 

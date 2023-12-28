@@ -44,7 +44,6 @@ public class ResourceData {
     protected static final Int2ObjectMap<BlockStateProperties> BLOCK_STATE_PROPERTIES;
     // For loading by BlockShapeType
     protected static final IntSet BLOCK_STATE_DEFAULTS;
-    protected static final Map<String, BlockProperties> BLOCK_PROPERTY_MAP;
 
     // Static initialization allows us to preload this in a native image
     static {
@@ -91,42 +90,6 @@ public class ResourceData {
 
         BLOCK_STATE_PROPERTIES = blockStateProperties;
         BLOCK_STATE_DEFAULTS = blockStateDefaults;
-
-        JsonObject blockProperties;
-        try (var stream = ResourceData.class.getClassLoader().getResourceAsStream("minecraft/blockProperties.json")) {
-            Objects.requireNonNull(stream, "block_states.json not found");
-            blockProperties = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-
-        var blockPropertyMap = new HashMap<String, BlockProperties>();
-        for (var blockEntry : blockProperties.entrySet()) {
-            var blockName = blockEntry.getKey();
-            var blockObject = blockEntry.getValue().getAsJsonObject();
-
-            OffsetData offsetData = null;
-            var offsetObject = blockObject.getAsJsonObject("offsetData");
-            if (offsetObject != null) {
-                offsetData = new OffsetData(
-                        OffsetData.OffsetType.valueOf(offsetObject.get("type").getAsString()),
-                        offsetObject.get("maxHorizontalOffset").getAsFloat(),
-                        offsetObject.get("maxVerticalOffset").getAsFloat()
-                );
-            }
-
-            var propertyArray = blockObject.getAsJsonArray("properties");
-            var blockProperty = new BlockProperties(
-                    offsetData,
-                    hasValue(propertyArray, "replaceable"),
-                    hasValue(propertyArray, "fallingBlock"),
-                    hasValue(propertyArray, "requiresCorrectToolForDrops")
-            );
-
-            blockPropertyMap.put(blockName, blockProperty);
-        }
-
-        BLOCK_PROPERTY_MAP = blockPropertyMap;
 
         // Load global palette
         Int2ObjectMap<BlockStateMeta> stateMap = new Int2ObjectOpenHashMap<>();

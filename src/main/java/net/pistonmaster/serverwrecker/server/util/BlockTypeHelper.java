@@ -62,4 +62,8 @@ public class BlockTypeHelper {
     public static boolean isSafeBlockToStandOn(BlockStateMeta meta) {
         return meta.blockShapeType().isFullBlock() && !isHurtWhenStoodOn(meta.blockType());
     }
+
+    public static boolean isDiggable(BlockType type) {
+        return type.destroyTime() != -1;
+    }
 }

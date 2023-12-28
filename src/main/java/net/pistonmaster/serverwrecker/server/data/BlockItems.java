@@ -19,6 +19,8 @@
  */
 package net.pistonmaster.serverwrecker.server.data;
 
+import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
+
 import java.util.Optional;
 
 public class BlockItems {
@@ -31,7 +33,7 @@ public class BlockItems {
                 var blockShapeTypes = blockType.blockShapeTypes();
 
                 // Let's not use bedrock as a building block
-                if (blockType.diggable()
+                if (BlockTypeHelper.isDiggable(blockType)
                         && blockShapeTypes.size() == 1
                         && itemType.name().equals(blockType.name())
                         && blockShapeTypes.getFirst().isFullBlock()) {

@@ -36,7 +36,7 @@ public class ItemsDataGenerator implements IDataGenerator {
         itemDesc.addProperty("id", BuiltInRegistries.ITEM.getId(item));
         itemDesc.addProperty("name", BuiltInRegistries.ITEM.getKey(item).getPath());
 
-        itemDesc.addProperty("stackSize", item.getMaxStackSize());
+        itemDesc.addProperty("maxStackSize", item.getMaxStackSize());
 
         var enchantmentTargets = getApplicableEnchantmentTargets(item);
 
@@ -62,8 +62,7 @@ public class ItemsDataGenerator implements IDataGenerator {
                 depletionData.add("repairWith", fixedWithArray);
             }
 
-            var maxDurability = item.getMaxDamage();
-            depletionData.addProperty("maxDurability", maxDurability);
+            depletionData.addProperty("maxDamage", item.getMaxDamage());
 
             itemDesc.add("depletionData", depletionData);
         }

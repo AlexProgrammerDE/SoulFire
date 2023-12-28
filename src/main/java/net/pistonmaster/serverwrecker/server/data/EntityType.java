@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record EntityType(int id, String name, String displayName, String type,
-                         float width, float height, String category) {
+public record EntityType(int id, String name, float width, float height,
+                         String category, boolean friendly) {
     public static final List<EntityType> VALUES = new ArrayList<>();
 
     public static final EntityType ALLAY = register("allay");

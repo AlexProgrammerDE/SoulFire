@@ -62,7 +62,7 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
             var playerInventory = inventoryManager.getPlayerInventory();
 
             SWItemStack leastHardItem = null;
-            var leastHardness = 0F;
+            var leastDestroyTime = 0F;
             for (var slot : playerInventory.storage()) {
                 if (slot.item() == null) {
                     continue;
@@ -74,9 +74,10 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
                     continue;
                 }
 
-                if (leastHardItem == null || blockType.get().hardness() < leastHardness) {
+                var destroyTime = blockType.get().destroyTime();
+                if (leastHardItem == null || destroyTime < leastDestroyTime) {
                     leastHardItem = item;
-                    leastHardness = blockType.get().hardness();
+                    leastDestroyTime = destroyTime;
                 }
             }
 

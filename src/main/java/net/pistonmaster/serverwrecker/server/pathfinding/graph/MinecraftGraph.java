@@ -290,7 +290,7 @@ public record MinecraftGraph(TagsState tagsState) {
                                 // Search for a way to break this block
                                 if (playerMovement.allowBlockActions()
                                         // Narrow this down to blocks that can be broken
-                                        && blockState.blockType().diggable()
+                                        && BlockTypeHelper.isDiggable(blockState.blockType())
                                         // Check if we previously found out this block is unsafe to break
                                         && !playerMovement.unsafeToBreak()[subscriber.blockArrayIndex]
                                         // Narrows the list down to a reasonable size
@@ -321,7 +321,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
                                 var unsafe = switch (subscriber.safetyType) {
                                     case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
-                                            || blockState.blockType().blockProperties().fallingBlock();
+                                            || blockState.blockType().fallingBlock();
                                     case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
                                 };
 
@@ -347,7 +347,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
                                 if (playerMovement.allowBlockActions()
                                         && node.inventory().hasBlockToPlace()
-                                        && blockState.blockType().blockProperties().replaceable()) {
+                                        && blockState.blockType().replaceable()) {
                                     // We can place a block here, but we need to find a block to place against
                                     playerMovement.requiresAgainstBlock(true);
                                 } else {
@@ -423,7 +423,7 @@ public record MinecraftGraph(TagsState tagsState) {
                     case DownMovement downMovement -> {
                         switch (subscriber.type) {
                             case MOVEMENT_FREE -> {
-                                if (blockState.blockType().diggable()
+                                if (BlockTypeHelper.isDiggable(blockState.blockType())
                                         // Narrows the list down to a reasonable size
                                         && BlockItems.hasItemType(blockState.blockType())) {
                                     var cacheableMiningCost = node.inventory()
@@ -470,7 +470,7 @@ public record MinecraftGraph(TagsState tagsState) {
                                 }
 
                                 // Search for a way to break this block
-                                if (blockState.blockType().diggable()
+                                if (BlockTypeHelper.isDiggable(blockState.blockType())
                                         && !upMovement.unsafeToBreak()[subscriber.blockArrayIndex]
                                         && BlockItems.hasItemType(blockState.blockType())) {
                                     var cacheableMiningCost = node.inventory()
@@ -499,7 +499,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
                                 var unsafe = switch (subscriber.safetyType) {
                                     case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
-                                            || blockState.blockType().blockProperties().fallingBlock();
+                                            || blockState.blockType().fallingBlock();
                                     case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
                                 };
 

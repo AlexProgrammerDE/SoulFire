@@ -1,0 +1,6998 @@
+[
+  {
+    "id": 0,
+    "name": "air",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "air": true,
+    "replaceable": true
+  },
+  {
+    "id": 1,
+    "name": "stone",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 2,
+    "name": "granite",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 3,
+    "name": "polished_granite",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 4,
+    "name": "diorite",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 5,
+    "name": "polished_diorite",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 6,
+    "name": "andesite",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 7,
+    "name": "polished_andesite",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 8,
+    "name": "grass_block",
+    "destroyTime": 0.6,
+    "explosionResistance": 0.6
+  },
+  {
+    "id": 9,
+    "name": "dirt",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 10,
+    "name": "coarse_dirt",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 11,
+    "name": "podzol",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 12,
+    "name": "cobblestone",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 13,
+    "name": "oak_planks",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 14,
+    "name": "spruce_planks",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 15,
+    "name": "birch_planks",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 16,
+    "name": "jungle_planks",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 17,
+    "name": "acacia_planks",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 18,
+    "name": "cherry_planks",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 19,
+    "name": "dark_oak_planks",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 20,
+    "name": "mangrove_planks",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 21,
+    "name": "bamboo_planks",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 22,
+    "name": "bamboo_mosaic",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 23,
+    "name": "oak_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 24,
+    "name": "spruce_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 25,
+    "name": "birch_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 26,
+    "name": "jungle_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 27,
+    "name": "acacia_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 28,
+    "name": "cherry_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 29,
+    "name": "dark_oak_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 30,
+    "name": "mangrove_propagule",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 31,
+    "name": "bedrock",
+    "destroyTime": -1.0,
+    "explosionResistance": 3600000.0
+  },
+  {
+    "id": 32,
+    "name": "water",
+    "destroyTime": 100.0,
+    "explosionResistance": 100.0,
+    "replaceable": true,
+    "fluidSource": true
+  },
+  {
+    "id": 33,
+    "name": "lava",
+    "destroyTime": 100.0,
+    "explosionResistance": 100.0,
+    "replaceable": true,
+    "fluidSource": true
+  },
+  {
+    "id": 34,
+    "name": "sand",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 35,
+    "name": "suspicious_sand",
+    "destroyTime": 0.25,
+    "explosionResistance": 0.25
+  },
+  {
+    "id": 36,
+    "name": "red_sand",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 37,
+    "name": "gravel",
+    "destroyTime": 0.6,
+    "explosionResistance": 0.6,
+    "fallingBlock": true
+  },
+  {
+    "id": 38,
+    "name": "suspicious_gravel",
+    "destroyTime": 0.25,
+    "explosionResistance": 0.25
+  },
+  {
+    "id": 39,
+    "name": "gold_ore",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 40,
+    "name": "deepslate_gold_ore",
+    "destroyTime": 4.5,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 41,
+    "name": "iron_ore",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 42,
+    "name": "deepslate_iron_ore",
+    "destroyTime": 4.5,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 43,
+    "name": "coal_ore",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 44,
+    "name": "deepslate_coal_ore",
+    "destroyTime": 4.5,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 45,
+    "name": "nether_gold_ore",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 46,
+    "name": "oak_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 47,
+    "name": "spruce_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 48,
+    "name": "birch_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 49,
+    "name": "jungle_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 50,
+    "name": "acacia_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 51,
+    "name": "cherry_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 52,
+    "name": "dark_oak_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 53,
+    "name": "mangrove_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 54,
+    "name": "mangrove_roots",
+    "destroyTime": 0.7,
+    "explosionResistance": 0.7
+  },
+  {
+    "id": 55,
+    "name": "muddy_mangrove_roots",
+    "destroyTime": 0.7,
+    "explosionResistance": 0.7
+  },
+  {
+    "id": 56,
+    "name": "bamboo_block",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 57,
+    "name": "stripped_spruce_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 58,
+    "name": "stripped_birch_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 59,
+    "name": "stripped_jungle_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 60,
+    "name": "stripped_acacia_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 61,
+    "name": "stripped_cherry_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 62,
+    "name": "stripped_dark_oak_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 63,
+    "name": "stripped_oak_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 64,
+    "name": "stripped_mangrove_log",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 65,
+    "name": "stripped_bamboo_block",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 66,
+    "name": "oak_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 67,
+    "name": "spruce_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 68,
+    "name": "birch_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 69,
+    "name": "jungle_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 70,
+    "name": "acacia_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 71,
+    "name": "cherry_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 72,
+    "name": "dark_oak_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 73,
+    "name": "mangrove_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 74,
+    "name": "stripped_oak_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 75,
+    "name": "stripped_spruce_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 76,
+    "name": "stripped_birch_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 77,
+    "name": "stripped_jungle_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 78,
+    "name": "stripped_acacia_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 79,
+    "name": "stripped_cherry_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 80,
+    "name": "stripped_dark_oak_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 81,
+    "name": "stripped_mangrove_wood",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 82,
+    "name": "oak_leaves",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 83,
+    "name": "spruce_leaves",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 84,
+    "name": "birch_leaves",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 85,
+    "name": "jungle_leaves",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 86,
+    "name": "acacia_leaves",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 87,
+    "name": "cherry_leaves",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 88,
+    "name": "dark_oak_leaves",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 89,
+    "name": "mangrove_leaves",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 90,
+    "name": "azalea_leaves",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 91,
+    "name": "flowering_azalea_leaves",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 92,
+    "name": "sponge",
+    "destroyTime": 0.6,
+    "explosionResistance": 0.6
+  },
+  {
+    "id": 93,
+    "name": "wet_sponge",
+    "destroyTime": 0.6,
+    "explosionResistance": 0.6
+  },
+  {
+    "id": 94,
+    "name": "glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 95,
+    "name": "lapis_ore",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 96,
+    "name": "deepslate_lapis_ore",
+    "destroyTime": 4.5,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 97,
+    "name": "lapis_block",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 98,
+    "name": "dispenser",
+    "destroyTime": 3.5,
+    "explosionResistance": 3.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 99,
+    "name": "sandstone",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 100,
+    "name": "chiseled_sandstone",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 101,
+    "name": "cut_sandstone",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 102,
+    "name": "note_block",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 103,
+    "name": "white_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 104,
+    "name": "orange_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 105,
+    "name": "magenta_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 106,
+    "name": "light_blue_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 107,
+    "name": "yellow_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 108,
+    "name": "lime_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 109,
+    "name": "pink_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 110,
+    "name": "gray_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 111,
+    "name": "light_gray_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 112,
+    "name": "cyan_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 113,
+    "name": "purple_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 114,
+    "name": "blue_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 115,
+    "name": "brown_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 116,
+    "name": "green_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 117,
+    "name": "red_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 118,
+    "name": "black_bed",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 119,
+    "name": "powered_rail",
+    "destroyTime": 0.7,
+    "explosionResistance": 0.7
+  },
+  {
+    "id": 120,
+    "name": "detector_rail",
+    "destroyTime": 0.7,
+    "explosionResistance": 0.7
+  },
+  {
+    "id": 121,
+    "name": "sticky_piston",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.5
+  },
+  {
+    "id": 122,
+    "name": "cobweb",
+    "destroyTime": 4.0,
+    "explosionResistance": 4.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 123,
+    "name": "short_grass",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XYZ"
+    }
+  },
+  {
+    "id": 124,
+    "name": "fern",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XYZ"
+    }
+  },
+  {
+    "id": 125,
+    "name": "dead_bush",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true
+  },
+  {
+    "id": 126,
+    "name": "seagrass",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true,
+    "fluidSource": true
+  },
+  {
+    "id": 127,
+    "name": "tall_seagrass",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true,
+    "fluidSource": true,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 128,
+    "name": "piston",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.5
+  },
+  {
+    "id": 129,
+    "name": "piston_head",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.5
+  },
+  {
+    "id": 130,
+    "name": "white_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 131,
+    "name": "orange_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 132,
+    "name": "magenta_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 133,
+    "name": "light_blue_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 134,
+    "name": "yellow_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 135,
+    "name": "lime_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 136,
+    "name": "pink_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 137,
+    "name": "gray_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 138,
+    "name": "light_gray_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 139,
+    "name": "cyan_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 140,
+    "name": "purple_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 141,
+    "name": "blue_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 142,
+    "name": "brown_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 143,
+    "name": "green_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 144,
+    "name": "red_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 145,
+    "name": "black_wool",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8
+  },
+  {
+    "id": 146,
+    "name": "moving_piston",
+    "destroyTime": -1.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 147,
+    "name": "dandelion",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 148,
+    "name": "torchflower",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 149,
+    "name": "poppy",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 150,
+    "name": "blue_orchid",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 151,
+    "name": "allium",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 152,
+    "name": "azure_bluet",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 153,
+    "name": "red_tulip",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 154,
+    "name": "orange_tulip",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 155,
+    "name": "white_tulip",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 156,
+    "name": "pink_tulip",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 157,
+    "name": "oxeye_daisy",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 158,
+    "name": "cornflower",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 159,
+    "name": "wither_rose",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 160,
+    "name": "lily_of_the_valley",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 161,
+    "name": "brown_mushroom",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 162,
+    "name": "red_mushroom",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 163,
+    "name": "gold_block",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 164,
+    "name": "iron_block",
+    "destroyTime": 5.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 165,
+    "name": "bricks",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 166,
+    "name": "tnt",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 167,
+    "name": "bookshelf",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.5
+  },
+  {
+    "id": 168,
+    "name": "chiseled_bookshelf",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.5
+  },
+  {
+    "id": 169,
+    "name": "mossy_cobblestone",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 170,
+    "name": "obsidian",
+    "destroyTime": 50.0,
+    "explosionResistance": 1200.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 171,
+    "name": "torch",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 172,
+    "name": "wall_torch",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 173,
+    "name": "fire",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true
+  },
+  {
+    "id": 174,
+    "name": "soul_fire",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true
+  },
+  {
+    "id": 175,
+    "name": "spawner",
+    "destroyTime": 5.0,
+    "explosionResistance": 5.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 176,
+    "name": "oak_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 177,
+    "name": "chest",
+    "destroyTime": 2.5,
+    "explosionResistance": 2.5
+  },
+  {
+    "id": 178,
+    "name": "redstone_wire",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 179,
+    "name": "diamond_ore",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 180,
+    "name": "deepslate_diamond_ore",
+    "destroyTime": 4.5,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 181,
+    "name": "diamond_block",
+    "destroyTime": 5.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 182,
+    "name": "crafting_table",
+    "destroyTime": 2.5,
+    "explosionResistance": 2.5
+  },
+  {
+    "id": 183,
+    "name": "wheat",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 184,
+    "name": "farmland",
+    "destroyTime": 0.6,
+    "explosionResistance": 0.6
+  },
+  {
+    "id": 185,
+    "name": "furnace",
+    "destroyTime": 3.5,
+    "explosionResistance": 3.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 186,
+    "name": "oak_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 187,
+    "name": "spruce_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 188,
+    "name": "birch_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 189,
+    "name": "acacia_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 190,
+    "name": "cherry_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 191,
+    "name": "jungle_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 192,
+    "name": "dark_oak_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 193,
+    "name": "mangrove_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 194,
+    "name": "bamboo_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 195,
+    "name": "oak_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 196,
+    "name": "ladder",
+    "destroyTime": 0.4,
+    "explosionResistance": 0.4
+  },
+  {
+    "id": 197,
+    "name": "rail",
+    "destroyTime": 0.7,
+    "explosionResistance": 0.7
+  },
+  {
+    "id": 198,
+    "name": "cobblestone_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 199,
+    "name": "oak_wall_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 200,
+    "name": "spruce_wall_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 201,
+    "name": "birch_wall_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 202,
+    "name": "acacia_wall_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 203,
+    "name": "cherry_wall_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 204,
+    "name": "jungle_wall_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 205,
+    "name": "dark_oak_wall_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 206,
+    "name": "mangrove_wall_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 207,
+    "name": "bamboo_wall_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 208,
+    "name": "oak_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 209,
+    "name": "spruce_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 210,
+    "name": "birch_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 211,
+    "name": "acacia_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 212,
+    "name": "cherry_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 213,
+    "name": "jungle_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 214,
+    "name": "dark_oak_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 215,
+    "name": "crimson_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 216,
+    "name": "warped_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 217,
+    "name": "mangrove_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 218,
+    "name": "bamboo_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 219,
+    "name": "oak_wall_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 220,
+    "name": "spruce_wall_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 221,
+    "name": "birch_wall_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 222,
+    "name": "acacia_wall_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 223,
+    "name": "cherry_wall_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 224,
+    "name": "jungle_wall_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 225,
+    "name": "dark_oak_wall_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 226,
+    "name": "mangrove_wall_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 227,
+    "name": "crimson_wall_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 228,
+    "name": "warped_wall_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 229,
+    "name": "bamboo_wall_hanging_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 230,
+    "name": "lever",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 231,
+    "name": "stone_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 232,
+    "name": "iron_door",
+    "destroyTime": 5.0,
+    "explosionResistance": 5.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 233,
+    "name": "oak_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 234,
+    "name": "spruce_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 235,
+    "name": "birch_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 236,
+    "name": "jungle_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 237,
+    "name": "acacia_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 238,
+    "name": "cherry_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 239,
+    "name": "dark_oak_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 240,
+    "name": "mangrove_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 241,
+    "name": "bamboo_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 242,
+    "name": "redstone_ore",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 243,
+    "name": "deepslate_redstone_ore",
+    "destroyTime": 4.5,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 244,
+    "name": "redstone_torch",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 245,
+    "name": "redstone_wall_torch",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 246,
+    "name": "stone_button",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 247,
+    "name": "snow",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1,
+    "replaceable": true,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 248,
+    "name": "ice",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 249,
+    "name": "snow_block",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 250,
+    "name": "cactus",
+    "destroyTime": 0.4,
+    "explosionResistance": 0.4
+  },
+  {
+    "id": 251,
+    "name": "clay",
+    "destroyTime": 0.6,
+    "explosionResistance": 0.6
+  },
+  {
+    "id": 252,
+    "name": "sugar_cane",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 253,
+    "name": "jukebox",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0
+  },
+  {
+    "id": 254,
+    "name": "oak_fence",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 255,
+    "name": "netherrack",
+    "destroyTime": 0.4,
+    "explosionResistance": 0.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 256,
+    "name": "soul_sand",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 257,
+    "name": "soul_soil",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 258,
+    "name": "basalt",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 259,
+    "name": "polished_basalt",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 260,
+    "name": "soul_torch",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 261,
+    "name": "soul_wall_torch",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 262,
+    "name": "glowstone",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 263,
+    "name": "nether_portal",
+    "destroyTime": -1.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 264,
+    "name": "carved_pumpkin",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 265,
+    "name": "jack_o_lantern",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 266,
+    "name": "cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 267,
+    "name": "repeater",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 268,
+    "name": "white_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 269,
+    "name": "orange_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 270,
+    "name": "magenta_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 271,
+    "name": "light_blue_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 272,
+    "name": "yellow_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 273,
+    "name": "lime_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 274,
+    "name": "pink_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 275,
+    "name": "gray_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 276,
+    "name": "light_gray_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 277,
+    "name": "cyan_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 278,
+    "name": "purple_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 279,
+    "name": "blue_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 280,
+    "name": "brown_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 281,
+    "name": "green_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 282,
+    "name": "red_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 283,
+    "name": "black_stained_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 284,
+    "name": "oak_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 285,
+    "name": "spruce_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 286,
+    "name": "birch_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 287,
+    "name": "jungle_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 288,
+    "name": "acacia_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 289,
+    "name": "cherry_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 290,
+    "name": "dark_oak_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 291,
+    "name": "mangrove_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 292,
+    "name": "bamboo_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 293,
+    "name": "stone_bricks",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 294,
+    "name": "mossy_stone_bricks",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 295,
+    "name": "cracked_stone_bricks",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 296,
+    "name": "chiseled_stone_bricks",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 297,
+    "name": "packed_mud",
+    "destroyTime": 1.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 298,
+    "name": "mud_bricks",
+    "destroyTime": 1.5,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 299,
+    "name": "infested_stone",
+    "destroyTime": 0.75,
+    "explosionResistance": 0.75
+  },
+  {
+    "id": 300,
+    "name": "infested_cobblestone",
+    "destroyTime": 1.0,
+    "explosionResistance": 0.75
+  },
+  {
+    "id": 301,
+    "name": "infested_stone_bricks",
+    "destroyTime": 0.75,
+    "explosionResistance": 0.75
+  },
+  {
+    "id": 302,
+    "name": "infested_mossy_stone_bricks",
+    "destroyTime": 0.75,
+    "explosionResistance": 0.75
+  },
+  {
+    "id": 303,
+    "name": "infested_cracked_stone_bricks",
+    "destroyTime": 0.75,
+    "explosionResistance": 0.75
+  },
+  {
+    "id": 304,
+    "name": "infested_chiseled_stone_bricks",
+    "destroyTime": 0.75,
+    "explosionResistance": 0.75
+  },
+  {
+    "id": 305,
+    "name": "brown_mushroom_block",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 306,
+    "name": "red_mushroom_block",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 307,
+    "name": "mushroom_stem",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 308,
+    "name": "iron_bars",
+    "destroyTime": 5.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 309,
+    "name": "chain",
+    "destroyTime": 5.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 310,
+    "name": "glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 311,
+    "name": "pumpkin",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 312,
+    "name": "melon",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 313,
+    "name": "attached_pumpkin_stem",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 314,
+    "name": "attached_melon_stem",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 315,
+    "name": "pumpkin_stem",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 316,
+    "name": "melon_stem",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 317,
+    "name": "vine",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2,
+    "replaceable": true
+  },
+  {
+    "id": 318,
+    "name": "glow_lichen",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2,
+    "replaceable": true
+  },
+  {
+    "id": 319,
+    "name": "oak_fence_gate",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 320,
+    "name": "brick_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 321,
+    "name": "stone_brick_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 322,
+    "name": "mud_brick_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 323,
+    "name": "mycelium",
+    "destroyTime": 0.6,
+    "explosionResistance": 0.6
+  },
+  {
+    "id": 324,
+    "name": "lily_pad",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 325,
+    "name": "nether_bricks",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 326,
+    "name": "nether_brick_fence",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 327,
+    "name": "nether_brick_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 328,
+    "name": "nether_wart",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 329,
+    "name": "enchanting_table",
+    "destroyTime": 5.0,
+    "explosionResistance": 1200.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 330,
+    "name": "brewing_stand",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 331,
+    "name": "cauldron",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 332,
+    "name": "water_cauldron",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 333,
+    "name": "lava_cauldron",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 334,
+    "name": "powder_snow_cauldron",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 335,
+    "name": "end_portal",
+    "destroyTime": -1.0,
+    "explosionResistance": 3600000.0
+  },
+  {
+    "id": 336,
+    "name": "end_portal_frame",
+    "destroyTime": -1.0,
+    "explosionResistance": 3600000.0
+  },
+  {
+    "id": 337,
+    "name": "end_stone",
+    "destroyTime": 3.0,
+    "explosionResistance": 9.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 338,
+    "name": "dragon_egg",
+    "destroyTime": 3.0,
+    "explosionResistance": 9.0,
+    "fallingBlock": true
+  },
+  {
+    "id": 339,
+    "name": "redstone_lamp",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 340,
+    "name": "cocoa",
+    "destroyTime": 0.2,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 341,
+    "name": "sandstone_stairs",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 342,
+    "name": "emerald_ore",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 343,
+    "name": "deepslate_emerald_ore",
+    "destroyTime": 4.5,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 344,
+    "name": "ender_chest",
+    "destroyTime": 22.5,
+    "explosionResistance": 600.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 345,
+    "name": "tripwire_hook",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 346,
+    "name": "tripwire",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 347,
+    "name": "emerald_block",
+    "destroyTime": 5.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 348,
+    "name": "spruce_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 349,
+    "name": "birch_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 350,
+    "name": "jungle_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 351,
+    "name": "command_block",
+    "destroyTime": -1.0,
+    "explosionResistance": 3600000.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 352,
+    "name": "beacon",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 353,
+    "name": "cobblestone_wall",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 354,
+    "name": "mossy_cobblestone_wall",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 355,
+    "name": "flower_pot",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 356,
+    "name": "potted_torchflower",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 357,
+    "name": "potted_oak_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 358,
+    "name": "potted_spruce_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 359,
+    "name": "potted_birch_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 360,
+    "name": "potted_jungle_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 361,
+    "name": "potted_acacia_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 362,
+    "name": "potted_cherry_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 363,
+    "name": "potted_dark_oak_sapling",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 364,
+    "name": "potted_mangrove_propagule",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 365,
+    "name": "potted_fern",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 366,
+    "name": "potted_dandelion",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 367,
+    "name": "potted_poppy",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 368,
+    "name": "potted_blue_orchid",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 369,
+    "name": "potted_allium",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 370,
+    "name": "potted_azure_bluet",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 371,
+    "name": "potted_red_tulip",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 372,
+    "name": "potted_orange_tulip",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 373,
+    "name": "potted_white_tulip",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 374,
+    "name": "potted_pink_tulip",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 375,
+    "name": "potted_oxeye_daisy",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 376,
+    "name": "potted_cornflower",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 377,
+    "name": "potted_lily_of_the_valley",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 378,
+    "name": "potted_wither_rose",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 379,
+    "name": "potted_red_mushroom",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 380,
+    "name": "potted_brown_mushroom",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 381,
+    "name": "potted_dead_bush",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 382,
+    "name": "potted_cactus",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 383,
+    "name": "carrots",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 384,
+    "name": "potatoes",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 385,
+    "name": "oak_button",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 386,
+    "name": "spruce_button",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 387,
+    "name": "birch_button",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 388,
+    "name": "jungle_button",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 389,
+    "name": "acacia_button",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 390,
+    "name": "cherry_button",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 391,
+    "name": "dark_oak_button",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 392,
+    "name": "mangrove_button",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 393,
+    "name": "bamboo_button",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 394,
+    "name": "skeleton_skull",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 395,
+    "name": "skeleton_wall_skull",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 396,
+    "name": "wither_skeleton_skull",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 397,
+    "name": "wither_skeleton_wall_skull",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 398,
+    "name": "zombie_head",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 399,
+    "name": "zombie_wall_head",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 400,
+    "name": "player_head",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 401,
+    "name": "player_wall_head",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 402,
+    "name": "creeper_head",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 403,
+    "name": "creeper_wall_head",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 404,
+    "name": "dragon_head",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 405,
+    "name": "dragon_wall_head",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 406,
+    "name": "piglin_head",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 407,
+    "name": "piglin_wall_head",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 408,
+    "name": "anvil",
+    "destroyTime": 5.0,
+    "explosionResistance": 1200.0,
+    "fallingBlock": true,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 409,
+    "name": "chipped_anvil",
+    "destroyTime": 5.0,
+    "explosionResistance": 1200.0,
+    "fallingBlock": true,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 410,
+    "name": "damaged_anvil",
+    "destroyTime": 5.0,
+    "explosionResistance": 1200.0,
+    "fallingBlock": true,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 411,
+    "name": "trapped_chest",
+    "destroyTime": 2.5,
+    "explosionResistance": 2.5
+  },
+  {
+    "id": 412,
+    "name": "light_weighted_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 413,
+    "name": "heavy_weighted_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 414,
+    "name": "comparator",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 415,
+    "name": "daylight_detector",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 416,
+    "name": "redstone_block",
+    "destroyTime": 5.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 417,
+    "name": "nether_quartz_ore",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 418,
+    "name": "hopper",
+    "destroyTime": 3.0,
+    "explosionResistance": 4.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 419,
+    "name": "quartz_block",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 420,
+    "name": "chiseled_quartz_block",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 421,
+    "name": "quartz_pillar",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 422,
+    "name": "quartz_stairs",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 423,
+    "name": "activator_rail",
+    "destroyTime": 0.7,
+    "explosionResistance": 0.7
+  },
+  {
+    "id": 424,
+    "name": "dropper",
+    "destroyTime": 3.5,
+    "explosionResistance": 3.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 425,
+    "name": "white_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 426,
+    "name": "orange_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 427,
+    "name": "magenta_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 428,
+    "name": "light_blue_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 429,
+    "name": "yellow_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 430,
+    "name": "lime_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 431,
+    "name": "pink_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 432,
+    "name": "gray_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 433,
+    "name": "light_gray_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 434,
+    "name": "cyan_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 435,
+    "name": "purple_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 436,
+    "name": "blue_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 437,
+    "name": "brown_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 438,
+    "name": "green_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 439,
+    "name": "red_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 440,
+    "name": "black_terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 441,
+    "name": "white_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 442,
+    "name": "orange_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 443,
+    "name": "magenta_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 444,
+    "name": "light_blue_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 445,
+    "name": "yellow_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 446,
+    "name": "lime_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 447,
+    "name": "pink_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 448,
+    "name": "gray_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 449,
+    "name": "light_gray_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 450,
+    "name": "cyan_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 451,
+    "name": "purple_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 452,
+    "name": "blue_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 453,
+    "name": "brown_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 454,
+    "name": "green_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 455,
+    "name": "red_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 456,
+    "name": "black_stained_glass_pane",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 457,
+    "name": "acacia_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 458,
+    "name": "cherry_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 459,
+    "name": "dark_oak_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 460,
+    "name": "mangrove_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 461,
+    "name": "bamboo_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 462,
+    "name": "bamboo_mosaic_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 463,
+    "name": "slime_block",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 464,
+    "name": "barrier",
+    "destroyTime": -1.0,
+    "explosionResistance": 3600000.8
+  },
+  {
+    "id": 465,
+    "name": "light",
+    "destroyTime": -1.0,
+    "explosionResistance": 3600000.8,
+    "replaceable": true
+  },
+  {
+    "id": 466,
+    "name": "iron_trapdoor",
+    "destroyTime": 5.0,
+    "explosionResistance": 5.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 467,
+    "name": "prismarine",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 468,
+    "name": "prismarine_bricks",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 469,
+    "name": "dark_prismarine",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 470,
+    "name": "prismarine_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 471,
+    "name": "prismarine_brick_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 472,
+    "name": "dark_prismarine_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 473,
+    "name": "prismarine_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 474,
+    "name": "prismarine_brick_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 475,
+    "name": "dark_prismarine_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 476,
+    "name": "sea_lantern",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 477,
+    "name": "hay_block",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 478,
+    "name": "white_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 479,
+    "name": "orange_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 480,
+    "name": "magenta_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 481,
+    "name": "light_blue_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 482,
+    "name": "yellow_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 483,
+    "name": "lime_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 484,
+    "name": "pink_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 485,
+    "name": "gray_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 486,
+    "name": "light_gray_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 487,
+    "name": "cyan_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 488,
+    "name": "purple_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 489,
+    "name": "blue_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 490,
+    "name": "brown_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 491,
+    "name": "green_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 492,
+    "name": "red_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 493,
+    "name": "black_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 494,
+    "name": "terracotta",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 495,
+    "name": "coal_block",
+    "destroyTime": 5.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 496,
+    "name": "packed_ice",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 497,
+    "name": "sunflower",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 498,
+    "name": "lilac",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 499,
+    "name": "rose_bush",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 500,
+    "name": "peony",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 501,
+    "name": "tall_grass",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 502,
+    "name": "large_fern",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 503,
+    "name": "white_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 504,
+    "name": "orange_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 505,
+    "name": "magenta_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 506,
+    "name": "light_blue_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 507,
+    "name": "yellow_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 508,
+    "name": "lime_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 509,
+    "name": "pink_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 510,
+    "name": "gray_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 511,
+    "name": "light_gray_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 512,
+    "name": "cyan_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 513,
+    "name": "purple_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 514,
+    "name": "blue_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 515,
+    "name": "brown_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 516,
+    "name": "green_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 517,
+    "name": "red_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 518,
+    "name": "black_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 519,
+    "name": "white_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 520,
+    "name": "orange_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 521,
+    "name": "magenta_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 522,
+    "name": "light_blue_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 523,
+    "name": "yellow_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 524,
+    "name": "lime_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 525,
+    "name": "pink_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 526,
+    "name": "gray_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 527,
+    "name": "light_gray_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 528,
+    "name": "cyan_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 529,
+    "name": "purple_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 530,
+    "name": "blue_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 531,
+    "name": "brown_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 532,
+    "name": "green_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 533,
+    "name": "red_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 534,
+    "name": "black_wall_banner",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 535,
+    "name": "red_sandstone",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 536,
+    "name": "chiseled_red_sandstone",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 537,
+    "name": "cut_red_sandstone",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 538,
+    "name": "red_sandstone_stairs",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 539,
+    "name": "oak_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 540,
+    "name": "spruce_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 541,
+    "name": "birch_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 542,
+    "name": "jungle_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 543,
+    "name": "acacia_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 544,
+    "name": "cherry_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 545,
+    "name": "dark_oak_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 546,
+    "name": "mangrove_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 547,
+    "name": "bamboo_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 548,
+    "name": "bamboo_mosaic_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 549,
+    "name": "stone_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 550,
+    "name": "smooth_stone_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 551,
+    "name": "sandstone_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 552,
+    "name": "cut_sandstone_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 553,
+    "name": "petrified_oak_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 554,
+    "name": "cobblestone_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 555,
+    "name": "brick_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 556,
+    "name": "stone_brick_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 557,
+    "name": "mud_brick_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 558,
+    "name": "nether_brick_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 559,
+    "name": "quartz_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 560,
+    "name": "red_sandstone_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 561,
+    "name": "cut_red_sandstone_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 562,
+    "name": "purpur_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 563,
+    "name": "smooth_stone",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 564,
+    "name": "smooth_sandstone",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 565,
+    "name": "smooth_quartz",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 566,
+    "name": "smooth_red_sandstone",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 567,
+    "name": "spruce_fence_gate",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 568,
+    "name": "birch_fence_gate",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 569,
+    "name": "jungle_fence_gate",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 570,
+    "name": "acacia_fence_gate",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 571,
+    "name": "cherry_fence_gate",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 572,
+    "name": "dark_oak_fence_gate",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 573,
+    "name": "mangrove_fence_gate",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 574,
+    "name": "bamboo_fence_gate",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 575,
+    "name": "spruce_fence",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 576,
+    "name": "birch_fence",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 577,
+    "name": "jungle_fence",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 578,
+    "name": "acacia_fence",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 579,
+    "name": "cherry_fence",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 580,
+    "name": "dark_oak_fence",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 581,
+    "name": "mangrove_fence",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 582,
+    "name": "bamboo_fence",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 583,
+    "name": "spruce_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 584,
+    "name": "birch_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 585,
+    "name": "jungle_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 586,
+    "name": "acacia_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 587,
+    "name": "cherry_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 588,
+    "name": "dark_oak_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 589,
+    "name": "mangrove_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 590,
+    "name": "bamboo_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 591,
+    "name": "end_rod",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 592,
+    "name": "chorus_plant",
+    "destroyTime": 0.4,
+    "explosionResistance": 0.4
+  },
+  {
+    "id": 593,
+    "name": "chorus_flower",
+    "destroyTime": 0.4,
+    "explosionResistance": 0.4
+  },
+  {
+    "id": 594,
+    "name": "purpur_block",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 595,
+    "name": "purpur_pillar",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 596,
+    "name": "purpur_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 597,
+    "name": "end_stone_bricks",
+    "destroyTime": 3.0,
+    "explosionResistance": 9.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 598,
+    "name": "torchflower_crop",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 599,
+    "name": "pitcher_crop",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 600,
+    "name": "pitcher_plant",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 601,
+    "name": "beetroots",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 602,
+    "name": "dirt_path",
+    "destroyTime": 0.65,
+    "explosionResistance": 0.65
+  },
+  {
+    "id": 603,
+    "name": "end_gateway",
+    "destroyTime": -1.0,
+    "explosionResistance": 3600000.0
+  },
+  {
+    "id": 604,
+    "name": "repeating_command_block",
+    "destroyTime": -1.0,
+    "explosionResistance": 3600000.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 605,
+    "name": "chain_command_block",
+    "destroyTime": -1.0,
+    "explosionResistance": 3600000.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 606,
+    "name": "frosted_ice",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 607,
+    "name": "magma_block",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 608,
+    "name": "nether_wart_block",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 609,
+    "name": "red_nether_bricks",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 610,
+    "name": "bone_block",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 611,
+    "name": "structure_void",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true
+  },
+  {
+    "id": 612,
+    "name": "observer",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 613,
+    "name": "shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 614,
+    "name": "white_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 615,
+    "name": "orange_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 616,
+    "name": "magenta_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 617,
+    "name": "light_blue_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 618,
+    "name": "yellow_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 619,
+    "name": "lime_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 620,
+    "name": "pink_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 621,
+    "name": "gray_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 622,
+    "name": "light_gray_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 623,
+    "name": "cyan_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 624,
+    "name": "purple_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 625,
+    "name": "blue_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 626,
+    "name": "brown_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 627,
+    "name": "green_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 628,
+    "name": "red_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 629,
+    "name": "black_shulker_box",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 630,
+    "name": "white_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 631,
+    "name": "orange_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 632,
+    "name": "magenta_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 633,
+    "name": "light_blue_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 634,
+    "name": "yellow_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 635,
+    "name": "lime_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 636,
+    "name": "pink_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 637,
+    "name": "gray_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 638,
+    "name": "light_gray_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 639,
+    "name": "cyan_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 640,
+    "name": "purple_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 641,
+    "name": "blue_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 642,
+    "name": "brown_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 643,
+    "name": "green_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 644,
+    "name": "red_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 645,
+    "name": "black_glazed_terracotta",
+    "destroyTime": 1.4,
+    "explosionResistance": 1.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 646,
+    "name": "white_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 647,
+    "name": "orange_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 648,
+    "name": "magenta_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 649,
+    "name": "light_blue_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 650,
+    "name": "yellow_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 651,
+    "name": "lime_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 652,
+    "name": "pink_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 653,
+    "name": "gray_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 654,
+    "name": "light_gray_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 655,
+    "name": "cyan_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 656,
+    "name": "purple_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 657,
+    "name": "blue_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 658,
+    "name": "brown_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 659,
+    "name": "green_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 660,
+    "name": "red_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 661,
+    "name": "black_concrete",
+    "destroyTime": 1.8,
+    "explosionResistance": 1.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 662,
+    "name": "white_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 663,
+    "name": "orange_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 664,
+    "name": "magenta_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 665,
+    "name": "light_blue_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 666,
+    "name": "yellow_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 667,
+    "name": "lime_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 668,
+    "name": "pink_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 669,
+    "name": "gray_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 670,
+    "name": "light_gray_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 671,
+    "name": "cyan_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 672,
+    "name": "purple_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 673,
+    "name": "blue_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 674,
+    "name": "brown_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 675,
+    "name": "green_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 676,
+    "name": "red_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 677,
+    "name": "black_concrete_powder",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "fallingBlock": true
+  },
+  {
+    "id": 678,
+    "name": "kelp",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 679,
+    "name": "kelp_plant",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 680,
+    "name": "dried_kelp_block",
+    "destroyTime": 0.5,
+    "explosionResistance": 2.5
+  },
+  {
+    "id": 681,
+    "name": "turtle_egg",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 682,
+    "name": "sniffer_egg",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 683,
+    "name": "dead_tube_coral_block",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 684,
+    "name": "dead_brain_coral_block",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 685,
+    "name": "dead_bubble_coral_block",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 686,
+    "name": "dead_fire_coral_block",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 687,
+    "name": "dead_horn_coral_block",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 688,
+    "name": "tube_coral_block",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 689,
+    "name": "brain_coral_block",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 690,
+    "name": "bubble_coral_block",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 691,
+    "name": "fire_coral_block",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 692,
+    "name": "horn_coral_block",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 693,
+    "name": "dead_tube_coral",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 694,
+    "name": "dead_brain_coral",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 695,
+    "name": "dead_bubble_coral",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 696,
+    "name": "dead_fire_coral",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 697,
+    "name": "dead_horn_coral",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 698,
+    "name": "tube_coral",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 699,
+    "name": "brain_coral",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 700,
+    "name": "bubble_coral",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 701,
+    "name": "fire_coral",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 702,
+    "name": "horn_coral",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 703,
+    "name": "dead_tube_coral_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 704,
+    "name": "dead_brain_coral_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 705,
+    "name": "dead_bubble_coral_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 706,
+    "name": "dead_fire_coral_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 707,
+    "name": "dead_horn_coral_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 708,
+    "name": "tube_coral_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 709,
+    "name": "brain_coral_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 710,
+    "name": "bubble_coral_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 711,
+    "name": "fire_coral_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 712,
+    "name": "horn_coral_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 713,
+    "name": "dead_tube_coral_wall_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 714,
+    "name": "dead_brain_coral_wall_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 715,
+    "name": "dead_bubble_coral_wall_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 716,
+    "name": "dead_fire_coral_wall_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 717,
+    "name": "dead_horn_coral_wall_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "requiresCorrectToolForDrops": true,
+    "fluidSource": true
+  },
+  {
+    "id": 718,
+    "name": "tube_coral_wall_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 719,
+    "name": "brain_coral_wall_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 720,
+    "name": "bubble_coral_wall_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 721,
+    "name": "fire_coral_wall_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 722,
+    "name": "horn_coral_wall_fan",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 723,
+    "name": "sea_pickle",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "fluidSource": true
+  },
+  {
+    "id": 724,
+    "name": "blue_ice",
+    "destroyTime": 2.8,
+    "explosionResistance": 2.8
+  },
+  {
+    "id": 725,
+    "name": "conduit",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0,
+    "fluidSource": true
+  },
+  {
+    "id": 726,
+    "name": "bamboo_sapling",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 727,
+    "name": "bamboo",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 728,
+    "name": "potted_bamboo",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 729,
+    "name": "void_air",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "air": true,
+    "replaceable": true
+  },
+  {
+    "id": 730,
+    "name": "cave_air",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "air": true,
+    "replaceable": true
+  },
+  {
+    "id": 731,
+    "name": "bubble_column",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true,
+    "fluidSource": true
+  },
+  {
+    "id": 732,
+    "name": "polished_granite_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 733,
+    "name": "smooth_red_sandstone_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 734,
+    "name": "mossy_stone_brick_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 735,
+    "name": "polished_diorite_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 736,
+    "name": "mossy_cobblestone_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 737,
+    "name": "end_stone_brick_stairs",
+    "destroyTime": 3.0,
+    "explosionResistance": 9.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 738,
+    "name": "stone_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 739,
+    "name": "smooth_sandstone_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 740,
+    "name": "smooth_quartz_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 741,
+    "name": "granite_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 742,
+    "name": "andesite_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 743,
+    "name": "red_nether_brick_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 744,
+    "name": "polished_andesite_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 745,
+    "name": "diorite_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 746,
+    "name": "polished_granite_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 747,
+    "name": "smooth_red_sandstone_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 748,
+    "name": "mossy_stone_brick_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 749,
+    "name": "polished_diorite_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 750,
+    "name": "mossy_cobblestone_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 751,
+    "name": "end_stone_brick_slab",
+    "destroyTime": 3.0,
+    "explosionResistance": 9.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 752,
+    "name": "smooth_sandstone_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 753,
+    "name": "smooth_quartz_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 754,
+    "name": "granite_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 755,
+    "name": "andesite_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 756,
+    "name": "red_nether_brick_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 757,
+    "name": "polished_andesite_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 758,
+    "name": "diorite_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 759,
+    "name": "brick_wall",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 760,
+    "name": "prismarine_wall",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 761,
+    "name": "red_sandstone_wall",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 762,
+    "name": "mossy_stone_brick_wall",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 763,
+    "name": "granite_wall",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 764,
+    "name": "stone_brick_wall",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 765,
+    "name": "mud_brick_wall",
+    "destroyTime": 1.5,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 766,
+    "name": "nether_brick_wall",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 767,
+    "name": "andesite_wall",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 768,
+    "name": "red_nether_brick_wall",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 769,
+    "name": "sandstone_wall",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 770,
+    "name": "end_stone_brick_wall",
+    "destroyTime": 3.0,
+    "explosionResistance": 9.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 771,
+    "name": "diorite_wall",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 772,
+    "name": "scaffolding",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 773,
+    "name": "loom",
+    "destroyTime": 2.5,
+    "explosionResistance": 2.5
+  },
+  {
+    "id": 774,
+    "name": "barrel",
+    "destroyTime": 2.5,
+    "explosionResistance": 2.5
+  },
+  {
+    "id": 775,
+    "name": "smoker",
+    "destroyTime": 3.5,
+    "explosionResistance": 3.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 776,
+    "name": "blast_furnace",
+    "destroyTime": 3.5,
+    "explosionResistance": 3.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 777,
+    "name": "cartography_table",
+    "destroyTime": 2.5,
+    "explosionResistance": 2.5
+  },
+  {
+    "id": 778,
+    "name": "fletching_table",
+    "destroyTime": 2.5,
+    "explosionResistance": 2.5
+  },
+  {
+    "id": 779,
+    "name": "grindstone",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 780,
+    "name": "lectern",
+    "destroyTime": 2.5,
+    "explosionResistance": 2.5
+  },
+  {
+    "id": 781,
+    "name": "smithing_table",
+    "destroyTime": 2.5,
+    "explosionResistance": 2.5
+  },
+  {
+    "id": 782,
+    "name": "stonecutter",
+    "destroyTime": 3.5,
+    "explosionResistance": 3.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 783,
+    "name": "bell",
+    "destroyTime": 5.0,
+    "explosionResistance": 5.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 784,
+    "name": "lantern",
+    "destroyTime": 3.5,
+    "explosionResistance": 3.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 785,
+    "name": "soul_lantern",
+    "destroyTime": 3.5,
+    "explosionResistance": 3.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 786,
+    "name": "campfire",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 787,
+    "name": "soul_campfire",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 788,
+    "name": "sweet_berry_bush",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 789,
+    "name": "warped_stem",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 790,
+    "name": "stripped_warped_stem",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 791,
+    "name": "warped_hyphae",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 792,
+    "name": "stripped_warped_hyphae",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 793,
+    "name": "warped_nylium",
+    "destroyTime": 0.4,
+    "explosionResistance": 0.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 794,
+    "name": "warped_fungus",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 795,
+    "name": "warped_wart_block",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 796,
+    "name": "warped_roots",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 797,
+    "name": "nether_sprouts",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 798,
+    "name": "crimson_stem",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 799,
+    "name": "stripped_crimson_stem",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 800,
+    "name": "crimson_hyphae",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 801,
+    "name": "stripped_crimson_hyphae",
+    "destroyTime": 2.0,
+    "explosionResistance": 2.0
+  },
+  {
+    "id": 802,
+    "name": "crimson_nylium",
+    "destroyTime": 0.4,
+    "explosionResistance": 0.4,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 803,
+    "name": "crimson_fungus",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 804,
+    "name": "shroomlight",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 805,
+    "name": "weeping_vines",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 806,
+    "name": "weeping_vines_plant",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 807,
+    "name": "twisting_vines",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 808,
+    "name": "twisting_vines_plant",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 809,
+    "name": "crimson_roots",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 810,
+    "name": "crimson_planks",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 811,
+    "name": "warped_planks",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 812,
+    "name": "crimson_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 813,
+    "name": "warped_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 814,
+    "name": "crimson_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 815,
+    "name": "warped_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 816,
+    "name": "crimson_fence",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 817,
+    "name": "warped_fence",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 818,
+    "name": "crimson_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 819,
+    "name": "warped_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 820,
+    "name": "crimson_fence_gate",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 821,
+    "name": "warped_fence_gate",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 822,
+    "name": "crimson_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 823,
+    "name": "warped_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 824,
+    "name": "crimson_button",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 825,
+    "name": "warped_button",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 826,
+    "name": "crimson_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 827,
+    "name": "warped_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 828,
+    "name": "crimson_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 829,
+    "name": "warped_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 830,
+    "name": "crimson_wall_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 831,
+    "name": "warped_wall_sign",
+    "destroyTime": 1.0,
+    "explosionResistance": 1.0
+  },
+  {
+    "id": 832,
+    "name": "structure_block",
+    "destroyTime": -1.0,
+    "explosionResistance": 3600000.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 833,
+    "name": "jigsaw",
+    "destroyTime": -1.0,
+    "explosionResistance": 3600000.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 834,
+    "name": "composter",
+    "destroyTime": 0.6,
+    "explosionResistance": 0.6
+  },
+  {
+    "id": 835,
+    "name": "target",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 836,
+    "name": "bee_nest",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 837,
+    "name": "beehive",
+    "destroyTime": 0.6,
+    "explosionResistance": 0.6
+  },
+  {
+    "id": 838,
+    "name": "honey_block",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 839,
+    "name": "honeycomb_block",
+    "destroyTime": 0.6,
+    "explosionResistance": 0.6
+  },
+  {
+    "id": 840,
+    "name": "netherite_block",
+    "destroyTime": 50.0,
+    "explosionResistance": 1200.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 841,
+    "name": "ancient_debris",
+    "destroyTime": 30.0,
+    "explosionResistance": 1200.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 842,
+    "name": "crying_obsidian",
+    "destroyTime": 50.0,
+    "explosionResistance": 1200.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 843,
+    "name": "respawn_anchor",
+    "destroyTime": 50.0,
+    "explosionResistance": 1200.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 844,
+    "name": "potted_crimson_fungus",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 845,
+    "name": "potted_warped_fungus",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 846,
+    "name": "potted_crimson_roots",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 847,
+    "name": "potted_warped_roots",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 848,
+    "name": "lodestone",
+    "destroyTime": 3.5,
+    "explosionResistance": 3.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 849,
+    "name": "blackstone",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 850,
+    "name": "blackstone_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 851,
+    "name": "blackstone_wall",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 852,
+    "name": "blackstone_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 853,
+    "name": "polished_blackstone",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 854,
+    "name": "polished_blackstone_bricks",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 855,
+    "name": "cracked_polished_blackstone_bricks",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 856,
+    "name": "chiseled_polished_blackstone",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 857,
+    "name": "polished_blackstone_brick_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 858,
+    "name": "polished_blackstone_brick_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 859,
+    "name": "polished_blackstone_brick_wall",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 860,
+    "name": "gilded_blackstone",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 861,
+    "name": "polished_blackstone_stairs",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 862,
+    "name": "polished_blackstone_slab",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 863,
+    "name": "polished_blackstone_pressure_plate",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 864,
+    "name": "polished_blackstone_button",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 865,
+    "name": "polished_blackstone_wall",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 866,
+    "name": "chiseled_nether_bricks",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 867,
+    "name": "cracked_nether_bricks",
+    "destroyTime": 2.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 868,
+    "name": "quartz_bricks",
+    "destroyTime": 0.8,
+    "explosionResistance": 0.8,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 869,
+    "name": "candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 870,
+    "name": "white_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 871,
+    "name": "orange_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 872,
+    "name": "magenta_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 873,
+    "name": "light_blue_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 874,
+    "name": "yellow_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 875,
+    "name": "lime_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 876,
+    "name": "pink_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 877,
+    "name": "gray_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 878,
+    "name": "light_gray_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 879,
+    "name": "cyan_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 880,
+    "name": "purple_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 881,
+    "name": "blue_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 882,
+    "name": "brown_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 883,
+    "name": "green_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 884,
+    "name": "red_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 885,
+    "name": "black_candle",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 886,
+    "name": "candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 887,
+    "name": "white_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 888,
+    "name": "orange_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 889,
+    "name": "magenta_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 890,
+    "name": "light_blue_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 891,
+    "name": "yellow_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 892,
+    "name": "lime_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 893,
+    "name": "pink_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 894,
+    "name": "gray_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 895,
+    "name": "light_gray_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 896,
+    "name": "cyan_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 897,
+    "name": "purple_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 898,
+    "name": "blue_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 899,
+    "name": "brown_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 900,
+    "name": "green_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 901,
+    "name": "red_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 902,
+    "name": "black_candle_cake",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 903,
+    "name": "amethyst_block",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 904,
+    "name": "budding_amethyst",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.5,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 905,
+    "name": "amethyst_cluster",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.5
+  },
+  {
+    "id": 906,
+    "name": "large_amethyst_bud",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.5
+  },
+  {
+    "id": 907,
+    "name": "medium_amethyst_bud",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.5
+  },
+  {
+    "id": 908,
+    "name": "small_amethyst_bud",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.5
+  },
+  {
+    "id": 909,
+    "name": "tuff",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 910,
+    "name": "tuff_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 911,
+    "name": "tuff_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 912,
+    "name": "tuff_wall",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 913,
+    "name": "polished_tuff",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 914,
+    "name": "polished_tuff_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 915,
+    "name": "polished_tuff_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 916,
+    "name": "polished_tuff_wall",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 917,
+    "name": "chiseled_tuff",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 918,
+    "name": "tuff_bricks",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 919,
+    "name": "tuff_brick_slab",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 920,
+    "name": "tuff_brick_stairs",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 921,
+    "name": "tuff_brick_wall",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 922,
+    "name": "chiseled_tuff_bricks",
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 923,
+    "name": "calcite",
+    "destroyTime": 0.75,
+    "explosionResistance": 0.75,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 924,
+    "name": "tinted_glass",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 925,
+    "name": "powder_snow",
+    "destroyTime": 0.25,
+    "explosionResistance": 0.25
+  },
+  {
+    "id": 926,
+    "name": "sculk_sensor",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.5
+  },
+  {
+    "id": 927,
+    "name": "calibrated_sculk_sensor",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.5
+  },
+  {
+    "id": 928,
+    "name": "sculk",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 929,
+    "name": "sculk_vein",
+    "destroyTime": 0.2,
+    "explosionResistance": 0.2
+  },
+  {
+    "id": 930,
+    "name": "sculk_catalyst",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 931,
+    "name": "sculk_shrieker",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0
+  },
+  {
+    "id": 932,
+    "name": "copper_block",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 933,
+    "name": "exposed_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 934,
+    "name": "weathered_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 935,
+    "name": "oxidized_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 936,
+    "name": "copper_ore",
+    "destroyTime": 3.0,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 937,
+    "name": "deepslate_copper_ore",
+    "destroyTime": 4.5,
+    "explosionResistance": 3.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 938,
+    "name": "oxidized_cut_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 939,
+    "name": "weathered_cut_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 940,
+    "name": "exposed_cut_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 941,
+    "name": "cut_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 942,
+    "name": "oxidized_chiseled_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 943,
+    "name": "weathered_chiseled_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 944,
+    "name": "exposed_chiseled_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 945,
+    "name": "chiseled_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 946,
+    "name": "waxed_oxidized_chiseled_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 947,
+    "name": "waxed_weathered_chiseled_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 948,
+    "name": "waxed_exposed_chiseled_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 949,
+    "name": "waxed_chiseled_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 950,
+    "name": "oxidized_cut_copper_stairs",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 951,
+    "name": "weathered_cut_copper_stairs",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 952,
+    "name": "exposed_cut_copper_stairs",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 953,
+    "name": "cut_copper_stairs",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 954,
+    "name": "oxidized_cut_copper_slab",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 955,
+    "name": "weathered_cut_copper_slab",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 956,
+    "name": "exposed_cut_copper_slab",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 957,
+    "name": "cut_copper_slab",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 958,
+    "name": "waxed_copper_block",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 959,
+    "name": "waxed_weathered_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 960,
+    "name": "waxed_exposed_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 961,
+    "name": "waxed_oxidized_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 962,
+    "name": "waxed_oxidized_cut_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 963,
+    "name": "waxed_weathered_cut_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 964,
+    "name": "waxed_exposed_cut_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 965,
+    "name": "waxed_cut_copper",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 966,
+    "name": "waxed_oxidized_cut_copper_stairs",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 967,
+    "name": "waxed_weathered_cut_copper_stairs",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 968,
+    "name": "waxed_exposed_cut_copper_stairs",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 969,
+    "name": "waxed_cut_copper_stairs",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 970,
+    "name": "waxed_oxidized_cut_copper_slab",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 971,
+    "name": "waxed_weathered_cut_copper_slab",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 972,
+    "name": "waxed_exposed_cut_copper_slab",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 973,
+    "name": "waxed_cut_copper_slab",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 974,
+    "name": "copper_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 975,
+    "name": "exposed_copper_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 976,
+    "name": "oxidized_copper_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 977,
+    "name": "weathered_copper_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 978,
+    "name": "waxed_copper_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 979,
+    "name": "waxed_exposed_copper_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 980,
+    "name": "waxed_oxidized_copper_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 981,
+    "name": "waxed_weathered_copper_door",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 982,
+    "name": "copper_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 983,
+    "name": "exposed_copper_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 984,
+    "name": "oxidized_copper_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 985,
+    "name": "weathered_copper_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 986,
+    "name": "waxed_copper_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 987,
+    "name": "waxed_exposed_copper_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 988,
+    "name": "waxed_oxidized_copper_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 989,
+    "name": "waxed_weathered_copper_trapdoor",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 990,
+    "name": "copper_grate",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 991,
+    "name": "exposed_copper_grate",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 992,
+    "name": "weathered_copper_grate",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 993,
+    "name": "oxidized_copper_grate",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 994,
+    "name": "waxed_copper_grate",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 995,
+    "name": "waxed_exposed_copper_grate",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 996,
+    "name": "waxed_weathered_copper_grate",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 997,
+    "name": "waxed_oxidized_copper_grate",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 998,
+    "name": "copper_bulb",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 999,
+    "name": "exposed_copper_bulb",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1000,
+    "name": "weathered_copper_bulb",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1001,
+    "name": "oxidized_copper_bulb",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1002,
+    "name": "waxed_copper_bulb",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1003,
+    "name": "waxed_exposed_copper_bulb",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1004,
+    "name": "waxed_weathered_copper_bulb",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1005,
+    "name": "waxed_oxidized_copper_bulb",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1006,
+    "name": "lightning_rod",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1007,
+    "name": "pointed_dripstone",
+    "destroyTime": 1.5,
+    "explosionResistance": 3.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.125,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 1008,
+    "name": "dripstone_block",
+    "destroyTime": 1.5,
+    "explosionResistance": 1.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1009,
+    "name": "cave_vines",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 1010,
+    "name": "cave_vines_plant",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 1011,
+    "name": "spore_blossom",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 1012,
+    "name": "azalea",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 1013,
+    "name": "flowering_azalea",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 1014,
+    "name": "moss_carpet",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 1015,
+    "name": "pink_petals",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 1016,
+    "name": "moss_block",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 1017,
+    "name": "big_dripleaf",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 1018,
+    "name": "big_dripleaf_stem",
+    "destroyTime": 0.1,
+    "explosionResistance": 0.1
+  },
+  {
+    "id": 1019,
+    "name": "small_dripleaf",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.1,
+      "offsetType": "XYZ"
+    }
+  },
+  {
+    "id": 1020,
+    "name": "hanging_roots",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0,
+    "replaceable": true,
+    "offsetData": {
+      "maxHorizontalOffset": 0.25,
+      "maxVerticalOffset": 0.2,
+      "offsetType": "XZ"
+    }
+  },
+  {
+    "id": 1021,
+    "name": "rooted_dirt",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 1022,
+    "name": "mud",
+    "destroyTime": 0.5,
+    "explosionResistance": 0.5
+  },
+  {
+    "id": 1023,
+    "name": "deepslate",
+    "destroyTime": 3.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1024,
+    "name": "cobbled_deepslate",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1025,
+    "name": "cobbled_deepslate_stairs",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1026,
+    "name": "cobbled_deepslate_slab",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1027,
+    "name": "cobbled_deepslate_wall",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1028,
+    "name": "polished_deepslate",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1029,
+    "name": "polished_deepslate_stairs",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1030,
+    "name": "polished_deepslate_slab",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1031,
+    "name": "polished_deepslate_wall",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1032,
+    "name": "deepslate_tiles",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1033,
+    "name": "deepslate_tile_stairs",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1034,
+    "name": "deepslate_tile_slab",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1035,
+    "name": "deepslate_tile_wall",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1036,
+    "name": "deepslate_bricks",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1037,
+    "name": "deepslate_brick_stairs",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1038,
+    "name": "deepslate_brick_slab",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1039,
+    "name": "deepslate_brick_wall",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1040,
+    "name": "chiseled_deepslate",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1041,
+    "name": "cracked_deepslate_bricks",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1042,
+    "name": "cracked_deepslate_tiles",
+    "destroyTime": 3.5,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1043,
+    "name": "infested_deepslate",
+    "destroyTime": 1.5,
+    "explosionResistance": 0.75
+  },
+  {
+    "id": 1044,
+    "name": "smooth_basalt",
+    "destroyTime": 1.25,
+    "explosionResistance": 4.2,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1045,
+    "name": "raw_iron_block",
+    "destroyTime": 5.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1046,
+    "name": "raw_copper_block",
+    "destroyTime": 5.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1047,
+    "name": "raw_gold_block",
+    "destroyTime": 5.0,
+    "explosionResistance": 6.0,
+    "requiresCorrectToolForDrops": true
+  },
+  {
+    "id": 1048,
+    "name": "potted_azalea_bush",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 1049,
+    "name": "potted_flowering_azalea_bush",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 1050,
+    "name": "ochre_froglight",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 1051,
+    "name": "verdant_froglight",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 1052,
+    "name": "pearlescent_froglight",
+    "destroyTime": 0.3,
+    "explosionResistance": 0.3
+  },
+  {
+    "id": 1053,
+    "name": "frogspawn",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 1054,
+    "name": "reinforced_deepslate",
+    "destroyTime": 55.0,
+    "explosionResistance": 1200.0
+  },
+  {
+    "id": 1055,
+    "name": "decorated_pot",
+    "destroyTime": 0.0,
+    "explosionResistance": 0.0
+  },
+  {
+    "id": 1056,
+    "name": "crafter",
+    "destroyTime": 1.5,
+    "explosionResistance": 3.5
+  },
+  {
+    "id": 1057,
+    "name": "trial_spawner",
+    "destroyTime": 50.0,
+    "explosionResistance": 50.0,
+    "requiresCorrectToolForDrops": true
+  }
+]

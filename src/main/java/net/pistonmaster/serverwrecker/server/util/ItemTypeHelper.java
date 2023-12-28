@@ -39,4 +39,8 @@ public class ItemTypeHelper {
         return type == ItemType.SAND
                 || type == ItemType.GRAVEL;
     }
+
+    public static boolean isGoodEdibleFood(ItemType type) {
+        return type.foodProperties() != null && !type.foodProperties().possiblyHarmful();
+    }
 }

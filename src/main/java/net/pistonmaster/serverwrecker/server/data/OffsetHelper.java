@@ -24,9 +24,17 @@ import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-public record OffsetData(OffsetType type, float maxHorizontalOffset, float maxVerticalOffset) {
-    public Vector3d getOffsetForBlock(Vector3i block) {
-        return switch (type) {
+public class OffsetHelper {
+    public static Vector3d getOffsetForBlock(BlockType blockType, Vector3i block) {
+        var offsetData = blockType.offsetData();
+        if (offsetData == null) {
+            return Vector3d.ZERO;
+        }
+
+        var maxHorizontalOffset = offsetData.maxHorizontalOffset();
+        var maxVerticalOffset = offsetData.maxVerticalOffset();
+
+        return switch (offsetData.offsetType()) {
             case XYZ -> {
                 var seed = MathHelper.getSeed(block.getX(), 0, block.getZ());
                 var yOffset = ((double) ((float) (seed >> 4 & 15L) / 15.0F) - 1.0) * (double) maxVerticalOffset;
@@ -41,10 +49,5 @@ public record OffsetData(OffsetType type, float maxHorizontalOffset, float maxVe
                 yield Vector3d.from(xOffset, 0.0, zOffset);
             }
         };
-    }
-
-    public enum OffsetType {
-        XZ,
-        XYZ
     }
 }

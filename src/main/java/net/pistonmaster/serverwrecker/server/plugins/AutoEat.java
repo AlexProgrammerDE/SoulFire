@@ -32,6 +32,7 @@ import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.MinMaxPropertyLink;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
+import net.pistonmaster.serverwrecker.server.util.ItemTypeHelper;
 import net.pistonmaster.serverwrecker.server.util.TimeUtil;
 
 import java.util.concurrent.TimeUnit;
@@ -65,12 +66,7 @@ public class AutoEat implements InternalExtension {
                 }
 
                 var itemType = slot.item().type();
-                var foodType = FoodType.VALUES.stream()
-                        .filter(type -> type.itemType() == itemType)
-                        .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
-                        .orElse(null);
-
-                if (foodType == null || DangerFood.isDangerFood(foodType)) {
+                if (!ItemTypeHelper.isGoodEdibleFood(itemType)) {
                     continue;
                 }
 
@@ -97,12 +93,7 @@ public class AutoEat implements InternalExtension {
                 }
 
                 var itemType = slot.item().type();
-                var foodType = FoodType.VALUES.stream()
-                        .filter(type -> type.itemType() == itemType)
-                        .max((o1, o2) -> Double.compare(o2.effectiveQuality(), o1.effectiveQuality()))
-                        .orElse(null);
-
-                if (foodType == null || DangerFood.isDangerFood(foodType)) {
+                if (ItemTypeHelper.isGoodEdibleFood(itemType)) {
                     continue;
                 }
 

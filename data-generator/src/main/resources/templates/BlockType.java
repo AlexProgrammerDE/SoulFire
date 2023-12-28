@@ -1,16 +1,24 @@
 package net.pistonmaster.serverwrecker.data;
 
+import lombok.AccessLevel;
+import lombok.With;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record BlockType(int id, String name, float hardness, int stackSize) {
+@With(value = AccessLevel.PRIVATE)
+public record BlockType(int id, String name, float destroyTime, float explosionResistance,
+                        boolean air, boolean fallingBlock, boolean replaceable,
+                        boolean requiresCorrectToolForDrops, boolean fluidSource,
+                        OffsetData offsetData, List<BlockShapeType> blockShapeTypes) {
     public static final List<BlockType> VALUES = new ArrayList<>();
 
     // VALUES REPLACE
 
     public static BlockType register(String name) {
-        var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class);
+        var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class)
+                .withBlockShapeTypes(BlockStateLoader.getBlockShapes(name));
         VALUES.add(blockType);
         return blockType;
     }
@@ -45,5 +53,12 @@ public record BlockType(int id, String name, float hardness, int stackSize) {
     @Override
     public int hashCode() {
         return id;
+    }
+
+    public record OffsetData(float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType) {
+        public enum OffsetType {
+            XZ,
+            XYZ
+        }
     }
 }
