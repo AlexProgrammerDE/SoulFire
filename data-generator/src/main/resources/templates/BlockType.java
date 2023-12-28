@@ -10,7 +10,7 @@ public record BlockType(int id, String name, float hardness, int stackSize) {
     // VALUES REPLACE
 
     public static BlockType register(String name) {
-        var blockTape = GsonDataHelper.fromJson("/templates/blocks.json", name, BlockType.class);
+        var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class);
         VALUES.add(blockType);
         return blockType;
     }
