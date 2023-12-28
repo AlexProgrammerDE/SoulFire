@@ -82,19 +82,20 @@ public class ItemsDataGenerator implements IDataGenerator {
 
         if (item.isEdible()) {
             var foodComponent = Objects.requireNonNull(item.getFoodProperties());
-            itemDesc.addProperty("nutrition", foodComponent.getNutrition());
-            itemDesc.addProperty("saturationModifier", foodComponent.getSaturationModifier());
+            var foodDesc = new JsonObject();
+            foodDesc.addProperty("nutrition", foodComponent.getNutrition());
+            foodDesc.addProperty("saturationModifier", foodComponent.getSaturationModifier());
 
             if (foodComponent.isFastFood()) {
-                itemDesc.addProperty("fastFood", true);
+                foodDesc.addProperty("fastFood", true);
             }
 
             if (foodComponent.isMeat()) {
-                itemDesc.addProperty("isMeat", true);
+                foodDesc.addProperty("isMeat", true);
             }
 
             if (foodComponent.canAlwaysEat()) {
-                itemDesc.addProperty("canAlwaysEat", true);
+                foodDesc.addProperty("canAlwaysEat", true);
             }
 
             if (foodComponent.getEffects().stream()
@@ -102,8 +103,10 @@ public class ItemsDataGenerator implements IDataGenerator {
                     .map(MobEffectInstance::getEffect)
                     .map(MobEffect::getCategory)
                     .anyMatch(c -> c == MobEffectCategory.HARMFUL)) {
-                itemDesc.addProperty("possiblyHarmful", true);
+                foodDesc.addProperty("possiblyHarmful", true);
             }
+
+            itemDesc.add("foodProperties", foodDesc);
         }
 
         return itemDesc;
