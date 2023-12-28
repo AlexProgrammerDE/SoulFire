@@ -42,6 +42,7 @@ gradle-app.setting
 !gradle-wrapper.jar
 
 **/build/
+**/run/
 out/
 
 temp/

@@ -2,13 +2,18 @@ package net.pistonmaster.serverwrecker.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ItemsDataGenerator implements IDataGenerator {
@@ -73,6 +78,32 @@ public class ItemsDataGenerator implements IDataGenerator {
 
             var maxDurability = item.getMaxDamage();
             itemDesc.addProperty("maxDurability", maxDurability);
+        }
+
+        if (item.isEdible()) {
+            var foodComponent = Objects.requireNonNull(item.getFoodProperties());
+            itemDesc.addProperty("nutrition", foodComponent.getNutrition());
+            itemDesc.addProperty("saturationModifier", foodComponent.getSaturationModifier());
+
+            if (foodComponent.isFastFood()) {
+                itemDesc.addProperty("fastFood", true);
+            }
+
+            if (foodComponent.isMeat()) {
+                itemDesc.addProperty("isMeat", true);
+            }
+
+            if (foodComponent.canAlwaysEat()) {
+                itemDesc.addProperty("canAlwaysEat", true);
+            }
+
+            if (foodComponent.getEffects().stream()
+                    .map(Pair::getFirst)
+                    .map(MobEffectInstance::getEffect)
+                    .map(MobEffect::getCategory)
+                    .anyMatch(c -> c == MobEffectCategory.HARMFUL)) {
+                itemDesc.addProperty("possiblyHarmful", true);
+            }
         }
 
         return itemDesc;

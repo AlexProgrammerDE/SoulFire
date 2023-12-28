@@ -21,7 +21,6 @@ public class DataGenerators {
             new EffectsDataGenerator(),
             new EnchantmentsDataGenerator(),
             new EntitiesDataGenerator(),
-            new FoodsDataGenerator(),
             new ItemsDataGenerator(),
             new LanguageDataGenerator(),
             new InstrumentsDataGenerator(),
