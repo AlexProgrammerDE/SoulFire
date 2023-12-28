@@ -17,25 +17,18 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
-package net.pistonmaster.serverwrecker.server.data;
+package net.pistonmaster.serverwrecker.util;
 
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
-/**
- * Food to avoid eating or else you may get hurt!
- */
-public class DangerFood {
-    public static final List<FoodType> VALUES = List.of(
-            FoodType.POISONOUS_POTATO, // Poison
-            FoodType.CHORUS_FRUIT, // Teleports you randomly
-            FoodType.SUSPICIOUS_STEW, // Random effect can give bad stuff like wither and poison
-            FoodType.SPIDER_EYE, // Poison
-            FoodType.ROTTEN_FLESH, // Hunger
-            FoodType.PUFFERFISH, // Poison, Nausea and Hunger
-            FoodType.CHICKEN // Hunger (Raw chicken)
-    );
-
-    public static boolean isDangerFood(FoodType foodType) {
-        return VALUES.contains(foodType);
+public class ResourceHelper {
+    public static String getResource(String path) {
+        try {
+            var inputStream = Objects.requireNonNull(ResourceHelper.class.getResourceAsStream(path));
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate language file", e);
+        }
     }
 }

@@ -10,7 +10,8 @@ public record EntityType(int id, String name, String displayName, String type,
 
     // VALUES REPLACE
 
-    public static EntityType register(EntityType entityType) {
+    public static EntityType register(String name) {
+        var entityType = GsonDataHelper.fromJson("/templates/entities.json", name, EntityType.class);
         VALUES.add(entityType);
         return entityType;
     }

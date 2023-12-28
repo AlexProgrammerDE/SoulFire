@@ -28,8 +28,6 @@ import net.pistonmaster.serverwrecker.server.api.PluginHelper;
 import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.server.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.server.api.event.lifecycle.SettingsRegistryInitEvent;
-import net.pistonmaster.serverwrecker.server.data.DangerFood;
-import net.pistonmaster.serverwrecker.server.data.FoodType;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.MinMaxPropertyLink;

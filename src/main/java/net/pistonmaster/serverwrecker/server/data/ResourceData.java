@@ -68,8 +68,8 @@ public class ResourceData {
 
         // Load block states
         JsonObject blocks;
-        try (var stream = ResourceData.class.getClassLoader().getResourceAsStream("minecraft/blocks.json")) {
-            Objects.requireNonNull(stream, "blocks.json not found");
+        try (var stream = ResourceData.class.getClassLoader().getResourceAsStream("minecraft/block_states.json")) {
+            Objects.requireNonNull(stream, "block_states.json not found");
             blocks = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -94,7 +94,7 @@ public class ResourceData {
 
         JsonObject blockProperties;
         try (var stream = ResourceData.class.getClassLoader().getResourceAsStream("minecraft/blockProperties.json")) {
-            Objects.requireNonNull(stream, "blocks.json not found");
+            Objects.requireNonNull(stream, "block_states.json not found");
             blockProperties = gson.fromJson(new InputStreamReader(stream), JsonObject.class);
         } catch (IOException e) {
             throw new IllegalStateException(e);

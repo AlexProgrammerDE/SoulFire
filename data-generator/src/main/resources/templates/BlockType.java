@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record BlockType(int id, String name, String displayName, float hardness, int stackSize,
-                        boolean diggable, BlockProperties blockProperties, List<BlockShapeType> blockShapeTypes) {
+public record BlockType(int id, String name, float hardness, int stackSize) {
     public static final List<BlockType> VALUES = new ArrayList<>();
 
     // VALUES REPLACE
 
-    public static BlockType register(BlockType blockType) {
+    public static BlockType register(String name) {
+        var blockTape = GsonDataHelper.fromJson("/templates/blocks.json", name, BlockType.class);
         VALUES.add(blockType);
         return blockType;
     }
@@ -33,10 +33,6 @@ public record BlockType(int id, String name, String displayName, float hardness,
         }
 
         return null;
-    }
-
-    public boolean isFluid() {
-        return this == WATER || this == LAVA;
     }
 
     @Override

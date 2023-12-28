@@ -10,7 +10,8 @@ public record ItemType(int id, String name, String displayName, int stackSize, L
 
     // VALUES REPLACE
 
-    public static ItemType register(ItemType itemType) {
+    public static ItemType register(String name) {
+        var itemType = GsonDataHelper.fromJson("/minecraft/items.json", name, ItemType.class);
         VALUES.add(itemType);
         return itemType;
     }
