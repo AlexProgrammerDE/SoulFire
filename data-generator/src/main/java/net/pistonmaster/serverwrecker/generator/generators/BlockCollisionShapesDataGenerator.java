@@ -68,23 +68,23 @@ public class BlockCollisionShapesDataGenerator {
         public final Map<Block, IntList> blockCollisionShapes = new LinkedHashMap<>();
         private int lastCollisionShapeId = 0;
 
-         {
-             BuiltInRegistries.BLOCK.forEach(block -> {
-                 IntList blockCollisionShapes = new IntArrayList();
+        {
+            BuiltInRegistries.BLOCK.forEach(block -> {
+                IntList blockCollisionShapes = new IntArrayList();
 
-                 for (var blockState : block.getStateDefinition().getPossibleStates()) {
-                     var blockShape = blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+                for (var blockState : block.getStateDefinition().getPossibleStates()) {
+                    var blockShape = blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
 
-                     // Revert block offset
-                     var blockShapeCenter = blockState.getOffset(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
-                     var inverseBlockShapeCenter = blockShapeCenter.reverse();
-                     blockShape = blockShape.move(inverseBlockShapeCenter.x, inverseBlockShapeCenter.y, inverseBlockShapeCenter.z);
+                    // Revert block offset
+                    var blockShapeCenter = blockState.getOffset(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+                    var inverseBlockShapeCenter = blockShapeCenter.reverse();
+                    blockShape = blockShape.move(inverseBlockShapeCenter.x, inverseBlockShapeCenter.y, inverseBlockShapeCenter.z);
 
-                     blockCollisionShapes.add(uniqueBlockShapes.computeIfAbsent(blockShape, k -> lastCollisionShapeId++));
-                 }
+                    blockCollisionShapes.add(uniqueBlockShapes.computeIfAbsent(blockShape, k -> lastCollisionShapeId++));
+                }
 
-                 this.blockCollisionShapes.put(block, blockCollisionShapes);
-             });
+                this.blockCollisionShapes.put(block, blockCollisionShapes);
+            });
         }
 
         public String dumpBlockShapeIndices() {

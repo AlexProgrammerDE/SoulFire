@@ -2,11 +2,27 @@ package net.pistonmaster.serverwrecker.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 
 public class EntitiesDataGenerator implements IDataGenerator {
+
+    public static JsonObject generateEntity(EntityType<?> entityType) {
+        var entityDesc = new JsonObject();
+
+        entityDesc.addProperty("id", BuiltInRegistries.ENTITY_TYPE.getId(entityType));
+        entityDesc.addProperty("name", BuiltInRegistries.ENTITY_TYPE.getKey(entityType).getPath());
+
+        var dimensions = entityType.getDimensions();
+        entityDesc.addProperty("width", dimensions.width);
+        entityDesc.addProperty("height", dimensions.height);
+
+        var category = entityType.getCategory();
+        entityDesc.addProperty("category", category.getName());
+        entityDesc.addProperty("friendly", category.isFriendly());
+
+        return entityDesc;
+    }
 
     @Override
     public String getDataName() {
@@ -16,24 +32,7 @@ public class EntitiesDataGenerator implements IDataGenerator {
     @Override
     public JsonArray generateDataJson() {
         var resultArray = new JsonArray();
-        var entityTypeRegistry = BuiltInRegistries.ENTITY_TYPE;
-        entityTypeRegistry.forEach(entity -> resultArray.add(generateEntity(entityTypeRegistry, entity)));
+        BuiltInRegistries.ENTITY_TYPE.forEach(entity -> resultArray.add(generateEntity(entity)));
         return resultArray;
-    }
-
-    public static JsonObject generateEntity(Registry<EntityType<?>> entityRegistry, EntityType<?> entityType) {
-        var entityDesc = new JsonObject();
-        var registryKey = entityRegistry.getResourceKey(entityType).orElseThrow().location();
-        var entityRawId = entityRegistry.getId(entityType);
-
-        entityDesc.addProperty("id", entityRawId);
-        entityDesc.addProperty("name", registryKey.getPath());
-
-        entityDesc.addProperty("width", entityType.getDimensions().width);
-        entityDesc.addProperty("height", entityType.getDimensions().height);
-
-        entityDesc.addProperty("friendly", entityType.getCategory().isFriendly());
-
-        return entityDesc;
     }
 }

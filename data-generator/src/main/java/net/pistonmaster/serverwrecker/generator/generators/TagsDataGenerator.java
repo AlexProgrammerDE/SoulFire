@@ -4,6 +4,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
+import net.pistonmaster.serverwrecker.generator.Main;
 import net.pistonmaster.serverwrecker.generator.util.GeneratorConstants;
 import net.pistonmaster.serverwrecker.generator.util.ResourceHelper;
 
@@ -19,7 +20,7 @@ public class TagsDataGenerator {
                 var tag = (TagKey<?>) field.get(null);
                 resultArray.add(tag.location().getPath());
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                Main.LOGGER.error("Failed to generate tag", e);
             }
         }
         return resultArray;

@@ -2,12 +2,12 @@ package net.pistonmaster.serverwrecker.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 
 import java.util.Locale;
+import java.util.Objects;
 
 public class EnchantmentsDataGenerator implements IDataGenerator {
     public static String getEnchantmentTargetName(EnchantmentCategory target) {
@@ -35,26 +35,11 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
         return resultObject;
     }
 
-    @Override
-    public String getDataName() {
-        return "enchantments.json";
-    }
-
-    @Override
-    public JsonArray generateDataJson() {
-        var resultsArray = new JsonArray();
-        var enchantmentRegistry = BuiltInRegistries.ENCHANTMENT;
-        enchantmentRegistry.stream()
-                .forEach(enchantment -> resultsArray.add(generateEnchantment(enchantmentRegistry, enchantment)));
-        return resultsArray;
-    }
-
-    public static JsonObject generateEnchantment(Registry<Enchantment> registry, Enchantment enchantment) {
+    public static JsonObject generateEnchantment(Enchantment enchantment) {
         var enchantmentDesc = new JsonObject();
-        var registryKey = registry.getResourceKey(enchantment).orElseThrow().location();
 
-        enchantmentDesc.addProperty("id", registry.getId(enchantment));
-        enchantmentDesc.addProperty("name", registryKey.getPath());
+        enchantmentDesc.addProperty("id", BuiltInRegistries.ENCHANTMENT.getId(enchantment));
+        enchantmentDesc.addProperty("name", Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(enchantment)).getPath());
 
         enchantmentDesc.addProperty("maxLevel", enchantment.getMaxLevel());
         enchantmentDesc.add("minCost", generateEnchantmentMinPowerCoefficients(enchantment));
@@ -63,15 +48,14 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
         enchantmentDesc.addProperty("treasureOnly", enchantment.isTreasureOnly());
         enchantmentDesc.addProperty("curse", enchantment.isCurse());
 
-        var incompatibleEnchantments = registry.stream()
+        var incompatibleEnchantments = BuiltInRegistries.ENCHANTMENT.stream()
                 .filter(other -> !enchantment.isCompatibleWith(other))
                 .filter(other -> other != enchantment)
                 .toList();
 
         var excludes = new JsonArray();
         for (var excludedEnchantment : incompatibleEnchantments) {
-            var otherKey = registry.getResourceKey(excludedEnchantment).orElseThrow().location();
-            excludes.add(otherKey.getPath());
+            excludes.add(Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(excludedEnchantment)).getPath());
         }
         enchantmentDesc.add("exclude", excludes);
 
@@ -81,5 +65,18 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
         enchantmentDesc.addProperty("discoverable", enchantment.isDiscoverable());
 
         return enchantmentDesc;
+    }
+
+    @Override
+    public String getDataName() {
+        return "enchantments.json";
+    }
+
+    @Override
+    public JsonArray generateDataJson() {
+        var resultsArray = new JsonArray();
+        BuiltInRegistries.ENCHANTMENT.stream()
+                .forEach(enchantment -> resultsArray.add(generateEnchantment(enchantment)));
+        return resultsArray;
     }
 }

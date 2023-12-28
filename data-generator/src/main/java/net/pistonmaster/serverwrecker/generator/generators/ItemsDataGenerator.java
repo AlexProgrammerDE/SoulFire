@@ -3,7 +3,6 @@ package net.pistonmaster.serverwrecker.generator.generators;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -18,9 +17,9 @@ import java.util.stream.Collectors;
 
 public class ItemsDataGenerator implements IDataGenerator {
 
-    private static List<Item> calculateItemsToRepairWith(Registry<Item> itemRegistry, Item sourceItem) {
+    private static List<Item> calculateItemsToRepairWith(Item sourceItem) {
         var sourceItemStack = sourceItem.getDefaultInstance();
-        return itemRegistry.stream()
+        return BuiltInRegistries.ITEM.stream()
                 .filter(otherItem -> sourceItem.isValidRepairItem(sourceItemStack, otherItem.getDefaultInstance()))
                 .collect(Collectors.toList());
     }
@@ -31,25 +30,11 @@ public class ItemsDataGenerator implements IDataGenerator {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public String getDataName() {
-        return "items.json";
-    }
-
-    @Override
-    public JsonArray generateDataJson() {
-        var resultArray = new JsonArray();
-        var itemRegistry = BuiltInRegistries.ITEM;
-        itemRegistry.forEach(item -> resultArray.add(generateItem(itemRegistry, item)));
-        return resultArray;
-    }
-
-    public static JsonObject generateItem(Registry<Item> itemRegistry, Item item) {
+    public static JsonObject generateItem(Item item) {
         var itemDesc = new JsonObject();
-        var registryKey = itemRegistry.getResourceKey(item).orElseThrow().location();
 
-        itemDesc.addProperty("id", itemRegistry.getId(item));
-        itemDesc.addProperty("name", registryKey.getPath());
+        itemDesc.addProperty("id", BuiltInRegistries.ITEM.getId(item));
+        itemDesc.addProperty("name", BuiltInRegistries.ITEM.getKey(item).getPath());
 
         itemDesc.addProperty("stackSize", item.getMaxStackSize());
 
@@ -65,19 +50,22 @@ public class ItemsDataGenerator implements IDataGenerator {
         }
 
         if (item.canBeDepleted()) {
-            var repairWithItems = calculateItemsToRepairWith(itemRegistry, item);
+            var depletionData = new JsonObject();
+            var repairWithItems = calculateItemsToRepairWith(item);
 
             var fixedWithArray = new JsonArray();
             for (var repairWithItem : repairWithItems) {
-                var repairWithName = itemRegistry.getResourceKey(repairWithItem).orElseThrow().location();
-                fixedWithArray.add(repairWithName.getPath());
+                fixedWithArray.add(BuiltInRegistries.ITEM.getKey(repairWithItem).getPath());
             }
+
             if (!fixedWithArray.isEmpty()) {
-                itemDesc.add("repairWith", fixedWithArray);
+                depletionData.add("repairWith", fixedWithArray);
             }
 
             var maxDurability = item.getMaxDamage();
-            itemDesc.addProperty("maxDurability", maxDurability);
+            depletionData.addProperty("maxDurability", maxDurability);
+
+            itemDesc.add("depletionData", depletionData);
         }
 
         if (item.isEdible()) {
@@ -110,5 +98,17 @@ public class ItemsDataGenerator implements IDataGenerator {
         }
 
         return itemDesc;
+    }
+
+    @Override
+    public String getDataName() {
+        return "items.json";
+    }
+
+    @Override
+    public JsonArray generateDataJson() {
+        var resultArray = new JsonArray();
+        BuiltInRegistries.ITEM.forEach(item -> resultArray.add(generateItem(item)));
+        return resultArray;
     }
 }
