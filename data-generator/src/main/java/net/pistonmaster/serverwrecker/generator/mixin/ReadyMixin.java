@@ -16,13 +16,14 @@ import java.nio.file.Path;
 public class ReadyMixin {
     @Inject(method = "initServer()Z", at = @At("TAIL"))
     private void init(CallbackInfoReturnable<Boolean> cir) {
+        Main.SERVER = (MinecraftServer) (Object) this;
+
         Main.LOGGER.info("Starting data generation!");
         var versionName = DetectedVersion.BUILT_IN.getName();
         var dataDumpDirectory = Path.of(System.getProperty("user.dir")).resolve("minecraft-data").resolve(versionName);
         DataGenerators.runDataGenerators(dataDumpDirectory);
         Main.LOGGER.info("Done data generation!");
 
-        var server = (MinecraftServer) (Object) this;
-        server.halt(false);
+        Main.SERVER.halt(false);
     }
 }
