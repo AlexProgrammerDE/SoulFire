@@ -19,7 +19,7 @@ dependencies {
         officialMojangMappings {
             nameSyntheticMembers = true
         }
-        parchment("org.parchmentmc.data:parchment-1.20.3:2023.12.26-nightly-20231226.120039-1@zip")
+        parchment("org.parchmentmc.data:parchment-1.20.3:2023.12.31@zip")
     })
 
     modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
