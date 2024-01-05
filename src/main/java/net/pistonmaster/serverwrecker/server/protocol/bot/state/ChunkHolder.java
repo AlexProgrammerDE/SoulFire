@@ -17,8 +17,8 @@
  */
 package net.pistonmaster.serverwrecker.server.protocol.bot.state;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.data.ResourceData;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
@@ -33,7 +33,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ChunkHolder {
     private static final BlockStateMeta VOID_AIR_BLOCK_STATE = BlockStateMeta.forDefaultBlockType(BlockType.VOID_AIR);
-    private final Int2ObjectMap<ChunkData> chunks = new Int2ObjectOpenHashMap<>();
+    private final Long2ObjectMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
     private final Lock readLock;
     private final Lock writeLock;
     private final int minBuildHeight;
@@ -56,14 +56,14 @@ public class ChunkHolder {
     }
 
     public ChunkData getChunk(int chunkX, int chunkZ) {
-        return getChunkFromSection(ChunkKey.calculateHash(chunkX, chunkZ));
+        return getChunkFromSection(ChunkKey.calculateKey(chunkX, chunkZ));
     }
 
     public ChunkData getChunk(Vector3i block) {
         return getChunk(SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
     }
 
-    private ChunkData getChunkFromSection(int sectionIndex) {
+    private ChunkData getChunkFromSection(long sectionIndex) {
         readLock.lock();
         try {
             return chunks.get(sectionIndex);
@@ -75,7 +75,7 @@ public class ChunkHolder {
     public boolean isChunkLoaded(int x, int z) {
         readLock.lock();
         try {
-            return chunks.containsKey(ChunkKey.calculateHash(x, z));
+            return chunks.containsKey(ChunkKey.calculateKey(x, z));
         } finally {
             readLock.unlock();
         }
@@ -88,7 +88,7 @@ public class ChunkHolder {
     public void removeChunk(int x, int z) {
         writeLock.lock();
         try {
-            chunks.remove(ChunkKey.calculateHash(x, z));
+            chunks.remove(ChunkKey.calculateKey(x, z));
         } finally {
             writeLock.unlock();
         }
@@ -97,7 +97,7 @@ public class ChunkHolder {
     public ChunkData getOrCreateChunk(int x, int z, LevelState levelState) {
         writeLock.lock();
         try {
-            return chunks.computeIfAbsent(ChunkKey.calculateHash(x, z), (key) ->
+            return chunks.computeIfAbsent(ChunkKey.calculateKey(x, z), (key) ->
                     new ChunkData(levelState));
         } finally {
             writeLock.unlock();

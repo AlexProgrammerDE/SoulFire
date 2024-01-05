@@ -17,17 +17,8 @@
  */
 package net.pistonmaster.serverwrecker.server.protocol.bot.model;
 
-public record ChunkKey(int chunkX, int chunkZ, int calculatedHash) {
-    public ChunkKey(int chunkX, int chunkZ) {
-        this(chunkX, chunkZ, calculateHash(chunkX, chunkZ));
-    }
-
-    public static int calculateHash(int chunkX, int chunkZ) {
-        return (chunkX << 16) | (chunkZ & 0xFFFF);
-    }
-
-    @Override
-    public int hashCode() {
-        return calculatedHash;
+public record ChunkKey(int chunkX, int chunkZ) {
+    public static long calculateKey(int chunkX, int chunkZ) {
+        return (long) chunkX & 0xffffffffL | ((long) chunkZ & 0xffffffffL) << 32;
     }
 }
