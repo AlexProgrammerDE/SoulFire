@@ -32,7 +32,7 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
 import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
 import net.pistonmaster.serverwrecker.server.util.ObjectReference;
 
-import java.util.Queue;
+import java.util.function.Consumer;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {
@@ -228,11 +228,11 @@ public record MinecraftGraph(TagsState tagsState) {
         return movement;
     }
 
-    public void insertActions(BotEntityState node, Queue<GraphInstructions> instructions) {
+    public void insertActions(BotEntityState node, Consumer<GraphInstructions> callback) {
         var actions = new GraphAction[ACTIONS_TEMPLATE.length];
 
         fillTemplateActions(node, actions);
-        calculateActions(node, actions, instructions);
+        calculateActions(node, actions, callback);
     }
 
     private void fillTemplateActions(BotEntityState node, GraphAction[] actions) {
@@ -241,50 +241,54 @@ public record MinecraftGraph(TagsState tagsState) {
         }
     }
 
-    private void calculateActions(BotEntityState node, GraphAction[] actions, Queue<GraphInstructions> instructions) {
+    private void calculateActions(BotEntityState node, GraphAction[] actions, Consumer<GraphInstructions> callback) {
         for (var i = 0; i < SUBSCRIPTION_KEYS.length; i++) {
-            var key = SUBSCRIPTION_KEYS[i];
-            var value = SUBSCRIPTION_VALUES[i];
+             processSubscription(node, actions, callback, i);
+        }
+    }
 
-            BlockStateMeta blockState = null;
-            SWVec3i absolutePositionBlock = null;
+    private void processSubscription(BotEntityState node, GraphAction[] actions, Consumer<GraphInstructions> callback, int i) {
+        var key = SUBSCRIPTION_KEYS[i];
+        var value = SUBSCRIPTION_VALUES[i];
 
-            // We cache only this, but not solid because solid will only occur a single time
-            var isFreeReference = new ObjectReference<>(TriState.NOT_SET);
-            for (var subscriber : value) {
-                var action = actions[subscriber.actionIndex];
-                if (action == null) {
-                    continue;
+        BlockStateMeta blockState = null;
+        SWVec3i absolutePositionBlock = null;
+
+        // We cache only this, but not solid because solid will only occur a single time
+        var isFreeReference = new ObjectReference<>(TriState.NOT_SET);
+        for (var subscriber : value) {
+            var action = actions[subscriber.actionIndex];
+            if (action == null) {
+                continue;
+            }
+
+            if (blockState == null) {
+                // Lazy calculation to avoid unnecessary calls
+                absolutePositionBlock = node.positionBlock().add(key);
+                blockState = node.levelState()
+                        .getBlockStateAt(absolutePositionBlock);
+
+                if (blockState.blockType() == BlockType.VOID_AIR) {
+                    throw new OutOfLevelException();
                 }
+            }
 
-                if (blockState == null) {
-                    // Lazy calculation to avoid unnecessary calls
-                    absolutePositionBlock = node.positionBlock().add(key);
-                    blockState = node.levelState()
-                            .getBlockStateAt(absolutePositionBlock);
-
-                    if (blockState.blockType() == BlockType.VOID_AIR) {
-                        throw new OutOfLevelException();
+            switch (processSubscriptionAction(key, subscriber, action, isFreeReference, blockState, absolutePositionBlock, node)) {
+                case CONTINUE -> {
+                    if (!action.decrementAndIsDone() || action.impossibleToComplete()) {
+                        continue;
                     }
-                }
 
-                switch (processSubscription(key, subscriber, action, isFreeReference, blockState, absolutePositionBlock, node)) {
-                    case CONTINUE -> {
-                        if (!action.decrementAndIsDone() || action.impossibleToComplete()) {
-                            continue;
-                        }
-
-                        instructions.add(action.getInstructions(node));
-                    }
-                    case IMPOSSIBLE -> actions[subscriber.actionIndex] = null;
+                    callback.accept(action.getInstructions(node));
                 }
+                case IMPOSSIBLE -> actions[subscriber.actionIndex] = null;
             }
         }
     }
 
-    private SubscriptionSingleResult processSubscription(SWVec3i key, BlockSubscription subscriber, GraphAction action, ObjectReference<TriState> isFreeReference,
-                                                         BlockStateMeta blockState, SWVec3i absolutePositionBlock,
-                                                         BotEntityState node) {
+    private SubscriptionSingleResult processSubscriptionAction(SWVec3i key, BlockSubscription subscriber, GraphAction action, ObjectReference<TriState> isFreeReference,
+                                                               BlockStateMeta blockState, SWVec3i absolutePositionBlock,
+                                                               BotEntityState node) {
         return switch (action) {
             case PlayerMovement playerMovement -> switch (subscriber.type) {
                 case MOVEMENT_FREE -> {
@@ -407,7 +411,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + subscriber.type);
             };
-            case ParkourMovement parkourMovement -> switch (subscriber.type) {
+            case ParkourMovement ignored -> switch (subscriber.type) {
                 case MOVEMENT_FREE -> {
                     if (isFreeReference.value == TriState.NOT_SET) {
                         // We can walk through blocks like air or grass
