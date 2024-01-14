@@ -49,6 +49,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.*;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.*;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
@@ -211,44 +212,29 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onPosition(ClientboundPlayerPositionPacket packet) {
-        var isInitial = !joinedWorld;
-
-        var currentX = isInitial ? 0 : clientEntity.x();
-        var currentY = isInitial ? 0 : clientEntity.y();
-        var currentZ = isInitial ? 0 : clientEntity.z();
-        var currentYaw = isInitial ? 0 : clientEntity.yaw();
-        var currentPitch = isInitial ? 0 : clientEntity.pitch();
-
-        var xRelative = packet.getRelative().contains(PositionElement.X);
-        var yRelative = packet.getRelative().contains(PositionElement.Y);
-        var zRelative = packet.getRelative().contains(PositionElement.Z);
-        var yawRelative = packet.getRelative().contains(PositionElement.YAW);
-        var pitchRelative = packet.getRelative().contains(PositionElement.PITCH);
-
-        var x = xRelative ? currentX + packet.getX() : packet.getX();
-        var y = yRelative ? currentY + packet.getY() : packet.getY();
-        var z = zRelative ? currentZ + packet.getZ() : packet.getZ();
-        var yaw = yawRelative ? currentYaw + packet.getYaw() : packet.getYaw();
-        var pitch = pitchRelative ? currentPitch + packet.getPitch() : packet.getPitch();
+        var relative = packet.getRelative();
+        var x = relative.contains(PositionElement.X) ? clientEntity.x() + packet.getX() : packet.getX();
+        var y = relative.contains(PositionElement.Y) ? clientEntity.y() + packet.getY() : packet.getY();
+        var z = relative.contains(PositionElement.Z) ? clientEntity.z() + packet.getZ() : packet.getZ();
+        var yaw = relative.contains(PositionElement.YAW) ? clientEntity.yaw() + packet.getYaw() : packet.getYaw();
+        var pitch = relative.contains(PositionElement.PITCH) ? clientEntity.pitch() + packet.getPitch() : packet.getPitch();
 
         clientEntity.setPosition(x, y, z);
         clientEntity.setRotation(yaw, pitch);
 
-        if (isInitial) {
+        var position = clientEntity.blockPos();
+        if (!joinedWorld) {
             joinedWorld = true;
 
-            var position = clientEntity.blockPos();
             log.info("Joined server at position: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
 
             connection.eventBus().call(new BotJoinedEvent(connection));
+        } else {
+            log.debug("Position updated: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
         }
 
         session.send(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
-        if (isInitial) {
-            clientEntity.sendOnGround();
-        }
-
-        log.debug("Position updated: {}", clientEntity.botMovementManager());
+        session.send(new ServerboundMovePlayerPosRotPacket(false, x, y, z, yaw, pitch));
     }
 
     @EventHandler

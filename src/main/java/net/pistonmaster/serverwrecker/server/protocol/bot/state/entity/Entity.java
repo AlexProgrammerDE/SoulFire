@@ -25,6 +25,7 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.movement.AABB;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributeState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityEffectState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityMetadataState;
+import net.pistonmaster.serverwrecker.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.slf4j.Logger;
@@ -87,26 +88,20 @@ public abstract class Entity {
     /**
      * Updates the rotation to look at a given block or location.
      *
-     * @param origin The rotation origin, either EYES or FEET.
-     * @param block  The block or location to look at.
+     * @param origin   The rotation origin, either EYES or FEET.
+     * @param position The block or location to look at.
      */
-    public void lookAt(RotationOrigin origin, Vector3d block) {
+    public void lookAt(RotationOrigin origin, Vector3d position) {
         var eyes = origin == RotationOrigin.EYES;
 
-        var dx = block.getX() - x;
-        var dy = block.getY() - (eyes ? y + getEyeHeight() : y);
-        var dz = block.getZ() - z;
+        var dx = position.getX() - x;
+        var dy = position.getY() - (eyes ? y + getEyeHeight() : y);
+        var dz = position.getZ() - z;
 
-        var r = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        var yaw = -Math.atan2(dx, dz) / Math.PI * 180;
-        if (yaw < 0) {
-            yaw = 360 + yaw;
-        }
+        var sqr = Math.sqrt(dx * dx + dz * dz);
 
-        var pitch = -Math.asin(dy / r) / Math.PI * 180;
-
-        this.yaw = (float) yaw;
-        this.pitch = (float) pitch;
+        this.pitch = MathHelper.wrapDegrees((float) (-(Math.atan2(dy, sqr) * 180.0F / (float) Math.PI)));
+        this.yaw  = MathHelper.wrapDegrees((float) (Math.atan2(dz, dx) * 180.0F / (float) Math.PI) - 90.0F);
     }
 
     public double getEyeHeight() {

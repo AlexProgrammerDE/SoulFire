@@ -243,7 +243,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
     private void calculateActions(BotEntityState node, GraphAction[] actions, Consumer<GraphInstructions> callback) {
         for (var i = 0; i < SUBSCRIPTION_KEYS.length; i++) {
-             processSubscription(node, actions, callback, i);
+            processSubscription(node, actions, callback, i);
         }
     }
 
@@ -273,15 +273,17 @@ public record MinecraftGraph(TagsState tagsState) {
                 }
             }
 
-            switch (processSubscriptionAction(key, subscriber, action, isFreeReference, blockState, absolutePositionBlock, node)) {
-                case CONTINUE -> {
-                    if (!action.decrementAndIsDone() || action.impossibleToComplete()) {
-                        continue;
-                    }
+            synchronized (action.actionLock) {
+                switch (processSubscriptionAction(key, subscriber, action, isFreeReference, blockState, absolutePositionBlock, node)) {
+                    case CONTINUE -> {
+                        if (!action.decrementAndIsDone() || action.impossibleToComplete()) {
+                            continue;
+                        }
 
-                    callback.accept(action.getInstructions(node));
+                        callback.accept(action.getInstructions(node));
+                    }
+                    case IMPOSSIBLE -> actions[subscriber.actionIndex] = null;
                 }
-                case IMPOSSIBLE -> actions[subscriber.actionIndex] = null;
             }
         }
     }

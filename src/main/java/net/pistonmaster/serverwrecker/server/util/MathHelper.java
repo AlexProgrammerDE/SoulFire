@@ -49,4 +49,17 @@ public class MathHelper {
         l = l * l * 42317861L + l * 11L;
         return l >> 16;
     }
+
+    public static float wrapDegrees(float value) {
+        var mod = value % 360.0F;
+        if (mod >= 180.0F) {
+            mod -= 360.0F;
+        }
+
+        if (mod < -180.0F) {
+            mod += 360.0F;
+        }
+
+        return mod;
+    }
 }

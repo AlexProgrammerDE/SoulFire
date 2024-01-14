@@ -167,7 +167,7 @@ public class ServerCommandManager {
                                                 var sessionDataManager = bot.sessionDataManager();
                                                 var clientEntity = sessionDataManager.clientEntity();
 
-                                                clientEntity.lookAt(RotationOrigin.FEET, Vector3d.from(x, y, z));
+                                                clientEntity.lookAt(RotationOrigin.EYES, Vector3d.from(x, y, z));
                                                 return Command.SINGLE_SUCCESS;
                                             });
                                         }))))));
