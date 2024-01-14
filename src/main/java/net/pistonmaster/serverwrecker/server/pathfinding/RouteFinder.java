@@ -33,10 +33,12 @@ import net.pistonmaster.serverwrecker.server.pathfinding.graph.OutOfLevelExcepti
 import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 @Slf4j
-public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
+public record RouteFinder(MinecraftGraph graph, GoalScorer scorer, ExecutorService executor) {
     private static List<WorldAction> getActionTrace(MinecraftRouteNode current) {
         var actions = new ObjectArrayList<WorldAction>();
         var previousElement = current;
@@ -79,6 +81,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             openSet.enqueue(start);
         }
 
+        var instructionQueue = new LinkedList<GraphInstructions>();
         while (!openSet.isEmpty()) {
             var current = openSet.dequeue();
             log.debug("Looking at node: {}", current.entityState().position());
@@ -91,9 +94,8 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 return getActionTrace(current);
             }
 
-            GraphInstructions[] instructionsList;
             try {
-                instructionsList = graph.getActions(current.entityState());
+                graph.insertActions(current.entityState(), instructionQueue);
             } catch (OutOfLevelException e) {
                 log.debug("Found a node out of the level: {}", current.entityState().positionBlock());
                 stopwatch.stop();
@@ -119,16 +121,12 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 return recalculateTrace;
             }
 
-            for (var instructions : instructionsList) {
-                if (instructions == null) {
-                    break;
-                }
-
+            GraphInstructions instructions;
+            while ((instructions = instructionQueue.poll()) != null) {
+                var actionCost = instructions.actionCost();
+                var worldActions = instructions.actions();
                 var actionTargetState = instructions.targetState();
                 routeIndex.compute(actionTargetState.positionBlock(), (k, v) -> {
-                    var actionCost = instructions.actionCost();
-                    var worldActions = instructions.actions();
-
                     // Calculate new distance from start to this connection,
                     // Get distance from the current element
                     // and add the distance from the current element to the next element

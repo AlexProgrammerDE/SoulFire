@@ -60,6 +60,18 @@ public class ExecutorManager {
         return executor;
     }
 
+    public ExecutorService newCachedExecutorService(BotConnection botConnection, String threadName) {
+        if (shutdown) {
+            throw new IllegalStateException("Cannot create new executor after shutdown!");
+        }
+
+        var executor = Executors.newCachedThreadPool(getThreadFactory(botConnection, threadName));
+
+        executors.add(executor);
+
+        return executor;
+    }
+
     private ThreadFactory getThreadFactory(BotConnection botConnection, String threadName) {
         return runnable -> {
             var thread = new Thread(() -> {

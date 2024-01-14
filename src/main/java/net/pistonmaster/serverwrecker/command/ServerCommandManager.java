@@ -327,11 +327,15 @@ public class ServerCommandManager {
     private int executePathfinding(GoalScorer goalScorer) {
         return forEveryBot(bot -> {
             var logger = bot.logger();
-            var executorService = bot.executorManager().newExecutorService(bot, "Pathfinding");
+            var executorService = bot.executorManager().newExecutorService(bot, "PathfindingManager");
             executorService.execute(() -> {
                 var sessionDataManager = bot.sessionDataManager();
                 var clientEntity = sessionDataManager.clientEntity();
-                var routeFinder = new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState()), goalScorer);
+                var routeFinder = new RouteFinder(
+                        new MinecraftGraph(sessionDataManager.tagsState()),
+                        goalScorer,
+                        bot.executorManager().newCachedExecutorService(bot, "PathfindingCalculator")
+                );
 
                 Boolean2ObjectFunction<List<WorldAction>> findPath = requiresRepositioning -> {
                     var start = BotEntityState.initialState(

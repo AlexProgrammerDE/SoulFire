@@ -23,14 +23,26 @@ import net.pistonmaster.serverwrecker.server.pathfinding.graph.GraphInstructions
 /**
  * A calculated action that the bot can take on a graph world representation.
  */
-public sealed interface GraphAction permits PlayerMovement, ParkourMovement, UpMovement, DownMovement {
-    boolean impossible();
+public sealed abstract class GraphAction permits PlayerMovement, ParkourMovement, UpMovement, DownMovement {
+    private int subscriptionCounter;
+
+    public void subscribe() {
+        // Shall only be called in the precautions of the graph action
+        subscriptionCounter++;
+    }
+
+    public boolean decrementAndIsDone() {
+        // Check if this action has all subscriptions fulfilled
+        return --subscriptionCounter == 0;
+    }
 
     // A step further than isImpossible, for block placing this also considers no block
     // to place against found.
-    boolean impossibleToComplete();
+    public boolean impossibleToComplete() {
+        return false;
+    }
 
-    GraphInstructions getInstructions(BotEntityState previousEntityState);
+    public abstract GraphInstructions getInstructions(BotEntityState previousEntityState);
 
-    GraphAction copy(BotEntityState previousEntityState);
+    public abstract GraphAction copy(BotEntityState previousEntityState);
 }

@@ -18,8 +18,6 @@
 package net.pistonmaster.serverwrecker.server.pathfinding.graph.actions;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import lombok.Getter;
-import lombok.Setter;
 import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.server.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
@@ -30,13 +28,10 @@ import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 import java.util.List;
 
-public final class ParkourMovement implements GraphAction, Cloneable {
+public final class ParkourMovement extends GraphAction implements Cloneable {
     private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
     private final ParkourDirection direction;
     private final SWVec3i targetFeetBlock;
-    @Setter
-    @Getter
-    private boolean impossible = false;
 
     public ParkourMovement(ParkourDirection direction) {
         this.direction = direction;
@@ -77,11 +72,6 @@ public final class ParkourMovement implements GraphAction, Cloneable {
     public SWVec3i requiredSolidBlock() {
         // Floor block
         return targetFeetBlock.sub(0, 1, 0);
-    }
-
-    @Override
-    public boolean impossibleToComplete() {
-        return impossible;
     }
 
     @Override

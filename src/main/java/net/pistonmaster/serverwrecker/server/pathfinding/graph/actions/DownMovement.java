@@ -30,15 +30,12 @@ import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 import java.util.List;
 
-public final class DownMovement implements GraphAction, Cloneable {
+public final class DownMovement extends GraphAction implements Cloneable {
     private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
     private final SWVec3i targetToMineBlock;
     @Getter
     @Setter
     private MovementMiningCost blockBreakCosts;
-    @Setter
-    @Getter
-    private boolean impossible = false;
     @Getter
     @Setter
     private int closestBlockToFallOn = Integer.MIN_VALUE;
@@ -68,7 +65,7 @@ public final class DownMovement implements GraphAction, Cloneable {
 
     @Override
     public boolean impossibleToComplete() {
-        return impossible || closestBlockToFallOn == Integer.MIN_VALUE;
+        return closestBlockToFallOn == Integer.MIN_VALUE;
     }
 
     @Override

@@ -20,7 +20,6 @@ package net.pistonmaster.serverwrecker.server.pathfinding.graph.actions;
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.server.pathfinding.Costs;
@@ -38,7 +37,7 @@ import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 import java.util.List;
 
 @Slf4j
-public final class UpMovement implements GraphAction, Cloneable {
+public final class UpMovement extends GraphAction implements Cloneable {
     private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
     private final SWVec3i targetFeetBlock;
     @Getter
@@ -47,9 +46,6 @@ public final class UpMovement implements GraphAction, Cloneable {
     private boolean[] unsafeToBreak;
     @Getter
     private boolean[] noNeedToBreak;
-    @Setter
-    @Getter
-    private boolean impossible = false;
 
     public UpMovement() {
         this.targetFeetBlock = FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0);
@@ -90,11 +86,6 @@ public final class UpMovement implements GraphAction, Cloneable {
         };
 
         return results;
-    }
-
-    @Override
-    public boolean impossibleToComplete() {
-        return impossible;
     }
 
     @Override
@@ -141,9 +132,12 @@ public final class UpMovement implements GraphAction, Cloneable {
 
     @Override
     public UpMovement copy(BotEntityState previousEntityState) {
-        var upMovement = this.clone();
-        upMovement.impossible = !previousEntityState.inventory().hasBlockToPlace();
-        return upMovement;
+        // Skip calculations since we have no blocks to place
+        if (!previousEntityState.inventory().hasBlockToPlace()) {
+            return null;
+        }
+
+        return this.clone();
     }
 
     @Override

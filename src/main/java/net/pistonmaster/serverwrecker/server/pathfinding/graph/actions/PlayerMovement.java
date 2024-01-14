@@ -37,7 +37,7 @@ import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 import java.util.List;
 
 @Slf4j
-public final class PlayerMovement implements GraphAction, Cloneable {
+public final class PlayerMovement extends GraphAction implements Cloneable {
     private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
     private final MovementDirection direction;
     private final MovementSide side;
@@ -59,9 +59,6 @@ public final class PlayerMovement implements GraphAction, Cloneable {
     private double cost;
     @Getter
     private boolean appliedCornerCost = false;
-    @Setter
-    @Getter
-    private boolean impossible = false;
     @Setter
     private boolean requiresAgainstBlock = false;
 
@@ -315,7 +312,7 @@ public final class PlayerMovement implements GraphAction, Cloneable {
 
     @Override
     public boolean impossibleToComplete() {
-        return impossible || (requiresAgainstBlock && blockPlaceData == null);
+        return requiresAgainstBlock && blockPlaceData == null;
     }
 
     @Override
