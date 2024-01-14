@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
+import net.pistonmaster.serverwrecker.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 
 @ToString
@@ -29,6 +30,7 @@ import org.cloudburstmc.math.vector.Vector3d;
 public final class GapJumpAction implements WorldAction {
     private final Vector3d position;
     private boolean didLook = false;
+    private boolean lockYaw = false;
     private int noJumpTicks = 0;
 
     @Override
@@ -66,13 +68,14 @@ public final class GapJumpAction implements WorldAction {
         clientEntity.pitch(0);
         var newYaw = clientEntity.yaw();
 
-        var yawDifference = Math.abs(previousYaw - newYaw);
+        var yawDifference = Math.abs(MathHelper.wrapDegrees(newYaw - previousYaw));
 
         // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
-        if (didLook && yawDifference > 5) {
-            clientEntity.lastYaw(newYaw);
-        } else {
+        if (!didLook) {
             didLook = true;
+        } else if (yawDifference > 5 || lockYaw) {
+            lockYaw = true;
+            clientEntity.lastYaw(newYaw);
         }
 
         clientEntity.controlState().forward(true);
