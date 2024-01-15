@@ -80,6 +80,8 @@ public class GUIManager {
         // Inject and open the GUI
         var guiFrame = new GUIFrame();
 
+        injector.register(GUIFrame.class, guiFrame);
+
         guiFrame.initComponents(injector);
 
         log.info("Opening GUI!");

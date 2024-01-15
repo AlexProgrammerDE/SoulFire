@@ -23,14 +23,25 @@ import net.pistonmaster.serverwrecker.client.gui.libs.SwingTextUtils;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-public class AboutPopup extends JPopupMenu {
-    public AboutPopup() {
-        add(SwingTextUtils.createHtmlPane("<b>ServerWrecker</b>"));
-        add(SwingTextUtils.createHtmlPane("Version: <b><code>" + BuildData.VERSION + "</code></b>"));
-        add(SwingTextUtils.createHtmlPane("Author: <b><a href='https://github.com/AlexProgrammerDE'>AlexProgrammerDE</a></b>"));
-        add(SwingTextUtils.createHtmlPane("GitHub: <b><a href='https://github.com/AlexProgrammerDE/ServerWrecker'>github.com/AlexProgrammerDE/ServerWrecker</a></b>"));
-        add(SwingTextUtils.createHtmlPane("Commit: <b><code>" + BuildData.COMMIT + "</code></b> " +
+public class AboutPopup extends JDialog {
+    public AboutPopup(JFrame parent) {
+        super(parent, "About ServerWrecker", true);
+
+        var content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+
+        content.add(SwingTextUtils.createHtmlPane("<b>ServerWrecker</b>"));
+        content.add(SwingTextUtils.createHtmlPane("Version: <b><code>" + BuildData.VERSION + "</code></b>"));
+        content.add(SwingTextUtils.createHtmlPane("Author: <b><a href='https://github.com/AlexProgrammerDE'>AlexProgrammerDE</a></b>"));
+        content.add(SwingTextUtils.createHtmlPane("GitHub: <b><a href='https://github.com/AlexProgrammerDE/ServerWrecker'>github.com/AlexProgrammerDE/ServerWrecker</a></b>"));
+        content.add(SwingTextUtils.createHtmlPane("Commit: <b><code>" + BuildData.COMMIT.substring(0, 7) + "</code></b> " +
                 "(<b><a href='https://github.com/AlexProgrammerDE/ServerWrecker/commit/" + BuildData.COMMIT + "'>Click to show</a></b>)"));
-        setBorder(new EmptyBorder(10, 10, 10, 10));
+        content.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        add(content);
+
+        pack();
+        setLocationRelativeTo(parent);
+        setVisible(true);
     }
 }

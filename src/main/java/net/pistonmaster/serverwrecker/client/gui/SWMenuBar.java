@@ -67,8 +67,12 @@ public class SWMenuBar extends JMenuBar {
         THEMES = List.copyOf(tempThemes);
     }
 
+    private final GUIFrame guiFrame;
+
     @Inject
-    public SWMenuBar(GUIManager guiManager) {
+    public SWMenuBar(GUIManager guiManager, GUIFrame guiFrame) {
+        this.guiFrame = guiFrame;
+
         var fileMenu = new JMenu("File");
         var loadProfile = new JMenuItem("Load Profile");
         loadProfile.addActionListener(e -> JFXFileHelper.showOpenDialog(SWPathConstants.PROFILES_FOLDER, Map.of(
@@ -136,9 +140,12 @@ public class SWMenuBar extends JMenuBar {
         add(viewMenu);
 
         var helpMenu = new JMenu("Help");
-        var openHome = new JMenuItem("Open home");
+        var openHome = new JMenuItem("Show home");
         openHome.addActionListener(e -> openHome());
         helpMenu.add(openHome);
+
+        helpMenu.addSeparator();
+
         var about = new JMenuItem("About");
         about.addActionListener(e -> showAboutDialog());
         helpMenu.add(about);
@@ -164,8 +171,7 @@ public class SWMenuBar extends JMenuBar {
     }
 
     private void showAboutDialog() {
-        JPopupMenu popupMenu = new AboutPopup();
-        popupMenu.show(this, 0, 0);
+        new AboutPopup(guiFrame);
     }
 
     private void openHome() {
