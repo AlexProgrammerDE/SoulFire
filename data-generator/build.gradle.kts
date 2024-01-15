@@ -1,10 +1,7 @@
 plugins {
-    id("fabric-loom") version "1.5.5"
-    java
+    id("sw.java-conventions")
+    alias(libs.plugins.loom)
 }
-
-group = "net.pistonmaster"
-version = "1.0.0"
 
 repositories {
     maven("https://maven.parchmentmc.org") {
@@ -33,11 +30,4 @@ tasks {
             expand(mutableMapOf("version" to project.version))
         }
     }
-}
-
-java {
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
-    withSourcesJar()
 }
