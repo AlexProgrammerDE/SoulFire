@@ -24,15 +24,14 @@ public class TickTimer {
     private static final long NS_PER_SECOND = 1000000000L;
     private static final long MAX_NS_PER_UPDATE = 1000000000L;
     private static final int MAX_TICKS_PER_UPDATE = 100;
-
-    /**
-     * Amount of ticks per second
-     */
-    private final float ticksPerSecond;
     /**
      * Scale the tick speed
      */
     public final float timeScale = 1.0F;
+    /**
+     * Amount of ticks per second
+     */
+    private final float ticksPerSecond;
     /**
      * Framerate of the advanceTime update
      */

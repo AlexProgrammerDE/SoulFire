@@ -22,6 +22,7 @@ import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.reflect.Agents;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
+import net.pistonmaster.serverwrecker.client.gui.GUIManager;
 import net.pistonmaster.serverwrecker.server.api.MixinExtension;
 import net.pistonmaster.serverwrecker.server.settings.DevSettings;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;
@@ -126,8 +127,8 @@ public class ServerWreckerBootstrap {
             ServerWreckerLoader.runHeadless(host, port, args);
         } else {
             LOGGER.info("Starting GUI and server on {}:{}", host, port);
-            ServerWreckerLoader.injectTheme();
-            ServerWreckerLoader.loadGUIProperties();
+            GUIManager.injectTheme();
+            GUIManager.loadGUIProperties();
 
             ServerWreckerLoader.runGUI(host, port);
         }

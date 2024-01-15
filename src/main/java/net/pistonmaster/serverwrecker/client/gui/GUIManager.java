@@ -42,6 +42,7 @@ import java.util.concurrent.Executors;
 
 @Getter
 public class GUIManager {
+    public static final Queue<Runnable> MAIN_THREAD_QUEUE = new ConcurrentLinkedQueue<>();
     private final RPCClient rpcClient;
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
@@ -50,11 +51,19 @@ public class GUIManager {
     private final Logger logger = LoggerFactory.getLogger(GUIManager.class);
     private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
     private final SettingsManager settingsManager = new SettingsManager();
-    public static final Queue<Runnable> MAIN_THREAD_QUEUE = new ConcurrentLinkedQueue<>();
 
     public GUIManager(RPCClient rpcClient) {
         this.rpcClient = rpcClient;
         injector.register(GUIManager.class, this);
+    }
+
+    public static void injectTheme() {
+        ThemeUtil.initFlatLaf();
+        ThemeUtil.setLookAndFeel();
+    }
+
+    public static void loadGUIProperties() {
+        GUIClientProps.loadSettings();
     }
 
     public void initGUI() {

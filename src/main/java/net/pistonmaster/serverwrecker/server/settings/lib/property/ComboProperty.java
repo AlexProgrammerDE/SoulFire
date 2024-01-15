@@ -30,6 +30,16 @@ public record ComboProperty(
         ComboOption[] options,
         int defaultValue
 ) implements SingleProperty {
+    public static <T extends Enum<T>> String capitalizeEnum(T enumValue) {
+        return String.join(" ", Arrays.stream(enumValue.name().split("_"))
+                .map(ComboProperty::capitalizeString)
+                .toArray(String[]::new));
+    }
+
+    public static String capitalizeString(String str) {
+        return str.substring(0, 1).toUpperCase(Locale.ROOT) + str.substring(1).toLowerCase(Locale.ROOT);
+    }
+
     public record ComboOption(
             String id,
             String displayName
@@ -43,15 +53,5 @@ public record ComboProperty(
 
             return options;
         }
-    }
-
-    public static <T extends Enum<T>> String capitalizeEnum(T enumValue) {
-        return String.join(" ", Arrays.stream(enumValue.name().split("_"))
-                .map(ComboProperty::capitalizeString)
-                .toArray(String[]::new));
-     }
-
-    public static String capitalizeString(String str) {
-        return str.substring(0, 1).toUpperCase(Locale.ROOT) + str.substring(1).toLowerCase(Locale.ROOT);
     }
 }

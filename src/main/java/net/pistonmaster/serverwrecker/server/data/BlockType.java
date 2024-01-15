@@ -1092,7 +1092,7 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
 
     public static BlockType register(String name) {
         var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class)
-                        .withBlockShapeTypes(BlockStateLoader.getBlockShapes(name));
+                .withBlockShapeTypes(BlockStateLoader.getBlockShapes(name));
         VALUES.add(blockType);
         return blockType;
     }

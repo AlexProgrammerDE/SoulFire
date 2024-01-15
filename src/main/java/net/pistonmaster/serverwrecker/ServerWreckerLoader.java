@@ -19,27 +19,15 @@ package net.pistonmaster.serverwrecker;
 
 import net.pistonmaster.serverwrecker.client.cli.CLIManager;
 import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
-import net.pistonmaster.serverwrecker.client.gui.GUIClientProps;
 import net.pistonmaster.serverwrecker.client.gui.GUIManager;
-import net.pistonmaster.serverwrecker.client.gui.ThemeUtil;
 import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.server.api.OperationMode;
 
 public class ServerWreckerLoader {
     private ServerWreckerLoader() {
     }
 
-    public static void injectTheme() {
-        ThemeUtil.initFlatLaf();
-        ThemeUtil.setLookAndFeel();
-    }
-
-    public static void loadGUIProperties() {
-        GUIClientProps.loadSettings();
-    }
-
     public static void runHeadless(String host, int port, String[] args) {
-        var serverWrecker = new ServerWreckerServer(OperationMode.CLI, host, port);
+        var serverWrecker = new ServerWreckerServer(host, port);
 
         var rpcClient = new RPCClient(host, port, serverWrecker.generateLocalCliJWT());
         var cliManager = new CLIManager(rpcClient);
@@ -47,7 +35,7 @@ public class ServerWreckerLoader {
     }
 
     public static void runGUI(String host, int port) {
-        var serverWrecker = new ServerWreckerServer(OperationMode.GUI, host, port);
+        var serverWrecker = new ServerWreckerServer(host, port);
 
         var rpcClient = new RPCClient(host, port, serverWrecker.generateAdminJWT());
         var guiManager = new GUIManager(rpcClient);

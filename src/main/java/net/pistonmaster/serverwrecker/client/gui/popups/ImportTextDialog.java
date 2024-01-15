@@ -128,7 +128,7 @@ public class ImportTextDialog extends JDialog {
     }
 
     private record ImportClipboardListener(GUIManager guiManager, GUIFrame frame,
-                                            Consumer<String> consumer,
+                                           Consumer<String> consumer,
                                            ImportTextDialog dialog) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {

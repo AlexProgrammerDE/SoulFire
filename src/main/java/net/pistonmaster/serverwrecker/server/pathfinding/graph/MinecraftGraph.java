@@ -228,6 +228,11 @@ public record MinecraftGraph(TagsState tagsState) {
         return movement;
     }
 
+    private static TriState isBlockFree(BlockStateMeta blockState) {
+        return TriState.byBoolean(blockState.blockShapeType().hasNoCollisions()
+                && !BlockTypeHelper.isFluid(blockState.blockType()));
+    }
+
     public void insertActions(BotEntityState node, Consumer<GraphInstructions> callback) {
         var actions = new GraphAction[ACTIONS_TEMPLATE.length];
 
@@ -550,11 +555,6 @@ public record MinecraftGraph(TagsState tagsState) {
         };
     }
 
-    private static TriState isBlockFree(BlockStateMeta blockState) {
-        return TriState.byBoolean(blockState.blockShapeType().hasNoCollisions()
-                && !BlockTypeHelper.isFluid(blockState.blockType()));
-    }
-
     private enum SubscriptionSingleResult {
         CONTINUE,
         IMPOSSIBLE
@@ -571,8 +571,8 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     private record BlockSubscription(int actionIndex, SubscriptionType type, int blockArrayIndex,
-                             BotActionManager.BlockPlaceData blockToPlaceAgainst,
-                             BlockSafetyData.BlockSafetyType safetyType) {
+                                     BotActionManager.BlockPlaceData blockToPlaceAgainst,
+                                     BlockSafetyData.BlockSafetyType safetyType) {
         BlockSubscription(int movementIndex, SubscriptionType type) {
             this(movementIndex, type, -1, null, null);
         }

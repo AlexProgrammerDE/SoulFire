@@ -39,7 +39,6 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.server.api.AttackState;
-import net.pistonmaster.serverwrecker.server.api.OperationMode;
 import net.pistonmaster.serverwrecker.server.api.ServerExtension;
 import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.server.api.event.attack.AttackInitEvent;
@@ -104,16 +103,13 @@ public class ServerWreckerServer {
             .addClass(DevSettings.class, "Dev Settings", true)
             .addClass(AccountSettings.class, "Account Settings", true)
             .addClass(ProxySettings.class, "Proxy Settings", true);
-    private final OperationMode operationMode;
     private final boolean outdated;
     private final Int2ObjectMap<AttackManager> attacks = Int2ObjectMaps.synchronize(new Int2ObjectArrayMap<>());
     private final RPCServer rpcServer;
     private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
     private final SecretKey jwtSecretKey;
 
-    public ServerWreckerServer(OperationMode operationMode, String host, int port) {
-        this.operationMode = operationMode;
-
+    public ServerWreckerServer(String host, int port) {
         // Register into injector
         injector.register(ServerWreckerServer.class, this);
 

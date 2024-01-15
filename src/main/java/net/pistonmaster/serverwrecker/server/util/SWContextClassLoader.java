@@ -33,7 +33,7 @@ public class SWContextClassLoader extends ClassLoader {
     private final Method findLoadedClassMethod = Objects.requireNonNull(Methods.getDeclaredMethod(ClassLoader.class, "loadClass", String.class, boolean.class));
     private final ClassLoader platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
 
-    private SWContextClassLoader() {
+    public SWContextClassLoader() {
         super(ClassLoader.getSystemClassLoader());
     }
 
