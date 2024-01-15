@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.client.gui.GUIManager;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingsPage;
+import net.pistonmaster.serverwrecker.util.BuiltinSettingsConstants;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -49,7 +50,7 @@ public class CardsContainer extends JPanel {
                 .getPluginSettingsList());
 
         // Add bot settings
-        panels.add(new GeneratedPanel(guiManager.settingsManager(), getByNamespace("bot")));
+        panels.add(new GeneratedPanel(guiManager.settingsManager(), getByNamespace(BuiltinSettingsConstants.BOT_SETTINGS_ID)));
         panels.add(injector.getSingleton(PluginListPanel.class));
         panels.add(injector.getSingleton(AccountPanel.class));
         panels.add(injector.getSingleton(ProxyPanel.class));

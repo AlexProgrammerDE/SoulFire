@@ -23,10 +23,11 @@ import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.StringProperty;
+import net.pistonmaster.serverwrecker.util.BuiltinSettingsConstants;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class AccountSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("account");
+    private static final Property.Builder BUILDER = Property.builder(BuiltinSettingsConstants.ACCOUNT_SETTINGS_ID);
     public static final StringProperty NAME_FORMAT = BUILDER.ofString(
             "name-format",
             "Name format",

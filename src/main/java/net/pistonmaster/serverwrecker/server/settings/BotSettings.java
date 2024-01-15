@@ -22,10 +22,11 @@ import lombok.NoArgsConstructor;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.*;
 import net.pistonmaster.serverwrecker.server.viaversion.SWVersionConstants;
+import net.pistonmaster.serverwrecker.util.BuiltinSettingsConstants;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BotSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("bot");
+    private static final Property.Builder BUILDER = Property.builder(BuiltinSettingsConstants.BOT_SETTINGS_ID);
     public static final StringProperty ADDRESS = BUILDER.ofString(
             "address",
             "Address",

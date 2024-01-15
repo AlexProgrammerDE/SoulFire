@@ -24,6 +24,7 @@ import net.pistonmaster.serverwrecker.client.gui.GUIManager;
 import net.pistonmaster.serverwrecker.client.gui.libs.JEnumComboBox;
 import net.pistonmaster.serverwrecker.client.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.client.gui.popups.ImportTextDialog;
+import net.pistonmaster.serverwrecker.util.BuiltinSettingsConstants;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
 
 import javax.inject.Inject;
@@ -43,7 +44,7 @@ public class AccountPanel extends NavigationItem {
         var accountSettingsPanel = new JPanel();
         accountSettingsPanel.setLayout(new GridLayout(0, 2));
 
-        GeneratedPanel.addComponents(accountSettingsPanel, cardsContainer.getByNamespace("account"), guiManager.settingsManager());
+        GeneratedPanel.addComponents(accountSettingsPanel, cardsContainer.getByNamespace(BuiltinSettingsConstants.ACCOUNT_SETTINGS_ID), guiManager.settingsManager());
 
         accountOptionsPanel.add(accountSettingsPanel);
 

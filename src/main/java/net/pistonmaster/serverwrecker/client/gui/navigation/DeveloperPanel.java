@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.client.gui.GUIManager;
 import net.pistonmaster.serverwrecker.client.gui.LogPanel;
 import net.pistonmaster.serverwrecker.client.gui.libs.JFXFileHelper;
+import net.pistonmaster.serverwrecker.util.BuiltinSettingsConstants;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
 
 import javax.inject.Inject;
@@ -36,7 +37,7 @@ public class DeveloperPanel extends NavigationItem {
     public DeveloperPanel(GUIManager guiManager, LogPanel logPanel, CardsContainer cardsContainer) {
         setLayout(new GridLayout(0, 2));
 
-        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace("dev"), guiManager.settingsManager());
+        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace(BuiltinSettingsConstants.DEV_SETTINGS_ID), guiManager.settingsManager());
 
         add(new JLabel("Save Log"));
         var saveLog = new JButton("Click to save");

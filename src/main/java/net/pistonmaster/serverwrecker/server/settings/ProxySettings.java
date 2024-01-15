@@ -22,10 +22,11 @@ import lombok.NoArgsConstructor;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.IntProperty;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
+import net.pistonmaster.serverwrecker.util.BuiltinSettingsConstants;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProxySettings implements SettingsObject {
-    private static final Property.Builder builder = Property.builder("proxy");
+    private static final Property.Builder builder = Property.builder(BuiltinSettingsConstants.PROXY_SETTINGS_ID);
     public static final IntProperty BOTS_PER_PROXY = builder.ofInt(
             "bots-per-proxy",
             "Bots per proxy",

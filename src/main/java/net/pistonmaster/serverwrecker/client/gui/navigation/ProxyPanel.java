@@ -24,6 +24,7 @@ import net.pistonmaster.serverwrecker.client.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.client.gui.popups.ImportTextDialog;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
+import net.pistonmaster.serverwrecker.util.BuiltinSettingsConstants;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
 
 import javax.inject.Inject;
@@ -43,7 +44,7 @@ public class ProxyPanel extends NavigationItem {
         var proxySettingsPanel = new JPanel();
         proxySettingsPanel.setLayout(new GridLayout(0, 2));
 
-        GeneratedPanel.addComponents(proxySettingsPanel, cardsContainer.getByNamespace("proxy"), guiManager.settingsManager());
+        GeneratedPanel.addComponents(proxySettingsPanel, cardsContainer.getByNamespace(BuiltinSettingsConstants.PROXY_SETTINGS_ID), guiManager.settingsManager());
 
         proxyOptionsPanel.add(proxySettingsPanel);
 

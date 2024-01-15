@@ -22,10 +22,11 @@ import lombok.NoArgsConstructor;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.Property;
+import net.pistonmaster.serverwrecker.util.BuiltinSettingsConstants;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DevSettings implements SettingsObject {
-    public static final Property.Builder BUILDER = Property.builder("dev");
+    public static final Property.Builder BUILDER = Property.builder(BuiltinSettingsConstants.DEV_SETTINGS_ID);
     public static final BooleanProperty CORE_DEBUG = BUILDER.ofBoolean(
             "core-debug",
             "Core debug",
