@@ -23,6 +23,12 @@ import lombok.extern.slf4j.Slf4j;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Modified version of: <a href="https://github.com/SKCraft/Launcher/blob/master/launcher/src/main/java/com/skcraft/launcher/swing/MessageLog.java">SKCraft/Launcher Log Panel</a>
@@ -30,20 +36,15 @@ import java.awt.*;
 @Slf4j
 public class MessageLogPanel extends JPanel {
     private final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();
-    private final int numLines;
     private final NoopDocumentFilter noopDocumentFilter = new NoopDocumentFilter();
-    private JTextArea textComponent;
-    private Document document;
+    private final List<String> toInsert = Collections.synchronizedList(new ArrayList<>());
+    private final JTextArea textComponent;
+    private final Document document;
+    private boolean clearText;
 
     public MessageLogPanel(int numLines) {
-        this.numLines = numLines;
-
         setLayout(new BorderLayout());
 
-        initComponents();
-    }
-
-    private void initComponents() {
         this.textComponent = new JTextArea();
 
         textComponent.setLineWrap(true);
@@ -69,6 +70,49 @@ public class MessageLogPanel extends JPanel {
         new SmartScroller(scrollText);
 
         add(scrollText, BorderLayout.CENTER);
+
+        var executorService = Executors.newSingleThreadScheduledExecutor((r) -> {
+            var thread = new Thread(r);
+            thread.setName("MessageLogPanel");
+            thread.setDaemon(true);
+            return thread;
+        });
+        executorService.scheduleWithFixedDelay(
+                this::updateTextComponent,
+                100,
+                100,
+                TimeUnit.MILLISECONDS
+        );
+    }
+
+    private void updateTextComponent() {
+        if (!clearText && toInsert.isEmpty()) {
+            return;
+        }
+
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                noopDocumentFilter.filter(false);
+                if (clearText) {
+                    textComponent.setText("");
+                    clearText = false;
+                } else {
+                    try {
+                        var offset = document.getLength();
+                        document.insertString(
+                                offset,
+                                String.join("", toInsert),
+                                defaultAttributes
+                        );
+                    } catch (BadLocationException ignored) {
+                    }
+                    toInsert.clear();
+                }
+                noopDocumentFilter.filter(true);
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void updatePopup() {
@@ -105,28 +149,11 @@ public class MessageLogPanel extends JPanel {
     }
 
     public void clear() {
-        SwingUtilities.invokeLater(() -> {
-            noopDocumentFilter.filter(false);
-            textComponent.setText("");
-            noopDocumentFilter.filter(true);
-        });
+        clearText = true;
     }
 
-    /**
-     * Log a message given the {@link javax.swing.text.AttributeSet}.
-     *
-     * @param line line
-     */
     public void log(final String line) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                noopDocumentFilter.filter(false);
-                var offset = document.getLength();
-                document.insertString(offset, line, defaultAttributes);
-                noopDocumentFilter.filter(true);
-            } catch (BadLocationException ignored) {
-            }
-        });
+        toInsert.add(line);
     }
 
     public String getLogs() {
