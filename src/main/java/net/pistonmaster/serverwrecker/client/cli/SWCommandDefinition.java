@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.account.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
-import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
+import net.pistonmaster.serverwrecker.client.command.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.server.viaversion.SWVersionConstants;
 import org.slf4j.Logger;

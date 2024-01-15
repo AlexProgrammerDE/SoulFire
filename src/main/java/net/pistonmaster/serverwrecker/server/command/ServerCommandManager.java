@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.command;
+package net.pistonmaster.serverwrecker.server.command;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.mojang.brigadier.Command;
@@ -64,7 +64,7 @@ import java.util.*;
 import java.util.function.ToIntFunction;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
-import static net.pistonmaster.serverwrecker.command.BrigadierHelper.*;
+import static net.pistonmaster.serverwrecker.server.command.BrigadierHelper.*;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ServerCommandManager {

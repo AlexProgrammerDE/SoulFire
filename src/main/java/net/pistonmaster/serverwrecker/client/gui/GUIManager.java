@@ -21,11 +21,11 @@ import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import lombok.Getter;
 import net.lenni0451.reflect.Modules;
+import net.pistonmaster.serverwrecker.client.command.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.client.settings.SettingsManager;
-import net.pistonmaster.serverwrecker.command.SWTerminalConsole;
-import net.pistonmaster.serverwrecker.command.ShutdownManager;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
+import net.pistonmaster.serverwrecker.util.ShutdownManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
