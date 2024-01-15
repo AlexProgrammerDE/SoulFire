@@ -32,19 +32,13 @@ public class SWContextClassLoader extends ClassLoader {
     private final List<ClassLoader> childClassLoaders = new ArrayList<>();
     private final Method findLoadedClassMethod = Objects.requireNonNull(Methods.getDeclaredMethod(ClassLoader.class, "loadClass", String.class, boolean.class));
     private final ClassLoader platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
-    private final ClassLoader parent;
 
-    public SWContextClassLoader() {
-        this(ClassLoader.getSystemClassLoader());
-    }
-
-    private SWContextClassLoader(ClassLoader parent) {
-        super(parent);
-        this.parent = parent;
+    private SWContextClassLoader() {
+        super(ClassLoader.getSystemClassLoader());
     }
 
     @Override
-    public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         synchronized (getClassLoadingLock(name)) {
             // First, check if the class has already been loaded
             var c = findLoadedClass(name);
@@ -54,7 +48,7 @@ public class SWContextClassLoader extends ClassLoader {
                 } catch (MethodInvocationException ignored) {
                 }
 
-                var classData = loadClassData(parent, name);
+                var classData = loadClassData(this.getParent(), name);
                 if (classData == null) {
                     // Check if child class loaders can load the class
                     for (var childClassLoader : childClassLoaders) {
@@ -90,9 +84,7 @@ public class SWContextClassLoader extends ClassLoader {
             }
 
             return inputStream.readAllBytes();
-        } catch (IOException e) {
-            e.printStackTrace();
-
+        } catch (IOException ignored) {
             return null;
         }
     }

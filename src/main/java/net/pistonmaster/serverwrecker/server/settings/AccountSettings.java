@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.account;
+package net.pistonmaster.serverwrecker.server.settings;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

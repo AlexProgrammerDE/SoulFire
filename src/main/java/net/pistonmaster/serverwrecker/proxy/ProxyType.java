@@ -27,5 +27,5 @@ public enum ProxyType {
     SOCKS4(false),
     SOCKS5(true);
 
-    private final boolean udp;
+    private final boolean udpSupport;
 }
