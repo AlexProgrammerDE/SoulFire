@@ -19,9 +19,9 @@ package net.pistonmaster.serverwrecker.client.cli;
 
 import com.google.gson.JsonPrimitive;
 import lombok.Getter;
+import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.client.settings.SettingsManager;
 import net.pistonmaster.serverwrecker.command.ShutdownManager;
-import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.ComboOption;
 import net.pistonmaster.serverwrecker.grpc.generated.ComboSetting;

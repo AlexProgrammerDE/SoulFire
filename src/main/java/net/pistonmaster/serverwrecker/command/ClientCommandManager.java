@@ -21,7 +21,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.grpc.RPCClient;
+import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandCompletionRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandHistoryRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandRequest;

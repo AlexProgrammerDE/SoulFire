@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.grpc;
+package net.pistonmaster.serverwrecker.client.grpc;
 
 import io.grpc.CallCredentials;
 import io.grpc.Metadata;
 import io.grpc.Status;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.serverwrecker.util.RPCConstants;
 
 import java.util.concurrent.Executor;
 

@@ -19,7 +19,7 @@ package net.pistonmaster.serverwrecker.command;
 
 import lombok.RequiredArgsConstructor;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
-import net.pistonmaster.serverwrecker.grpc.RPCClient;
+import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

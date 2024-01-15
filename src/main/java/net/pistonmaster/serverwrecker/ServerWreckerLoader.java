@@ -18,10 +18,10 @@
 package net.pistonmaster.serverwrecker;
 
 import net.pistonmaster.serverwrecker.client.cli.CLIManager;
+import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.client.gui.GUIClientProps;
 import net.pistonmaster.serverwrecker.client.gui.GUIManager;
 import net.pistonmaster.serverwrecker.client.gui.ThemeUtil;
-import net.pistonmaster.serverwrecker.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.server.api.OperationMode;
 

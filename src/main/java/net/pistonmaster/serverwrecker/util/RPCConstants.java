@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.grpc;
+package net.pistonmaster.serverwrecker.util;
 
 import io.grpc.Context;
 import io.grpc.Metadata;
@@ -23,10 +23,10 @@ import io.grpc.Metadata;
 import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
 
 public class RPCConstants {
-    static final String BEARER_TYPE = "Bearer";
+    public static final String BEARER_TYPE = "Bearer";
 
-    static final Metadata.Key<String> AUTHORIZATION_METADATA_KEY = Metadata.Key.of("Authorization", ASCII_STRING_MARSHALLER);
-    static final Context.Key<String> CLIENT_ID_CONTEXT_KEY = Context.key("clientId");
+    public static final Metadata.Key<String> AUTHORIZATION_METADATA_KEY = Metadata.Key.of("Authorization", ASCII_STRING_MARSHALLER);
+    public static final Context.Key<String> CLIENT_ID_CONTEXT_KEY = Context.key("clientId");
 
     private RPCConstants() {
     }

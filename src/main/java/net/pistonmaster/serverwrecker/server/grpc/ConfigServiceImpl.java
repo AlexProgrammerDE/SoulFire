@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.grpc;
+package net.pistonmaster.serverwrecker.server.grpc;
 
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,7 @@ import net.pistonmaster.serverwrecker.grpc.generated.ClientPlugin;
 import net.pistonmaster.serverwrecker.grpc.generated.ConfigServiceGrpc;
 import net.pistonmaster.serverwrecker.grpc.generated.UIClientDataResponse;
 import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.util.RPCConstants;
 
 import javax.inject.Inject;
 import java.util.ArrayList;

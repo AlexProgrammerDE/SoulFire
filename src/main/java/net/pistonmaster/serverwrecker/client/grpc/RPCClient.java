@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.grpc;
+package net.pistonmaster.serverwrecker.client.grpc;
 
 import io.grpc.CallCredentials;
 import io.grpc.Grpc;
 import io.grpc.InsecureChannelCredentials;
 import io.grpc.ManagedChannel;
+import io.grpc.stub.AbstractStub;
 import lombok.Getter;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.grpc.generated.AttackServiceGrpc;
@@ -60,11 +61,15 @@ public class RPCClient {
 
     public RPCClient(CallCredentials callCredentials, ManagedChannel managedChannel) {
         channel = managedChannel;
-        logStub = LogsServiceGrpc.newStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
-        commandStub = CommandServiceGrpc.newStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
-        commandStubBlocking = CommandServiceGrpc.newBlockingStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
-        attackStub = AttackServiceGrpc.newStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
-        configStubBlocking = ConfigServiceGrpc.newBlockingStub(channel).withCallCredentials(callCredentials).withCompression("gzip");
+        logStub = prepareChannel(LogsServiceGrpc.newStub(channel), callCredentials);
+        commandStub = prepareChannel(CommandServiceGrpc.newStub(channel), callCredentials);
+        commandStubBlocking = prepareChannel(CommandServiceGrpc.newBlockingStub(channel), callCredentials);
+        attackStub = prepareChannel(AttackServiceGrpc.newStub(channel), callCredentials);
+        configStubBlocking = prepareChannel(ConfigServiceGrpc.newBlockingStub(channel), callCredentials);
+    }
+
+    private <T extends AbstractStub<T>> T prepareChannel(T channel, CallCredentials callCredentials) {
+        return channel.withCallCredentials(callCredentials).withCompression("gzip");
     }
 
     public void shutdown() throws InterruptedException {
