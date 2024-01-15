@@ -39,7 +39,7 @@ public class MessageLogPanel extends JPanel {
     private final NoopDocumentFilter noopDocumentFilter = new NoopDocumentFilter();
     private final List<String> toInsert = Collections.synchronizedList(new ArrayList<>());
     private final JTextArea textComponent;
-    private final Document document;
+    private final AbstractDocument document;
     private boolean clearText;
 
     public MessageLogPanel(int numLines) {
@@ -54,9 +54,9 @@ public class MessageLogPanel extends JPanel {
         textComponent.setEditable(true);
         var caret = (DefaultCaret) textComponent.getCaret();
         caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-        document = textComponent.getDocument();
+        document = (AbstractDocument) textComponent.getDocument();
         document.addDocumentListener(new LimitLinesDocumentListener(numLines, true));
-        ((AbstractDocument) document).setDocumentFilter(noopDocumentFilter);
+        document.setDocumentFilter(noopDocumentFilter);
 
         updatePopup();
 
