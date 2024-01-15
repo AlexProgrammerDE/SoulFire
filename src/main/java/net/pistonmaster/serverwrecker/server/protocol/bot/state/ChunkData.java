@@ -31,9 +31,18 @@ public class ChunkData {
     private final int minSection;
     private final ChunkSection[] sections;
 
-    public ChunkData(LevelState level) {
-        this.minSection = level.minSection();
-        this.sections = new ChunkSection[level.sectionsCount()];
+    public ChunkData(int minSection, int sectionsCount, boolean fillEmpty) {
+        this.minSection = minSection;
+        this.sections = new ChunkSection[sectionsCount];
+        if (fillEmpty) {
+            fillEmpty();
+        }
+    }
+
+    public void fillEmpty() {
+        for (var i = 0; i < sections.length; i++) {
+            setSection(i, new ChunkSection());
+        }
     }
 
     public static int log2RoundUp(int num) {
@@ -56,6 +65,10 @@ public class ChunkData {
         }
 
         return section;
+    }
+
+    public boolean isSectionMissing(int sectionIndex) {
+        return sections[sectionIndex] == null;
     }
 
     public int getSectionCount() {

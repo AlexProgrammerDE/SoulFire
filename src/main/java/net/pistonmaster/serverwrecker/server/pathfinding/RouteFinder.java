@@ -34,12 +34,11 @@ import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 @Slf4j
-public record RouteFinder(MinecraftGraph graph, GoalScorer scorer, ExecutorService executor) {
+public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     private static List<WorldAction> getActionTrace(MinecraftRouteNode current) {
         var actions = new ObjectArrayList<WorldAction>();
         var previousElement = current;

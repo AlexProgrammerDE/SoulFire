@@ -23,7 +23,6 @@ import com.google.gson.stream.JsonWriter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -46,7 +45,8 @@ public class DataGenerators {
             new InstrumentsDataGenerator(),
             new TagsDataGenerator.BlockTagsDataGenerator(),
             new TagsDataGenerator.ItemTagsDataGenerator(),
-            new TagsDataGenerator.EntityTypeTagsDataGenerator()
+            new TagsDataGenerator.EntityTypeTagsDataGenerator(),
+            new WorldExporterGenerator()
     );
 
     public static boolean runDataGenerators(Path outputDirectory) {
@@ -68,14 +68,18 @@ public class DataGenerators {
                 var outputElement = dataGenerator.generateDataJson();
 
                 if (outputElement instanceof JsonElement jsonElement) {
-                    try (Writer writer = Files.newBufferedWriter(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+                    try (var writer = Files.newBufferedWriter(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
                         var jsonWriter = new JsonWriter(writer);
                         jsonWriter.setIndent("  ");
                         Streams.write(jsonElement, jsonWriter);
                     }
                 } else if (outputElement instanceof String string) {
-                    try (Writer writer = Files.newBufferedWriter(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+                    try (var writer = Files.newBufferedWriter(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
                         writer.write(string);
+                    }
+                } else if (outputElement instanceof byte[] bytes) {
+                    try (var outputStream = Files.newOutputStream(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+                        outputStream.write(bytes);
                     }
                 } else {
                     log.error("Unknown output type for data generator {}", dataGenerator.getDataName());

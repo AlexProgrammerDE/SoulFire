@@ -17,10 +17,13 @@
  */
 package net.pistonmaster.serverwrecker.server.data;
 
+import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.AccessLevel;
 import lombok.With;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -29,7 +32,8 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
                         boolean air, boolean fallingBlock, boolean replaceable,
                         boolean requiresCorrectToolForDrops, boolean fluidSource,
                         OffsetData offsetData, List<BlockShapeType> blockShapeTypes) {
-    public static final List<BlockType> VALUES = new ArrayList<>();
+    public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
+    public static final Object2ReferenceMap<String, BlockType> FROM_NAME = new Object2ReferenceOpenHashMap<>();
 
     public static final BlockType AIR = register("air");
     public static final BlockType STONE = register("stone");
@@ -1093,28 +1097,17 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
     public static BlockType register(String name) {
         var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class)
                 .withBlockShapeTypes(BlockStateLoader.getBlockShapes(name));
-        VALUES.add(blockType);
+        FROM_ID.put(blockType.id(), blockType);
+        FROM_NAME.put(blockType.name(), blockType);
         return blockType;
     }
 
     public static BlockType getById(int id) {
-        for (var blockType : VALUES) {
-            if (blockType.id() == id) {
-                return blockType;
-            }
-        }
-
-        return null;
+        return FROM_ID.get(id);
     }
 
     public static BlockType getByName(String name) {
-        for (var blockType : VALUES) {
-            if (blockType.name().equals(name) || ("minecraft:" + blockType.name()).equals(name)) {
-                return blockType;
-            }
-        }
-
-        return null;
+        return FROM_NAME.get(name.replace("minecraft:", ""));
     }
 
     @Override

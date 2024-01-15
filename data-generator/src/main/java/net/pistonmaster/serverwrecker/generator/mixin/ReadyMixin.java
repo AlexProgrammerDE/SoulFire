@@ -41,6 +41,6 @@ public class ReadyMixin {
         DataGenerators.runDataGenerators(dataDumpDirectory);
         Main.LOGGER.info("Done data generation!");
 
-        Main.SERVER.halt(false);
+        Runtime.getRuntime().halt(0);
     }
 }

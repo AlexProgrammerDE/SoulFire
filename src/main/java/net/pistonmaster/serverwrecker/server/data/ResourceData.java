@@ -18,7 +18,6 @@
 package net.pistonmaster.serverwrecker.server.data;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -107,23 +106,14 @@ public class ResourceData {
         doNothing(BlockItems.VALUES);
         doNothing(BlockShapeType.VALUES);
         doNothing(BlockStateLoader.BLOCK_SHAPES);
-        doNothing(BlockType.VALUES);
-        doNothing(EntityType.VALUES);
-        doNothing(ItemType.VALUES);
+        doNothing(BlockType.FROM_ID);
+        doNothing(EntityType.FROM_ID);
+        doNothing(ItemType.FROM_ID);
         doNothing(new MinecraftGraph(null));
     }
 
     @SuppressWarnings("unused")
     private static void doNothing(Object param) {
         // Do nothing
-    }
-
-    private static boolean hasValue(JsonArray json, String value) {
-        for (var element : json) {
-            if (element.getAsString().equals(value)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

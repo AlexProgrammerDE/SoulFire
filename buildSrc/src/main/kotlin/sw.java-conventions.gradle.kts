@@ -9,13 +9,6 @@ plugins {
     id("io.freefair.lombok")
 }
 
-java {
-    javaTarget(21)
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
 tasks {
     javadoc {
         title = "ServerWrecker Javadocs"

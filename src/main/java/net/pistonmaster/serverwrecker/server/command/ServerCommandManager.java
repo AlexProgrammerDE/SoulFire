@@ -332,15 +332,14 @@ public class ServerCommandManager {
                 var clientEntity = sessionDataManager.clientEntity();
                 var routeFinder = new RouteFinder(
                         new MinecraftGraph(sessionDataManager.tagsState()),
-                        goalScorer,
-                        bot.executorManager().newCachedExecutorService(bot, "PathfindingCalculator")
+                        goalScorer
                 );
 
                 Boolean2ObjectFunction<List<WorldAction>> findPath = requiresRepositioning -> {
                     var start = BotEntityState.initialState(
                             clientEntity.pos(),
                             new ProjectedLevelState(
-                                    Objects.requireNonNull(sessionDataManager.getCurrentLevel(), "Level is null!")
+                                    Objects.requireNonNull(sessionDataManager.getCurrentLevel(), "Level is null!").chunks().immutableCopy()
                             ),
                             new ProjectedInventory(
                                     sessionDataManager.inventoryManager().getPlayerInventory()

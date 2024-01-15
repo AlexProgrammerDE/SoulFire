@@ -22,11 +22,15 @@ import java.util.Objects;
 
 public class ResourceHelper {
     public static String getResource(String path) {
+        return new String(getResourceBytes(path), StandardCharsets.UTF_8);
+    }
+
+    public static byte[] getResourceBytes(String path) {
         try {
             var inputStream = Objects.requireNonNull(ResourceHelper.class.getResourceAsStream(path));
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            return inputStream.readAllBytes();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to generate language file", e);
+            throw new RuntimeException("Failed to get file", e);
         }
     }
 }

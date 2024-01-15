@@ -17,13 +17,13 @@
  */
 package net.pistonmaster.serverwrecker.server.data;
 
-import java.util.ArrayList;
-import java.util.List;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 
 @SuppressWarnings("unused")
 public record EntityType(int id, String name, float width, float height,
                          String category, boolean friendly) {
-    public static final List<EntityType> VALUES = new ArrayList<>();
+    public static final Int2ReferenceMap<EntityType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
     public static final EntityType ALLAY = register("allay");
     public static final EntityType AREA_EFFECT_CLOUD = register("area_effect_cloud");
@@ -154,18 +154,12 @@ public record EntityType(int id, String name, float width, float height,
 
     public static EntityType register(String name) {
         var entityType = GsonDataHelper.fromJson("/minecraft/entities.json", name, EntityType.class);
-        VALUES.add(entityType);
+        FROM_ID.put(entityType.id(), entityType);
         return entityType;
     }
 
     public static EntityType getById(int id) {
-        for (var entityId : VALUES) {
-            if (entityId.id() == id) {
-                return entityId;
-            }
-        }
-
-        return null;
+        return FROM_ID.get(id);
     }
 
     @Override

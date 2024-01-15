@@ -21,6 +21,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.data.ResourceData;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockAccessor;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.server.protocol.bot.model.ChunkKey;
 import net.pistonmaster.serverwrecker.server.protocol.bot.utils.SectionUtils;
@@ -31,20 +32,28 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class ChunkHolder {
+public class ChunkHolder implements BlockAccessor {
     private static final BlockStateMeta VOID_AIR_BLOCK_STATE = BlockStateMeta.forDefaultBlockType(BlockType.VOID_AIR);
     private final Long2ObjectMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
     private final Lock readLock;
     private final Lock writeLock;
     private final int minBuildHeight;
     private final int maxBuildHeight;
+    private final int minSection;
+    private final int maxSection;
+    private final int sectionsCount;
 
-    public ChunkHolder(LevelState levelState) {
+    public ChunkHolder(int minBuildHeight, int maxBuildHeight) {
         ReadWriteLock lock = new ReentrantReadWriteLock();
         this.readLock = lock.readLock();
         this.writeLock = lock.writeLock();
-        this.minBuildHeight = levelState.getMinBuildHeight();
-        this.maxBuildHeight = levelState.getMaxBuildHeight();
+        this.minBuildHeight = minBuildHeight;
+        this.maxBuildHeight = maxBuildHeight;
+
+        // Precalculate section values
+        this.minSection = SectionUtils.blockToSection(minBuildHeight);
+        this.maxSection = SectionUtils.blockToSection(maxBuildHeight - 1) + 1;
+        this.sectionsCount = this.maxSection - this.minSection;
     }
 
     private ChunkHolder(ChunkHolder chunkHolder) {
@@ -53,6 +62,9 @@ public class ChunkHolder {
         this.writeLock = new NoopLock();
         this.minBuildHeight = chunkHolder.minBuildHeight;
         this.maxBuildHeight = chunkHolder.maxBuildHeight;
+        this.minSection = chunkHolder.minSection;
+        this.maxSection = chunkHolder.maxSection;
+        this.sectionsCount = chunkHolder.sectionsCount;
     }
 
     public ChunkData getChunk(int chunkX, int chunkZ) {
@@ -94,16 +106,17 @@ public class ChunkHolder {
         }
     }
 
-    public ChunkData getOrCreateChunk(int x, int z, LevelState levelState) {
+    public ChunkData getOrCreateChunk(int x, int z) {
         writeLock.lock();
         try {
             return chunks.computeIfAbsent(ChunkKey.calculateKey(x, z), (key) ->
-                    new ChunkData(levelState));
+                    new ChunkData(minSection, sectionsCount, false));
         } finally {
             writeLock.unlock();
         }
     }
 
+    @Override
     public BlockStateMeta getBlockStateAt(int x, int y, int z) {
         if (y < minBuildHeight) {
             return VOID_AIR_BLOCK_STATE;
@@ -119,6 +132,10 @@ public class ChunkHolder {
         }
 
         return ResourceData.GLOBAL_BLOCK_PALETTE.getBlockStateForStateId(chunkData.getBlock(x, y, z));
+    }
+
+    public boolean isOutsideBuildHeight(int y) {
+        return y < minBuildHeight || y >= maxBuildHeight;
     }
 
     public ChunkHolder immutableCopy() {

@@ -27,7 +27,6 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.movement.AABB;
 import net.pistonmaster.serverwrecker.server.protocol.bot.nbt.MCUniform;
 import net.pistonmaster.serverwrecker.server.protocol.bot.nbt.MCUniformInt;
 import net.pistonmaster.serverwrecker.server.protocol.bot.nbt.UniformOrInt;
-import net.pistonmaster.serverwrecker.server.protocol.bot.utils.SectionUtils;
 import net.pistonmaster.serverwrecker.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
@@ -61,10 +60,6 @@ public class LevelState {
     private final byte hasRaids;
     private final byte respawnAnchorWorks;
 
-    // Some precalculated chunk values based on level data
-    private final int minSection;
-    private final int maxSection;
-    private final int sectionsCount;
     @Setter
     private long worldAge;
     @Setter
@@ -102,12 +97,7 @@ public class LevelState {
         this.hasRaids = levelRegistry.<ByteTag>get("has_raids").getValue();
         this.respawnAnchorWorks = levelRegistry.<ByteTag>get("respawn_anchor_works").getValue();
 
-        this.chunks = new ChunkHolder(this);
-
-        // Precalculate min section
-        this.minSection = SectionUtils.blockToSection(this.getMinBuildHeight());
-        this.maxSection = SectionUtils.blockToSection(this.getMaxBuildHeight() - 1) + 1;
-        this.sectionsCount = this.maxSection - this.minSection;
+        this.chunks = new ChunkHolder(getMinBuildHeight(), getMaxBuildHeight());
     }
 
     public int getMinBuildHeight() {
@@ -116,10 +106,6 @@ public class LevelState {
 
     public int getMaxBuildHeight() {
         return this.getMinBuildHeight() + this.height;
-    }
-
-    public boolean isOutsideBuildHeight(int y) {
-        return y < this.getMinBuildHeight() || y >= this.getMaxBuildHeight();
     }
 
     public void setBlockId(Vector3i block, int state) {

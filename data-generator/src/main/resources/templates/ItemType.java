@@ -17,7 +17,9 @@
  */
 package net.pistonmaster.serverwrecker.data;
 
-import java.util.ArrayList;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
+
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -25,24 +27,18 @@ public record ItemType(int id, String name, int stackSize,
                        List<String> enchantCategories,
                        DepletionData depletionData,
                        FoodProperties foodProperties) {
-    public static final List<ItemType> VALUES = new ArrayList<>();
+    public static final Int2ReferenceMap<ItemType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
     // VALUES REPLACE
 
     public static ItemType register(String name) {
         var itemType = GsonDataHelper.fromJson("/minecraft/items.json", name, ItemType.class);
-        VALUES.add(itemType);
+        FROM_ID.put(itemType.id(), itemType);
         return itemType;
     }
 
     public static ItemType getById(int id) {
-        for (var itemType : VALUES) {
-            if (itemType.id() == id) {
-                return itemType;
-            }
-        }
-
-        return null;
+        return FROM_ID.get(id);
     }
 
     @Override

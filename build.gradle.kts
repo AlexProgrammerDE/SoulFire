@@ -6,6 +6,7 @@ plugins {
     idea
     id("sw.shadow-conventions")
     alias(libs.plugins.protobuf)
+    alias(libs.plugins.jmh)
 }
 
 allprojects {
@@ -222,4 +223,10 @@ tasks.named<ShadowJar>("shadowJar") {
             "velocity-plugin.json"
         )
     )
+}
+
+jmh {
+    warmupIterations = 2
+    iterations = 2
+    fork = 2
 }

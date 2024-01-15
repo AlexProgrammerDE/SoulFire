@@ -23,9 +23,8 @@ import net.pistonmaster.serverwrecker.server.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockAccessor;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.ChunkHolder;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 /**
@@ -37,28 +36,28 @@ import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 public class ProjectedLevelState {
     private static final BlockStateMeta AIR_BLOCK_STATE = new BlockStateMeta(BlockType.AIR, BlockShapeType.getById(0));
 
-    private final LevelState levelState;
-    private final ChunkHolder chunkHolder;
+    private final BlockAccessor accessor;
     private final Object2ObjectOpenCustomHashMap<SWVec3i, BlockStateMeta> blockChanges;
 
-    public ProjectedLevelState(LevelState levelState) {
-        this.levelState = levelState;
-        this.chunkHolder = levelState.chunks().immutableCopy();
-        this.blockChanges = new Object2ObjectOpenCustomHashMap<>(VectorHelper.VECTOR3I_HASH_STRATEGY);
+    public ProjectedLevelState(BlockAccessor accessor) {
+        this(
+                accessor,
+                new Object2ObjectOpenCustomHashMap<>(VectorHelper.VECTOR3I_HASH_STRATEGY)
+        );
     }
 
     public ProjectedLevelState withChangeToSolidBlock(SWVec3i position) {
         var blockChanges = this.blockChanges.clone();
         blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
 
-        return new ProjectedLevelState(levelState, chunkHolder, blockChanges);
+        return new ProjectedLevelState(accessor, blockChanges);
     }
 
     public ProjectedLevelState withChangeToAir(SWVec3i position) {
         var blockChanges = this.blockChanges.clone();
         blockChanges.put(position, AIR_BLOCK_STATE);
 
-        return new ProjectedLevelState(levelState, chunkHolder, blockChanges);
+        return new ProjectedLevelState(accessor, blockChanges);
     }
 
     public ProjectedLevelState withChanges(SWVec3i[] air, SWVec3i solid) {
@@ -81,11 +80,7 @@ public class ProjectedLevelState {
             blockChanges.put(solid, Costs.SOLID_PLACED_BLOCK_STATE);
         }
 
-        return new ProjectedLevelState(levelState, chunkHolder, blockChanges);
-    }
-
-    public boolean isOutsideBuildHeight(SWVec3i position) {
-        return levelState.isOutsideBuildHeight(position.y);
+        return new ProjectedLevelState(accessor, blockChanges);
     }
 
     public BlockStateMeta getBlockStateAt(SWVec3i position) {
@@ -94,7 +89,7 @@ public class ProjectedLevelState {
             return blockChange;
         }
 
-        return chunkHolder.getBlockStateAt(position.x, position.y, position.z);
+        return accessor.getBlockStateAt(position.x, position.y, position.z);
     }
 
     public boolean isChanged(SWVec3i position) {

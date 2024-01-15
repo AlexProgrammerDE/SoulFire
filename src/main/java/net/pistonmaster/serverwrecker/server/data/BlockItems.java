@@ -22,12 +22,12 @@ import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
 import java.util.Optional;
 
 public class BlockItems {
-    public static final BlockType[] VALUES = new BlockType[ItemType.VALUES.size()];
-    public static final ItemType[] VALUES_REVERSE = new ItemType[BlockType.VALUES.size()];
+    public static final BlockType[] VALUES = new BlockType[ItemType.FROM_ID.size()];
+    public static final ItemType[] VALUES_REVERSE = new ItemType[BlockType.FROM_ID.size()];
 
     static {
-        for (var itemType : ItemType.VALUES) {
-            for (var blockType : BlockType.VALUES) {
+        for (var itemType : ItemType.FROM_ID.values()) {
+            for (var blockType : BlockType.FROM_ID.values()) {
                 var blockShapeTypes = blockType.blockShapeTypes();
 
                 // Let's not use bedrock as a building block
