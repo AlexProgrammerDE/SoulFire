@@ -28,6 +28,7 @@ import com.mojang.brigadier.tree.CommandNode;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.client.gui.LogPanel;
 import net.pistonmaster.serverwrecker.server.AttackManager;
 import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
@@ -50,8 +51,6 @@ import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
 import org.apache.commons.io.FileUtils;
 import org.cloudburstmc.math.vector.Vector3d;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -66,9 +65,9 @@ import java.util.function.ToIntFunction;
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 import static net.pistonmaster.serverwrecker.server.command.BrigadierHelper.*;
 
+@Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ServerCommandManager {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerCommandManager.class);
     @Getter
     private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
     private final ServerWreckerServer serverWreckerServer;
@@ -241,7 +240,7 @@ public class ServerCommandManager {
                             });
                         }))));
         dispatcher.register(literal("stats").executes(help("Shows network stats", c -> forEveryAttackEnsureHasBots(attackManager -> {
-            LOGGER.info("Total bots: {}", attackManager.botConnections().size());
+            log.info("Total bots: {}", attackManager.botConnections().size());
             long readTraffic = 0;
             long writeTraffic = 0;
             for (var bot : attackManager.botConnections()) {
@@ -255,8 +254,8 @@ public class ServerCommandManager {
                 writeTraffic += trafficShapingHandler.trafficCounter().cumulativeWrittenBytes();
             }
 
-            LOGGER.info("Total read traffic: {}", FileUtils.byteCountToDisplaySize(readTraffic));
-            LOGGER.info("Total write traffic: {}", FileUtils.byteCountToDisplaySize(writeTraffic));
+            log.info("Total read traffic: {}", FileUtils.byteCountToDisplaySize(readTraffic));
+            log.info("Total write traffic: {}", FileUtils.byteCountToDisplaySize(writeTraffic));
 
             long currentReadTraffic = 0;
             long currentWriteTraffic = 0;
@@ -271,8 +270,8 @@ public class ServerCommandManager {
                 currentWriteTraffic += trafficShapingHandler.trafficCounter().lastWriteThroughput();
             }
 
-            LOGGER.info("Current read traffic: {}/s", FileUtils.byteCountToDisplaySize(currentReadTraffic));
-            LOGGER.info("Current write traffic: {}/s", FileUtils.byteCountToDisplaySize(currentWriteTraffic));
+            log.info("Current read traffic: {}/s", FileUtils.byteCountToDisplaySize(currentReadTraffic));
+            log.info("Current write traffic: {}/s", FileUtils.byteCountToDisplaySize(currentWriteTraffic));
 
             return Command.SINGLE_SUCCESS;
         }))));
@@ -282,13 +281,13 @@ public class ServerCommandManager {
 
     private int forEveryAttack(ToIntFunction<AttackManager> consumer) {
         if (serverWreckerServer.attacks().isEmpty()) {
-            LOGGER.warn("No attacks found!");
+            log.warn("No attacks found!");
             return 2;
         }
 
         var resultCode = Command.SINGLE_SUCCESS;
         for (var attackManager : serverWreckerServer.attacks().values()) {
-            LOGGER.info("Running command for attack {}", attackManager.id());
+            log.info("Running command for attack {}", attackManager.id());
             var result = consumer.applyAsInt(attackManager);
             if (result != Command.SINGLE_SUCCESS) {
                 resultCode = result;
@@ -301,7 +300,7 @@ public class ServerCommandManager {
     private int forEveryAttackEnsureHasBots(ToIntFunction<AttackManager> consumer) {
         return forEveryAttack(attackManager -> {
             if (attackManager.botConnections().isEmpty()) {
-                LOGGER.info("No bots connected!");
+                log.info("No bots connected!");
                 return 3;
             }
 
@@ -313,7 +312,7 @@ public class ServerCommandManager {
         return forEveryAttackEnsureHasBots(attackManager -> {
             var resultCode = Command.SINGLE_SUCCESS;
             for (var bot : attackManager.botConnections()) {
-                LOGGER.info("Running command for bot {}", bot.meta().minecraftAccount().username());
+                log.info("Running command for bot {}", bot.meta().minecraftAccount().username());
                 var result = consumer.applyAsInt(bot);
                 if (result != Command.SINGLE_SUCCESS) {
                     resultCode = result;
@@ -381,7 +380,7 @@ public class ServerCommandManager {
 
             return result;
         } catch (CommandSyntaxException e) {
-            LOGGER.warn(e.getMessage());
+            log.warn(e.getMessage());
             return Command.SINGLE_SUCCESS;
         }
     }
@@ -407,7 +406,7 @@ public class ServerCommandManager {
                     commandHistory.add(Map.entry(Instant.ofEpochSecond(seconds), command));
                 }
             } catch (IOException e) {
-                LOGGER.error("Failed to create command history file!", e);
+                log.error("Failed to create command history file!", e);
             }
         }
     }
@@ -419,7 +418,7 @@ public class ServerCommandManager {
                 var newLine = Instant.now().getEpochSecond() + ":" + command + System.lineSeparator();
                 Files.writeString(targetFile, newLine, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             } catch (IOException e) {
-                LOGGER.error("Failed to create command history file!", e);
+                log.error("Failed to create command history file!", e);
             }
         }
     }
@@ -430,7 +429,7 @@ public class ServerCommandManager {
                 Files.deleteIfExists(targetFile);
                 commandHistory.clear();
             } catch (IOException e) {
-                LOGGER.error("Failed to delete command history file!", e);
+                log.error("Failed to delete command history file!", e);
             }
         }
     }

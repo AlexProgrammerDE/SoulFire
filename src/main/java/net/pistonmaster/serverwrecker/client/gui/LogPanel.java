@@ -21,13 +21,12 @@ import io.grpc.stub.StreamObserver;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.client.command.ClientCommandManager;
 import net.pistonmaster.serverwrecker.client.gui.libs.MessageLogPanel;
 import net.pistonmaster.serverwrecker.client.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.grpc.generated.LogRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.LogResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -40,9 +39,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Getter
 public class LogPanel extends JPanel {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogPanel.class);
     private final MessageLogPanel messageLogPanel = new MessageLogPanel(3000);
     private final GUIManager guiManager;
     private final ClientCommandManager clientCommandManager;
@@ -61,7 +60,7 @@ public class LogPanel extends JPanel {
 
             @Override
             public void onError(Throwable t) {
-                LOGGER.error("Error while logging!", t);
+                log.error("Error while logging!", t);
             }
 
             @Override

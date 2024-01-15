@@ -33,6 +33,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -61,8 +62,6 @@ import net.pistonmaster.serverwrecker.server.viaversion.platform.*;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
 import net.pistonmaster.serverwrecker.util.ShutdownManager;
 import org.apache.logging.log4j.LogManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -77,9 +76,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Slf4j
 @Getter
 public class ServerWreckerServer {
-    public static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerServer.class);
     public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER;
     public static final Gson GENERAL_GSON = new Gson();
 
@@ -137,7 +136,7 @@ public class ServerWreckerServer {
             throw new RuntimeException(e);
         }
 
-        LOGGER.info("Starting ServerWrecker v{}...", BuildData.VERSION);
+        log.info("Starting ServerWrecker v{}...", BuildData.VERSION);
 
         // Override status packet, so we can support any version
         MinecraftCodec.CODEC.getCodec(ProtocolState.STATUS)
@@ -186,10 +185,10 @@ public class ServerWreckerServer {
 
         ServerWreckerAPI.postEvent(new SettingsRegistryInitEvent(settingsRegistry));
 
-        LOGGER.info("Checking for updates...");
+        log.info("Checking for updates...");
         outdated = checkForUpdates();
 
-        LOGGER.info("Finished loading!");
+        log.info("Finished loading!");
     }
 
     private static void registerInternalServerExtensions() {
@@ -212,7 +211,7 @@ public class ServerWreckerServer {
 
     private static boolean checkForUpdates() {
         if (Boolean.getBoolean("serverwrecker.disable-updates")) {
-            LOGGER.info("Skipping update check because of system property");
+            log.info("Skipping update check because of system property");
             return false;
         }
 
@@ -225,7 +224,7 @@ public class ServerWreckerServer {
             connection.setReadTimeout(5000);
 
             if (connection.getResponseCode() != 200) {
-                LOGGER.warn("Failed to check for updates: {}", connection.getResponseCode());
+                log.warn("Failed to check for updates: {}", connection.getResponseCode());
                 return false;
             }
 
@@ -236,11 +235,11 @@ public class ServerWreckerServer {
 
             var latestVersion = response.get("tag_name").getAsString();
             if (VersionComparator.isNewer(BuildData.VERSION, latestVersion)) {
-                LOGGER.warn("ServerWrecker is outdated! Current version: {}, latest version: {}", BuildData.VERSION, latestVersion);
+                log.warn("ServerWrecker is outdated! Current version: {}, latest version: {}", BuildData.VERSION, latestVersion);
                 return true;
             }
         } catch (IOException e) {
-            LOGGER.warn("Failed to check for updates", e);
+            log.warn("Failed to check for updates", e);
         }
 
         return false;
@@ -279,7 +278,7 @@ public class ServerWreckerServer {
         try {
             rpcServer.shutdown();
         } catch (InterruptedException e) {
-            LOGGER.error("Failed to stop RPC server", e);
+            log.error("Failed to stop RPC server", e);
         }
     }
 
@@ -291,7 +290,7 @@ public class ServerWreckerServer {
 
         attackManager.start(settingsHolder);
 
-        LOGGER.debug("Started attack with id {}", attackManager.id());
+        log.debug("Started attack with id {}", attackManager.id());
 
         return attackManager.id();
     }

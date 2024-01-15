@@ -24,14 +24,13 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.account.AuthType;
 import net.pistonmaster.serverwrecker.account.MinecraftAccount;
 import net.pistonmaster.serverwrecker.account.service.AccountData;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.PropertyKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.inject.Provider;
@@ -49,8 +48,8 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.function.Consumer;
 
+@Slf4j
 public class SettingsManager {
-    public static final Logger LOGGER = LoggerFactory.getLogger(SettingsManager.class);
     // Used to read & write the settings file
     private static final Gson serializeGson = new GsonBuilder()
             .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())

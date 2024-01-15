@@ -19,6 +19,7 @@ package net.pistonmaster.serverwrecker.client.cli;
 
 import com.google.gson.JsonPrimitive;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.client.settings.SettingsManager;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
@@ -27,8 +28,6 @@ import net.pistonmaster.serverwrecker.grpc.generated.ComboSetting;
 import net.pistonmaster.serverwrecker.grpc.generated.IntSetting;
 import net.pistonmaster.serverwrecker.server.settings.lib.property.PropertyKey;
 import net.pistonmaster.serverwrecker.util.ShutdownManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 import java.util.List;
@@ -37,10 +36,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Slf4j
 @Getter
 @SuppressWarnings("unchecked")
 public class CLIManager {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CLIManager.class);
     private final RPCClient rpcClient;
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
@@ -62,7 +61,7 @@ public class CLIManager {
         commandLine.setUsageHelpAutoWidth(true);
         commandLine.setUsageHelpLongOptionsMaxWidth(30);
         commandLine.setExecutionExceptionHandler((ex, cmdLine, parseResult) -> {
-            LOGGER.error("Exception while executing command", ex);
+            log.error("Exception while executing command", ex);
             return 1;
         });
 

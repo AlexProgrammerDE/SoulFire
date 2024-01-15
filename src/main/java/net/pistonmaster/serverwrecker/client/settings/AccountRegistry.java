@@ -18,19 +18,18 @@
 package net.pistonmaster.serverwrecker.client.settings;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.account.AuthType;
 import net.pistonmaster.serverwrecker.account.MinecraftAccount;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 public class AccountRegistry {
-    public static final Logger LOGGER = LoggerFactory.getLogger(AccountRegistry.class);
     private final List<MinecraftAccount> accounts = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
 
@@ -42,14 +41,14 @@ public class AccountRegistry {
                 .toList();
 
         if (newAccounts.isEmpty()) {
-            LOGGER.warn("No accounts found in the provided data!");
+            log.warn("No accounts found in the provided data!");
             return;
         }
 
         this.accounts.addAll(newAccounts);
         callLoadHooks();
 
-        LOGGER.info("Loaded {} accounts!", newAccounts.size());
+        log.info("Loaded {} accounts!", newAccounts.size());
     }
 
     private MinecraftAccount fromStringSingle(String data, AuthType authType) {

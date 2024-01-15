@@ -23,15 +23,13 @@ import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 
+@Slf4j
 public class ThemeUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ThemeUtil.class);
-
     private ThemeUtil() {
     }
 
@@ -58,7 +56,7 @@ public class ThemeUtil {
 
             FlatAnimatedLafChange.hideSnapshotWithAnimation();
         } catch (UnsupportedLookAndFeelException | ReflectiveOperationException e) {
-            LOGGER.error("Failed to set theme!", e);
+            log.error("Failed to set theme!", e);
         }
     }
 

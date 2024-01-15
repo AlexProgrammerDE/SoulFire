@@ -19,13 +19,12 @@ package net.pistonmaster.serverwrecker.client.cli;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.account.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.client.command.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.server.viaversion.SWVersionConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -37,12 +36,12 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Command(name = "serverwrecker", mixinStandardHelpOptions = true,
         version = "ServerWrecker v" + BuildData.VERSION, showDefaultValues = true,
         description = BuildData.DESCRIPTION, sortOptions = false)
 public class SWCommandDefinition implements Callable<Integer> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SWCommandDefinition.class);
     private final CLIManager cliManager;
     @Setter
     private CommandLine commandLine;
@@ -107,7 +106,7 @@ public class SWCommandDefinition implements Callable<Integer> {
             try {
                 cliManager.settingsManager().accountRegistry().loadFromString(Files.readString(accountFile), authType);
             } catch (IOException e) {
-                LOGGER.error("Failed to load accounts!", e);
+                log.error("Failed to load accounts!", e);
                 return 1;
             }
         }
@@ -116,7 +115,7 @@ public class SWCommandDefinition implements Callable<Integer> {
             try {
                 cliManager.settingsManager().proxyRegistry().loadFromString(Files.readString(proxyFile), proxyType);
             } catch (IOException e) {
-                LOGGER.error("Failed to load proxies!", e);
+                log.error("Failed to load proxies!", e);
                 return 1;
             }
         }
@@ -125,7 +124,7 @@ public class SWCommandDefinition implements Callable<Integer> {
             try {
                 cliManager.settingsManager().loadProfile(profileFile);
             } catch (IOException e) {
-                LOGGER.error("Failed to load profile!", e);
+                log.error("Failed to load profile!", e);
                 return 1;
             }
         }

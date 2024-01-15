@@ -23,20 +23,18 @@ import io.grpc.InsecureChannelCredentials;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.AbstractStub;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.grpc.generated.AttackServiceGrpc;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandServiceGrpc;
 import net.pistonmaster.serverwrecker.grpc.generated.ConfigServiceGrpc;
 import net.pistonmaster.serverwrecker.grpc.generated.LogsServiceGrpc;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Getter
 public class RPCClient {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RPCClient.class);
-
     private final ManagedChannel channel;
     private final LogsServiceGrpc.LogsServiceStub logStub;
     private final CommandServiceGrpc.CommandServiceStub commandStub;
@@ -48,14 +46,14 @@ public class RPCClient {
         this(new JwtCredential(jwt), Grpc.newChannelBuilderForAddress(host, port, InsecureChannelCredentials.create())
                 .userAgent("ServerWreckerJavaClient/" + BuildData.VERSION).build());
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            LOGGER.info("*** shutting down gRPC client since JVM is shutting down");
+            log.info("*** shutting down gRPC client since JVM is shutting down");
             try {
                 shutdown();
             } catch (Throwable e) {
-                LOGGER.error("Interrupted while shutting down gRPC client", e);
+                log.error("Interrupted while shutting down gRPC client", e);
                 return;
             }
-            LOGGER.info("*** client shut down");
+            log.info("*** client shut down");
         }));
     }
 

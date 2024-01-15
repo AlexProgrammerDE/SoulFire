@@ -21,17 +21,15 @@ import ch.jalu.injector.Injector;
 import io.grpc.*;
 import io.grpc.netty.NettyServerBuilder;
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class RPCServer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RPCServer.class);
-
     @Getter
     private final String host;
     @Getter
@@ -64,16 +62,16 @@ public class RPCServer {
 
     public void start() throws IOException {
         server.start();
-        LOGGER.info("RPC Server started, listening on " + port);
+        log.info("RPC Server started, listening on " + port);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            LOGGER.info("*** shutting down gRPC server since JVM is shutting down");
+            log.info("*** shutting down gRPC server since JVM is shutting down");
             try {
                 shutdown();
             } catch (Throwable e) {
-                LOGGER.error("Error while shutting down gRPC server", e);
+                log.error("Error while shutting down gRPC server", e);
                 return;
             }
-            LOGGER.info("*** server shut down");
+            log.info("*** server shut down");
         }));
     }
 

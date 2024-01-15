@@ -19,15 +19,14 @@ package net.pistonmaster.serverwrecker.util;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@Slf4j
 @RequiredArgsConstructor
 public class ShutdownManager {
-    public static final Logger LOGGER = LoggerFactory.getLogger(ShutdownManager.class);
     private final Runnable shutdownHook;
     private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
     @Getter
@@ -44,7 +43,7 @@ public class ShutdownManager {
         }
 
         if (explicitExit) {
-            LOGGER.info("Shutting down...");
+            log.info("Shutting down...");
         }
 
         shutdownHook.run();

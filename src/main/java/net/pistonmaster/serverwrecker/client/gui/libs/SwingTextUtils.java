@@ -17,9 +17,8 @@
  */
 package net.pistonmaster.serverwrecker.client.gui.libs;
 
+import lombok.extern.slf4j.Slf4j;
 import org.intellij.lang.annotations.Language;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
@@ -33,9 +32,8 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+@Slf4j
 public class SwingTextUtils {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SwingTextUtils.class);
-
     private SwingTextUtils() {
     }
 
@@ -52,7 +50,7 @@ public class SwingTextUtils {
                 try {
                     Desktop.getDesktop().browse(event.getURL().toURI());
                 } catch (IOException | URISyntaxException e) {
-                    LOGGER.error("Failed to open link!", e);
+                    log.error("Failed to open link!", e);
                 }
             }
         });

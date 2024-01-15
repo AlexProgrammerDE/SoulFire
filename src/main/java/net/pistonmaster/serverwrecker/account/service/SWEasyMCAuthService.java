@@ -19,6 +19,7 @@ package net.pistonmaster.serverwrecker.account.service;
 
 import com.google.gson.Gson;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.account.AuthType;
 import net.pistonmaster.serverwrecker.account.HttpHelper;
 import net.pistonmaster.serverwrecker.account.MinecraftAccount;
@@ -27,16 +28,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
 
+@Slf4j
 public final class SWEasyMCAuthService implements MCAuthService<SWEasyMCAuthService.EasyMCAuthData> {
     private static final URI AUTHENTICATE_ENDPOINT = URI.create("https://api.easymc.io/v1/token/redeem");
-    private static final Logger LOGGER = LoggerFactory.getLogger(SWEasyMCAuthService.class);
     private final Gson gson = new Gson();
 
     @Override
@@ -49,7 +48,7 @@ public final class SWEasyMCAuthService implements MCAuthService<SWEasyMCAuthServ
                     TokenRedeemResponse.class);
 
             if (response.message() != null) {
-                LOGGER.info("EasyMC has a message for you (This is not a error): {}", response.message());
+                log.info("EasyMC has a message for you (This is not a error): {}", response.message());
             }
 
             return new MinecraftAccount(

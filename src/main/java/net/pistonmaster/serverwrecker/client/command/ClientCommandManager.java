@@ -21,6 +21,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandCompletionRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.CommandHistoryRequest;
@@ -28,8 +29,6 @@ import net.pistonmaster.serverwrecker.grpc.generated.CommandRequest;
 import net.pistonmaster.serverwrecker.server.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.server.api.event.lifecycle.DispatcherInitEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -38,9 +37,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientCommandManager {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientCommandManager.class);
     @Getter
     private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
     private final RPCClient rpcClient;
@@ -63,7 +62,7 @@ public class ClientCommandManager {
 
             return dispatcher.execute(parsed);
         } catch (CommandSyntaxException e) {
-            LOGGER.error("An error occurred while trying to execute a command.", e);
+            log.error("An error occurred while trying to execute a command.", e);
             return 1;
         }
     }
@@ -76,7 +75,7 @@ public class ClientCommandManager {
             ).getSuggestionsList();
             suggestions.addAll(offers);
         } catch (Exception e) {
-            LOGGER.error("An error occurred while trying to perform tab completion.", e);
+            log.error("An error occurred while trying to perform tab completion.", e);
         }
 
         return suggestions;

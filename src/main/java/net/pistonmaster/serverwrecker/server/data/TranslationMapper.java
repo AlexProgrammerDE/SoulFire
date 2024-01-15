@@ -18,26 +18,25 @@
 package net.pistonmaster.serverwrecker.server.data;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.TranslationArgumentLike;
 import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.function.Function;
 
+@Slf4j
 @RequiredArgsConstructor
 public class TranslationMapper implements Function<TranslatableComponent, String> {
     private final Map<String, String> mojangTranslations;
-    private final Logger logger = LoggerFactory.getLogger(TranslationMapper.class);
 
     @Override
     public String apply(TranslatableComponent component) {
         var translation = mojangTranslations.get(component.key());
 
         if (translation == null) {
-            logger.warn("Missing translation for key: {}", component.key());
+            log.warn("Missing translation for key: {}", component.key());
             return component.key();
         }
 

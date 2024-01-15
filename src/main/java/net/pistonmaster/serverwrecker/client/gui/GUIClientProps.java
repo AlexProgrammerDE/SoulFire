@@ -17,9 +17,8 @@
  */
 package net.pistonmaster.serverwrecker.client.gui;
 
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -31,8 +30,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 
+@Slf4j
 public class GUIClientProps {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GUIClientProps.class);
     private static final Path SETTINGS_PATH = SWPathConstants.DATA_FOLDER.resolve("gui-data.properties");
     private static final Properties SETTINGS = new Properties();
 
@@ -47,7 +46,7 @@ public class GUIClientProps {
         try (var is = Files.newInputStream(SETTINGS_PATH)) {
             SETTINGS.load(new InputStreamReader(is, StandardCharsets.UTF_8));
         } catch (IOException e) {
-            LOGGER.error("Failed to load settings!", e);
+            log.error("Failed to load settings!", e);
         }
     }
 
@@ -55,7 +54,7 @@ public class GUIClientProps {
         try (var os = Files.newOutputStream(SETTINGS_PATH, StandardOpenOption.CREATE)) {
             SETTINGS.store(new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8)), "ServerWrecker GUI Settings");
         } catch (IOException e) {
-            LOGGER.error("Failed to save settings!", e);
+            log.error("Failed to save settings!", e);
         }
     }
 

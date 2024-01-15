@@ -20,6 +20,7 @@ package net.pistonmaster.serverwrecker.server.protocol.bot.state.entity;
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.server.data.EntityType;
 import net.pistonmaster.serverwrecker.server.protocol.bot.movement.AABB;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributeState;
@@ -28,12 +29,10 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityMetadataSt
 import net.pistonmaster.serverwrecker.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 @Data
 public abstract class Entity {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Entity.class);
     private final EntityMetadataState metadataState = new EntityMetadataState();
     private final EntityAttributeState attributeState = new EntityAttributeState();
     private final EntityEffectState effectState = new EntityEffectState();
@@ -82,7 +81,7 @@ public abstract class Entity {
     }
 
     public void handleEntityEvent(EntityEvent event) {
-        LOGGER.debug("Unhandled entity event for entity {}: {}", entityId, event.name());
+        log.debug("Unhandled entity event for entity {}: {}", entityId, event.name());
     }
 
     /**

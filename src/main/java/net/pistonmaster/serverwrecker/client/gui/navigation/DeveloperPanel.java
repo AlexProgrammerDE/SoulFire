@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.serverwrecker.client.gui.navigation;
 
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.client.gui.GUIManager;
 import net.pistonmaster.serverwrecker.client.gui.LogPanel;
 import net.pistonmaster.serverwrecker.client.gui.libs.JFXFileHelper;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
 
+@Slf4j
 public class DeveloperPanel extends NavigationItem {
     @Inject
     public DeveloperPanel(GUIManager guiManager, LogPanel logPanel, CardsContainer cardsContainer) {
@@ -45,9 +47,9 @@ public class DeveloperPanel extends NavigationItem {
         ), "log.txt").ifPresent(file -> {
             try (var writer = Files.newBufferedWriter(file)) {
                 writer.write(logPanel.messageLogPanel().getLogs());
-                guiManager.logger().info("Saved log to: {}", file);
+                log.info("Saved log to: {}", file);
             } catch (IOException e) {
-                guiManager.logger().error("Failed to save log!", e);
+                log.error("Failed to save log!", e);
             }
         }));
     }

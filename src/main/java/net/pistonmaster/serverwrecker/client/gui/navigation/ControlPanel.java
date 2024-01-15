@@ -18,6 +18,7 @@
 package net.pistonmaster.serverwrecker.client.gui.navigation;
 
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.client.gui.GUIManager;
 import net.pistonmaster.serverwrecker.grpc.generated.*;
 
@@ -26,6 +27,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 public class ControlPanel extends JPanel {
     @Inject
     public ControlPanel(GUIManager guiManager) {
@@ -57,13 +59,13 @@ public class ControlPanel extends JPanel {
                     .setSettings(guiManager.settingsManager().exportSettings()).build(), new StreamObserver<>() {
                 @Override
                 public void onNext(AttackStartResponse value) {
-                    guiManager.logger().debug("Started bot attack with id {}", value.getId());
+                    log.debug("Started bot attack with id {}", value.getId());
                     attackId.set(value.getId());
                 }
 
                 @Override
                 public void onError(Throwable t) {
-                    guiManager.logger().error("Error while starting bot attack!", t);
+                    log.error("Error while starting bot attack!", t);
                 }
 
                 @Override
@@ -76,10 +78,10 @@ public class ControlPanel extends JPanel {
             var pauseText = pauseButton.getText().equals("Pause");
 
             if (pauseText) {
-                guiManager.logger().info("Paused bot attack");
+                log.info("Paused bot attack");
                 pauseButton.setText("Resume");
             } else {
-                guiManager.logger().info("Resumed bot attack");
+                log.info("Resumed bot attack");
                 pauseButton.setText("Pause");
             }
 
@@ -89,12 +91,12 @@ public class ControlPanel extends JPanel {
                     .setId(attackId.get()).setNewState(stateTarget).build(), new StreamObserver<>() {
                 @Override
                 public void onNext(AttackStateToggleResponse value) {
-                    guiManager.logger().debug("Toggled bot attack state to {}", stateTarget.name());
+                    log.debug("Toggled bot attack state to {}", stateTarget.name());
                 }
 
                 @Override
                 public void onError(Throwable t) {
-                    guiManager.logger().error("Error while toggling bot attack!", t);
+                    log.error("Error while toggling bot attack!", t);
                 }
 
                 @Override
@@ -115,12 +117,12 @@ public class ControlPanel extends JPanel {
                     .setId(attackId.get()).build(), new StreamObserver<>() {
                 @Override
                 public void onNext(AttackStopResponse value) {
-                    guiManager.logger().info("Stop of attack {} has been scheduled, follow logs for progress", attackId.get());
+                    log.info("Stop of attack {} has been scheduled, follow logs for progress", attackId.get());
                 }
 
                 @Override
                 public void onError(Throwable t) {
-                    guiManager.logger().error("Error while stopping bot attack!", t);
+                    log.error("Error while stopping bot attack!", t);
                 }
 
                 @Override

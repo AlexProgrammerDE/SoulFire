@@ -17,17 +17,15 @@
  */
 package net.pistonmaster.serverwrecker.server.api;
 
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.server.util.RandomUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 public class ExecutorHelper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExecutorHelper.class);
-
     private ExecutorHelper() {
     }
 
@@ -44,7 +42,7 @@ public class ExecutorHelper {
                 try {
                     runnable.run();
                 } catch (Throwable t) {
-                    LOGGER.error("Error while executing task!", t);
+                    log.error("Error while executing task!", t);
                 }
 
                 counter.set(0);

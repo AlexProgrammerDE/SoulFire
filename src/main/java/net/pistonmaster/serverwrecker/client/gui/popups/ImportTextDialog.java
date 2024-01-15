@@ -17,11 +17,10 @@
  */
 package net.pistonmaster.serverwrecker.client.gui.popups;
 
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.client.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.client.gui.GUIManager;
 import net.pistonmaster.serverwrecker.client.gui.libs.JFXFileHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,9 +35,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+@Slf4j
 public class ImportTextDialog extends JDialog {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImportTextDialog.class);
-
     public ImportTextDialog(Path initialDirectory, String loadText, String typeText, GUIManager guiManager, GUIFrame frame, Consumer<String> consumer) {
         super(frame, loadText, true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -93,11 +91,11 @@ public class ImportTextDialog extends JDialog {
             try {
                 return ((String) contents.getTransferData(DataFlavor.stringFlavor)).describeConstable();
             } catch (UnsupportedFlavorException | IOException e) {
-                LOGGER.error("Failed to get clipboard!", e);
+                log.error("Failed to get clipboard!", e);
                 return Optional.empty();
             }
         } else {
-            LOGGER.error("Clipboard does not contain text!");
+            log.error("Clipboard does not contain text!");
             return Optional.empty();
         }
     }
@@ -112,16 +110,16 @@ public class ImportTextDialog extends JDialog {
 
             JFXFileHelper.showOpenDialog(initialDirectory, filterMap).ifPresent(file -> {
                 if (!Files.isReadable(file)) {
-                    LOGGER.error("File is not readable!");
+                    log.error("File is not readable!");
                     return;
                 }
 
-                LOGGER.info("Opening: {}", file.getFileName());
+                log.info("Opening: {}", file.getFileName());
 
                 try {
                     consumer.accept(Files.readString(file));
                 } catch (Throwable e) {
-                    LOGGER.error("Failed to import text!", e);
+                    log.error("Failed to import text!", e);
                 }
             });
         }
@@ -138,7 +136,7 @@ public class ImportTextDialog extends JDialog {
                 try {
                     getClipboard().ifPresent(consumer);
                 } catch (Throwable e) {
-                    LOGGER.error("Failed to import text!", e);
+                    log.error("Failed to import text!", e);
                 }
             });
         }
@@ -154,7 +152,7 @@ public class ImportTextDialog extends JDialog {
                 try {
                     consumer.accept(textArea.getText());
                 } catch (Throwable e) {
-                    LOGGER.error("Failed to import text!", e);
+                    log.error("Failed to import text!", e);
                 }
             });
         }

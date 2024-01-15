@@ -19,10 +19,9 @@ package net.pistonmaster.serverwrecker.server.protocol.netty;
 
 import com.google.common.net.HostAndPort;
 import io.netty.channel.EventLoopGroup;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.server.settings.BotSettings;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
@@ -33,8 +32,8 @@ import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.Optional;
 
+@Slf4j
 public class ResolveUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResolveUtil.class);
     private static final DirContext DIR_CONTEXT;
 
     static {
@@ -64,7 +63,7 @@ public class ResolveUtil {
                 return resolved;
             }
         } else {
-            LOGGER.debug("Not resolving SRV record for {}", serverAddress.host());
+            log.debug("Not resolving SRV record for {}", serverAddress.host());
         }
 
         return resolveByHost(serverAddress)
@@ -73,22 +72,22 @@ public class ResolveUtil {
 
     private static Optional<ResolvedAddress> resolveSrv(ServerAddress serverAddress, EventLoopGroup eventLoopGroup) {
         var name = "_minecraft._tcp." + serverAddress.host();
-        LOGGER.debug("Attempting SRV lookup for \"{}\".", name);
+        log.debug("Attempting SRV lookup for \"{}\".", name);
 
         try {
             var srvAttribute = DIR_CONTEXT.getAttributes(name, new String[]{"SRV"})
                     .get("srv");
             if (srvAttribute != null) {
                 var attributeSplit = srvAttribute.get().toString().split(" ", 4);
-                LOGGER.debug("SRV lookup resolved \"{}\" to \"{}\".", name, srvAttribute.get().toString());
+                log.debug("SRV lookup resolved \"{}\" to \"{}\".", name, srvAttribute.get().toString());
 
                 return resolveByHost(new ServerAddress(attributeSplit[3], parsePort(attributeSplit[2])))
                         .map(e -> new ResolvedAddress(serverAddress, e));
             } else {
-                LOGGER.debug("SRV lookup for \"{}\" returned no records.", name);
+                log.debug("SRV lookup for \"{}\" returned no records.", name);
             }
         } catch (Exception e) {
-            LOGGER.debug("Failed to resolve SRV record.", e);
+            log.debug("Failed to resolve SRV record.", e);
         }
 
         return Optional.empty();
@@ -98,10 +97,10 @@ public class ResolveUtil {
         try {
             var host = serverAddress.host();
             var resolved = InetAddress.getByName(host);
-            LOGGER.debug("Resolved {} -> {}", host, resolved.getHostAddress());
+            log.debug("Resolved {} -> {}", host, resolved.getHostAddress());
             return Optional.of(new InetSocketAddress(resolved, serverAddress.port()));
         } catch (UnknownHostException e) {
-            LOGGER.debug("Failed to resolve host.", e);
+            log.debug("Failed to resolve host.", e);
             return Optional.empty();
         }
     }

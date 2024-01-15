@@ -25,10 +25,10 @@ import org.slf4j.LoggerFactory;
 
 public class EventExceptionHandler implements IExceptionHandler {
     public static final EventExceptionHandler INSTANCE = new EventExceptionHandler();
-    private static final Logger LOGGER = LoggerFactory.getLogger("ServerWrecker");
+    private static final Logger log = LoggerFactory.getLogger("ServerWrecker");
 
     @Override
     public void handle(@NotNull AHandler handler, @NotNull Object event, @NotNull Throwable t) {
-        LOGGER.error("Exception while handling event " + event.getClass().getName() + " in handler " + handler.getClass().getName(), t);
+        log.error("Exception while handling event " + event.getClass().getName() + " in handler " + handler.getClass().getName(), t);
     }
 }

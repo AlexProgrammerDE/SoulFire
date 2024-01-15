@@ -17,14 +17,12 @@
  */
 package net.pistonmaster.serverwrecker.server.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 
+@Slf4j
 public class VersionComparator {
-    private static final Logger logger = LoggerFactory.getLogger(VersionComparator.class);
-
     private VersionComparator() {
     }
 
@@ -53,7 +51,7 @@ public class VersionComparator {
                 i++;
             }
         } catch (NumberFormatException e) {
-            logger.error("Error while parsing version!", e);
+            log.error("Error while parsing version!", e);
         }
         return false;
     }

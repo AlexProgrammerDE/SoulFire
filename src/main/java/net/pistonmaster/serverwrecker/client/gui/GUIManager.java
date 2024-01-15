@@ -20,14 +20,13 @@ package net.pistonmaster.serverwrecker.client.gui;
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.reflect.Modules;
 import net.pistonmaster.serverwrecker.client.command.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.client.settings.SettingsManager;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
 import net.pistonmaster.serverwrecker.util.ShutdownManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,6 +39,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Slf4j
 @Getter
 public class GUIManager {
     public static final Queue<Runnable> MAIN_THREAD_QUEUE = new ConcurrentLinkedQueue<>();
@@ -48,7 +48,6 @@ public class GUIManager {
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
-    private final Logger logger = LoggerFactory.getLogger(GUIManager.class);
     private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
     private final SettingsManager settingsManager = new SettingsManager();
 
@@ -70,7 +69,7 @@ public class GUIManager {
         try {
             Files.createDirectories(SWPathConstants.PROFILES_FOLDER);
         } catch (IOException e) {
-            logger.error("Failed to create profiles folder!", e);
+            log.error("Failed to create profiles folder!", e);
         }
 
         SWTerminalConsole.setupTerminalConsole(threadPool, shutdownManager, rpcClient);
@@ -83,7 +82,7 @@ public class GUIManager {
 
         guiFrame.initComponents(injector);
 
-        logger.info("Opening GUI!");
+        log.info("Opening GUI!");
 
         SwingUtilities.invokeLater(() -> guiFrame.open(injector));
     }
@@ -112,7 +111,7 @@ public class GUIManager {
 
             CLASS_NAME_VARIABLE.set("ServerWrecker");
         } catch (Exception e) {
-            logger.error("Failed to set app title!", e);
+            log.error("Failed to set app title!", e);
         }
     }
 

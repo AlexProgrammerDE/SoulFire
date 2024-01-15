@@ -26,13 +26,12 @@ import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDarker
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicIJTheme;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.client.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.client.gui.popups.AboutPopup;
 import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.server.api.event.gui.WindowCloseEvent;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -44,8 +43,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class SWMenuBar extends JMenuBar {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SWMenuBar.class);
     private static final List<Class<? extends BasicLookAndFeel>> THEMES;
 
     static {
@@ -77,9 +76,9 @@ public class SWMenuBar extends JMenuBar {
         )).ifPresent(file -> {
             try {
                 guiManager.settingsManager().loadProfile(file);
-                LOGGER.info("Loaded profile!");
+                log.info("Loaded profile!");
             } catch (IOException ex) {
-                LOGGER.warn("Failed to load profile!", ex);
+                log.warn("Failed to load profile!", ex);
             }
         }));
 
@@ -96,9 +95,9 @@ public class SWMenuBar extends JMenuBar {
 
             try {
                 guiManager.settingsManager().saveProfile(Path.of(path));
-                LOGGER.info("Saved profile!");
+                log.info("Saved profile!");
             } catch (IOException ex) {
-                LOGGER.warn("Failed to save profile!", ex);
+                log.warn("Failed to save profile!", ex);
             }
         }));
 
@@ -173,7 +172,7 @@ public class SWMenuBar extends JMenuBar {
         try {
             Desktop.getDesktop().browse(SWPathConstants.DATA_FOLDER.toUri());
         } catch (IOException e) {
-            LOGGER.warn("Failed to open home page!", e);
+            log.warn("Failed to open home page!", e);
         }
     }
 }

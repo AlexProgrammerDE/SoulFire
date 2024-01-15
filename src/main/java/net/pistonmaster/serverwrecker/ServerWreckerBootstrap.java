@@ -18,6 +18,7 @@
 package net.pistonmaster.serverwrecker;
 
 import io.netty.util.ResourceLeakDetector;
+import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.reflect.Agents;
@@ -33,8 +34,6 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.fusesource.jansi.AnsiConsole;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.IOException;
@@ -48,9 +47,9 @@ import java.util.List;
  * This class prepares the earliest work possible, such as loading mixins and
  * setting up logging.
  */
+@Slf4j
 public class ServerWreckerBootstrap {
     public static final PluginManager PLUGIN_MANAGER = new JarPluginManager(SWPathConstants.PLUGINS_FOLDER);
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerWreckerBootstrap.class);
 
     static {
         System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
@@ -91,9 +90,9 @@ public class ServerWreckerBootstrap {
         PLUGIN_MANAGER.getExtensions(MixinExtension.class).forEach(mixinExtension -> {
             for (var mixinPath : mixinExtension.getMixinPaths()) {
                 if (mixinPaths.add(mixinPath)) {
-                    LOGGER.info("Added mixin \"{}\"", mixinPath);
+                    log.info("Added mixin \"{}\"", mixinPath);
                 } else {
-                    LOGGER.warn("Mixin path \"{}\" is already added!", mixinPath);
+                    log.warn("Mixin path \"{}\" is already added!", mixinPath);
                 }
             }
         });
@@ -110,11 +109,11 @@ public class ServerWreckerBootstrap {
 
         try {
             transformerManager.hookInstrumentation(Agents.getInstrumentation());
-            LOGGER.info("Used Runtime Agent to inject mixins");
+            log.info("Used Runtime Agent to inject mixins");
 
             postMixinMain(runServer, args);
         } catch (ReflectiveOperationException | IOException t) {
-            LOGGER.error("Failed to inject mixins", t);
+            log.error("Failed to inject mixins", t);
             System.exit(1);
         }
     }
@@ -123,10 +122,10 @@ public class ServerWreckerBootstrap {
         var host = getHost();
         var port = getAvailablePort();
         if (runServer) {
-            LOGGER.info("Starting server on {}:{}", host, port);
+            log.info("Starting server on {}:{}", host, port);
             ServerWreckerLoader.runHeadless(host, port, args);
         } else {
-            LOGGER.info("Starting GUI and server on {}:{}", host, port);
+            log.info("Starting GUI and server on {}:{}", host, port);
             GUIManager.injectTheme();
             GUIManager.loadGUIProperties();
 
@@ -136,7 +135,7 @@ public class ServerWreckerBootstrap {
 
     public static void injectExceptionHandler() {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            LOGGER.error("Exception in thread {}", thread.getName());
+            log.error("Exception in thread {}", thread.getName());
             //noinspection CallToPrintStackTrace
             throwable.printStackTrace();
         });
@@ -146,7 +145,7 @@ public class ServerWreckerBootstrap {
         try {
             Files.createDirectories(SWPathConstants.PLUGINS_FOLDER);
         } catch (IOException e) {
-            LOGGER.error("Failed to create plugin directory", e);
+            log.error("Failed to create plugin directory", e);
         }
 
         // Prepare the plugin manager
@@ -199,7 +198,7 @@ public class ServerWreckerBootstrap {
                 serverSocket.close();
                 break; // Port is available, exit the loop
             } catch (IOException e) {
-                LOGGER.info("Port {} is already in use, trying next port...", initialPort);
+                log.info("Port {} is already in use, trying next port...", initialPort);
                 initialPort++; // Increment the port number and try again
             }
         }

@@ -18,6 +18,7 @@
 package net.pistonmaster.serverwrecker.client.settings;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import org.slf4j.Logger;
@@ -27,9 +28,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 public class ProxyRegistry {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyRegistry.class);
+    private static final Logger log = LoggerFactory.getLogger(ProxyRegistry.class);
     private final List<SWProxy> proxies = new ArrayList<>();
     private final List<Runnable> loadHooks = new ArrayList<>();
 
@@ -49,14 +51,14 @@ public class ProxyRegistry {
                 .toList();
 
         if (newProxies.isEmpty()) {
-            LOGGER.warn("No proxies found in the provided data!");
+            log.warn("No proxies found in the provided data!");
             return;
         }
 
         this.proxies.addAll(newProxies);
         callLoadHooks();
 
-        LOGGER.info("Loaded {} proxies!", newProxies.size());
+        log.info("Loaded {} proxies!", newProxies.size());
     }
 
     private SWProxy fromStringSingle(String data, ProxyType proxyType) {
