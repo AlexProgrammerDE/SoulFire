@@ -1,10 +1,26 @@
+/*
+ * ServerWrecker
+ * Copyright (C) 2024  AlexProgrammerDE
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package net.pistonmaster.serverwrecker.generator.generators;
 
 import com.google.gson.JsonElement;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -13,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 
+@Slf4j
 public class DataGenerators {
     private static final List<IDataGenerator> GENERATORS = List.of(
             new BlockCollisionShapesDataGenerator.BlockShapesGenerator(),
@@ -31,21 +48,20 @@ public class DataGenerators {
             new TagsDataGenerator.ItemTagsDataGenerator(),
             new TagsDataGenerator.EntityTypeTagsDataGenerator()
     );
-    private static final Logger logger = LoggerFactory.getLogger(DataGenerators.class);
 
     public static boolean runDataGenerators(Path outputDirectory) {
         try {
             Files.createDirectories(outputDirectory);
         } catch (IOException exception) {
-            logger.error("Failed to create data generator output directory at {}", outputDirectory, exception);
+            log.error("Failed to create data generator output directory at {}", outputDirectory, exception);
             return false;
         }
 
         var generatorsFailed = 0;
-        logger.info("Running minecraft data generators, output at {}", outputDirectory);
+        log.info("Running minecraft data generators, output at {}", outputDirectory);
 
         for (var dataGenerator : GENERATORS) {
-            logger.info("Running generator {}", dataGenerator.getDataName());
+            log.info("Running generator {}", dataGenerator.getDataName());
             try {
                 var outputFileName = dataGenerator.getDataName();
                 var outputFilePath = outputDirectory.resolve(outputFileName);
@@ -62,27 +78,27 @@ public class DataGenerators {
                         writer.write(string);
                     }
                 } else {
-                    logger.error("Unknown output type for data generator {}", dataGenerator.getDataName());
+                    log.error("Unknown output type for data generator {}", dataGenerator.getDataName());
                     generatorsFailed++;
                     continue;
                 }
 
-                logger.info("Generator: {} -> {}", dataGenerator.getDataName(), outputFileName);
+                log.info("Generator: {} -> {}", dataGenerator.getDataName(), outputFileName);
             } catch (Throwable exception) {
-                logger.error("Failed to run data generator {}", dataGenerator.getDataName(), exception);
+                log.error("Failed to run data generator {}", dataGenerator.getDataName(), exception);
                 generatorsFailed++;
             }
         }
 
-        logger.info("Running built-in data generator");
+        log.info("Running built-in data generator");
         try {
             net.minecraft.data.Main.main(new String[]{"--all", "--output", outputDirectory.resolve("built-in-generator").toString()});
         } catch (IOException e) {
-            logger.error("Failed to run built-in data generator", e);
+            log.error("Failed to run built-in data generator", e);
             generatorsFailed++;
         }
 
-        logger.info("Finishing running data generators");
+        log.info("Finishing running data generators");
         return generatorsFailed == 0;
     }
 }
