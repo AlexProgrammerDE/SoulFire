@@ -20,6 +20,7 @@ package net.pistonmaster.serverwrecker.server.pathfinding.execution;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import net.pistonmaster.serverwrecker.server.pathfinding.MovementConstants;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
 import net.pistonmaster.serverwrecker.server.util.MathHelper;
@@ -84,7 +85,7 @@ public final class MovementAction implements WorldAction {
         clientEntity.controlState().forward(true);
 
         var botPosition = clientEntity.pos();
-        if (position.getY() > botPosition.getY() && shouldJump()) {
+        if (position.getY() - MovementConstants.STEP_HEIGHT > botPosition.getY() && shouldJump()) {
             clientEntity.controlState().jumping(true);
         }
     }
