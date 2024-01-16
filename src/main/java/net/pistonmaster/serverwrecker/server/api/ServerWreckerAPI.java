@@ -74,11 +74,11 @@ public class ServerWreckerAPI {
     }
 
     public static <T extends ServerWreckerGlobalEvent> void registerListener(Class<T> clazz, Consumer<? super T> subscriber) {
-        EventUtil.runAndCompareChanges(eventBus, () -> eventBus.registerConsumer(subscriber, clazz));
+        EventUtil.runAndAssertChanged(eventBus, () -> eventBus.registerConsumer(subscriber, clazz));
     }
 
     public static void registerListeners(Class<?> listenerClass) {
-        EventUtil.runAndCompareChanges(eventBus, () -> eventBus.register(listenerClass));
+        EventUtil.runAndAssertChanged(eventBus, () -> eventBus.register(listenerClass));
     }
 
     public static void unregisterListener(Object listener) {

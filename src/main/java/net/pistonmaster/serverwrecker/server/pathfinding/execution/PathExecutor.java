@@ -113,23 +113,14 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     }
 
     public void register() {
-        EventUtil.runAndCompareChanges(connection.eventBus(), () ->
+        EventUtil.runAndAssertChanged(connection.eventBus(), () ->
                 connection.eventBus().registerConsumer(this, BotPreTickEvent.class));
     }
 
     public void unregister() {
-        connection.eventBus().unregisterAll(BotPreTickEvent.class, (c, o) -> {
-            if (c == PathExecutor.class && o.isPresent()) {
-                var executor = (PathExecutor) o.get();
-
-                if (executor == this) {
-                    executor.cancel();
-                    return true;
-                }
-            }
-
-            return false;
-        });
+        EventUtil.runAndAssertChanged(connection.eventBus(), () ->
+                connection.eventBus().unregisterConsumer(this, BotPreTickEvent.class));
+        this.cancel();
     }
 
     public void cancel() {
@@ -154,6 +145,11 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
                 var newActions = findPath.get(false);
                 if (cancelled) {
+                    return;
+                }
+
+                if (newActions.isEmpty()) {
+                    connection.logger().info("We're already at the goal!");
                     return;
                 }
 

@@ -128,7 +128,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             };
 
             try {
-                graph.insertActions(current.entityState(), callback);
+                graph.insertActions(current.entityState(), callback, routeIndex::containsKey);
             } catch (OutOfLevelException e) {
                 log.debug("Found a node out of the level: {}", current.entityState().positionBlock());
                 stopwatch.stop();

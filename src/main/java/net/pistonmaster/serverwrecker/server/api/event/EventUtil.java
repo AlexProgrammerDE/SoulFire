@@ -27,13 +27,13 @@ import java.util.Map;
 public class EventUtil {
     private static final FieldWrapper handlersWrapper = RStream.of(LambdaManager.class).fields().by("handlers");
 
-    public static void runAndCompareChanges(LambdaManager manager, Runnable runnable) {
+    public static void runAndAssertChanged(LambdaManager manager, Runnable runnable) {
         var handlers = handlersWrapper.<Map<?, List<?>>>get(manager);
         var initialHandlers = countTotalHandlers(handlers);
         runnable.run();
         var finalHandlers = countTotalHandlers(handlers);
         if (initialHandlers == finalHandlers) {
-            throw new IllegalStateException("No events were registered!");
+            throw new IllegalStateException("No handlers changed!");
         }
     }
 

@@ -17,10 +17,13 @@
  */
 package net.pistonmaster.serverwrecker.server.util;
 
+import net.pistonmaster.serverwrecker.server.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
 
 public class BlockTypeHelper {
+    private static final double SAFE_BLOCK_MIN_HEIGHT = 0.9;
+
     private BlockTypeHelper() {
     }
 
@@ -58,7 +61,18 @@ public class BlockTypeHelper {
     }
 
     public static boolean isSafeBlockToStandOn(BlockStateMeta meta) {
-        return meta.blockShapeType().isFullBlock() && !isHurtWhenStoodOn(meta.blockType());
+        return isRoughlyFullBlock(meta.blockShapeType()) && !isHurtWhenStoodOn(meta.blockType());
+    }
+
+    public static boolean isRoughlyFullBlock(BlockShapeType type) {
+        if (type.blockShapes().size() != 1) {
+            return false;
+        }
+
+        var shape = type.blockShapes().getFirst();
+        return shape.isBlockXZCollision()
+                && shape.minY() == 0
+                && shape.maxY() >= SAFE_BLOCK_MIN_HEIGHT;
     }
 
     public static boolean isDiggable(BlockType type) {

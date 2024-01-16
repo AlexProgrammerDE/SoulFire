@@ -23,10 +23,9 @@ import org.cloudburstmc.math.vector.Vector3i;
 
 /**
  * A simple 3D integer vector.
- * This class is used instead of SWVec3i because this uses direct field access instead of getters.
+ * This class is used instead of Vector3i because this uses direct field access instead of getters.
  * Even though the JIT compiler could optimize this, it's still faster to use this class.
  */
-@SuppressWarnings("ClassCanBeRecord") // We want direct field access to boost performance
 @RequiredArgsConstructor
 public class SWVec3i {
     public static final SWVec3i ZERO = new SWVec3i(0, 0, 0);
@@ -34,6 +33,8 @@ public class SWVec3i {
     public final int x;
     public final int y;
     public final int z;
+    private int hashCode;
+    private boolean hashCodeSet;
 
     public static SWVec3i fromDouble(Vector3d vec) {
         return new SWVec3i(vec.getFloorX(), vec.getFloorY(), vec.getFloorZ());
@@ -50,7 +51,12 @@ public class SWVec3i {
 
     @Override
     public int hashCode() {
-        return (x * 211 + y) * 97 + z;
+        if (!hashCodeSet) {
+            hashCode = (x * 211 + y) * 97 + z;
+            hashCodeSet = true;
+        }
+
+        return hashCode;
     }
 
     public SWVec3i add(int x, int y, int z) {

@@ -33,6 +33,7 @@ import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
 import net.pistonmaster.serverwrecker.server.util.ObjectReference;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {
@@ -233,11 +234,11 @@ public record MinecraftGraph(TagsState tagsState) {
                 && !BlockTypeHelper.isFluid(blockState.blockType()));
     }
 
-    public void insertActions(BotEntityState node, Consumer<GraphInstructions> callback) {
+    public void insertActions(BotEntityState node, Consumer<GraphInstructions> callback, Predicate<SWVec3i> alreadySeen) {
         var actions = new GraphAction[ACTIONS_TEMPLATE.length];
 
         fillTemplateActions(node, actions);
-        calculateActions(node, actions, callback);
+        calculateActions(node, actions, callback, alreadySeen);
     }
 
     private void fillTemplateActions(BotEntityState node, GraphAction[] actions) {
@@ -246,7 +247,7 @@ public record MinecraftGraph(TagsState tagsState) {
         }
     }
 
-    private void calculateActions(BotEntityState node, GraphAction[] actions, Consumer<GraphInstructions> callback) {
+    private void calculateActions(BotEntityState node, GraphAction[] actions, Consumer<GraphInstructions> callback, Predicate<SWVec3i> alreadySeen) {
         for (var i = 0; i < SUBSCRIPTION_KEYS.length; i++) {
             processSubscription(node, actions, callback, i);
         }
@@ -278,16 +279,16 @@ public record MinecraftGraph(TagsState tagsState) {
                 }
             }
 
-                switch (processSubscriptionAction(key, subscriber, action, isFreeReference, blockState, absolutePositionBlock, node)) {
-                    case CONTINUE -> {
-                        if (!action.decrementAndIsDone() || action.impossibleToComplete()) {
-                            continue;
-                        }
-
-                        callback.accept(action.getInstructions(node));
+            switch (processSubscriptionAction(key, subscriber, action, isFreeReference, blockState, absolutePositionBlock, node)) {
+                case CONTINUE -> {
+                    if (!action.decrementAndIsDone() || action.impossibleToComplete()) {
+                        continue;
                     }
-                    case IMPOSSIBLE -> actions[subscriber.actionIndex] = null;
+
+                    callback.accept(action.getInstructions(node));
                 }
+                case IMPOSSIBLE -> actions[subscriber.actionIndex] = null;
+            }
         }
     }
 
@@ -349,25 +350,28 @@ public record MinecraftGraph(TagsState tagsState) {
                         case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
                     };
 
-                    if (unsafe) {
-                        var currentValue = playerMovement.blockBreakCosts()[subscriber.blockArrayIndex];
-
-                        if (currentValue != null) {
-                            // We learned that this block needs to be broken, so we need to set it as impossible
-                            yield SubscriptionSingleResult.IMPOSSIBLE;
-                        }
-
-                        // Store for a later time that this is unsafe,
-                        // so if we check this block,
-                        // we know it's unsafe
-                        playerMovement.unsafeToBreak()[subscriber.blockArrayIndex] = true;
+                    if (!unsafe) {
+                        // All good, we can continue
+                        yield SubscriptionSingleResult.CONTINUE;
                     }
+
+                    var currentValue = playerMovement.blockBreakCosts()[subscriber.blockArrayIndex];
+
+                    if (currentValue != null) {
+                        // We learned that this block needs to be broken, so we need to set it as impossible
+                        yield SubscriptionSingleResult.IMPOSSIBLE;
+                    }
+
+                    // Store for a later time that this is unsafe,
+                    // so if we check this block,
+                    // we know it's unsafe
+                    playerMovement.unsafeToBreak()[subscriber.blockArrayIndex] = true;
 
                     yield SubscriptionSingleResult.CONTINUE;
                 }
                 case MOVEMENT_SOLID -> {
                     // Block is safe to walk on, no need to check for more
-                    if (blockState.blockShapeType().isFullBlock()) {
+                    if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
                         yield SubscriptionSingleResult.CONTINUE;
                     }
 
@@ -441,7 +445,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 }
                 case MOVEMENT_SOLID -> {
                     // Block is safe to walk on, no need to check for more
-                    if (blockState.blockShapeType().isFullBlock()) {
+                    if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
                         yield SubscriptionSingleResult.CONTINUE;
                     }
 

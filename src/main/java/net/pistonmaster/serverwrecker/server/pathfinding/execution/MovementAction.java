@@ -51,7 +51,7 @@ public final class MovementAction implements WorldAction {
             // We are inside a block, so being close is good enough
             var distance = botPosition.distance(position);
             return distance <= 1;
-        } else if (botPosition.getY() != position.getY()) {
+        } else if (MathHelper.isOutsideTolerance(botPosition.getY(), position.getY(), 0.2)) {
             // We want to be on the same Y level
             return false;
         } else {
