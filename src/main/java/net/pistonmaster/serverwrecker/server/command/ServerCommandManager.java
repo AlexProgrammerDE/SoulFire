@@ -148,7 +148,7 @@ public class ServerCommandManager {
         dispatcher.register(literal("stop-path")
                 .executes(help("Makes all connected bots stop pathfinding", c -> forEveryBot(bot -> {
                     EventUtil.runAndAssertChanged(bot.eventBus(), () ->
-                            bot.eventBus().unregisterAll(BotPreTickEvent.class,PathExecutor.class::isAssignableFrom));
+                            bot.eventBus().unregisterAll(BotPreTickEvent.class, PathExecutor.class::isAssignableFrom));
 
                     bot.sessionDataManager().controlState().resetAll();
                     return Command.SINGLE_SUCCESS;
