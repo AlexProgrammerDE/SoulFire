@@ -101,6 +101,8 @@ public class PlayerMovementState {
         entity.y(pos.y);
         entity.z(pos.z);
 
+        entity.onGround(onGround);
+
         entity.motionX(vel.x);
         entity.motionY(vel.y);
         entity.motionZ(vel.z);

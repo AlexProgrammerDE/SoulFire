@@ -101,7 +101,7 @@ public final class BlockBreakAction implements WorldAction {
                 var cost = Costs.getRequiredMiningTicks(
                         sessionDataManager.tagsState(),
                         sessionDataManager.clientEntity().effectState(),
-                        clientEntity.movementState().onGround(),
+                        clientEntity.onGround(),
                         item,
                         optionalBlockType
                 ).ticks();
@@ -191,7 +191,7 @@ public final class BlockBreakAction implements WorldAction {
             remainingTicks = Costs.getRequiredMiningTicks(
                     sessionDataManager.tagsState(),
                     sessionDataManager.clientEntity().effectState(),
-                    clientEntity.movementState().onGround(),
+                    clientEntity.onGround(),
                     sessionDataManager.inventoryManager().getPlayerInventory()
                             .hotbarSlot(sessionDataManager.inventoryManager().heldItemSlot())
                             .item(),

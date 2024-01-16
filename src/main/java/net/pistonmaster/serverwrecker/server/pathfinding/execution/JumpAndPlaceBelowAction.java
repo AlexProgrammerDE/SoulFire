@@ -143,7 +143,7 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
             return;
         }
 
-        if (clientEntity.movementState().pos().y() <= blockPosition.y + 1) {
+        if (clientEntity.y() <= blockPosition.y + 1) {
             // Make sure we are so high that we can place the block
             sessionDataManager.controlState().jumping(true);
             return;

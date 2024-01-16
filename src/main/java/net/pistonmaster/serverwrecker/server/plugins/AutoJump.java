@@ -45,7 +45,7 @@ public class AutoJump implements InternalExtension {
             var clientEntity = sessionDataManager.clientEntity();
             if (level != null && clientEntity != null
                     && level.isChunkLoaded(clientEntity.blockPos())
-                    && clientEntity.movementState().onGround()) {
+                    && clientEntity.onGround()) {
                 connection.logger().debug("[AutoJump] Jumping!");
                 clientEntity.jump();
             }
