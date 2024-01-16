@@ -348,7 +348,7 @@ public class ServerCommandManager {
 
                 Boolean2ObjectFunction<List<WorldAction>> findPath = requiresRepositioning -> {
                     var start = BotEntityState.initialState(
-                            clientEntity.pos(),
+                            clientEntity,
                             new ProjectedLevelState(
                                     Objects.requireNonNull(sessionDataManager.getCurrentLevel(), "Level is null!").chunks().immutableCopy()
                             ),

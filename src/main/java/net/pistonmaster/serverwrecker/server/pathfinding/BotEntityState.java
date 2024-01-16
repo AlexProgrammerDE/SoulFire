@@ -19,6 +19,8 @@ package net.pistonmaster.serverwrecker.server.pathfinding;
 
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedLevelState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ClientEntity;
+import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
 import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 
@@ -38,7 +40,15 @@ public record BotEntityState(Vector3d position, SWVec3i positionBlock, Projected
         this(position, SWVec3i.fromDouble(position), levelState, inventory);
     }
 
-    public static BotEntityState initialState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory) {
-        return new BotEntityState(VectorHelper.middleOfBlockNormalize(position), levelState, inventory);
+    public static BotEntityState initialState(ClientEntity clientEntity, ProjectedLevelState levelState, ProjectedInventory inventory) {
+        var pos = clientEntity.pos();
+        var insideBlock = levelState.getBlockStateAt(SWVec3i.fromDouble(pos));
+        if (BlockTypeHelper.isRoughlyFullBlock(insideBlock.blockShapeType())) {
+            // We are inside a block that is likely 0.9 blocks high,
+            // so we want to start calculating as if we stand on top of it.
+            pos = pos.add(0, 1, 0);
+        }
+
+        return new BotEntityState(VectorHelper.middleOfBlockNormalize(pos), levelState, inventory);
     }
 }
