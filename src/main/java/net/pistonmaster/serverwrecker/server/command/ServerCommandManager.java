@@ -148,9 +148,18 @@ public class ServerCommandManager {
         dispatcher.register(literal("stop-path")
                 .executes(help("Makes all connected bots stop pathfinding", c -> forEveryBot(bot -> {
                     EventUtil.runAndAssertChanged(bot.eventBus(), () ->
-                            bot.eventBus().unregisterAll(BotPreTickEvent.class, PathExecutor.class::isAssignableFrom));
+                            bot.eventBus().unregisterAll(BotPreTickEvent.class, (clazz, o) -> {
+                                if (PathExecutor.class.isAssignableFrom(clazz)) {
+                                    ((PathExecutor) o.orElseThrow()).cancel();
+                                    return true;
+                                }
+
+                                return false;
+                            }));
 
                     bot.sessionDataManager().controlState().resetAll();
+
+                    c.getSource().sendMessage("Stopped pathfinding for " + bot.meta().minecraftAccount().username());
                     return Command.SINGLE_SUCCESS;
                 }))));
 
