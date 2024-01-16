@@ -34,6 +34,7 @@ import net.pistonmaster.serverwrecker.server.AttackManager;
 import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
 import net.pistonmaster.serverwrecker.server.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.event.EventUtil;
 import net.pistonmaster.serverwrecker.server.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.server.api.event.lifecycle.DispatcherInitEvent;
 import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
@@ -146,7 +147,8 @@ public class ServerCommandManager {
                         }))));
         dispatcher.register(literal("stop-path")
                 .executes(help("Makes all connected bots stop pathfinding", c -> forEveryBot(bot -> {
-                    bot.eventBus().unregisterAll(BotPreTickEvent.class, PathExecutor.class::isAssignableFrom);
+                    EventUtil.runAndAssertChanged(bot.eventBus(), () ->
+                            bot.eventBus().unregisterAll(BotPreTickEvent.class,PathExecutor.class::isAssignableFrom));
 
                     bot.sessionDataManager().controlState().resetAll();
                     return Command.SINGLE_SUCCESS;
@@ -287,7 +289,7 @@ public class ServerCommandManager {
 
         var resultCode = Command.SINGLE_SUCCESS;
         for (var attackManager : serverWreckerServer.attacks().values()) {
-            log.info("Running command for attack {}", attackManager.id());
+            log.info("--- Running command for attack {} ---", attackManager.id());
             var result = consumer.applyAsInt(attackManager);
             if (result != Command.SINGLE_SUCCESS) {
                 resultCode = result;
@@ -300,7 +302,7 @@ public class ServerCommandManager {
     private int forEveryAttackEnsureHasBots(ToIntFunction<AttackManager> consumer) {
         return forEveryAttack(attackManager -> {
             if (attackManager.botConnections().isEmpty()) {
-                log.info("No bots connected!");
+                log.warn("No bots connected!");
                 return 3;
             }
 
@@ -312,7 +314,7 @@ public class ServerCommandManager {
         return forEveryAttackEnsureHasBots(attackManager -> {
             var resultCode = Command.SINGLE_SUCCESS;
             for (var bot : attackManager.botConnections()) {
-                log.info("Running command for bot {}", bot.meta().minecraftAccount().username());
+                log.info("--- Running command for bot {} ---", bot.meta().minecraftAccount().username());
                 var result = consumer.applyAsInt(bot);
                 if (result != Command.SINGLE_SUCCESS) {
                     resultCode = result;

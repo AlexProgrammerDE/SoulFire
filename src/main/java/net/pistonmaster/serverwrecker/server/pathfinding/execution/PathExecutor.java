@@ -120,7 +120,6 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     public void unregister() {
         EventUtil.runAndAssertChanged(connection.eventBus(), () ->
                 connection.eventBus().unregisterConsumer(this, BotPreTickEvent.class));
-        this.cancel();
     }
 
     public void cancel() {
