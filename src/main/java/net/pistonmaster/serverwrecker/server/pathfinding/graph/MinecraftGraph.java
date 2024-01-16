@@ -278,7 +278,6 @@ public record MinecraftGraph(TagsState tagsState) {
                 }
             }
 
-            synchronized (action.actionLock) {
                 switch (processSubscriptionAction(key, subscriber, action, isFreeReference, blockState, absolutePositionBlock, node)) {
                     case CONTINUE -> {
                         if (!action.decrementAndIsDone() || action.impossibleToComplete()) {
@@ -289,7 +288,6 @@ public record MinecraftGraph(TagsState tagsState) {
                     }
                     case IMPOSSIBLE -> actions[subscriber.actionIndex] = null;
                 }
-            }
         }
     }
 

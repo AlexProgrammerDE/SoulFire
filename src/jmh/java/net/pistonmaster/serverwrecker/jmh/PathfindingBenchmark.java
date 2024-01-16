@@ -21,7 +21,18 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.data.ResourceData;
+import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
+import net.pistonmaster.serverwrecker.server.pathfinding.RouteFinder;
+import net.pistonmaster.serverwrecker.server.pathfinding.goals.PosGoal;
+import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
+import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedInventory;
+import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedLevelState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockAccessor;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.protocol.bot.container.PlayerInventoryContainer;
+import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
 import net.pistonmaster.serverwrecker.util.ResourceHelper;
+import org.cloudburstmc.math.vector.Vector3d;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -34,10 +45,13 @@ import java.util.zip.GZIPInputStream;
 
 @State(Scope.Benchmark)
 public class PathfindingBenchmark {
+    private RouteFinder routeFinder;
+    private BotEntityState initialState;
+
     @Setup
     public void setup() {
         // Load all the data
-        if (ResourceData.GLOBAL_BLOCK_PALETTE.toString().isEmpty()) {
+        if (ResourceData.GLOBAL_BLOCK_PALETTE.blockBitsPerEntry() == 0) {
             throw new IllegalStateException("Something went horribly wrong!");
         }
 
@@ -57,21 +71,50 @@ public class PathfindingBenchmark {
 
             System.out.println("Parsing world data...");
 
-            var yHeight = data[0][0].length;
-            var blocks = new BlockType[data.length][][];
+            var blocks = new BlockStateMeta[data.length][][];
             for (var x = 0; x < data.length; x++) {
                 var xArray = data[x];
-                var xBlocksArray = blocks[x] = new BlockType[xArray.length][];
+                var xBlocksArray = blocks[x] = new BlockStateMeta[xArray.length][];
                 for (var y = 0; y < xArray.length; y++) {
                     var yArray = xArray[y];
-                    var yBlocksArray = xBlocksArray[y] = new BlockType[yArray.length];
+                    var yBlocksArray = xBlocksArray[y] = new BlockStateMeta[yArray.length];
                     for (var z = 0; z < yArray.length; z++) {
-                        yBlocksArray[z] = BlockType.getByName(blockDefinitions[yArray[z]]);
+                        yBlocksArray[z] = BlockStateMeta.forDefaultBlockType(
+                                BlockType.getByName(blockDefinitions[yArray[z]])
+                        );
                     }
                 }
             }
 
+            System.out.println("Calculating world data...");
+            var airState = BlockStateMeta.forDefaultBlockType(BlockType.AIR);
+            BlockAccessor accessor = (x, y, z) -> {
+                if (x < 0 || y < 0 || z < 0 || x >= blocks.length || y >= blocks[x].length || z >= blocks[x][y].length) {
+                    return airState;
+                }
 
+                return blocks[x][y][z];
+            };
+
+            // Find the first safe block at 0 0
+            var safeY = 0;
+            for (var y = 0; y < blocks[0].length; y++) {
+                if (blocks[0][y][0].blockType() == BlockType.AIR) {
+                    safeY = y;
+                    break;
+                }
+            }
+
+            routeFinder = new RouteFinder(
+                    new MinecraftGraph(new TagsState()),
+                    new PosGoal(100, 80, 100)
+            );
+
+            initialState = new BotEntityState(
+                    Vector3d.from(0, safeY, 0),
+                    new ProjectedLevelState(accessor),
+                    new ProjectedInventory(new PlayerInventoryContainer())
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -79,6 +122,6 @@ public class PathfindingBenchmark {
 
     @Benchmark
     public void calculatePath(Blackhole bh) {
-
+        routeFinder.findRoute(initialState, true);
     }
 }

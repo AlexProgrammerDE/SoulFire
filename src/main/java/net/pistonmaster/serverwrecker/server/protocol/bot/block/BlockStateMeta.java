@@ -34,11 +34,7 @@ public record BlockStateMeta(BlockType blockType, BlockShapeType blockShapeType,
         this(blockType, blockShapeType, Objects.hash(blockType, blockShapeType));
     }
 
-    public BlockStateMeta(String blockName, int stateIndex) {
-        this(Objects.requireNonNull(BlockType.getByName(blockName), "BlockType was null!"), stateIndex);
-    }
-
-    private BlockStateMeta(BlockType blockType, int stateIndex) {
+    public BlockStateMeta(BlockType blockType, int stateIndex) {
         this(blockType, getBlockShapeType(blockType, stateIndex));
     }
 

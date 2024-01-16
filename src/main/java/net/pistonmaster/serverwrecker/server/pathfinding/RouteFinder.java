@@ -34,7 +34,6 @@ import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -81,7 +80,6 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             openSet.enqueue(start);
         }
 
-        var processingLock = new ReentrantLock();
         while (!openSet.isEmpty()) {
             var current = openSet.dequeue();
             log.debug("Looking at node: {}", current.entityState().position());
@@ -95,43 +93,38 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             }
 
             Consumer<GraphInstructions> callback = instructions -> {
-                processingLock.lock();
-                try {
-                    var actionCost = instructions.actionCost();
-                    var worldActions = instructions.actions();
-                    var actionTargetState = instructions.targetState();
-                    routeIndex.compute(actionTargetState.positionBlock(), (k, v) -> {
-                        // Calculate new distance from start to this connection,
-                        // Get distance from the current element
-                        // and add the distance from the current element to the next element
-                        var newSourceCost = current.sourceCost() + actionCost;
-                        var newTotalRouteScore = newSourceCost + scorer.computeScore(graph, actionTargetState);
+                var actionCost = instructions.actionCost();
+                var worldActions = instructions.actions();
+                var actionTargetState = instructions.targetState();
+                routeIndex.compute(actionTargetState.positionBlock(), (k, v) -> {
+                    // Calculate new distance from start to this connection,
+                    // Get distance from the current element
+                    // and add the distance from the current element to the next element
+                    var newSourceCost = current.sourceCost() + actionCost;
+                    var newTotalRouteScore = newSourceCost + scorer.computeScore(graph, actionTargetState);
 
-                        // The first time we see this node
-                        if (v == null) {
-                            var node = new MinecraftRouteNode(actionTargetState, current, worldActions, newSourceCost, newTotalRouteScore);
-                            log.debug("Found a new node: {}", actionTargetState.positionBlock());
-                            openSet.enqueue(node);
+                    // The first time we see this node
+                    if (v == null) {
+                        var node = new MinecraftRouteNode(actionTargetState, current, worldActions, newSourceCost, newTotalRouteScore);
+                        log.debug("Found a new node: {}", actionTargetState.positionBlock());
+                        openSet.enqueue(node);
 
-                            return node;
-                        }
+                        return node;
+                    }
 
-                        // If we found a better route to this node, update it
-                        if (newSourceCost < v.sourceCost()) {
-                            v.previous(current);
-                            v.previousActions(worldActions);
-                            v.sourceCost(newSourceCost);
-                            v.totalRouteScore(newTotalRouteScore);
+                    // If we found a better route to this node, update it
+                    if (newSourceCost < v.sourceCost()) {
+                        v.previous(current);
+                        v.previousActions(worldActions);
+                        v.sourceCost(newSourceCost);
+                        v.totalRouteScore(newTotalRouteScore);
 
-                            log.debug("Found a better route to node: {}", actionTargetState.positionBlock());
-                            openSet.enqueue(v);
-                        }
+                        log.debug("Found a better route to node: {}", actionTargetState.positionBlock());
+                        openSet.enqueue(v);
+                    }
 
-                        return v;
-                    });
-                } finally {
-                    processingLock.unlock();
-                }
+                    return v;
+                });
             };
 
             try {

@@ -95,7 +95,7 @@ public class ResourceData {
             for (var state : blockEntry.getValue().getAsJsonObject().getAsJsonArray("states")) {
                 var stateObject = state.getAsJsonObject();
                 var stateId = stateObject.get("id").getAsInt();
-                stateMap.put(stateId, new BlockStateMeta(blockEntry.getKey(), i));
+                stateMap.put(stateId, new BlockStateMeta(Objects.requireNonNull(BlockType.getByName(blockEntry.getKey()), "BlockType was null!"), i));
                 i++;
             }
         }
