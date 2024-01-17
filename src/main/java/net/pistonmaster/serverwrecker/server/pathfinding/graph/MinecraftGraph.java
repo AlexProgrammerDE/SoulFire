@@ -270,7 +270,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
             if (blockState == null) {
                 // Lazy calculation to avoid unnecessary calls
-                absolutePositionBlock = node.positionBlock().add(key);
+                absolutePositionBlock = node.blockPosition().add(key);
                 blockState = node.levelState()
                         .getBlockStateAt(absolutePositionBlock);
 

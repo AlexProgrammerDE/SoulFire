@@ -26,7 +26,6 @@ import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.pathfinding.execution.BlockBreakAction;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.MovementMiningCost;
-import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 import java.util.List;
 
@@ -88,12 +87,10 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
         levelState = levelState.withChangeToAir(blockBreakCosts.block());
 
-        var absoluteMinedBlock = previousEntityState.positionBlock().add(targetToMineBlock);
-        var absoluteTargetFeetBlock = previousEntityState.positionBlock().add(0, closestBlockToFallOn + 1, 0);
-        var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toVector3d());
+        var absoluteMinedBlock = previousEntityState.blockPosition().add(targetToMineBlock);
+        var absoluteTargetFeetBlock = previousEntityState.blockPosition().add(0, closestBlockToFallOn + 1, 0);
 
         return new GraphInstructions(new BotEntityState(
-                targetFeetDoublePosition,
                 absoluteTargetFeetBlock,
                 levelState,
                 inventory

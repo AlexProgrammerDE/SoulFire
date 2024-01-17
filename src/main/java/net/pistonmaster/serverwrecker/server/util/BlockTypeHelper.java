@@ -39,10 +39,6 @@ public class BlockTypeHelper {
                 || type == BlockType.BUBBLE_COLUMN;
     }
 
-    public static boolean isEmpty(BlockStateMeta meta) {
-        return meta.blockShapeType().hasNoCollisions();
-    }
-
     public static boolean isFullBlock(BlockStateMeta meta) {
         return meta.blockShapeType().isFullBlock();
     }

@@ -20,18 +20,14 @@ package net.pistonmaster.serverwrecker.server.pathfinding.goals;
 import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
 
-public record YGoal(double y) implements GoalScorer {
-    public YGoal {
-        y = Math.round(y);
-    }
-
+public record YGoal(int y) implements GoalScorer {
     @Override
     public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-        return Math.abs(entityState.position().getY() - y);
+        return Math.abs(entityState.blockPosition().y - y);
     }
 
     @Override
     public boolean isFinished(BotEntityState entityState) {
-        return entityState.position().getY() == y;
+        return entityState.blockPosition().y == y;
     }
 }

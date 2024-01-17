@@ -23,6 +23,7 @@ import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.data.ResourceData;
 import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.server.pathfinding.RouteFinder;
+import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.pathfinding.goals.PosGoal;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedInventory;
@@ -32,7 +33,6 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
 import net.pistonmaster.serverwrecker.util.ResourceHelper;
-import org.cloudburstmc.math.vector.Vector3d;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -111,7 +111,7 @@ public class PathfindingBenchmark {
             );
 
             initialState = new BotEntityState(
-                    Vector3d.from(0, safeY, 0),
+                    new SWVec3i(0, safeY, 0),
                     new ProjectedLevelState(accessor),
                     new ProjectedInventory(new PlayerInventoryContainer())
             );

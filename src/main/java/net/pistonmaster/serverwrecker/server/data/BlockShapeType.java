@@ -26,7 +26,7 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public record BlockShapeType(int id, List<BlockShape> blockShapes, boolean defaultShape,
-                             BlockStateProperties properties) {
+                             BlockStateProperties properties, double highestY) {
     public static final List<BlockShapeType> VALUES = new ObjectArrayList<>();
 
     static {
@@ -40,23 +40,35 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes, boolean defau
 
                 var id = Integer.parseInt(parts[0]);
                 var blockShapes = new ObjectArrayList<BlockShape>();
+                var highestY = 0D;
 
                 if (parts.length > 1) {
                     for (var i = 1; i < parts.length; i++) {
                         var part = parts[i];
                         var subParts = part.split(",");
-                        blockShapes.add(new BlockShape(
+                        var shape = new BlockShape(
                                 Double.parseDouble(subParts[0]),
                                 Double.parseDouble(subParts[1]),
                                 Double.parseDouble(subParts[2]),
                                 Double.parseDouble(subParts[3]),
                                 Double.parseDouble(subParts[4]),
                                 Double.parseDouble(subParts[5])
-                        ));
+                        );
+                        blockShapes.add(shape);
+
+                        if (shape.maxY() > highestY) {
+                            highestY = shape.maxY();
+                        }
                     }
                 }
 
-                VALUES.add(new BlockShapeType(id, blockShapes, ResourceData.BLOCK_STATE_DEFAULTS.contains(id), ResourceData.BLOCK_STATE_PROPERTIES.get(id)));
+                VALUES.add(new BlockShapeType(
+                        id,
+                        blockShapes,
+                        ResourceData.BLOCK_STATE_DEFAULTS.contains(id),
+                        ResourceData.BLOCK_STATE_PROPERTIES.get(id),
+                        highestY
+                ));
             });
         } catch (IOException e) {
             throw new IllegalStateException(e);

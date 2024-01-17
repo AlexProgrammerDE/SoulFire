@@ -22,22 +22,17 @@ import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.server.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
-import org.cloudburstmc.math.vector.Vector3d;
 
 // TODO: Extract into having more fine behaviour control
-public record PlaceBlockGoal(SWVec3i goal, Vector3d goal3d, BlockType blockType) implements GoalScorer {
+public record PlaceBlockGoal(SWVec3i goal, BlockType blockType) implements GoalScorer {
     public PlaceBlockGoal(int x, int y, int z, BlockType blockType) {
-        this(Vector3d.from(x, y, z), blockType);
-    }
-
-    public PlaceBlockGoal(Vector3d goalBlock, BlockType blockType) {
-        this(SWVec3i.fromDouble(goalBlock), goalBlock, blockType);
+        this(new SWVec3i(x, y, z), blockType);
     }
 
     @Override
     public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
         // We normally stand right next to the block, not inside, so we need to subtract 1.
-        return entityState.position().distance(goal3d) - 1 + Costs.PLACE_BLOCK;
+        return entityState.blockPosition().distance(goal) - 1 + Costs.PLACE_BLOCK;
     }
 
     @Override

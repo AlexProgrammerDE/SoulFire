@@ -24,7 +24,6 @@ import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.pathfinding.execution.GapJumpAction;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.ParkourDirection;
-import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 import java.util.List;
 
@@ -76,15 +75,13 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
 
     @Override
     public GraphInstructions getInstructions(BotEntityState previousEntityState) {
-        var absoluteTargetFeetBlock = previousEntityState.positionBlock().add(targetFeetBlock);
-        var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toVector3d());
+        var absoluteTargetFeetBlock = previousEntityState.blockPosition().add(targetFeetBlock);
 
         return new GraphInstructions(new BotEntityState(
-                targetFeetDoublePosition,
                 absoluteTargetFeetBlock,
                 previousEntityState.levelState(),
                 previousEntityState.inventory()
-        ), Costs.ONE_GAP_JUMP, List.of(new GapJumpAction(targetFeetDoublePosition)));
+        ), Costs.ONE_GAP_JUMP, List.of(new GapJumpAction(absoluteTargetFeetBlock)));
     }
 
     @Override

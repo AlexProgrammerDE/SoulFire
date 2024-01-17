@@ -72,17 +72,17 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             var start = new MinecraftRouteNode(
                     from,
                     null,
-                    requiresRepositioning ? List.of(new MovementAction(from.position(), false)) : List.of(),
+                    requiresRepositioning ? List.of(new MovementAction(from.blockPosition(), false)) : List.of(),
                     0,
                     startScore
             );
-            routeIndex.put(from.positionBlock(), start);
+            routeIndex.put(from.blockPosition(), start);
             openSet.enqueue(start);
         }
 
         while (!openSet.isEmpty()) {
             var current = openSet.dequeue();
-            log.debug("Looking at node: {}", current.entityState().position());
+            log.debug("Looking at node: {}", current.entityState().blockPosition());
 
             // If we found our destination, we can stop looking
             if (scorer.isFinished(current.entityState())) {
@@ -96,7 +96,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 var actionCost = instructions.actionCost();
                 var worldActions = instructions.actions();
                 var actionTargetState = instructions.targetState();
-                routeIndex.compute(actionTargetState.positionBlock(), (k, v) -> {
+                routeIndex.compute(actionTargetState.blockPosition(), (k, v) -> {
                     // Calculate new distance from start to this connection,
                     // Get distance from the current element
                     // and add the distance from the current element to the next element
@@ -106,7 +106,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                     // The first time we see this node
                     if (v == null) {
                         var node = new MinecraftRouteNode(actionTargetState, current, worldActions, newSourceCost, newTotalRouteScore);
-                        log.debug("Found a new node: {}", actionTargetState.positionBlock());
+                        log.debug("Found a new node: {}", actionTargetState.blockPosition());
                         openSet.enqueue(node);
 
                         return node;
@@ -119,7 +119,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                         v.sourceCost(newSourceCost);
                         v.totalRouteScore(newTotalRouteScore);
 
-                        log.debug("Found a better route to node: {}", actionTargetState.positionBlock());
+                        log.debug("Found a better route to node: {}", actionTargetState.blockPosition());
                         openSet.enqueue(v);
                     }
 
@@ -130,7 +130,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             try {
                 graph.insertActions(current.entityState(), callback, routeIndex::containsKey);
             } catch (OutOfLevelException e) {
-                log.debug("Found a node out of the level: {}", current.entityState().positionBlock());
+                log.debug("Found a node out of the level: {}", current.entityState().blockPosition());
                 stopwatch.stop();
                 log.info("Took {}ms to find route to reach the edge of view distance", stopwatch.elapsed().toMillis());
 

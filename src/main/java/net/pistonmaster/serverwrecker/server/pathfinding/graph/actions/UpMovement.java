@@ -32,7 +32,6 @@ import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import net.pistonmaster.serverwrecker.server.protocol.bot.BotActionManager;
-import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 import java.util.List;
 
@@ -111,19 +110,17 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
         // Change values for block we're going to place and stand on
         inventory = inventory.withOneLessBlock();
-        levelState = levelState.withChangeToSolidBlock(previousEntityState.positionBlock());
+        levelState = levelState.withChangeToSolidBlock(previousEntityState.blockPosition());
 
-        var absoluteTargetFeetBlock = previousEntityState.positionBlock().add(targetFeetBlock);
-        var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toVector3d());
+        var absoluteTargetFeetBlock = previousEntityState.blockPosition().add(targetFeetBlock);
 
         // Where we are standing right now, we'll place the target block below us after jumping
-        actions.add(new JumpAndPlaceBelowAction(previousEntityState.positionBlock(), new BotActionManager.BlockPlaceData(
-                previousEntityState.positionBlock().sub(0, 1, 0),
+        actions.add(new JumpAndPlaceBelowAction(previousEntityState.blockPosition(), new BotActionManager.BlockPlaceData(
+                previousEntityState.blockPosition().sub(0, 1, 0),
                 Direction.UP
         )));
 
         return new GraphInstructions(new BotEntityState(
-                targetFeetDoublePosition,
                 absoluteTargetFeetBlock,
                 levelState,
                 inventory

@@ -37,7 +37,15 @@ public class SWVec3i {
     private boolean hashCodeSet;
 
     public static SWVec3i fromDouble(Vector3d vec) {
-        return new SWVec3i(vec.getFloorX(), vec.getFloorY(), vec.getFloorZ());
+        return fromInt(vec.toInt());
+    }
+
+    public static SWVec3i fromInt(Vector3i vec) {
+        return new SWVec3i(vec.getX(), vec.getY(), vec.getZ());
+    }
+
+    public static SWVec3i from(int x, int y, int z) {
+        return new SWVec3i(x, y, z);
     }
 
     @Override
@@ -82,5 +90,9 @@ public class SWVec3i {
     @Override
     public String toString() {
         return "SWVec3i(" + x + ", " + y + ", " + z + ")";
+    }
+
+    public double distance(SWVec3i goal) {
+        return Math.sqrt(Math.pow(goal.x - x, 2) + Math.pow(goal.y - y, 2) + Math.pow(goal.z - z, 2));
     }
 }

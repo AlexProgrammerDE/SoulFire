@@ -32,7 +32,6 @@ import net.pistonmaster.serverwrecker.server.pathfinding.execution.WorldAction;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.*;
 import net.pistonmaster.serverwrecker.server.protocol.bot.BotActionManager;
-import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 import java.util.List;
 
@@ -344,7 +343,7 @@ public final class PlayerMovement extends GraphAction implements Cloneable {
             }
         }
 
-        var absoluteTargetFeetBlock = previousEntityState.positionBlock().add(targetFeetBlock);
+        var absoluteTargetFeetBlock = previousEntityState.blockPosition().add(targetFeetBlock);
 
         if (requiresAgainstBlock) {
             var floorBlock = absoluteTargetFeetBlock.sub(0, 1, 0);
@@ -359,11 +358,9 @@ public final class PlayerMovement extends GraphAction implements Cloneable {
             levelState = levelState.withChanges(blockToBreakArray, blockToPlacePosition);
         }
 
-        var targetFeetDoublePosition = VectorHelper.middleOfBlockNormalize(absoluteTargetFeetBlock.toVector3d());
-        actions.add(new MovementAction(targetFeetDoublePosition, diagonal));
+        actions.add(new MovementAction(absoluteTargetFeetBlock, diagonal));
 
         return new GraphInstructions(new BotEntityState(
-                targetFeetDoublePosition,
                 absoluteTargetFeetBlock,
                 levelState,
                 inventory

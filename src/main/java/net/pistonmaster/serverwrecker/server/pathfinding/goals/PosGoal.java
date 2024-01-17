@@ -18,26 +18,21 @@
 package net.pistonmaster.serverwrecker.server.pathfinding.goals;
 
 import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
+import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
-import net.pistonmaster.serverwrecker.server.util.VectorHelper;
-import org.cloudburstmc.math.vector.Vector3d;
 
-public record PosGoal(Vector3d goal) implements GoalScorer {
-    public PosGoal {
-        goal = VectorHelper.middleOfBlockNormalize(goal);
-    }
-
-    public PosGoal(double x, double y, double z) {
-        this(Vector3d.from(x, y, z));
+public record PosGoal(SWVec3i goal) implements GoalScorer {
+    public PosGoal(int x, int y, int z) {
+        this(SWVec3i.from(x, y, z));
     }
 
     @Override
     public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-        return entityState.position().distance(goal);
+        return entityState.blockPosition().distance(goal);
     }
 
     @Override
     public boolean isFinished(BotEntityState entityState) {
-        return entityState.position().equals(goal);
+        return entityState.blockPosition().equals(goal);
     }
 }

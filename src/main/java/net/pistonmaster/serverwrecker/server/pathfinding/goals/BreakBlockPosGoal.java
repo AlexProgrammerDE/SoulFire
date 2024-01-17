@@ -26,7 +26,7 @@ import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
 public record BreakBlockPosGoal(SWVec3i goal) implements GoalScorer {
     @Override
     public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-        var distance = entityState.position().distance(goal.x, goal.y, goal.z);
+        var distance = entityState.blockPosition().distance(goal);
         var blockStateMeta = entityState.levelState().getBlockStateAt(goal);
 
         // Instead of failing when the block is not in render distance, we just return the distance.

@@ -20,35 +20,23 @@ package net.pistonmaster.serverwrecker.server.pathfinding;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.entity.ClientEntity;
-import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
-import net.pistonmaster.serverwrecker.server.util.VectorHelper;
-import org.cloudburstmc.math.vector.Vector3d;
 
 /**
  * Represents the state of the bot in the level.
  * This means the positions and in the future also inventory.
  *
- * @param position      The position of the bot.
- *                      This is always the middle of the block.
- * @param positionBlock The position of the bot in block coordinates.
+ * @param blockPosition The position of the bot in block coordinates.
+ *                      This is the block the bottom of the bot is in, so the "feet" block.
  * @param levelState    The level state of the world the bot is in.
  * @param inventory     The inventory state of the bot.
  */
-public record BotEntityState(Vector3d position, SWVec3i positionBlock, ProjectedLevelState levelState,
+public record BotEntityState(SWVec3i blockPosition, ProjectedLevelState levelState,
                              ProjectedInventory inventory) {
-    public BotEntityState(Vector3d position, ProjectedLevelState levelState, ProjectedInventory inventory) {
-        this(position, SWVec3i.fromDouble(position), levelState, inventory);
-    }
-
     public static BotEntityState initialState(ClientEntity clientEntity, ProjectedLevelState levelState, ProjectedInventory inventory) {
-        var pos = clientEntity.pos();
-        var insideBlock = levelState.getBlockStateAt(SWVec3i.fromDouble(pos));
-        if (BlockTypeHelper.isRoughlyFullBlock(insideBlock.blockShapeType())) {
-            // We are inside a block that is likely 0.9 blocks high,
-            // so we want to start calculating as if we stand on top of it.
-            pos = pos.add(0, 1, 0);
-        }
-
-        return new BotEntityState(VectorHelper.middleOfBlockNormalize(pos), levelState, inventory);
+        return new BotEntityState(
+                SWVec3i.fromDouble(clientEntity.pos()),
+                levelState,
+                inventory
+        );
     }
 }

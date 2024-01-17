@@ -21,6 +21,7 @@ import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
@@ -120,29 +121,29 @@ public class ServerCommandManager {
 
         // Pathfinding
         dispatcher.register(literal("walkxyz")
-                .then(argument("x", DoubleArgumentType.doubleArg())
-                        .then(argument("y", DoubleArgumentType.doubleArg())
-                                .then(argument("z", DoubleArgumentType.doubleArg())
-                                        .executes(help("Makes all connected bots pathfind to the xyz coordinates", c -> {
-                                            var x = DoubleArgumentType.getDouble(c, "x");
-                                            var y = DoubleArgumentType.getDouble(c, "y");
-                                            var z = DoubleArgumentType.getDouble(c, "z");
+                .then(argument("x", IntegerArgumentType.integer())
+                        .then(argument("y", IntegerArgumentType.integer())
+                                .then(argument("z", IntegerArgumentType.integer())
+                                        .executes(help("Makes all connected bots walk to the xyz coordinates", c -> {
+                                            var x = IntegerArgumentType.getInteger(c, "x");
+                                            var y = IntegerArgumentType.getInteger(c, "y");
+                                            var z = IntegerArgumentType.getInteger(c, "z");
 
                                             return executePathfinding(new PosGoal(x, y, z));
                                         }))))));
         dispatcher.register(literal("walkxz")
-                .then(argument("x", DoubleArgumentType.doubleArg())
-                        .then(argument("z", DoubleArgumentType.doubleArg())
-                                .executes(help("Makes all connected bots pathfind to the xz coordinates", c -> {
-                                    var x = DoubleArgumentType.getDouble(c, "x");
-                                    var z = DoubleArgumentType.getDouble(c, "z");
+                .then(argument("x", IntegerArgumentType.integer())
+                        .then(argument("z", IntegerArgumentType.integer())
+                                .executes(help("Makes all connected bots walk to the xz coordinates", c -> {
+                                    var x = IntegerArgumentType.getInteger(c, "x");
+                                    var z = IntegerArgumentType.getInteger(c, "z");
 
                                     return executePathfinding(new XZGoal(x, z));
                                 })))));
         dispatcher.register(literal("walky")
-                .then(argument("y", DoubleArgumentType.doubleArg())
-                        .executes(help("Makes all connected bots pathfind to the y coordinates", c -> {
-                            var y = DoubleArgumentType.getDouble(c, "y");
+                .then(argument("y", IntegerArgumentType.integer())
+                        .executes(help("Makes all connected bots walk to the y coordinates", c -> {
+                            var y = IntegerArgumentType.getInteger(c, "y");
                             return executePathfinding(new YGoal(y));
                         }))));
         dispatcher.register(literal("stop-path")

@@ -19,27 +19,22 @@ package net.pistonmaster.serverwrecker.server.pathfinding.goals;
 
 import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
-import net.pistonmaster.serverwrecker.server.util.VectorHelper;
-import org.cloudburstmc.math.vector.Vector2d;
+import org.cloudburstmc.math.vector.Vector2i;
 
-public record XZGoal(Vector2d goal) implements GoalScorer {
-    public XZGoal {
-        goal = VectorHelper.middleOfBlockNormalize(goal);
-    }
-
-    public XZGoal(double x, double z) {
-        this(Vector2d.from(x, z));
+public record XZGoal(Vector2i goal) implements GoalScorer {
+    public XZGoal(int x, int z) {
+        this(Vector2i.from(x, z));
     }
 
     @Override
     public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-        var position = entityState.position();
-        return Vector2d.from(position.getX(), position.getZ()).distance(goal);
+        return Vector2i.from(entityState.blockPosition().x, entityState.blockPosition().z)
+                .distance(goal);
     }
 
     @Override
     public boolean isFinished(BotEntityState entityState) {
-        var position = entityState.position();
-        return Vector2d.from(position.getX(), position.getZ()).equals(goal);
+        return Vector2i.from(entityState.blockPosition().x, entityState.blockPosition().z)
+                .equals(goal);
     }
 }

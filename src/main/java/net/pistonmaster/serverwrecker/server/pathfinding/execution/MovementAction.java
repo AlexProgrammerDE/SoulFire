@@ -21,15 +21,15 @@ import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.server.pathfinding.MovementConstants;
+import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
-import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
 import net.pistonmaster.serverwrecker.server.util.MathHelper;
-import org.cloudburstmc.math.vector.Vector3d;
+import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 @ToString
 @RequiredArgsConstructor
 public final class MovementAction implements WorldAction {
-    private final Vector3d position;
+    private final SWVec3i position;
     // Corner jumps normally require you to stand closer to the block to jump
     private final boolean walkFewTicksNoJump;
     private boolean didLook = false;
@@ -45,18 +45,13 @@ public final class MovementAction implements WorldAction {
             return false;
         }
 
-        var blockMeta = levelState.getBlockStateAt(position.toInt());
-        var insideBlock = !BlockTypeHelper.isEmpty(blockMeta);
-
-        if (insideBlock) {
-            // We are inside a block, so being close is good enough
-            var distance = botPosition.distance(position);
-            return distance <= 1;
-        } else if (MathHelper.isOutsideTolerance(botPosition.getY(), position.getY(), 0.2)) {
+        var blockMeta = levelState.getBlockStateAt(position);
+        var targetMiddleBlock = VectorHelper.topMiddleOfBlock(position.toVector3d(), blockMeta);
+        if (MathHelper.isOutsideTolerance(botPosition.getY(), targetMiddleBlock.getY(), 0.2)) {
             // We want to be on the same Y level
             return false;
         } else {
-            var distance = botPosition.distance(position);
+            var distance = botPosition.distance(targetMiddleBlock);
             // Close enough to be able to bridge up
             return distance <= 0.2;
         }
@@ -67,8 +62,16 @@ public final class MovementAction implements WorldAction {
         var clientEntity = connection.sessionDataManager().clientEntity();
         clientEntity.controlState().resetAll();
 
+        var levelState = connection.sessionDataManager().getCurrentLevel();
+        if (levelState == null) {
+            return;
+        }
+
+        var blockMeta = levelState.getBlockStateAt(position);
+        var targetMiddleBlock = VectorHelper.topMiddleOfBlock(position.toVector3d(), blockMeta);
+
         var previousYaw = clientEntity.yaw();
-        clientEntity.lookAt(RotationOrigin.EYES, position);
+        clientEntity.lookAt(RotationOrigin.EYES, targetMiddleBlock);
         clientEntity.pitch(0);
         var newYaw = clientEntity.yaw();
 
@@ -85,7 +88,7 @@ public final class MovementAction implements WorldAction {
         clientEntity.controlState().forward(true);
 
         var botPosition = clientEntity.pos();
-        if (position.getY() - MovementConstants.STEP_HEIGHT > botPosition.getY() && shouldJump()) {
+        if (targetMiddleBlock.getY() - MovementConstants.STEP_HEIGHT > botPosition.getY() && shouldJump()) {
             clientEntity.controlState().jumping(true);
         }
     }
