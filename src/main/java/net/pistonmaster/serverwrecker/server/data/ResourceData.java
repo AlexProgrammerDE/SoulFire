@@ -23,24 +23,27 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateProperties;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.GlobalBlockPalette;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class ResourceData {
     public static final GlobalBlockPalette GLOBAL_BLOCK_PALETTE;
     public static final Map<String, String> MOJANG_TRANSLATIONS;
-    // For loading by BlockShapeType
-    protected static final Int2ObjectMap<BlockStateProperties> BLOCK_STATE_PROPERTIES;
-    // For loading by BlockShapeType
-    protected static final IntSet BLOCK_STATE_DEFAULTS;
+    public static final Int2ObjectMap<BlockStateProperties> BLOCK_STATE_PROPERTIES;
+    public static final IntSet BLOCK_STATE_DEFAULTS;
+    public static final Object2ObjectMap<BlockType, List<BlockState>> BLOCK_STATES;
 
     // Static initialization allows us to preload this in a native image
     static {
@@ -89,23 +92,35 @@ public class ResourceData {
         BLOCK_STATE_DEFAULTS = blockStateDefaults;
 
         // Load global palette
-        Int2ObjectMap<BlockStateMeta> stateMap = new Int2ObjectOpenHashMap<>();
+        Int2ObjectMap<BlockState> stateMap = new Int2ObjectOpenHashMap<>();
+        Object2ObjectMap<BlockType, List<BlockState>> blockStates = new Object2ObjectOpenHashMap<>();
         for (var blockEntry : blocks.entrySet()) {
+            var name = blockEntry.getKey();
+            var blockEntryData = blockEntry.getValue().getAsJsonObject();
             var i = 0;
-            for (var state : blockEntry.getValue().getAsJsonObject().getAsJsonArray("states")) {
+            for (var state : blockEntryData.getAsJsonArray("states")) {
                 var stateObject = state.getAsJsonObject();
                 var stateId = stateObject.get("id").getAsInt();
-                stateMap.put(stateId, new BlockStateMeta(Objects.requireNonNull(BlockType.getByName(blockEntry.getKey()), "BlockType was null!"), i));
+                var stateInstance = new BlockState(
+                        stateId,
+                        Objects.requireNonNull(BlockType.getByName(name), "BlockType was null!"),
+                        i
+                );
+                stateMap.put(stateId, stateInstance);
+                blockStates.computeIfAbsent(stateInstance.blockType(), (key) -> new ObjectArrayList<>())
+                        .add(stateInstance);
+
                 i++;
             }
         }
 
         GLOBAL_BLOCK_PALETTE = new GlobalBlockPalette(stateMap);
+        BLOCK_STATES = blockStates;
 
         // Initialize all classes
         doNothing(BlockItems.VALUES);
-        doNothing(BlockShapeType.VALUES);
-        doNothing(BlockStateLoader.BLOCK_SHAPES);
+        doNothing(BlockShapeGroup.FROM_ID);
+        doNothing(BlockShapeLoader.BLOCK_SHAPES);
         doNothing(BlockType.FROM_ID);
         doNothing(EntityType.FROM_ID);
         doNothing(ItemType.FROM_ID);

@@ -20,7 +20,6 @@ package net.pistonmaster.serverwrecker.jmh;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
-import net.pistonmaster.serverwrecker.server.data.ResourceData;
 import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.server.pathfinding.RouteFinder;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
@@ -29,7 +28,7 @@ import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockAccessor;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
 import net.pistonmaster.serverwrecker.util.ResourceHelper;
@@ -50,11 +49,6 @@ public class PathfindingBenchmark {
 
     @Setup
     public void setup() {
-        // Load all the data
-        if (ResourceData.GLOBAL_BLOCK_PALETTE.blockBitsPerEntry() == 0) {
-            throw new IllegalStateException("Something went horribly wrong!");
-        }
-
         var gson = new Gson();
         var byteArrayInputStream = new ByteArrayInputStream(ResourceHelper.getResourceBytes("/world_data.json.zip"));
         try (var gzipInputStream = new GZIPInputStream(byteArrayInputStream);
@@ -71,15 +65,15 @@ public class PathfindingBenchmark {
 
             System.out.println("Parsing world data...");
 
-            var blocks = new BlockStateMeta[data.length][][];
+            var blocks = new BlockState[data.length][][];
             for (var x = 0; x < data.length; x++) {
                 var xArray = data[x];
-                var xBlocksArray = blocks[x] = new BlockStateMeta[xArray.length][];
+                var xBlocksArray = blocks[x] = new BlockState[xArray.length][];
                 for (var y = 0; y < xArray.length; y++) {
                     var yArray = xArray[y];
-                    var yBlocksArray = xBlocksArray[y] = new BlockStateMeta[yArray.length];
+                    var yBlocksArray = xBlocksArray[y] = new BlockState[yArray.length];
                     for (var z = 0; z < yArray.length; z++) {
-                        yBlocksArray[z] = BlockStateMeta.forDefaultBlockType(
+                        yBlocksArray[z] = BlockState.forDefaultBlockType(
                                 BlockType.getByName(blockDefinitions[yArray[z]])
                         );
                     }
@@ -87,7 +81,7 @@ public class PathfindingBenchmark {
             }
 
             System.out.println("Calculating world data...");
-            var airState = BlockStateMeta.forDefaultBlockType(BlockType.AIR);
+            var airState = BlockState.forDefaultBlockType(BlockType.AIR);
             BlockAccessor accessor = (x, y, z) -> {
                 if (x < 0 || y < 0 || z < 0 || x >= blocks.length || y >= blocks[x].length || z >= blocks[x][y].length) {
                     return airState;

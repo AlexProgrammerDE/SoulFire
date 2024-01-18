@@ -39,14 +39,14 @@ public class ChunkData {
         }
     }
 
+    public static int log2RoundUp(int num) {
+        return (int) Math.ceil(Math.log(num) / Math.log(2));
+    }
+
     public void fillEmpty() {
         for (var i = 0; i < sections.length; i++) {
             setSection(i, new ChunkSection());
         }
-    }
-
-    public static int log2RoundUp(int num) {
-        return (int) Math.ceil(Math.log(num) / Math.log(2));
     }
 
     public int getBlock(int x, int y, int z) {

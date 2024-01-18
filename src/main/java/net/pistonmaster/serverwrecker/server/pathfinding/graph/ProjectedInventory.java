@@ -21,7 +21,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.pathfinding.Costs;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
@@ -81,8 +81,8 @@ public class ProjectedInventory {
         return new ProjectedInventory(usableBlockItems + 1, usableToolsAndNull, sharedMiningCosts);
     }
 
-    public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockStateMeta blockStateMeta) {
-        return sharedMiningCosts.computeIfAbsent(blockStateMeta.blockType(), type ->
+    public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockState blockState) {
+        return sharedMiningCosts.computeIfAbsent(blockState.blockType(), type ->
                 Costs.calculateBlockBreakCost(tagsState, this, type));
     }
 }

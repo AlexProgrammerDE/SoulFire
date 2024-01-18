@@ -31,15 +31,14 @@ import java.util.List;
 public record BlockType(int id, String name, float destroyTime, float explosionResistance,
                         boolean air, boolean fallingBlock, boolean replaceable,
                         boolean requiresCorrectToolForDrops, boolean fluidSource,
-                        OffsetData offsetData, List<BlockShapeType> blockShapeTypes) {
+                        OffsetData offsetData) {
     public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
     public static final Object2ReferenceMap<String, BlockType> FROM_NAME = new Object2ReferenceOpenHashMap<>();
 
     // VALUES REPLACE
 
     public static BlockType register(String name) {
-        var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class)
-                .withBlockShapeTypes(BlockStateLoader.getBlockShapes(name));
+        var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class);
         FROM_ID.put(blockType.id(), blockType);
         FROM_NAME.put(blockType.name(), blockType);
         return blockType;

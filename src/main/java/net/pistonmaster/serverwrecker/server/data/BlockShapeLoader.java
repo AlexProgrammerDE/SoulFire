@@ -17,7 +17,7 @@
  */
 package net.pistonmaster.serverwrecker.server.data;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.io.IOException;
@@ -25,11 +25,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-public class BlockStateLoader {
-    public static final Map<String, List<BlockShapeType>> BLOCK_SHAPES = new Object2ObjectArrayMap<>();
+public class BlockShapeLoader {
+    public static final Map<BlockType, List<BlockShapeGroup>> BLOCK_SHAPES = new Object2ObjectOpenHashMap<>();
 
     static {
-        try (var inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockstates.txt")) {
+        try (var inputStream = BlockShapeGroup.class.getClassLoader().getResourceAsStream("minecraft/blockstates.txt")) {
             if (inputStream == null) {
                 throw new IllegalStateException("blockstates.txt not found!");
             }
@@ -38,26 +38,22 @@ public class BlockStateLoader {
                 var parts = line.split("\\|");
                 var name = parts[0];
 
-                var blockShapeTypes = new ObjectArrayList<BlockShapeType>();
+                var blockShapeTypes = new ObjectArrayList<BlockShapeGroup>();
                 if (parts.length > 1) {
                     var part = parts[1];
 
                     var subParts = part.split(",");
                     for (var subPart : subParts) {
                         var id = Integer.parseInt(subPart);
-                        var blockShapeType = BlockShapeType.getById(id);
+                        var blockShapeType = BlockShapeGroup.getById(id);
                         blockShapeTypes.add(blockShapeType);
                     }
                 }
 
-                BLOCK_SHAPES.put(name, blockShapeTypes);
+                BLOCK_SHAPES.put(BlockType.getByName(name), blockShapeTypes);
             });
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    public static List<BlockShapeType> getBlockShapes(String name) {
-        return BLOCK_SHAPES.get(name);
     }
 }

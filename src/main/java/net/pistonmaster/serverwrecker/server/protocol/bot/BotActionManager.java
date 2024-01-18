@@ -29,7 +29,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.movement.AABB;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
@@ -48,10 +48,10 @@ public class BotActionManager {
     private final SessionDataManager dataManager;
     private int sequenceNumber = 0;
 
-    private static Optional<Vector3f> rayCastToBlock(BlockStateMeta blockStateMeta, Vector3d eyePosition, Vector3d headRotation, Vector3i targetBlock) {
+    private static Optional<Vector3f> rayCastToBlock(BlockState blockState, Vector3d eyePosition, Vector3d headRotation, Vector3i targetBlock) {
         var intersections = new ArrayList<Vector3f>();
 
-        for (var shape : blockStateMeta.getCollisionBoxes(targetBlock)) {
+        for (var shape : blockState.getCollisionBoxes(targetBlock)) {
             shape.getIntersection(eyePosition, headRotation)
                     .map(Vector3d::toFloat)
                     .ifPresent(intersections::add);

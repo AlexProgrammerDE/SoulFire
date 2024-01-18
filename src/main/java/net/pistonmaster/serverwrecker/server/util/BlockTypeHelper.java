@@ -17,9 +17,9 @@
  */
 package net.pistonmaster.serverwrecker.server.util;
 
-import net.pistonmaster.serverwrecker.server.data.BlockShapeType;
+import net.pistonmaster.serverwrecker.server.data.BlockShapeGroup;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 
 public class BlockTypeHelper {
     private static final double SAFE_BLOCK_MIN_HEIGHT = 0.9;
@@ -39,8 +39,8 @@ public class BlockTypeHelper {
                 || type == BlockType.BUBBLE_COLUMN;
     }
 
-    public static boolean isFullBlock(BlockStateMeta meta) {
-        return meta.blockShapeType().isFullBlock();
+    public static boolean isFullBlock(BlockState meta) {
+        return meta.blockShapeGroup().isFullBlock();
     }
 
     public static boolean isHurtOnTouchSide(BlockType type) {
@@ -56,11 +56,11 @@ public class BlockTypeHelper {
         return type == BlockType.MAGMA_BLOCK;
     }
 
-    public static boolean isSafeBlockToStandOn(BlockStateMeta meta) {
-        return isRoughlyFullBlock(meta.blockShapeType()) && !isHurtWhenStoodOn(meta.blockType());
+    public static boolean isSafeBlockToStandOn(BlockState meta) {
+        return isRoughlyFullBlock(meta.blockShapeGroup()) && !isHurtWhenStoodOn(meta.blockType());
     }
 
-    public static boolean isRoughlyFullBlock(BlockShapeType type) {
+    public static boolean isRoughlyFullBlock(BlockShapeGroup type) {
         if (type.blockShapes().size() != 1) {
             return false;
         }

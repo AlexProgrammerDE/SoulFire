@@ -22,7 +22,7 @@ import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.data.ItemType;
 import net.pistonmaster.serverwrecker.server.data.ToolSpeedType;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedInventory;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityEffectState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
@@ -54,7 +54,7 @@ public class Costs {
      * This allows the inventory to just store the number of blocks and tools instead of the actual items.
      * Although this decreases the result "quality" a bit, it is a good tradeoff for performance.
      */
-    public static final BlockStateMeta SOLID_PLACED_BLOCK_STATE = BlockStateMeta.forDefaultBlockType(BlockType.STONE);
+    public static final BlockState SOLID_PLACED_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.STONE);
 
     private Costs() {
     }

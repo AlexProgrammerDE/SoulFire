@@ -26,7 +26,7 @@ import lombok.Getter;
 import net.pistonmaster.serverwrecker.server.data.BlockTags;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.EntityAttributeState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.LevelState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
@@ -69,7 +69,7 @@ public class BotMovementManager {
         this.controlState = dataManager.controlState();
     }
 
-    private static void consumeIntersectedBlocks(LevelState world, AABB queryBB, BiConsumer<BlockStateMeta, Vector3i> consumer) {
+    private static void consumeIntersectedBlocks(LevelState world, AABB queryBB, BiConsumer<BlockState, Vector3i> consumer) {
         var startX = MathHelper.floorDouble(queryBB.minX - 1.0E-7) - 1;
         var endX = MathHelper.floorDouble(queryBB.maxX + 1.0E-7) + 1;
         var startY = MathHelper.floorDouble(queryBB.minY - 1.0E-7) - 1;
@@ -585,7 +585,7 @@ public class BotMovementManager {
             if (block.blockType() == BlockType.COBWEB) {
                 movementState.isInWeb = true;
             } else if (block.blockType() == BlockType.BUBBLE_COLUMN) {
-                var down = !block.blockShapeType().properties().getBoolean("drag");
+                var down = !block.properties().getBoolean("drag");
                 var aboveBlock = world.getBlockStateAt(cursor.add(0, 1, 0));
                 var bubbleDrag = aboveBlock.blockType() == BlockType.AIR ?
                         physics.bubbleColumnSurfaceDrag : physics.bubbleColumnDrag;
@@ -662,24 +662,24 @@ public class BotMovementManager {
         return world.getCollisionBoxes(pBB).isEmpty() && getWaterInBB(world, pBB).isEmpty();
     }
 
-    public int getLiquidHeightPercent(@Nullable BlockStateMeta meta) {
+    public int getLiquidHeightPercent(@Nullable BlockState meta) {
         return (getRenderedDepth(meta) + 1) / 9;
     }
 
-    public int getRenderedDepth(@Nullable BlockStateMeta meta) {
+    public int getRenderedDepth(@Nullable BlockState meta) {
         if (meta == null) return -1;
 
         if (WATER_LIKE_TYPES.contains(meta.blockType())) return 0;
 
-        if (meta.blockShapeType().properties().getBoolean("waterlogged")) return 0;
+        if (meta.properties().getBoolean("waterlogged")) return 0;
 
         if (!WATER_TYPES.contains(meta.blockType())) return -1;
 
-        var level = meta.blockShapeType().properties().getInt("level");
+        var level = meta.properties().getInt("level");
         return level >= 8 ? 0 : level;
     }
 
-    public Vector3i getFlow(LevelState world, BlockStateMeta meta, Vector3i block) {
+    public Vector3i getFlow(LevelState world, BlockState meta, Vector3i block) {
         var curlevel = getRenderedDepth(meta);
         var flow = new MutableVector3d(0, 0, 0);
         for (var combination : new int[][]{new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0}}) {
@@ -689,7 +689,7 @@ public class BotMovementManager {
             var adjBlock = world.getBlockStateAt(adjBlockVec);
             var adjLevel = getRenderedDepth(adjBlock);
             if (adjLevel < 0) {
-                if (adjBlock.blockShapeType().isEmpty()) {
+                if (adjBlock.blockShapeGroup().hasNoCollisions()) {
                     var adjLevel2Vec = block.add(dx, -1, dz);
                     var adjLevel2 = getRenderedDepth(world.getBlockStateAt(adjLevel2Vec));
                     if (adjLevel2 >= 0) {
@@ -705,14 +705,14 @@ public class BotMovementManager {
             }
         }
 
-        if (meta.blockShapeType().properties().getInt("level") >= 8) {
+        if (meta.properties().getInt("level") >= 8) {
             for (var combination : new int[][]{new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0}}) {
                 var dx = combination[0];
                 var dz = combination[1];
                 var adjBlock = world.getBlockStateAt(block.add(dx, 0, dz));
                 var adjUpBlock = world.getBlockStateAt(block.add(dx, 1, dz));
-                if ((adjBlock.blockShapeType().isEmpty())
-                        || (adjUpBlock.blockShapeType().isEmpty())) {
+                if ((adjBlock.blockShapeGroup().hasNoCollisions())
+                        || (adjUpBlock.blockShapeGroup().hasNoCollisions())) {
                     flow.normalize().translate(0, -6, 0);
                 }
             }
@@ -721,13 +721,13 @@ public class BotMovementManager {
         return flow.normalize().toImmutableInt();
     }
 
-    public List<Pair<Vector3i, BlockStateMeta>> getWaterInBB(LevelState world, AABB bb) {
-        var waterBlocks = new ArrayList<Pair<Vector3i, BlockStateMeta>>();
+    public List<Pair<Vector3i, BlockState>> getWaterInBB(LevelState world, AABB bb) {
+        var waterBlocks = new ArrayList<Pair<Vector3i, BlockState>>();
 
         consumeIntersectedBlocks(world, bb, (block, cursor) -> {
             if (WATER_TYPES.contains(block.blockType())
                     || WATER_LIKE_TYPES.contains(block.blockType())
-                    || block.blockShapeType().properties().getBoolean("waterlogged")) {
+                    || block.properties().getBoolean("waterlogged")) {
                 var waterLevel = cursor.getY() + 1 - getLiquidHeightPercent(block);
                 if (Math.ceil(bb.maxY) >= waterLevel) {
                     waterBlocks.add(Pair.of(cursor, block));

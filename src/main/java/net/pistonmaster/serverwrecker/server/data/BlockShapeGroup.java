@@ -17,20 +17,22 @@
  */
 package net.pistonmaster.serverwrecker.server.data;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateProperties;
+import net.pistonmaster.serverwrecker.server.protocol.bot.movement.AABB;
+import org.cloudburstmc.math.vector.Vector3i;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record BlockShapeType(int id, List<BlockShape> blockShapes, boolean defaultShape,
-                             BlockStateProperties properties, double highestY) {
-    public static final List<BlockShapeType> VALUES = new ObjectArrayList<>();
+public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highestY) {
+    public static final Int2ObjectMap<BlockShapeGroup> FROM_ID = new Int2ObjectOpenHashMap<>();
 
     static {
-        try (var inputStream = BlockShapeType.class.getClassLoader().getResourceAsStream("minecraft/blockshapes.txt")) {
+        try (var inputStream = BlockShapeGroup.class.getClassLoader().getResourceAsStream("minecraft/blockshapes.txt")) {
             if (inputStream == null) {
                 throw new IllegalStateException("blockshapes.txt not found!");
             }
@@ -62,12 +64,10 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes, boolean defau
                     }
                 }
 
-                VALUES.add(new BlockShapeType(
+                FROM_ID.put(id, new BlockShapeGroup(
                         id,
                         blockShapes,
-                        ResourceData.BLOCK_STATE_DEFAULTS.contains(id),
-                        ResourceData.BLOCK_STATE_PROPERTIES.get(id),
-                        highestY
+                        blockShapes.stream().mapToDouble(BlockShape::maxY).max().orElse(0)
                 ));
             });
         } catch (IOException e) {
@@ -75,23 +75,32 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes, boolean defau
         }
     }
 
-    public static BlockShapeType register(BlockShapeType blockShapeType) {
-        VALUES.add(blockShapeType);
-        return blockShapeType;
+    public static BlockShapeGroup getById(int id) {
+        return FROM_ID.get(id);
     }
 
-    public static BlockShapeType getById(int id) {
-        for (var blockShapeType : VALUES) {
-            if (blockShapeType.id() == id) {
-                return blockShapeType;
-            }
+    public List<AABB> getCollisionBoxes(Vector3i block, BlockType blockType) {
+        var collisionBoxes = new ObjectArrayList<AABB>(blockShapes.size());
+        for (var shape : blockShapes) {
+            var shapeBB = new AABB(
+                    shape.minX(),
+                    shape.minY(),
+                    shape.minZ(),
+                    shape.maxX(),
+                    shape.maxY(),
+                    shape.maxZ()
+            );
+
+            // Apply random offset if needed
+            shapeBB = shapeBB.move(OffsetHelper.getOffsetForBlock(blockType, block));
+
+            // Apply block offset
+            shapeBB = shapeBB.move(block.getX(), block.getY(), block.getZ());
+
+            collisionBoxes.add(shapeBB);
         }
 
-        return null;
-    }
-
-    public double collisionHeight() {
-        return blockShapes.stream().mapToDouble(BlockShape::maxY).max().orElse(0);
+        return collisionBoxes;
     }
 
     public boolean isFullBlock() {
@@ -109,16 +118,12 @@ public record BlockShapeType(int id, List<BlockShape> blockShapes, boolean defau
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof BlockShapeType blockShapeType)) return false;
-        return id == blockShapeType.id;
+        if (!(o instanceof BlockShapeGroup blockShapeGroup)) return false;
+        return id == blockShapeGroup.id;
     }
 
     @Override
     public int hashCode() {
         return id;
-    }
-
-    public boolean isEmpty() {
-        return blockShapes.isEmpty();
     }
 }

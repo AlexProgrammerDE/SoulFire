@@ -19,12 +19,11 @@ package net.pistonmaster.serverwrecker.server.pathfinding.graph;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.server.data.BlockShapeType;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockAccessor;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
 /**
@@ -34,10 +33,10 @@ import net.pistonmaster.serverwrecker.server.util.VectorHelper;
  */
 @RequiredArgsConstructor
 public class ProjectedLevelState {
-    private static final BlockStateMeta AIR_BLOCK_STATE = new BlockStateMeta(BlockType.AIR, BlockShapeType.getById(0));
+    private static final BlockState AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.AIR);
 
     private final BlockAccessor accessor;
-    private final Object2ObjectOpenCustomHashMap<SWVec3i, BlockStateMeta> blockChanges;
+    private final Object2ObjectOpenCustomHashMap<SWVec3i, BlockState> blockChanges;
 
     public ProjectedLevelState(BlockAccessor accessor) {
         this(
@@ -83,7 +82,7 @@ public class ProjectedLevelState {
         return new ProjectedLevelState(accessor, blockChanges);
     }
 
-    public BlockStateMeta getBlockStateAt(SWVec3i position) {
+    public BlockState getBlockStateAt(SWVec3i position) {
         var blockChange = blockChanges.get(position);
         if (blockChange != null) {
             return blockChange;

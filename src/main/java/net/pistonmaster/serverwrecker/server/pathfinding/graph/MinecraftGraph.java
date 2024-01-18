@@ -27,7 +27,7 @@ import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.*;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.*;
 import net.pistonmaster.serverwrecker.server.protocol.bot.BotActionManager;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
 import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
 import net.pistonmaster.serverwrecker.server.util.ObjectReference;
@@ -229,8 +229,8 @@ public record MinecraftGraph(TagsState tagsState) {
         return movement;
     }
 
-    private static TriState isBlockFree(BlockStateMeta blockState) {
-        return TriState.byBoolean(blockState.blockShapeType().hasNoCollisions()
+    private static TriState isBlockFree(BlockState blockState) {
+        return TriState.byBoolean(blockState.blockShapeGroup().hasNoCollisions()
                 && !BlockTypeHelper.isFluid(blockState.blockType()));
     }
 
@@ -257,7 +257,7 @@ public record MinecraftGraph(TagsState tagsState) {
         var key = SUBSCRIPTION_KEYS[i];
         var value = SUBSCRIPTION_VALUES[i];
 
-        BlockStateMeta blockState = null;
+        BlockState blockState = null;
         SWVec3i absolutePositionBlock = null;
 
         // We cache only this, but not solid because solid will only occur a single time
@@ -293,18 +293,21 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     private SubscriptionSingleResult processSubscriptionAction(SWVec3i key, BlockSubscription subscriber, GraphAction action, ObjectReference<TriState> isFreeReference,
-                                                               BlockStateMeta blockState, SWVec3i absolutePositionBlock,
+                                                               BlockState blockState, SWVec3i absolutePositionBlock,
                                                                BotEntityState node) {
         return switch (action) {
-            case PlayerMovement playerMovement -> processMovementSubscription(subscriber, isFreeReference, blockState, absolutePositionBlock, node, playerMovement);
+            case PlayerMovement playerMovement ->
+                    processMovementSubscription(subscriber, isFreeReference, blockState, absolutePositionBlock, node, playerMovement);
             case ParkourMovement ignored -> processParkourSubscription(subscriber, isFreeReference, blockState);
-            case DownMovement downMovement -> processDownSubscription(key, subscriber, blockState, absolutePositionBlock, node, downMovement);
-            case UpMovement upMovement -> processUpSubscription(subscriber, isFreeReference, blockState, absolutePositionBlock, node, upMovement);
+            case DownMovement downMovement ->
+                    processDownSubscription(key, subscriber, blockState, absolutePositionBlock, node, downMovement);
+            case UpMovement upMovement ->
+                    processUpSubscription(subscriber, isFreeReference, blockState, absolutePositionBlock, node, upMovement);
         };
     }
 
     private SubscriptionSingleResult processMovementSubscription(BlockSubscription subscriber, ObjectReference<TriState> isFreeReference,
-                                                                 BlockStateMeta blockState, SWVec3i absolutePositionBlock,
+                                                                 BlockState blockState, SWVec3i absolutePositionBlock,
                                                                  BotEntityState node, PlayerMovement playerMovement) {
         return switch (subscriber.type) {
             case MOVEMENT_FREE -> {
@@ -402,7 +405,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 }
 
                 // This block should not be placed against
-                if (!blockState.blockShapeType().isFullBlock()) {
+                if (!blockState.blockShapeGroup().isFullBlock()) {
                     yield SubscriptionSingleResult.CONTINUE;
                 }
 
@@ -419,7 +422,7 @@ public record MinecraftGraph(TagsState tagsState) {
                     yield SubscriptionSingleResult.CONTINUE;
                 }
 
-                if (blockState.blockShapeType().isFullBlock()) {
+                if (blockState.blockShapeGroup().isFullBlock()) {
                     playerMovement.addCornerCost();
                 } else if (BlockTypeHelper.isHurtOnTouchSide(blockState.blockType())) {
                     // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
@@ -433,7 +436,7 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     private SubscriptionSingleResult processParkourSubscription(BlockSubscription subscriber, ObjectReference<TriState> isFreeReference,
-                                                                BlockStateMeta blockState) {
+                                                                BlockState blockState) {
         return switch (subscriber.type) {
             case MOVEMENT_FREE -> {
                 if (isFreeReference.value == TriState.NOT_SET) {
@@ -470,7 +473,7 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     private SubscriptionSingleResult processDownSubscription(SWVec3i key, BlockSubscription subscriber,
-                                                             BlockStateMeta blockState, SWVec3i absolutePositionBlock,
+                                                             BlockState blockState, SWVec3i absolutePositionBlock,
                                                              BotEntityState node, DownMovement downMovement) {
         return switch (subscriber.type) {
             case MOVEMENT_FREE -> {
@@ -511,7 +514,7 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     private SubscriptionSingleResult processUpSubscription(BlockSubscription subscriber, ObjectReference<TriState> isFreeReference,
-                                                           BlockStateMeta blockState, SWVec3i absolutePositionBlock,
+                                                           BlockState blockState, SWVec3i absolutePositionBlock,
                                                            BotEntityState node, UpMovement upMovement) {
         return switch (subscriber.type) {
             case MOVEMENT_FREE -> {

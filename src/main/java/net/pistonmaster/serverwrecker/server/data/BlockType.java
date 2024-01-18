@@ -24,14 +24,12 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.AccessLevel;
 import lombok.With;
 
-import java.util.List;
-
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
 public record BlockType(int id, String name, float destroyTime, float explosionResistance,
                         boolean air, boolean fallingBlock, boolean replaceable,
                         boolean requiresCorrectToolForDrops, boolean fluidSource,
-                        OffsetData offsetData, List<BlockShapeType> blockShapeTypes) {
+                        OffsetData offsetData) {
     public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
     public static final Object2ReferenceMap<String, BlockType> FROM_NAME = new Object2ReferenceOpenHashMap<>();
 
@@ -1095,8 +1093,7 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
     public static final BlockType TRIAL_SPAWNER = register("trial_spawner");
 
     public static BlockType register(String name) {
-        var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class)
-                .withBlockShapeTypes(BlockStateLoader.getBlockShapes(name));
+        var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class);
         FROM_ID.put(blockType.id(), blockType);
         FROM_NAME.put(blockType.name(), blockType);
         return blockType;

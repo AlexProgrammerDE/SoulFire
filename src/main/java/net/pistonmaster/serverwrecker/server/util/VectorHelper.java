@@ -18,9 +18,9 @@
 package net.pistonmaster.serverwrecker.server.util;
 
 import it.unimi.dsi.fastutil.Hash;
-import net.pistonmaster.serverwrecker.server.data.BlockShapeType;
+import net.pistonmaster.serverwrecker.server.data.BlockShapeGroup;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import org.cloudburstmc.math.vector.Vector2d;
 import org.cloudburstmc.math.vector.Vector3d;
 
@@ -50,12 +50,12 @@ public class VectorHelper {
     private VectorHelper() {
     }
 
-    public static Vector3d topMiddleOfBlock(Vector3d vector, BlockStateMeta blockStateMeta) {
-        return topMiddleOfBlock(vector, blockStateMeta.blockShapeType());
+    public static Vector3d topMiddleOfBlock(Vector3d vector, BlockState blockState) {
+        return topMiddleOfBlock(vector, blockState.blockShapeGroup());
     }
 
-    public static Vector3d topMiddleOfBlock(Vector3d vector, BlockShapeType blockShapeType) {
-        return vector.floor().add(0.5, blockShapeType.highestY(), 0.5);
+    public static Vector3d topMiddleOfBlock(Vector3d vector, BlockShapeGroup blockShapeGroup) {
+        return vector.floor().add(0.5, blockShapeGroup.highestY(), 0.5);
     }
 
     public static Vector2d middleOfXZNormalize(Vector2d vector) {

@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.serverwrecker.server.data;
 
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
 
 import java.util.Optional;
@@ -28,13 +29,12 @@ public class BlockItems {
     static {
         for (var itemType : ItemType.FROM_ID.values()) {
             for (var blockType : BlockType.FROM_ID.values()) {
-                var blockShapeTypes = blockType.blockShapeTypes();
+                var blockShapeTypes = BlockState.forDefaultBlockType(blockType).blockShapeGroup();
 
                 // Let's not use bedrock as a building block
                 if (BlockTypeHelper.isDiggable(blockType)
-                        && blockShapeTypes.size() == 1
                         && itemType.name().equals(blockType.name())
-                        && blockShapeTypes.getFirst().isFullBlock()) {
+                        && blockShapeTypes.isFullBlock()) {
                     VALUES[itemType.id()] = blockType;
                     VALUES_REVERSE[blockType.id()] = itemType;
                 }

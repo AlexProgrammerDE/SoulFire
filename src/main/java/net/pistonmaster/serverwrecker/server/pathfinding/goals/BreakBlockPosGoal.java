@@ -40,7 +40,7 @@ public record BreakBlockPosGoal(SWVec3i goal) implements GoalScorer {
         }
 
         // We only want to dig full blocks (not slabs, stairs, etc.), removes a lot of edge cases
-        if (!blockStateMeta.blockShapeType().isFullBlock()) {
+        if (!blockStateMeta.blockShapeGroup().isFullBlock()) {
             throw new IllegalStateException("Block is not a full block!");
         }
 

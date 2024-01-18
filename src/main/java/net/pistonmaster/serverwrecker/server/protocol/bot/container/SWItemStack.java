@@ -34,12 +34,13 @@ import java.util.Objects;
 public class SWItemStack extends ItemStack {
     private final ItemType type;
     private final Object2ShortMap<String> enchantments;
-    private final int precalculatedHash = precalculateHash();
+    private final int precalculatedHash;
 
     private SWItemStack(SWItemStack clone, int amount) {
         super(clone.getId(), amount, clone.getNbt());
         this.type = clone.type;
         this.enchantments = clone.enchantments;
+        this.precalculatedHash = clone.precalculatedHash;
     }
 
     private SWItemStack(ItemStack itemStack) {
@@ -64,12 +65,15 @@ public class SWItemStack extends ItemStack {
                 this.enchantments = Object2ShortMaps.emptyMap();
             }
         }
+
+        this.precalculatedHash = Objects.hash(this.type, this.enchantments);
     }
 
     private SWItemStack(ItemType itemType, int amount) {
         super(itemType.id(), amount, null);
         this.type = itemType;
         this.enchantments = Object2ShortMaps.emptyMap();
+        this.precalculatedHash = Objects.hash(this.type, this.enchantments);
     }
 
     public static SWItemStack from(ItemStack itemStack) {
@@ -86,10 +90,6 @@ public class SWItemStack extends ItemStack {
 
     public short getEnchantmentLevel(String enchantment) {
         return this.enchantments.getShort(enchantment);
-    }
-
-    private int precalculateHash() {
-        return Objects.hash(this.type, this.enchantments);
     }
 
     public SWItemStack withAmount(int amount) {
@@ -111,7 +111,7 @@ public class SWItemStack extends ItemStack {
         }
 
         if (obj instanceof SWItemStack other) {
-            return this.precalculatedHash == other.precalculatedHash;
+            return this.equalsShape(other) && this.getAmount() == other.getAmount();
         }
 
         return false;

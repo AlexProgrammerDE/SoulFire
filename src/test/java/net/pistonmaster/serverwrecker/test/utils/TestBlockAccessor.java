@@ -15,30 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.jmh.util;
+package net.pistonmaster.serverwrecker.test.utils;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
+import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockAccessor;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
-import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class TestBlockAccessor implements BlockAccessor {
-    private final Map<Vector3i, BlockState> blocks = new HashMap<>();
+    private final Map<SWVec3i, BlockState> blocks = new Object2ObjectOpenHashMap<>();
+    private final BlockState defaultBlock;
+
+    public TestBlockAccessor() {
+        this(BlockState.forDefaultBlockType(BlockType.AIR));
+    }
+
+    public TestBlockAccessor(BlockState defaultBlock) {
+        this.defaultBlock = defaultBlock;
+    }
 
     public void setBlockAt(int x, int y, int z, BlockType block) {
-        blocks.put(Vector3i.from(x, y, z), BlockState.forDefaultBlockType(block));
+        blocks.put(new SWVec3i(x, y, z), BlockState.forDefaultBlockType(block));
     }
 
     @Override
     public BlockState getBlockStateAt(int x, int y, int z) {
-        var block = blocks.get(Vector3i.from(x, y, z));
-        if (block == null) {
-            return BlockState.forDefaultBlockType(BlockType.VOID_AIR);
-        }
-
-        return block;
+        return blocks.getOrDefault(new SWVec3i(x, y, z), defaultBlock);
     }
 }

@@ -26,6 +26,7 @@ import net.pistonmaster.serverwrecker.server.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.SWItemStack;
+import net.pistonmaster.serverwrecker.server.util.BlockTypeHelper;
 import net.pistonmaster.serverwrecker.server.util.TimeUtil;
 import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
@@ -50,8 +51,7 @@ public final class BlockBreakAction implements WorldAction {
             return false;
         }
 
-        return levelState.getBlockStateAt(blockPosition)
-                .blockType().blockShapeTypes().isEmpty();
+        return BlockTypeHelper.isAir(levelState.getBlockStateAt(blockPosition).blockType());
     }
 
     @Override

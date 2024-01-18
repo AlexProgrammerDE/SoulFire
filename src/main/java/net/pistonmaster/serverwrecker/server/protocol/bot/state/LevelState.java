@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.movement.AABB;
 import net.pistonmaster.serverwrecker.server.protocol.bot.nbt.MCUniform;
 import net.pistonmaster.serverwrecker.server.protocol.bot.nbt.MCUniformInt;
@@ -123,11 +123,11 @@ public class LevelState {
         return chunks.isChunkLoaded(block);
     }
 
-    public BlockStateMeta getBlockStateAt(Vector3i block) {
+    public BlockState getBlockStateAt(Vector3i block) {
         return chunks.getBlockStateAt(block.getX(), block.getY(), block.getZ());
     }
 
-    public BlockStateMeta getBlockStateAt(SWVec3i block) {
+    public BlockState getBlockStateAt(SWVec3i block) {
         return chunks.getBlockStateAt(block.x, block.y, block.z);
     }
 

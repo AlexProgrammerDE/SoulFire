@@ -28,18 +28,18 @@ public class GlobalBlockPalette {
     private final int maxStates;
     @Getter
     private final int blockBitsPerEntry;
-    private final BlockStateMeta[] stateIdToBlockState;
+    private final BlockState[] stateIdToBlockState;
 
-    public GlobalBlockPalette(Int2ObjectMap<BlockStateMeta> states) {
+    public GlobalBlockPalette(Int2ObjectMap<BlockState> states) {
         this.maxStates = states.size();
         this.blockBitsPerEntry = ChunkData.log2RoundUp(maxStates);
-        this.stateIdToBlockState = new BlockStateMeta[maxStates];
+        this.stateIdToBlockState = new BlockState[maxStates];
         for (var entry : states.int2ObjectEntrySet()) {
             this.stateIdToBlockState[entry.getIntKey()] = entry.getValue();
         }
     }
 
-    public BlockStateMeta getBlockStateForStateId(int id) {
+    public BlockState getBlockStateForStateId(int id) {
         return stateIdToBlockState[id];
     }
 }

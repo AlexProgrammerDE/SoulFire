@@ -22,7 +22,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.data.ResourceData;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockAccessor;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateMeta;
+import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.model.ChunkKey;
 import net.pistonmaster.serverwrecker.server.protocol.bot.utils.SectionUtils;
 import net.pistonmaster.serverwrecker.server.util.NoopLock;
@@ -33,7 +33,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ChunkHolder implements BlockAccessor {
-    private static final BlockStateMeta VOID_AIR_BLOCK_STATE = BlockStateMeta.forDefaultBlockType(BlockType.VOID_AIR);
+    private static final BlockState VOID_AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.VOID_AIR);
     private final Long2ObjectMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
     private final Lock readLock;
     private final Lock writeLock;
@@ -117,7 +117,7 @@ public class ChunkHolder implements BlockAccessor {
     }
 
     @Override
-    public BlockStateMeta getBlockStateAt(int x, int y, int z) {
+    public BlockState getBlockStateAt(int x, int y, int z) {
         if (y < minBuildHeight) {
             return VOID_AIR_BLOCK_STATE;
         } else if (y >= maxBuildHeight) {

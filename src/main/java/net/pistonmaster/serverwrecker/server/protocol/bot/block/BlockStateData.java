@@ -17,12 +17,14 @@
  */
 package net.pistonmaster.serverwrecker.server.protocol.bot.block;
 
-import org.cloudburstmc.math.vector.Vector3i;
+import net.pistonmaster.serverwrecker.server.data.BlockShapeGroup;
+import net.pistonmaster.serverwrecker.server.data.BlockType;
 
-public interface BlockAccessor {
-    BlockState getBlockStateAt(int x, int y, int z);
-
-    default BlockState getBlockStateAt(Vector3i pos) {
-        return getBlockStateAt(pos.getX(), pos.getY(), pos.getZ());
+public record BlockStateData(BlockType blockType, int id, boolean defaultState,
+                             BlockStateProperties properties,
+                             BlockShapeGroup blockShapeGroup) {
+    @Override
+    public int hashCode() {
+        return id;
     }
 }
