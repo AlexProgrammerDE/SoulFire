@@ -28,6 +28,9 @@ tasks {
         )
         options.isFork = true
     }
+    test {
+        useJUnitPlatform()
+    }
 }
 
 indra {
