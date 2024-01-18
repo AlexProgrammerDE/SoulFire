@@ -23,9 +23,9 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockStateProperties;
@@ -43,7 +43,7 @@ public class ResourceData {
     public static final Map<String, String> MOJANG_TRANSLATIONS;
     public static final Int2ObjectMap<BlockStateProperties> BLOCK_STATE_PROPERTIES;
     public static final IntSet BLOCK_STATE_DEFAULTS;
-    public static final Object2ObjectMap<BlockType, List<BlockState>> BLOCK_STATES;
+    public static final Reference2ObjectMap<BlockType, List<BlockState>> BLOCK_STATES;
 
     // Static initialization allows us to preload this in a native image
     static {
@@ -93,7 +93,7 @@ public class ResourceData {
 
         // Load global palette
         Int2ObjectMap<BlockState> stateMap = new Int2ObjectOpenHashMap<>();
-        Object2ObjectMap<BlockType, List<BlockState>> blockStates = new Object2ObjectOpenHashMap<>();
+        Reference2ObjectMap<BlockType, List<BlockState>> blockStates = new Reference2ObjectOpenHashMap<>();
         for (var blockEntry : blocks.entrySet()) {
             var name = blockEntry.getKey();
             var blockEntryData = blockEntry.getValue().getAsJsonObject();
