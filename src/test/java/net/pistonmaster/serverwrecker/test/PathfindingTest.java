@@ -17,5 +17,11 @@
  */
 package net.pistonmaster.serverwrecker.test;
 
+import org.junit.jupiter.api.Test;
+
 public class PathfindingTest {
+    @Test
+    public void testPathfinding() {
+
+    }
 }
