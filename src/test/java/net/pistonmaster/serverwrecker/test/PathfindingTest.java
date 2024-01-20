@@ -318,4 +318,70 @@ public class PathfindingTest {
         var route = routeFinder.findRoute(initialState, false);
         assertEquals(3, route.size());
     }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testPathfindingDigSideUnsafe(boolean unsafe) {
+        var accessor = new TestBlockAccessor();
+        accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(0, -1, 0, BlockType.STONE);
+        if (unsafe) {
+            accessor.setBlockAt(1, 0, 0, BlockType.LAVA);
+        }
+
+        var routeFinder = new RouteFinder(
+                DEFAULT_GRAPH,
+                new PosGoal(0, 0, 0)
+        );
+
+        var initialState = new BotEntityState(
+                new SWVec3i(0, 1, 0),
+                new ProjectedLevelState(accessor),
+                new ProjectedInventory(List.of(
+                        SWItemStack.forType(ItemType.DIAMOND_PICKAXE)
+                ))
+        );
+
+        if (unsafe) {
+            assertThrowsExactly(NoRouteFoundException.class,
+                    () -> routeFinder.findRoute(initialState, false));
+        } else {
+            var route = routeFinder.findRoute(initialState, false);
+            assertEquals(1, route.size());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 4})
+    public void testPathfindingDigBelowUnsafe(int level) {
+        var accessor = new TestBlockAccessor();
+        accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(0, -1, 0, BlockType.LAVA);
+        accessor.setBlockAt(0, -2, 0, BlockType.LAVA);
+        accessor.setBlockAt(0, -3, 0, BlockType.LAVA);
+        accessor.setBlockAt(0, -4, 0, BlockType.LAVA);
+
+        accessor.setBlockAt(0, -level, 0, BlockType.STONE);
+
+        var routeFinder = new RouteFinder(
+                DEFAULT_GRAPH,
+                new PosGoal(0, 0, 0)
+        );
+
+        var initialState = new BotEntityState(
+                new SWVec3i(0, 1, 0),
+                new ProjectedLevelState(accessor),
+                new ProjectedInventory(List.of(
+                        SWItemStack.forType(ItemType.DIAMOND_PICKAXE)
+                ))
+        );
+
+        if (level > 1) {
+            assertThrowsExactly(NoRouteFoundException.class,
+                    () -> routeFinder.findRoute(initialState, false));
+        } else {
+            var route = routeFinder.findRoute(initialState, false);
+            assertEquals(1, route.size());
+        }
+    }
 }
