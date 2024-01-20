@@ -29,8 +29,6 @@ import java.util.List;
 public record BlockState(int id, BlockType blockType, boolean defaultState,
                          BlockStateProperties properties,
                          BlockShapeGroup blockShapeGroup) {
-    private static final BlockShapeGroup EMPTY_SHAPE = BlockShapeGroup.getById(0);
-
     public BlockState(int id, BlockType blockType, int stateIndex) {
         this(
                 id,
@@ -50,7 +48,7 @@ public record BlockState(int id, BlockType blockType, boolean defaultState,
         var size = shapeGroups.size();
         if (size == 0) {
             // This block has no shape stored, this is for example for air or grass
-            return EMPTY_SHAPE;
+            return BlockShapeGroup.EMPTY;
         } else if (size == 1) {
             // This block shares a shape for all states
             return shapeGroups.getFirst();
@@ -64,13 +62,10 @@ public record BlockState(int id, BlockType blockType, boolean defaultState,
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof BlockState blockState)) {
-            return false;
-        }
-
-        // A block state id is unique
-        return blockState.id == id;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BlockState blockState)) return false;
+        return id == blockState.id;
     }
 
     @Override

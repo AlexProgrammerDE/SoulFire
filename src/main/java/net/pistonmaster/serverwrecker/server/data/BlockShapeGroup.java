@@ -30,6 +30,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highestY) {
     public static final Int2ObjectMap<BlockShapeGroup> FROM_ID = new Int2ObjectOpenHashMap<>();
+    public static final BlockShapeGroup EMPTY;
 
     static {
         try (var inputStream = BlockShapeGroup.class.getClassLoader().getResourceAsStream("minecraft/blockshapes.txt")) {
@@ -73,6 +74,8 @@ public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highe
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+
+        EMPTY = getById(0);
     }
 
     public static BlockShapeGroup getById(int id) {
