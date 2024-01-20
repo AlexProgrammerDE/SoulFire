@@ -34,7 +34,30 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PathfindingTest {
     @Test
-    public void testPathfinding() {
+    public void testPathfindingStraight() {
+        var accessor = new TestBlockAccessor();
+        accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(1, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(2, 0, 0, BlockType.STONE);
+
+        var routeFinder = new RouteFinder(
+                new MinecraftGraph(new TagsState()),
+                new PosGoal(2, 1, 0)
+        );
+
+        var initialState = new BotEntityState(
+                new SWVec3i(0, 1, 0),
+                new ProjectedLevelState(accessor),
+                new ProjectedInventory(new PlayerInventoryContainer())
+        );
+
+        var route = routeFinder.findRoute(initialState, true);
+
+        assertEquals(3, route.size());
+    }
+
+    @Test
+    public void testPathfindingDiagonal() {
         var accessor = new TestBlockAccessor();
         accessor.setBlockAt(0, 0, 0, BlockType.STONE);
         accessor.setBlockAt(1, 0, 1, BlockType.STONE);
@@ -42,7 +65,7 @@ public class PathfindingTest {
 
         var routeFinder = new RouteFinder(
                 new MinecraftGraph(new TagsState()),
-                new PosGoal(100, 80, 100)
+                new PosGoal(2, 1, 2)
         );
 
         var initialState = new BotEntityState(
