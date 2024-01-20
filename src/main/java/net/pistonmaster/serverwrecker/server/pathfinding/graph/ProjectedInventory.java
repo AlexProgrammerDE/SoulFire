@@ -28,7 +28,9 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
 import net.pistonmaster.serverwrecker.server.util.ItemTypeHelper;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,25 +47,24 @@ public class ProjectedInventory {
     private final Map<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
 
     public ProjectedInventory(PlayerInventoryContainer playerInventory) {
-        this(playerInventory.storage());
+        this(Arrays.stream(playerInventory.storage())
+                .map(ContainerSlot::item)
+                .filter(item -> item != null && item.getAmount() > 0)
+                .toList());
     }
 
-    public ProjectedInventory(ContainerSlot[] storage) {
+    public ProjectedInventory(List<SWItemStack> items) {
         var blockItems = 0;
         var usableToolsAndNull = new HashSet<SWItemStack>();
 
         // Empty slot
         usableToolsAndNull.add(null);
 
-        for (var slot : storage) {
-            if (slot.item() == null) {
-                continue;
-            }
-
-            if (ItemTypeHelper.isSafeFullBlockItem(slot.item().type())) {
-                blockItems += slot.item().getAmount();
-            } else if (ItemTypeHelper.isTool(slot.item().type())) {
-                usableToolsAndNull.add(slot.item());
+        for (var item : items) {
+            if (ItemTypeHelper.isSafeFullBlockItem(item.type())) {
+                blockItems += item.getAmount();
+            } else if (ItemTypeHelper.isTool(item.type())) {
+                usableToolsAndNull.add(item);
             }
         }
 

@@ -18,6 +18,7 @@
 package net.pistonmaster.serverwrecker.test;
 
 import net.pistonmaster.serverwrecker.server.data.BlockType;
+import net.pistonmaster.serverwrecker.server.data.ItemType;
 import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
 import net.pistonmaster.serverwrecker.server.pathfinding.NoRouteFoundException;
 import net.pistonmaster.serverwrecker.server.pathfinding.RouteFinder;
@@ -26,18 +27,20 @@ import net.pistonmaster.serverwrecker.server.pathfinding.goals.PosGoal;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedLevelState;
-import net.pistonmaster.serverwrecker.server.protocol.bot.container.ContainerSlot;
+import net.pistonmaster.serverwrecker.server.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
 import net.pistonmaster.serverwrecker.test.utils.TestBlockAccessor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 public class PathfindingTest {
-    private static final ContainerSlot[] EMPTY_CONTAINER = new ContainerSlot[]{};
+    private static final MinecraftGraph DEFAULT_GRAPH = new MinecraftGraph(new TagsState());
 
     @Test
     public void testPathfindingStraight() {
@@ -47,14 +50,14 @@ public class PathfindingTest {
         accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
         var routeFinder = new RouteFinder(
-                new MinecraftGraph(new TagsState()),
+                DEFAULT_GRAPH,
                 new PosGoal(2, 1, 0)
         );
 
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(EMPTY_CONTAINER)
+                new ProjectedInventory(List.of())
         );
 
         var route = routeFinder.findRoute(initialState, false);
@@ -70,7 +73,7 @@ public class PathfindingTest {
         accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
         var routeFinder = new RouteFinder(
-                new MinecraftGraph(new TagsState()),
+                DEFAULT_GRAPH,
                 // This is impossible to reach
                 new PosGoal(3, 1, 0)
         );
@@ -78,7 +81,7 @@ public class PathfindingTest {
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(EMPTY_CONTAINER)
+                new ProjectedInventory(List.of())
         );
 
         assertThrowsExactly(NoRouteFoundException.class,
@@ -93,14 +96,14 @@ public class PathfindingTest {
         accessor.setBlockAt(2, 0, 2, BlockType.STONE);
 
         var routeFinder = new RouteFinder(
-                new MinecraftGraph(new TagsState()),
+                DEFAULT_GRAPH,
                 new PosGoal(2, 1, 2)
         );
 
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(EMPTY_CONTAINER)
+                new ProjectedInventory(List.of())
         );
 
         var route = routeFinder.findRoute(initialState, false);
@@ -116,14 +119,14 @@ public class PathfindingTest {
         accessor.setBlockAt(1, height, 0, BlockType.STONE);
 
         var routeFinder = new RouteFinder(
-                new MinecraftGraph(new TagsState()),
+                DEFAULT_GRAPH,
                 new PosGoal(1, height + 1, 0)
         );
 
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(EMPTY_CONTAINER)
+                new ProjectedInventory(List.of())
         );
 
         if (height > 1) {
@@ -143,14 +146,14 @@ public class PathfindingTest {
         accessor.setBlockAt(1, height, 1, BlockType.STONE);
 
         var routeFinder = new RouteFinder(
-                new MinecraftGraph(new TagsState()),
+                DEFAULT_GRAPH,
                 new PosGoal(1, height + 1, 1)
         );
 
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(EMPTY_CONTAINER)
+                new ProjectedInventory(List.of())
         );
 
         if (height > 1) {
@@ -170,14 +173,14 @@ public class PathfindingTest {
         accessor.setBlockAt(1, -height, 0, BlockType.STONE);
 
         var routeFinder = new RouteFinder(
-                new MinecraftGraph(new TagsState()),
+                DEFAULT_GRAPH,
                 new PosGoal(1, -height + 1, 0)
         );
 
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(EMPTY_CONTAINER)
+                new ProjectedInventory(List.of())
         );
 
         if (height > 3) {
@@ -197,14 +200,14 @@ public class PathfindingTest {
         accessor.setBlockAt(1, -height, 1, BlockType.STONE);
 
         var routeFinder = new RouteFinder(
-                new MinecraftGraph(new TagsState()),
+                DEFAULT_GRAPH,
                 new PosGoal(1, -height + 1, 1)
         );
 
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(EMPTY_CONTAINER)
+                new ProjectedInventory(List.of())
         );
 
         if (height > 3) {
@@ -224,14 +227,14 @@ public class PathfindingTest {
         accessor.setBlockAt(gapLength + 1, 0, 0, BlockType.STONE);
 
         var routeFinder = new RouteFinder(
-                new MinecraftGraph(new TagsState()),
+                DEFAULT_GRAPH,
                 new PosGoal(gapLength + 1, 1, 0)
         );
 
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(EMPTY_CONTAINER)
+                new ProjectedInventory(List.of())
         );
 
         // TODO: Allow longer jumps
@@ -242,5 +245,50 @@ public class PathfindingTest {
             var route = routeFinder.findRoute(initialState, false);
             assertEquals(1, route.size());
         }
+    }
+
+    @Test
+    public void testPathfindingUp() {
+        var accessor = new TestBlockAccessor();
+        accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+
+        var routeFinder = new RouteFinder(
+                DEFAULT_GRAPH,
+                new PosGoal(0, 2, 0)
+        );
+
+        var initialState = new BotEntityState(
+                new SWVec3i(0, 1, 0),
+                new ProjectedLevelState(accessor),
+                new ProjectedInventory(List.of(
+                        SWItemStack.forType(ItemType.STONE)
+                ))
+        );
+
+        var route = routeFinder.findRoute(initialState, false);
+        assertEquals(1, route.size());
+    }
+
+    @Test
+    public void testPathfindingDown() {
+        var accessor = new TestBlockAccessor();
+        accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(0, -1, 0, BlockType.STONE);
+
+        var routeFinder = new RouteFinder(
+                DEFAULT_GRAPH,
+                new PosGoal(0, 0, 0)
+        );
+
+        var initialState = new BotEntityState(
+                new SWVec3i(0, 1, 0),
+                new ProjectedLevelState(accessor),
+                new ProjectedInventory(List.of(
+                        SWItemStack.forType(ItemType.DIAMOND_PICKAXE)
+                ))
+        );
+
+        var route = routeFinder.findRoute(initialState, false);
+        assertEquals(1, route.size());
     }
 }
