@@ -19,6 +19,7 @@ package net.pistonmaster.serverwrecker.client.gui;
 
 import ch.jalu.injector.Injector;
 import com.formdev.flatlaf.util.SystemInfo;
+import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.client.gui.libs.HintManager;
 import net.pistonmaster.serverwrecker.client.gui.navigation.CardsContainer;
 import net.pistonmaster.serverwrecker.client.gui.navigation.ControlPanel;
@@ -34,7 +35,7 @@ public class GUIFrame extends JFrame {
     private Runnable hintFocusListener;
 
     public GUIFrame() {
-        super("ServerWrecker");
+        super("ServerWrecker " + BuildData.VERSION);
     }
 
     public static void showHints(Injector injector) {
