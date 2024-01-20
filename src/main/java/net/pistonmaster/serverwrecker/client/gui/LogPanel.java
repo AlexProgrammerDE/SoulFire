@@ -22,7 +22,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.serverwrecker.client.ClientCommandManager;
 import net.pistonmaster.serverwrecker.client.gui.libs.MessageLogPanel;
 import net.pistonmaster.serverwrecker.client.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.grpc.generated.LogRequest;
@@ -44,12 +43,10 @@ import java.util.Map;
 public class LogPanel extends JPanel {
     private final MessageLogPanel messageLogPanel = new MessageLogPanel(3000);
     private final GUIManager guiManager;
-    private final ClientCommandManager clientCommandManager;
 
     @Inject
     public LogPanel(GUIManager guiManager) {
         this.guiManager = guiManager;
-        this.clientCommandManager = new ClientCommandManager(guiManager.rpcClient());
 
         var request = LogRequest.newBuilder().setPrevious(300).build();
         guiManager.rpcClient().logStub().subscribe(request, new StreamObserver<>() {
@@ -97,7 +94,7 @@ public class LogPanel extends JPanel {
         private int pointer = -1;
 
         public void initHistory() {
-            commandHistory.addAll(clientCommandManager.getCommandHistory()
+            commandHistory.addAll(guiManager.clientCommandManager().getCommandHistory()
                     .stream().map(Map.Entry::getValue).toList());
         }
 
@@ -116,7 +113,7 @@ public class LogPanel extends JPanel {
             undoManager.discardAllEdits();
 
             commandHistory.add(command);
-            clientCommandManager.execute(command);
+            guiManager.clientCommandManager().execute(command);
         }
     }
 
