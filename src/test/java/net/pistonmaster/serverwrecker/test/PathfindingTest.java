@@ -106,15 +106,16 @@ public class PathfindingTest {
         assertEquals(3, route.size());
     }
 
-    @Test
-    public void testPathfindingJump() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    public void testPathfindingJump(int height) {
         var accessor = new TestBlockAccessor();
         accessor.setBlockAt(0, 0, 0, BlockType.STONE);
-        accessor.setBlockAt(1, 1, 0, BlockType.STONE);
+        accessor.setBlockAt(1, height, 0, BlockType.STONE);
 
         var routeFinder = new RouteFinder(
                 new MinecraftGraph(new TagsState()),
-                new PosGoal(1, 2, 0)
+                new PosGoal(1, height + 1, 0)
         );
 
         var initialState = new BotEntityState(
@@ -123,20 +124,25 @@ public class PathfindingTest {
                 new ProjectedInventory(new ContainerSlot[]{})
         );
 
-        var route = routeFinder.findRoute(initialState, true);
-
-        assertEquals(2, route.size());
+        if (height > 1) {
+            assertThrowsExactly(NoRouteFoundException.class,
+                    () -> routeFinder.findRoute(initialState, true));
+        } else {
+            var route = routeFinder.findRoute(initialState, true);
+            assertEquals(2, route.size());
+        }
     }
 
-    @Test
-    public void testPathfindingJumpDiagonal() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    public void testPathfindingJumpDiagonal(int height) {
         var accessor = new TestBlockAccessor();
         accessor.setBlockAt(0, 0, 0, BlockType.STONE);
-        accessor.setBlockAt(1, 1, 1, BlockType.STONE);
+        accessor.setBlockAt(1, height, 1, BlockType.STONE);
 
         var routeFinder = new RouteFinder(
                 new MinecraftGraph(new TagsState()),
-                new PosGoal(1, 2, 1)
+                new PosGoal(1, height + 1, 1)
         );
 
         var initialState = new BotEntityState(
@@ -145,9 +151,13 @@ public class PathfindingTest {
                 new ProjectedInventory(new ContainerSlot[]{})
         );
 
-        var route = routeFinder.findRoute(initialState, true);
-
-        assertEquals(2, route.size());
+        if (height > 1) {
+            assertThrowsExactly(NoRouteFoundException.class,
+                    () -> routeFinder.findRoute(initialState, true));
+        } else {
+            var route = routeFinder.findRoute(initialState, true);
+            assertEquals(2, route.size());
+        }
     }
 
     @ParameterizedTest
