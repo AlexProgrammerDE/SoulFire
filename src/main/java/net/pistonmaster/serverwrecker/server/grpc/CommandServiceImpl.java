@@ -20,7 +20,7 @@ package net.pistonmaster.serverwrecker.server.grpc;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.grpc.generated.*;
-import net.pistonmaster.serverwrecker.server.command.ServerCommandManager;
+import net.pistonmaster.serverwrecker.server.ServerCommandManager;
 
 import javax.inject.Inject;
 

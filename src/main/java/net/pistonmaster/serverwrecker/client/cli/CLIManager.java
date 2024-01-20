@@ -17,9 +17,12 @@
  */
 package net.pistonmaster.serverwrecker.client.cli;
 
+import ch.jalu.injector.Injector;
+import ch.jalu.injector.InjectorBuilder;
 import com.google.gson.JsonPrimitive;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.serverwrecker.client.ClientCommandManager;
 import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.client.settings.SettingsManager;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
@@ -41,12 +44,18 @@ import java.util.concurrent.atomic.AtomicReference;
 @SuppressWarnings("unchecked")
 public class CLIManager {
     private final RPCClient rpcClient;
+    private final ClientCommandManager clientCommandManager;
+    private final Injector injector = new InjectorBuilder()
+            .addDefaultHandlers("net.pistonmaster.serverwrecker")
+            .create();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
     private final SettingsManager settingsManager = new SettingsManager();
 
     public CLIManager(RPCClient rpcClient) {
         this.rpcClient = rpcClient;
+        this.clientCommandManager = new ClientCommandManager(rpcClient, settingsManager);
+        injector.register(CLIManager.class, this);
     }
 
     private static String escapeFormatSpecifiers(String input) {

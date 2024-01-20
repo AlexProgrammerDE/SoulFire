@@ -22,7 +22,8 @@ import ch.jalu.injector.InjectorBuilder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.reflect.Modules;
-import net.pistonmaster.serverwrecker.client.command.SWTerminalConsole;
+import net.pistonmaster.serverwrecker.client.ClientCommandManager;
+import net.pistonmaster.serverwrecker.client.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.client.settings.SettingsManager;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
@@ -44,6 +45,7 @@ import java.util.concurrent.Executors;
 public class GUIManager {
     public static final Queue<Runnable> MAIN_THREAD_QUEUE = new ConcurrentLinkedQueue<>();
     private final RPCClient rpcClient;
+    private final ClientCommandManager clientCommandManager;
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.serverwrecker")
             .create();
@@ -53,6 +55,7 @@ public class GUIManager {
 
     public GUIManager(RPCClient rpcClient) {
         this.rpcClient = rpcClient;
+        this.clientCommandManager = new ClientCommandManager(rpcClient, settingsManager);
         injector.register(GUIManager.class, this);
     }
 
@@ -72,7 +75,7 @@ public class GUIManager {
             log.error("Failed to create profiles folder!", e);
         }
 
-        SWTerminalConsole.setupTerminalConsole(threadPool, shutdownManager, rpcClient);
+        SWTerminalConsole.setupTerminalConsole(threadPool, shutdownManager, clientCommandManager);
 
         // Override the title in AWT (GNOME displays the class name otherwise)
         setAppTitle();

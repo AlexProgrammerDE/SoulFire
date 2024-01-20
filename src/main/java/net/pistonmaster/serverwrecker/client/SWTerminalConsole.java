@@ -15,11 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.client.command;
+package net.pistonmaster.serverwrecker.client;
 
 import lombok.RequiredArgsConstructor;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
-import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.util.ShutdownManager;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -46,9 +45,9 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
         System.setErr(IoBuilder.forLogger(logger).setLevel(Level.ERROR).buildPrintStream());
     }
 
-    public static void setupTerminalConsole(ExecutorService threadPool, ShutdownManager shutdownManager, RPCClient rpcClient) {
+    public static void setupTerminalConsole(ExecutorService threadPool, ShutdownManager shutdownManager, ClientCommandManager clientCommandManager) {
         SWTerminalConsole.setupStreams();
-        threadPool.execute(new SWTerminalConsole(shutdownManager, new ClientCommandManager(rpcClient))::start);
+        threadPool.execute(new SWTerminalConsole(shutdownManager, clientCommandManager)::start);
     }
 
     @Override

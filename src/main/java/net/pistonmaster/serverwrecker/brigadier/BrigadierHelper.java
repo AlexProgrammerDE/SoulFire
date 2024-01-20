@@ -15,13 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.server.command;
+package net.pistonmaster.serverwrecker.brigadier;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import net.pistonmaster.serverwrecker.server.api.ConsoleSubject;
 
 public class BrigadierHelper {
     private BrigadierHelper() {

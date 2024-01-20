@@ -15,20 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.client.command;
+package net.pistonmaster.serverwrecker.client;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import io.grpc.stub.StreamObserver;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.serverwrecker.brigadier.ConsoleSubject;
 import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
-import net.pistonmaster.serverwrecker.grpc.generated.CommandCompletionRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.CommandHistoryRequest;
-import net.pistonmaster.serverwrecker.grpc.generated.CommandRequest;
-import net.pistonmaster.serverwrecker.server.api.ConsoleSubject;
-import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
-import net.pistonmaster.serverwrecker.server.api.event.lifecycle.DispatcherInitEvent;
+import net.pistonmaster.serverwrecker.client.settings.SettingsManager;
+import net.pistonmaster.serverwrecker.grpc.generated.*;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -37,16 +36,40 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static net.pistonmaster.serverwrecker.brigadier.BrigadierHelper.help;
+import static net.pistonmaster.serverwrecker.brigadier.BrigadierHelper.literal;
+
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientCommandManager {
     @Getter
     private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
     private final RPCClient rpcClient;
+    private final SettingsManager settingsManager;
 
     @PostConstruct
     public void postConstruct() {
-        ServerWreckerAPI.postEvent(new DispatcherInitEvent(dispatcher));
+        dispatcher.register(literal("start-attack")
+                .executes(help("Start a attack using the current settings", c -> {
+                    rpcClient.attackStub().startAttack(AttackStartRequest.newBuilder()
+                            .setSettings(settingsManager.exportSettings()).build(), new StreamObserver<>() {
+                        @Override
+                        public void onNext(AttackStartResponse value) {
+                            log.debug("Started bot attack with id {}", value.getId());
+                        }
+
+                        @Override
+                        public void onError(Throwable t) {
+                            log.error("Error while starting bot attack!", t);
+                        }
+
+                        @Override
+                        public void onCompleted() {
+                        }
+                    });
+
+                    return Command.SINGLE_SUCCESS;
+                })));
     }
 
     public int execute(String command) {

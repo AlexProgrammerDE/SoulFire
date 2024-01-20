@@ -18,7 +18,7 @@
 package net.pistonmaster.serverwrecker.server.api.event.lifecycle;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.pistonmaster.serverwrecker.server.api.ConsoleSubject;
+import net.pistonmaster.serverwrecker.brigadier.ConsoleSubject;
 import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerGlobalEvent;
 
 /**

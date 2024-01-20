@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.serverwrecker.client.command.ClientCommandManager;
+import net.pistonmaster.serverwrecker.client.ClientCommandManager;
 import net.pistonmaster.serverwrecker.client.gui.libs.MessageLogPanel;
 import net.pistonmaster.serverwrecker.client.gui.libs.SwingTextUtils;
 import net.pistonmaster.serverwrecker.grpc.generated.LogRequest;

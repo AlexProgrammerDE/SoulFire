@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.server.command;
+package net.pistonmaster.serverwrecker.server;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.mojang.brigadier.Command;
@@ -30,10 +30,9 @@ import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.serverwrecker.brigadier.CommandHelpWrapper;
+import net.pistonmaster.serverwrecker.brigadier.ConsoleSubject;
 import net.pistonmaster.serverwrecker.client.gui.LogPanel;
-import net.pistonmaster.serverwrecker.server.AttackManager;
-import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.server.api.ConsoleSubject;
 import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
 import net.pistonmaster.serverwrecker.server.api.event.EventUtil;
 import net.pistonmaster.serverwrecker.server.api.event.bot.BotPreTickEvent;
@@ -65,7 +64,7 @@ import java.util.*;
 import java.util.function.ToIntFunction;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
-import static net.pistonmaster.serverwrecker.server.command.BrigadierHelper.*;
+import static net.pistonmaster.serverwrecker.brigadier.BrigadierHelper.*;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

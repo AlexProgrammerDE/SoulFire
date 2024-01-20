@@ -22,7 +22,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.account.AuthType;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
-import net.pistonmaster.serverwrecker.client.command.SWTerminalConsole;
+import net.pistonmaster.serverwrecker.client.SWTerminalConsole;
 import net.pistonmaster.serverwrecker.proxy.ProxyType;
 import net.pistonmaster.serverwrecker.server.viaversion.SWVersionConstants;
 import picocli.CommandLine;
@@ -45,6 +45,9 @@ public class SWCommandDefinition implements Callable<Integer> {
     private final CLIManager cliManager;
     @Setter
     private CommandLine commandLine;
+
+    @Option(names = {"-s", "--start"}, description = "Whether to start the attack automatically")
+    private boolean start;
 
     @Option(names = {"--account-file"}, description = "File to load accounts from")
     private Path accountFile;
@@ -100,7 +103,11 @@ public class SWCommandDefinition implements Callable<Integer> {
         }
 
         // Delayed to here, so help and version do not get cut off
-        SWTerminalConsole.setupTerminalConsole(cliManager.threadPool(), cliManager.shutdownManager(), cliManager.rpcClient());
+        SWTerminalConsole.setupTerminalConsole(
+                cliManager.threadPool(),
+                cliManager.shutdownManager(),
+                cliManager.clientCommandManager()
+        );
 
         if (accountFile != null && authType != null) {
             try {
@@ -127,6 +134,12 @@ public class SWCommandDefinition implements Callable<Integer> {
                 log.error("Failed to load profile!", e);
                 return 1;
             }
+        }
+
+        if (start) {
+            cliManager.clientCommandManager().execute("start-attack");
+        } else {
+            log.info("ServerWrecker is ready to go! Type 'start-attack' to start the attack! (Use --start to start automatically)");
         }
 
         return 0;
