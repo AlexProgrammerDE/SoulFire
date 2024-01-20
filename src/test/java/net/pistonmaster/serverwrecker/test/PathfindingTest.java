@@ -269,6 +269,34 @@ public class PathfindingTest {
         assertEquals(1, route.size());
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {15, 20, 25})
+    public void testPathfindingUpStacking(int amount) {
+        var accessor = new TestBlockAccessor();
+        accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+
+        var routeFinder = new RouteFinder(
+                DEFAULT_GRAPH,
+                new PosGoal(0, 21, 0)
+        );
+
+        var initialState = new BotEntityState(
+                new SWVec3i(0, 1, 0),
+                new ProjectedLevelState(accessor),
+                new ProjectedInventory(List.of(
+                        SWItemStack.forType(ItemType.STONE).withAmount(amount)
+                ))
+        );
+
+        if (amount < 20) {
+            assertThrowsExactly(NoRouteFoundException.class,
+                    () -> routeFinder.findRoute(initialState, false));
+        } else {
+            var route = routeFinder.findRoute(initialState, false);
+            assertEquals(20, route.size());
+        }
+    }
+
     @Test
     public void testPathfindingDown() {
         var accessor = new TestBlockAccessor();
@@ -317,6 +345,7 @@ public class PathfindingTest {
 
         var route = routeFinder.findRoute(initialState, false);
         assertEquals(3, route.size());
+        System.out.println(route);
     }
 
     @ParameterizedTest
