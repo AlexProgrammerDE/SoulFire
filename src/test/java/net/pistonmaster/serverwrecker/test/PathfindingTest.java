@@ -37,6 +37,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 public class PathfindingTest {
+    private static final ContainerSlot[] EMPTY_CONTAINER = new ContainerSlot[]{};
+
     @Test
     public void testPathfindingStraight() {
         var accessor = new TestBlockAccessor();
@@ -52,12 +54,12 @@ public class PathfindingTest {
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(new ContainerSlot[]{})
+                new ProjectedInventory(EMPTY_CONTAINER)
         );
 
-        var route = routeFinder.findRoute(initialState, true);
+        var route = routeFinder.findRoute(initialState, false);
 
-        assertEquals(3, route.size());
+        assertEquals(2, route.size());
     }
 
     @Test
@@ -76,11 +78,11 @@ public class PathfindingTest {
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(new ContainerSlot[]{})
+                new ProjectedInventory(EMPTY_CONTAINER)
         );
 
         assertThrowsExactly(NoRouteFoundException.class,
-                () -> routeFinder.findRoute(initialState, true));
+                () -> routeFinder.findRoute(initialState, false));
     }
 
     @Test
@@ -98,12 +100,12 @@ public class PathfindingTest {
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(new ContainerSlot[]{})
+                new ProjectedInventory(EMPTY_CONTAINER)
         );
 
-        var route = routeFinder.findRoute(initialState, true);
+        var route = routeFinder.findRoute(initialState, false);
 
-        assertEquals(3, route.size());
+        assertEquals(2, route.size());
     }
 
     @ParameterizedTest
@@ -121,15 +123,15 @@ public class PathfindingTest {
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(new ContainerSlot[]{})
+                new ProjectedInventory(EMPTY_CONTAINER)
         );
 
         if (height > 1) {
             assertThrowsExactly(NoRouteFoundException.class,
-                    () -> routeFinder.findRoute(initialState, true));
+                    () -> routeFinder.findRoute(initialState, false));
         } else {
-            var route = routeFinder.findRoute(initialState, true);
-            assertEquals(2, route.size());
+            var route = routeFinder.findRoute(initialState, false);
+            assertEquals(1, route.size());
         }
     }
 
@@ -148,15 +150,15 @@ public class PathfindingTest {
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(new ContainerSlot[]{})
+                new ProjectedInventory(EMPTY_CONTAINER)
         );
 
         if (height > 1) {
             assertThrowsExactly(NoRouteFoundException.class,
-                    () -> routeFinder.findRoute(initialState, true));
+                    () -> routeFinder.findRoute(initialState, false));
         } else {
-            var route = routeFinder.findRoute(initialState, true);
-            assertEquals(2, route.size());
+            var route = routeFinder.findRoute(initialState, false);
+            assertEquals(1, route.size());
         }
     }
 
@@ -175,15 +177,15 @@ public class PathfindingTest {
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(new ContainerSlot[]{})
+                new ProjectedInventory(EMPTY_CONTAINER)
         );
 
         if (height > 3) {
             assertThrowsExactly(NoRouteFoundException.class,
-                    () -> routeFinder.findRoute(initialState, true));
+                    () -> routeFinder.findRoute(initialState, false));
         } else {
-            var route = routeFinder.findRoute(initialState, true);
-            assertEquals(2, route.size());
+            var route = routeFinder.findRoute(initialState, false);
+            assertEquals(1, route.size());
         }
     }
 
@@ -202,15 +204,43 @@ public class PathfindingTest {
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(new ContainerSlot[]{})
+                new ProjectedInventory(EMPTY_CONTAINER)
         );
 
         if (height > 3) {
             assertThrowsExactly(NoRouteFoundException.class,
-                    () -> routeFinder.findRoute(initialState, true));
+                    () -> routeFinder.findRoute(initialState, false));
         } else {
-            var route = routeFinder.findRoute(initialState, true);
-            assertEquals(2, route.size());
+            var route = routeFinder.findRoute(initialState, false);
+            assertEquals(1, route.size());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 4, 5})
+    public void testPathfindingGapJump(int gapLength) {
+        var accessor = new TestBlockAccessor();
+        accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(gapLength + 1, 0, 0, BlockType.STONE);
+
+        var routeFinder = new RouteFinder(
+                new MinecraftGraph(new TagsState()),
+                new PosGoal(gapLength + 1, 1, 0)
+        );
+
+        var initialState = new BotEntityState(
+                new SWVec3i(0, 1, 0),
+                new ProjectedLevelState(accessor),
+                new ProjectedInventory(EMPTY_CONTAINER)
+        );
+
+        // TODO: Allow longer jumps
+        if (gapLength > 1) {
+            assertThrowsExactly(NoRouteFoundException.class,
+                    () -> routeFinder.findRoute(initialState, false));
+        } else {
+            var route = routeFinder.findRoute(initialState, false);
+            assertEquals(1, route.size());
         }
     }
 }
