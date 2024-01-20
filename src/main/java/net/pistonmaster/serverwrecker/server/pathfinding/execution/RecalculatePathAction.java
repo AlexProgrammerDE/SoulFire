@@ -17,10 +17,8 @@
  */
 package net.pistonmaster.serverwrecker.server.pathfinding.execution;
 
-import lombok.ToString;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 
-@ToString
 public final class RecalculatePathAction implements WorldAction {
     @Override
     public boolean isCompleted(BotConnection connection) {
@@ -35,5 +33,10 @@ public final class RecalculatePathAction implements WorldAction {
     @Override
     public int getAllowedTicks() {
         throw new UnsupportedOperationException("Should be handled separately!");
+    }
+
+    @Override
+    public String toString() {
+        return "RecalculatePathAction";
     }
 }

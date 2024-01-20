@@ -92,6 +92,10 @@ public class SWVec3i {
         return "SWVec3i(" + x + ", " + y + ", " + z + ")";
     }
 
+    public String formatXYZ() {
+        return "[" + x + ", " + y + ", " + z + "]";
+    }
+
     public double distance(SWVec3i goal) {
         return Math.sqrt(Math.pow(goal.x - x, 2) + Math.pow(goal.y - y, 2) + Math.pow(goal.z - z, 2));
     }

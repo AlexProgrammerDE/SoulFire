@@ -19,16 +19,16 @@ package net.pistonmaster.serverwrecker.server.pathfinding.execution;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 import net.pistonmaster.serverwrecker.server.util.MathHelper;
 import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 
-@ToString
+@Slf4j
 @RequiredArgsConstructor
 public final class GapJumpAction implements WorldAction {
-    private final SWVec3i position;
+    private final SWVec3i blockPosition;
     private boolean didLook = false;
     private boolean lockYaw = false;
     private int noJumpTicks = 0;
@@ -42,8 +42,8 @@ public final class GapJumpAction implements WorldAction {
             return false;
         }
 
-        var blockMeta = levelState.getBlockStateAt(position);
-        var targetMiddleBlock = VectorHelper.topMiddleOfBlock(position.toVector3d(), blockMeta);
+        var blockMeta = levelState.getBlockStateAt(blockPosition);
+        var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
         if (MathHelper.isOutsideTolerance(botPosition.getY(), targetMiddleBlock.getY(), 0.2)) {
             // We want to be on the same Y level
             return false;
@@ -63,8 +63,8 @@ public final class GapJumpAction implements WorldAction {
             return;
         }
 
-        var blockMeta = levelState.getBlockStateAt(position);
-        var targetMiddleBlock = VectorHelper.topMiddleOfBlock(position.toVector3d(), blockMeta);
+        var blockMeta = levelState.getBlockStateAt(blockPosition);
+        var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
 
         var previousYaw = clientEntity.yaw();
         clientEntity.lookAt(RotationOrigin.EYES, targetMiddleBlock);
@@ -102,5 +102,10 @@ public final class GapJumpAction implements WorldAction {
     public int getAllowedTicks() {
         // 5-seconds max to walk to a block
         return 5 * 20;
+    }
+
+    @Override
+    public String toString() {
+        return "GapJumpAction -> " + blockPosition.formatXYZ();
     }
 }

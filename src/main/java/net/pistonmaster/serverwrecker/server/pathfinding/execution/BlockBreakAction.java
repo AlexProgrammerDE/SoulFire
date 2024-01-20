@@ -19,7 +19,6 @@ package net.pistonmaster.serverwrecker.server.pathfinding.execution;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.pathfinding.Costs;
@@ -32,7 +31,6 @@ import net.pistonmaster.serverwrecker.server.util.VectorHelper;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-@ToString
 @RequiredArgsConstructor
 public final class BlockBreakAction implements WorldAction {
     private final SWVec3i blockPosition;
@@ -215,5 +213,10 @@ public final class BlockBreakAction implements WorldAction {
     public int getAllowedTicks() {
         // 20-seconds max to break a block
         return 20 * 20;
+    }
+
+    @Override
+    public String toString() {
+        return "BlockBreakAction -> " + blockPosition.formatXYZ();
     }
 }

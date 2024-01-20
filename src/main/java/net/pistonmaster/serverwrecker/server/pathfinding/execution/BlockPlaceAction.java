@@ -19,7 +19,7 @@ package net.pistonmaster.serverwrecker.server.pathfinding.execution;
 
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.server.data.BlockItems;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
@@ -31,7 +31,7 @@ import net.pistonmaster.serverwrecker.server.util.TimeUtil;
 
 import java.util.concurrent.TimeUnit;
 
-@ToString
+@Slf4j
 @RequiredArgsConstructor
 public final class BlockPlaceAction implements WorldAction {
     private final SWVec3i blockPosition;
@@ -150,5 +150,10 @@ public final class BlockPlaceAction implements WorldAction {
     public int getAllowedTicks() {
         // 3-seconds max to place a block
         return 3 * 20;
+    }
+
+    @Override
+    public String toString() {
+        return "BlockPlaceAction -> " + blockPosition.formatXYZ();
     }
 }

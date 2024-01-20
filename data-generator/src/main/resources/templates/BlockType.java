@@ -24,8 +24,6 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.AccessLevel;
 import lombok.With;
 
-import java.util.List;
-
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
 public record BlockType(int id, String name, float destroyTime, float explosionResistance,
