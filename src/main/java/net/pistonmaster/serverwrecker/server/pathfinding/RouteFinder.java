@@ -147,8 +147,8 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                         bestNode.totalRouteScore()
                 ));
 
-                if (recalculateTrace.size() <= 2) {
-                    throw new IllegalStateException("Could not find a path and this is already the closest we can get to the goal.");
+                if (recalculateTrace.size() == (requiresRepositioning ? 2 : 1)) {
+                    throw new AlreadyClosestException();
                 }
 
                 return recalculateTrace;
@@ -157,7 +157,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
         stopwatch.stop();
         log.info("Failed to find route after {}ms", stopwatch.elapsed().toMillis());
-        throw new IllegalStateException("No route found");
+        throw new NoRouteFoundException();
     }
 
     private MinecraftRouteNode findBestNode(ObjectCollection<MinecraftRouteNode> values) {

@@ -19,6 +19,7 @@ package net.pistonmaster.serverwrecker.test;
 
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
+import net.pistonmaster.serverwrecker.server.pathfinding.NoRouteFoundException;
 import net.pistonmaster.serverwrecker.server.pathfinding.RouteFinder;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.pathfinding.goals.PosGoal;
@@ -31,6 +32,7 @@ import net.pistonmaster.serverwrecker.test.utils.TestBlockAccessor;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 public class PathfindingTest {
     @Test
@@ -54,6 +56,29 @@ public class PathfindingTest {
         var route = routeFinder.findRoute(initialState, true);
 
         assertEquals(3, route.size());
+    }
+
+    @Test
+    public void testPathfindingImpossible() {
+        var accessor = new TestBlockAccessor();
+        accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(1, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(2, 0, 0, BlockType.STONE);
+
+        var routeFinder = new RouteFinder(
+                new MinecraftGraph(new TagsState()),
+                // This is impossible to reach
+                new PosGoal(3, 1, 0)
+        );
+
+        var initialState = new BotEntityState(
+                new SWVec3i(0, 1, 0),
+                new ProjectedLevelState(accessor),
+                new ProjectedInventory(new PlayerInventoryContainer())
+        );
+
+        assertThrowsExactly(NoRouteFoundException.class,
+                () -> routeFinder.findRoute(initialState, true));
     }
 
     @Test

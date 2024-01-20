@@ -15,19 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.server.pathfinding.graph;
+package net.pistonmaster.serverwrecker.server.pathfinding;
 
 import java.io.Serial;
 
-/**
- * Exception thrown when a node is out of the render distance.
- * The RouteFinder is supposed to catch this exception and insert a path recalculation action and return the best path.
- */
-public class OutOfLevelException extends RuntimeException {
+public class AlreadyClosestException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public OutOfLevelException() {
-        super();
+    public AlreadyClosestException() {
+        super("Could not find a path and this is already the closest we can get to the goal.");
     }
 }
