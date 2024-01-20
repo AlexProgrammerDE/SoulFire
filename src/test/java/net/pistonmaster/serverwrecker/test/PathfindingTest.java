@@ -26,10 +26,12 @@ import net.pistonmaster.serverwrecker.server.pathfinding.goals.PosGoal;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedLevelState;
-import net.pistonmaster.serverwrecker.server.protocol.bot.container.PlayerInventoryContainer;
+import net.pistonmaster.serverwrecker.server.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
 import net.pistonmaster.serverwrecker.test.utils.TestBlockAccessor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
@@ -50,7 +52,7 @@ public class PathfindingTest {
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(new PlayerInventoryContainer())
+                new ProjectedInventory(new ContainerSlot[]{})
         );
 
         var route = routeFinder.findRoute(initialState, true);
@@ -74,7 +76,7 @@ public class PathfindingTest {
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(new PlayerInventoryContainer())
+                new ProjectedInventory(new ContainerSlot[]{})
         );
 
         assertThrowsExactly(NoRouteFoundException.class,
@@ -96,11 +98,109 @@ public class PathfindingTest {
         var initialState = new BotEntityState(
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
-                new ProjectedInventory(new PlayerInventoryContainer())
+                new ProjectedInventory(new ContainerSlot[]{})
         );
 
         var route = routeFinder.findRoute(initialState, true);
 
         assertEquals(3, route.size());
+    }
+
+    @Test
+    public void testPathfindingJump() {
+        var accessor = new TestBlockAccessor();
+        accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(1, 1, 0, BlockType.STONE);
+
+        var routeFinder = new RouteFinder(
+                new MinecraftGraph(new TagsState()),
+                new PosGoal(1, 2, 0)
+        );
+
+        var initialState = new BotEntityState(
+                new SWVec3i(0, 1, 0),
+                new ProjectedLevelState(accessor),
+                new ProjectedInventory(new ContainerSlot[]{})
+        );
+
+        var route = routeFinder.findRoute(initialState, true);
+
+        assertEquals(2, route.size());
+    }
+
+    @Test
+    public void testPathfindingJumpDiagonal() {
+        var accessor = new TestBlockAccessor();
+        accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(1, 1, 1, BlockType.STONE);
+
+        var routeFinder = new RouteFinder(
+                new MinecraftGraph(new TagsState()),
+                new PosGoal(1, 2, 1)
+        );
+
+        var initialState = new BotEntityState(
+                new SWVec3i(0, 1, 0),
+                new ProjectedLevelState(accessor),
+                new ProjectedInventory(new ContainerSlot[]{})
+        );
+
+        var route = routeFinder.findRoute(initialState, true);
+
+        assertEquals(2, route.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 4, 5})
+    public void testPathfindingFall(int height) {
+        var accessor = new TestBlockAccessor();
+        accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(1, -height, 0, BlockType.STONE);
+
+        var routeFinder = new RouteFinder(
+                new MinecraftGraph(new TagsState()),
+                new PosGoal(1, -height + 1, 0)
+        );
+
+        var initialState = new BotEntityState(
+                new SWVec3i(0, 1, 0),
+                new ProjectedLevelState(accessor),
+                new ProjectedInventory(new ContainerSlot[]{})
+        );
+
+        if (height > 3) {
+            assertThrowsExactly(NoRouteFoundException.class,
+                    () -> routeFinder.findRoute(initialState, true));
+        } else {
+            var route = routeFinder.findRoute(initialState, true);
+            assertEquals(2, route.size());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 4, 5})
+    public void testPathfindingFallDiagonal(int height) {
+        var accessor = new TestBlockAccessor();
+        accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(1, -height, 1, BlockType.STONE);
+
+        var routeFinder = new RouteFinder(
+                new MinecraftGraph(new TagsState()),
+                new PosGoal(1, -height + 1, 1)
+        );
+
+        var initialState = new BotEntityState(
+                new SWVec3i(0, 1, 0),
+                new ProjectedLevelState(accessor),
+                new ProjectedInventory(new ContainerSlot[]{})
+        );
+
+        if (height > 3) {
+            assertThrowsExactly(NoRouteFoundException.class,
+                    () -> routeFinder.findRoute(initialState, true));
+        } else {
+            var route = routeFinder.findRoute(initialState, true);
+            assertEquals(2, route.size());
+        }
     }
 }

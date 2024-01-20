@@ -389,7 +389,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 }
 
                 if (!playerMovement.allowBlockActions()
-                        || !node.inventory().hasBlockToPlace()
+                        || node.inventory().hasNoBlocks()
                         || !blockState.blockType().replaceable()) {
                     yield SubscriptionSingleResult.IMPOSSIBLE;
                 }

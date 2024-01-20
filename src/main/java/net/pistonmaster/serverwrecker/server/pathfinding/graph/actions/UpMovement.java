@@ -130,7 +130,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     @Override
     public UpMovement copy(BotEntityState previousEntityState) {
         // Skip calculations since we have no blocks to place
-        if (!previousEntityState.inventory().hasBlockToPlace()) {
+        if (previousEntityState.inventory().hasNoBlocks()) {
             return null;
         }
 

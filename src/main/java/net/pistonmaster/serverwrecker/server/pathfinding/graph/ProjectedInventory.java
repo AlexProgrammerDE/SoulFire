@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
+import net.pistonmaster.serverwrecker.server.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.SWItemStack;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
@@ -44,13 +45,17 @@ public class ProjectedInventory {
     private final Map<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
 
     public ProjectedInventory(PlayerInventoryContainer playerInventory) {
+        this(playerInventory.storage());
+    }
+
+    public ProjectedInventory(ContainerSlot[] storage) {
         var blockItems = 0;
         var usableToolsAndNull = new HashSet<SWItemStack>();
 
         // Empty slot
         usableToolsAndNull.add(null);
 
-        for (var slot : playerInventory.storage()) {
+        for (var slot : storage) {
             if (slot.item() == null) {
                 continue;
             }
@@ -69,8 +74,8 @@ public class ProjectedInventory {
         this.sharedMiningCosts = new ConcurrentHashMap<>();
     }
 
-    public boolean hasBlockToPlace() {
-        return usableBlockItems > 0;
+    public boolean hasNoBlocks() {
+        return usableBlockItems <= 0;
     }
 
     public ProjectedInventory withOneLessBlock() {
