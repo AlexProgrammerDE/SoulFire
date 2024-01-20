@@ -27,18 +27,6 @@ public class BlockTypeHelper {
     private BlockTypeHelper() {
     }
 
-    public static boolean isAir(BlockType type) {
-        return type == BlockType.AIR
-                || type == BlockType.CAVE_AIR
-                || type == BlockType.VOID_AIR;
-    }
-
-    public static boolean isFluid(BlockType type) {
-        return type == BlockType.WATER
-                || type == BlockType.LAVA
-                || type == BlockType.BUBBLE_COLUMN;
-    }
-
     public static boolean isFullBlock(BlockState meta) {
         return meta.blockShapeGroup().isFullBlock();
     }

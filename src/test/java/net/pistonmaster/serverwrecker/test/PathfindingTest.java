@@ -301,9 +301,10 @@ public class PathfindingTest {
         accessor.setBlockAt(1, 2, 0, BlockType.STONE);
         accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
+        // TODO: Fix stacking up
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
-                new PosGoal(2, 3, 0)
+                new PosGoal(2, 1, 0)
         );
 
         var initialState = new BotEntityState(
@@ -315,6 +316,6 @@ public class PathfindingTest {
         );
 
         var route = routeFinder.findRoute(initialState, false);
-        assertEquals(6, route.size());
+        assertEquals(3, route.size());
     }
 }

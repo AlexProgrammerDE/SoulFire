@@ -25,6 +25,8 @@ import net.pistonmaster.serverwrecker.server.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.pathfinding.execution.BlockBreakAction;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.GraphInstructions;
+import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.BlockDirection;
+import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.actions.movement.MovementMiningCost;
 
 import java.util.List;
@@ -60,6 +62,24 @@ public final class DownMovement extends GraphAction implements Cloneable {
         requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 4, 0));
 
         return requiredFreeBlocks;
+    }
+
+    public BlockSafetyData[][] listCheckSafeMineBlocks() {
+        var results = new BlockSafetyData[1][];
+
+        var firstDirection = BlockDirection.NORTH;
+        var oppositeDirection = firstDirection.opposite();
+        var leftDirectionSide = firstDirection.leftSide();
+        var rightDirectionSide = firstDirection.rightSide();
+
+        results[0] = new BlockSafetyData[]{
+                new BlockSafetyData(firstDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
+                new BlockSafetyData(oppositeDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
+                new BlockSafetyData(leftDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
+                new BlockSafetyData(rightDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS)
+        };
+
+        return results;
     }
 
     @Override

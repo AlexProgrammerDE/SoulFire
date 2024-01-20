@@ -196,6 +196,21 @@ public record MinecraftGraph(TagsState tagsState) {
                     .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE));
         }
 
+        {
+            var safeBlocks = movement.listCheckSafeMineBlocks();
+            for (var i = 0; i < safeBlocks.length; i++) {
+                var savedBlock = safeBlocks[i];
+                if (savedBlock == null) {
+                    continue;
+                }
+
+                for (var block : savedBlock) {
+                    movement.subscribe();
+                    blockSubscribers.computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION).add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK, i, block.type()));
+                }
+            }
+        }
+
         return movement;
     }
 
@@ -230,8 +245,7 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     private static TriState isBlockFree(BlockState blockState) {
-        return TriState.byBoolean(blockState.blockShapeGroup().hasNoCollisions()
-                && !BlockTypeHelper.isFluid(blockState.blockType()));
+        return TriState.byBoolean(blockState.blockShapeGroup().hasNoCollisions() && !blockState.blockType().fluidSource());
     }
 
     public void insertActions(BotEntityState node, Consumer<GraphInstructions> callback, Predicate<SWVec3i> alreadySeen) {
@@ -358,9 +372,9 @@ public record MinecraftGraph(TagsState tagsState) {
                 }
 
                 var unsafe = switch (subscriber.safetyType) {
-                    case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
+                    case FALLING_AND_FLUIDS -> blockState.blockType().fluidSource()
                             || blockState.blockType().fallingBlock();
-                    case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
+                    case FLUIDS -> blockState.blockType().fluidSource();
                 };
 
                 if (!unsafe) {
@@ -509,6 +523,22 @@ public record MinecraftGraph(TagsState tagsState) {
 
                 yield SubscriptionSingleResult.CONTINUE;
             }
+            case MOVEMENT_BREAK_SAFETY_CHECK -> {
+                var unsafe = switch (subscriber.safetyType) {
+                    case FALLING_AND_FLUIDS ->
+                            blockState.blockType().fluidSource() || blockState.blockType().fallingBlock();
+                    case FLUIDS -> blockState.blockType().fluidSource();
+                };
+
+                if (unsafe) {
+                    // We know already WE MUST dig the block below for this action
+                    // So if one block around the block below is unsafe, we can't do this action
+                    yield SubscriptionSingleResult.IMPOSSIBLE;
+                }
+
+                // All good, we can continue
+                yield SubscriptionSingleResult.CONTINUE;
+            }
             default -> throw new IllegalStateException("Unexpected value: " + subscriber.type);
         };
     }
@@ -558,24 +588,27 @@ public record MinecraftGraph(TagsState tagsState) {
                 }
 
                 var unsafe = switch (subscriber.safetyType) {
-                    case FALLING_AND_FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType())
+                    case FALLING_AND_FLUIDS -> blockState.blockType().fluidSource()
                             || blockState.blockType().fallingBlock();
-                    case FLUIDS -> BlockTypeHelper.isFluid(blockState.blockType());
+                    case FLUIDS -> blockState.blockType().fluidSource();
                 };
 
-                if (unsafe) {
-                    var currentValue = upMovement.blockBreakCosts()[subscriber.blockArrayIndex];
-
-                    if (currentValue != null) {
-                        // We learned that this block needs to be broken, so we need to set it as impossible
-                        yield SubscriptionSingleResult.IMPOSSIBLE;
-                    }
-
-                    // Store for a later time that this is unsafe,
-                    // so if we check this block,
-                    // we know it's unsafe
-                    upMovement.unsafeToBreak()[subscriber.blockArrayIndex] = true;
+                if (!unsafe) {
+                    // All good, we can continue
+                    yield SubscriptionSingleResult.CONTINUE;
                 }
+
+                var currentValue = upMovement.blockBreakCosts()[subscriber.blockArrayIndex];
+
+                if (currentValue != null) {
+                    // We learned that this block needs to be broken, so we need to set it as impossible
+                    yield SubscriptionSingleResult.IMPOSSIBLE;
+                }
+
+                // Store for a later time that this is unsafe,
+                // so if we check this block,
+                // we know it's unsafe
+                upMovement.unsafeToBreak()[subscriber.blockArrayIndex] = true;
 
                 yield SubscriptionSingleResult.CONTINUE;
             }

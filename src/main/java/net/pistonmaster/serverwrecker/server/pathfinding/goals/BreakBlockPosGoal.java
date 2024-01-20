@@ -54,8 +54,9 @@ public record BreakBlockPosGoal(SWVec3i goal) implements GoalScorer {
 
     @Override
     public boolean isFinished(BotEntityState entityState) {
-        return BlockTypeHelper.isAir(entityState.levelState()
+        return entityState.levelState()
                 .getBlockStateAt(goal)
-                .blockType());
+                .blockType()
+                .air();
     }
 }
