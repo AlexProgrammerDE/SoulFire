@@ -23,7 +23,7 @@ import net.pistonmaster.serverwrecker.server.pathfinding.graph.GraphInstructions
 /**
  * A calculated action that the bot can take on a graph world representation.
  */
-public sealed abstract class GraphAction permits PlayerMovement, ParkourMovement, UpMovement, DownMovement {
+public sealed abstract class GraphAction permits SimpleMovement, ParkourMovement, UpMovement, DownMovement {
     public final Object actionLock = new Object();
     private int subscriptionCounter;
 

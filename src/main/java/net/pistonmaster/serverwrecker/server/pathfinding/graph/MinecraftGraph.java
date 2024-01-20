@@ -54,14 +54,14 @@ public record MinecraftGraph(TagsState tagsState) {
                     for (var side : MovementSide.VALUES) {
                         actions.add(registerMovement(
                                 blockSubscribers,
-                                new PlayerMovement(direction, side, modifier),
+                                new SimpleMovement(direction, side, modifier),
                                 actions.size()
                         ));
                     }
                 } else {
                     actions.add(registerMovement(
                             blockSubscribers,
-                            new PlayerMovement(direction, null, modifier),
+                            new SimpleMovement(direction, null, modifier),
                             actions.size()
                     ));
                 }
@@ -102,8 +102,8 @@ public record MinecraftGraph(TagsState tagsState) {
         }
     }
 
-    private static PlayerMovement registerMovement(Object2ObjectMap<SWVec3i, ObjectList<BlockSubscription>> blockSubscribers,
-                                                   PlayerMovement movement, int movementIndex) {
+    private static SimpleMovement registerMovement(Object2ObjectMap<SWVec3i, ObjectList<BlockSubscription>> blockSubscribers,
+                                                   SimpleMovement movement, int movementIndex) {
         {
             var blockId = 0;
             for (var freeBlock : movement.listRequiredFreeBlocks()) {
@@ -296,8 +296,8 @@ public record MinecraftGraph(TagsState tagsState) {
                                                                BlockState blockState, SWVec3i absolutePositionBlock,
                                                                BotEntityState node) {
         return switch (action) {
-            case PlayerMovement playerMovement ->
-                    processMovementSubscription(subscriber, isFreeReference, blockState, absolutePositionBlock, node, playerMovement);
+            case SimpleMovement simpleMovement ->
+                    processMovementSubscription(subscriber, isFreeReference, blockState, absolutePositionBlock, node, simpleMovement);
             case ParkourMovement ignored -> processParkourSubscription(subscriber, isFreeReference, blockState);
             case DownMovement downMovement ->
                     processDownSubscription(key, subscriber, blockState, absolutePositionBlock, node, downMovement);
@@ -308,7 +308,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
     private SubscriptionSingleResult processMovementSubscription(BlockSubscription subscriber, ObjectReference<TriState> isFreeReference,
                                                                  BlockState blockState, SWVec3i absolutePositionBlock,
-                                                                 BotEntityState node, PlayerMovement playerMovement) {
+                                                                 BotEntityState node, SimpleMovement simpleMovement) {
         return switch (subscriber.type) {
             case MOVEMENT_FREE -> {
                 if (isFreeReference.value == TriState.NOT_SET) {
@@ -317,19 +317,19 @@ public record MinecraftGraph(TagsState tagsState) {
                 }
 
                 if (isFreeReference.value == TriState.TRUE) {
-                    if (playerMovement.allowBlockActions()) {
-                        playerMovement.noNeedToBreak()[subscriber.blockArrayIndex] = true;
+                    if (simpleMovement.allowBlockActions()) {
+                        simpleMovement.noNeedToBreak()[subscriber.blockArrayIndex] = true;
                     }
 
                     yield SubscriptionSingleResult.CONTINUE;
                 }
 
                 // Search for a way to break this block
-                if (!playerMovement.allowBlockActions()
+                if (!simpleMovement.allowBlockActions()
                         // Narrow this down to blocks that can be broken
                         || !BlockTypeHelper.isDiggable(blockState.blockType())
                         // Check if we previously found out this block is unsafe to break
-                        || playerMovement.unsafeToBreak()[subscriber.blockArrayIndex]
+                        || simpleMovement.unsafeToBreak()[subscriber.blockArrayIndex]
                         // Narrows the list down to a reasonable size
                         || !BlockItems.hasItemType(blockState.blockType())) {
                     // No way to break this block
@@ -339,7 +339,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 var cacheableMiningCost = node.inventory()
                         .getMiningCosts(tagsState, blockState);
                 // We can mine this block, lets add costs and continue
-                playerMovement.blockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
+                simpleMovement.blockBreakCosts()[subscriber.blockArrayIndex] = new MovementMiningCost(
                         absolutePositionBlock,
                         cacheableMiningCost.miningCost(),
                         cacheableMiningCost.willDrop()
@@ -348,12 +348,12 @@ public record MinecraftGraph(TagsState tagsState) {
             }
             case MOVEMENT_BREAK_SAFETY_CHECK -> {
                 // There is no need to break this block, so there is no need for safety checks
-                if (playerMovement.noNeedToBreak()[subscriber.blockArrayIndex]) {
+                if (simpleMovement.noNeedToBreak()[subscriber.blockArrayIndex]) {
                     yield SubscriptionSingleResult.CONTINUE;
                 }
 
                 // The block was already marked as unsafe
-                if (playerMovement.unsafeToBreak()[subscriber.blockArrayIndex]) {
+                if (simpleMovement.unsafeToBreak()[subscriber.blockArrayIndex]) {
                     yield SubscriptionSingleResult.CONTINUE;
                 }
 
@@ -368,7 +368,7 @@ public record MinecraftGraph(TagsState tagsState) {
                     yield SubscriptionSingleResult.CONTINUE;
                 }
 
-                var currentValue = playerMovement.blockBreakCosts()[subscriber.blockArrayIndex];
+                var currentValue = simpleMovement.blockBreakCosts()[subscriber.blockArrayIndex];
 
                 if (currentValue != null) {
                     // We learned that this block needs to be broken, so we need to set it as impossible
@@ -378,7 +378,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 // Store for a later time that this is unsafe,
                 // so if we check this block,
                 // we know it's unsafe
-                playerMovement.unsafeToBreak()[subscriber.blockArrayIndex] = true;
+                simpleMovement.unsafeToBreak()[subscriber.blockArrayIndex] = true;
 
                 yield SubscriptionSingleResult.CONTINUE;
             }
@@ -388,19 +388,19 @@ public record MinecraftGraph(TagsState tagsState) {
                     yield SubscriptionSingleResult.CONTINUE;
                 }
 
-                if (!playerMovement.allowBlockActions()
+                if (!simpleMovement.allowBlockActions()
                         || node.inventory().hasNoBlocks()
                         || !blockState.blockType().replaceable()) {
                     yield SubscriptionSingleResult.IMPOSSIBLE;
                 }
 
                 // We can place a block here, but we need to find a block to place against
-                playerMovement.requiresAgainstBlock(true);
+                simpleMovement.requiresAgainstBlock(true);
                 yield SubscriptionSingleResult.CONTINUE;
             }
             case MOVEMENT_AGAINST_PLACE_SOLID -> {
                 // We already found one, no need to check for more
-                if (playerMovement.blockPlaceData() != null) {
+                if (simpleMovement.blockPlaceData() != null) {
                     yield SubscriptionSingleResult.CONTINUE;
                 }
 
@@ -410,7 +410,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 }
 
                 // Fixup the position to be the block we are placing against instead of relative
-                playerMovement.blockPlaceData(new BotActionManager.BlockPlaceData(
+                simpleMovement.blockPlaceData(new BotActionManager.BlockPlaceData(
                         absolutePositionBlock,
                         subscriber.blockToPlaceAgainst.blockFace()
                 ));
@@ -418,12 +418,12 @@ public record MinecraftGraph(TagsState tagsState) {
             }
             case MOVEMENT_ADD_CORNER_COST_IF_SOLID -> {
                 // No need to apply the cost multiple times.
-                if (playerMovement.appliedCornerCost()) {
+                if (simpleMovement.appliedCornerCost()) {
                     yield SubscriptionSingleResult.CONTINUE;
                 }
 
                 if (blockState.blockShapeGroup().isFullBlock()) {
-                    playerMovement.addCornerCost();
+                    simpleMovement.addCornerCost();
                 } else if (BlockTypeHelper.isHurtOnTouchSide(blockState.blockType())) {
                     // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
                     yield SubscriptionSingleResult.IMPOSSIBLE;

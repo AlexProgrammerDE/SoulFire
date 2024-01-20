@@ -291,4 +291,30 @@ public class PathfindingTest {
         var route = routeFinder.findRoute(initialState, false);
         assertEquals(1, route.size());
     }
+
+    @Test
+    public void testPathfindingThroughWallToMoveUp() {
+        var accessor = new TestBlockAccessor();
+        accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(1, 0, 0, BlockType.STONE);
+        accessor.setBlockAt(1, 1, 0, BlockType.STONE);
+        accessor.setBlockAt(1, 2, 0, BlockType.STONE);
+        accessor.setBlockAt(2, 0, 0, BlockType.STONE);
+
+        var routeFinder = new RouteFinder(
+                DEFAULT_GRAPH,
+                new PosGoal(2, 3, 0)
+        );
+
+        var initialState = new BotEntityState(
+                new SWVec3i(0, 1, 0),
+                new ProjectedLevelState(accessor),
+                new ProjectedInventory(List.of(
+                        SWItemStack.forType(ItemType.DIAMOND_PICKAXE)
+                ))
+        );
+
+        var route = routeFinder.findRoute(initialState, false);
+        assertEquals(6, route.size());
+    }
 }

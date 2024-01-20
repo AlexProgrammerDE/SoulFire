@@ -36,7 +36,7 @@ import net.pistonmaster.serverwrecker.server.protocol.bot.BotActionManager;
 import java.util.List;
 
 @Slf4j
-public final class PlayerMovement extends GraphAction implements Cloneable {
+public final class SimpleMovement extends GraphAction implements Cloneable {
     private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
     private final MovementDirection direction;
     private final MovementSide side;
@@ -61,7 +61,7 @@ public final class PlayerMovement extends GraphAction implements Cloneable {
     @Setter
     private boolean requiresAgainstBlock = false;
 
-    public PlayerMovement(MovementDirection direction, MovementSide side, MovementModifier modifier) {
+    public SimpleMovement(MovementDirection direction, MovementSide side, MovementModifier modifier) {
         this.direction = direction;
         this.side = side;
         this.modifier = modifier;
@@ -368,14 +368,14 @@ public final class PlayerMovement extends GraphAction implements Cloneable {
     }
 
     @Override
-    public PlayerMovement copy(BotEntityState previousEntityState) {
+    public SimpleMovement copy(BotEntityState previousEntityState) {
         return this.clone();
     }
 
     @Override
-    public PlayerMovement clone() {
+    public SimpleMovement clone() {
         try {
-            var c = (PlayerMovement) super.clone();
+            var c = (SimpleMovement) super.clone();
 
             c.blockBreakCosts = this.blockBreakCosts == null ? null : new MovementMiningCost[this.blockBreakCosts.length];
             c.unsafeToBreak = this.unsafeToBreak == null ? null : new boolean[this.unsafeToBreak.length];
