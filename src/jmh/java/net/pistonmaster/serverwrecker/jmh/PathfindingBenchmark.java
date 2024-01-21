@@ -27,10 +27,9 @@ import net.pistonmaster.serverwrecker.server.pathfinding.goals.PosGoal;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedLevelState;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockAccessor;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import net.pistonmaster.serverwrecker.server.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
+import net.pistonmaster.serverwrecker.test.utils.TestBlockAccessor;
 import net.pistonmaster.serverwrecker.util.ResourceHelper;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
@@ -65,35 +64,24 @@ public class PathfindingBenchmark {
 
             System.out.println("Parsing world data...");
 
-            var blocks = new BlockState[data.length][][];
+            var accessor = new TestBlockAccessor();
             for (var x = 0; x < data.length; x++) {
                 var xArray = data[x];
-                var xBlocksArray = blocks[x] = new BlockState[xArray.length][];
                 for (var y = 0; y < xArray.length; y++) {
                     var yArray = xArray[y];
-                    var yBlocksArray = xBlocksArray[y] = new BlockState[yArray.length];
                     for (var z = 0; z < yArray.length; z++) {
-                        yBlocksArray[z] = BlockState.forDefaultBlockType(
-                                BlockType.getByName(blockDefinitions[yArray[z]])
-                        );
+                        accessor.setBlockAt(x, y, z,
+                                BlockType.getByName(blockDefinitions[yArray[z]]));
                     }
                 }
             }
 
             System.out.println("Calculating world data...");
-            var airState = BlockState.forDefaultBlockType(BlockType.AIR);
-            BlockAccessor accessor = (x, y, z) -> {
-                if (x < 0 || y < 0 || z < 0 || x >= blocks.length || y >= blocks[x].length || z >= blocks[x][y].length) {
-                    return airState;
-                }
-
-                return blocks[x][y][z];
-            };
 
             // Find the first safe block at 0 0
             var safeY = 0;
-            for (var y = 0; y < blocks[0].length; y++) {
-                if (blocks[0][y][0].blockType() == BlockType.AIR) {
+            for (var y = 0; y < 255; y++) {
+                if (accessor.getBlockStateAt(0, y, 0).blockType() == BlockType.AIR) {
                     safeY = y;
                     break;
                 }
@@ -109,6 +97,8 @@ public class PathfindingBenchmark {
                     new ProjectedLevelState(accessor),
                     new ProjectedInventory(new PlayerInventoryContainer())
             );
+
+            System.out.println("Done! Testing...");
         } catch (Exception e) {
             e.printStackTrace();
         }
