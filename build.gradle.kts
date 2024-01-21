@@ -80,6 +80,7 @@ dependencies {
     val lwjglPlatforms = listOf("linux", "macos", "macos-arm64", "windows")
     lwjglPlatforms.forEach { platform ->
         implementation("org.lwjgl:lwjgl-nfd:$lwjglVersion:natives-$platform")
+        implementation("org.lwjgl:lwjgl:$lwjglVersion:natives-$platform")
     }
     implementation("org.lwjgl:lwjgl-nfd:$lwjglVersion")
 

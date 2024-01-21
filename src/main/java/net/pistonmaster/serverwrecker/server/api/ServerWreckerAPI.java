@@ -31,7 +31,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public class ServerWreckerAPI {
-    private static final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator())
+    private static final LambdaManager EVENT_BUS = LambdaManager.basic(new ASMGenerator())
             .setExceptionHandler(EventExceptionHandler.INSTANCE)
             .setEventFilter((c, h) -> {
                 if (ServerWreckerGlobalEvent.class.isAssignableFrom(c)) {
@@ -70,19 +70,19 @@ public class ServerWreckerAPI {
     }
 
     public static void postEvent(ServerWreckerGlobalEvent event) {
-        eventBus.call(event);
+        EVENT_BUS.call(event);
     }
 
     public static <T extends ServerWreckerGlobalEvent> void registerListener(Class<T> clazz, Consumer<? super T> subscriber) {
-        EventUtil.runAndAssertChanged(eventBus, () -> eventBus.registerConsumer(subscriber, clazz));
+        EventUtil.runAndAssertChanged(EVENT_BUS, () -> EVENT_BUS.registerConsumer(subscriber, clazz));
     }
 
     public static void registerListeners(Class<?> listenerClass) {
-        EventUtil.runAndAssertChanged(eventBus, () -> eventBus.register(listenerClass));
+        EventUtil.runAndAssertChanged(EVENT_BUS, () -> EVENT_BUS.register(listenerClass));
     }
 
-    public static void unregisterListener(Object listener) {
-        eventBus.unregister(listener);
+    public static LambdaManager getEventBus() {
+        return EVENT_BUS;
     }
 
     public static void registerServerExtension(ServerExtension serverExtension) {

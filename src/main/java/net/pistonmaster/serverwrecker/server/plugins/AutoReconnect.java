@@ -51,7 +51,8 @@ public class AutoReconnect implements InternalExtension {
     public void onDisconnect(BotDisconnectedEvent event) {
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
-        if (!settingsHolder.get(AutoReconnectSettings.ENABLED) || connection.attackManager().attackState().isInactive()) {
+        if (!settingsHolder.get(AutoReconnectSettings.ENABLED)
+                || connection.attackManager().attackState().isInactive()) {
             return;
         }
 
