@@ -17,16 +17,14 @@
  */
 package net.pistonmaster.serverwrecker.test.utils;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockAccessor;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
-
-import java.util.Map;
+import net.pistonmaster.serverwrecker.server.util.Vec2ObjectOpenHashMap;
 
 public class TestBlockAccessor implements BlockAccessor {
-    private final Map<SWVec3i, BlockState> blocks = new Object2ObjectOpenHashMap<>();
+    private final Vec2ObjectOpenHashMap<SWVec3i, BlockState> blocks = new Vec2ObjectOpenHashMap<>();
     private final BlockState defaultBlock;
 
     public TestBlockAccessor() {
@@ -39,6 +37,10 @@ public class TestBlockAccessor implements BlockAccessor {
 
     public void setBlockAt(int x, int y, int z, BlockType block) {
         blocks.put(new SWVec3i(x, y, z), BlockState.forDefaultBlockType(block));
+    }
+
+    public void prepareForAccess() {
+        blocks.trim();
     }
 
     @Override

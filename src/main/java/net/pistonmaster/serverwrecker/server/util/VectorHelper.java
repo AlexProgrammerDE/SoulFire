@@ -17,36 +17,12 @@
  */
 package net.pistonmaster.serverwrecker.server.util;
 
-import it.unimi.dsi.fastutil.Hash;
 import net.pistonmaster.serverwrecker.server.data.BlockShapeGroup;
-import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
 import org.cloudburstmc.math.vector.Vector2d;
 import org.cloudburstmc.math.vector.Vector3d;
 
 public class VectorHelper {
-    public static final Hash.Strategy<SWVec3i> VECTOR3I_HASH_STRATEGY = new Hash.Strategy<>() {
-        @Override
-        public int hashCode(SWVec3i o) {
-            return o.hashCode();
-        }
-
-        @Override
-        public boolean equals(SWVec3i a, SWVec3i b) {
-            if (b == null) {
-                return false;
-            }
-
-            if (a == b) {
-                return true;
-            }
-
-            return a.x == b.x
-                    && a.y == b.y
-                    && a.z == b.z;
-        }
-    };
-
     private VectorHelper() {
     }
 

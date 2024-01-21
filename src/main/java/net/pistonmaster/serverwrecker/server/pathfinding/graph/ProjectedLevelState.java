@@ -17,14 +17,13 @@
  */
 package net.pistonmaster.serverwrecker.server.pathfinding.graph;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.server.data.BlockType;
 import net.pistonmaster.serverwrecker.server.pathfinding.Costs;
 import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockAccessor;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
-import net.pistonmaster.serverwrecker.server.util.VectorHelper;
+import net.pistonmaster.serverwrecker.server.util.Vec2ObjectOpenHashMap;
 
 /**
  * An immutable representation of the world state.
@@ -36,12 +35,12 @@ public class ProjectedLevelState {
     private static final BlockState AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.AIR);
 
     private final BlockAccessor accessor;
-    private final Object2ObjectOpenCustomHashMap<SWVec3i, BlockState> blockChanges;
+    private final Vec2ObjectOpenHashMap<SWVec3i, BlockState> blockChanges;
 
     public ProjectedLevelState(BlockAccessor accessor) {
         this(
                 accessor,
-                new Object2ObjectOpenCustomHashMap<>(VectorHelper.VECTOR3I_HASH_STRATEGY)
+                new Vec2ObjectOpenHashMap<>()
         );
     }
 

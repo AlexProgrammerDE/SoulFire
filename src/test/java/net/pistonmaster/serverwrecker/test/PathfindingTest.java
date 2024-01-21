@@ -49,6 +49,8 @@ public class PathfindingTest {
         accessor.setBlockAt(1, 0, 0, BlockType.STONE);
         accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
+        accessor.prepareForAccess();
+
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
                 new PosGoal(2, 1, 0)
@@ -71,6 +73,8 @@ public class PathfindingTest {
         accessor.setBlockAt(0, 0, 0, BlockType.STONE);
         accessor.setBlockAt(1, 0, 0, BlockType.STONE);
         accessor.setBlockAt(2, 0, 0, BlockType.STONE);
+
+        accessor.prepareForAccess();
 
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
@@ -95,6 +99,8 @@ public class PathfindingTest {
         accessor.setBlockAt(1, 0, 1, BlockType.STONE);
         accessor.setBlockAt(2, 0, 2, BlockType.STONE);
 
+        accessor.prepareForAccess();
+
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
                 new PosGoal(2, 1, 2)
@@ -117,6 +123,8 @@ public class PathfindingTest {
         var accessor = new TestBlockAccessor();
         accessor.setBlockAt(0, 0, 0, BlockType.STONE);
         accessor.setBlockAt(1, height, 0, BlockType.STONE);
+
+        accessor.prepareForAccess();
 
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
@@ -145,6 +153,8 @@ public class PathfindingTest {
         accessor.setBlockAt(0, 0, 0, BlockType.STONE);
         accessor.setBlockAt(1, height, 1, BlockType.STONE);
 
+        accessor.prepareForAccess();
+
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
                 new PosGoal(1, height + 1, 1)
@@ -171,6 +181,8 @@ public class PathfindingTest {
         var accessor = new TestBlockAccessor();
         accessor.setBlockAt(0, 0, 0, BlockType.STONE);
         accessor.setBlockAt(1, -height, 0, BlockType.STONE);
+
+        accessor.prepareForAccess();
 
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
@@ -199,6 +211,8 @@ public class PathfindingTest {
         accessor.setBlockAt(0, 0, 0, BlockType.STONE);
         accessor.setBlockAt(1, -height, 1, BlockType.STONE);
 
+        accessor.prepareForAccess();
+
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
                 new PosGoal(1, -height + 1, 1)
@@ -226,6 +240,8 @@ public class PathfindingTest {
         accessor.setBlockAt(0, 0, 0, BlockType.STONE);
         accessor.setBlockAt(gapLength + 1, 0, 0, BlockType.STONE);
 
+        accessor.prepareForAccess();
+
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
                 new PosGoal(gapLength + 1, 1, 0)
@@ -252,6 +268,8 @@ public class PathfindingTest {
         var accessor = new TestBlockAccessor();
         accessor.setBlockAt(0, 0, 0, BlockType.STONE);
 
+        accessor.prepareForAccess();
+
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
                 new PosGoal(0, 2, 0)
@@ -274,6 +292,8 @@ public class PathfindingTest {
     public void testPathfindingUpStacking(int amount) {
         var accessor = new TestBlockAccessor();
         accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+
+        accessor.prepareForAccess();
 
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
@@ -303,6 +323,8 @@ public class PathfindingTest {
         accessor.setBlockAt(0, 0, 0, BlockType.STONE);
         accessor.setBlockAt(0, -1, 0, BlockType.STONE);
 
+        accessor.prepareForAccess();
+
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
                 new PosGoal(0, 0, 0)
@@ -329,6 +351,8 @@ public class PathfindingTest {
         accessor.setBlockAt(1, 2, 0, BlockType.STONE);
         accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
+        accessor.prepareForAccess();
+
         // TODO: Fix stacking up
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
@@ -345,7 +369,6 @@ public class PathfindingTest {
 
         var route = routeFinder.findRoute(initialState, false);
         assertEquals(3, route.size());
-        System.out.println(route);
     }
 
     @ParameterizedTest
@@ -357,6 +380,8 @@ public class PathfindingTest {
         if (unsafe) {
             accessor.setBlockAt(1, 0, 0, BlockType.LAVA);
         }
+
+        accessor.prepareForAccess();
 
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,
@@ -391,6 +416,8 @@ public class PathfindingTest {
         accessor.setBlockAt(0, -4, 0, BlockType.LAVA);
 
         accessor.setBlockAt(0, -level, 0, BlockType.STONE);
+
+        accessor.prepareForAccess();
 
         var routeFinder = new RouteFinder(
                 DEFAULT_GRAPH,

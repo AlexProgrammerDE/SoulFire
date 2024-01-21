@@ -18,7 +18,6 @@
 package net.pistonmaster.serverwrecker.server.pathfinding;
 
 import com.google.common.base.Stopwatch;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
@@ -30,7 +29,7 @@ import net.pistonmaster.serverwrecker.server.pathfinding.goals.GoalScorer;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.serverwrecker.server.pathfinding.graph.OutOfLevelException;
-import net.pistonmaster.serverwrecker.server.util.VectorHelper;
+import net.pistonmaster.serverwrecker.server.util.Vec2ObjectOpenHashMap;
 
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +59,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         var stopwatch = Stopwatch.createStarted();
 
         // Store block positions and the best route to them
-        var routeIndex = new Object2ObjectOpenCustomHashMap<SWVec3i, MinecraftRouteNode>(VectorHelper.VECTOR3I_HASH_STRATEGY);
+        var routeIndex = new Vec2ObjectOpenHashMap<SWVec3i, MinecraftRouteNode>();
 
         // Store block positions that we need to look at
         var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>(1);

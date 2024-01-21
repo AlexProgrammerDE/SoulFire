@@ -76,6 +76,8 @@ public class PathfindingBenchmark {
                 }
             }
 
+            accessor.prepareForAccess();
+
             System.out.println("Calculating world data...");
 
             // Find the first safe block at 0 0
@@ -98,7 +100,7 @@ public class PathfindingBenchmark {
                     new ProjectedInventory(new PlayerInventoryContainer())
             );
 
-            System.out.println("Done! Testing...");
+            System.out.println("Done loading! Testing...");
         } catch (Exception e) {
             e.printStackTrace();
         }
