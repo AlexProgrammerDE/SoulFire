@@ -19,7 +19,6 @@ package net.pistonmaster.serverwrecker.server.util;
 
 import net.pistonmaster.serverwrecker.server.data.BlockShapeGroup;
 import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
-import org.cloudburstmc.math.vector.Vector2d;
 import org.cloudburstmc.math.vector.Vector3d;
 
 public class VectorHelper {
@@ -32,9 +31,5 @@ public class VectorHelper {
 
     public static Vector3d topMiddleOfBlock(Vector3d vector, BlockShapeGroup blockShapeGroup) {
         return vector.floor().add(0.5, blockShapeGroup.highestY(), 0.5);
-    }
-
-    public static Vector2d middleOfXZNormalize(Vector2d vector) {
-        return vector.floor().add(0.5, 0.5);
     }
 }

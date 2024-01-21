@@ -43,7 +43,6 @@ public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highe
 
                 var id = Integer.parseInt(parts[0]);
                 var blockShapes = new ObjectArrayList<BlockShape>();
-                var highestY = 0D;
 
                 if (parts.length > 1) {
                     for (var i = 1; i < parts.length; i++) {
@@ -58,17 +57,16 @@ public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highe
                                 Double.parseDouble(subParts[5])
                         );
                         blockShapes.add(shape);
-
-                        if (shape.maxY() > highestY) {
-                            highestY = shape.maxY();
-                        }
                     }
                 }
 
                 FROM_ID.put(id, new BlockShapeGroup(
                         id,
                         blockShapes,
-                        blockShapes.stream().mapToDouble(BlockShape::maxY).max().orElse(0)
+                        blockShapes.stream()
+                                .mapToDouble(BlockShape::maxY)
+                                .max()
+                                .orElse(0)
                 ));
             });
         } catch (IOException e) {
