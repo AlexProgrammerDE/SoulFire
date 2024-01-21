@@ -40,60 +40,18 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
     @Serial
     private static final long serialVersionUID = 0L;
     private static final boolean ASSERTS = false;
-    /**
-     * We never resize below this threshold, which is the construction-time {#n}.
-     */
     protected final transient int minN;
-    /**
-     * The acceptable load factor.
-     */
     protected final float f;
-    /**
-     * The array of keys.
-     */
     protected transient K[] key;
-    /**
-     * The array of values.
-     */
     protected transient V[] value;
-    /**
-     * The mask for wrapping a position counter.
-     */
     protected transient int mask;
-    /**
-     * The current table size.
-     */
     protected transient int n;
-    /**
-     * Threshold after which we rehash. It must be the table size times {@link #f}.
-     */
     protected transient int maxFill;
-    /**
-     * Number of entries in the set (including the key zero, if present).
-     */
     protected int size;
-    /**
-     * Cached set of entries.
-     */
     protected transient FastEntrySet<K, V> entries;
-    /**
-     * Cached set of keys.
-     */
     protected transient ObjectSet<K> keys;
-    /**
-     * Cached collection of values.
-     */
     protected transient ObjectCollection<V> values;
 
-    /**
-     * Creates a new hash map.
-     *
-     * <p>
-     * The actual table size will be the least power of two greater than {@code expected}/{@code f}.
-     *
-     * @param expected the expected number of elements in the hash map.
-     * @param f        the load factor.
-     */
     @SuppressWarnings("unchecked")
     public Vec2ObjectOpenHashMap(final int expected, final float f) {
         if (f <= 0 || f >= 1)
@@ -107,10 +65,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         value = (V[]) new Object[n + 1];
     }
 
-    /**
-     * Creates a new hash map with initial expected {@link Hash#DEFAULT_INITIAL_SIZE} entries and
-     * {@link Hash#DEFAULT_LOAD_FACTOR} as load factor.
-     */
     public Vec2ObjectOpenHashMap() {
         this(DEFAULT_INITIAL_SIZE, DEFAULT_LOAD_FACTOR);
     }
@@ -137,12 +91,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         return size;
     }
 
-    /**
-     * Ensures that this map can hold a certain number of keys without rehashing.
-     *
-     * @param capacity a number of keys; there will be no rehashing unless the map {@linkplain #size()
-     *                 size} exceeds this number.
-     */
     public void ensureCapacity(final int capacity) {
         final var needed = arraySize(capacity, f);
         if (needed > n) rehash(needed);
@@ -203,15 +151,10 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         return oldValue;
     }
 
-    /**
-     * Shifts left entries with the specified hash code, starting at the specified position, and empties
-     * the resulting free entry.
-     *
-     * @param pos a starting position.
-     */
     protected final void shiftKeys(int pos) {
         // Shift entries with the same hash.
-        int last, slot;
+        int last;
+        int slot;
         K curr;
         final var key = this.key;
         for (; ; ) {
@@ -286,9 +229,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @SuppressWarnings("unchecked")
     public V getOrDefault(final Object k, final V defaultValue) {
@@ -305,9 +245,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public V putIfAbsent(final K k, final V v) {
         final var pos = find(k);
@@ -316,9 +253,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         return defRetValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @SuppressWarnings("unchecked")
     public boolean remove(final Object k, final Object v) {
@@ -340,9 +274,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean replace(final K k, final V oldValue, final V v) {
         final var pos = find(k);
@@ -351,9 +282,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public V replace(final K k, final V v) {
         final var pos = find(k);
@@ -363,9 +291,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         return oldValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public V computeIfAbsent(final K key, final Object2ObjectFunction<? super K, ? extends V> mappingFunction) {
         java.util.Objects.requireNonNull(mappingFunction);
@@ -377,9 +302,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         return newValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public V computeIfPresent(final K k, final java.util.function.BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
         java.util.Objects.requireNonNull(remappingFunction);
@@ -394,9 +316,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         return value[pos] = (newValue);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public V compute(final K k, final java.util.function.BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
         java.util.Objects.requireNonNull(remappingFunction);
@@ -415,9 +334,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         return value[pos] = (newValue);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public V merge(final K k, final V v, final java.util.function.BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
         java.util.Objects.requireNonNull(remappingFunction);
@@ -436,12 +352,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         return value[pos] = (newValue);
     }
 
-    /* Removes all elements from this map.
-     *
-     * <p>To increase object reuse, this method does not change the table size.
-     * If you want to reduce the table size, you must use {@link #trim()}.
-     *
-     */
     @Override
     public void clear() {
         if (size == 0) return;
@@ -485,7 +395,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
                 return new ValueSpliterator();
             }
 
-            /** {@inheritDoc} */
             @Override
             public void forEach(final Consumer<? super V> consumer) {
                 for (var pos = n; pos-- != 0; ) if (!((key[pos]) == null)) consumer.accept(value[pos]);
@@ -509,41 +418,10 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         return values;
     }
 
-    /**
-     * Rehashes the map, making the table as small as possible.
-     *
-     * <p>
-     * This method rehashes the table to the smallest size satisfying the load factor. It can be used
-     * when the set will not be changed anymore, so to optimize access speed and size.
-     *
-     * <p>
-     * If the table size is already the minimum possible, this method does nothing.
-     *
-     * @return true if there was enough memory to trim the map.
-     * @see #trim(int)
-     */
     public boolean trim() {
         return trim(size);
     }
 
-    /**
-     * Rehashes this map if the table is too large.
-     *
-     * <p>
-     * Let <var>N</var> be the smallest table size that can hold <code>max(n,{@link #size()})</code>
-     * entries, still satisfying the load factor. If the current table size is smaller than or equal to
-     * <var>N</var>, this method does nothing. Otherwise, it rehashes this map in a table of size
-     * <var>N</var>.
-     *
-     * <p>
-     * This method is useful when reusing maps. {@linkplain #clear() Clearing a map} leaves the table
-     * size untouched. If you are reusing a map many times, you can call this method with a typical size
-     * to avoid keeping around a very large table just because of a few large transient maps.
-     *
-     * @param n the threshold for the trimming.
-     * @return true if there was enough memory to trim the map.
-     * @see #trim()
-     */
     public boolean trim(final int n) {
         final var l = HashCommon.nextPowerOfTwo((int) Math.ceil(n / f));
         if (l >= this.n || size > maxFill(l, f)) return true;
@@ -555,16 +433,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         return true;
     }
 
-    /**
-     * Rehashes the map.
-     *
-     * <p>
-     * This method implements the basic rehashing strategy, and may be overridden by subclasses
-     * implementing different rehashing strategies (e.g., disk-based rehashing). However, you should not
-     * override this method unless you understand the internal workings of this class.
-     *
-     * @param newN the new size
-     */
     @SuppressWarnings("unchecked")
     protected void rehash(final int newN) {
         final var key = this.key;
@@ -572,7 +440,8 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         final var mask = newN - 1; // Note that this is used by the hashing macro
         final var newKey = (K[]) new SWVec3i[newN + 1];
         final var newValue = (V[]) new Object[newN + 1];
-        int i = n, pos;
+        var i = n;
+        int pos;
         for (var j = realSize(); j-- != 0; ) {
             while (((key[--i]) == null)) ;
             if (!((newKey[pos = (HashCommon.mix(hashVec(key[i]))) & mask]) == null))
@@ -588,15 +457,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         this.value = newValue;
     }
 
-    /**
-     * Returns a deep copy of this map.
-     *
-     * <p>
-     * This method performs a deep copy of this hash map; the data stored in the map, however, is not
-     * cloned. Note that this makes a difference only for object keys.
-     *
-     * @return a deep copy of this map.
-     */
     @Override
     @SuppressWarnings("unchecked")
     public Vec2ObjectOpenHashMap<K, V> clone() {
@@ -614,15 +474,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         return c;
     }
 
-    /**
-     * Returns a hash code for this map.
-     * <p>
-     * This method overrides the generic method provided by the superclass. Since {@code equals()} is
-     * not overriden, it is important that the value returned by this method is the same value as the
-     * one returned by the overriden method.
-     *
-     * @return a hash code for this map.
-     */
     @Override
     public int hashCode() {
         var h = 0;
@@ -640,11 +491,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
     private void checkTable() {
     }
 
-    /**
-     * The entry class for a hash map does not record key and value, but rather the position in the hash
-     * table of the corresponding entry. This is necessary so that calls to
-     * {@link java.util.Map.Entry#setValue(Object)} are reflected in the map
-     */
     final class MapEntry implements Entry<K, V>, Map.Entry<K, V>, it.unimi.dsi.fastutil.Pair<K, V> {
         // The table index this entry refers to, or -1 if this entry has been deleted.
         int index;
@@ -708,30 +554,10 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         }
     }
 
-    /**
-     * An iterator over a hash map.
-     */
     private abstract class MapIterator<ConsumerType> {
-        /**
-         * The index of the last entry returned, if positive or zero; initially, {@link #n}. If negative,
-         * the last entry returned was that of the key of index {@code - pos - 1} from the {@link #wrapped}
-         * list.
-         */
         int pos = n;
-        /**
-         * The index of the last entry that has been returned (more precisely, the value of {@link #pos} if
-         * {@link #pos} is positive, or {@link Integer#MIN_VALUE} if {@link #pos} is negative). It is -1 if
-         * either we did not return an entry yet, or the last returned entry has been removed.
-         */
         int last = -1;
-        /**
-         * A downward counter measuring how many entries must still be returned.
-         */
         int c = size;
-        /**
-         * A lazily allocated list containing keys of entries that have wrapped around the table because of
-         * removals.
-         */
         ObjectArrayList<K> wrapped;
 
         @SuppressWarnings("unused")
@@ -776,15 +602,10 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
             }
         }
 
-        /**
-         * Shifts left entries with the specified hash code, starting at the specified position, and empties
-         * the resulting free entry.
-         *
-         * @param pos a starting position.
-         */
         private void shiftKeys(int pos) {
             // Shift entries with the same hash.
-            int last, slot;
+            int last;
+            int slot;
             K curr;
             final var key = Vec2ObjectOpenHashMap.this.key;
             for (; ; ) {
@@ -871,18 +692,8 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
     }
 
     private abstract class MapSpliterator<ConsumerType, SplitType extends MapSpliterator<ConsumerType, SplitType>> {
-        /**
-         * The index (which bucket) of the next item to give to the action.
-         * counts up instead of down.
-         */
         int pos = 0;
-        /**
-         * The maximum bucket (exclusive) to iterate to
-         */
         int max = n;
-        /**
-         * An upwards counter counting how many we have given
-         */
         int c = 0;
         boolean hasSplit = false;
 
@@ -1066,17 +877,11 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
             Vec2ObjectOpenHashMap.this.clear();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void forEach(final Consumer<? super Entry<K, V>> consumer) {
             for (var pos = n; pos-- != 0; ) if (!((key[pos]) == null)) consumer.accept(new MapEntry(pos));
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void fastForEach(final Consumer<? super Entry<K, V>> consumer) {
             final var entry = new MapEntry();
@@ -1088,19 +893,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         }
     }
 
-    /**
-     * An iterator on keys.
-     *
-     * <p>
-     * We simply override the
-     * {@link java.util.ListIterator#next()}/{@link java.util.ListIterator#previous()} methods (and
-     * possibly their type-specific counterparts) so that they return keys instead of entries.
-     */
     private final class KeyIterator extends MapIterator<Consumer<? super K>> implements ObjectIterator<K> {
-        public KeyIterator() {
-            super();
-        }
-
         // forEachRemaining inherited from MapIterator superclass.
         // Despite the superclass declared with generics, the way Java inherits and generates bridge methods
         // avoids the boxing/unboxing
@@ -1152,9 +945,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
             return new KeySpliterator();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void forEach(final Consumer<? super K> consumer) {
             for (var pos = n; pos-- != 0; ) {
@@ -1186,19 +976,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         }
     }
 
-    /**
-     * An iterator on values.
-     *
-     * <p>
-     * We simply override the
-     * {@link java.util.ListIterator#next()}/{@link java.util.ListIterator#previous()} methods (and
-     * possibly their type-specific counterparts) so that they return values instead of entries.
-     */
     private final class ValueIterator extends MapIterator<Consumer<? super V>> implements ObjectIterator<V> {
-        public ValueIterator() {
-            super();
-        }
-
         // forEachRemaining inherited from MapIterator superclass.
         // Despite the superclass declared with generics, the way Java inherits and generates bridge methods
         // avoids the boxing/unboxing

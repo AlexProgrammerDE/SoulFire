@@ -55,9 +55,6 @@
         <!-- https://checkstyle.org/config_whitespace.html#EmptyForInitializerPad -->
         <module name="EmptyForInitializerPad"/>
 
-        <!-- https://checkstyle.org/config_whitespace.html#EmptyForIteratorPad -->
-        <module name="EmptyForIteratorPad"/>
-
         <!-- https://checkstyle.org/config_whitespace.html#EmptyLineSeparator -->
         <module name="EmptyLineSeparator">
             <property name="allowMultipleEmptyLines" value="false"/>
@@ -162,11 +159,6 @@
 
         <!-- https://checkstyle.org/config_javadoc.html#RequireEmptyLineBeforeBlockTagGroup -->
         <module name="RequireEmptyLineBeforeBlockTagGroup"/>
-
-        <!-- https://checkstyle.org/config_coding.html#RequireThis -->
-        <module name="RequireThis">
-            <property name="validateOnlyOverlapping" value="true"/>
-        </module>
 
         <!-- https://checkstyle.org/config_blocks.html#RightCurly -->
         <module name="RightCurly">
