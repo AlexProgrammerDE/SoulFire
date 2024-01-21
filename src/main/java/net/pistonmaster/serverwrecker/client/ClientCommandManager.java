@@ -74,20 +74,25 @@ public class ClientCommandManager {
 
     public int execute(String command) {
         try {
-            var parsed = dispatcher.parse(command, ConsoleSubject.INSTANCE);
-
-            // We found no registered command, so forward to server.
-            if (parsed.getExceptions().isEmpty()) {
+            if (isClientCommand(command)) {
+                log.debug("Executing command {} on client", command);
+                return dispatcher.execute(command, ConsoleSubject.INSTANCE);
+            } else {
+                log.debug("Executing command {} on server", command);
                 return rpcClient.commandStubBlocking().executeCommand(
                         CommandRequest.newBuilder().setCommand(command).build()
                 ).getCode();
             }
-
-            return dispatcher.execute(parsed);
         } catch (CommandSyntaxException e) {
             log.error("An error occurred while trying to execute a command.", e);
             return 1;
         }
+    }
+
+    private boolean isClientCommand(String command) {
+        var spaceIndex = command.indexOf(' ');
+        var commandName = spaceIndex == -1 ? command : command.substring(0, spaceIndex);
+        return dispatcher.getRoot().getChild(commandName) != null;
     }
 
     public List<String> getCompletionSuggestions(String command) {

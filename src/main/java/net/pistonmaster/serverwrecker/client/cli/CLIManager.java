@@ -54,8 +54,12 @@ public class CLIManager {
 
     public CLIManager(RPCClient rpcClient) {
         this.rpcClient = rpcClient;
-        this.clientCommandManager = new ClientCommandManager(rpcClient, settingsManager);
         injector.register(CLIManager.class, this);
+        injector.register(RPCClient.class, rpcClient);
+        injector.register(ShutdownManager.class, shutdownManager);
+        injector.register(SettingsManager.class, settingsManager);
+
+        this.clientCommandManager = injector.getSingleton(ClientCommandManager.class);
     }
 
     private static String escapeFormatSpecifiers(String input) {

@@ -55,8 +55,12 @@ public class GUIManager {
 
     public GUIManager(RPCClient rpcClient) {
         this.rpcClient = rpcClient;
-        this.clientCommandManager = new ClientCommandManager(rpcClient, settingsManager);
         injector.register(GUIManager.class, this);
+        injector.register(RPCClient.class, rpcClient);
+        injector.register(ShutdownManager.class, shutdownManager);
+        injector.register(SettingsManager.class, settingsManager);
+
+        this.clientCommandManager = injector.getSingleton(ClientCommandManager.class);
     }
 
     public static void injectTheme() {
