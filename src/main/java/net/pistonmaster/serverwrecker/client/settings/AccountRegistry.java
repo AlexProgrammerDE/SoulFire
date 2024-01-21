@@ -35,6 +35,7 @@ public class AccountRegistry {
 
     public void loadFromString(String data, AuthType authType) {
         var newAccounts = data.lines()
+                .map(String::strip)
                 .filter(line -> !line.isBlank())
                 .distinct()
                 .map(account -> fromStringSingle(account, authType))

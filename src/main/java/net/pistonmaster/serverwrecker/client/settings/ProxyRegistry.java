@@ -42,6 +42,7 @@ public class ProxyRegistry {
 
     public void loadFromString(String data, ProxyType proxyType) {
         var newProxies = data.lines()
+                .map(String::strip)
                 .filter(line -> !line.isBlank())
                 .distinct()
                 .map(line -> fromStringSingle(line, proxyType))
