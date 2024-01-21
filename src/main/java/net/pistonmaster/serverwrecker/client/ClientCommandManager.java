@@ -56,6 +56,7 @@ public class ClientCommandManager {
                         @Override
                         public void onNext(AttackStartResponse value) {
                             log.debug("Started bot attack with id {}", value.getId());
+                            // TODO: Sync with GUI state somehow
                         }
 
                         @Override

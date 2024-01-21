@@ -20,9 +20,12 @@ package net.pistonmaster.serverwrecker.client.gui.popups;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.client.gui.GUIFrame;
 import net.pistonmaster.serverwrecker.client.gui.GUIManager;
+import net.pistonmaster.serverwrecker.client.gui.libs.HintTextArea;
 import net.pistonmaster.serverwrecker.client.gui.libs.JFXFileHelper;
 
 import javax.swing.*;
+import javax.swing.border.MatteBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -41,8 +44,7 @@ public class ImportTextDialog extends JDialog {
         super(frame, loadText, true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        var contentPane = new JPanel();
-        contentPane.setLayout(new BorderLayout());
+        var contentPane = new JPanel(new BorderLayout());
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         var buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -59,7 +61,7 @@ public class ImportTextDialog extends JDialog {
         buttonPanel.add(loadFromFileButton);
         buttonPanel.add(getFromClipboardButton);
 
-        var textArea = new JTextArea(5, 20);
+        var textArea = new HintTextArea("Put text here...", 5, 20);
         textArea.setWrapStyleWord(true);
         textArea.setLineWrap(true);
 
@@ -73,7 +75,24 @@ public class ImportTextDialog extends JDialog {
         inputPanel.add(submitButton, BorderLayout.EAST);
 
         contentPane.add(buttonPanel, BorderLayout.NORTH);
-        contentPane.add(inputPanel, BorderLayout.CENTER);
+
+        var separatorPanel = new JPanel();
+        var titledBorder = BorderFactory.createTitledBorder(
+                new MatteBorder(UIManager.getInt("Separator.stripeWidth"), 0, 0, 0,
+                        UIManager.getColor("Separator.foreground")),
+                "OR"
+        );
+        titledBorder.setTitleJustification(TitledBorder.CENTER);
+        separatorPanel.setBorder(titledBorder);
+        var separatorPanelLayout = new GridBagLayout();
+        separatorPanelLayout.columnWidths = new int[]{0, 0};
+        separatorPanelLayout.rowHeights = new int[]{0, 0};
+        separatorPanelLayout.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+        separatorPanelLayout.rowWeights = new double[]{1.0, Double.MIN_VALUE};
+        separatorPanel.setLayout(separatorPanelLayout);
+        contentPane.add(separatorPanel, BorderLayout.CENTER);
+
+        contentPane.add(inputPanel, BorderLayout.SOUTH);
 
         setContentPane(contentPane);
 
