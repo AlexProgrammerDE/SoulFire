@@ -47,6 +47,11 @@ public final class SWEasyMCAuthService implements MCAuthService<SWEasyMCAuthServ
             var response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
                     TokenRedeemResponse.class);
 
+            if (response.error() != null) {
+                log.error("EasyMC has returned a error: {}", response.error());
+                throw new IOException(response.error());
+            }
+
             if (response.message() != null) {
                 log.info("EasyMC has a message for you (This is not a error): {}", response.message());
             }
@@ -90,5 +95,6 @@ public final class SWEasyMCAuthService implements MCAuthService<SWEasyMCAuthServ
         private String uuid;
         private String session;
         private String message;
+        private String error;
     }
 }
