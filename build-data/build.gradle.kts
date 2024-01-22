@@ -1,5 +1,5 @@
 plugins {
-    id("sw.java-conventions")
+    id("sf.java-conventions")
     alias(libs.plugins.blossom)
 }
 

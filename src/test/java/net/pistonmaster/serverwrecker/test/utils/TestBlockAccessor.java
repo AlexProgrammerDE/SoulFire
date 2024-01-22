@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.test.utils;
+package net.pistonmaster.soulfire.test.utils;
 
-import net.pistonmaster.serverwrecker.server.data.BlockType;
-import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockAccessor;
-import net.pistonmaster.serverwrecker.server.protocol.bot.block.BlockState;
-import net.pistonmaster.serverwrecker.server.util.Vec2ObjectOpenHashMap;
+import net.pistonmaster.soulfire.server.data.BlockType;
+import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.protocol.bot.block.BlockAccessor;
+import net.pistonmaster.soulfire.server.protocol.bot.block.BlockState;
+import net.pistonmaster.soulfire.server.util.Vec2ObjectOpenHashMap;
 
 public class TestBlockAccessor implements BlockAccessor {
     private final Vec2ObjectOpenHashMap<SWVec3i, BlockState> blocks = new Vec2ObjectOpenHashMap<>();

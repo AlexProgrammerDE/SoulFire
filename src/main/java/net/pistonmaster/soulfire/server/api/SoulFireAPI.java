@@ -1,0 +1,96 @@
+/*
+ * SoulFire
+ * Copyright (C) 2024  AlexProgrammerDE
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package net.pistonmaster.soulfire.server.api;
+
+import net.lenni0451.lambdaevents.LambdaManager;
+import net.lenni0451.lambdaevents.generator.ASMGenerator;
+import net.pistonmaster.soulfire.server.SoulFireServer;
+import net.pistonmaster.soulfire.server.api.event.EventExceptionHandler;
+import net.pistonmaster.soulfire.server.api.event.EventUtil;
+import net.pistonmaster.soulfire.server.api.event.SoulFireGlobalEvent;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
+
+public class SoulFireAPI {
+    private static final LambdaManager EVENT_BUS = LambdaManager.basic(new ASMGenerator())
+            .setExceptionHandler(EventExceptionHandler.INSTANCE)
+            .setEventFilter((c, h) -> {
+                if (SoulFireGlobalEvent.class.isAssignableFrom(c)) {
+                    return true;
+                } else {
+                    throw new IllegalStateException("This event handler only accepts global events");
+                }
+            });
+    private static final List<ServerExtension> SERVER_EXTENSIONS = new ArrayList<>();
+    private static SoulFireServer serverWreckerServer;
+
+    private SoulFireAPI() {
+    }
+
+    /**
+     * Get the current SoulFire instance for access to internals.
+     *
+     * @return The current SoulFire instance.
+     */
+    public static SoulFireServer getSoulFire() {
+        Objects.requireNonNull(serverWreckerServer, "SoulFireAPI not initialized yet!");
+        return serverWreckerServer;
+    }
+
+    /**
+     * Internal method to set the current SoulFire instance.
+     *
+     * @param serverWreckerServer The current SoulFire instance.
+     */
+    public static void setSoulFire(SoulFireServer serverWreckerServer) {
+        if (SoulFireAPI.serverWreckerServer != null) {
+            throw new IllegalStateException("SoulFireAPI already initialized!");
+        }
+
+        SoulFireAPI.serverWreckerServer = serverWreckerServer;
+    }
+
+    public static void postEvent(SoulFireGlobalEvent event) {
+        EVENT_BUS.call(event);
+    }
+
+    public static <T extends SoulFireGlobalEvent> void registerListener(Class<T> clazz, Consumer<? super T> subscriber) {
+        EventUtil.runAndAssertChanged(EVENT_BUS, () -> EVENT_BUS.registerConsumer(subscriber, clazz));
+    }
+
+    public static void registerListeners(Class<?> listenerClass) {
+        EventUtil.runAndAssertChanged(EVENT_BUS, () -> EVENT_BUS.register(listenerClass));
+    }
+
+    public static LambdaManager getEventBus() {
+        return EVENT_BUS;
+    }
+
+    public static void registerServerExtension(ServerExtension serverExtension) {
+        SERVER_EXTENSIONS.add(serverExtension);
+        serverExtension.onLoad();
+    }
+
+    public static List<ServerExtension> getServerExtensions() {
+        return Collections.unmodifiableList(SERVER_EXTENSIONS);
+    }
+}

@@ -4,7 +4,7 @@ import com.google.protobuf.gradle.id
 plugins {
     application
     idea
-    id("sw.shadow-conventions")
+    id("sf.shadow-conventions")
     alias(libs.plugins.protobuf)
     alias(libs.plugins.jmh)
 }
@@ -15,7 +15,7 @@ allprojects {
     description = "Advanced Minecraft Server-Stresser Tool."
 }
 
-var mainClassString = "net.pistonmaster.serverwrecker.launcher.SoulFireJava8Launcher"
+var mainClassString = "net.pistonmaster.soulfire.launcher.SoulFireJava8Launcher"
 
 application {
     applicationName = "SoulFire"

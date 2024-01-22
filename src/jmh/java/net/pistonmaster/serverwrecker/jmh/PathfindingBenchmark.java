@@ -15,22 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.jmh;
+package net.pistonmaster.soulfire.jmh;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import net.pistonmaster.serverwrecker.server.data.BlockType;
-import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
-import net.pistonmaster.serverwrecker.server.pathfinding.RouteFinder;
-import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
-import net.pistonmaster.serverwrecker.server.pathfinding.goals.PosGoal;
-import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
-import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedInventory;
-import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedLevelState;
-import net.pistonmaster.serverwrecker.server.protocol.bot.container.PlayerInventoryContainer;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
-import net.pistonmaster.serverwrecker.test.utils.TestBlockAccessor;
-import net.pistonmaster.serverwrecker.util.ResourceHelper;
+import net.pistonmaster.soulfire.server.data.BlockType;
+import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
+import net.pistonmaster.soulfire.server.pathfinding.RouteFinder;
+import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.goals.PosGoal;
+import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
+import net.pistonmaster.soulfire.server.pathfinding.graph.ProjectedInventory;
+import net.pistonmaster.soulfire.server.pathfinding.graph.ProjectedLevelState;
+import net.pistonmaster.soulfire.server.protocol.bot.container.PlayerInventoryContainer;
+import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
+import net.pistonmaster.soulfire.test.utils.TestBlockAccessor;
+import net.pistonmaster.soulfire.util.ResourceHelper;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;

@@ -15,21 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.serverwrecker.test;
+package net.pistonmaster.soulfire.test;
 
-import net.pistonmaster.serverwrecker.server.data.BlockType;
-import net.pistonmaster.serverwrecker.server.data.ItemType;
-import net.pistonmaster.serverwrecker.server.pathfinding.BotEntityState;
-import net.pistonmaster.serverwrecker.server.pathfinding.NoRouteFoundException;
-import net.pistonmaster.serverwrecker.server.pathfinding.RouteFinder;
-import net.pistonmaster.serverwrecker.server.pathfinding.SWVec3i;
-import net.pistonmaster.serverwrecker.server.pathfinding.goals.PosGoal;
-import net.pistonmaster.serverwrecker.server.pathfinding.graph.MinecraftGraph;
-import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedInventory;
-import net.pistonmaster.serverwrecker.server.pathfinding.graph.ProjectedLevelState;
-import net.pistonmaster.serverwrecker.server.protocol.bot.container.SWItemStack;
-import net.pistonmaster.serverwrecker.server.protocol.bot.state.TagsState;
-import net.pistonmaster.serverwrecker.test.utils.TestBlockAccessor;
+import net.pistonmaster.soulfire.server.data.BlockType;
+import net.pistonmaster.soulfire.server.data.ItemType;
+import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
+import net.pistonmaster.soulfire.server.pathfinding.NoRouteFoundException;
+import net.pistonmaster.soulfire.server.pathfinding.RouteFinder;
+import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.goals.PosGoal;
+import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
+import net.pistonmaster.soulfire.server.pathfinding.graph.ProjectedInventory;
+import net.pistonmaster.soulfire.server.pathfinding.graph.ProjectedLevelState;
+import net.pistonmaster.soulfire.server.protocol.bot.container.SWItemStack;
+import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
+import net.pistonmaster.soulfire.test.utils.TestBlockAccessor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

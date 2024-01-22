@@ -4,7 +4,7 @@ import "google/protobuf/timestamp.proto";
 
 option java_multiple_files = true;
 
-package net.pistonmaster.serverwrecker.grpc.generated;
+package net.pistonmaster.soulfire.grpc.generated;
 
 message CommandRequest {
   string command = 1;
