@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -52,7 +52,7 @@ public class GUIClientProps {
 
     public static void saveSettings() {
         try (var os = Files.newOutputStream(SETTINGS_PATH, StandardOpenOption.CREATE)) {
-            SETTINGS.store(new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8)), "ServerWrecker GUI Settings");
+            SETTINGS.store(new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8)), "SoulFire GUI Settings");
         } catch (IOException e) {
             log.error("Failed to save settings!", e);
         }

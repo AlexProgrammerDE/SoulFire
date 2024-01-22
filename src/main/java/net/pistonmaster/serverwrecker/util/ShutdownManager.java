@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ package net.pistonmaster.serverwrecker.util;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
+import net.pistonmaster.serverwrecker.SoulFireBootstrap;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -48,8 +48,8 @@ public class ShutdownManager {
 
         shutdownHook.run();
 
-        ServerWreckerBootstrap.PLUGIN_MANAGER.stopPlugins();
-        ServerWreckerBootstrap.PLUGIN_MANAGER.unloadPlugins();
+        SoulFireBootstrap.PLUGIN_MANAGER.stopPlugins();
+        SoulFireBootstrap.PLUGIN_MANAGER.unloadPlugins();
 
         shutdown = true;
 

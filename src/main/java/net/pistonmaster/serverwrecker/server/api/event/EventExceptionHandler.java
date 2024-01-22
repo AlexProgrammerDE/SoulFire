@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class EventExceptionHandler implements IExceptionHandler {
     public static final EventExceptionHandler INSTANCE = new EventExceptionHandler();
-    private static final Logger log = LoggerFactory.getLogger("ServerWrecker");
+    private static final Logger log = LoggerFactory.getLogger("SoulFire");
 
     @Override
     public void handle(@NotNull AHandler handler, @NotNull Object event, @NotNull Throwable t) {

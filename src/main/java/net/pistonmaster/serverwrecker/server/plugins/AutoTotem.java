@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.server.api.ExecutorHelper;
 import net.pistonmaster.serverwrecker.server.api.PluginHelper;
-import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.SoulFireAPI;
 import net.pistonmaster.serverwrecker.server.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.server.data.ItemType;
@@ -85,7 +85,7 @@ public class AutoTotem implements InternalExtension {
 
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListeners(AutoTotem.class);
+        SoulFireAPI.registerListeners(AutoTotem.class);
         PluginHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoTotem::onJoined);
     }
 

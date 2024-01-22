@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.serverwrecker.server.api.event.AbstractCancellable;
-import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerBotEvent;
+import net.pistonmaster.serverwrecker.server.api.event.SoulFireBotEvent;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 
 /**
@@ -30,7 +30,7 @@ import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
  * Setter is used to change the packet by a plugin.
  */
 @AllArgsConstructor
-public class SWPacketSendingEvent extends AbstractCancellable implements ServerWreckerBotEvent {
+public class SWPacketSendingEvent extends AbstractCancellable implements SoulFireBotEvent {
     private final BotConnection connection;
     @Getter
     @Setter

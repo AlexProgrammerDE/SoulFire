@@ -9,14 +9,14 @@ body:
       description: |
         Please search to see if an feature request like this already exists.
 
-        Tip: You can go to the [GitHub issue tab](https://github.com/AlexProgrammerDE/ServerWrecker/labels/type%3A%20%3Abulb%3A%20enhancement) for a list of open feature requests
+        Tip: You can go to the [GitHub issue tab](https://github.com/AlexProgrammerDE/SoulFire/labels/type%3A%20%3Abulb%3A%20enhancement) for a list of open feature requests
       options:
       - label: I have searched the existing feature requests
         required: true
   - type: textarea
     attributes:
       label: Describe your feature request
-      description: What do you want added to ServerWrecker?
-      placeholder: "I want x feature added to ServerWrecker"
+      description: What do you want added to SoulFire?
+      placeholder: "I want x feature added to SoulFire"
     validations:
       required: true

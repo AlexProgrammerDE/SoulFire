@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -116,7 +116,7 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
 
     @Override
     public String getPlatformName() {
-        return "ServerWrecker";
+        return "SoulFire";
     }
 
     @Override

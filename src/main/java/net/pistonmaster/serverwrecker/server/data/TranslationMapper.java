@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.TranslationArgumentLike;
-import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.server.SoulFireServer;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -42,7 +42,7 @@ public class TranslationMapper implements Function<TranslatableComponent, String
 
         var args = component.arguments().stream()
                 .map(TranslationArgumentLike::asComponent)
-                .map(ServerWreckerServer.PLAIN_MESSAGE_SERIALIZER::serialize)
+                .map(SoulFireServer.PLAIN_MESSAGE_SERIALIZER::serialize)
                 .toArray(String[]::new);
         return String.format(translation, (Object[]) args);
     }

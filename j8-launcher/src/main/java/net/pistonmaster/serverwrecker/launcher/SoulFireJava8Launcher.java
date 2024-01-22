@@ -8,24 +8,24 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-public class ServerWreckerJava8Launcher {
+public class SoulFireJava8Launcher {
     public static void main(String[] args) {
         try {
-            Class.forName("net.pistonmaster.serverwrecker.ServerWreckerLauncher")
+            Class.forName("net.pistonmaster.serverwrecker.SoulFireLauncher")
                     .getMethod("main", String[].class)
                     .invoke(null, (Object) args);
         } catch (UnsupportedClassVersionError e) {
-            System.out.println("[ServerWrecker] ServerWrecker requires Java 21 or higher!");
-            System.out.println("[ServerWrecker] Please update your Java version!");
-            System.out.println("[ServerWrecker] You are currently using Java " + System.getProperty("java.version"));
-            System.out.println("[ServerWrecker] You can download the latest version of Java at https://adoptopenjdk.net/");
+            System.out.println("[SoulFire] SoulFire requires Java 21 or higher!");
+            System.out.println("[SoulFire] Please update your Java version!");
+            System.out.println("[SoulFire] You are currently using Java " + System.getProperty("java.version"));
+            System.out.println("[SoulFire] You can download the latest version of Java at https://adoptopenjdk.net/");
 
             if (!GraphicsEnvironment.isHeadless() && args.length == 0) {
                 FlatDarkLaf.setup();
                 new UnsupportedVersionDialog();
             }
         } catch (ReflectiveOperationException e) {
-            System.out.println("ServerWreckerLauncher is not in the classpath!");
+            System.out.println("SoulFireLauncher is not in the classpath!");
             e.printStackTrace();
         }
     }
@@ -40,7 +40,7 @@ public class ServerWreckerJava8Launcher {
             JTextPane pane = new JTextPane();
             pane.setContentType("text/html");
             pane.setText("<html><center><h1>Unsupported Java Version</h1><br>" +
-                    "<h2>ServerWrecker requires Java 21 or higher!</h2><br>" +
+                    "<h2>SoulFire requires Java 21 or higher!</h2><br>" +
                     "<h2>Please update your Java version!</h2><br>" +
                     "<h2>You are currently using Java " + System.getProperty("java.version") + "</h2><br>" +
                     "<h2>You can download the latest version of Java at <a href=\"https://adoptium.net/\">https://adoptium.net/</a></h2></center></html>"

@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 package net.pistonmaster.serverwrecker.server.api;
 
 import net.pistonmaster.serverwrecker.server.api.event.EventUtil;
-import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerAttackEvent;
-import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerBotEvent;
+import net.pistonmaster.serverwrecker.server.api.event.SoulFireAttackEvent;
+import net.pistonmaster.serverwrecker.server.api.event.SoulFireBotEvent;
 import net.pistonmaster.serverwrecker.server.api.event.attack.AttackInitEvent;
 import net.pistonmaster.serverwrecker.server.api.event.attack.BotConnectionInitEvent;
 
@@ -43,7 +43,7 @@ public class PluginHelper {
      * @param <T>      The type of the bot event.
      * @see #registerAttackEventConsumer(Class, Consumer)
      */
-    public static <T extends ServerWreckerBotEvent> void registerBotEventConsumer(Class<T> clazz, Consumer<T> consumer) {
+    public static <T extends SoulFireBotEvent> void registerBotEventConsumer(Class<T> clazz, Consumer<T> consumer) {
         registerAttackEventConsumer(BotConnectionInitEvent.class, event ->
                 EventUtil.runAndAssertChanged(event.connection().eventBus(), () ->
                         event.connection().eventBus().registerConsumer(consumer, clazz)));
@@ -56,8 +56,8 @@ public class PluginHelper {
      * @param consumer The consumer that is called when the event is posted.
      * @param <T>      The type of the attack event.
      */
-    public static <T extends ServerWreckerAttackEvent> void registerAttackEventConsumer(Class<T> clazz, Consumer<T> consumer) {
-        ServerWreckerAPI.registerListener(AttackInitEvent.class, event ->
+    public static <T extends SoulFireAttackEvent> void registerAttackEventConsumer(Class<T> clazz, Consumer<T> consumer) {
+        SoulFireAPI.registerListener(AttackInitEvent.class, event ->
                 EventUtil.runAndAssertChanged(event.attackManager().eventBus(), () ->
                         event.attackManager().eventBus().registerConsumer(consumer, clazz)));
     }

@@ -30,8 +30,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           # Artifact name
-          name: ServerWrecker
+          name: SoulFire
           # A file, directory or wildcard pattern that describes what to upload
           path: |
-            build/libs/ServerWrecker-*.jar
-            !build/libs/ServerWrecker-*-unshaded.jar
+            build/libs/SoulFire-*.jar
+            !build/libs/SoulFire-*-unshaded.jar

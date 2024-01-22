@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@ import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.client.gui.libs.JFXFileHelper;
 import net.pistonmaster.serverwrecker.client.gui.popups.AboutPopup;
-import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.SoulFireAPI;
 import net.pistonmaster.serverwrecker.server.api.event.gui.WindowCloseEvent;
 import net.pistonmaster.serverwrecker.util.SWPathConstants;
 
@@ -76,7 +76,7 @@ public class SWMenuBar extends JMenuBar {
         var fileMenu = new JMenu("File");
         var loadProfile = new JMenuItem("Load Profile");
         loadProfile.addActionListener(e -> JFXFileHelper.showOpenDialog(SWPathConstants.PROFILES_FOLDER, Map.of(
-                "ServerWrecker profile", "json"
+                "SoulFire profile", "json"
         )).ifPresent(file -> {
             try {
                 guiManager.settingsManager().loadProfile(file);
@@ -89,7 +89,7 @@ public class SWMenuBar extends JMenuBar {
         fileMenu.add(loadProfile);
         var saveProfile = new JMenuItem("Save Profile");
         saveProfile.addActionListener(e -> JFXFileHelper.showSaveDialog(SWPathConstants.PROFILES_FOLDER, Map.of(
-                "ServerWrecker profile", "json"
+                "SoulFire profile", "json"
         ), "profile.json").ifPresent(file -> {
             // Add .json if not present
             var path = file.toString();
@@ -159,7 +159,7 @@ public class SWMenuBar extends JMenuBar {
         if (desktop.isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
             desktop.setQuitHandler((e, response) -> {
                 var event = new WindowCloseEvent();
-                ServerWreckerAPI.postEvent(event);
+                SoulFireAPI.postEvent(event);
                 var canQuit = !event.isCancelled();
                 if (canQuit) {
                     response.performQuit();

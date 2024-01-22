@@ -11,7 +11,7 @@ plugins {
 
 tasks {
     javadoc {
-        title = "ServerWrecker Javadocs"
+        title = "SoulFire Javadocs"
         options.encoding = Charsets.UTF_8.name()
         (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
     }
@@ -34,7 +34,7 @@ tasks {
 }
 
 indra {
-    github("AlexProgrammerDE", "ServerWrecker") {
+    github("AlexProgrammerDE", "SoulFire") {
         ci(true)
     }
 
@@ -44,8 +44,8 @@ indra {
 
     configurePublications {
         pom {
-            name = "ServerWrecker"
-            url = "https://github.com/AlexProgrammerDE/ServerWrecker"
+            name = "SoulFire"
+            url = "https://github.com/AlexProgrammerDE/SoulFire"
             organization {
                 name = "AlexProgrammerDE"
                 url = "https://pistonmaster.net"

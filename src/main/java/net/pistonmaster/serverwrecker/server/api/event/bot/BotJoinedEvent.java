@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  */
 package net.pistonmaster.serverwrecker.server.api.event.bot;
 
-import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerBotEvent;
+import net.pistonmaster.serverwrecker.server.api.event.SoulFireBotEvent;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 
 /**
@@ -26,5 +26,5 @@ import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
  *
  * @param connection The bot connection instance.
  */
-public record BotJoinedEvent(BotConnection connection) implements ServerWreckerBotEvent {
+public record BotJoinedEvent(BotConnection connection) implements SoulFireBotEvent {
 }

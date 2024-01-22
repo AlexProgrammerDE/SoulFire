@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 package net.pistonmaster.serverwrecker.server.api.event.attack;
 
 import net.pistonmaster.serverwrecker.server.AttackManager;
-import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerGlobalEvent;
+import net.pistonmaster.serverwrecker.server.api.event.SoulFireGlobalEvent;
 
 /**
  * This event is called right after an AttackManager is created and before any attack is scheduled.
@@ -26,5 +26,5 @@ import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerGlobalEvent;
  *
  * @param attackManager The attack manager instance.
  */
-public record AttackInitEvent(AttackManager attackManager) implements ServerWreckerGlobalEvent {
+public record AttackInitEvent(AttackManager attackManager) implements SoulFireGlobalEvent {
 }

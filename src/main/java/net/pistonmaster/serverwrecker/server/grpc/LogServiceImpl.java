@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ import io.grpc.stub.StreamObserver;
 import net.pistonmaster.serverwrecker.grpc.generated.LogRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.LogResponse;
 import net.pistonmaster.serverwrecker.grpc.generated.LogsServiceGrpc;
-import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.SoulFireAPI;
 import net.pistonmaster.serverwrecker.server.api.event.system.SystemLogEvent;
 
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     private final QueueWithMaxSize<String> logs = new QueueWithMaxSize<>(300); // Keep max 300 logs
 
     public LogServiceImpl() {
-        ServerWreckerAPI.registerListener(SystemLogEvent.class, event ->
+        SoulFireAPI.registerListener(SystemLogEvent.class, event ->
                 logs.add(event.message()));
     }
 
@@ -49,7 +49,7 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     @Override
     public void subscribe(LogRequest request, StreamObserver<LogResponse> responseObserver) {
         sendPreviousLogs(request.getPrevious(), responseObserver);
-        ServerWreckerAPI.registerListener(SystemLogEvent.class, new LogEventListener(responseObserver));
+        SoulFireAPI.registerListener(SystemLogEvent.class, new LogEventListener(responseObserver));
     }
 
     private void sendPreviousLogs(int requestPrevious, StreamObserver<LogResponse> responseObserver) {

@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,14 +25,14 @@ import java.util.List;
  * This class only changes the classLoader for the rest of the program.
  * This is so we can merge plugin and server classes.
  */
-public class ServerWreckerLauncher {
+public class SoulFireLauncher {
     private static final SWContextClassLoader SW_CONTEXT_CLASS_LOADER = new SWContextClassLoader();
 
     public static void main(String[] args) {
         Thread.currentThread().setContextClassLoader(SW_CONTEXT_CLASS_LOADER);
 
         try {
-            SW_CONTEXT_CLASS_LOADER.loadClass("net.pistonmaster.serverwrecker.ServerWreckerBootstrap")
+            SW_CONTEXT_CLASS_LOADER.loadClass("net.pistonmaster.serverwrecker.SoulFireBootstrap")
                     .getDeclaredMethod("bootstrap", String[].class, List.class)
                     .invoke(null, args, SW_CONTEXT_CLASS_LOADER.childClassLoaders());
         } catch (ReflectiveOperationException e) {

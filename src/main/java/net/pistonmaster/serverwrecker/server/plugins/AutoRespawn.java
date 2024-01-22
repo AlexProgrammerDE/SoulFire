@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,9 +23,9 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundCl
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.server.SoulFireServer;
 import net.pistonmaster.serverwrecker.server.api.PluginHelper;
-import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.SoulFireAPI;
 import net.pistonmaster.serverwrecker.server.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
@@ -45,7 +45,7 @@ public class AutoRespawn implements InternalExtension {
                 return;
             }
 
-            var message = ServerWreckerServer.PLAIN_MESSAGE_SERIALIZER.serialize(combatKillPacket.getMessage());
+            var message = SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(combatKillPacket.getMessage());
             connection.logger().info("[AutoRespawn] Died with killer: {} and message: '{}'",
                     combatKillPacket.getPlayerId(), message);
 
@@ -62,7 +62,7 @@ public class AutoRespawn implements InternalExtension {
 
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListeners(AutoRespawn.class);
+        SoulFireAPI.registerListeners(AutoRespawn.class);
         PluginHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, AutoRespawn::onPacket);
     }
 

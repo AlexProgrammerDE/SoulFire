@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ import java.util.UUID;
 public final class SWTheAlteningAuthService implements MCAuthService<SWTheAlteningAuthService.TheAlteningAuthData> {
     @SuppressWarnings("HttpUrlsUsage") // The Altening doesn't support encrypted HTTPS
     private static final URI AUTHENTICATE_ENDPOINT = URI.create("http://authserver.thealtening.com/authenticate");
-    private static final String PASSWORD = "ServerWreckerIsCool"; // Password doesn't matter for The Altening
+    private static final String PASSWORD = "SoulFireIsCool"; // Password doesn't matter for The Altening
     private final Gson gson = new Gson();
 
     @Override

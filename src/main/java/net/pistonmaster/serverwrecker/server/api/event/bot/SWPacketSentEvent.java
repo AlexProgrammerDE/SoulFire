@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 package net.pistonmaster.serverwrecker.server.api.event.bot;
 
 import com.github.steveice10.mc.protocol.codec.MinecraftPacket;
-import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerBotEvent;
+import net.pistonmaster.serverwrecker.server.api.event.SoulFireBotEvent;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 
-public record SWPacketSentEvent(BotConnection connection, MinecraftPacket packet) implements ServerWreckerBotEvent {
+public record SWPacketSentEvent(BotConnection connection, MinecraftPacket packet) implements SoulFireBotEvent {
 }

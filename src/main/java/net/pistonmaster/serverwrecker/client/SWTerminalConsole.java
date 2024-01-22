@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutorService;
 
 @RequiredArgsConstructor
 public class SWTerminalConsole extends SimpleTerminalConsole {
-    private static final Logger logger = LogManager.getLogger("ServerWrecker");
+    private static final Logger logger = LogManager.getLogger("SoulFire");
     private final ShutdownManager shutdownManager;
     private final ClientCommandManager clientCommandManager;
 
@@ -73,7 +73,7 @@ public class SWTerminalConsole extends SimpleTerminalConsole {
         }
 
         return super.buildReader(builder
-                .appName("ServerWrecker")
+                .appName("SoulFire")
                 .completer((reader, parsedLine, list) -> {
                     for (var suggestion : clientCommandManager.getCompletionSuggestions(parsedLine.line())) {
                         list.add(new Candidate(suggestion));

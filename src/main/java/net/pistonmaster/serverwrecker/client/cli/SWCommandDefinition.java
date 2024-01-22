@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 @Command(name = "serverwrecker", mixinStandardHelpOptions = true,
-        version = "ServerWrecker v" + BuildData.VERSION, showDefaultValues = true,
+        version = "SoulFire v" + BuildData.VERSION, showDefaultValues = true,
         description = BuildData.DESCRIPTION, sortOptions = false)
 public class SWCommandDefinition implements Callable<Integer> {
     private final CLIManager cliManager;
@@ -139,7 +139,7 @@ public class SWCommandDefinition implements Callable<Integer> {
         if (start) {
             cliManager.clientCommandManager().execute("start-attack");
         } else {
-            log.info("ServerWrecker is ready to go! Type 'start-attack' to start the attack! (Use --start to start automatically)");
+            log.info("SoulFire is ready to go! Type 'start-attack' to start the attack! (Use --start to start automatically)");
         }
 
         return 0;

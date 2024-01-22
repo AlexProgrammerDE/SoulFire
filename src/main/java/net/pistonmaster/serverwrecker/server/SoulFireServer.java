@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -37,11 +37,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
+import net.pistonmaster.serverwrecker.SoulFireBootstrap;
 import net.pistonmaster.serverwrecker.builddata.BuildData;
 import net.pistonmaster.serverwrecker.server.api.AttackState;
 import net.pistonmaster.serverwrecker.server.api.ServerExtension;
-import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.SoulFireAPI;
 import net.pistonmaster.serverwrecker.server.api.event.attack.AttackInitEvent;
 import net.pistonmaster.serverwrecker.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.server.data.ResourceData;
@@ -78,7 +78,7 @@ import java.util.concurrent.Executors;
 
 @Slf4j
 @Getter
-public class ServerWreckerServer {
+public class SoulFireServer {
     public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER;
     public static final Gson GENERAL_GSON = new Gson();
 
@@ -108,12 +108,12 @@ public class ServerWreckerServer {
     private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
     private final SecretKey jwtSecretKey;
 
-    public ServerWreckerServer(String host, int port) {
+    public SoulFireServer(String host, int port) {
         // Register into injector
-        injector.register(ServerWreckerServer.class, this);
+        injector.register(SoulFireServer.class, this);
 
         // Init API
-        ServerWreckerAPI.setServerWrecker(this);
+        SoulFireAPI.setSoulFire(this);
 
         injector.register(ShutdownManager.class, shutdownManager);
 
@@ -136,7 +136,7 @@ public class ServerWreckerServer {
             throw new RuntimeException(e);
         }
 
-        log.info("Starting ServerWrecker v{}...", BuildData.VERSION);
+        log.info("Starting SoulFire v{}...", BuildData.VERSION);
 
         // Override status packet, so we can support any version
         MinecraftCodec.CODEC.getCodec(ProtocolState.STATUS)
@@ -179,11 +179,11 @@ public class ServerWreckerServer {
         registerInternalServerExtensions();
         registerServerExtensions();
 
-        for (var serverExtension : ServerWreckerAPI.getServerExtensions()) {
+        for (var serverExtension : SoulFireAPI.getServerExtensions()) {
             serverExtension.onEnable(this);
         }
 
-        ServerWreckerAPI.postEvent(new SettingsRegistryInitEvent(settingsRegistry));
+        SoulFireAPI.postEvent(new SettingsRegistryInitEvent(settingsRegistry));
 
         log.info("Checking for updates...");
         outdated = checkForUpdates();
@@ -201,12 +201,12 @@ public class ServerWreckerServer {
                 new ForwardingBypass()
         );
 
-        plugins.forEach(ServerWreckerAPI::registerServerExtension);
+        plugins.forEach(SoulFireAPI::registerServerExtension);
     }
 
     private static void registerServerExtensions() {
-        ServerWreckerBootstrap.PLUGIN_MANAGER.getExtensions(ServerExtension.class)
-                .forEach(ServerWreckerAPI::registerServerExtension);
+        SoulFireBootstrap.PLUGIN_MANAGER.getExtensions(ServerExtension.class)
+                .forEach(SoulFireAPI::registerServerExtension);
     }
 
     private static boolean checkForUpdates() {
@@ -216,10 +216,10 @@ public class ServerWreckerServer {
         }
 
         try {
-            var url = URI.create("https://api.github.com/repos/AlexProgrammerDE/ServerWrecker/releases/latest").toURL();
+            var url = URI.create("https://api.github.com/repos/AlexProgrammerDE/SoulFire/releases/latest").toURL();
             var connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-            connection.setRequestProperty("User-Agent", "ServerWrecker");
+            connection.setRequestProperty("User-Agent", "SoulFire");
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
 
@@ -235,7 +235,7 @@ public class ServerWreckerServer {
 
             var latestVersion = response.get("tag_name").getAsString();
             if (VersionComparator.isNewer(BuildData.VERSION, latestVersion)) {
-                log.warn("ServerWrecker is outdated! Current version: {}, latest version: {}", BuildData.VERSION, latestVersion);
+                log.warn("SoulFire is outdated! Current version: {}, latest version: {}", BuildData.VERSION, latestVersion);
                 return true;
             }
         } catch (IOException e) {
@@ -248,7 +248,7 @@ public class ServerWreckerServer {
     @SuppressWarnings("UnstableApiUsage")
     public static void setupLoggingAndVia(SettingsHolder settingsHolder) {
         Via.getManager().debugHandler().setEnabled(settingsHolder.get(DevSettings.VIA_DEBUG));
-        ServerWreckerBootstrap.setupLogging(settingsHolder);
+        SoulFireBootstrap.setupLogging(settingsHolder);
     }
 
     public String generateAdminJWT() {
@@ -284,7 +284,7 @@ public class ServerWreckerServer {
 
     public int startAttack(SettingsHolder settingsHolder) {
         var attackManager = injector.newInstance(AttackManager.class);
-        ServerWreckerAPI.postEvent(new AttackInitEvent(attackManager));
+        SoulFireAPI.postEvent(new AttackInitEvent(attackManager));
 
         attacks.put(attackManager.id(), attackManager);
 

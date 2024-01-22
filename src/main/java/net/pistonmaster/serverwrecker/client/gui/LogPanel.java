@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -66,7 +66,7 @@ public class LogPanel extends JPanel {
         });
 
         var commands = new JTextField();
-        commands.putClientProperty("JTextField.placeholderText", "Type ServerWrecker commands here...");
+        commands.putClientProperty("JTextField.placeholderText", "Type SoulFire commands here...");
 
         putClientProperty("log-panel-command-input", commands);
 

@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -32,7 +32,7 @@ import net.pistonmaster.serverwrecker.account.service.SWOfflineAuthService;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.server.api.AttackState;
 import net.pistonmaster.serverwrecker.server.api.event.EventExceptionHandler;
-import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerAttackEvent;
+import net.pistonmaster.serverwrecker.server.api.event.SoulFireAttackEvent;
 import net.pistonmaster.serverwrecker.server.api.event.attack.AttackEndedEvent;
 import net.pistonmaster.serverwrecker.server.api.event.attack.AttackStartEvent;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
@@ -64,14 +64,14 @@ public class AttackManager {
     private final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator())
             .setExceptionHandler(EventExceptionHandler.INSTANCE)
             .setEventFilter((c, h) -> {
-                if (ServerWreckerAttackEvent.class.isAssignableFrom(c)) {
+                if (SoulFireAttackEvent.class.isAssignableFrom(c)) {
                     return true;
                 } else {
                     throw new IllegalStateException("This event handler only accepts attack events");
                 }
             });
     private final List<BotConnection> botConnections = new CopyOnWriteArrayList<>();
-    private final ServerWreckerServer serverWreckerServer;
+    private final SoulFireServer serverWreckerServer;
     @Setter
     private AttackState attackState = AttackState.STOPPED;
 
@@ -111,7 +111,7 @@ public class AttackManager {
                 .filter(SWProxy::enabled)
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        ServerWreckerServer.setupLoggingAndVia(settingsHolder);
+        SoulFireServer.setupLoggingAndVia(settingsHolder);
 
         this.attackState = AttackState.RUNNING;
 

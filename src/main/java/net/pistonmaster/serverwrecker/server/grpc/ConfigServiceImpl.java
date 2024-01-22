@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,12 +19,12 @@ package net.pistonmaster.serverwrecker.server.grpc;
 
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.serverwrecker.ServerWreckerBootstrap;
+import net.pistonmaster.serverwrecker.SoulFireBootstrap;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientPlugin;
 import net.pistonmaster.serverwrecker.grpc.generated.ConfigServiceGrpc;
 import net.pistonmaster.serverwrecker.grpc.generated.UIClientDataResponse;
-import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.server.SoulFireServer;
 import net.pistonmaster.serverwrecker.util.RPCConstants;
 
 import javax.inject.Inject;
@@ -33,11 +33,11 @@ import java.util.Collection;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
-    private final ServerWreckerServer serverWreckerServer;
+    private final SoulFireServer serverWreckerServer;
 
     private static Collection<ClientPlugin> getExtensions() {
         var plugins = new ArrayList<ClientPlugin>();
-        for (var pluginWrapper : ServerWreckerBootstrap.PLUGIN_MANAGER.getPlugins()) {
+        for (var pluginWrapper : SoulFireBootstrap.PLUGIN_MANAGER.getPlugins()) {
             var id = pluginWrapper.getPluginId();
             var description = pluginWrapper.getDescriptor().getPluginDescription();
             var version = pluginWrapper.getDescriptor().getVersion();

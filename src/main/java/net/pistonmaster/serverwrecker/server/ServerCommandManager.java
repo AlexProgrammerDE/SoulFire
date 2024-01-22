@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.serverwrecker.brigadier.CommandHelpWrapper;
 import net.pistonmaster.serverwrecker.brigadier.ConsoleSubject;
 import net.pistonmaster.serverwrecker.client.gui.LogPanel;
-import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.SoulFireAPI;
 import net.pistonmaster.serverwrecker.server.api.event.EventUtil;
 import net.pistonmaster.serverwrecker.server.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.serverwrecker.server.api.event.lifecycle.DispatcherInitEvent;
@@ -71,7 +71,7 @@ import static net.pistonmaster.serverwrecker.brigadier.BrigadierHelper.*;
 public class ServerCommandManager {
     @Getter
     private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
-    private final ServerWreckerServer serverWreckerServer;
+    private final SoulFireServer serverWreckerServer;
     private final List<Map.Entry<Instant, String>> commandHistory = Collections.synchronizedList(new ArrayList<>());
     private final Path targetFile = SWPathConstants.DATA_FOLDER.resolve(".command_history");
 
@@ -287,7 +287,7 @@ public class ServerCommandManager {
             return Command.SINGLE_SUCCESS;
         }))));
 
-        ServerWreckerAPI.postEvent(new DispatcherInitEvent(dispatcher));
+        SoulFireAPI.postEvent(new DispatcherInitEvent(dispatcher));
     }
 
     private int forEveryAttack(ToIntFunction<AttackManager> consumer) {

@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,6 +29,6 @@ public class SWPathConstants {
     public static final Path PROFILES_FOLDER = DATA_FOLDER.resolve("profiles");
 
     private static Path getApplicationDataFolder() {
-        return Path.of(AppDirsFactory.getInstance().getUserDataDir("ServerWrecker", null, null));
+        return Path.of(AppDirsFactory.getInstance().getUserDataDir("SoulFire", null, null));
     }
 }

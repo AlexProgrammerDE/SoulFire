@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ import java.util.Set;
  */
 public interface MixinExtension extends ExtensionPoint {
     /**
-     * This method is used to inject into ServerWrecker classes.
+     * This method is used to inject into SoulFire classes.
      *
      * @return A list of mixin paths.
      */

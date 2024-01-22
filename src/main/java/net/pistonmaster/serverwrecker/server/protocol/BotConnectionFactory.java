@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ import net.pistonmaster.serverwrecker.account.MinecraftAccount;
 import net.pistonmaster.serverwrecker.proxy.SWProxy;
 import net.pistonmaster.serverwrecker.server.AttackManager;
 import net.pistonmaster.serverwrecker.server.api.event.EventExceptionHandler;
-import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerBotEvent;
+import net.pistonmaster.serverwrecker.server.api.event.SoulFireBotEvent;
 import net.pistonmaster.serverwrecker.server.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.serverwrecker.server.protocol.bot.BotControlAPI;
 import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
@@ -50,11 +50,11 @@ public record BotConnectionFactory(AttackManager attackManager, ResolveUtil.Reso
         var meta = new BotConnectionMeta(minecraftAccount, targetState, proxyData);
         var session = new ViaClientSession(resolvedAddress.resolvedAddress(), logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
         var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.serverWreckerServer(),
-                settingsHolder, logger, protocol, session, resolvedAddress, new ExecutorManager("ServerWrecker-Attack-" + attackManager.id()), meta,
+                settingsHolder, logger, protocol, session, resolvedAddress, new ExecutorManager("SoulFire-Attack-" + attackManager.id()), meta,
                 LambdaManager.basic(new ASMGenerator())
                         .setExceptionHandler(EventExceptionHandler.INSTANCE)
                         .setEventFilter((c, h) -> {
-                            if (ServerWreckerBotEvent.class.isAssignableFrom(c)) {
+                            if (SoulFireBotEvent.class.isAssignableFrom(c)) {
                                 return true;
                             } else {
                                 throw new IllegalStateException("This event handler only accepts bot events");

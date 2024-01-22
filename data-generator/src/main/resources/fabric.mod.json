@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "serverwrecker-data-generator",
   "version": "${version}",
-  "name": "ServerWrecker Data Generator",
+  "name": "SoulFire Data Generator",
   "description": "",
   "authors": [
     "Archengius",

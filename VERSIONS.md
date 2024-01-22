@@ -1,11 +1,11 @@
 # Supported Versions
 
-ServerWrecker supports a wide range of Minecraft versions thanks to ViaVersion and many extensions.
-All versions that are supported by ViaVersion are supported by ServerWrecker, such
+SoulFire supports a wide range of Minecraft versions thanks to ViaVersion and many extensions.
+All versions that are supported by ViaVersion are supported by SoulFire, such
 as releases, april fools snapshots, beta, alpha and bedrock.
-ServerWrecker itself is always coded for the latest stable release of Minecraft, and all connections are
+SoulFire itself is always coded for the latest stable release of Minecraft, and all connections are
 downgraded/translated by ViaVersion.
-Below is a list of all versions that are supported by ServerWrecker.
+Below is a list of all versions that are supported by SoulFire.
 
 ## List of versions
 
@@ -95,5 +95,5 @@ Below is a list of all versions that are supported by ServerWrecker.
 ## How to generate this list
 
 ```bash
-java -jar ServerWrecker.jar --generate-versions
+java -jar SoulFire.jar --generate-versions
 ```

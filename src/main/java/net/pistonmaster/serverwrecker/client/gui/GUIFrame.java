@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ public class GUIFrame extends JFrame {
     private Runnable hintFocusListener;
 
     public GUIFrame() {
-        super("ServerWrecker " + BuildData.VERSION);
+        super("SoulFire " + BuildData.VERSION);
     }
 
     public static void showHints(Injector injector) {
@@ -138,8 +138,8 @@ public class GUIFrame extends JFrame {
         if (GUIClientProps.getBoolean("firstRun", true)) {
             var result = JOptionPane.showConfirmDialog(
                     this,
-                    "Is this your first time using ServerWrecker? If yes, we can help you to get started with a few hints. :D",
-                    "ServerWrecker First Run",
+                    "Is this your first time using SoulFire? If yes, we can help you to get started with a few hints. :D",
+                    "SoulFire First Run",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE
             );

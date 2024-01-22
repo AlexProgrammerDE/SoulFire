@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,9 +29,9 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.server.SoulFireServer;
 import net.pistonmaster.serverwrecker.server.api.PluginHelper;
-import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.SoulFireAPI;
 import net.pistonmaster.serverwrecker.server.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.serverwrecker.server.api.event.bot.SWPacketSendingEvent;
 import net.pistonmaster.serverwrecker.server.api.event.lifecycle.SettingsRegistryInitEvent;
@@ -149,7 +149,7 @@ public class ForwardingBypass implements InternalExtension {
 
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListeners(ForwardingBypass.class);
+        SoulFireAPI.registerListeners(ForwardingBypass.class);
         PluginHelper.registerBotEventConsumer(SWPacketSendingEvent.class, this::onPacket);
         PluginHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, this::onPacketReceive);
     }
@@ -224,7 +224,7 @@ public class ForwardingBypass implements InternalExtension {
                 .append(LEGACY_FORWARDING_SEPARATOR)
                 .append(UUIDHelper.convertToNoDashes(botUniqueId))
                 .append(LEGACY_FORWARDING_SEPARATOR);
-        ServerWreckerServer.GENERAL_GSON
+        SoulFireServer.GENERAL_GSON
                 .toJson(propertiesTransform.apply(List.of()), data);
         return data.toString();
     }

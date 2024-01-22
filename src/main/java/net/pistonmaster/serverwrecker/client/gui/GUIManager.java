@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -118,7 +118,7 @@ public class GUIManager {
                     .privateLookupIn(xToolkit.getClass(), MethodHandles.lookup())
                     .findStaticVarHandle(xToolkit.getClass(), "awtAppClassName", String.class);
 
-            CLASS_NAME_VARIABLE.set("ServerWrecker");
+            CLASS_NAME_VARIABLE.set("SoulFire");
         } catch (Exception e) {
             log.error("Failed to set app title!", e);
         }

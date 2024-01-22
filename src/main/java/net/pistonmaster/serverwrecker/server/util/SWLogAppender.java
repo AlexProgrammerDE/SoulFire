@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  */
 package net.pistonmaster.serverwrecker.server.util;
 
-import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.SoulFireAPI;
 import net.pistonmaster.serverwrecker.server.api.event.system.SystemLogEvent;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
@@ -56,6 +56,6 @@ public class SWLogAppender extends AbstractAppender {
             return;
         }
 
-        ServerWreckerAPI.postEvent(new SystemLogEvent(formatted));
+        SoulFireAPI.postEvent(new SystemLogEvent(formatted));
     }
 }

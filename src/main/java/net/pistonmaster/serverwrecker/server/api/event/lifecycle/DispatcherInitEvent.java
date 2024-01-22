@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@ package net.pistonmaster.serverwrecker.server.api.event.lifecycle;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.pistonmaster.serverwrecker.brigadier.ConsoleSubject;
-import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerGlobalEvent;
+import net.pistonmaster.serverwrecker.server.api.event.SoulFireGlobalEvent;
 
 /**
  * Add yourself to the command dispatcher to add custom commands.
@@ -28,5 +28,5 @@ import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerGlobalEvent;
  * @param commandDispatcher The command dispatcher.
  */
 public record DispatcherInitEvent(
-        CommandDispatcher<ConsoleSubject> commandDispatcher) implements ServerWreckerGlobalEvent {
+        CommandDispatcher<ConsoleSubject> commandDispatcher) implements SoulFireGlobalEvent {
 }

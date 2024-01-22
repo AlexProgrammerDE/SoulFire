@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 package net.pistonmaster.serverwrecker.server.api.event.bot;
 
 import net.kyori.adventure.text.Component;
-import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
-import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerBotEvent;
+import net.pistonmaster.serverwrecker.server.SoulFireServer;
+import net.pistonmaster.serverwrecker.server.api.event.SoulFireBotEvent;
 import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
 
 /**
@@ -28,8 +28,8 @@ import net.pistonmaster.serverwrecker.server.protocol.BotConnection;
  * @param connection The bot connection instance.
  * @param message    The message that was received.
  */
-public record ChatMessageReceiveEvent(BotConnection connection, Component message) implements ServerWreckerBotEvent {
+public record ChatMessageReceiveEvent(BotConnection connection, Component message) implements SoulFireBotEvent {
     public String parseToText() {
-        return ServerWreckerServer.PLAIN_MESSAGE_SERIALIZER.serialize(message);
+        return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(message);
     }
 }

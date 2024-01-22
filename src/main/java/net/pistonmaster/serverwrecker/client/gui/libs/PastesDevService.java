@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -42,7 +42,7 @@ public class PastesDevService {
         var headers = new ArrayList<Header>();
         headers.add(new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType()));
         headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en"));
-        headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "ServerWrecker/" + BuildData.VERSION));
+        headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "SoulFire/" + BuildData.VERSION));
 
         return HttpHelper.createHttpClient(headers, null);
     }

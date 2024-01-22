@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -72,7 +72,7 @@ public class ThemeUtil {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
 
             // Set name in top menu bar
-            System.setProperty("apple.awt.application.name", "ServerWrecker");
+            System.setProperty("apple.awt.application.name", "SoulFire");
 
             // Color the frame
             System.setProperty("apple.awt.application.appearance", "system");

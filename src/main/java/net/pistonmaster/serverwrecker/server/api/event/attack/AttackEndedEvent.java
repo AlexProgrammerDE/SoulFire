@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 package net.pistonmaster.serverwrecker.server.api.event.attack;
 
 import net.pistonmaster.serverwrecker.server.AttackManager;
-import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerAttackEvent;
+import net.pistonmaster.serverwrecker.server.api.event.SoulFireAttackEvent;
 
-public record AttackEndedEvent(AttackManager attackManager) implements ServerWreckerAttackEvent {
+public record AttackEndedEvent(AttackManager attackManager) implements SoulFireAttackEvent {
 }

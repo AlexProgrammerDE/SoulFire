@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,14 +20,14 @@ package net.pistonmaster.serverwrecker;
 import net.pistonmaster.serverwrecker.client.cli.CLIManager;
 import net.pistonmaster.serverwrecker.client.grpc.RPCClient;
 import net.pistonmaster.serverwrecker.client.gui.GUIManager;
-import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.server.SoulFireServer;
 
-public class ServerWreckerLoader {
-    private ServerWreckerLoader() {
+public class SoulFireLoader {
+    private SoulFireLoader() {
     }
 
     public static void runHeadless(String host, int port, String[] args) {
-        var serverWrecker = new ServerWreckerServer(host, port);
+        var serverWrecker = new SoulFireServer(host, port);
 
         var rpcClient = new RPCClient(host, port, serverWrecker.generateLocalCliJWT());
         var cliManager = new CLIManager(rpcClient);
@@ -35,7 +35,7 @@ public class ServerWreckerLoader {
     }
 
     public static void runGUI(String host, int port) {
-        var serverWrecker = new ServerWreckerServer(host, port);
+        var serverWrecker = new SoulFireServer(host, port);
 
         var rpcClient = new RPCClient(host, port, serverWrecker.generateAdminJWT());
         var guiManager = new GUIManager(rpcClient);

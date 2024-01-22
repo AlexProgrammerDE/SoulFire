@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,5 @@
  */
 package net.pistonmaster.serverwrecker.server.api.event;
 
-/**
- * Represents events that are on a global software level.
- * No attack/bot specific events should be a part of this.
- */
-public non-sealed interface ServerWreckerGlobalEvent extends ServerWreckerEvent {
+public sealed interface SoulFireEvent permits SoulFireGlobalEvent, SoulFireAttackEvent, SoulFireBotEvent {
 }

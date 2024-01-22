@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,13 +21,13 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.serverwrecker.client.settings.SettingsManager;
 import net.pistonmaster.serverwrecker.grpc.generated.*;
-import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.server.SoulFireServer;
 
 import javax.inject.Inject;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
-    private final ServerWreckerServer serverWreckerServer;
+    private final SoulFireServer serverWreckerServer;
 
     @Override
     public void startAttack(AttackStartRequest request, StreamObserver<AttackStartResponse> responseObserver) {

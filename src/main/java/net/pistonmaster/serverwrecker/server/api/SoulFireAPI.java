@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,10 +19,10 @@ package net.pistonmaster.serverwrecker.server.api;
 
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
-import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.server.SoulFireServer;
 import net.pistonmaster.serverwrecker.server.api.event.EventExceptionHandler;
 import net.pistonmaster.serverwrecker.server.api.event.EventUtil;
-import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerGlobalEvent;
+import net.pistonmaster.serverwrecker.server.api.event.SoulFireGlobalEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,50 +30,50 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class ServerWreckerAPI {
+public class SoulFireAPI {
     private static final LambdaManager EVENT_BUS = LambdaManager.basic(new ASMGenerator())
             .setExceptionHandler(EventExceptionHandler.INSTANCE)
             .setEventFilter((c, h) -> {
-                if (ServerWreckerGlobalEvent.class.isAssignableFrom(c)) {
+                if (SoulFireGlobalEvent.class.isAssignableFrom(c)) {
                     return true;
                 } else {
                     throw new IllegalStateException("This event handler only accepts global events");
                 }
             });
     private static final List<ServerExtension> SERVER_EXTENSIONS = new ArrayList<>();
-    private static ServerWreckerServer serverWreckerServer;
+    private static SoulFireServer serverWreckerServer;
 
-    private ServerWreckerAPI() {
+    private SoulFireAPI() {
     }
 
     /**
-     * Get the current ServerWrecker instance for access to internals.
+     * Get the current SoulFire instance for access to internals.
      *
-     * @return The current ServerWrecker instance.
+     * @return The current SoulFire instance.
      */
-    public static ServerWreckerServer getServerWrecker() {
-        Objects.requireNonNull(serverWreckerServer, "ServerWreckerAPI not initialized yet!");
+    public static SoulFireServer getSoulFire() {
+        Objects.requireNonNull(serverWreckerServer, "SoulFireAPI not initialized yet!");
         return serverWreckerServer;
     }
 
     /**
-     * Internal method to set the current ServerWrecker instance.
+     * Internal method to set the current SoulFire instance.
      *
-     * @param serverWreckerServer The current ServerWrecker instance.
+     * @param serverWreckerServer The current SoulFire instance.
      */
-    public static void setServerWrecker(ServerWreckerServer serverWreckerServer) {
-        if (ServerWreckerAPI.serverWreckerServer != null) {
-            throw new IllegalStateException("ServerWreckerAPI already initialized!");
+    public static void setSoulFire(SoulFireServer serverWreckerServer) {
+        if (SoulFireAPI.serverWreckerServer != null) {
+            throw new IllegalStateException("SoulFireAPI already initialized!");
         }
 
-        ServerWreckerAPI.serverWreckerServer = serverWreckerServer;
+        SoulFireAPI.serverWreckerServer = serverWreckerServer;
     }
 
-    public static void postEvent(ServerWreckerGlobalEvent event) {
+    public static void postEvent(SoulFireGlobalEvent event) {
         EVENT_BUS.call(event);
     }
 
-    public static <T extends ServerWreckerGlobalEvent> void registerListener(Class<T> clazz, Consumer<? super T> subscriber) {
+    public static <T extends SoulFireGlobalEvent> void registerListener(Class<T> clazz, Consumer<? super T> subscriber) {
         EventUtil.runAndAssertChanged(EVENT_BUS, () -> EVENT_BUS.registerConsumer(subscriber, clazz));
     }
 

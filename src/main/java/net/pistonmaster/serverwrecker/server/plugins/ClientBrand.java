@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.serverwrecker.server.api.PluginHelper;
-import net.pistonmaster.serverwrecker.server.api.ServerWreckerAPI;
+import net.pistonmaster.serverwrecker.server.api.SoulFireAPI;
 import net.pistonmaster.serverwrecker.server.api.event.bot.SWPacketSentEvent;
 import net.pistonmaster.serverwrecker.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.serverwrecker.server.settings.lib.SettingsObject;
@@ -61,7 +61,7 @@ public class ClientBrand implements InternalExtension {
 
     @Override
     public void onLoad() {
-        ServerWreckerAPI.registerListeners(ClientBrand.class);
+        SoulFireAPI.registerListeners(ClientBrand.class);
         PluginHelper.registerBotEventConsumer(SWPacketSentEvent.class, ClientBrand::onPacket);
     }
 

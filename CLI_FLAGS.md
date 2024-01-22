@@ -52,7 +52,7 @@
 | `--register-command`             | `/register %password% %password%` | Command to be executed to register                                                        |
 | `--login-command`                | `/login %password%`               | Command to be executed to log in                                                          |
 | `--captcha-command`              | `/captcha %captcha%`              | Command to be executed to confirm a captcha                                               |
-| `--password-format`              | `ServerWrecker`                   | The password for registering                                                              |
+| `--password-format`              | `SoulFire`                   | The password for registering                                                              |
 | `--auto-respawn`                 | `true`                            | Respawn automatically after death                                                         |
 | `--respawn-min-delay`            | `1`                               | Minimum delay between respawns                                                            |
 | `--respawn-max-delay`            | `3`                               | Maximum delay between respawns                                                            |
@@ -80,11 +80,11 @@
 ## Example usage
 
 ```bash
-java -jar ServerWrecker.jar --host 127.0.0.1 --port 25565 --amount 100 --mc-version 1.20 --min-join-delay 1000 --max-join-delay 3000
+java -jar SoulFire.jar --host 127.0.0.1 --port 25565 --amount 100 --mc-version 1.20 --min-join-delay 1000 --max-join-delay 3000
 ```
 
 ## How to generate this list
 
 ```bash
-java -jar ServerWrecker.jar --generate-flags
+java -jar SoulFire.jar --generate-flags
 ```

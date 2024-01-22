@@ -1,19 +1,19 @@
-# ServerWrecker
+# SoulFire
 
 <!--suppress HtmlDeprecatedAttribute -->
 <p align="center">
-<a href="https://ci.codemc.io/job/AlexProgrammerDE/job/ServerWrecker/"><img src="https://ci.codemc.io/job/AlexProgrammerDE/job/ServerWrecker/badge/icon" alt="Build Status"></a>
-<a href="https://github.com/AlexProgrammerDE/ServerWrecker/actions/workflows/build.yml"><img src="https://github.com/AlexProgrammerDE/ServerWrecker/actions/workflows/build.yml/badge.svg?branch=main" alt="Java CI"></a>
-<a href="https://github.com/AlexProgrammerDE/ServerWrecker/graphs/contributors"><img src="https://img.shields.io/github/contributors/AlexProgrammerDE/ServerWrecker.svg" alt="Contributors"></a>
-<a href="https://github.com/AlexProgrammerDE/ServerWrecker/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AlexProgrammerDE/ServerWrecker.svg" alt="License"></a>
-<a href="https://github.com/AlexProgrammerDE/ServerWrecker/releases/latest"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/AlexProgrammerDE/ServerWrecker/total"></a>
-<a href="https://github.com/AlexProgrammerDE/ServerWrecker/releases/latest"><img src="https://img.shields.io/github/release/AlexProgrammerDE/ServerWrecker.svg" alt="Current Release"></a>
+<a href="https://ci.codemc.io/job/AlexProgrammerDE/job/SoulFire/"><img src="https://ci.codemc.io/job/AlexProgrammerDE/job/SoulFire/badge/icon" alt="Build Status"></a>
+<a href="https://github.com/AlexProgrammerDE/SoulFire/actions/workflows/build.yml"><img src="https://github.com/AlexProgrammerDE/SoulFire/actions/workflows/build.yml/badge.svg?branch=main" alt="Java CI"></a>
+<a href="https://github.com/AlexProgrammerDE/SoulFire/graphs/contributors"><img src="https://img.shields.io/github/contributors/AlexProgrammerDE/SoulFire.svg" alt="Contributors"></a>
+<a href="https://github.com/AlexProgrammerDE/SoulFire/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AlexProgrammerDE/SoulFire.svg" alt="License"></a>
+<a href="https://github.com/AlexProgrammerDE/SoulFire/releases/latest"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/AlexProgrammerDE/SoulFire/total"></a>
+<a href="https://github.com/AlexProgrammerDE/SoulFire/releases/latest"><img src="https://img.shields.io/github/release/AlexProgrammerDE/SoulFire.svg" alt="Current Release"></a>
 </p>
 <p align="center"><a href="https://discord.gg/vHgRd6YZmH"><img src="https://discordapp.com/api/guilds/739784741124833301/embed.png" alt="Discord embed"></a></p>
 
 <p align="center">
-<a href="https://github.com/AlexProgrammerDE/ServerWrecker/releases/latest"><img src="https://img.shields.io/badge/DOWNLOAD-LATEST-success?style=for-the-badge" alt="download badge"></a>
-<a href="https://nightly.link/AlexProgrammerDE/ServerWrecker/workflows/build/main/ServerWrecker.zip"><img src="https://img.shields.io/badge/DOWNLOAD-DEV__BUILD-important?style=for-the-badge" alt="download2 badge"></a>
+<a href="https://github.com/AlexProgrammerDE/SoulFire/releases/latest"><img src="https://img.shields.io/badge/DOWNLOAD-LATEST-success?style=for-the-badge" alt="download badge"></a>
+<a href="https://nightly.link/AlexProgrammerDE/SoulFire/workflows/build/main/SoulFire.zip"><img src="https://img.shields.io/badge/DOWNLOAD-DEV__BUILD-important?style=for-the-badge" alt="download2 badge"></a>
 </p>
 
 Advanced Minecraft Server-Stresser Tool. Launch bot attacks on your own servers to stress-test them and measure
@@ -22,7 +22,7 @@ performance.
 ---
 
 > [!WARNING]
-> This is a very powerful tool that shall only be used to attack your own servers. Ensure your own DDoS protection provider and your host are okay with stress-tests. If you use this software to attack others, you make yourself (or your legal guardians) criminally liable, the developers of ServerWrecker are not responsible for your own actions.
+> This is a very powerful tool that shall only be used to attack your own servers. Ensure your own DDoS protection provider and your host are okay with stress-tests. If you use this software to attack others, you make yourself (or your legal guardians) criminally liable, the developers of SoulFire are not responsible for your own actions.
 
 ---
 
@@ -41,8 +41,8 @@ performance.
 
 ## ✨ Nightly builds
 
-You can download the latest development version of ServerWrecker
-through [nightly.link](https://nightly.link/AlexProgrammerDE/ServerWrecker/workflows/build/main/ServerWrecker.zip).
+You can download the latest development version of SoulFire
+through [nightly.link](https://nightly.link/AlexProgrammerDE/SoulFire/workflows/build/main/SoulFire.zip).
 
 ## 🔭 Requirements
 
@@ -51,7 +51,7 @@ through [nightly.link](https://nightly.link/AlexProgrammerDE/ServerWrecker/workf
 
 ## 🍿 Version support
 
-ServerWrecker supports many version of Minecraft, including releases, april fools snapshots, beta, alpha, classic (including [CPE](https://wiki.vg/Classic_Protocol_Extension)) and even Minecraft Bedrock edition,
+SoulFire supports many version of Minecraft, including releases, april fools snapshots, beta, alpha, classic (including [CPE](https://wiki.vg/Classic_Protocol_Extension)) and even Minecraft Bedrock edition,
 and that includes every single subversion, not just a few specific versions.
 
 You can find a up-to-date list of supported versions in [VERSIONS.md](./VERSIONS.md).
@@ -60,7 +60,7 @@ You can find a up-to-date list of supported versions in [VERSIONS.md](./VERSIONS
 
 Thanks to a built-in implementation of [ViaVersion](https://github.com/ViaVersion/ViaVersion),
 [ViaLegacy](https://github.com/RaphiMC/ViaLegacy), [ViaBedrock](https://github.com/RaphiMC/ViaBedrock) and many others,
-a ServerWrecker bot can connect to all these versions even without the server having ViaVersion installed.
+a SoulFire bot can connect to all these versions even without the server having ViaVersion installed.
 The packet translation happens "client/bot side".
 This feature takes inspiration from services like [VIAaaS](https://github.com/ViaVersion/VIAaaS)
 and [ViaProxy](https://github.com/RaphiMC/ViaProxy),
@@ -68,7 +68,7 @@ which include client-side translation externally.
 
 ## 🎬 Videos
 
-[Download & install ServerWrecker](https://youtu.be/X9hREa17yAo)
+[Download & install SoulFire](https://youtu.be/X9hREa17yAo)
 
 ## ⌨ Commands
 
@@ -105,9 +105,9 @@ Useful for bypassing anti-bot plugins that check for client settings.
 
 ### Accounts
 
-ServerWrecker supports Microsoft, The Altening and Offline accounts.
+SoulFire supports Microsoft, The Altening and Offline accounts.
 
-If no account is selected, ServerWrecker will generate offline accounts based on the configured name format.
+If no account is selected, SoulFire will generate offline accounts based on the configured name format.
 
 Select the account type in the GUI or CLI and use one of these formats with one account per line:
 
@@ -137,7 +137,7 @@ Username3
 
 ### Proxies
 
-ServerWrecker supports HTTP, SOCKS4 and SOCKS5 proxies.
+SoulFire supports HTTP, SOCKS4 and SOCKS5 proxies.
 
 Select the proxy type in the GUI or CLI and use one of these formats with one proxy per line:
 
@@ -164,18 +164,18 @@ ip:port:username:password <- authentication
 
 ## 🧵 Demo
 
-ServerWrecker has a built-in GUI for easy usage.
+SoulFire has a built-in GUI for easy usage.
 ![GUI](./assets/demo.png)
 
 ## 💻 Command Line Usage
 
-To run ServerWrecker from the command line without a GUI, enter:
-`java -jar ServerWrecker.jar <flags>`
+To run SoulFire from the command line without a GUI, enter:
+`java -jar SoulFire.jar <flags>`
 
 > **Note:** Some features are not available in CLI mode, we recommend using the GUI.
 
 For a list of all available CLI flags, look at [CLI_FLAGS.md](./CLI_FLAGS.md)
-or run `java -jar ServerWrecker.jar --help`.
+or run `java -jar SoulFire.jar --help`.
 
 ## 🔧 Build from source
 
@@ -186,10 +186,10 @@ or run `java -jar ServerWrecker.jar --help`.
 
 ## 👨‍💻 Developer API
 
-ServerWrecker offers a Developer API to create your own plugins using the plugin API and mixins.
-The software may regularly have breaking changes, so you'll have to stick to a version of ServerWrecker or update your plugin regularly.
+SoulFire offers a Developer API to create your own plugins using the plugin API and mixins.
+The software may regularly have breaking changes, so you'll have to stick to a version of SoulFire or update your plugin regularly.
 
-To learn more about the Developer API, take a look at the official [plugin example](https://github.com/AlexProgrammerDE/ServerWreckerPluginExample).
+To learn more about the Developer API, take a look at the official [plugin example](https://github.com/AlexProgrammerDE/SoulFirePluginExample).
 
 ## 🌈 Community
 
@@ -202,11 +202,11 @@ PRs are welcome, too.
 
 ## 🌟 Star History
 
-<a href="https://star-history.com/#AlexProgrammerDE/ServerWrecker&Date">
+<a href="https://star-history.com/#AlexProgrammerDE/SoulFire&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=AlexProgrammerDE/ServerWrecker&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=AlexProgrammerDE/ServerWrecker&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=AlexProgrammerDE/ServerWrecker&type=Date" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=AlexProgrammerDE/SoulFire&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=AlexProgrammerDE/SoulFire&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=AlexProgrammerDE/SoulFire&type=Date" />
   </picture>
 </a>
 

@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,17 +17,17 @@
  */
 package net.pistonmaster.serverwrecker.server.api;
 
-import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.server.SoulFireServer;
 import org.pf4j.ExtensionPoint;
 
 /**
- * This interface loads only when the JVM is running as a ServerWrecker server.
+ * This interface loads only when the JVM is running as a SoulFire server.
  * Therefore, you can also use this to load server-only classes.
  */
 public interface ServerExtension extends ExtensionPoint {
     default void onLoad() {
     }
 
-    default void onEnable(ServerWreckerServer serverWreckerServer) {
+    default void onEnable(SoulFireServer serverWreckerServer) {
     }
 }

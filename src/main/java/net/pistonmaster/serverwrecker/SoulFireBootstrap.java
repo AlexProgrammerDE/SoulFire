@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -48,7 +48,7 @@ import java.util.List;
  * setting up logging.
  */
 @Slf4j
-public class ServerWreckerBootstrap {
+public class SoulFireBootstrap {
     public static final PluginManager PLUGIN_MANAGER = new JarPluginManager(SWPathConstants.PLUGINS_FOLDER);
 
     static {
@@ -67,7 +67,7 @@ public class ServerWreckerBootstrap {
         }
     }
 
-    private ServerWreckerBootstrap() {
+    private SoulFireBootstrap() {
     }
 
     @SuppressWarnings("unused")
@@ -98,7 +98,7 @@ public class ServerWreckerBootstrap {
         });
 
         var classLoaders = new ArrayList<ClassLoader>();
-        classLoaders.add(ServerWreckerBootstrap.class.getClassLoader());
+        classLoaders.add(SoulFireBootstrap.class.getClassLoader());
         PLUGIN_MANAGER.getPlugins().forEach(pluginWrapper ->
                 classLoaders.add(pluginWrapper.getPluginClassLoader()));
 
@@ -123,13 +123,13 @@ public class ServerWreckerBootstrap {
         var port = getAvailablePort();
         if (runServer) {
             log.info("Starting server on {}:{}", host, port);
-            ServerWreckerLoader.runHeadless(host, port, args);
+            SoulFireLoader.runHeadless(host, port, args);
         } else {
             log.info("Starting GUI and server on {}:{}", host, port);
             GUIManager.injectTheme();
             GUIManager.loadGUIProperties();
 
-            ServerWreckerLoader.runGUI(host, port);
+            SoulFireLoader.runGUI(host, port);
         }
     }
 

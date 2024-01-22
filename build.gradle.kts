@@ -15,10 +15,10 @@ allprojects {
     description = "Advanced Minecraft Server-Stresser Tool."
 }
 
-var mainClassString = "net.pistonmaster.serverwrecker.launcher.ServerWreckerJava8Launcher"
+var mainClassString = "net.pistonmaster.serverwrecker.launcher.SoulFireJava8Launcher"
 
 application {
-    applicationName = "ServerWrecker"
+    applicationName = "SoulFire"
     mainClass = mainClassString
 }
 
@@ -36,10 +36,10 @@ tasks {
         onlyIf { false }
     }
     withType<ShadowJar> {
-        archiveBaseName = "ServerWrecker"
+        archiveBaseName = "SoulFire"
     }
     jar {
-        archiveBaseName = "ServerWrecker"
+        archiveBaseName = "SoulFire"
     }
 }
 

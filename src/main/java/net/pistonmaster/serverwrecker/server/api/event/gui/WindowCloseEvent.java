@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 package net.pistonmaster.serverwrecker.server.api.event.gui;
 
 import net.pistonmaster.serverwrecker.server.api.event.AbstractCancellable;
-import net.pistonmaster.serverwrecker.server.api.event.ServerWreckerGlobalEvent;
+import net.pistonmaster.serverwrecker.server.api.event.SoulFireGlobalEvent;
 
-public class WindowCloseEvent extends AbstractCancellable implements ServerWreckerGlobalEvent {
+public class WindowCloseEvent extends AbstractCancellable implements SoulFireGlobalEvent {
 }

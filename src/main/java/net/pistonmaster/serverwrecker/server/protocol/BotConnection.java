@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.pistonmaster.serverwrecker.server.AttackManager;
-import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.server.SoulFireServer;
 import net.pistonmaster.serverwrecker.server.api.event.attack.PreBotConnectEvent;
 import net.pistonmaster.serverwrecker.server.protocol.bot.BotControlAPI;
 import net.pistonmaster.serverwrecker.server.protocol.bot.SessionDataManager;
@@ -36,7 +36,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public record BotConnection(UUID connectionId, BotConnectionFactory factory, AttackManager attackManager,
-                            ServerWreckerServer serverWreckerServer, SettingsHolder settingsHolder,
+                            SoulFireServer serverWreckerServer, SettingsHolder settingsHolder,
                             Logger logger, MinecraftProtocol protocol, ViaClientSession session,
                             ResolveUtil.ResolvedAddress resolvedAddress,
                             ExecutorManager executorManager, BotConnectionMeta meta,

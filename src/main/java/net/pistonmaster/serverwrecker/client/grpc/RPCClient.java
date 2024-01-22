@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -44,7 +44,7 @@ public class RPCClient {
 
     public RPCClient(String host, int port, String jwt) {
         this(new JwtCredential(jwt), Grpc.newChannelBuilderForAddress(host, port, InsecureChannelCredentials.create())
-                .userAgent("ServerWreckerJavaClient/" + BuildData.VERSION).build());
+                .userAgent("SoulFireJavaClient/" + BuildData.VERSION).build());
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("*** shutting down gRPC client since JVM is shutting down");
             try {

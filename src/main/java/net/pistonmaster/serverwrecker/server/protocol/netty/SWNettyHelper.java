@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -72,7 +72,7 @@ public class SWNettyHelper {
     }
 
     public static EventLoopGroup createEventLoopGroup(int threads, String name) {
-        ThreadFactory threadFactory = r -> new Thread(r, "ServerWrecker-" + name);
+        ThreadFactory threadFactory = r -> new Thread(r, "SoulFire-" + name);
         EventLoopGroup group = switch (TransportHelper.determineTransportMethod()) {
             case IO_URING -> new IOUringEventLoopGroup(threads, threadFactory);
             case EPOLL -> new EpollEventLoopGroup(threads, threadFactory);

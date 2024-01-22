@@ -1,5 +1,5 @@
 /*
- * ServerWrecker
+ * SoulFire
  * Copyright (C) 2024  AlexProgrammerDE
  *
  * This program is free software: you can redistribute it and/or modify
@@ -66,7 +66,7 @@ import lombok.Getter;
 import lombok.ToString;
 import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.pistonmaster.serverwrecker.server.ServerWreckerServer;
+import net.pistonmaster.serverwrecker.server.SoulFireServer;
 import net.pistonmaster.serverwrecker.server.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.serverwrecker.server.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.serverwrecker.server.api.event.bot.BotPreTickEvent;
@@ -102,7 +102,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class SessionDataManager {
     private final SettingsHolder settingsHolder;
     private final Logger log;
-    private final ServerWreckerServer serverWreckerServer;
+    private final SoulFireServer serverWreckerServer;
     private final ViaClientSession session;
     private final BotConnection connection;
     private final WeatherState weatherState = new WeatherState();
@@ -951,7 +951,7 @@ public final class SessionDataManager {
     }
 
     private String toPlainText(Component component) {
-        return ServerWreckerServer.PLAIN_MESSAGE_SERIALIZER.serialize(component);
+        return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(component);
     }
 
     public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {
