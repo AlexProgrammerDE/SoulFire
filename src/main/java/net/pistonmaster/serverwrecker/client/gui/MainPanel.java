@@ -29,18 +29,17 @@ import java.awt.*;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MainPanel extends JPanel {
     private final Injector injector;
-    private final CardsContainer cardsContainer;
 
     @PostConstruct
     public void postConstruct() {
         injector.register(MainPanel.class, this);
 
-        JPanel logPanel = injector.getSingleton(LogPanel.class);
-        cardsContainer.create();
-
         setLayout(new GridLayout(1, 1));
 
+        var cardsContainer = injector.newInstance(CardsContainer.class);
         cardsContainer.setMinimumSize(new Dimension(600, 0));
+
+        var logPanel = injector.getSingleton(LogPanel.class);
         logPanel.setMinimumSize(new Dimension(600, 0));
 
         cardsContainer.setPreferredSize(new Dimension(600,

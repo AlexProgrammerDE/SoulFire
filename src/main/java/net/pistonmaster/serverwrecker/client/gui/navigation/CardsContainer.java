@@ -25,6 +25,7 @@ import net.pistonmaster.serverwrecker.grpc.generated.ClientDataRequest;
 import net.pistonmaster.serverwrecker.grpc.generated.ClientPluginSettingsPage;
 import net.pistonmaster.serverwrecker.util.BuiltinSettingsConstants;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
@@ -41,7 +42,10 @@ public class CardsContainer extends JPanel {
     private final List<ClientPluginSettingsPage> pluginPages = new ArrayList<>();
     private final CardLayout cardLayout = new CardLayout();
 
-    public void create() {
+    @PostConstruct
+    public void postConstruct() {
+        injector.register(CardsContainer.class, this);
+
         setLayout(cardLayout);
         setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));
 
