@@ -7,5 +7,7 @@ dependencies {
 }
 
 java {
-    javaTarget(8)
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
 }

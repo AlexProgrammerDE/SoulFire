@@ -22,32 +22,6 @@ application {
     mainClass = mainClassString
 }
 
-tasks {
-    distTar {
-        onlyIf { false }
-    }
-    distZip {
-        onlyIf { false }
-    }
-    shadowDistTar {
-        onlyIf { false }
-    }
-    shadowDistZip {
-        onlyIf { false }
-    }
-    withType<ShadowJar> {
-        archiveBaseName = "SoulFire"
-    }
-    jar {
-        archiveBaseName = "SoulFire"
-    }
-}
-
-// So the run task doesn't get marked as up-to-date, ever.
-tasks.run.get().apply {
-    outputs.upToDateWhen { false }
-}
-
 dependencies {
     implementation(projects.buildData)
 
@@ -159,17 +133,6 @@ dependencies {
     implementation(libs.protobuf.util)
 }
 
-val repoName = if (version.toString().endsWith("SNAPSHOT")) "maven-snapshots" else "maven-releases"
-publishing {
-    repositories {
-        maven("https://repo.codemc.org/repository/${repoName}/") {
-            credentials.username = System.getenv("CODEMC_USERNAME")
-            credentials.password = System.getenv("CODEMC_PASSWORD")
-            name = "codemc"
-        }
-    }
-}
-
 protobuf {
     protoc {
         artifact = "com.google.protobuf:protoc:${libs.versions.protoc.get()}"
@@ -189,6 +152,56 @@ protobuf {
     }
 }
 
+tasks {
+    distTar {
+        onlyIf { false }
+    }
+    distZip {
+        onlyIf { false }
+    }
+    shadowDistTar {
+        onlyIf { false }
+    }
+    shadowDistZip {
+        onlyIf { false }
+    }
+    // So the run task doesn't get marked as up-to-date, ever.
+    run.get().apply {
+        outputs.upToDateWhen { false }
+    }
+    withType<Checkstyle> {
+        exclude("**/net/pistonmaster/soulfire/data**")
+        exclude("**/net/pistonmaster/soulfire/grpc/generated**")
+    }
+    jar {
+        archiveBaseName = "SoulFire"
+        manifest {
+            attributes["Main-Class"] = mainClassString
+        }
+    }
+    shadowJar {
+        archiveBaseName = "SoulFire"
+        excludes.addAll(
+            setOf(
+                "META-INF/*.DSA",
+                "META-INF/*.RSA",
+                "META-INF/*.SF",
+                "META-INF/sponge_plugins.json",
+                "plugin.yml",
+                "bungee.yml",
+                "fabric.mod.json",
+                "velocity-plugin.json"
+            )
+        )
+    }
+}
+
+jmh {
+    warmupIterations = 2
+    iterations = 2
+    fork = 2
+}
+
 idea {
     module {
         generatedSourceDirs.addAll(
@@ -200,34 +213,13 @@ idea {
     }
 }
 
-tasks.withType<Checkstyle> {
-    exclude("**/net/pistonmaster/soulfire/data**")
-    exclude("**/net/pistonmaster/soulfire/grpc/generated**")
-}
-
-tasks.named<Jar>("jar") {
-    manifest {
-        attributes["Main-Class"] = mainClassString
+val repoName = if (version.toString().endsWith("SNAPSHOT")) "maven-snapshots" else "maven-releases"
+publishing {
+    repositories {
+        maven("https://repo.codemc.org/repository/${repoName}/") {
+            credentials.username = System.getenv("CODEMC_USERNAME")
+            credentials.password = System.getenv("CODEMC_PASSWORD")
+            name = "codemc"
+        }
     }
-}
-
-tasks.named<ShadowJar>("shadowJar") {
-    excludes.addAll(
-        setOf(
-            "META-INF/*.DSA",
-            "META-INF/*.RSA",
-            "META-INF/*.SF",
-            "META-INF/sponge_plugins.json",
-            "plugin.yml",
-            "bungee.yml",
-            "fabric.mod.json",
-            "velocity-plugin.json"
-        )
-    )
-}
-
-jmh {
-    warmupIterations = 2
-    iterations = 2
-    fork = 2
 }

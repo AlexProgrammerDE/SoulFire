@@ -52,7 +52,7 @@
 | `--register-command`             | `/register %password% %password%` | Command to be executed to register                                                        |
 | `--login-command`                | `/login %password%`               | Command to be executed to log in                                                          |
 | `--captcha-command`              | `/captcha %captcha%`              | Command to be executed to confirm a captcha                                               |
-| `--password-format`              | `SoulFire`                   | The password for registering                                                              |
+| `--password-format`              | `SoulFire`                        | The password for registering                                                              |
 | `--auto-respawn`                 | `true`                            | Respawn automatically after death                                                         |
 | `--respawn-min-delay`            | `1`                               | Minimum delay between respawns                                                            |
 | `--respawn-max-delay`            | `3`                               | Maximum delay between respawns                                                            |
