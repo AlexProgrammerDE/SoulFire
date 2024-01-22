@@ -8,7 +8,7 @@
     <suppress files="src[\\/]main[\\/]java\d+[\\/].*" checks="JavadocPackage"/>
 
     <!-- Allow ViaVersion packages to use ViaVersion shaded libraries -->
-    <suppress files=".*[\\/]src[\\/].*[\\/]java[\\/]net[\\/]pistonmaster[\\/]serverwrecker[\\/]server[\\/]viaversion[\\/].*" checks="IllegalImport"/>
+    <suppress files=".*[\\/]src[\\/].*[\\/]java[\\/]net[\\/]pistonmaster[\\/]soulfire[\\/]server[\\/]viaversion[\\/].*" checks="IllegalImport"/>
 
     <!-- Gradle forces us to use get/set prefixes -->
     <suppress checks="MethodName"/>

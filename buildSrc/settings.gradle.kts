@@ -6,4 +6,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "serverwrecker-buildsrc"
+rootProject.name = "soulfire-buildsrc"

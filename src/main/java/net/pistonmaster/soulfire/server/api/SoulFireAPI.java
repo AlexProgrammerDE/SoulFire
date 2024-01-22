@@ -41,7 +41,7 @@ public class SoulFireAPI {
                 }
             });
     private static final List<ServerExtension> SERVER_EXTENSIONS = new ArrayList<>();
-    private static SoulFireServer serverWreckerServer;
+    private static SoulFireServer soulFireServer;
 
     private SoulFireAPI() {
     }
@@ -52,21 +52,21 @@ public class SoulFireAPI {
      * @return The current SoulFire instance.
      */
     public static SoulFireServer getSoulFire() {
-        Objects.requireNonNull(serverWreckerServer, "SoulFireAPI not initialized yet!");
-        return serverWreckerServer;
+        Objects.requireNonNull(soulFireServer, "SoulFireAPI not initialized yet!");
+        return soulFireServer;
     }
 
     /**
      * Internal method to set the current SoulFire instance.
      *
-     * @param serverWreckerServer The current SoulFire instance.
+     * @param soulFireServer The current SoulFire instance.
      */
-    public static void setSoulFire(SoulFireServer serverWreckerServer) {
-        if (SoulFireAPI.serverWreckerServer != null) {
+    public static void setSoulFire(SoulFireServer soulFireServer) {
+        if (SoulFireAPI.soulFireServer != null) {
             throw new IllegalStateException("SoulFireAPI already initialized!");
         }
 
-        SoulFireAPI.serverWreckerServer = serverWreckerServer;
+        SoulFireAPI.soulFireServer = soulFireServer;
     }
 
     public static void postEvent(SoulFireGlobalEvent event) {

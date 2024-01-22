@@ -67,9 +67,9 @@ public class CLIManager {
     }
 
     public void initCLI(String[] args) {
-        var serverWreckerCommand = new SWCommandDefinition(this);
-        var commandLine = new CommandLine(serverWreckerCommand);
-        serverWreckerCommand.commandLine(commandLine);
+        var soulFireCommand = new SWCommandDefinition(this);
+        var commandLine = new CommandLine(soulFireCommand);
+        soulFireCommand.commandLine(commandLine);
         commandLine.setCaseInsensitiveEnumValuesAllowed(true);
         commandLine.setUsageHelpAutoWidth(true);
         commandLine.setUsageHelpLongOptionsMaxWidth(30);

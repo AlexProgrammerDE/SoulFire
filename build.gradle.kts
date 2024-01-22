@@ -201,8 +201,8 @@ idea {
 }
 
 tasks.withType<Checkstyle> {
-    exclude("**/net/pistonmaster/serverwrecker/data**")
-    exclude("**/net/pistonmaster/serverwrecker/grpc/generated**")
+    exclude("**/net/pistonmaster/soulfire/data**")
+    exclude("**/net/pistonmaster/soulfire/grpc/generated**")
 }
 
 tasks.named<Jar>("jar") {

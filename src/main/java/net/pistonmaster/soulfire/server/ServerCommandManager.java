@@ -71,7 +71,7 @@ import static net.pistonmaster.soulfire.brigadier.BrigadierHelper.*;
 public class ServerCommandManager {
     @Getter
     private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
-    private final SoulFireServer serverWreckerServer;
+    private final SoulFireServer soulFireServer;
     private final List<Map.Entry<Instant, String>> commandHistory = Collections.synchronizedList(new ArrayList<>());
     private final Path targetFile = SWPathConstants.DATA_FOLDER.resolve(".command_history");
 
@@ -110,7 +110,7 @@ public class ServerCommandManager {
             return Command.SINGLE_SUCCESS;
         })));
         dispatcher.register(literal("clear-console").executes(help("Clears the GUIs log panel", c -> {
-            var logPanel = serverWreckerServer.injector().getIfAvailable(LogPanel.class);
+            var logPanel = soulFireServer.injector().getIfAvailable(LogPanel.class);
             if (logPanel != null) {
                 logPanel.messageLogPanel().clear();
             }
@@ -217,7 +217,7 @@ public class ServerCommandManager {
         // Attack controls
         dispatcher.register(literal("stop-attack")
                 .executes(help("Stops the ongoing attacks", c -> forEveryAttack(attackManager -> {
-                    serverWreckerServer.stopAttack(attackManager.id());
+                    soulFireServer.stopAttack(attackManager.id());
                     return Command.SINGLE_SUCCESS;
                 }))));
 
@@ -291,13 +291,13 @@ public class ServerCommandManager {
     }
 
     private int forEveryAttack(ToIntFunction<AttackManager> consumer) {
-        if (serverWreckerServer.attacks().isEmpty()) {
+        if (soulFireServer.attacks().isEmpty()) {
             log.warn("No attacks found!");
             return 2;
         }
 
         var resultCode = Command.SINGLE_SUCCESS;
-        for (var attackManager : serverWreckerServer.attacks().values()) {
+        for (var attackManager : soulFireServer.attacks().values()) {
             log.info("--- Running command for attack {} ---", attackManager.id());
             var result = consumer.applyAsInt(attackManager);
             if (result != Command.SINGLE_SUCCESS) {

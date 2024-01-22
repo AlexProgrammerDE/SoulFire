@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
-@Command(name = "serverwrecker", mixinStandardHelpOptions = true,
+@Command(name = "soulfire", mixinStandardHelpOptions = true,
         version = "SoulFire v" + BuildData.VERSION, showDefaultValues = true,
         description = BuildData.DESCRIPTION, sortOptions = false)
 public class SWCommandDefinition implements Callable<Integer> {

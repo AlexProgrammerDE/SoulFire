@@ -28,6 +28,6 @@ public interface ServerExtension extends ExtensionPoint {
     default void onLoad() {
     }
 
-    default void onEnable(SoulFireServer serverWreckerServer) {
+    default void onEnable(SoulFireServer soulFireServer) {
     }
 }

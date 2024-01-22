@@ -63,4 +63,4 @@ gradleEnterprise {
 include("data-generator")
 include("build-data", "j8-launcher")
 
-rootProject.name = "serverwrecker"
+rootProject.name = "soulfire"

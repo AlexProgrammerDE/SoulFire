@@ -49,7 +49,7 @@ public record BotConnectionFactory(AttackManager attackManager, ResolveUtil.Reso
     public BotConnection prepareConnectionInternal(ProtocolState targetState) {
         var meta = new BotConnectionMeta(minecraftAccount, targetState, proxyData);
         var session = new ViaClientSession(resolvedAddress.resolvedAddress(), logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
-        var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.serverWreckerServer(),
+        var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.soulFireServer(),
                 settingsHolder, logger, protocol, session, resolvedAddress, new ExecutorManager("SoulFire-Attack-" + attackManager.id()), meta,
                 LambdaManager.basic(new ASMGenerator())
                         .setExceptionHandler(EventExceptionHandler.INSTANCE)

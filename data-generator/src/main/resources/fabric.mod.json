@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "serverwrecker-data-generator",
+  "id": "soulfire-data-generator",
   "version": "${version}",
   "name": "SoulFire Data Generator",
   "description": "",
@@ -17,7 +17,7 @@
     ]
   },
   "mixins": [
-    "serverwrecker-data-generator.mixins.json"
+    "soulfire-data-generator.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.4",

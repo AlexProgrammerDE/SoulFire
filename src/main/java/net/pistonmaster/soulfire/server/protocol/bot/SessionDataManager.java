@@ -102,7 +102,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class SessionDataManager {
     private final SettingsHolder settingsHolder;
     private final Logger log;
-    private final SoulFireServer serverWreckerServer;
+    private final SoulFireServer soulFireServer;
     private final ViaClientSession session;
     private final BotConnection connection;
     private final WeatherState weatherState = new WeatherState();
@@ -142,7 +142,7 @@ public final class SessionDataManager {
     public SessionDataManager(BotConnection connection) {
         this.settingsHolder = connection.settingsHolder();
         this.log = connection.logger();
-        this.serverWreckerServer = connection.serverWreckerServer();
+        this.soulFireServer = connection.soulFireServer();
         this.session = connection.session();
         this.connection = connection;
     }

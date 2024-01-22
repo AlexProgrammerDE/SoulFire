@@ -33,7 +33,7 @@ import java.util.Collection;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
-    private final SoulFireServer serverWreckerServer;
+    private final SoulFireServer soulFireServer;
 
     private static Collection<ClientPlugin> getExtensions() {
         var plugins = new ArrayList<ClientPlugin>();
@@ -63,7 +63,7 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
                 UIClientDataResponse.newBuilder()
                         .setUsername(username)
                         .addAllPlugins(getExtensions())
-                        .addAllPluginSettings(serverWreckerServer.settingsRegistry().exportSettingsMeta())
+                        .addAllPluginSettings(soulFireServer.settingsRegistry().exportSettingsMeta())
                         .build()
         );
         responseObserver.onCompleted();

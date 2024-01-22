@@ -210,7 +210,7 @@ public class SoulFireServer {
     }
 
     private static boolean checkForUpdates() {
-        if (Boolean.getBoolean("serverwrecker.disable-updates")) {
+        if (Boolean.getBoolean("soulfire.disable-updates")) {
             log.info("Skipping update check because of system property");
             return false;
         }

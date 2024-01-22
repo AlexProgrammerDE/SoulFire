@@ -36,7 +36,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public record BotConnection(UUID connectionId, BotConnectionFactory factory, AttackManager attackManager,
-                            SoulFireServer serverWreckerServer, SettingsHolder settingsHolder,
+                            SoulFireServer soulFireServer, SettingsHolder settingsHolder,
                             Logger logger, MinecraftProtocol protocol, ViaClientSession session,
                             ResolveUtil.ResolvedAddress resolvedAddress,
                             ExecutorManager executorManager, BotConnectionMeta meta,

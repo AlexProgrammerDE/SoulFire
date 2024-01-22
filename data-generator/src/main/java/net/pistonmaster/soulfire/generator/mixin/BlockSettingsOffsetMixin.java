@@ -36,7 +36,7 @@ public class BlockSettingsOffsetMixin implements BlockSettingsAccessor {
     }
 
     @Override
-    public BlockBehaviour.OffsetType serverwrecker$getOffsetType() {
+    public BlockBehaviour.OffsetType soulfire$getOffsetType() {
         return offsetType;
     }
 }

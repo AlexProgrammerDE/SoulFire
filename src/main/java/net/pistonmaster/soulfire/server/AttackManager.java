@@ -71,7 +71,7 @@ public class AttackManager {
                 }
             });
     private final List<BotConnection> botConnections = new CopyOnWriteArrayList<>();
-    private final SoulFireServer serverWreckerServer;
+    private final SoulFireServer soulFireServer;
     @Setter
     private AttackState attackState = AttackState.STOPPED;
 

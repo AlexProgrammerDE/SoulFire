@@ -27,20 +27,20 @@ import javax.inject.Inject;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
-    private final SoulFireServer serverWreckerServer;
+    private final SoulFireServer soulFireServer;
 
     @Override
     public void startAttack(AttackStartRequest request, StreamObserver<AttackStartResponse> responseObserver) {
         var settingsHolder = SettingsManager.createSettingsHolder(request.getSettings(), null);
 
-        var id = serverWreckerServer.startAttack(settingsHolder);
+        var id = soulFireServer.startAttack(settingsHolder);
         responseObserver.onNext(AttackStartResponse.newBuilder().setId(id).build());
         responseObserver.onCompleted();
     }
 
     @Override
     public void toggleAttackState(AttackStateToggleRequest request, StreamObserver<AttackStateToggleResponse> responseObserver) {
-        serverWreckerServer.toggleAttackState(request.getId(), switch (request.getNewState()) {
+        soulFireServer.toggleAttackState(request.getId(), switch (request.getNewState()) {
             case PAUSE -> true;
             case RESUME, UNRECOGNIZED -> false;
         });
@@ -50,7 +50,7 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
 
     @Override
     public void stopAttack(AttackStopRequest request, StreamObserver<AttackStopResponse> responseObserver) {
-        serverWreckerServer.stopAttack(request.getId());
+        soulFireServer.stopAttack(request.getId());
         responseObserver.onNext(AttackStopResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
