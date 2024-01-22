@@ -65,6 +65,7 @@ public class ThemeUtil {
         FlatUIDefaultsInspector.install("ctrl shift O");
         ToolTipManager.sharedInstance().setInitialDelay(100);
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
+        UIManager.put("PasswordField.showRevealButton", true);
 
         if (SystemInfo.isMacOS) {
             // Use top screen menu bar on macOS

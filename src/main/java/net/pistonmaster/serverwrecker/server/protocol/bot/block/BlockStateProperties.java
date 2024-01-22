@@ -19,7 +19,9 @@ package net.pistonmaster.serverwrecker.server.protocol.bot.block;
 
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.*;
+import lombok.ToString;
 
+@ToString
 public class BlockStateProperties {
     private final Object2BooleanMap<String> booleanProperties;
     private final Object2IntMap<String> intProperties;
@@ -40,7 +42,7 @@ public class BlockStateProperties {
 
             if (value.equals("true") || value.equals("false")) {
                 booleanProperties.put(key, Boolean.parseBoolean(value));
-            } else if (value.matches("-?\\d+")) {
+            } else if (isNumeric(value)) {
                 intProperties.put(key, Integer.parseInt(value));
             } else {
                 stringProperties.put(key, value);
@@ -58,5 +60,14 @@ public class BlockStateProperties {
 
     public String getString(String key) {
         return stringProperties.get(key);
+    }
+
+    private static boolean isNumeric(String strNum) {
+        try {
+            Integer.parseInt(strNum);
+            return true;
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
     }
 }

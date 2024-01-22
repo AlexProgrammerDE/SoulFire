@@ -9,6 +9,7 @@ message ClientDataRequest {
 
 message StringSetting {
   string def = 1;
+  bool secret = 2;
 }
 
 message IntSetting {

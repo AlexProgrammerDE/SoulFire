@@ -69,7 +69,8 @@ public class GeneratedPanel extends NavigationItem {
                     panel.add(switch (settingType.getValueCase()) {
                         case STRING -> {
                             var stringEntry = settingType.getString();
-                            var textField = new JTextField(stringEntry.getDef());
+                            var textField = stringEntry.getSecret() ? new JPasswordField(stringEntry.getDef())
+                                    : new JTextField(stringEntry.getDef());
                             settingsManager.registerListener(propertyKey, s -> textField.setText(s.getAsString()));
                             settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(textField.getText()));
 

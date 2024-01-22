@@ -23,6 +23,7 @@ public record StringProperty(
         String uiName,
         String[] cliFlags,
         String description,
-        String defaultValue
+        String defaultValue,
+        boolean secret
 ) implements SingleProperty {
 }

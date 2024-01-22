@@ -254,7 +254,7 @@ public class ForwardingBypass implements InternalExtension {
                 ForwardingMode.values(),
                 ForwardingMode.NONE
         );
-        public static final StringProperty SECRET = BUILDER.ofString(
+        public static final StringProperty SECRET = BUILDER.ofStringSecret(
                 "secret",
                 "Secret",
                 new String[]{"--secret"},

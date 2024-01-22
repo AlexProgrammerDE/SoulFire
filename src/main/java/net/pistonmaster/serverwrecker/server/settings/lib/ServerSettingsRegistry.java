@@ -122,6 +122,7 @@ public class ServerSettingsRegistry {
                                             .setType(ClientPluginSettingType.newBuilder()
                                                     .setString(StringSetting.newBuilder()
                                                             .setDef(stringProperty.defaultValue())
+                                                            .setSecret(stringProperty.secret())
                                                             .build())
                                                     .build())
                                             .build())

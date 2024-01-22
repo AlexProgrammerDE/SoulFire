@@ -50,7 +50,12 @@ public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
 
         public StringProperty ofString(String key, String uiName, String[] cliFlags, String description,
                                        String defaultValue) {
-            return new StringProperty(namespace, key, uiName, cliFlags, description, defaultValue);
+            return new StringProperty(namespace, key, uiName, cliFlags, description, defaultValue, false);
+        }
+
+        public StringProperty ofStringSecret(String key, String uiName, String[] cliFlags, String description,
+                                             String defaultValue) {
+            return new StringProperty(namespace, key, uiName, cliFlags, description, defaultValue, true);
         }
 
         public ComboProperty ofCombo(String key, String uiName, String[] cliFlags, String description,
