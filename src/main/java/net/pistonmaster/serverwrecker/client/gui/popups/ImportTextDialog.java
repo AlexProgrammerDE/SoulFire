@@ -106,15 +106,16 @@ public class ImportTextDialog extends JDialog {
 
         var contents = clipboard.getContents(null);
 
-        if (contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-            try {
-                return ((String) contents.getTransferData(DataFlavor.stringFlavor)).describeConstable();
-            } catch (UnsupportedFlavorException | IOException e) {
-                log.error("Failed to get clipboard!", e);
-                return Optional.empty();
-            }
-        } else {
+        if (contents == null || !contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
             log.error("Clipboard does not contain text!");
+            return Optional.empty();
+        }
+
+        try {
+            return ((String) contents.getTransferData(DataFlavor.stringFlavor))
+                    .describeConstable();
+        } catch (UnsupportedFlavorException | IOException e) {
+            log.error("Failed to get clipboard!", e);
             return Optional.empty();
         }
     }
