@@ -41,7 +41,7 @@ public record BotConnection(UUID connectionId, BotConnectionFactory factory, Att
                             ResolveUtil.ResolvedAddress resolvedAddress,
                             ExecutorManager executorManager, BotConnectionMeta meta,
                             LambdaManager eventBus) {
-    public CompletableFuture<Void> connect() {
+    public CompletableFuture<?> connect() {
         return CompletableFuture.runAsync(() -> {
             attackManager.eventBus().call(new PreBotConnectEvent(this));
             session.connect(true);
@@ -75,7 +75,7 @@ public record BotConnection(UUID connectionId, BotConnectionFactory factory, Att
         return session.getFlag(SWProtocolConstants.TRAFFIC_HANDLER);
     }
 
-    public CompletableFuture<Void> gracefulDisconnect() {
+    public CompletableFuture<?> gracefulDisconnect() {
         return CompletableFuture.runAsync(() -> {
             session.disconnect("Disconnect");
 

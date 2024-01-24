@@ -151,7 +151,10 @@ public class SWBaseListener extends SessionAdapter {
             if (this.targetState == ProtocolState.LOGIN) {
                 var minecraftAccount = botConnection.meta().minecraftAccount();
 
-                session.send(new ServerboundHelloPacket(minecraftAccount.username(), minecraftAccount.uniqueId()));
+                session.send(new ServerboundHelloPacket(
+                        minecraftAccount.username(),
+                        minecraftAccount.uniqueId()
+                ));
             } else {
                 session.send(new ServerboundStatusRequestPacket());
             }

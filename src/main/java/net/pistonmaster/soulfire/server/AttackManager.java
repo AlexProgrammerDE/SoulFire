@@ -99,7 +99,7 @@ public class AttackManager {
         return Optional.of(selectedProxy.getKey());
     }
 
-    public CompletableFuture<Void> start(SettingsHolder settingsHolder) {
+    public CompletableFuture<?> start(SettingsHolder settingsHolder) {
         if (!attackState.isStopped()) {
             throw new IllegalStateException("Attack is already running");
         }
@@ -222,7 +222,7 @@ public class AttackManager {
         });
     }
 
-    public CompletableFuture<Void> stop() {
+    public CompletableFuture<?> stop() {
         if (attackState.isStopped()) {
             return CompletableFuture.completedFuture(null);
         }
@@ -237,7 +237,7 @@ public class AttackManager {
         logger.info("Disconnecting bots");
         do {
             var eventLoopGroups = new HashSet<EventLoopGroup>();
-            var disconnectFuture = new ArrayList<CompletableFuture<Void>>();
+            var disconnectFuture = new ArrayList<CompletableFuture<?>>();
             for (var botConnection : List.copyOf(botConnections)) {
                 disconnectFuture.add(botConnection.gracefulDisconnect());
                 eventLoopGroups.add(botConnection.session().eventLoopGroup());

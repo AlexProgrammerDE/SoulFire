@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.util;
 
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -29,6 +30,14 @@ public class ResourceHelper {
         try {
             return Objects.requireNonNull(ResourceHelper.class.getResourceAsStream(path))
                     .readAllBytes();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get file", e);
+        }
+    }
+
+    public static URL getResourceUrl(String path) {
+        try {
+            return Objects.requireNonNull(ResourceHelper.class.getResource(path));
         } catch (Exception e) {
             throw new RuntimeException("Failed to get file", e);
         }

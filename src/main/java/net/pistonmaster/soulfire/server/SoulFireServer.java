@@ -299,12 +299,12 @@ public class SoulFireServer {
         attacks.get(id).attackState(pause ? AttackState.PAUSED : AttackState.RUNNING);
     }
 
-    public CompletableFuture<Void> stopAllAttacks() {
+    public CompletableFuture<?> stopAllAttacks() {
         return CompletableFuture.allOf(Set.copyOf(attacks.keySet()).stream()
                 .map(this::stopAttack).toArray(CompletableFuture[]::new));
     }
 
-    public CompletableFuture<Void> stopAttack(int id) {
+    public CompletableFuture<?> stopAttack(int id) {
         return attacks.remove(id).stop();
     }
 
