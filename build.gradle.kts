@@ -1,4 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.google.protobuf.gradle.id
 
 plugins {
@@ -177,6 +176,14 @@ tasks {
         archiveBaseName = "SoulFire"
         manifest {
             attributes["Main-Class"] = mainClassString
+            attributes["Name"] = "SoulFire"
+            attributes["Specification-Title"] = "SoulFire"
+            attributes["Specification-Version"] = version.toString()
+            attributes["Specification-Vendor"] = "AlexProgrammerDE"
+            attributes["Implementation-Title"] = "SoulFire"
+            attributes["Implementation-Version"] = version.toString()
+            attributes["Implementation-Vendor"] = "AlexProgrammerDE"
+            attributes["Multi-Release"] = "true"
         }
     }
     shadowJar {
