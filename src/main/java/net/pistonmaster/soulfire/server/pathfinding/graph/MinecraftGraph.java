@@ -245,20 +245,22 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     private static TriState isBlockFree(BlockState blockState) {
-        return TriState.byBoolean(blockState.blockShapeGroup().hasNoCollisions() && !blockState.blockType().fluidSource());
+        return TriState.byBoolean(blockState.blockShapeGroup().hasNoCollisions()
+                && !blockState.blockType().fluidSource());
     }
 
     public void insertActions(BotEntityState node, Consumer<GraphInstructions> callback, Predicate<SWVec3i> alreadySeen) {
-        var actions = new GraphAction[ACTIONS_TEMPLATE.length];
-
-        fillTemplateActions(node, actions);
-        calculateActions(node, actions, callback, alreadySeen);
+        log.debug("Inserting actions for node: {}", node.blockPosition());
+        calculateActions(node, generateTemplateActions(node), callback, alreadySeen);
     }
 
-    private void fillTemplateActions(BotEntityState node, GraphAction[] actions) {
+    private GraphAction[] generateTemplateActions(BotEntityState node) {
+        var actions = new GraphAction[ACTIONS_TEMPLATE.length];
         for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
             actions[i] = ACTIONS_TEMPLATE[i].copy(node);
         }
+
+        return actions;
     }
 
     private void calculateActions(BotEntityState node, GraphAction[] actions, Consumer<GraphInstructions> callback, Predicate<SWVec3i> alreadySeen) {

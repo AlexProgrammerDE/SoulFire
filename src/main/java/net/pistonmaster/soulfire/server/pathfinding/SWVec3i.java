@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.server.pathfinding;
 
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.soulfire.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -41,7 +42,7 @@ public class SWVec3i {
     }
 
     public static SWVec3i fromInt(Vector3i vec) {
-        return new SWVec3i(vec.getX(), vec.getY(), vec.getZ());
+        return from(vec.getX(), vec.getY(), vec.getZ());
     }
 
     public static SWVec3i from(int x, int y, int z) {
@@ -97,6 +98,6 @@ public class SWVec3i {
     }
 
     public double distance(SWVec3i goal) {
-        return Math.sqrt(Math.pow(goal.x - x, 2) + Math.pow(goal.y - y, 2) + Math.pow(goal.z - z, 2));
+        return Math.sqrt(MathHelper.square(goal.x - x) + MathHelper.square(goal.y - y) + MathHelper.square(goal.z - z));
     }
 }

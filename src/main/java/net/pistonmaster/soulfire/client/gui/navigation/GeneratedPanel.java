@@ -19,7 +19,6 @@ package net.pistonmaster.soulfire.client.gui.navigation;
 
 import com.google.gson.JsonPrimitive;
 import net.pistonmaster.soulfire.client.gui.libs.JMinMaxHelper;
-import net.pistonmaster.soulfire.client.gui.libs.PresetJCheckBox;
 import net.pistonmaster.soulfire.client.gui.libs.SwingTextUtils;
 import net.pistonmaster.soulfire.client.settings.SettingsManager;
 import net.pistonmaster.soulfire.grpc.generated.ClientPluginSettingsPage;
@@ -84,7 +83,8 @@ public class GeneratedPanel extends NavigationItem {
                         }
                         case BOOL -> {
                             var boolEntry = settingType.getBool();
-                            var checkBox = new PresetJCheckBox(boolEntry.getDef());
+                            var checkBox = new JCheckBox();
+                            checkBox.setSelected(boolEntry.getDef());
                             settingsManager.registerListener(propertyKey, s -> checkBox.setSelected(s.getAsBoolean()));
                             settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(checkBox.isSelected()));
 
