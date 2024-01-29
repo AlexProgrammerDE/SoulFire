@@ -127,9 +127,6 @@ dependencies {
     implementation(libs.grpc.services)
     implementation(libs.grpc.stub)
     implementation(libs.grpc.netty)
-
-    // For JsonFormat
-    implementation(libs.protobuf.util)
 }
 
 protobuf {
