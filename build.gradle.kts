@@ -43,9 +43,7 @@ dependencies {
     annotationProcessor(libs.picoli.codegen)
 
     // For GUI support
-    implementation(libs.flatlaf)
-    implementation(libs.flatlaf.intellij.themes)
-    implementation(libs.flatlaf.extras)
+    implementation(libs.bundles.flatlaf)
     implementation(libs.xchart)
     implementation(libs.miglayout.swing)
 
@@ -87,8 +85,7 @@ dependencies {
     // For YAML support (ViaVersion)
     api(libs.snakeyaml)
 
-    api(libs.kyori.plain)
-    api(libs.kyori.gson)
+    api(libs.bundles.kyori)
 
     api(libs.commons.validator)
     api(libs.commons.io)
@@ -101,9 +98,7 @@ dependencies {
     api(libs.fastutil)
     api(libs.caffeine)
 
-    api(libs.classtransform.mixinstranslator)
-    api(libs.classtransform.mixinsdummy)
-    api(libs.classtransform.additionalclassprovider)
+    api(libs.bundles.mixins)
     api(libs.reflect)
     api(libs.lambdaevents)
 
@@ -123,10 +118,7 @@ dependencies {
     api(libs.injector)
 
     // gRPC
-    implementation(libs.grpc.proto)
-    implementation(libs.grpc.services)
-    implementation(libs.grpc.stub)
-    implementation(libs.grpc.netty)
+    implementation(libs.bundles.grpc)
 }
 
 protobuf {

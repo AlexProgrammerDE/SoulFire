@@ -76,3 +76,7 @@ grpc-netty = { module = "io.grpc:grpc-netty", version.ref = "grpc" }
 
 [bundles]
 log4j = ["log4j-api", "log4j-core", "log4j-slf4j2-impl", "log4j-iostreams", "log4j-jul"]
+grpc = ["grpc-proto", "grpc-services", "grpc-stub", "grpc-netty"]
+mixins = ["classtransform-mixinstranslator", "classtransform-mixinsdummy", "classtransform-additionalclassprovider"]
+flatlaf = ["flatlaf", "flatlaf-extras", "flatlaf-intellij-themes"]
+kyori = ["kyori-plain", "kyori-gson"]
