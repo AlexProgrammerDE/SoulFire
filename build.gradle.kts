@@ -10,7 +10,7 @@ plugins {
 
 allprojects {
     group = "net.pistonmaster"
-    version = "1.5.0"
+    version = "1.6.0-SNAPSHOT"
     description = "Advanced Minecraft Server-Stresser Tool."
 }
 
