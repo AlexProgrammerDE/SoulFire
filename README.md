@@ -210,8 +210,3 @@ PRs are welcome, too.
     <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=AlexProgrammerDE/SoulFire&type=Date" />
   </picture>
 </a>
-
-## 📜 Attribution
-
-This project is based on [LambdaAttack](https://github.com/games647/LambdaAttack), but over the years the code has been
-remade multiple times to be far more complex than the original project.
