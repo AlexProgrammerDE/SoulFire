@@ -6,7 +6,8 @@
 <a href="https://github.com/AlexProgrammerDE/SoulFire/actions/workflows/build.yml"><img src="https://github.com/AlexProgrammerDE/SoulFire/actions/workflows/build.yml/badge.svg?branch=main" alt="Java CI"></a>
 <a href="https://github.com/AlexProgrammerDE/SoulFire/graphs/contributors"><img src="https://img.shields.io/github/contributors/AlexProgrammerDE/SoulFire.svg" alt="Contributors"></a>
 <a href="https://github.com/AlexProgrammerDE/SoulFire/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AlexProgrammerDE/SoulFire.svg" alt="License"></a>
-<a href="https://github.com/AlexProgrammerDE/SoulFire/releases/latest"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/AlexProgrammerDE/SoulFire/total"></a>
+<a href="https://github.com/AlexProgrammerDE/SoulFire/releases/latest"><img alt="GitHub all releases downloads" src="https://img.shields.io/github/downloads/AlexProgrammerDE/SoulFire/total"></a>
+<a href="https://github.com/AlexProgrammerDE/SoulFire/releases/latest"><img alt="GitHub latest release downloads" src="https://img.shields.io/github/downloads/AlexProgrammerDE/SoulFire/latest/total"></a>
 <a href="https://github.com/AlexProgrammerDE/SoulFire/releases/latest"><img src="https://img.shields.io/github/release/AlexProgrammerDE/SoulFire.svg" alt="Current Release"></a>
 </p>
 <p align="center"><a href="https://discord.gg/vHgRd6YZmH"><img src="https://discordapp.com/api/guilds/739784741124833301/embed.png" alt="Discord embed"></a></p>
@@ -209,8 +210,3 @@ PRs are welcome, too.
     <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=AlexProgrammerDE/SoulFire&type=Date" />
   </picture>
 </a>
-
-## 📜 Attribution
-
-This project is based on [LambdaAttack](https://github.com/games647/LambdaAttack), but over the years the code has been
-remade multiple times to be far more complex than the original project.
