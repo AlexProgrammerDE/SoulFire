@@ -147,6 +147,10 @@ public final class SessionDataManager {
         this.connection = connection;
     }
 
+    private static String toPlainText(Component component) {
+        return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(component);
+    }
+
     @EventHandler
     public void onLoginSuccess(ClientboundGameProfilePacket packet) {
         botProfile = packet.getProfile();
@@ -924,12 +928,12 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onLoginDisconnectPacket(ClientboundLoginDisconnectPacket packet) {
-        log.error("Login failed: {}", toPlainText(packet.getReason()));
+        log.error("Login failed with reason \"{}\"", toPlainText(packet.getReason()));
     }
 
     @EventHandler
     public void onDisconnectPacket(ClientboundDisconnectPacket packet) {
-        log.error("Disconnected: {}", toPlainText(packet.getReason()));
+        log.info("Disconnected with reason \"{}\"", toPlainText(packet.getReason()));
     }
 
     public void onDisconnectEvent(DisconnectedEvent event) {
@@ -948,10 +952,6 @@ public final class SessionDataManager {
         }
 
         log.error("Cause: {}", cause.getMessage());
-    }
-
-    private String toPlainText(Component component) {
-        return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(component);
     }
 
     public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {

@@ -50,6 +50,15 @@ public class BlockStateProperties {
         }
     }
 
+    private static boolean isNumeric(String strNum) {
+        try {
+            Integer.parseInt(strNum);
+            return true;
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+    }
+
     public boolean getBoolean(String key) {
         return booleanProperties.getBoolean(key);
     }
@@ -60,14 +69,5 @@ public class BlockStateProperties {
 
     public String getString(String key) {
         return stringProperties.get(key);
-    }
-
-    private static boolean isNumeric(String strNum) {
-        try {
-            Integer.parseInt(strNum);
-            return true;
-        } catch (NumberFormatException nfe) {
-            return false;
-        }
     }
 }

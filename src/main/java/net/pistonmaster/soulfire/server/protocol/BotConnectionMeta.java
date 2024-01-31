@@ -49,7 +49,7 @@ public class BotConnectionMeta {
         try {
             var javaData = (OnlineJavaData) minecraftAccount.accountData();
             sessionService.joinServer(javaData.profileId(), javaData.authToken(), serverId);
-            session.logger().info("Successfully sent mojang join request!");
+            session.logger().debug("Successfully sent mojang join request!");
         } catch (IOException e) {
             session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
         }
