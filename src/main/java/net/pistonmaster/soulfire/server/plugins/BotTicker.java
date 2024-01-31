@@ -21,6 +21,7 @@ import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.util.TickTimer;
+import org.slf4j.MDC;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -38,11 +39,15 @@ public class BotTicker implements InternalExtension {
         executor.scheduleWithFixedDelay(() -> {
             tickTimer.advanceTime();
 
+            MDC.put("connectionId", connection.connectionId().toString());
+            MDC.put("botName", connection.meta().minecraftAccount().username());
+            MDC.put("botUuid", connection.meta().minecraftAccount().uniqueId().toString());
             try {
                 connection.tick(tickTimer.ticks, tickTimer.partialTicks);
             } catch (Throwable t) {
                 connection.logger().error("Exception ticking bot", t);
             }
+            MDC.clear();
         }, 0, 50, TimeUnit.MILLISECONDS); // 20 TPS
     }
 

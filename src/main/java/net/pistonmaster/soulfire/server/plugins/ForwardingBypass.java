@@ -218,7 +218,7 @@ public class ForwardingBypass implements InternalExtension {
         // BungeeCord IP forwarding is simply a special injection after the "address" in the handshake,
         // separated by \0 (the null byte). In order, you send the original host, the player's IP, their
         // UUID (undashed), and if you are in online-mode, their login properties (from Mojang).
-        var data = new StringBuilder().append(initialHostname)
+        var data = new StringBuilder(initialHostname)
                 .append(LEGACY_FORWARDING_SEPARATOR)
                 .append(selfIp)
                 .append(LEGACY_FORWARDING_SEPARATOR)

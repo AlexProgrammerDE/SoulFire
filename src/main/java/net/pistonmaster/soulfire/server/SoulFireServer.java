@@ -197,7 +197,8 @@ public class SoulFireServer {
                 new AutoReconnect(), new AutoRegister(), new AutoRespawn(),
                 new AutoTotem(), new AutoJump(), new AutoArmor(), new AutoEat(),
                 new ChatMessageLogger(), new ServerListBypass(),
-                new FakeVirtualHost(), // Needs to be before ForwardingBypass to not break it
+                new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
+                new ModLoaderSupport(), // Needs to be before ForwardingBypass to not break it
                 new ForwardingBypass()
         );
 
