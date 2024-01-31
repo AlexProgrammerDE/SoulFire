@@ -42,6 +42,8 @@ import java.util.function.Consumer;
 public class ImportTextDialog extends JDialog {
     public ImportTextDialog(Path initialDirectory, String loadText, String typeText, GUIManager guiManager, GUIFrame frame, Consumer<String> consumer) {
         super(frame, loadText, true);
+        Consumer<String> threadSpawningConsumer = text -> guiManager.threadPool().submit(() -> consumer.accept(text));
+
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         var contentPane = new JPanel(new BorderLayout());
@@ -50,13 +52,13 @@ public class ImportTextDialog extends JDialog {
         var buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         var loadFromFileButton = new JButton("Load from File");
 
-        loadFromFileButton.addActionListener(new ImportFileListener(guiManager, frame, initialDirectory, Map.of(
+        loadFromFileButton.addActionListener(new ImportFileListener(initialDirectory, Map.of(
                 typeText, "txt"
-        ), consumer, this));
+        ), threadSpawningConsumer, this));
 
         var getFromClipboardButton = new JButton("Get from Clipboard");
 
-        getFromClipboardButton.addActionListener(new ImportClipboardListener(guiManager, frame, consumer, this));
+        getFromClipboardButton.addActionListener(new ImportClipboardListener(threadSpawningConsumer, this));
 
         buttonPanel.add(loadFromFileButton);
         buttonPanel.add(getFromClipboardButton);
@@ -68,7 +70,7 @@ public class ImportTextDialog extends JDialog {
         var textScrollPane = new JScrollPane(textArea);
         var submitButton = new JButton("Submit");
 
-        submitButton.addActionListener(new SubmitTextListener(guiManager, frame, consumer, this, textArea));
+        submitButton.addActionListener(new SubmitTextListener(threadSpawningConsumer, this, textArea));
 
         var inputPanel = new JPanel(new BorderLayout());
         inputPanel.add(textScrollPane, BorderLayout.CENTER);
@@ -120,8 +122,7 @@ public class ImportTextDialog extends JDialog {
         }
     }
 
-    private record ImportFileListener(GUIManager guiManager, GUIFrame frame,
-                                      Path initialDirectory, Map<String, String> filterMap,
+    private record ImportFileListener(Path initialDirectory, Map<String, String> filterMap,
                                       Consumer<String> consumer,
                                       ImportTextDialog dialog) implements ActionListener {
         @Override
@@ -145,36 +146,31 @@ public class ImportTextDialog extends JDialog {
         }
     }
 
-    private record ImportClipboardListener(GUIManager guiManager, GUIFrame frame,
-                                           Consumer<String> consumer,
+    private record ImportClipboardListener(Consumer<String> consumer,
                                            ImportTextDialog dialog) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             dialog.dispose();
 
-            guiManager.threadPool().submit(() -> {
-                try {
-                    getClipboard().ifPresent(consumer);
-                } catch (Throwable e) {
-                    log.error("Failed to import text!", e);
-                }
-            });
+            try {
+                getClipboard().ifPresent(consumer);
+            } catch (Throwable e) {
+                log.error("Failed to import text!", e);
+            }
         }
     }
 
-    private record SubmitTextListener(GUIManager guiManager, GUIFrame frame, Consumer<String> consumer,
+    private record SubmitTextListener(Consumer<String> consumer,
                                       ImportTextDialog dialog, JTextArea textArea) implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             dialog.dispose();
 
-            guiManager.threadPool().submit(() -> {
-                try {
-                    consumer.accept(textArea.getText());
-                } catch (Throwable e) {
-                    log.error("Failed to import text!", e);
-                }
-            });
+            try {
+                consumer.accept(textArea.getText());
+            } catch (Throwable e) {
+                log.error("Failed to import text!", e);
+            }
         }
     }
 }
