@@ -289,6 +289,7 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onPluginMessage(ClientboundCustomPayloadPacket packet) {
+        log.debug("Received plugin message on channel {}", packet.getChannel());
         var helper = session.getCodecHelper();
         switch (packet.getChannel()) {
             case "minecraft:register" -> {

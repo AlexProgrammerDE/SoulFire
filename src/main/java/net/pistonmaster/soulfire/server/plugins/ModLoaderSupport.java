@@ -79,7 +79,7 @@ public class ModLoaderSupport implements InternalExtension {
 
         if (event.packet() instanceof ClientboundCustomPayloadPacket pluginMessage) {
             if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
-            == ModLoaderSettings.ModLoaderMode.FML) {
+                    == ModLoaderSettings.ModLoaderMode.FML) {
                 handleFMLPluginMessage(event.connection(), pluginMessage);
             }
         } else if (event.packet() instanceof ClientboundCustomQueryPacket loginPluginMessage) {
@@ -101,6 +101,12 @@ public class ModLoaderSupport implements InternalExtension {
             // ServerHello
             case 0 -> {
                 var fmlProtocolVersion = buffer.readByte();
+                var helper = botConnection.session().getCodecHelper();
+                if (fmlProtocolVersion > 1) {
+                    var dimension = helper.readVarInt(buffer);
+                    log.debug("FML dimension override: {}", dimension);
+                }
+
                 botConnection.botControl().registerPluginChannels(
                         "fml:hs",
                         "fml:fml",

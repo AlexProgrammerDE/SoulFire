@@ -117,9 +117,13 @@ public class BotControlAPI {
 
     public void registerPluginChannels(String... channels) {
         var buffer = Unpooled.buffer();
-        for (var channel : channels) {
+        for (int i = 0; i < channels.length; i++) {
+            var channel = channels[i];
             buffer.writeBytes(channel.getBytes(StandardCharsets.UTF_8));
-            buffer.writeByte(0);
+
+            if (i != channels.length - 1) {
+                buffer.writeByte(0);
+            }
         }
 
         sendPluginMessage("minecraft:register", buffer);
