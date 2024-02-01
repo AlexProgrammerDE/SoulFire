@@ -20,6 +20,7 @@ package net.pistonmaster.soulfire.server.plugins;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 import com.github.steveice10.mc.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
+import io.netty.buffer.Unpooled;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -30,12 +31,13 @@ import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.bot.SWPacketReceiveEvent;
 import net.pistonmaster.soulfire.server.api.event.bot.SWPacketSendingEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.ComboProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 
 import javax.inject.Inject;
-import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -78,7 +80,7 @@ public class ModLoaderSupport implements InternalExtension {
         if (event.packet() instanceof ClientboundCustomPayloadPacket pluginMessage) {
             if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
             == ModLoaderSettings.ModLoaderMode.FML) {
-                handleFMLPluginMessage(pluginMessage);
+                handleFMLPluginMessage(event.connection(), pluginMessage);
             }
         } else if (event.packet() instanceof ClientboundCustomQueryPacket loginPluginMessage) {
             if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
@@ -88,11 +90,94 @@ public class ModLoaderSupport implements InternalExtension {
         }
     }
 
-    private void handleFMLPluginMessage(ClientboundCustomPayloadPacket pluginMessage) {
+    private void handleFMLPluginMessage(BotConnection botConnection, ClientboundCustomPayloadPacket pluginMessage) {
+        if (!pluginMessage.getChannel().equals("fml:hs")) {
+            return;
+        }
 
+        var buffer = Unpooled.wrappedBuffer(pluginMessage.getData());
+        var discriminator = buffer.readByte();
+        switch (discriminator) {
+            // ServerHello
+            case 0 -> {
+                var fmlProtocolVersion = buffer.readByte();
+                botConnection.botControl().registerPluginChannels(
+                        "fml:hs",
+                        "fml:fml",
+                        "fml:mp",
+                        "fml:fml",
+                        "fml:forge"
+                );
+                sendFMLClientHello(botConnection, fmlProtocolVersion);
+                sendFMLModList(botConnection, List.of());
+            }
+            // ModList
+            case 2 -> {
+                // WAITINGSERVERDATA
+                sendFMLHandshakeAck(botConnection, (byte) 2);
+            }
+            // RegistryData
+            case 3 -> {
+                var hasMore = buffer.readBoolean();
+                if (!hasMore) {
+                    // WAITINGSERVERCOMPLETE
+                    sendFMLHandshakeAck(botConnection, (byte) 3);
+                }
+            }
+            // HandshakeAck
+            case -1 -> {
+                var phase = buffer.readByte();
+                switch (phase) {
+                    // WAITINGCACK
+                    case 2 -> {
+                        // PENDINGCOMPLETE
+                        sendFMLHandshakeAck(botConnection, (byte) 4);
+                    }
+                    // COMPLETE
+                    case 3 -> {
+                        // COMPLETE
+                        sendFMLHandshakeAck(botConnection, (byte) 5);
+                    }
+                }
+            }
+            // HandshakeReset
+            case -2 -> {
+                log.debug("FML handshake reset");
+            }
+        }
+    }
+
+    private void sendFMLClientHello(BotConnection botConnection, byte fmlProtocolVersion) {
+        var buffer = Unpooled.buffer();
+        buffer.writeByte(1);
+        buffer.writeByte(fmlProtocolVersion);
+
+        botConnection.botControl().sendPluginMessage("fml:hs", buffer);
+    }
+
+    private void sendFMLModList(BotConnection botConnection, List<Mod> mods) {
+        var helper = botConnection.session().getCodecHelper();
+        var buffer = Unpooled.buffer();
+        buffer.writeByte(2);
+        helper.writeVarInt(buffer, mods.size());
+        for (var mod : mods) {
+            helper.writeString(buffer, mod.modId);
+            helper.writeString(buffer, mod.version);
+        }
+
+        botConnection.botControl().sendPluginMessage("fml:hs", buffer);
+    }
+
+    private void sendFMLHandshakeAck(BotConnection botConnection, byte phase) {
+        var buffer = Unpooled.buffer();
+        buffer.writeByte(-1);
+        buffer.writeByte(phase);
+
+        botConnection.botControl().sendPluginMessage("fml:hs", buffer);
     }
 
     private void handleFML2PluginMessage(ClientboundCustomQueryPacket loginPluginMessage) {
+        var buffer = Unpooled.wrappedBuffer(loginPluginMessage.getData());
 
     }
 
@@ -129,5 +214,8 @@ public class ModLoaderSupport implements InternalExtension {
                 return displayName;
             }
         }
+    }
+
+    private record Mod(String modId, String version) {
     }
 }

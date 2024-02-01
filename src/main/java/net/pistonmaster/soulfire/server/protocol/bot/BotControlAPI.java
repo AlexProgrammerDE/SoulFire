@@ -18,14 +18,18 @@
 package net.pistonmaster.soulfire.server.protocol.bot;
 
 import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerState;
+import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerCommandPacket;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.BitSet;
@@ -109,5 +113,29 @@ public class BotControlAPI {
                     new BitSet()
             ));
         }
+    }
+
+    public void registerPluginChannels(String... channels) {
+        var buffer = Unpooled.buffer();
+        for (var channel : channels) {
+            buffer.writeBytes(channel.getBytes(StandardCharsets.UTF_8));
+            buffer.writeByte(0);
+        }
+
+        sendPluginMessage("minecraft:register", buffer);
+    }
+
+    public void sendPluginMessage(String channel, ByteBuf data) {
+        var array = new byte[data.readableBytes()];
+        data.readBytes(array);
+
+        sendPluginMessage(channel, array);
+    }
+
+    public void sendPluginMessage(String channel, byte[] data) {
+        sessionDataManager.sendPacket(new ServerboundCustomPayloadPacket(
+                channel,
+                data
+        ));
     }
 }
