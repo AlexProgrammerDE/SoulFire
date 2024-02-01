@@ -20,6 +20,7 @@ package net.pistonmaster.soulfire.server.viaversion;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
+import com.viaversion.viaversion.protocols.protocol1_13to1_12_2.Protocol1_13To1_12_2;
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.CompressionProvider;
 import net.pistonmaster.soulfire.server.viaversion.providers.*;
 import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
@@ -40,6 +41,13 @@ public class SWViaLoader implements ViaPlatformLoader {
 
         // For ViaBedrock
         Via.getManager().getProviders().use(NettyPipelineProvider.class, new SWViaNettyPipelineProvider());
+
+        // For Forge
+        Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FML|HS", "fml:hs"); // Forge 1.7 - 1.12.2
+        Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FML|MP", "fml:mp"); // Forge 1.7 - 1.12.2
+        Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FML", "fml:fml"); // Forge 1.7
+        Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FORGE", "fml:forge"); // Forge
+        Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("Forge", "fml:old_forge"); // Forge
     }
 
     @Override

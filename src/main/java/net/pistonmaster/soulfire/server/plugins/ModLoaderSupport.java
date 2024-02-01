@@ -17,8 +17,8 @@
  */
 package net.pistonmaster.soulfire.server.plugins;
 
+import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 import com.github.steveice10.mc.protocol.packet.handshake.serverbound.ClientIntentionPacket;
-import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -71,14 +71,16 @@ public class ModLoaderSupport implements InternalExtension {
     }
 
     public void onPacketReceive(SWPacketReceiveEvent event) {
-        if (!(event.packet() instanceof ClientboundCustomQueryPacket loginPluginMessage)) {
+        if (!(event.packet() instanceof ClientboundCustomPayloadPacket pluginMessage)) {
             return;
         }
 
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
-        System.out.println(Arrays.toString(loginPluginMessage.getData()));
-        var channelName = loginPluginMessage.getChannel();
+
+        System.out.println(Arrays.toString(pluginMessage.getData()));
+        var channelName = pluginMessage.getChannel();
+        System.out.println(channelName);
 
         switch (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)) {
             case FML -> {

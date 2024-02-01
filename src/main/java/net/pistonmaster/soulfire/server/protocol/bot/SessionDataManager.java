@@ -34,6 +34,7 @@ import com.github.steveice10.mc.protocol.data.game.level.notify.LimitedCraftingV
 import com.github.steveice10.mc.protocol.data.game.level.notify.RainStrengthValue;
 import com.github.steveice10.mc.protocol.data.game.level.notify.RespawnScreenValue;
 import com.github.steveice10.mc.protocol.data.game.level.notify.ThunderStrengthValue;
+import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundResourcePackPushPacket;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
@@ -86,6 +87,7 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.entity.RawEntity;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.soulfire.server.settings.BotSettings;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
+import net.pistonmaster.soulfire.server.util.PrimitiveHelper;
 import net.pistonmaster.soulfire.server.viaversion.SWVersionConstants;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.jetbrains.annotations.Nullable;
@@ -94,6 +96,8 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -281,6 +285,39 @@ public final class SessionDataManager {
                 packet.getIconBytes(),
                 packet.isEnforcesSecureChat()
         );
+    }
+
+    @EventHandler
+    public void onPluginMessage(ClientboundCustomPayloadPacket packet) {
+        var helper = session.getCodecHelper();
+        switch (packet.getChannel()) {
+            case "minecraft:register" -> {
+                log.debug("Received register packet for channels: {}",
+                        String.join(", ", readChannels(packet, helper)));
+            }
+            case "minecraft:unregister" -> {
+                log.debug("Received unregister packet for channels; {}",
+                        String.join(", ", readChannels(packet, helper)));
+            }
+            case "minecraft:brand" -> {
+                log.debug("Received server brand \"{}\"",
+                        helper.readString(Unpooled.wrappedBuffer(packet.getData())));
+            }
+        }
+    }
+
+    private static List<String> readChannels(ClientboundCustomPayloadPacket packet, MinecraftCodecHelper helper) {
+        var split = PrimitiveHelper.split(packet.getData(), (byte) 0x00);
+        var list = new ArrayList<String>();
+        for (var channel : split) {
+            if (channel.length == 0) {
+                continue;
+            }
+
+            list.add(new String(channel));
+        }
+
+        return list;
     }
 
     //
