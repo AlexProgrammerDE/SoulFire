@@ -17,17 +17,19 @@
  */
 package net.pistonmaster.soulfire.account;
 
+import net.lenni0451.commons.httpclient.HttpClient;
 import net.pistonmaster.soulfire.proxy.SWProxy;
-import net.raphimc.minecraftauth.util.MicrosoftConstants;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
 
 import java.util.List;
 
@@ -36,7 +38,13 @@ public class HttpHelper {
     }
 
     public static CloseableHttpClient createMCAuthHttpClient(SWProxy proxyData) {
-        return createHttpClient(MicrosoftConstants.getDefaultHeaders(), proxyData);
+        return createHttpClient(List.of(
+                new BasicHeader("Accept", ContentType.APPLICATION_JSON.getMimeType()),
+                new BasicHeader("Accept-Language", "en-US,en")
+        ), proxyData);
+    }
+
+    public static HttpClient createLenniMCAuthHttpClient(SWProxy proxyData) {
     }
 
     public static CloseableHttpClient createHttpClient(List<Header> headers, SWProxy proxyData) {

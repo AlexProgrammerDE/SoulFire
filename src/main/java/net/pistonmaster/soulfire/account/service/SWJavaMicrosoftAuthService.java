@@ -30,8 +30,8 @@ import java.io.IOException;
 public final class SWJavaMicrosoftAuthService implements MCAuthService<SWJavaMicrosoftAuthService.JavaMicrosoftAuthData> {
     @Override
     public MinecraftAccount login(JavaMicrosoftAuthData data, SWProxy proxyData) throws IOException {
-        try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-            var fullJavaSession = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient,
+        try {
+            var fullJavaSession = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(HttpHelper.createLenniMCAuthHttpClient(proxyData),
                     new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
             var mcProfile = fullJavaSession.getMcProfile();
             var mcToken = mcProfile.getMcToken();

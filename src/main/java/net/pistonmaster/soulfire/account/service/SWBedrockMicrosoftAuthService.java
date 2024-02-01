@@ -30,8 +30,8 @@ import java.io.IOException;
 public final class SWBedrockMicrosoftAuthService implements MCAuthService<SWBedrockMicrosoftAuthService.BedrockMicrosoftAuthData> {
     @Override
     public MinecraftAccount login(BedrockMicrosoftAuthData data, SWProxy proxyData) throws IOException {
-        try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-            var fullBedrockSession = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(httpClient,
+        try {
+            var fullBedrockSession = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(HttpHelper.createLenniMCAuthHttpClient(proxyData),
                     new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
 
             var mcChain = fullBedrockSession.getMcChain();
