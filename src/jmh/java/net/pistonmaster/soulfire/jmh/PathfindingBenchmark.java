@@ -19,6 +19,7 @@ package net.pistonmaster.soulfire.jmh;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.RouteFinder;
@@ -35,12 +36,12 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.infra.Blackhole;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.util.zip.GZIPInputStream;
 
+@Slf4j
 @State(Scope.Benchmark)
 public class PathfindingBenchmark {
     private RouteFinder routeFinder;
@@ -52,7 +53,7 @@ public class PathfindingBenchmark {
         var byteArrayInputStream = new ByteArrayInputStream(ResourceHelper.getResourceBytes("/world_data.json.zip"));
         try (var gzipInputStream = new GZIPInputStream(byteArrayInputStream);
              var reader = new InputStreamReader(gzipInputStream)) {
-            System.out.println("Reading world data...");
+            log.info("Reading world data...");
             var worldData = gson.fromJson(reader, JsonObject.class);
             var definitions = worldData.getAsJsonArray("definitions");
             var blockDefinitions = new String[definitions.size()];
@@ -62,7 +63,7 @@ public class PathfindingBenchmark {
 
             var data = gson.fromJson(worldData.getAsJsonArray("data"), int[][][].class);
 
-            System.out.println("Parsing world data...");
+            log.info("Parsing world data...");
 
             var accessor = new TestBlockAccessor();
             for (var x = 0; x < data.length; x++) {
@@ -78,7 +79,7 @@ public class PathfindingBenchmark {
 
             accessor.prepareForAccess();
 
-            System.out.println("Calculating world data...");
+            log.info("Calculating world data...");
 
             // Find the first safe block at 0 0
             var safeY = 0;
@@ -100,14 +101,14 @@ public class PathfindingBenchmark {
                     new ProjectedInventory(new PlayerInventoryContainer())
             );
 
-            System.out.println("Done loading! Testing...");
+            log.info("Done loading! Testing...");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to load world data!", e);
         }
     }
 
     @Benchmark
-    public void calculatePath(Blackhole bh) {
+    public void calculatePath() {
         routeFinder.findRoute(initialState, true);
     }
 }
