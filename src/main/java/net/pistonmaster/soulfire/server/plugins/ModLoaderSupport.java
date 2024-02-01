@@ -19,6 +19,7 @@ package net.pistonmaster.soulfire.server.plugins;
 
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 import com.github.steveice10.mc.protocol.packet.handshake.serverbound.ClientIntentionPacket;
+import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -71,25 +72,28 @@ public class ModLoaderSupport implements InternalExtension {
     }
 
     public void onPacketReceive(SWPacketReceiveEvent event) {
-        if (!(event.packet() instanceof ClientboundCustomPayloadPacket pluginMessage)) {
-            return;
-        }
-
         var connection = event.connection();
         var settingsHolder = connection.settingsHolder();
 
-        System.out.println(Arrays.toString(pluginMessage.getData()));
-        var channelName = pluginMessage.getChannel();
-        System.out.println(channelName);
-
-        switch (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)) {
-            case FML -> {
-
+        if (event.packet() instanceof ClientboundCustomPayloadPacket pluginMessage) {
+            if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
+            == ModLoaderSettings.ModLoaderMode.FML) {
+                handleFMLPluginMessage(pluginMessage);
             }
-            case FML2 -> {
-
+        } else if (event.packet() instanceof ClientboundCustomQueryPacket loginPluginMessage) {
+            if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
+                    == ModLoaderSettings.ModLoaderMode.FML2) {
+                handleFML2PluginMessage(loginPluginMessage);
             }
         }
+    }
+
+    private void handleFMLPluginMessage(ClientboundCustomPayloadPacket pluginMessage) {
+
+    }
+
+    private void handleFML2PluginMessage(ClientboundCustomQueryPacket loginPluginMessage) {
+
     }
 
     private static String createFMLAddress(String initialHostname) {
