@@ -45,6 +45,7 @@ public class HttpHelper {
     }
 
     public static HttpClient createLenniMCAuthHttpClient(SWProxy proxyData) {
+        return new HttpClient();
     }
 
     public static CloseableHttpClient createHttpClient(List<Header> headers, SWProxy proxyData) {
