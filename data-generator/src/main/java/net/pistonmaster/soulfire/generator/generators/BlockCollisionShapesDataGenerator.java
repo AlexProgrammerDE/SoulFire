@@ -56,16 +56,16 @@ public class BlockCollisionShapesDataGenerator {
 
     private static String voxelShapeToString(VoxelShape voxelShape) {
         var list = new ArrayList<String>();
-        voxelShape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
-            list.add(String.join(",", formatDouble(x1), formatDouble(y1), formatDouble(z1),
-                    formatDouble(x2), formatDouble(y2), formatDouble(z2)));
-        });
+        voxelShape.forAllBoxes((x1, y1, z1, x2, y2, z2) ->
+                list.add(String.join(",",
+                        formatDouble(x1), formatDouble(y1), formatDouble(z1),
+                        formatDouble(x2), formatDouble(y2), formatDouble(z2))));
 
         return String.join("|", list);
     }
 
     private static class BlockShapesCache {
-        public final Object2IntMap<VoxelShape> uniqueBlockShapes = new Object2IntLinkedOpenCustomHashMap<>(new Hash.Strategy<VoxelShape>() {
+        public final Object2IntMap<VoxelShape> uniqueBlockShapes = new Object2IntLinkedOpenCustomHashMap<>(new Hash.Strategy<>() {
             @Override
             public int hashCode(VoxelShape voxelShape) {
                 return voxelShapeToString(voxelShape).hashCode();

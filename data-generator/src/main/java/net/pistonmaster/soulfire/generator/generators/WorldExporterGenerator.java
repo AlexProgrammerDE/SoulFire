@@ -55,7 +55,6 @@ public class WorldExporterGenerator implements IDataGenerator {
             var level = Objects.requireNonNull(Main.SERVER.getLevel(Level.OVERWORLD));
             var jsonObject = new JsonObject();
             var minBuildHeight = level.getMinBuildHeight();
-            var maxBuildHeight = level.getMaxBuildHeight();
             var definitionArray = new String[BuiltInRegistries.BLOCK.size()];
             for (var blockState : BuiltInRegistries.BLOCK) {
                 definitionArray[BuiltInRegistries.BLOCK.getId(blockState)] = BuiltInRegistries.BLOCK.getKey(blockState).getPath();
@@ -66,7 +65,7 @@ public class WorldExporterGenerator implements IDataGenerator {
             for (var x = 0; x < CHUNK_X * CHUNK_SIZE; x++) {
                 for (var y = 0; y < level.getHeight(); y++) {
                     for (var z = 0; z < CHUNK_Z * CHUNK_SIZE; z++) {
-                        var pos = new BlockPos(x, y + level.getMinBuildHeight(), z);
+                        var pos = new BlockPos(x, y + minBuildHeight, z);
                         var blockState = level.getBlockState(pos);
 
                         if (!blockState.isCollisionShapeFullBlock(level, pos)) {

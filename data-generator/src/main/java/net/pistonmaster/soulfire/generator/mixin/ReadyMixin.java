@@ -38,9 +38,9 @@ public class ReadyMixin {
         Main.LOGGER.info("Starting data generation!");
         var versionName = DetectedVersion.BUILT_IN.getName();
         var dataDumpDirectory = Path.of(System.getProperty("user.dir")).resolve("minecraft-data").resolve(versionName);
-        DataGenerators.runDataGenerators(dataDumpDirectory);
-        Main.LOGGER.info("Done data generation!");
+        boolean error = DataGenerators.runDataGenerators(dataDumpDirectory);
+        Main.LOGGER.info("Done data generation! Error: {}", error);
 
-        Runtime.getRuntime().halt(0);
+        Runtime.getRuntime().halt(error ? 1 : 0);
     }
 }

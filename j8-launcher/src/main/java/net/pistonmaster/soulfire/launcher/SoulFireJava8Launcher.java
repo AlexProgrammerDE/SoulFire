@@ -8,6 +8,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+// Too early to init loggers
+@SuppressWarnings("CallToPrintStackTrace")
 public class SoulFireJava8Launcher {
     public static void main(String[] args) {
         try {
@@ -30,6 +32,7 @@ public class SoulFireJava8Launcher {
         }
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private static class UnsupportedVersionDialog extends JFrame {
         public UnsupportedVersionDialog() {
             super("Unsupported Java Version");
