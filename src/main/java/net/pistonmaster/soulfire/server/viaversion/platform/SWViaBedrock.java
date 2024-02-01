@@ -19,6 +19,7 @@ package net.pistonmaster.soulfire.server.viaversion.platform;
 
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.server.viaversion.JLoggerToSLF4J;
+import net.raphimc.viabedrock.ViaBedrockConfig;
 import net.raphimc.viabedrock.platform.ViaBedrockPlatform;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,12 @@ public class SWViaBedrock implements ViaBedrockPlatform {
     private final Path dataFolder;
 
     public void init() {
-        init(dataFolder.resolve("config.yml").toFile());
+        var configFile = dataFolder.resolve("config.yml").toFile();
+        ViaBedrockConfig config = new ViaBedrockConfig(configFile);
+        config.reload();
+        config.set("translate-resource-packs", false);
+        config.save();
+        init(configFile);
     }
 
     @Override
