@@ -18,18 +18,6 @@ application {
     mainClass = mainClassString
 }
 
-tasks {
-    processResources {
-        doFirst {
-            val resourcesDir = sourceSets.main.get().output.resourcesDir
-            resourcesDir?.mkdirs()
-            val contents = "projectInfo.project=$project.name"
-            val file = File(resourcesDir, "project.properties")
-            file.writeText(contents)
-        }
-    }
-}
-
 dependencies {
     implementation(projects.buildData)
     implementation(projects.proto)
