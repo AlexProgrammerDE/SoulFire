@@ -1,10 +1,7 @@
-import com.google.protobuf.gradle.id
-
 plugins {
     application
     idea
     id("sf.shadow-conventions")
-    alias(libs.plugins.protobuf)
     alias(libs.plugins.jmh)
 }
 
@@ -23,6 +20,7 @@ application {
 
 dependencies {
     implementation(projects.buildData)
+    implementation(projects.proto)
 
     // The java 8 launcher takes care of notifiying the user if they are using an unsupported java version
     implementation(projects.j8Launcher)
@@ -117,28 +115,6 @@ dependencies {
 
     // For class injection
     api(libs.injector)
-
-    // gRPC
-    implementation(libs.bundles.grpc)
-}
-
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:${libs.versions.protoc.get()}"
-    }
-    plugins {
-        id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:${libs.versions.grpc.get()}"
-        }
-    }
-    generateProtoTasks {
-        ofSourceSet("main").forEach {
-            it.plugins {
-                // Apply the "grpc" plugin whose spec is defined above, without options.
-                id("grpc")
-            }
-        }
-    }
 }
 
 tasks {
@@ -197,17 +173,6 @@ jmh {
     warmupIterations = 2
     iterations = 2
     fork = 2
-}
-
-idea {
-    module {
-        generatedSourceDirs.addAll(
-            listOf(
-                file("${protobuf.generatedFilesBaseDir}/main/grpc"),
-                file("${protobuf.generatedFilesBaseDir}/main/java")
-            )
-        )
-    }
 }
 
 val repoName = if (version.toString().endsWith("SNAPSHOT")) "maven-snapshots" else "maven-releases"

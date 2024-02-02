@@ -60,7 +60,11 @@ gradleEnterprise {
     }
 }
 
-include("data-generator")
-include("build-data", "j8-launcher")
+include(
+    "data-generator",
+    "build-data",
+    "j8-launcher",
+    "proto"
+)
 
 rootProject.name = "soulfire"
