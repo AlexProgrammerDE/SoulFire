@@ -135,6 +135,9 @@ tasks {
         archiveClassifier = "unshaded"
 
         from(rootProject.file("LICENSE"))
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        dependsOn(configurations.runtimeClasspath)
         from({
             configurations.runtimeClasspath.get()
                 .filter { it.name.endsWith("jar") }
