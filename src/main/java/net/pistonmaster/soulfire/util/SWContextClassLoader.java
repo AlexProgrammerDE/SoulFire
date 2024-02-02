@@ -18,11 +18,14 @@
 package net.pistonmaster.soulfire.util;
 
 import lombok.Getter;
-import net.lenni0451.reflect.Methods;
-import net.lenni0451.reflect.exceptions.MethodInvocationException;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +36,7 @@ public class SWContextClassLoader extends ClassLoader {
     private final ClassLoader platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
 
     public SWContextClassLoader() {
-        super(ClassLoader.getSystemClassLoader());
+        super(createLibClassLoader());
         try {
             findLoadedClassMethod = ClassLoader.class.getDeclaredMethod("loadClass", String.class, boolean.class);
         } catch (ReflectiveOperationException e) {
@@ -48,8 +51,11 @@ public class SWContextClassLoader extends ClassLoader {
             var c = findLoadedClass(name);
             if (c == null) {
                 try {
-                    return Methods.invoke(platformClassLoader, findLoadedClassMethod, name, resolve);
-                } catch (MethodInvocationException ignored) {
+                    return loadClassFromClassLoader(platformClassLoader, name, resolve);
+                } catch (Throwable t) {
+                    if (!t.getCause().getCause().getClass().getSimpleName().equals("MethodInvocationException")) {
+                        throw new RuntimeException(t);
+                    }
                 }
 
                 var classData = loadClassData(this.getParent(), name);
@@ -57,11 +63,14 @@ public class SWContextClassLoader extends ClassLoader {
                     // Check if child class loaders can load the class
                     for (var childClassLoader : childClassLoaders) {
                         try {
-                            var pluginClass = (Class<?>) Methods.invoke(childClassLoader, findLoadedClassMethod, name, resolve);
+                            var pluginClass = loadClassFromClassLoader(childClassLoader, name, resolve);
                             if (pluginClass != null) {
                                 return pluginClass;
                             }
-                        } catch (MethodInvocationException ignored) {
+                        } catch (Throwable t) {
+                            if (!t.getCause().getCause().getClass().getSimpleName().equals("MethodInvocationException")) {
+                                throw new RuntimeException(t);
+                            }
                         }
                     }
 
@@ -79,6 +88,16 @@ public class SWContextClassLoader extends ClassLoader {
         }
     }
 
+    private Class<?> loadClassFromClassLoader(ClassLoader classLoader, String name, boolean resolve) {
+        try {
+            return (Class<?>) getParent().loadClass("net.lenni0451.reflect.Methods")
+                    .getDeclaredMethod("invoke", Object.class, Method.class, Object[].class)
+                    .invoke(null, classLoader, findLoadedClassMethod, new Object[]{name, resolve});
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private byte[] loadClassData(ClassLoader classLoader, String className) {
         var classPath = className.replace('.', '/') + ".class";
 
@@ -91,5 +110,31 @@ public class SWContextClassLoader extends ClassLoader {
         } catch (IOException ignored) {
             return null;
         }
+    }
+
+    private static URLClassLoader createLibClassLoader() {
+        var urls = new ArrayList<URL>();
+        try {
+            var tempDir = Files.createTempDirectory("sf-libraries");
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    Files.walk(tempDir)
+                            .map(Path::toFile)
+                            .forEach(java.io.File::delete);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }));
+            for (var entry : FileSystemUtil.getFilesInDirectory("/META-INF/lib").entrySet()) {
+                var fileName = entry.getKey().getFileName().toString();
+
+                var tempFile = tempDir.resolve(fileName);
+                Files.write(tempFile, entry.getValue());
+                urls.add(tempFile.toUri().toURL());
+            }
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        return new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getSystemClassLoader());
     }
 }

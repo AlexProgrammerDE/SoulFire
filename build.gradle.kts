@@ -18,6 +18,18 @@ application {
     mainClass = mainClassString
 }
 
+tasks {
+    processResources {
+        doFirst {
+            val resourcesDir = sourceSets.main.get().output.resourcesDir
+            resourcesDir?.mkdirs()
+            val contents = "projectInfo.project=$project.name"
+            val file = File(resourcesDir, "project.properties")
+            file.writeText(contents)
+        }
+    }
+}
+
 dependencies {
     implementation(projects.buildData)
     implementation(projects.proto)
@@ -117,6 +129,18 @@ dependencies {
     api(libs.injector)
 }
 
+fun Manifest.applySFAttributes() {
+    attributes["Main-Class"] = mainClassString
+    attributes["Name"] = "SoulFire"
+    attributes["Specification-Title"] = "SoulFire"
+    attributes["Specification-Version"] = version.toString()
+    attributes["Specification-Vendor"] = "AlexProgrammerDE"
+    attributes["Implementation-Title"] = "SoulFire"
+    attributes["Implementation-Version"] = version.toString()
+    attributes["Implementation-Vendor"] = "AlexProgrammerDE"
+    attributes["Multi-Release"] = "true"
+}
+
 tasks {
     distTar {
         onlyIf { false }
@@ -148,23 +172,15 @@ tasks {
                 .map { zipTree(it) }
         })
 
-        manifest {
-            attributes["Main-Class"] = mainClassString
-            attributes["Name"] = "SoulFire"
-            attributes["Specification-Title"] = "SoulFire"
-            attributes["Specification-Version"] = version.toString()
-            attributes["Specification-Vendor"] = "AlexProgrammerDE"
-            attributes["Implementation-Title"] = "SoulFire"
-            attributes["Implementation-Version"] = version.toString()
-            attributes["Implementation-Vendor"] = "AlexProgrammerDE"
-            attributes["Multi-Release"] = "true"
-        }
+        manifest.applySFAttributes()
     }
     val uberJar = register<Jar>("uberJar") {
         archiveClassifier = "uber"
 
-        from(rootProject.file("LICENSE"))
-        from(sourceSets.main.get().output)
+        dependsOn(jar)
+        from(zipTree(jar.get().outputs.files.singleFile))
+
+        manifest.applySFAttributes()
 
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         dependsOn(configurations.runtimeClasspath)
@@ -175,12 +191,6 @@ tasks {
         }) {
             into("META-INF/lib")
         }
-        from({
-            configurations.runtimeClasspath.get()
-                .filter { it.name.endsWith("jar") }
-                .filter { it.toString().contains("build/libs") }
-                .map { zipTree(it) }
-        })
     }
     build {
         dependsOn(uberJar)
