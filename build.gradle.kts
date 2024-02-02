@@ -136,7 +136,6 @@ tasks {
     }
     withType<Checkstyle> {
         exclude("**/net/pistonmaster/soulfire/data**")
-        exclude("**/net/pistonmaster/soulfire/grpc/generated**")
     }
     jar {
         archiveBaseName = "SoulFire"

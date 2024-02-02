@@ -33,6 +33,11 @@ protobuf {
     }
 }
 
+
+tasks.withType<Checkstyle> {
+    exclude("**/net/pistonmaster/soulfire/grpc/generated**")
+}
+
 idea {
     module {
         generatedSourceDirs.addAll(
