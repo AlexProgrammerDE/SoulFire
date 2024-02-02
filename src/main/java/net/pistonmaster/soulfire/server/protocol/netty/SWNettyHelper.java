@@ -89,7 +89,7 @@ public class SWNettyHelper {
         var address = proxy.getInetSocketAddress();
         switch (proxy.type()) {
             case HTTP -> {
-                if (proxy.hasCredentials()) {
+                if (proxy.username() != null && proxy.password() != null) {
                     pipeline.addFirst("proxy", new HttpProxyHandler(address, proxy.username(), proxy.password()));
                 } else {
                     pipeline.addFirst("proxy", new HttpProxyHandler(address));

@@ -61,7 +61,7 @@ public class HttpHelper {
         if (proxyData != null) {
             var proxy = new HttpHost(proxyData.host(), proxyData.port());
 
-            if (proxyData.hasCredentials()) {
+            if (proxyData.username() != null && proxyData.password() != null) {
                 var credentials = new UsernamePasswordCredentials(proxyData.username(), proxyData.password());
 
                 var authScope = new AuthScope(proxy);

@@ -20,10 +20,6 @@ package net.pistonmaster.soulfire.account.service;
 import java.util.UUID;
 
 public record OnlineJavaData(UUID profileId, String authToken, long tokenExpireAt) implements AccountData {
-    public boolean isPremium() {
-        return profileId != null && authToken != null;
-    }
-
     public boolean isTokenExpired() {
         return tokenExpireAt != -1 && System.currentTimeMillis() > tokenExpireAt;
     }
