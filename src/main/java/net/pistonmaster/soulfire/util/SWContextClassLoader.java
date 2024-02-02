@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.soulfire.server.util;
+package net.pistonmaster.soulfire.util;
 
 import lombok.Getter;
 import net.lenni0451.reflect.Methods;
@@ -25,16 +25,20 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class SWContextClassLoader extends ClassLoader {
     @Getter
     private final List<ClassLoader> childClassLoaders = new ArrayList<>();
-    private final Method findLoadedClassMethod = Objects.requireNonNull(Methods.getDeclaredMethod(ClassLoader.class, "loadClass", String.class, boolean.class));
+    private final Method findLoadedClassMethod;
     private final ClassLoader platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
 
     public SWContextClassLoader() {
         super(ClassLoader.getSystemClassLoader());
+        try {
+            findLoadedClassMethod = ClassLoader.class.getDeclaredMethod("loadClass", String.class, boolean.class);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -17,7 +17,7 @@
  */
 package net.pistonmaster.soulfire;
 
-import net.pistonmaster.soulfire.server.util.SWContextClassLoader;
+import net.pistonmaster.soulfire.util.SWContextClassLoader;
 
 import java.util.List;
 

@@ -124,6 +124,9 @@ tasks {
     distZip {
         onlyIf { false }
     }
+    startScripts {
+        onlyIf { false }
+    }
     // So the run task doesn't get marked as up-to-date, ever.
     run.get().apply {
         outputs.upToDateWhen { false }
