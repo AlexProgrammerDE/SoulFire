@@ -1,7 +1,7 @@
 plugins {
     application
     idea
-    id("sf.shadow-conventions")
+    id("sf.java-conventions")
     alias(libs.plugins.jmh)
 }
 
@@ -124,12 +124,6 @@ tasks {
     distZip {
         onlyIf { false }
     }
-    shadowDistTar {
-        onlyIf { false }
-    }
-    shadowDistZip {
-        onlyIf { false }
-    }
     // So the run task doesn't get marked as up-to-date, ever.
     run.get().apply {
         outputs.upToDateWhen { false }
@@ -138,7 +132,16 @@ tasks {
         exclude("**/net/pistonmaster/soulfire/data**")
     }
     jar {
-        archiveBaseName = "SoulFire"
+        archiveClassifier = "unshaded"
+
+        from(rootProject.file("LICENSE"))
+        from({
+            configurations.runtimeClasspath.get()
+                .filter { it.name.endsWith("jar") }
+                .filter { it.toString().contains("build/libs") }
+                .map { zipTree(it) }
+        })
+
         manifest {
             attributes["Main-Class"] = mainClassString
             attributes["Name"] = "SoulFire"
@@ -151,20 +154,30 @@ tasks {
             attributes["Multi-Release"] = "true"
         }
     }
-    shadowJar {
-        archiveBaseName = "SoulFire"
-        excludes.addAll(
-            setOf(
-                "META-INF/*.DSA",
-                "META-INF/*.RSA",
-                "META-INF/*.SF",
-                "META-INF/sponge_plugins.json",
-                "plugin.yml",
-                "bungee.yml",
-                "fabric.mod.json",
-                "velocity-plugin.json"
-            )
-        )
+    val uberJar = register<Jar>("uberJar") {
+        archiveClassifier = "uber"
+
+        from(rootProject.file("LICENSE"))
+        from(sourceSets.main.get().output)
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        dependsOn(configurations.runtimeClasspath)
+        from({
+            configurations.runtimeClasspath.get()
+                .filter { it.name.endsWith("jar") }
+                .filter { !it.toString().contains("build/libs") }
+        }) {
+            into("META-INF/lib")
+        }
+        from({
+            configurations.runtimeClasspath.get()
+                .filter { it.name.endsWith("jar") }
+                .filter { it.toString().contains("build/libs") }
+                .map { zipTree(it) }
+        })
+    }
+    build {
+        dependsOn(uberJar)
     }
 }
 
