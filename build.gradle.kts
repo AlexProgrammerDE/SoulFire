@@ -167,8 +167,6 @@ tasks {
         manifest.applySFAttributes()
     }
     val uberJar = register<Jar>("uberJar") {
-        archiveClassifier = "uber"
-
         dependsOn(jar)
         from(zipTree(jar.get().outputs.files.singleFile))
 
