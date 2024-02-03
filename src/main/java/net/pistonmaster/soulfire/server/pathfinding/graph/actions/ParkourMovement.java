@@ -38,7 +38,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     }
 
     public List<SWVec3i> listRequiredFreeBlocks() {
-        List<SWVec3i> requiredFreeBlocks = new ObjectArrayList<>();
+        var requiredFreeBlocks = new ObjectArrayList<SWVec3i>();
 
         // Make head block free (maybe head block is a slab)
         requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0));

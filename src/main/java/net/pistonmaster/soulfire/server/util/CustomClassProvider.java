@@ -75,7 +75,7 @@ public class CustomClassProvider implements IClassProvider {
     @Override
     @Nonnull
     public Map<String, Supplier<byte[]>> getAllClasses() {
-        Map<String, Supplier<byte[]>> map = new HashMap<>();
+        var map = new HashMap<String, Supplier<byte[]>>();
         for (var classPath : this.classPaths) {
             for (var classInfo : classPath.getAllClasses()) {
                 map.put(classInfo.getName(), sneakySupply(() -> this.getClass(classInfo.getName())));

@@ -58,7 +58,7 @@ public class ResourceData {
             throw new IllegalStateException(e);
         }
 
-        Map<String, String> mojangTranslations = new HashMap<>();
+        var mojangTranslations = new HashMap<String, String>();
         for (var translationEntry : translations.entrySet()) {
             mojangTranslations.put(translationEntry.getKey(), translationEntry.getValue().getAsString());
         }
@@ -92,8 +92,8 @@ public class ResourceData {
         BLOCK_STATE_DEFAULTS = blockStateDefaults;
 
         // Load global palette
-        Int2ObjectMap<BlockState> stateMap = new Int2ObjectOpenHashMap<>();
-        Reference2ObjectMap<BlockType, List<BlockState>> blockStates = new Reference2ObjectOpenHashMap<>();
+        var stateMap = new Int2ObjectOpenHashMap<BlockState>();
+        var blockStates = new Reference2ObjectOpenHashMap<BlockType, List<BlockState>>();
         for (var blockEntry : blocks.entrySet()) {
             var name = blockEntry.getKey();
             var blockEntryData = blockEntry.getValue().getAsJsonObject();

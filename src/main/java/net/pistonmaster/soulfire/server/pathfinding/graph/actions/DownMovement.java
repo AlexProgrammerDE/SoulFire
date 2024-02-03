@@ -50,7 +50,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     }
 
     public List<SWVec3i> listSafetyCheckBlocks() {
-        List<SWVec3i> requiredFreeBlocks = new ObjectArrayList<>();
+        var requiredFreeBlocks = new ObjectArrayList<SWVec3i>();
 
         // Falls one block
         requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0));

@@ -97,21 +97,18 @@ public class ClientCommandManager {
     }
 
     public List<String> getCompletionSuggestions(String command) {
-        var suggestions = new ArrayList<String>();
         try {
-            var offers = rpcClient.commandStubBlocking().tabCompleteCommand(
+            return rpcClient.commandStubBlocking().tabCompleteCommand(
                     CommandCompletionRequest.newBuilder().setCommand(command).build()
             ).getSuggestionsList();
-            suggestions.addAll(offers);
         } catch (Exception e) {
             log.error("An error occurred while trying to perform tab completion.", e);
+            return List.of();
         }
-
-        return suggestions;
     }
 
     public List<Map.Entry<Instant, String>> getCommandHistory() {
-        List<Map.Entry<Instant, String>> history = new ArrayList<>();
+        var history = new ArrayList<Map.Entry<Instant, String>>();
         for (var entry : rpcClient.commandStubBlocking()
                 .getCommandHistory(CommandHistoryRequest.newBuilder().build())
                 .getEntriesList()) {
@@ -119,8 +116,5 @@ public class ClientCommandManager {
         }
 
         return history;
-    }
-
-    private record HelpData(String command, String help) {
     }
 }

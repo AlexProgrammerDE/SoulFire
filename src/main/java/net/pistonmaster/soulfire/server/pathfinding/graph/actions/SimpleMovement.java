@@ -105,7 +105,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
 
     public List<SWVec3i> listRequiredFreeBlocks() {
-        List<SWVec3i> requiredFreeBlocks = new ObjectArrayList<>(freeCapacity());
+        var requiredFreeBlocks = new ObjectArrayList<SWVec3i>(freeCapacity());
 
         if (modifier == MovementModifier.JUMP) {
             // Make head block free (maybe head block is a slab)

@@ -59,7 +59,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     }
 
     public List<SWVec3i> listRequiredFreeBlocks() {
-        List<SWVec3i> requiredFreeBlocks = new ObjectArrayList<>(freeCapacity());
+        var requiredFreeBlocks = new ObjectArrayList<SWVec3i>(freeCapacity());
 
         // The one above the head to jump
         requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0));
