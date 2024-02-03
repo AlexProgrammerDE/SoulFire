@@ -1,6 +1,6 @@
 [versions]
 log4j = "2.22.1"
-grpc = "1.61.0"
+grpc = "1.61.1"
 protobuf = "3.25.2"
 protoc = "3.24.0"
 via-version = "4.10.0-24w05b-SNAPSHOT"
