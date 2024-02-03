@@ -110,9 +110,6 @@ dependencies {
         exclude("org.slf4j", "slf4j-api")
     }
 
-    // For TheAltening account authentication
-    api(libs.thealtening)
-
     // For class injection
     api(libs.injector)
 }

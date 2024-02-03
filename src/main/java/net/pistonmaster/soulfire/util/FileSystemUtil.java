@@ -30,7 +30,12 @@ import java.util.stream.Stream;
 public class FileSystemUtil {
 
     public static Map<Path, byte[]> getFilesInDirectory(final String assetPath) throws IOException, URISyntaxException {
-        final URI uri = Objects.requireNonNull(FileSystemUtil.class.getResource(assetPath)).toURI();
+        var resource = FileSystemUtil.class.getResource(assetPath);
+        if (resource == null) {
+            return Collections.emptyMap();
+        }
+
+        var uri = resource.toURI();
         if (uri.getScheme().equals("file")) {
             return getFilesInPath(Paths.get(uri));
         } else if (uri.getScheme().equals("jar")) {

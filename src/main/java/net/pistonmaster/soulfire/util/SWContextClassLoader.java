@@ -25,8 +25,8 @@ import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 public class SWContextClassLoader extends ClassLoader {
     @Getter
@@ -52,7 +52,6 @@ public class SWContextClassLoader extends ClassLoader {
                 try {
                     return loadClassFromClassLoader(platformClassLoader, name, resolve);
                 } catch (Throwable t) {
-                    t.printStackTrace();
                     if (!t.getCause().getCause().getClass().getSimpleName().equals("MethodInvocationException")) {
                         throw new RuntimeException(t);
                     }
@@ -90,11 +89,19 @@ public class SWContextClassLoader extends ClassLoader {
 
     private Class<?> loadClassFromClassLoader(ClassLoader classLoader, String name, boolean resolve) {
         try {
-            return (Class<?>) getParent().loadClass("net.lenni0451.reflect.Methods")
+            return (Class<?>) getMethodsClass()
                     .getDeclaredMethod("invoke", Object.class, Method.class, Object[].class)
                     .invoke(null, classLoader, findLoadedClassMethod, new Object[]{name, resolve});
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private Class<?> getMethodsClass() throws ClassNotFoundException {
+        try {
+            return getParent().loadClass("net.lenni0451.reflect.Methods");
+        } catch (ClassNotFoundException e) {
+            return getClass().getClassLoader().loadClass("net.lenni0451.reflect.Methods");
         }
     }
 
@@ -115,16 +122,9 @@ public class SWContextClassLoader extends ClassLoader {
     private static URLClassLoader createLibClassLoader() {
         var urls = new ArrayList<URL>();
         try {
-            var tempDir = Files.createTempDirectory("sf-libraries");
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    Files.walk(tempDir)
-                            .map(Path::toFile)
-                            .forEach(java.io.File::delete);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }));
+            var tempDir = Files.createTempDirectory("soulfire-lib-");
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> deleteDirRecursively(tempDir)));
+
             for (var entry : FileSystemUtil.getFilesInDirectory("/META-INF/lib").entrySet()) {
                 var fileName = entry.getKey().getFileName().toString();
 
@@ -136,5 +136,20 @@ public class SWContextClassLoader extends ClassLoader {
             throw new RuntimeException(e);
         }
         return new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getSystemClassLoader());
+    }
+
+    private static void deleteDirRecursively(Path dir) {
+        try (var stream = Files.walk(dir)) {
+            stream.sorted(Comparator.reverseOrder())
+                    .forEach(file -> {
+                        try {
+                            Files.delete(file);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
