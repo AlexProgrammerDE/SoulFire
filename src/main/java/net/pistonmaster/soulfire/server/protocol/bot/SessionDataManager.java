@@ -290,24 +290,17 @@ public final class SessionDataManager {
     @EventHandler
     public void onPluginMessage(ClientboundCustomPayloadPacket packet) {
         log.debug("Received plugin message on channel {}", packet.getChannel());
-        var helper = session.getCodecHelper();
         switch (packet.getChannel()) {
-            case "minecraft:register" -> {
-                log.debug("Received register packet for channels: {}",
-                        String.join(", ", readChannels(packet, helper)));
-            }
-            case "minecraft:unregister" -> {
-                log.debug("Received unregister packet for channels; {}",
-                        String.join(", ", readChannels(packet, helper)));
-            }
-            case "minecraft:brand" -> {
-                log.debug("Received server brand \"{}\"",
-                        helper.readString(Unpooled.wrappedBuffer(packet.getData())));
-            }
+            case "minecraft:register" -> log.debug("Received register packet for channels: {}",
+                    String.join(", ", readChannels(packet)));
+            case "minecraft:unregister" -> log.debug("Received unregister packet for channels; {}",
+                    String.join(", ", readChannels(packet)));
+            case "minecraft:brand" -> log.debug("Received server brand \"{}\"",
+                    session.getCodecHelper().readString(Unpooled.wrappedBuffer(packet.getData())));
         }
     }
 
-    private static List<String> readChannels(ClientboundCustomPayloadPacket packet, MinecraftCodecHelper helper) {
+    private static List<String> readChannels(ClientboundCustomPayloadPacket packet) {
         var split = PrimitiveHelper.split(packet.getData(), (byte) 0x00);
         var list = new ArrayList<String>();
         for (var channel : split) {
@@ -782,7 +775,7 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onEntityMetadata(ClientboundSetEntityDataPacket packet) {
-        var state = entityTrackerState.getEntity(packet.getEntityId()).metadataState();
+        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         if (state == null) {
             log.warn("Received entity metadata packet for unknown entity {}", packet.getEntityId());
@@ -790,13 +783,13 @@ public final class SessionDataManager {
         }
 
         for (var entry : packet.getMetadata()) {
-            state.setMetadata(entry);
+            state.metadataState().setMetadata(entry);
         }
     }
 
     @EventHandler
     public void onEntityAttributes(ClientboundUpdateAttributesPacket packet) {
-        var state = entityTrackerState.getEntity(packet.getEntityId()).attributeState();
+        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         if (state == null) {
             log.warn("Received entity attributes packet for unknown entity {}", packet.getEntityId());
@@ -804,7 +797,7 @@ public final class SessionDataManager {
         }
 
         for (var entry : packet.getAttributes()) {
-            state.setAttribute(entry);
+            state.attributeState().setAttribute(entry);
         }
     }
 
@@ -822,26 +815,32 @@ public final class SessionDataManager {
 
     @EventHandler
     public void onUpdateEffect(ClientboundUpdateMobEffectPacket packet) {
-        var state = entityTrackerState.getEntity(packet.getEntityId()).effectState();
+        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         if (state == null) {
             log.warn("Received update effect packet for unknown entity {}", packet.getEntityId());
             return;
         }
 
-        state.updateEffect(packet.getEffect(), packet.getAmplifier(), packet.getDuration(), packet.isAmbient(), packet.isShowParticles());
+        state.effectState().updateEffect(
+                packet.getEffect(),
+                packet.getAmplifier(),
+                packet.getDuration(),
+                packet.isAmbient(),
+                packet.isShowParticles()
+        );
     }
 
     @EventHandler
     public void onRemoveEffect(ClientboundRemoveMobEffectPacket packet) {
-        var state = entityTrackerState.getEntity(packet.getEntityId()).effectState();
+        var state = entityTrackerState.getEntity(packet.getEntityId());
 
         if (state == null) {
             log.warn("Received remove effect packet for unknown entity {}", packet.getEntityId());
             return;
         }
 
-        state.removeEffect(packet.getEffect());
+        state.effectState().removeEffect(packet.getEffect());
     }
 
     @EventHandler

@@ -21,6 +21,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Data;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 
 @Data
 public class EntityTrackerState {
@@ -34,7 +35,7 @@ public class EntityTrackerState {
         entities.remove(entityId);
     }
 
-    public Entity getEntity(int entityId) {
+    public @Nullable Entity getEntity(int entityId) {
         return entities.get(entityId);
     }
 
