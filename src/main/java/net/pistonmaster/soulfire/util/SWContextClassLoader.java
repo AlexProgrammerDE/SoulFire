@@ -51,10 +51,7 @@ public class SWContextClassLoader extends ClassLoader {
             if (c == null) {
                 try {
                     return loadClassFromClassLoader(platformClassLoader, name, resolve);
-                } catch (Throwable t) {
-                    if (!t.getCause().getCause().getClass().getSimpleName().equals("MethodInvocationException")) {
-                        throw new RuntimeException(t);
-                    }
+                } catch (ClassNotFoundException ignored) {
                 }
 
                 var classData = loadClassData(this.getParent(), name);
@@ -66,10 +63,7 @@ public class SWContextClassLoader extends ClassLoader {
                             if (pluginClass != null) {
                                 return pluginClass;
                             }
-                        } catch (Throwable t) {
-                            if (!t.getCause().getCause().getClass().getSimpleName().equals("MethodInvocationException")) {
-                                throw new RuntimeException(t);
-                            }
+                        } catch (ClassNotFoundException ignored) {
                         }
                     }
 
@@ -87,13 +81,19 @@ public class SWContextClassLoader extends ClassLoader {
         }
     }
 
-    private Class<?> loadClassFromClassLoader(ClassLoader classLoader, String name, boolean resolve) {
+    private Class<?> loadClassFromClassLoader(ClassLoader classLoader, String name, boolean resolve) throws ClassNotFoundException {
         try {
             return (Class<?>) getMethodsClass()
                     .getDeclaredMethod("invoke", Object.class, Method.class, Object[].class)
                     .invoke(null, classLoader, findLoadedClassMethod, new Object[]{name, resolve});
         } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
+            if (e.getCause() != null
+                    && e.getCause().getCause() != null
+                    && e.getCause().getCause() instanceof ClassNotFoundException cnfe) {
+                throw cnfe;
+            } else {
+                throw new RuntimeException(e);
+            }
         }
     }
 
