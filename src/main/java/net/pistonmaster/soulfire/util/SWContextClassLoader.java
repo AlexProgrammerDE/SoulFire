@@ -21,13 +21,12 @@ import lombok.Getter;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class SWContextClassLoader extends ClassLoader {
     @Getter
@@ -53,6 +52,7 @@ public class SWContextClassLoader extends ClassLoader {
                 try {
                     return loadClassFromClassLoader(platformClassLoader, name, resolve);
                 } catch (Throwable t) {
+                    t.printStackTrace();
                     if (!t.getCause().getCause().getClass().getSimpleName().equals("MethodInvocationException")) {
                         throw new RuntimeException(t);
                     }

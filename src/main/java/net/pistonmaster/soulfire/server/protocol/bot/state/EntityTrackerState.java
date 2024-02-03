@@ -17,15 +17,14 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.state;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Data;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
 
-import java.util.Map;
-
 @Data
 public class EntityTrackerState {
-    private final Map<Integer, Entity> entities = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<Entity> entities = new Int2ObjectOpenHashMap<>();
 
     public void addEntity(Entity entity) {
         entities.put(entity.entityId(), entity);
