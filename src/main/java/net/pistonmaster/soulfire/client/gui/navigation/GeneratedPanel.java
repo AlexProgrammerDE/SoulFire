@@ -23,6 +23,7 @@ import net.pistonmaster.soulfire.client.gui.libs.SwingTextUtils;
 import net.pistonmaster.soulfire.client.settings.SettingsManager;
 import net.pistonmaster.soulfire.grpc.generated.ClientPluginSettingsPage;
 import net.pistonmaster.soulfire.grpc.generated.ComboOption;
+import net.pistonmaster.soulfire.grpc.generated.DoubleSetting;
 import net.pistonmaster.soulfire.grpc.generated.IntSetting;
 import net.pistonmaster.soulfire.server.settings.lib.property.PropertyKey;
 
@@ -54,6 +55,18 @@ public class GeneratedPanel extends NavigationItem {
         return spinner;
     }
 
+    private static JSpinner createDoubleObject(PropertyKey propertyKey, SettingsManager settingsManager, DoubleSetting doubleSetting) {
+        var spinner = new JSpinner(new SpinnerNumberModel(doubleSetting.getDef(), doubleSetting.getMin(), doubleSetting.getMax(), doubleSetting.getStep()));
+        if (doubleSetting.hasFormat()) {
+            spinner.setEditor(new JSpinner.NumberEditor(spinner, doubleSetting.getFormat()));
+        }
+
+        settingsManager.registerListener(propertyKey, s -> spinner.setValue(s.getAsDouble()));
+        settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive((double) spinner.getValue()));
+
+        return spinner;
+    }
+
     public static void addComponents(JPanel panel, ClientPluginSettingsPage settingsPage, SettingsManager settingsManager) {
         for (var settingEntry : settingsPage.getEntriesList()) {
             switch (settingEntry.getValueCase()) {
@@ -80,6 +93,10 @@ public class GeneratedPanel extends NavigationItem {
                         case INT -> {
                             var intEntry = settingType.getInt();
                             yield createIntObject(propertyKey, settingsManager, intEntry);
+                        }
+                        case DOUBLE -> {
+                            var doubleEntry = settingType.getDouble();
+                            yield createDoubleObject(propertyKey, settingsManager, doubleEntry);
                         }
                         case BOOL -> {
                             var boolEntry = settingType.getBool();

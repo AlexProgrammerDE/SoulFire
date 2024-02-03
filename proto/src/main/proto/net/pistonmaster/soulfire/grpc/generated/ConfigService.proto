@@ -20,6 +20,14 @@ message IntSetting {
   optional string format = 5;
 }
 
+message DoubleSetting {
+  double def = 1;
+  double min = 2;
+  double max = 3;
+  double step = 4;
+  optional string format = 5;
+}
+
 message BoolSetting {
   bool def = 1;
 }
@@ -42,8 +50,9 @@ message ClientPluginSettingType {
   oneof value {
     StringSetting string = 1;
     IntSetting int = 2;
-    BoolSetting bool = 3;
-    ComboSetting combo = 4;
+    DoubleSetting double = 3;
+    BoolSetting bool = 4;
+    ComboSetting combo = 5;
   }
 }
 

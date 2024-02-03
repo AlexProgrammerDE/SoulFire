@@ -19,16 +19,14 @@ package net.pistonmaster.soulfire.client.cli;
 
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
+import com.google.common.util.concurrent.AtomicDouble;
 import com.google.gson.JsonPrimitive;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.client.ClientCommandManager;
 import net.pistonmaster.soulfire.client.grpc.RPCClient;
 import net.pistonmaster.soulfire.client.settings.SettingsManager;
-import net.pistonmaster.soulfire.grpc.generated.ClientDataRequest;
-import net.pistonmaster.soulfire.grpc.generated.ComboOption;
-import net.pistonmaster.soulfire.grpc.generated.ComboSetting;
-import net.pistonmaster.soulfire.grpc.generated.IntSetting;
+import net.pistonmaster.soulfire.grpc.generated.*;
 import net.pistonmaster.soulfire.server.settings.lib.property.PropertyKey;
 import net.pistonmaster.soulfire.util.ShutdownManager;
 import picocli.CommandLine;
@@ -91,7 +89,7 @@ public class CLIManager {
                         var propertyKey = new PropertyKey(page.getNamespace(), singleEntry.getKey());
 
                         var settingType = singleEntry.getType();
-                        switch (settingType.getValueCase()) {
+                        targetCommandSpec.addOption(switch (settingType.getValueCase()) {
                             case STRING -> {
                                 var stringEntry = settingType.getString();
                                 var reference = new AtomicReference<String>();
@@ -111,13 +109,17 @@ public class CLIManager {
                                 settingsManager.registerListener(propertyKey, s -> reference.set(s.getAsString()));
                                 settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
 
-                                targetCommandSpec.addOption(optionSpec);
+                                yield optionSpec;
                             }
                             case INT -> {
                                 var intEntry = settingType.getInt();
-
-                                addIntSetting(targetCommandSpec, propertyKey, settingsManager, description,
+                                yield addIntSetting(propertyKey, settingsManager, description,
                                         singleEntry.getCliFlagsList().toArray(new String[0]), intEntry);
+                            }
+                            case DOUBLE -> {
+                                var doubleEntry = settingType.getDouble();
+                                yield addDoubleSetting(propertyKey, settingsManager, description,
+                                        singleEntry.getCliFlagsList().toArray(new String[0]), doubleEntry);
                             }
                             case BOOL -> {
                                 var boolEntry = settingType.getBool();
@@ -138,7 +140,7 @@ public class CLIManager {
                                 settingsManager.registerListener(propertyKey, s -> reference.set(s.getAsBoolean()));
                                 settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
 
-                                targetCommandSpec.addOption(optionSpec);
+                                yield optionSpec;
                             }
                             case COMBO -> {
                                 var comboEntry = settingType.getCombo();
@@ -166,11 +168,11 @@ public class CLIManager {
                                         ));
                                 settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
 
-                                targetCommandSpec.addOption(optionSpec);
+                                yield optionSpec;
                             }
                             case VALUE_NOT_SET ->
                                     throw new IllegalStateException("Unexpected value: " + settingType.getValueCase());
-                        }
+                        });
                     }
                     case MINMAXPAIR -> {
                         var minMaxEntry = entry.getMinMaxPair();
@@ -178,14 +180,14 @@ public class CLIManager {
                         var min = minMaxEntry.getMin();
                         var minDescription = escapeFormatSpecifiers(min.getDescription());
                         var minPropertyKey = new PropertyKey(page.getNamespace(), min.getKey());
-                        addIntSetting(targetCommandSpec, minPropertyKey, settingsManager, minDescription,
-                                min.getCliFlagsList().toArray(new String[0]), min.getIntSetting());
+                        targetCommandSpec.addOption(addIntSetting(minPropertyKey, settingsManager, minDescription,
+                                min.getCliFlagsList().toArray(new String[0]), min.getIntSetting()));
 
                         var max = minMaxEntry.getMax();
                         var maxDescription = escapeFormatSpecifiers(max.getDescription());
                         var maxPropertyKey = new PropertyKey(page.getNamespace(), max.getKey());
-                        addIntSetting(targetCommandSpec, maxPropertyKey, settingsManager, maxDescription,
-                                max.getCliFlagsList().toArray(new String[0]), max.getIntSetting());
+                        targetCommandSpec.addOption(addIntSetting(maxPropertyKey, settingsManager, maxDescription,
+                                max.getCliFlagsList().toArray(new String[0]), max.getIntSetting()));
                     }
                     case VALUE_NOT_SET -> throw new IllegalStateException("Unexpected value: " + entry.getValueCase());
                 }
@@ -195,7 +197,7 @@ public class CLIManager {
         commandLine.execute(args);
     }
 
-    private void addIntSetting(CommandLine.Model.CommandSpec commandSpec, PropertyKey propertyKey, SettingsManager settingsManager, String cliDescription, String[] cliNames, IntSetting intEntry) {
+    private CommandLine.Model.OptionSpec addIntSetting(PropertyKey propertyKey, SettingsManager settingsManager, String cliDescription, String[] cliNames, IntSetting intEntry) {
         var reference = new AtomicInteger();
         var optionSpec = CommandLine.Model.OptionSpec.builder(cliNames)
                 .description(cliDescription)
@@ -213,7 +215,28 @@ public class CLIManager {
         settingsManager.registerListener(propertyKey, s -> reference.set(s.getAsInt()));
         settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
 
-        commandSpec.addOption(optionSpec);
+        return optionSpec;
+    }
+
+    private CommandLine.Model.OptionSpec addDoubleSetting(PropertyKey propertyKey, SettingsManager settingsManager, String cliDescription, String[] cliNames, DoubleSetting doubleSetting) {
+        var reference = new AtomicDouble();
+        var optionSpec = CommandLine.Model.OptionSpec.builder(cliNames)
+                .description(cliDescription)
+                .type(double.class)
+                .initialValue(doubleSetting.getDef())
+                .hasInitialValue(true)
+                .setter(new CommandLine.Model.ISetter() {
+                    @Override
+                    public <T> T set(T value) {
+                        return (T) (Double) reference.getAndSet((double) value);
+                    }
+                })
+                .build();
+
+        settingsManager.registerListener(propertyKey, s -> reference.set(s.getAsDouble()));
+        settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
+
+        return optionSpec;
     }
 
     private void shutdownHook() {

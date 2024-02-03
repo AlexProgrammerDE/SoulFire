@@ -40,12 +40,22 @@ public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
 
         public IntProperty ofInt(String key, String uiName, String[] cliFlags, String description,
                                  int defaultValue, int minValue, int maxValue, int stepValue) {
-            return new IntProperty(namespace, key, uiName, cliFlags, description, defaultValue, minValue, maxValue, stepValue, null);
+            return ofInt(key, uiName, cliFlags, description, defaultValue, minValue, maxValue, stepValue, null);
         }
 
         public IntProperty ofInt(String key, String uiName, String[] cliFlags, String description,
                                  int defaultValue, int minValue, int maxValue, int stepValue, String format) {
             return new IntProperty(namespace, key, uiName, cliFlags, description, defaultValue, minValue, maxValue, stepValue, format);
+        }
+
+        public DoubleProperty ofDouble(String key, String uiName, String[] cliFlags, String description,
+                                       double defaultValue, double minValue, double maxValue, double stepValue) {
+            return ofDouble(key, uiName, cliFlags, description, defaultValue, minValue, maxValue, stepValue, null);
+        }
+
+        public DoubleProperty ofDouble(String key, String uiName, String[] cliFlags, String description,
+                                       double defaultValue, double minValue, double maxValue, double stepValue, String format) {
+            return new DoubleProperty(namespace, key, uiName, cliFlags, description, defaultValue, minValue, maxValue, stepValue, format);
         }
 
         public StringProperty ofString(String key, String uiName, String[] cliFlags, String description,

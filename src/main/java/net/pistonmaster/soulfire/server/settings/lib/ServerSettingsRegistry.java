@@ -40,6 +40,20 @@ public class ServerSettingsRegistry {
         return builder.build();
     }
 
+    private static DoubleSetting createDoubleSetting(DoubleProperty property) {
+        var builder = DoubleSetting.newBuilder()
+                .setDef(property.defaultValue())
+                .setMin(property.minValue())
+                .setMax(property.maxValue())
+                .setStep(property.stepValue());
+
+        if (property.format() != null) {
+            builder = builder.setFormat(property.format());
+        }
+
+        return builder.build();
+    }
+
     public ServerSettingsRegistry addClass(Class<? extends SettingsObject> clazz, String pageName) {
         return addClass(clazz, pageName, false);
     }
@@ -100,6 +114,14 @@ public class ServerSettingsRegistry {
                                                     .build())
                                             .build())
                             .build());
+                    case DoubleProperty doubleProperty -> entries.add(ClientPluginSettingEntry.newBuilder()
+                            .setSingle(
+                                    fillSingleProperties(doubleProperty)
+                                            .setType(ClientPluginSettingType.newBuilder()
+                                                    .setDouble(createDoubleSetting(doubleProperty))
+                                                    .build())
+                                            .build())
+                            .build());
                     case MinMaxPropertyLink minMaxPropertyLink -> {
                         var minProperty = minMaxPropertyLink.min();
                         var maxProperty = minMaxPropertyLink.max();
@@ -147,7 +169,6 @@ public class ServerSettingsRegistry {
                                                 .build())
                                 .build());
                     }
-                    default -> throw new IllegalStateException("Unknown property type!");
                 }
             }
 
