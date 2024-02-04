@@ -1,6 +1,6 @@
 ARG JAVA_MODULES="java.base,java.compiler,java.instrument,java.logging,java.management,java.net.http,java.sql,java.desktop,java.security.sasl,java.naming,java.transaction.xa,java.xml,jdk.crypto.ec,jdk.incubator.vector,jdk.jfr,jdk.zipfs,jdk.security.auth,jdk.unsupported,jdk.management"
 
-FROM eclipse-temurin:21-jdk-alpine AS jre-javac-builder
+FROM eclipse-temurin:21.0.2_13-jdk-alpine AS jre-javac-builder
 
 # Install necessery dependencies
 RUN apk add --no-progress --no-cache binutils tzdata
@@ -33,7 +33,7 @@ WORKDIR /soulfire
 RUN --mount=type=cache,target=/root/.gradle,sharing=locked --mount=type=cache,target=/soulfire/.gradle,sharing=locked --mount=type=cache,target=/soulfire/work,sharing=locked \
     ./gradlew build --stacktrace
 
-FROM eclipse-temurin:21-jdk-alpine AS jre-no-javac-builder
+FROM eclipse-temurin:21.0.2_13-jdk-alpine AS jre-no-javac-builder
 
 # Install necessery dependencies
 RUN apk add --no-progress --no-cache binutils tzdata
