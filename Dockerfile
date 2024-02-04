@@ -1,29 +1,4 @@
-ARG JAVA_MODULES="java.base,java.compiler,java.instrument,java.logging,java.management,java.net.http,java.sql,java.desktop,java.security.sasl,java.naming,java.transaction.xa,java.xml,jdk.crypto.ec,jdk.incubator.vector,jdk.jfr,jdk.zipfs,jdk.security.auth,jdk.unsupported,jdk.management"
-
-FROM eclipse-temurin:21-jdk-alpine AS jre-javac-builder
-
-# Install necessery dependencies
-RUN apk add --no-progress --no-cache binutils tzdata
-
-ARG JAVA_MODULES
-
-# Create a custom Java runtime for soulfire Server
-RUN jlink \
-        --add-modules $JAVA_MODULES,jdk.compiler,java.rmi \
-        --strip-debug \
-        --no-man-pages \
-        --no-header-files \
-        --compress=2 \
-        --output /soulfire/java
-
-FROM alpine:latest AS soulfire-builder
-
-# Setting up Java
-ENV JAVA_HOME=/opt/java/openjdk \
-    PATH="/opt/java/openjdk/bin:$PATH"
-
-# Copy over JRE and javac
-COPY --from=jre-javac-builder /soulfire/java $JAVA_HOME
+FROM eclipse-temurin:21 AS soulfire-builder
 
 # Get soulfire data
 COPY --chown=root:root . /soulfire
@@ -38,7 +13,7 @@ FROM eclipse-temurin:21-jdk-alpine AS jre-no-javac-builder
 # Install necessery dependencies
 RUN apk add --no-progress --no-cache binutils tzdata
 
-ARG JAVA_MODULES
+ARG JAVA_MODULES="java.base,java.compiler,java.instrument,java.logging,java.management,java.net.http,java.sql,java.desktop,java.security.sasl,java.naming,java.transaction.xa,java.xml,jdk.crypto.ec,jdk.incubator.vector,jdk.jfr,jdk.zipfs,jdk.security.auth,jdk.unsupported,jdk.management"
 
 # Create a custom Java runtime for soulfire Server
 RUN jlink \
