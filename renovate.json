@@ -7,7 +7,8 @@
       "matchPackageNames": [
         "com.github.GeyserMC:MCProtocolLib",
         "com.github.GeyserMC:mcauthlib",
-        "org.cloudburstmc.netty:netty-transport-raknet"
+        "org.cloudburstmc.netty:netty-transport-raknet",
+        "eclipse-temurin"
       ],
       "enabled": false
     },
