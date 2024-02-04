@@ -23,10 +23,11 @@ import it.unimi.dsi.fastutil.objects.*;
 import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import static it.unimi.dsi.fastutil.HashCommon.arraySize;
@@ -35,7 +36,9 @@ import static it.unimi.dsi.fastutil.HashCommon.maxFill;
 // Fork of Object2ObjectCustomOpenHashMap
 // The main difference is that it uses native equals and hashcode methods
 // It also does not support null keys, if you provide one, the map will behave unexpectedly
-public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2ObjectMap<K, V> implements Cloneable, Hash {
+public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2ObjectMap<K, V> implements Serializable, Cloneable, Hash {
+    @Serial
+    private static final long serialVersionUID = 0L;
     private static final boolean ASSERTS = false;
     protected final transient int minN;
     protected final float f;
@@ -222,7 +225,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
     public boolean containsValue(final Object v) {
         final var value = this.value;
         final var key = this.key;
-        for (var i = n; i-- != 0; ) if (!((key[i]) == null) && Objects.equals(value[i], v)) return true;
+        for (var i = n; i-- != 0; ) if (!((key[i]) == null) && java.util.Objects.equals(value[i], v)) return true;
         return false;
     }
 
@@ -258,13 +261,13 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         int pos;
         // The starting point.
         if (((curr = key[pos = (HashCommon.mix(hashVec((K) k))) & mask]) == null)) return false;
-        if ((equalsVec((K) (k), (curr))) && Objects.equals(v, value[pos])) {
+        if ((equalsVec((K) (k), (curr))) && java.util.Objects.equals(v, value[pos])) {
             removeEntry(pos);
             return true;
         }
         while (true) {
             if (((curr = key[pos = (pos + 1) & mask]) == null)) return false;
-            if ((equalsVec((K) (k), (curr))) && Objects.equals(v, value[pos])) {
+            if ((equalsVec((K) (k), (curr))) && java.util.Objects.equals(v, value[pos])) {
                 removeEntry(pos);
                 return true;
             }
@@ -274,7 +277,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
     @Override
     public boolean replace(final K k, final V oldValue, final V v) {
         final var pos = find(k);
-        if (pos < 0 || !Objects.equals(oldValue, value[pos])) return false;
+        if (pos < 0 || !java.util.Objects.equals(oldValue, value[pos])) return false;
         value[pos] = v;
         return true;
     }
@@ -290,7 +293,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
 
     @Override
     public V computeIfAbsent(final K key, final Object2ObjectFunction<? super K, ? extends V> mappingFunction) {
-        Objects.requireNonNull(mappingFunction);
+        java.util.Objects.requireNonNull(mappingFunction);
         final var pos = find(key);
         if (pos >= 0) return value[pos];
         if (!mappingFunction.containsKey(key)) return defRetValue;
@@ -301,7 +304,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
 
     @Override
     public V computeIfPresent(final K k, final java.util.function.BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
-        Objects.requireNonNull(remappingFunction);
+        java.util.Objects.requireNonNull(remappingFunction);
         final var pos = find(k);
         if (pos < 0) return defRetValue;
         if (value[pos] == null) return defRetValue;
@@ -315,7 +318,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
 
     @Override
     public V compute(final K k, final java.util.function.BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
-        Objects.requireNonNull(remappingFunction);
+        java.util.Objects.requireNonNull(remappingFunction);
         final var pos = find(k);
         final var newValue = remappingFunction.apply((k), pos >= 0 ? (value[pos]) : null);
         if (newValue == null) {
@@ -477,7 +480,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         public boolean equals(final Object o) {
             if (!(o instanceof Map.Entry)) return false;
             var e = (Map.Entry<K, V>) o;
-            return (equalsVec((key[index]), ((e.getKey())))) && Objects.equals(value[index], (e.getValue()));
+            return (equalsVec((key[index]), ((e.getKey())))) && java.util.Objects.equals(value[index], (e.getValue()));
         }
 
         @Override
@@ -628,6 +631,117 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         }
     }
 
+    private abstract class MapSpliterator<ConsumerType, SplitType extends MapSpliterator<ConsumerType, SplitType>> {
+        int pos = 0;
+        int max = n;
+        int c = 0;
+        boolean hasSplit = false;
+
+        MapSpliterator() {
+        }
+
+        MapSpliterator(int pos, int max, boolean hasSplit) {
+            this.pos = pos;
+            this.max = max;
+            this.hasSplit = hasSplit;
+        }
+
+        abstract void acceptOnIndex(final ConsumerType action, final int index);
+
+        abstract SplitType makeForSplit(int pos, int max);
+
+        public boolean tryAdvance(final ConsumerType action) {
+            final var key = Vec2ObjectOpenHashMap.this.key;
+            while (pos < max) {
+                if (!((key[pos]) == null)) {
+                    ++c;
+                    acceptOnIndex(action, pos++);
+                    return true;
+                }
+                ++pos;
+            }
+            return false;
+        }
+
+        public void forEachRemaining(final ConsumerType action) {
+            final var key = Vec2ObjectOpenHashMap.this.key;
+            while (pos < max) {
+                if (!((key[pos]) == null)) {
+                    acceptOnIndex(action, pos);
+                    ++c;
+                }
+                ++pos;
+            }
+        }
+
+        public long estimateSize() {
+            if (!hasSplit) {
+                // Root spliterator; we know how many are remaining.
+                return size - c;
+            } else {
+                // After we split, we can no longer know exactly how many we have (or at least not efficiently).
+                // (size / n) * (max - pos) aka currentTableDensity * numberOfBucketsLeft seems like a good
+                // estimate.
+                return Math.min(size - c, (long) (((double) realSize() / n) * (max - pos)));
+            }
+        }
+
+        public SplitType trySplit() {
+            if (pos >= max - 1) return null;
+            var retLen = (max - pos) >> 1;
+            if (retLen <= 1) return null;
+            var myNewPos = pos + retLen;
+            var retPos = pos;
+            // Since null is returned first, and the convention is that the returned split is the prefix of
+            // elements,
+            // the split will take care of returning null (if needed), and we won't return it anymore.
+            var split = makeForSplit(retPos, myNewPos);
+            this.pos = myNewPos;
+            this.hasSplit = true;
+            return split;
+        }
+
+        public long skip(long n) {
+            if (n < 0) throw new IllegalArgumentException("Argument must be nonnegative: " + n);
+            if (n == 0) return 0;
+            long skipped = 0;
+            final var key = Vec2ObjectOpenHashMap.this.key;
+            while (pos < max && n > 0) {
+                if (!((key[pos++]) == null)) {
+                    ++skipped;
+                    --n;
+                }
+            }
+            return skipped;
+        }
+    }
+
+    private final class EntrySpliterator extends MapSpliterator<Consumer<? super Entry<K, V>>, EntrySpliterator> implements ObjectSpliterator<Entry<K, V>> {
+        private static final int POST_SPLIT_CHARACTERISTICS = ObjectSpliterators.SET_SPLITERATOR_CHARACTERISTICS & ~java.util.Spliterator.SIZED;
+
+        EntrySpliterator() {
+        }
+
+        EntrySpliterator(int pos, int max) {
+            super(pos, max, true);
+        }
+
+        @Override
+        public int characteristics() {
+            return hasSplit ? POST_SPLIT_CHARACTERISTICS : ObjectSpliterators.SET_SPLITERATOR_CHARACTERISTICS;
+        }
+
+        @Override
+        void acceptOnIndex(final Consumer<? super Entry<K, V>> action, final int index) {
+            action.accept(new MapEntry(index));
+        }
+
+        @Override
+        EntrySpliterator makeForSplit(int pos, int max) {
+            return new EntrySpliterator(pos, max);
+        }
+    }
+
     private final class MapEntrySet extends AbstractObjectSet<Entry<K, V>> implements FastEntrySet<K, V> {
         @Override
         public @NotNull ObjectIterator<Entry<K, V>> iterator() {
@@ -641,7 +755,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
 
         @Override
         public ObjectSpliterator<Entry<K, V>> spliterator() {
-            throw new UnsupportedOperationException();
+            return new EntrySpliterator();
         }
 
         //
@@ -656,11 +770,11 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
             int pos;
             // The starting point.
             if (((curr = key[pos = (HashCommon.mix(hashVec(k))) & mask]) == null)) return false;
-            if ((equalsVec((k), (curr)))) return Objects.equals(value[pos], v);
+            if ((equalsVec((k), (curr)))) return java.util.Objects.equals(value[pos], v);
             // There's always an unused entry.
             while (true) {
                 if (((curr = key[pos = (pos + 1) & mask]) == null)) return false;
-                if ((equalsVec((k), (curr)))) return Objects.equals(value[pos], v);
+                if ((equalsVec((k), (curr)))) return java.util.Objects.equals(value[pos], v);
             }
         }
 
@@ -676,7 +790,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
             // The starting point.
             if (((curr = key[pos = (HashCommon.mix(hashVec(k))) & mask]) == null)) return false;
             if ((equalsVec((curr), (k)))) {
-                if (Objects.equals(value[pos], v)) {
+                if (java.util.Objects.equals(value[pos], v)) {
                     removeEntry(pos);
                     return true;
                 }
@@ -685,7 +799,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
             while (true) {
                 if (((curr = key[pos = (pos + 1) & mask]) == null)) return false;
                 if ((equalsVec((curr), (k)))) {
-                    if (Objects.equals(value[pos], v)) {
+                    if (java.util.Objects.equals(value[pos], v)) {
                         removeEntry(pos);
                         return true;
                     }
