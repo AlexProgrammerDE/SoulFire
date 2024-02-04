@@ -77,8 +77,6 @@ public class PathfindingBenchmark {
                 }
             }
 
-            accessor.prepareForAccess();
-
             log.info("Calculating world data...");
 
             // Find the first safe block at 0 0

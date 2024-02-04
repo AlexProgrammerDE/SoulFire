@@ -21,8 +21,6 @@ import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.proxy.SWProxy;
 
-import java.io.IOException;
-
 public final class SWOfflineAuthService implements MCAuthService<SWOfflineAuthService.OfflineAuthData> {
     public static MinecraftAccount createAccount(String username) {
         return new MinecraftAccount(AuthType.OFFLINE, username, new OfflineJavaData(username), true);

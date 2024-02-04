@@ -39,10 +39,6 @@ public class TestBlockAccessor implements BlockAccessor {
         blocks.put(new SWVec3i(x, y, z), BlockState.forDefaultBlockType(block));
     }
 
-    public void prepareForAccess() {
-        blocks.trim();
-    }
-
     @Override
     public BlockState getBlockStateAt(int x, int y, int z) {
         return blocks.getOrDefault(new SWVec3i(x, y, z), defaultBlock);

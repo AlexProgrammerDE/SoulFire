@@ -336,20 +336,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
 
     @Override
     public V merge(final K k, final V v, final java.util.function.BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
-        java.util.Objects.requireNonNull(remappingFunction);
-        java.util.Objects.requireNonNull(v);
-        final var pos = find(k);
-        if (pos < 0 || value[pos] == null) {
-            if (pos < 0) insert(-pos - 1, k, v);
-            else value[pos] = v;
-            return v;
-        }
-        final var newValue = remappingFunction.apply((value[pos]), (v));
-        if (newValue == null) {
-            removeEntry(pos);
-            return defRetValue;
-        }
-        return value[pos] = (newValue);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -378,59 +365,12 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
 
     @Override
     public @NotNull ObjectSet<K> keySet() {
-        if (keys == null) keys = new KeySet();
-        return keys;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public @NotNull ObjectCollection<V> values() {
-        if (values == null) values = new AbstractObjectCollection<>() {
-            @Override
-            public @NotNull ObjectIterator<V> iterator() {
-                return new ValueIterator();
-            }
-
-            @Override
-            public ObjectSpliterator<V> spliterator() {
-                return new ValueSpliterator();
-            }
-
-            @Override
-            public void forEach(final Consumer<? super V> consumer) {
-                for (var pos = n; pos-- != 0; ) if (!((key[pos]) == null)) consumer.accept(value[pos]);
-            }
-
-            @Override
-            public int size() {
-                return size;
-            }
-
-            @Override
-            public boolean contains(Object v) {
-                return containsValue(v);
-            }
-
-            @Override
-            public void clear() {
-                Vec2ObjectOpenHashMap.this.clear();
-            }
-        };
-        return values;
-    }
-
-    public boolean trim() {
-        return trim(size);
-    }
-
-    public boolean trim(final int n) {
-        final var l = HashCommon.nextPowerOfTwo((int) Math.ceil(n / f));
-        if (l >= this.n || size > maxFill(l, f)) return true;
-        try {
-            rehash(l);
-        } catch (OutOfMemoryError cantDoIt) {
-            return false;
-        }
-        return true;
+        throw new UnsupportedOperationException();
     }
 
     @SuppressWarnings("unchecked")
@@ -890,130 +830,6 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
                     entry.index = pos;
                     consumer.accept(entry);
                 }
-        }
-    }
-
-    private final class KeyIterator extends MapIterator<Consumer<? super K>> implements ObjectIterator<K> {
-        // forEachRemaining inherited from MapIterator superclass.
-        // Despite the superclass declared with generics, the way Java inherits and generates bridge methods
-        // avoids the boxing/unboxing
-        @Override
-        void acceptOnIndex(final Consumer<? super K> action, final int index) {
-            action.accept(key[index]);
-        }
-
-        @Override
-        public K next() {
-            return key[nextEntry()];
-        }
-    }
-
-    private final class KeySpliterator extends MapSpliterator<Consumer<? super K>, KeySpliterator> implements ObjectSpliterator<K> {
-        private static final int POST_SPLIT_CHARACTERISTICS = ObjectSpliterators.SET_SPLITERATOR_CHARACTERISTICS & ~java.util.Spliterator.SIZED;
-
-        KeySpliterator() {
-        }
-
-        KeySpliterator(int pos, int max) {
-            super(pos, max, true);
-        }
-
-        @Override
-        public int characteristics() {
-            return hasSplit ? POST_SPLIT_CHARACTERISTICS : ObjectSpliterators.SET_SPLITERATOR_CHARACTERISTICS;
-        }
-
-        @Override
-        void acceptOnIndex(final Consumer<? super K> action, final int index) {
-            action.accept(key[index]);
-        }
-
-        @Override
-        KeySpliterator makeForSplit(int pos, int max) {
-            return new KeySpliterator(pos, max);
-        }
-    }
-
-    private final class KeySet extends AbstractObjectSet<K> {
-        @Override
-        public @NotNull ObjectIterator<K> iterator() {
-            return new KeyIterator();
-        }
-
-        @Override
-        public ObjectSpliterator<K> spliterator() {
-            return new KeySpliterator();
-        }
-
-        @Override
-        public void forEach(final Consumer<? super K> consumer) {
-            for (var pos = n; pos-- != 0; ) {
-                final var k = key[pos];
-                if (!((k) == null)) consumer.accept(k);
-            }
-        }
-
-        @Override
-        public int size() {
-            return size;
-        }
-
-        @Override
-        public boolean contains(Object k) {
-            return containsKey(k);
-        }
-
-        @Override
-        public boolean remove(Object k) {
-            final var oldSize = size;
-            Vec2ObjectOpenHashMap.this.remove(k);
-            return size != oldSize;
-        }
-
-        @Override
-        public void clear() {
-            Vec2ObjectOpenHashMap.this.clear();
-        }
-    }
-
-    private final class ValueIterator extends MapIterator<Consumer<? super V>> implements ObjectIterator<V> {
-        // forEachRemaining inherited from MapIterator superclass.
-        // Despite the superclass declared with generics, the way Java inherits and generates bridge methods
-        // avoids the boxing/unboxing
-        @Override
-        void acceptOnIndex(final Consumer<? super V> action, final int index) {
-            action.accept(value[index]);
-        }
-
-        @Override
-        public V next() {
-            return value[nextEntry()];
-        }
-    }
-
-    private final class ValueSpliterator extends MapSpliterator<Consumer<? super V>, ValueSpliterator> implements ObjectSpliterator<V> {
-        private static final int POST_SPLIT_CHARACTERISTICS = ObjectSpliterators.COLLECTION_SPLITERATOR_CHARACTERISTICS & ~java.util.Spliterator.SIZED;
-
-        ValueSpliterator() {
-        }
-
-        ValueSpliterator(int pos, int max) {
-            super(pos, max, true);
-        }
-
-        @Override
-        public int characteristics() {
-            return hasSplit ? POST_SPLIT_CHARACTERISTICS : ObjectSpliterators.COLLECTION_SPLITERATOR_CHARACTERISTICS;
-        }
-
-        @Override
-        void acceptOnIndex(final Consumer<? super V> action, final int index) {
-            action.accept(value[index]);
-        }
-
-        @Override
-        ValueSpliterator makeForSplit(int pos, int max) {
-            return new ValueSpliterator(pos, max);
         }
     }
 }

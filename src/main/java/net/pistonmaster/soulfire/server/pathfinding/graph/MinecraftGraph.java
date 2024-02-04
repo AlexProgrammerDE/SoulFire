@@ -31,6 +31,7 @@ import net.pistonmaster.soulfire.server.protocol.bot.block.BlockState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.util.BlockTypeHelper;
 import net.pistonmaster.soulfire.server.util.ObjectReference;
+import net.pistonmaster.soulfire.server.util.Vec2ObjectOpenHashMap;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -44,7 +45,7 @@ public record MinecraftGraph(TagsState tagsState) {
     private static final BlockSubscription[][] SUBSCRIPTION_VALUES;
 
     static {
-        var blockSubscribers = new Object2ObjectArrayMap<SWVec3i, ObjectList<BlockSubscription>>();
+        var blockSubscribers = new Vec2ObjectOpenHashMap<SWVec3i, ObjectList<BlockSubscription>>();
 
         var actions = new ObjectArrayList<GraphAction>();
         for (var direction : MovementDirection.VALUES) {
