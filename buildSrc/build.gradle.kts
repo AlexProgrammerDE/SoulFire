@@ -13,9 +13,3 @@ dependencies {
     implementation(libs.gradle.plugin.indra)
     implementation(libs.gradle.plugin.lombok)
 }
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-}

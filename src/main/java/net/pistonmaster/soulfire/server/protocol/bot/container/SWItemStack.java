@@ -84,8 +84,12 @@ public class SWItemStack extends ItemStack {
         return new SWItemStack(itemStack);
     }
 
-    public static SWItemStack forType(ItemType itemType) {
+    public static SWItemStack forTypeSingle(ItemType itemType) {
         return new SWItemStack(itemType, 1);
+    }
+
+    public static SWItemStack forTypeStack(ItemType itemType) {
+        return new SWItemStack(itemType, itemType.stackSize());
     }
 
     public short getEnchantmentLevel(String enchantment) {

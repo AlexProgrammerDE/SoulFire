@@ -279,7 +279,7 @@ public class PathfindingTest {
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of(
-                        SWItemStack.forType(ItemType.STONE)
+                        SWItemStack.forTypeSingle(ItemType.STONE)
                 ))
         );
 
@@ -304,7 +304,7 @@ public class PathfindingTest {
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of(
-                        SWItemStack.forType(ItemType.STONE).withAmount(amount)
+                        SWItemStack.forTypeSingle(ItemType.STONE).withAmount(amount)
                 ))
         );
 
@@ -334,7 +334,7 @@ public class PathfindingTest {
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of(
-                        SWItemStack.forType(ItemType.DIAMOND_PICKAXE)
+                        SWItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
                 ))
         );
 
@@ -363,7 +363,7 @@ public class PathfindingTest {
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of(
-                        SWItemStack.forType(ItemType.DIAMOND_PICKAXE)
+                        SWItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
                 ))
         );
 
@@ -392,7 +392,7 @@ public class PathfindingTest {
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of(
-                        SWItemStack.forType(ItemType.DIAMOND_PICKAXE)
+                        SWItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
                 ))
         );
 
@@ -428,7 +428,7 @@ public class PathfindingTest {
                 new SWVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of(
-                        SWItemStack.forType(ItemType.DIAMOND_PICKAXE)
+                        SWItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
                 ))
         );
 

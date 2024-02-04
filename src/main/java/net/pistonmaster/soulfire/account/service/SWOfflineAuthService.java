@@ -29,7 +29,7 @@ public final class SWOfflineAuthService implements MCAuthService<SWOfflineAuthSe
     }
 
     @Override
-    public MinecraftAccount login(OfflineAuthData data, SWProxy proxyData) throws IOException {
+    public MinecraftAccount login(OfflineAuthData data, SWProxy proxyData) {
         return createAccount(data.username());
     }
 

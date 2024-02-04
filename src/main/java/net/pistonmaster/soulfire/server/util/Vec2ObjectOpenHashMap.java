@@ -782,8 +782,8 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         EntrySpliterator() {
         }
 
-        EntrySpliterator(int pos, int max, boolean hasSplit) {
-            super(pos, max, hasSplit);
+        EntrySpliterator(int pos, int max) {
+            super(pos, max, true);
         }
 
         @Override
@@ -798,7 +798,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
 
         @Override
         EntrySpliterator makeForSplit(int pos, int max) {
-            return new EntrySpliterator(pos, max, true);
+            return new EntrySpliterator(pos, max);
         }
     }
 
@@ -914,8 +914,8 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         KeySpliterator() {
         }
 
-        KeySpliterator(int pos, int max, boolean hasSplit) {
-            super(pos, max, hasSplit);
+        KeySpliterator(int pos, int max) {
+            super(pos, max, true);
         }
 
         @Override
@@ -930,7 +930,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
 
         @Override
         KeySpliterator makeForSplit(int pos, int max) {
-            return new KeySpliterator(pos, max, true);
+            return new KeySpliterator(pos, max);
         }
     }
 
@@ -997,8 +997,8 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         ValueSpliterator() {
         }
 
-        ValueSpliterator(int pos, int max, boolean hasSplit) {
-            super(pos, max, hasSplit);
+        ValueSpliterator(int pos, int max) {
+            super(pos, max, true);
         }
 
         @Override
@@ -1013,7 +1013,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
 
         @Override
         ValueSpliterator makeForSplit(int pos, int max) {
-            return new ValueSpliterator(pos, max, true);
+            return new ValueSpliterator(pos, max);
         }
     }
 }
