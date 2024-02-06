@@ -19,10 +19,10 @@ package net.pistonmaster.soulfire.server.protocol.bot.state;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.data.ResourceData;
 import net.pistonmaster.soulfire.server.protocol.bot.block.BlockAccessor;
-import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.protocol.bot.model.ChunkKey;
 import net.pistonmaster.soulfire.server.protocol.bot.utils.SectionUtils;
 import net.pistonmaster.soulfire.server.util.NoopLock;

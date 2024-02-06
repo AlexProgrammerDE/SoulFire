@@ -17,17 +17,20 @@
  */
 package net.pistonmaster.soulfire.server.pathfinding.graph;
 
-import it.unimi.dsi.fastutil.objects.*;
+import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.util.TriState;
 import net.pistonmaster.soulfire.server.data.BlockItems;
+import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.*;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.*;
 import net.pistonmaster.soulfire.server.protocol.bot.BotActionManager;
-import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.util.BlockTypeHelper;
 import net.pistonmaster.soulfire.server.util.ObjectReference;

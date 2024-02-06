@@ -28,8 +28,8 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
 import net.pistonmaster.soulfire.server.data.BlockState;
+import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;

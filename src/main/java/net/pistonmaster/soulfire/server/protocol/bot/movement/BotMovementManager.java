@@ -23,10 +23,10 @@ import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeTyp
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.ModifierOperation;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.Getter;
+import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.BlockTags;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
-import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.EntityAttributeState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.LevelState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;

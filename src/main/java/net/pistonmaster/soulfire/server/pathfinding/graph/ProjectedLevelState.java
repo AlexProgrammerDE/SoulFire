@@ -18,11 +18,11 @@
 package net.pistonmaster.soulfire.server.pathfinding.graph;
 
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.pathfinding.Costs;
 import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
 import net.pistonmaster.soulfire.server.protocol.bot.block.BlockAccessor;
-import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.util.Vec2ObjectOpenHashMap;
 
 /**

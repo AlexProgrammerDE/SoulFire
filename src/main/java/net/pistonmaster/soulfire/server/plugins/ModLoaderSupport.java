@@ -49,6 +49,14 @@ public class ModLoaderSupport implements InternalExtension {
         event.settingsRegistry().addClass(ModLoaderSettings.class, "Mod Loader Support");
     }
 
+    private static String createFMLAddress(String initialHostname) {
+        return initialHostname + HOSTNAME_SEPARATOR + "FML" + HOSTNAME_SEPARATOR;
+    }
+
+    private static String createFML2Address(String initialHostname) {
+        return initialHostname + HOSTNAME_SEPARATOR + "FML2" + HOSTNAME_SEPARATOR;
+    }
+
     @Override
     public void onLoad() {
         SoulFireAPI.registerListeners(ModLoaderSupport.class);
@@ -185,14 +193,6 @@ public class ModLoaderSupport implements InternalExtension {
     private void handleFML2PluginMessage(ClientboundCustomQueryPacket loginPluginMessage) {
         var buffer = Unpooled.wrappedBuffer(loginPluginMessage.getData());
 
-    }
-
-    private static String createFMLAddress(String initialHostname) {
-        return initialHostname + HOSTNAME_SEPARATOR + "FML" + HOSTNAME_SEPARATOR;
-    }
-
-    private static String createFML2Address(String initialHostname) {
-        return initialHostname + HOSTNAME_SEPARATOR + "FML2" + HOSTNAME_SEPARATOR;
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)

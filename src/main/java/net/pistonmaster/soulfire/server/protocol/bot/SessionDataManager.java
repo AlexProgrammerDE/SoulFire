@@ -155,6 +155,20 @@ public final class SessionDataManager {
         return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(component);
     }
 
+    private static List<String> readChannels(ClientboundCustomPayloadPacket packet) {
+        var split = PrimitiveHelper.split(packet.getData(), (byte) 0x00);
+        var list = new ArrayList<String>();
+        for (var channel : split) {
+            if (channel.length == 0) {
+                continue;
+            }
+
+            list.add(new String(channel));
+        }
+
+        return list;
+    }
+
     @EventHandler
     public void onLoginSuccess(ClientboundGameProfilePacket packet) {
         botProfile = packet.getProfile();
@@ -298,20 +312,6 @@ public final class SessionDataManager {
             case "minecraft:brand" -> log.debug("Received server brand \"{}\"",
                     session.getCodecHelper().readString(Unpooled.wrappedBuffer(packet.getData())));
         }
-    }
-
-    private static List<String> readChannels(ClientboundCustomPayloadPacket packet) {
-        var split = PrimitiveHelper.split(packet.getData(), (byte) 0x00);
-        var list = new ArrayList<String>();
-        for (var channel : split) {
-            if (channel.length == 0) {
-                continue;
-            }
-
-            list.add(new String(channel));
-        }
-
-        return list;
     }
 
     //

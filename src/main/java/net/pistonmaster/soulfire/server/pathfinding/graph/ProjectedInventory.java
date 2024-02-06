@@ -19,9 +19,9 @@ package net.pistonmaster.soulfire.server.pathfinding.graph;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.pathfinding.Costs;
-import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.soulfire.server.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.soulfire.server.protocol.bot.container.SWItemStack;

@@ -21,7 +21,9 @@ import lombok.Getter;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.*;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -39,6 +41,40 @@ public class SWContextClassLoader extends ClassLoader {
         try {
             findLoadedClassMethod = ClassLoader.class.getDeclaredMethod("loadClass", String.class, boolean.class);
         } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static URLClassLoader createLibClassLoader() {
+        var urls = new ArrayList<URL>();
+        try {
+            var tempDir = Files.createTempDirectory("soulfire-lib-");
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> deleteDirRecursively(tempDir)));
+
+            for (var entry : FileSystemUtil.getFilesInDirectory("/META-INF/lib").entrySet()) {
+                var fileName = entry.getKey().getFileName().toString();
+
+                var tempFile = tempDir.resolve(fileName);
+                Files.write(tempFile, entry.getValue());
+                urls.add(tempFile.toUri().toURL());
+            }
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        return new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getSystemClassLoader());
+    }
+
+    private static void deleteDirRecursively(Path dir) {
+        try (var stream = Files.walk(dir)) {
+            stream.sorted(Comparator.reverseOrder())
+                    .forEach(file -> {
+                        try {
+                            Files.delete(file);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -116,40 +152,6 @@ public class SWContextClassLoader extends ClassLoader {
             return inputStream.readAllBytes();
         } catch (IOException ignored) {
             return null;
-        }
-    }
-
-    private static URLClassLoader createLibClassLoader() {
-        var urls = new ArrayList<URL>();
-        try {
-            var tempDir = Files.createTempDirectory("soulfire-lib-");
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> deleteDirRecursively(tempDir)));
-
-            for (var entry : FileSystemUtil.getFilesInDirectory("/META-INF/lib").entrySet()) {
-                var fileName = entry.getKey().getFileName().toString();
-
-                var tempFile = tempDir.resolve(fileName);
-                Files.write(tempFile, entry.getValue());
-                urls.add(tempFile.toUri().toURL());
-            }
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        return new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getSystemClassLoader());
-    }
-
-    private static void deleteDirRecursively(Path dir) {
-        try (var stream = Files.walk(dir)) {
-            stream.sorted(Comparator.reverseOrder())
-                    .forEach(file -> {
-                        try {
-                            Files.delete(file);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }

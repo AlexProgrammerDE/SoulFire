@@ -18,8 +18,8 @@
 package net.pistonmaster.soulfire.server.util;
 
 import net.pistonmaster.soulfire.server.data.BlockShapeGroup;
-import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.data.BlockState;
+import net.pistonmaster.soulfire.server.data.BlockType;
 
 public class BlockTypeHelper {
     private static final double SAFE_BLOCK_MIN_HEIGHT = 0.9;
