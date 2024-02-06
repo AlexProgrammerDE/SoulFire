@@ -94,14 +94,6 @@ public class DataGenerators {
             }
         }
 
-        log.info("Running built-in data generator");
-        try {
-            net.minecraft.data.Main.main(new String[]{"--all", "--output", outputDirectory.resolve("built-in-generator").toString()});
-        } catch (IOException e) {
-            log.error("Failed to run built-in data generator", e);
-            generatorsFailed++;
-        }
-
         log.info("Finishing running data generators");
         return generatorsFailed == 0;
     }

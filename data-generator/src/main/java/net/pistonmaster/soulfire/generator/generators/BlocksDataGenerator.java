@@ -19,6 +19,7 @@ package net.pistonmaster.soulfire.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FallingBlock;
@@ -64,6 +65,30 @@ public class BlocksDataGenerator implements IDataGenerator {
 
             blockDesc.add("offsetData", offsetData);
         }
+
+        var statesArray = new JsonArray();
+        for (var state : block.getStateDefinition().getPossibleStates()) {
+            var stateDesc = new JsonObject();
+
+            stateDesc.addProperty("id", Block.getId(state));
+
+            if (state == defaultState) {
+                stateDesc.addProperty("default", true);
+            }
+
+            var propertiesDesc = new JsonObject();
+            for (var property : state.getProperties()) {
+                propertiesDesc.addProperty(property.getName(), Util.getPropertyName(property, state.getValue(property)));
+            }
+
+            if (!propertiesDesc.isEmpty()) {
+                stateDesc.add("properties", propertiesDesc);
+            }
+
+            statesArray.add(stateDesc);
+        }
+
+        blockDesc.add("states", statesArray);
 
         return blockDesc;
     }

@@ -27,7 +27,7 @@ import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.*;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.*;
 import net.pistonmaster.soulfire.server.protocol.bot.BotActionManager;
-import net.pistonmaster.soulfire.server.protocol.bot.block.BlockState;
+import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.util.BlockTypeHelper;
 import net.pistonmaster.soulfire.server.util.ObjectReference;

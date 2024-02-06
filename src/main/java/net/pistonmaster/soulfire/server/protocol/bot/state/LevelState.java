@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
-import net.pistonmaster.soulfire.server.protocol.bot.block.BlockState;
+import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
 import net.pistonmaster.soulfire.server.protocol.bot.nbt.MCUniform;
 import net.pistonmaster.soulfire.server.protocol.bot.nbt.MCUniformInt;

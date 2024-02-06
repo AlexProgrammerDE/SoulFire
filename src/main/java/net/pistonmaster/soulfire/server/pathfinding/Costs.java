@@ -22,7 +22,7 @@ import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.data.ItemType;
 import net.pistonmaster.soulfire.server.data.ToolSpeedType;
 import net.pistonmaster.soulfire.server.pathfinding.graph.ProjectedInventory;
-import net.pistonmaster.soulfire.server.protocol.bot.block.BlockState;
+import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.protocol.bot.container.SWItemStack;
 import net.pistonmaster.soulfire.server.protocol.bot.state.EntityEffectState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;

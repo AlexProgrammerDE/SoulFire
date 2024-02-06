@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BlockShapeLoader {
-    public static final Map<BlockType, List<BlockShapeGroup>> BLOCK_SHAPES = new Object2ObjectOpenHashMap<>();
+    public static final Map<String, List<BlockShapeGroup>> BLOCK_SHAPES = new Object2ObjectOpenHashMap<>();
 
     static {
         try (var inputStream = BlockShapeGroup.class.getClassLoader().getResourceAsStream("minecraft/blockstates.txt")) {
@@ -50,7 +50,7 @@ public class BlockShapeLoader {
                     }
                 }
 
-                BLOCK_SHAPES.put(BlockType.getByName(name), blockShapeTypes);
+                BLOCK_SHAPES.put(name, blockShapeTypes);
             });
         } catch (IOException e) {
             throw new IllegalStateException(e);

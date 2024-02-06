@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.server.data;
 
+import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
@@ -29,7 +30,7 @@ import lombok.With;
 public record BlockType(int id, String name, float destroyTime, float explosionResistance,
                         boolean air, boolean fallingBlock, boolean replaceable,
                         boolean requiresCorrectToolForDrops, boolean fluidSource,
-                        OffsetData offsetData) {
+                        OffsetData offsetData, BlockStates statesData) {
     public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
     public static final Object2ReferenceMap<String, BlockType> FROM_NAME = new Object2ReferenceOpenHashMap<>();
 
@@ -1094,6 +1095,11 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
 
     public static BlockType register(String name) {
         var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class);
+        blockType = blockType.withStatesData(BlockStates.fromJsonArray(
+                blockType,
+                GsonDataHelper.fromJson("/minecraft/blocks.json", name, JsonObject.class)
+                        .getAsJsonArray("states")));
+
         FROM_ID.put(blockType.id(), blockType);
         FROM_NAME.put(blockType.name(), blockType);
         return blockType;

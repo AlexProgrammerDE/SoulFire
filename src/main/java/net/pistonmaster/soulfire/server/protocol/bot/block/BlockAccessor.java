@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.block;
 
+import net.pistonmaster.soulfire.server.data.BlockState;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public interface BlockAccessor {

@@ -20,6 +20,7 @@ package net.pistonmaster.soulfire.server.protocol.bot.block;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import lombok.Getter;
 import lombok.ToString;
+import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.ChunkData;
 
 @ToString

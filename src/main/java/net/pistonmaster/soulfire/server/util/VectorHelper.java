@@ -18,7 +18,7 @@
 package net.pistonmaster.soulfire.server.util;
 
 import net.pistonmaster.soulfire.server.data.BlockShapeGroup;
-import net.pistonmaster.soulfire.server.protocol.bot.block.BlockState;
+import net.pistonmaster.soulfire.server.data.BlockState;
 import org.cloudburstmc.math.vector.Vector3d;
 
 public class VectorHelper {

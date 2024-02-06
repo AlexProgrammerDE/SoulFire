@@ -17,7 +17,6 @@
  */
 package net.pistonmaster.soulfire.server.data;
 
-import net.pistonmaster.soulfire.server.protocol.bot.block.BlockState;
 import net.pistonmaster.soulfire.server.util.BlockTypeHelper;
 
 import java.util.Optional;

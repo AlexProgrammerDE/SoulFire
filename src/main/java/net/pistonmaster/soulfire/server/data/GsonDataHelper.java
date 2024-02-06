@@ -18,7 +18,9 @@
 package net.pistonmaster.soulfire.server.data;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.internal.bind.TypeAdapters;
 import net.pistonmaster.soulfire.util.ResourceHelper;
 
 import java.util.HashMap;

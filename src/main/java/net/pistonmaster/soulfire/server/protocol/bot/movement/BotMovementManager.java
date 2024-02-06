@@ -26,7 +26,7 @@ import lombok.Getter;
 import net.pistonmaster.soulfire.server.data.BlockTags;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
-import net.pistonmaster.soulfire.server.protocol.bot.block.BlockState;
+import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.EntityAttributeState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.LevelState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
