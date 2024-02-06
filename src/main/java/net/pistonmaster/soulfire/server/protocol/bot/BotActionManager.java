@@ -25,12 +25,15 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundSwingPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundUseItemOnPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundUseItemPacket;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
+import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
+import net.pistonmaster.soulfire.server.settings.BotSettings;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -44,6 +47,7 @@ import java.util.Optional;
 @Data
 @RequiredArgsConstructor
 public class BotActionManager {
+    private static final float EYE_HEIGHT = 1.62f;
     @ToString.Exclude
     private final SessionDataManager dataManager;
     private int sequenceNumber = 0;
@@ -190,6 +194,37 @@ public class BotActionManager {
 
     public void sendBreakBlockAnimation() {
         dataManager.sendPacket(new ServerboundSwingPacket(Hand.MAIN_HAND));
+    }
+
+    public void lookAt(Entity entity) {
+        if (entity == null) {
+            return;
+        }
+
+        double x = entity.x() - dataManager.clientEntity().x();
+        double y = (entity.y() + entity.height() / 2f) // Center of entity
+                - (dataManager.clientEntity().y() + EYE_HEIGHT); // Eye height
+
+        final int VER_1_14 = ProtocolVersion.v1_14.getVersion();
+        ProtocolVersion ver = dataManager.settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+        int version = ver.getVersion();
+
+        if (dataManager.controlState().sneaking()) {
+            if (version >= VER_1_14) {
+                // the sneak offset is 0.15 lower in 1.14+
+                y += 0.15f * 2;
+            }
+        }
+
+        double z = entity.z() - dataManager.clientEntity().z();
+
+        double distance = Math.sqrt(x * x + y * y + z * z);
+
+        float yaw = (float) Math.toDegrees(Math.atan2(z, x)) - 90;
+        float pitch = (float) -Math.toDegrees(Math.atan2(y, distance));
+
+        dataManager.clientEntity().yaw(yaw);
+        dataManager.clientEntity().pitch(pitch);
     }
 
     public record BlockPlaceData(SWVec3i againstPos, Direction blockFace) {
