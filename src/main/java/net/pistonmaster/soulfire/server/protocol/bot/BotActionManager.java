@@ -20,13 +20,12 @@ package net.pistonmaster.soulfire.server.protocol.bot;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
+import com.github.steveice10.mc.protocol.data.game.entity.player.InteractAction;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerAction;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerActionPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundSwingPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundUseItemOnPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundUseItemPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.*;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.soulfire.server.data.BlockState;
@@ -196,11 +195,7 @@ public class BotActionManager {
         dataManager.sendPacket(new ServerboundSwingPacket(Hand.MAIN_HAND));
     }
 
-    public void lookAt(Entity entity) {
-        if (entity == null) {
-            return;
-        }
-
+    public void lookAt(@NonNull Entity entity) {
         double x = entity.x() - dataManager.clientEntity().x();
         double y = (entity.y() + entity.height() / 2f) // Center of entity
                 - (dataManager.clientEntity().y() + EYE_HEIGHT); // Eye height
@@ -225,6 +220,21 @@ public class BotActionManager {
 
         dataManager.clientEntity().yaw(yaw);
         dataManager.clientEntity().pitch(pitch);
+    }
+
+    public void attack(@NonNull Entity entity, boolean swingArm) {
+        // TODO: 06/02/2024 check if the entity is "attackable" (i mean ignore arrows, egg,...)
+        if (swingArm) {
+            swingArm();
+        }
+        ServerboundInteractPacket packet = new ServerboundInteractPacket(entity.entityId(), InteractAction.ATTACK, dataManager.controlState().sneaking());
+        dataManager.sendPacket(packet);
+
+    }
+
+    public void swingArm() {
+        ServerboundSwingPacket swingPacket = new ServerboundSwingPacket(Hand.MAIN_HAND);
+        dataManager.sendPacket(swingPacket);
     }
 
     public record BlockPlaceData(SWVec3i againstPos, Direction blockFace) {
