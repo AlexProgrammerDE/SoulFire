@@ -70,10 +70,9 @@ public class SettingsManager {
         try {
             var settingsSerialized = deserializeGson.fromJson(json, RootDataStructure.class);
             var settingsData = settingsSerialized.settings();
-            var intProperties = new Object2IntArrayMap<PropertyKey>();
-            var doubleProperties = new Object2DoubleArrayMap<PropertyKey>();
-            var booleanProperties = new Object2BooleanArrayMap<PropertyKey>();
-            var stringProperties = new Object2ObjectArrayMap<PropertyKey, String>();
+            var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
+            var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
+            var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();
 
             for (var entry : settingsData.entrySet()) {
                 var namespace = entry.getKey();
@@ -94,7 +93,7 @@ public class SettingsManager {
                         if (primitive.isBoolean()) {
                             booleanProperties.put(propertyKey, primitive.getAsBoolean());
                         } else if (primitive.isNumber()) {
-                            intProperties.put(propertyKey, primitive.getAsInt());
+                            numberProperties.put(propertyKey, primitive.getAsNumber());
                         } else if (primitive.isString()) {
                             stringProperties.put(propertyKey, primitive.getAsString());
                         } else {
@@ -116,9 +115,8 @@ public class SettingsManager {
             }
 
             return new SettingsHolder(
-                    intProperties,
+                    numberProperties,
                     booleanProperties,
-                    doubleProperties,
                     stringProperties,
                     settingsSerialized.accounts(),
                     settingsSerialized.proxies()
