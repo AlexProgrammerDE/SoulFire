@@ -32,6 +32,7 @@ import lombok.ToString;
 import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.EntityType;
 import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.protocol.bot.container.SWItemStack;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
 import net.pistonmaster.soulfire.server.protocol.bot.state.EntityTrackerState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.LevelState;
@@ -44,7 +45,6 @@ import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Manages mostly block and interaction related stuff that requires to keep track of sequence numbers.
@@ -56,6 +56,8 @@ public class BotActionManager {
     @ToString.Exclude
     private final SessionDataManager dataManager;
     private int sequenceNumber = 0;
+    private long lastHit = 0;
+    private Map<String, Object> extraData = new HashMap<>();
 
     private static Optional<Vector3f> rayCastToBlock(BlockState blockState, Vector3d eyePosition, Vector3d headRotation, Vector3i targetBlock) {
         var intersections = new ArrayList<Vector3f>();
@@ -239,6 +241,7 @@ public class BotActionManager {
         }
         ServerboundInteractPacket packet = new ServerboundInteractPacket(entity.entityId(), InteractAction.ATTACK, dataManager.controlState().sneaking());
         dataManager.sendPacket(packet);
+        lastHit = System.currentTimeMillis();
     }
 
     public Entity getClosestEntity(double range, String whitelistedUser, boolean ignoreBots, boolean onlyInterractable, boolean musteBeSeen) {
@@ -335,8 +338,8 @@ public class BotActionManager {
                 if (box.intersects(new AABB(eye, vec)) || new AABB(eye, vec).intersects(box)) {
                     return false;
                 }
-            };
-        };
+            }
+        }
 
         return true;
     }
@@ -344,6 +347,29 @@ public class BotActionManager {
     public void swingArm() {
         ServerboundSwingPacket swingPacket = new ServerboundSwingPacket(Hand.MAIN_HAND);
         dataManager.sendPacket(swingPacket);
+    }
+
+    public long getCooldownRemainingTime() {
+        if (dataManager == null || dataManager.inventoryManager() == null || dataManager.inventoryManager().getPlayerInventory() == null) {
+            return 2000;
+        }
+
+        int itemSlot = dataManager.inventoryManager().heldItemSlot();
+        SWItemStack item = dataManager.inventoryManager().getPlayerInventory().hotbarSlot(itemSlot).item();
+        int cooldown = 500; // Default cooldown when you hit with your hand
+        if (item != null) {
+            //dataManager.onCooldown();
+            System.out.println("Item: " + item.type().id() + " " + item.getId());
+            System.out.println("CoolDowns: " + dataManager.itemCoolDowns().size());
+            dataManager.itemCoolDowns().forEach((k, v) -> System.out.println(" - " + k + " " + v));
+            cooldown = dataManager.itemCoolDowns().get(item.type().id()) * 50; // 50ms per tick
+        }
+        if (cooldown == 0) { // server didn't send a cooldown, so we need to use default item cooldown
+            // TODO: 2/7/24 add cooldown in items.json
+        }
+
+        System.out.println("Cooldown: " + cooldown);
+        return lastHit + cooldown - System.currentTimeMillis();
     }
 
     public record BlockPlaceData(SWVec3i againstPos, Direction blockFace) {

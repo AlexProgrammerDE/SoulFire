@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.server.plugins;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -27,6 +28,7 @@ import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInit
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.protocol.bot.BotActionManager;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
+import net.pistonmaster.soulfire.server.settings.BotSettings;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.DoubleProperty;
@@ -35,12 +37,36 @@ import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Random;
+
 public class Killaura implements InternalExtension {
+    private static final Random RANDOM = new Random();
     private static final Logger LOGGER = LoggerFactory.getLogger(Killaura.class);
 
     public static void onPre(BotPreTickEvent event) {
         BotConnection bot = event.connection();
         if (!bot.settingsHolder().get(KillauraSettings.ENABLE)) return;
+
+        BotActionManager manager = bot.sessionDataManager().botActionManager();
+
+        if (!manager.extraData().containsKey("next_hit")) {
+            manager.extraData().put("next_hit", System.currentTimeMillis());
+        }
+
+        long nextHit = (long) manager.extraData().get("next_hit");
+        if (nextHit > System.currentTimeMillis()) {
+            return;
+        }
+
+        ProtocolVersion ver = bot.sessionDataManager().settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+        if (ver.getVersion() < ProtocolVersion.v1_9.getVersion() || bot.settingsHolder().get(KillauraSettings.IGNORE_COOLDOWN)) {
+            double cpsMin = bot.settingsHolder().get(KillauraSettings.CPS_MIN);
+            double cpsMax = bot.settingsHolder().get(KillauraSettings.CPS_MAX);
+            double randomDelay = 1000.0d / (RANDOM.nextDouble() * (cpsMax - cpsMin) + cpsMin);
+            manager.extraData().put("next_hit", manager.lastHit() + randomDelay);
+        } else {
+            manager.extraData().put("next_hit", System.currentTimeMillis() + manager.getCooldownRemainingTime());
+        }
 
         String whitelistedUser = bot.settingsHolder().get(KillauraSettings.WHITELISTED_USER);
 
@@ -51,7 +77,6 @@ public class Killaura implements InternalExtension {
         double max = Math.max(lookRange, Math.max(hitRange, swingRange));
 
         //Entity entity = bot.botControl()..getClosestEntity(bot, max, whitelistedUser, true);
-        BotActionManager manager = bot.sessionDataManager().botActionManager();
         Entity entity = manager.getClosestEntity(max, whitelistedUser, true, true, bot.settingsHolder().get(KillauraSettings.CHECK_WALLS));
         if (entity == null) {
             //System.out.println("No entity found");
@@ -149,6 +174,28 @@ public class Killaura implements InternalExtension {
                 new String[]{"--killaura-ignore-cooldown", "--killaura-ic"},
                 "Ignore the 1.9+ attack cooldown to act like a 1.8 killaura",
                 false
+        );
+
+        public static final DoubleProperty CPS_MIN = BUILDER.ofDouble(
+                "cps-min",
+                "CPS Min",
+                new String[]{"--killaura-cps-min", "--killaura-cpsm"},
+                "Minimum CPS for the killaura",
+                1.0d,
+                0.1d,
+                20.0d,
+                0.1d
+        );
+
+        public static final DoubleProperty CPS_MAX = BUILDER.ofDouble(
+                "cps-max",
+                "CPS Max",
+                new String[]{"--killaura-cps-max", "--killaura-cpsm"},
+                "Maximum CPS for the killaura",
+                3.0d,
+                0.1d,
+                20.0d,
+                0.1d
         );
     }
 }
