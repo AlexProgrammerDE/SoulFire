@@ -1,7 +1,5 @@
 package net.pistonmaster.soulfire.launcher;
 
-import com.formdev.flatlaf.FlatDarkLaf;
-
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import java.awt.*;
@@ -23,12 +21,18 @@ public class SoulFireJava8Launcher {
             System.out.println("[SoulFire] You can download the latest version of Java at https://adoptopenjdk.net/");
 
             if (!GraphicsEnvironment.isHeadless() && args.length == 0) {
-                FlatDarkLaf.setup();
+                try {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                } catch (ReflectiveOperationException | UnsupportedLookAndFeelException e2) {
+                    throw new RuntimeException(e2);
+                }
                 new UnsupportedVersionDialog();
             }
-        } catch (ReflectiveOperationException e) {
+        } catch (ClassNotFoundException e) {
             System.out.println("SoulFireLauncher is not in the classpath!");
             e.printStackTrace();
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
         }
     }
 
