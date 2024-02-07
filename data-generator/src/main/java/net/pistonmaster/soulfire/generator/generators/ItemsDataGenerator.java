@@ -21,9 +21,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 
@@ -111,6 +113,42 @@ public class ItemsDataGenerator implements IDataGenerator {
             }
 
             itemDesc.add("foodProperties", foodDesc);
+        }
+
+        EquipmentSlot attributeSlot = null;
+        var attributeArray = new JsonArray();
+        for (var slot : EquipmentSlot.values()) {
+            var attributeModifiers = item.getDefaultAttributeModifiers(slot);
+            if (attributeModifiers.isEmpty()) {
+                continue;
+            }
+
+            if (attributeSlot != null) {
+                throw new IllegalStateException("Item " + item + " has attribute modifiers for multiple slots");
+            }
+
+            attributeSlot = slot;
+
+            for (var entry : attributeModifiers.asMap().entrySet()) {
+                var attributeDesc = new JsonObject();
+                attributeDesc.addProperty("name", Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(entry.getKey())).getPath());
+                var modifierArray = new JsonArray();
+                for (var modifier : entry.getValue()) {
+                    var modifierDesc = new JsonObject();
+                    modifierDesc.addProperty("uuid", modifier.getId().toString());
+                    modifierDesc.addProperty("amount", modifier.getAmount());
+                    modifierDesc.addProperty("operation", modifier.getOperation().name());
+                    modifierArray.add(modifierDesc);
+                }
+                attributeDesc.add("modifiers", modifierArray);
+
+                attributeArray.add(attributeDesc);
+            }
+        }
+
+        if (attributeSlot != null) {
+            itemDesc.addProperty("attributeSlot", attributeSlot.name());
+            itemDesc.add("attributes", attributeArray);
         }
 
         return itemDesc;

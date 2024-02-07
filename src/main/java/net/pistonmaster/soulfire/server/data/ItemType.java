@@ -26,7 +26,9 @@ import java.util.List;
 public record ItemType(int id, String name, int stackSize,
                        List<String> enchantCategories,
                        DepletionData depletionData,
-                       FoodProperties foodProperties) {
+                       FoodProperties foodProperties,
+                       EquipmentSlot attributeSlot,
+                       List<Attribute> attributes) {
     public static final Int2ReferenceMap<ItemType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
     public static final ItemType AIR = register("air");
