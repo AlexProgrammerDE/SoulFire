@@ -20,9 +20,7 @@ package net.pistonmaster.soulfire.client.settings;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.*;
-import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.account.AuthType;
@@ -73,6 +71,7 @@ public class SettingsManager {
             var settingsSerialized = deserializeGson.fromJson(json, RootDataStructure.class);
             var settingsData = settingsSerialized.settings();
             var intProperties = new Object2IntArrayMap<PropertyKey>();
+            var doubleProperties = new Object2DoubleArrayMap<PropertyKey>();
             var booleanProperties = new Object2BooleanArrayMap<PropertyKey>();
             var stringProperties = new Object2ObjectArrayMap<PropertyKey, String>();
 
@@ -119,6 +118,7 @@ public class SettingsManager {
             return new SettingsHolder(
                     intProperties,
                     booleanProperties,
+                    doubleProperties,
                     stringProperties,
                     settingsSerialized.accounts(),
                     settingsSerialized.proxies()
