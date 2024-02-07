@@ -356,17 +356,19 @@ public class BotActionManager {
         SWItemStack item = dataManager.inventoryManager().getPlayerInventory().hotbarSlot(itemSlot).item();
         int cooldown = 500; // Default cooldown when you hit with your hand
         if (item != null) {
-            //dataManager.onCooldown();
-            System.out.println("Item: " + item.type().id() + " " + item.getId());
-            System.out.println("CoolDowns: " + dataManager.itemCoolDowns().size());
-            dataManager.itemCoolDowns().forEach((k, v) -> System.out.println(" - " + k + " " + v));
             cooldown = dataManager.itemCoolDowns().get(item.type().id()) * 50; // 50ms per tick
-        }
-        if (cooldown == 0) { // server didn't send a cooldown, so we need to use default item cooldown
-            // TODO: 2/7/24 add cooldown in items.json
-        }
+            if (cooldown == 0) { // if the server hasn't changed the cooldown
+                double attackSpeedModifier = item.type().attributes().stream()
+                        .filter(attribute -> attribute.name().equals("generic.attack_speed"))
+                        .map(attribute -> attribute.modifiers()[0].amount())
+                        .findFirst()
+                        .orElse(0d);  // Default attack speed
 
-        System.out.println("Cooldown: " + cooldown);
+                double attackSpeed = 4.0 + attackSpeedModifier;
+                cooldown = (int) ((1 / attackSpeed) * 1000);
+
+            }
+        }
         return lastHit + cooldown - System.currentTimeMillis();
     }
 
