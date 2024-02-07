@@ -19,7 +19,10 @@ package net.pistonmaster.soulfire.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import lombok.Data;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.data.EntityType;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
@@ -30,9 +33,14 @@ import net.pistonmaster.soulfire.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
+import java.io.FileReader;
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 @Data
 public abstract class Entity {
+    private static final Map<Integer, Boolean> interrat = new HashMap<>();
     private final EntityMetadataState metadataState = new EntityMetadataState();
     private final EntityAttributeState attributeState = new EntityAttributeState();
     private final EntityEffectState effectState = new EntityEffectState();
@@ -148,5 +156,15 @@ public abstract class Entity {
         var w = width() / 2F;
         var h = height();
         return new AABB(x - w, y, z - w, x + w, y + h, z + w);
+    }
+
+    @SneakyThrows
+    public boolean canBeInterracted() {
+        if (interrat.isEmpty()) {
+            Gson gson = new Gson();
+            JsonObject jsonObject = gson.fromJson(new FileReader(getClass().getClassLoader().getResource("entities_interraction.json").getFile()), JsonObject.class);
+            jsonObject.entrySet().forEach(entry -> interrat.put(Integer.parseInt(entry.getKey()), entry.getValue().getAsBoolean()));
+        }
+        return interrat.getOrDefault(entityId, false);
     }
 }

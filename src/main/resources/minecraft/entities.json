@@ -5,7 +5,8 @@
     "width": 0.35,
     "height": 0.6,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 1,
@@ -13,7 +14,8 @@
     "width": 6.0,
     "height": 0.5,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 2,
@@ -21,7 +23,8 @@
     "width": 0.5,
     "height": 1.975,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 3,
@@ -29,7 +32,8 @@
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 4,
@@ -37,7 +41,8 @@
     "width": 0.75,
     "height": 0.42,
     "category": "axolotls",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 5,
@@ -45,7 +50,8 @@
     "width": 0.5,
     "height": 0.9,
     "category": "ambient",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 6,
@@ -53,7 +59,8 @@
     "width": 0.7,
     "height": 0.6,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 7,
@@ -61,7 +68,8 @@
     "width": 0.6,
     "height": 1.8,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 8,
@@ -69,7 +77,8 @@
     "width": 0.0,
     "height": 0.0,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 9,
@@ -77,7 +86,8 @@
     "width": 1.375,
     "height": 0.5625,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 10,
@@ -85,7 +95,8 @@
     "width": 0.6,
     "height": 1.7,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 11,
@@ -93,7 +104,8 @@
     "width": 1.7,
     "height": 2.375,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 12,
@@ -101,7 +113,8 @@
     "width": 0.6,
     "height": 0.7,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 13,
@@ -109,7 +122,8 @@
     "width": 0.7,
     "height": 0.5,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 14,
@@ -117,7 +131,8 @@
     "width": 1.375,
     "height": 0.5625,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 15,
@@ -125,7 +140,8 @@
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 16,
@@ -133,7 +149,8 @@
     "width": 0.4,
     "height": 0.7,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 17,
@@ -141,7 +158,8 @@
     "width": 0.5,
     "height": 0.3,
     "category": "water_ambient",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 18,
@@ -149,7 +167,8 @@
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 19,
@@ -157,7 +176,8 @@
     "width": 0.9,
     "height": 1.4,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 20,
@@ -165,7 +185,8 @@
     "width": 0.6,
     "height": 1.7,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 21,
@@ -173,7 +194,8 @@
     "width": 0.9,
     "height": 0.6,
     "category": "water_creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 22,
@@ -181,7 +203,8 @@
     "width": 1.3964844,
     "height": 1.5,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 23,
@@ -189,7 +212,8 @@
     "width": 1.0,
     "height": 1.0,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 24,
@@ -197,7 +221,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 25,
@@ -205,7 +230,8 @@
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 26,
@@ -213,7 +239,8 @@
     "width": 1.9975,
     "height": 1.9975,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 27,
@@ -221,7 +248,8 @@
     "width": 2.0,
     "height": 2.0,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 28,
@@ -229,7 +257,8 @@
     "width": 16.0,
     "height": 8.0,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 29,
@@ -237,7 +266,8 @@
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 30,
@@ -245,7 +275,8 @@
     "width": 0.6,
     "height": 2.9,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 31,
@@ -253,7 +284,8 @@
     "width": 0.4,
     "height": 0.3,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 32,
@@ -261,7 +293,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 33,
@@ -269,7 +302,8 @@
     "width": 0.5,
     "height": 0.8,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 34,
@@ -277,7 +311,8 @@
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 35,
@@ -285,7 +320,8 @@
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 36,
@@ -293,7 +329,8 @@
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 37,
@@ -301,7 +338,8 @@
     "width": 0.98,
     "height": 0.98,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 38,
@@ -309,7 +347,8 @@
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 39,
@@ -317,7 +356,8 @@
     "width": 0.6,
     "height": 0.7,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 40,
@@ -325,7 +365,8 @@
     "width": 0.5,
     "height": 0.5,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 41,
@@ -333,7 +374,8 @@
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 42,
@@ -341,7 +383,8 @@
     "width": 4.0,
     "height": 4.0,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 43,
@@ -349,7 +392,8 @@
     "width": 3.6,
     "height": 12.0,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 44,
@@ -357,7 +401,8 @@
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 45,
@@ -365,7 +410,8 @@
     "width": 0.8,
     "height": 0.8,
     "category": "underground_water_creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 46,
@@ -373,7 +419,8 @@
     "width": 0.9,
     "height": 1.3,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 47,
@@ -381,7 +428,8 @@
     "width": 0.85,
     "height": 0.85,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 48,
@@ -389,7 +437,8 @@
     "width": 1.3964844,
     "height": 1.4,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 49,
@@ -397,7 +446,8 @@
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 50,
@@ -405,7 +455,8 @@
     "width": 1.3964844,
     "height": 1.6,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 51,
@@ -413,7 +464,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 52,
@@ -421,7 +473,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 53,
@@ -429,7 +482,8 @@
     "width": 0.0,
     "height": 0.0,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 54,
@@ -437,7 +491,8 @@
     "width": 1.4,
     "height": 2.7,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 55,
@@ -445,7 +500,8 @@
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 56,
@@ -453,7 +509,8 @@
     "width": 0.0,
     "height": 0.0,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 57,
@@ -461,7 +518,8 @@
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 58,
@@ -469,7 +527,8 @@
     "width": 1.0,
     "height": 1.0,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 59,
@@ -477,7 +536,8 @@
     "width": 0.375,
     "height": 0.5,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 60,
@@ -485,7 +545,8 @@
     "width": 0.0,
     "height": 0.0,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 61,
@@ -493,7 +554,8 @@
     "width": 0.9,
     "height": 1.87,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 62,
@@ -501,7 +563,8 @@
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 63,
@@ -509,7 +572,8 @@
     "width": 2.04,
     "height": 2.04,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 64,
@@ -517,7 +581,8 @@
     "width": 0.0,
     "height": 0.0,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 65,
@@ -525,7 +590,8 @@
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 66,
@@ -533,7 +599,8 @@
     "width": 0.9,
     "height": 1.4,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 67,
@@ -541,7 +608,8 @@
     "width": 1.3964844,
     "height": 1.6,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 68,
@@ -549,7 +617,8 @@
     "width": 0.6,
     "height": 0.7,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 69,
@@ -557,7 +626,8 @@
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 70,
@@ -565,7 +635,8 @@
     "width": 1.3,
     "height": 1.25,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 71,
@@ -573,7 +644,8 @@
     "width": 0.5,
     "height": 0.9,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 72,
@@ -581,7 +653,8 @@
     "width": 0.9,
     "height": 0.5,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 73,
@@ -589,7 +662,8 @@
     "width": 0.9,
     "height": 0.9,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 74,
@@ -597,7 +671,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 75,
@@ -605,7 +680,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 76,
@@ -613,7 +689,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 77,
@@ -621,7 +698,8 @@
     "width": 1.4,
     "height": 1.4,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 78,
@@ -629,7 +707,8 @@
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 79,
@@ -637,7 +716,8 @@
     "width": 0.7,
     "height": 0.7,
     "category": "water_ambient",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 80,
@@ -645,7 +725,8 @@
     "width": 0.4,
     "height": 0.5,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 81,
@@ -653,7 +734,8 @@
     "width": 1.95,
     "height": 2.2,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 82,
@@ -661,7 +743,8 @@
     "width": 0.7,
     "height": 0.4,
     "category": "water_ambient",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 83,
@@ -669,7 +752,8 @@
     "width": 0.9,
     "height": 1.3,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 84,
@@ -677,7 +761,8 @@
     "width": 1.0,
     "height": 1.0,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 85,
@@ -685,7 +770,8 @@
     "width": 0.3125,
     "height": 0.3125,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 86,
@@ -693,7 +779,8 @@
     "width": 0.4,
     "height": 0.3,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 87,
@@ -701,7 +788,8 @@
     "width": 0.6,
     "height": 1.99,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 88,
@@ -709,7 +797,8 @@
     "width": 1.3964844,
     "height": 1.6,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 89,
@@ -717,7 +806,8 @@
     "width": 2.04,
     "height": 2.04,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 90,
@@ -725,7 +815,8 @@
     "width": 0.3125,
     "height": 0.3125,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 91,
@@ -733,7 +824,8 @@
     "width": 1.9,
     "height": 1.75,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 92,
@@ -741,7 +833,8 @@
     "width": 0.7,
     "height": 1.9,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 93,
@@ -749,7 +842,8 @@
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 94,
@@ -757,7 +851,8 @@
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 95,
@@ -765,7 +860,8 @@
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 96,
@@ -773,7 +869,8 @@
     "width": 1.4,
     "height": 0.9,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 97,
@@ -781,7 +878,8 @@
     "width": 0.8,
     "height": 0.8,
     "category": "water_creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 98,
@@ -789,7 +887,8 @@
     "width": 0.6,
     "height": 1.99,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 99,
@@ -797,7 +896,8 @@
     "width": 0.9,
     "height": 1.7,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 100,
@@ -805,7 +905,8 @@
     "width": 0.4,
     "height": 0.3,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 101,
@@ -813,7 +914,8 @@
     "width": 0.0,
     "height": 0.0,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 102,
@@ -821,7 +923,8 @@
     "width": 0.98,
     "height": 0.98,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 103,
@@ -829,7 +932,8 @@
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 104,
@@ -837,7 +941,8 @@
     "width": 0.9,
     "height": 1.87,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 105,
@@ -845,7 +950,8 @@
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 106,
@@ -853,7 +959,8 @@
     "width": 0.5,
     "height": 0.4,
     "category": "water_ambient",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 107,
@@ -861,7 +968,8 @@
     "width": 1.2,
     "height": 0.4,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 108,
@@ -869,7 +977,8 @@
     "width": 0.4,
     "height": 0.8,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 109,
@@ -877,7 +986,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 110,
@@ -885,7 +995,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 111,
@@ -893,7 +1004,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 112,
@@ -901,7 +1013,8 @@
     "width": 0.9,
     "height": 2.9,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 113,
@@ -909,7 +1022,8 @@
     "width": 0.3125,
     "height": 0.3125,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 114,
@@ -917,7 +1031,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 115,
@@ -925,7 +1040,8 @@
     "width": 0.9,
     "height": 3.5,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 116,
@@ -933,7 +1049,8 @@
     "width": 0.7,
     "height": 2.4,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 117,
@@ -941,7 +1058,8 @@
     "width": 0.3125,
     "height": 0.3125,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   },
   {
     "id": 118,
@@ -949,7 +1067,8 @@
     "width": 0.6,
     "height": 0.85,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 119,
@@ -957,7 +1076,8 @@
     "width": 1.3964844,
     "height": 1.4,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 120,
@@ -965,7 +1085,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 121,
@@ -973,7 +1094,8 @@
     "width": 1.3964844,
     "height": 1.6,
     "category": "creature",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 122,
@@ -981,7 +1103,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 123,
@@ -989,7 +1112,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false
+    "friendly": false,
+    "can_interact_with": true
   },
   {
     "id": 124,
@@ -997,7 +1121,8 @@
     "width": 0.6,
     "height": 1.8,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": true
   },
   {
     "id": 125,
@@ -1005,6 +1130,7 @@
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
-    "friendly": true
+    "friendly": true,
+    "can_interact_with": false
   }
 ]

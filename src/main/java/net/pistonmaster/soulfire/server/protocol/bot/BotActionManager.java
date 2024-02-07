@@ -223,7 +223,11 @@ public class BotActionManager {
     }
 
     public void attack(@NonNull Entity entity, boolean swingArm) {
-        // TODO: 06/02/2024 check if the entity is "attackable" (i mean ignore arrows, egg,...)
+        if (!entity.canBeInterracted()) {
+            System.err.println("Entity " + entity.entityId() + " can't be interacted with!");
+            return;
+        }
+
         if (swingArm) {
             swingArm();
         }
