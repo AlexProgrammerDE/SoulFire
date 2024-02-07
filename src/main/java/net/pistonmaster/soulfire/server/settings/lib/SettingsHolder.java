@@ -28,6 +28,7 @@ import java.util.function.Function;
 public record SettingsHolder(
         Object2IntMap<PropertyKey> intProperties,
         Object2BooleanMap<PropertyKey> booleanProperties,
+        Object2DoubleMap<PropertyKey> doubleProperties,
         Object2ObjectMap<PropertyKey, String> stringProperties,
         List<MinecraftAccount> accounts,
         List<SWProxy> proxies
@@ -35,6 +36,7 @@ public record SettingsHolder(
     public static final SettingsHolder EMPTY = new SettingsHolder(
             Object2IntMaps.emptyMap(),
             Object2BooleanMaps.emptyMap(),
+            Object2DoubleMaps.emptyMap(),
             Object2ObjectMaps.emptyMap(),
             List.of(),
             List.of()
@@ -42,6 +44,10 @@ public record SettingsHolder(
 
     public int get(IntProperty property) {
         return intProperties.getOrDefault(property.propertyKey(), property.defaultValue());
+    }
+
+    public double get(DoubleProperty property) {
+        return doubleProperties.getOrDefault(property.propertyKey(), property.defaultValue());
     }
 
     public boolean get(BooleanProperty property) {
