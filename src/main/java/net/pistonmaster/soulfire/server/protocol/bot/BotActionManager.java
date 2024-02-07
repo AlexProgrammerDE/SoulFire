@@ -240,7 +240,7 @@ public class BotActionManager {
     }
 
     public Entity getClosestEntity(double range, String whitelistedUser, boolean ignoreBots, boolean onlyInterractable) {
-        if (dataManager == null || dataManager.clientEntity() == null) {
+        if (dataManager.clientEntity() == null) {
             return null;
         }
 
@@ -295,6 +295,23 @@ public class BotActionManager {
         }
 
         return closest;
+    }
+
+    public double distanceTo(Entity entity) {
+        Vector3d vec = Vector3d.from(entity.x(), entity.y(), entity.z());
+        return distanceTo(vec);
+    }
+
+    public double distanceTo(Vector3d vec) {
+        if (dataManager.clientEntity() == null) {
+            return -1;
+        }
+
+        double x = vec.getX() - dataManager.clientEntity().x();
+        double y = vec.getY()- (dataManager.clientEntity().y() + 1.80f); // Eye height
+        double z = vec.getZ() - dataManager.clientEntity().z();
+
+        return (float) Math.sqrt(x * x + y * y + z * z);
     }
 
     public void swingArm() {
