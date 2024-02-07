@@ -289,10 +289,8 @@ public class BotActionManager {
                 if (botIds.contains(rawEntity.entityId())) continue;
             }
 
-
             double distance = Math.sqrt(Math.pow(entity.x() - x, 2) + Math.pow(entity.y() - y, 2) + Math.pow(entity.z() - z, 2));
             if (distance > range) continue;
-
 
             if (distance < closestDistance) {
                 closest = entity;
@@ -315,7 +313,7 @@ public class BotActionManager {
         }
 
         double x = vec.getX() - dataManager.clientEntity().x();
-        double y = vec.getY()- (dataManager.clientEntity().y() + 1.80f); // Eye height
+        double y = vec.getY() - (dataManager.clientEntity().y() + 1.80f); // Eye height
         double z = vec.getZ() - dataManager.clientEntity().z();
 
         return Math.sqrt(x * x + y * y + z * z);
