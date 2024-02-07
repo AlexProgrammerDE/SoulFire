@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot;
 
+import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
@@ -29,16 +30,19 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.soulfire.server.data.BlockState;
+import net.pistonmaster.soulfire.server.data.EntityType;
 import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
+import net.pistonmaster.soulfire.server.protocol.bot.state.EntityTrackerState;
+import net.pistonmaster.soulfire.server.protocol.bot.state.PlayerListState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
+import net.pistonmaster.soulfire.server.protocol.bot.state.entity.RawEntity;
 import net.pistonmaster.soulfire.server.settings.BotSettings;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Manages mostly block and interaction related stuff that requires to keep track of sequence numbers.
@@ -233,7 +237,64 @@ public class BotActionManager {
         }
         ServerboundInteractPacket packet = new ServerboundInteractPacket(entity.entityId(), InteractAction.ATTACK, dataManager.controlState().sneaking());
         dataManager.sendPacket(packet);
+    }
 
+    public Entity getClosestEntity(double range, String whitelistedUser, boolean ignoreBots, boolean onlyInterractable) {
+        if (dataManager == null || dataManager.clientEntity() == null) {
+            return null;
+        }
+
+        double x = dataManager.clientEntity().x();
+        double y = dataManager.clientEntity().y();
+        double z = dataManager.clientEntity().z();
+
+        EntityTrackerState ets = dataManager.entityTrackerState();
+        Map<Integer, Entity> entities = ets.entities();
+
+        Entity closest = null;
+        double closestDistance = Double.MAX_VALUE;
+
+        for (Entity entity : entities.values()) {
+            if (entity.entityId() == dataManager.clientEntity().entityId()) {
+                continue;
+            }
+
+            if (onlyInterractable && !entity.canBeInterracted()) continue;
+
+
+            if (whitelistedUser != null && !whitelistedUser.isEmpty() && entity.entityType() == EntityType.PLAYER) {
+                PlayerListState connectedUsers = dataManager.playerListState();
+                PlayerListEntry playerListEntry = connectedUsers.entries().get(((RawEntity) entity).uuid());
+                if (playerListEntry.getProfile() != null) {
+                    if (playerListEntry.getProfile().getName().equalsIgnoreCase(whitelistedUser))
+                        continue;
+                }
+            }
+
+
+            if (ignoreBots && entity instanceof RawEntity rawEntity) {
+                Set<Integer> botIds = new HashSet<>();
+                dataManager.connection().attackManager().botConnections().forEach(b -> {
+                    if (b.sessionDataManager() != null && b.sessionDataManager().clientEntity() != null) {
+                        botIds.add(b.sessionDataManager().clientEntity().entityId());
+                    }
+                });
+
+                if (botIds.contains(rawEntity.entityId())) continue;
+            }
+
+
+            double distance = Math.sqrt(Math.pow(entity.x() - x, 2) + Math.pow(entity.y() - y, 2) + Math.pow(entity.z() - z, 2));
+            if (distance > range) continue;
+
+
+            if (distance < closestDistance) {
+                closest = entity;
+                closestDistance = distance;
+            }
+        }
+
+        return closest;
     }
 
     public void swingArm() {
