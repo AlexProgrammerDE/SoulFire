@@ -52,7 +52,7 @@ public class Killaura implements InternalExtension {
 
         //Entity entity = bot.botControl()..getClosestEntity(bot, max, whitelistedUser, true);
         BotActionManager manager = bot.sessionDataManager().botActionManager();
-        Entity entity = manager.getClosestEntity(max, whitelistedUser, true, true);
+        Entity entity = manager.getClosestEntity(max, whitelistedUser, true, true, bot.settingsHolder().get(KillauraSettings.CHECK_WALLS));
         if (entity == null) {
             //System.out.println("No entity found");
             return;
@@ -135,7 +135,7 @@ public class Killaura implements InternalExtension {
                 0.0d
         );
 
-        public static final BooleanProperty CHECK_WALLS = BUILDER.ofBoolean( // TODO: 2/7/24 use this too
+        public static final BooleanProperty CHECK_WALLS = BUILDER.ofBoolean(
                 "check-walls",
                 "Check Walls",
                 new String[]{"--killaura-check-walls", "--killaura-cw"},
@@ -143,7 +143,7 @@ public class Killaura implements InternalExtension {
                 true
         );
 
-        public static final BooleanProperty IGNORE_COOLDOWN = BUILDER.ofBoolean( // TODO: 2/7/24 use this too
+        public static final BooleanProperty IGNORE_COOLDOWN = BUILDER.ofBoolean( // TODO: 2/7/24 use this
                 "ignore-cooldown",
                 "Ignore Cooldown",
                 new String[]{"--killaura-ignore-cooldown", "--killaura-ic"},
