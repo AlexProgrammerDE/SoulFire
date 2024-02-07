@@ -34,6 +34,7 @@ import net.pistonmaster.soulfire.server.data.EntityType;
 import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
 import net.pistonmaster.soulfire.server.protocol.bot.state.EntityTrackerState;
+import net.pistonmaster.soulfire.server.protocol.bot.state.LevelState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.PlayerListState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.RawEntity;
@@ -43,6 +44,7 @@ import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Manages mostly block and interaction related stuff that requires to keep track of sequence numbers.
@@ -239,7 +241,7 @@ public class BotActionManager {
         dataManager.sendPacket(packet);
     }
 
-    public Entity getClosestEntity(double range, String whitelistedUser, boolean ignoreBots, boolean onlyInterractable) {
+    public Entity getClosestEntity(double range, String whitelistedUser, boolean ignoreBots, boolean onlyInterractable, boolean musteBeSeen) {
         if (dataManager.clientEntity() == null) {
             return null;
         }
@@ -260,6 +262,7 @@ public class BotActionManager {
             }
 
             if (onlyInterractable && !entity.canBeInterracted()) continue;
+            if (musteBeSeen && !canSee(entity)) continue;
 
 
             if (whitelistedUser != null && !whitelistedUser.isEmpty() && entity.entityType() == EntityType.PLAYER) {
@@ -298,7 +301,8 @@ public class BotActionManager {
     }
 
     public double distanceTo(Entity entity) {
-        Vector3d vec = Vector3d.from(entity.x(), entity.y(), entity.z());
+        double middleHeight = entity.y() + entity.height() / 2f;
+        Vector3d vec = Vector3d.from(entity.x(), middleHeight, entity.z());
         return distanceTo(vec);
     }
 
@@ -311,7 +315,30 @@ public class BotActionManager {
         double y = vec.getY()- (dataManager.clientEntity().y() + 1.80f); // Eye height
         double z = vec.getZ() - dataManager.clientEntity().z();
 
-        return (float) Math.sqrt(x * x + y * y + z * z);
+        return Math.sqrt(x * x + y * y + z * z);
+    }
+
+    public boolean canSee(Entity entity) {
+        double middleHeight = entity.y() + entity.height() / 2f;
+        Vector3d vec = Vector3d.from(entity.x(), middleHeight, entity.z());
+        return canSee(vec);
+    }
+
+    public boolean canSee(Vector3d vec) {
+        double distance = distanceTo(vec);
+        if (distance >= 256) {
+            return false;
+        }
+        Vector3d eye = dataManager.clientEntity().getEyePosition();
+        for (Map.Entry<String, LevelState> entry : dataManager.levels().entrySet()) {
+            for (AABB box : entry.getValue().getCollisionBoxes(new AABB(eye, vec))) {
+                if (box.intersects(new AABB(eye, vec)) || new AABB(eye, vec).intersects(box)) {
+                    return false;
+                }
+            };
+        };
+
+        return true;
     }
 
     public void swingArm() {
