@@ -38,13 +38,9 @@ import org.slf4j.LoggerFactory;
 public class Killaura implements InternalExtension {
     private static final Logger LOGGER = LoggerFactory.getLogger(Killaura.class);
 
-    private static int tick = 0;
-
     public static void onPre(BotPreTickEvent event) {
-        if (tick++ % 5 != 0) return;
-
         BotConnection bot = event.connection();
-        //if (!bot.settingsHolder().get(KillauraSettings.ENABLE)) return;
+        if (!bot.settingsHolder().get(KillauraSettings.ENABLE)) return;
 
         String whitelistedUser = bot.settingsHolder().get(KillauraSettings.WHITELISTED_USER);
 
@@ -91,7 +87,7 @@ public class Killaura implements InternalExtension {
     @NoArgsConstructor(access = AccessLevel.NONE)
     private static class KillauraSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("plugin-killaura");
-        public static final BooleanProperty ENABLE = BUILDER.ofBoolean( // TODO: 2/7/24 use this x)
+        public static final BooleanProperty ENABLE = BUILDER.ofBoolean(
                 "enable",
                 "Enable",
                 new String[]{"--enable-killaura"},
