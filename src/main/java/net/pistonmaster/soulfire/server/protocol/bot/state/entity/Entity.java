@@ -21,6 +21,7 @@ import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -33,14 +34,17 @@ import net.pistonmaster.soulfire.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.io.FileReader;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 @Data
 public abstract class Entity {
-    private static final Map<Integer, Boolean> interrat = new HashMap<>();
+    private static final Map<Integer, Boolean> interract = new HashMap<>();
     private final EntityMetadataState metadataState = new EntityMetadataState();
     private final EntityAttributeState attributeState = new EntityAttributeState();
     private final EntityEffectState effectState = new EntityEffectState();
@@ -159,12 +163,18 @@ public abstract class Entity {
     }
 
     @SneakyThrows
-    public boolean canBeInterracted() {
-        if (interrat.isEmpty()) {
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public synchronized boolean canBeInterracted() {
+        if (interract.isEmpty()) {
             Gson gson = new Gson();
-            JsonObject jsonObject = gson.fromJson(new FileReader(getClass().getClassLoader().getResource("entities_interraction.json").getFile()), JsonObject.class);
-            jsonObject.entrySet().forEach(entry -> interrat.put(Integer.parseInt(entry.getKey()), entry.getValue().getAsBoolean()));
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("minecraft/entities_interraction.json");
+            if (inputStream == null) {
+                throw new FileNotFoundException("Resource file minecraft/entities_interraction.json not found");
+            }
+            JsonReader reader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            JsonObject jsonObject = gson.fromJson(reader, JsonObject.class);
+            jsonObject.entrySet().forEach(entry -> interract.put(Integer.parseInt(entry.getKey()), entry.getValue().getAsBoolean()));
         }
-        return interrat.getOrDefault(entityId, false);
+        return interract.getOrDefault(entityType.id(), true);
     }
 }
