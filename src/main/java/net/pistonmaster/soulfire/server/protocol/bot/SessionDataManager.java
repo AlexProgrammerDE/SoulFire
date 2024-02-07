@@ -73,8 +73,8 @@ import net.pistonmaster.soulfire.server.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.soulfire.server.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.soulfire.server.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.soulfire.server.data.EntityType;
-import net.pistonmaster.soulfire.server.data.ResourceData;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
+import net.pistonmaster.soulfire.server.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.soulfire.server.protocol.bot.container.InventoryManager;
 import net.pistonmaster.soulfire.server.protocol.bot.container.SWItemStack;
 import net.pistonmaster.soulfire.server.protocol.bot.container.WindowContainer;
@@ -999,7 +999,7 @@ public final class SessionDataManager {
         int blockCount = buf.readShort();
 
         var chunkPalette = codec.readDataPalette(buf, PaletteType.CHUNK,
-                ResourceData.GLOBAL_BLOCK_PALETTE.blockBitsPerEntry());
+                GlobalBlockPalette.INSTANCE.blockBitsPerEntry());
         var biomePalette = codec.readDataPalette(buf, PaletteType.BIOME,
                 biomesEntryBitsSize);
         return new ChunkSection(blockCount, chunkPalette, biomePalette);

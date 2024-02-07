@@ -21,8 +21,8 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.BlockType;
-import net.pistonmaster.soulfire.server.data.ResourceData;
 import net.pistonmaster.soulfire.server.protocol.bot.block.BlockAccessor;
+import net.pistonmaster.soulfire.server.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.soulfire.server.protocol.bot.model.ChunkKey;
 import net.pistonmaster.soulfire.server.protocol.bot.utils.SectionUtils;
 import net.pistonmaster.soulfire.server.util.NoopLock;
@@ -131,7 +131,7 @@ public class ChunkHolder implements BlockAccessor {
             return VOID_AIR_BLOCK_STATE;
         }
 
-        return ResourceData.GLOBAL_BLOCK_PALETTE.getBlockStateForStateId(chunkData.getBlock(x, y, z));
+        return GlobalBlockPalette.INSTANCE.getBlockStateForStateId(chunkData.getBlock(x, y, z));
     }
 
     public boolean isOutsideBuildHeight(int y) {

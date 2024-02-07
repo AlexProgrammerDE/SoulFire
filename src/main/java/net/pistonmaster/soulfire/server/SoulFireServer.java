@@ -44,7 +44,6 @@ import net.pistonmaster.soulfire.server.api.ServerExtension;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.attack.AttackInitEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
-import net.pistonmaster.soulfire.server.data.ResourceData;
 import net.pistonmaster.soulfire.server.data.TranslationMapper;
 import net.pistonmaster.soulfire.server.grpc.RPCServer;
 import net.pistonmaster.soulfire.server.plugins.*;
@@ -79,18 +78,13 @@ import java.util.concurrent.Executors;
 @Slf4j
 @Getter
 public class SoulFireServer {
-    public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER;
     public static final Gson GENERAL_GSON = new Gson();
-
-    // Static, but the preloading happens in ResourceData since we don't wanna init any constructors
-    static {
-        PLAIN_MESSAGE_SERIALIZER = PlainTextComponentSerializer.builder().flattener(
-                ComponentFlattener.basic()
-                        .toBuilder()
-                        .mapper(TranslatableComponent.class, new TranslationMapper(ResourceData.MOJANG_TRANSLATIONS))
-                        .build()
-        ).build();
-    }
+    public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER = PlainTextComponentSerializer.builder().flattener(
+            ComponentFlattener.basic()
+                    .toBuilder()
+                    .mapper(TranslatableComponent.class, TranslationMapper.INSTANCE)
+                    .build()
+    ).build();
 
     private final Injector injector = new InjectorBuilder()
             .addDefaultHandlers("net.pistonmaster.soulfire")
