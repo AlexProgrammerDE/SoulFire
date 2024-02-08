@@ -29,6 +29,7 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import net.pistonmaster.soulfire.server.data.AttributeType;
 import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.EntityType;
 import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
@@ -359,8 +360,8 @@ public class BotActionManager {
             cooldown = dataManager.itemCoolDowns().get(item.type().id()) * 50; // 50ms per tick
             if (cooldown == 0) { // if the server hasn't changed the cooldown
                 double attackSpeedModifier = item.type().attributes().stream()
-                        .filter(attribute -> attribute.name().equals("generic.attack_speed"))
-                        .map(attribute -> attribute.modifiers()[0].amount())
+                        .filter(attribute -> attribute.type() == AttributeType.GENERIC_ATTACK_SPEED)
+                        .map(attribute -> attribute.modifiers().get(0).amount())
                         .findFirst()
                         .orElse(0d);  // Default attack speed
 

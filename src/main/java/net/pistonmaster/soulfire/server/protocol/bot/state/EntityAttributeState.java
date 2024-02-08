@@ -29,6 +29,6 @@ public class EntityAttributeState {
     private final Map<AttributeType, AttributeState> attributeStore = new Object2ObjectOpenHashMap<>();
 
     public AttributeState getOrCreateAttribute(AttributeType type) {
-        return attributeStore.computeIfAbsent(type, k -> new AttributeState(type.defaultValue(), new ArrayList<>()));
+        return attributeStore.computeIfAbsent(type, k -> new AttributeState(type, type.defaultValue(), new ArrayList<>()));
     }
 }
