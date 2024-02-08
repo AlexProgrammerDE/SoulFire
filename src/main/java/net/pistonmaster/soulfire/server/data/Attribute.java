@@ -17,14 +17,10 @@
  */
 package net.pistonmaster.soulfire.server.data;
 
+import java.util.List;
 import java.util.UUID;
 
-public record Attribute(String name, Modifier[] modifiers) {
-    public record Modifier(UUID uuid, double amount, Operation operation) {
-        public enum Operation {
-            ADDITION,
-            MULTIPLY_BASE,
-            MULTIPLY_TOTAL
-        }
+public record Attribute(AttributeType type, List<Modifier> modifiers) {
+    public record Modifier(UUID uuid, double amount, ModifierOperation operation) {
     }
 }

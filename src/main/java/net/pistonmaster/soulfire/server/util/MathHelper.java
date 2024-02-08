@@ -36,6 +36,11 @@ public class MathHelper {
         return value < min ? min : (value > max ? max : value);
     }
 
+
+    public static double doubleClamp(double value, double min, double max) {
+        return Math.max(min, Math.min(value, max));
+    }
+
     public static double lengthSquared(double x, double y, double z) {
         return x * x + y * y + z * z;
     }

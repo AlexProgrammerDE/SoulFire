@@ -26,12 +26,13 @@ import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.client.ClientCommandManager;
 import net.pistonmaster.soulfire.client.grpc.RPCClient;
 import net.pistonmaster.soulfire.client.settings.SettingsManager;
-import net.pistonmaster.soulfire.grpc.generated.*;
+import net.pistonmaster.soulfire.grpc.generated.ClientDataRequest;
+import net.pistonmaster.soulfire.grpc.generated.DoubleSetting;
+import net.pistonmaster.soulfire.grpc.generated.IntSetting;
 import net.pistonmaster.soulfire.server.settings.lib.property.PropertyKey;
 import net.pistonmaster.soulfire.util.ShutdownManager;
 import picocli.CommandLine;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -148,7 +149,7 @@ public class CLIManager {
 
                                 var optionSpec = CommandLine.Model.OptionSpec.builder(singleEntry.getCliFlagsList().toArray(new String[0]))
                                         .description(description)
-                                        .typeInfo(new ComboTypeInfo(comboEntry))
+                                        .type(String.class)
                                         .initialValue(comboEntry.getOptionsList().get(comboEntry.getDef()).getId())
                                         .hasInitialValue(true)
                                         .setter(new CommandLine.Model.ISetter() {
@@ -245,77 +246,5 @@ public class CLIManager {
 
     public void shutdown() {
         shutdownManager.shutdownSoftware(true);
-    }
-
-    private record ComboTypeInfo(ComboSetting comboSetting) implements CommandLine.Model.ITypeInfo {
-        @Override
-        public boolean isBoolean() {
-            return false;
-        }
-
-        @Override
-        public boolean isMultiValue() {
-            return false;
-        }
-
-        @Override
-        public boolean isOptional() {
-            return false;
-        }
-
-        @Override
-        public boolean isArray() {
-            return false;
-        }
-
-        @Override
-        public boolean isCollection() {
-            return false;
-        }
-
-        @Override
-        public boolean isMap() {
-            return false;
-        }
-
-        @Override
-        public boolean isEnum() {
-            return true;
-        }
-
-        @Override
-        public List<String> getEnumConstantNames() {
-            return comboSetting.getOptionsList().stream().map(ComboOption::getId).toList();
-        }
-
-        @Override
-        public String getClassName() {
-            return null;
-        }
-
-        @Override
-        public String getClassSimpleName() {
-            return null;
-        }
-
-        @Override
-        public List<CommandLine.Model.ITypeInfo> getAuxiliaryTypeInfos() {
-            return null;
-        }
-
-        @Override
-        public List<String> getActualGenericTypeArguments() {
-            return null;
-        }
-
-        @Override
-        public Class<?> getType() {
-            return null;
-        }
-
-        @Override
-        public Class<?>[] getAuxiliaryTypes() {
-            return new Class[0];
-        }
     }
 }

@@ -30,6 +30,16 @@ public record ComboProperty(
         ComboOption[] options,
         int defaultValue
 ) implements SingleProperty {
+    public ComboProperty {
+        if (options.length == 0) {
+            throw new IllegalArgumentException("Options must not be empty!");
+        }
+
+        if (defaultValue < 0 || defaultValue >= options.length) {
+            throw new IllegalArgumentException("Default value must be in range of options!");
+        }
+    }
+
     public static <T extends Enum<T>> String capitalizeEnum(T enumValue) {
         return String.join(" ", Arrays.stream(enumValue.name().split("_"))
                 .map(ComboProperty::capitalizeString)
