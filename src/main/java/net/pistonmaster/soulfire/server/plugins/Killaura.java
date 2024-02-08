@@ -34,6 +34,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.DoubleProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
+import org.cloudburstmc.math.vector.Vector3d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,17 +67,19 @@ public class Killaura implements InternalExtension {
 
         double max = Math.max(lookRange, Math.max(hitRange, swingRange));
 
-        //Entity entity = bot.botControl()..getClosestEntity(bot, max, whitelistedUser, true);
         Entity entity = manager.getClosestEntity(max, whitelistedUser, true, true, bot.settingsHolder().get(KillauraSettings.CHECK_WALLS));
         if (entity == null) {
-            //System.out.println("No entity found");
             return;
         }
 
         double distance = manager.distanceTo(entity);
+        Vector3d bestVisiblePoint = manager.getEntityVisiblePoint(entity);
+        if (bestVisiblePoint != null) {
+            distance = manager.distanceTo(bestVisiblePoint);
+        }
         boolean swing = distance <= swingRange;
         if (distance <= lookRange) {
-            manager.lookAt(entity);
+            manager.lookAt(bestVisiblePoint == null ? entity.pos() : bestVisiblePoint);
         }
 
         if (distance <= hitRange) {
