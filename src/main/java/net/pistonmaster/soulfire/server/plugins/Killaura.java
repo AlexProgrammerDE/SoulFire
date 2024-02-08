@@ -58,16 +58,6 @@ public class Killaura implements InternalExtension {
             return;
         }
 
-        ProtocolVersion ver = bot.sessionDataManager().settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
-        if (ver.getVersion() < ProtocolVersion.v1_9.getVersion() || bot.settingsHolder().get(KillauraSettings.IGNORE_COOLDOWN)) {
-            double cpsMin = bot.settingsHolder().get(KillauraSettings.CPS_MIN);
-            double cpsMax = bot.settingsHolder().get(KillauraSettings.CPS_MAX);
-            double randomDelay = 1000.0d / (RANDOM.nextDouble() * (cpsMax - cpsMin) + cpsMin);
-            manager.extraData().put("next_hit", manager.lastHit() + randomDelay);
-        } else {
-            manager.extraData().put("next_hit", System.currentTimeMillis() + manager.getCooldownRemainingTime());
-        }
-
         String whitelistedUser = bot.settingsHolder().get(KillauraSettings.WHITELISTED_USER);
 
         double lookRange = bot.settingsHolder().get(KillauraSettings.LOOK_RANGE);
@@ -93,6 +83,16 @@ public class Killaura implements InternalExtension {
             manager.attack(entity, swing);
         } else if (swing) {
             manager.swingArm();
+        }
+
+        ProtocolVersion ver = bot.sessionDataManager().settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+        if (ver.getVersion() < ProtocolVersion.v1_9.getVersion() || bot.settingsHolder().get(KillauraSettings.IGNORE_COOLDOWN)) {
+            double cpsMin = bot.settingsHolder().get(KillauraSettings.CPS_MIN);
+            double cpsMax = bot.settingsHolder().get(KillauraSettings.CPS_MAX);
+            double randomDelay = 1000.0d / (RANDOM.nextDouble() * (cpsMax - cpsMin) + cpsMin);
+            manager.extraData().put("next_hit", manager.lastHit() + randomDelay);
+        } else {
+            manager.extraData().put("next_hit", System.currentTimeMillis() + manager.getCooldownRemainingTime());
         }
     }
 
@@ -168,7 +168,7 @@ public class Killaura implements InternalExtension {
                 true
         );
 
-        public static final BooleanProperty IGNORE_COOLDOWN = BUILDER.ofBoolean( // TODO: 2/7/24 use this
+        public static final BooleanProperty IGNORE_COOLDOWN = BUILDER.ofBoolean(
                 "ignore-cooldown",
                 "Ignore Cooldown",
                 new String[]{"--killaura-ignore-cooldown", "--killaura-ic"},
@@ -181,7 +181,7 @@ public class Killaura implements InternalExtension {
                 "CPS Min",
                 new String[]{"--killaura-cps-min", "--killaura-cpsm"},
                 "Minimum CPS for the killaura",
-                1.0d,
+                8.0d,
                 0.1d,
                 20.0d,
                 0.1d
@@ -192,7 +192,7 @@ public class Killaura implements InternalExtension {
                 "CPS Max",
                 new String[]{"--killaura-cps-max", "--killaura-cpsm"},
                 "Maximum CPS for the killaura",
-                3.0d,
+                12.0d,
                 0.1d,
                 20.0d,
                 0.1d
