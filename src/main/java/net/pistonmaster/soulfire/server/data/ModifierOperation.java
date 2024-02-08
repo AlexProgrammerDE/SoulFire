@@ -15,20 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.soulfire.server.protocol.bot.state;
+package net.pistonmaster.soulfire.server.data;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import lombok.Data;
-import net.pistonmaster.soulfire.server.data.AttributeType;
-
-import java.util.ArrayList;
-import java.util.Map;
-
-@Data
-public class EntityAttributeState {
-    private final Map<AttributeType, AttributeState> attributeStore = new Object2ObjectOpenHashMap<>();
-
-    public AttributeState getOrCreateAttribute(AttributeType type) {
-        return attributeStore.computeIfAbsent(type, k -> new AttributeState(type.defaultValue(), new ArrayList<>()));
-    }
+public enum ModifierOperation {
+    ADDITION,
+    MULTIPLY_BASE,
+    MULTIPLY_TOTAL
 }

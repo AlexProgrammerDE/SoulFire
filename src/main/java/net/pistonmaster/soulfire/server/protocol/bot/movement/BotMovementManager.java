@@ -17,17 +17,11 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.movement;
 
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeModifier;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.ModifierOperation;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.Getter;
-import net.pistonmaster.soulfire.server.data.BlockState;
-import net.pistonmaster.soulfire.server.data.BlockTags;
-import net.pistonmaster.soulfire.server.data.BlockType;
+import net.pistonmaster.soulfire.server.data.*;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
-import net.pistonmaster.soulfire.server.protocol.bot.state.EntityAttributeState;
+import net.pistonmaster.soulfire.server.protocol.bot.state.AttributeState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.LevelState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.ClientEntity;
@@ -470,32 +464,25 @@ public class BotMovementManager {
 
     public float getSpeed() {
         var attribute = movementState.entity().attributeState();
-        Attribute playerSpeedAttribute;
-        if (attribute.hasAttribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED)) {
-            // Use server-side player attributes
-            playerSpeedAttribute = attribute.getAttribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED);
-        } else {
-            // Create an attribute if the player does not have it
-            playerSpeedAttribute = new Attribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED, physics.playerSpeed);
-        }
+        AttributeState playerSpeedAttribute = attribute.getOrCreateAttribute(AttributeType.GENERIC_MOVEMENT_SPEED);
 
         if (controlState.sprinting()) {
-            if (playerSpeedAttribute.getModifiers().stream().noneMatch(modifier ->
-                    modifier.getUuid().equals(physics.sprintingUUID))) {
-                playerSpeedAttribute.getModifiers().add(new AttributeModifier(
+            if (playerSpeedAttribute.modifiers().stream().noneMatch(modifier ->
+                    modifier.uuid().equals(physics.sprintingUUID))) {
+                playerSpeedAttribute.modifiers().add(new Attribute.Modifier(
                         physics.sprintingUUID,
                         physics.sprintSpeed,
-                        ModifierOperation.MULTIPLY
+                        ModifierOperation.MULTIPLY_TOTAL
                 ));
             }
         } else {
             // Client-side sprinting (don't rely on server-side sprinting)
             // setSprinting in LivingEntity.java
-            playerSpeedAttribute.getModifiers().removeIf(modifier ->
-                    modifier.getUuid().equals(physics.sprintingUUID));
+            playerSpeedAttribute.modifiers().removeIf(modifier ->
+                    modifier.uuid().equals(physics.sprintingUUID));
         }
 
-        return (float) EntityAttributeState.getAttributeValue(playerSpeedAttribute);
+        return (float) clientEntity.getAttributeValue(AttributeType.GENERIC_MOVEMENT_SPEED);
     }
 
     public void moveEntity(LevelState world, double dx, double dy, double dz) {

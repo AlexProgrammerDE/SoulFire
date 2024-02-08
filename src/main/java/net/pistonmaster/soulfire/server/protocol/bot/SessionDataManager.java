@@ -24,8 +24,6 @@ import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.data.game.ResourcePackStatus;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.GlobalPos;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerSpawnInfo;
@@ -72,8 +70,7 @@ import net.pistonmaster.soulfire.server.api.event.bot.BotJoinedEvent;
 import net.pistonmaster.soulfire.server.api.event.bot.BotPostTickEvent;
 import net.pistonmaster.soulfire.server.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.soulfire.server.api.event.bot.ChatMessageReceiveEvent;
-import net.pistonmaster.soulfire.server.data.EntityType;
-import net.pistonmaster.soulfire.server.data.ResourceData;
+import net.pistonmaster.soulfire.server.data.*;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.protocol.bot.container.InventoryManager;
 import net.pistonmaster.soulfire.server.protocol.bot.container.SWItemStack;
@@ -412,8 +409,8 @@ public final class SessionDataManager {
         );
 
         var attributeState = clientEntity.attributeState();
-        attributeState.setAttribute(new Attribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED, abilitiesData.walkSpeed()));
-        attributeState.setAttribute(new Attribute(AttributeType.Builtin.GENERIC_FLYING_SPEED, abilitiesData.flySpeed()));
+        attributeState.getOrCreateAttribute(AttributeType.GENERIC_MOVEMENT_SPEED).baseValue(abilitiesData.walkSpeed());
+        attributeState.getOrCreateAttribute(AttributeType.GENERIC_FLYING_SPEED).baseValue(abilitiesData.flySpeed());
 
         controlState.flying(abilitiesData.flying());
     }
@@ -797,7 +794,23 @@ public final class SessionDataManager {
         }
 
         for (var entry : packet.getAttributes()) {
-            state.attributeState().setAttribute(entry);
+            var attributeType = AttributeType.getByName(entry.getType().getIdentifier());
+            if (attributeType == null) {
+                log.warn("Received unknown attribute type {}", entry.getType().getIdentifier());
+                continue;
+            }
+
+            state.attributeState().getOrCreateAttribute(attributeType)
+                    .baseValue(entry.getValue())
+                    .modifiers(entry.getModifiers().stream().map(modifier -> new Attribute.Modifier(
+                            modifier.getUuid(),
+                            modifier.getAmount(),
+                            switch (modifier.getOperation()) {
+                                case ADD -> ModifierOperation.ADDITION;
+                                case ADD_MULTIPLIED -> ModifierOperation.MULTIPLY_BASE;
+                                case MULTIPLY -> ModifierOperation.MULTIPLY_TOTAL;
+                            }
+                    )).toList());
         }
     }
 

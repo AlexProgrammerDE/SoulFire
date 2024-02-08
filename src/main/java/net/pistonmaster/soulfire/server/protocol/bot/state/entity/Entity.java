@@ -25,6 +25,7 @@ import com.google.gson.stream.JsonReader;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.soulfire.server.data.AttributeType;
 import net.pistonmaster.soulfire.server.data.EntityType;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
 import net.pistonmaster.soulfire.server.protocol.bot.state.EntityAttributeState;
@@ -176,5 +177,9 @@ public abstract class Entity {
             jsonObject.entrySet().forEach(entry -> interract.put(Integer.parseInt(entry.getKey()), entry.getValue().getAsBoolean()));
         }
         return interract.getOrDefault(entityType.id(), true);
+    }
+
+    public double getAttributeValue(AttributeType type) {
+        return attributeState.getOrCreateAttribute(type).calculateValue();
     }
 }
