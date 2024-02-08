@@ -179,7 +179,7 @@ public class Killaura implements InternalExtension {
         public static final DoubleProperty CPS_MIN = BUILDER.ofDouble(
                 "cps-min",
                 "CPS Min",
-                new String[]{"--killaura-cps-min", "--killaura-cpsm"},
+                new String[]{"--killaura-cps-min"},
                 "Minimum CPS for the killaura",
                 8.0d,
                 0.1d,
@@ -190,7 +190,7 @@ public class Killaura implements InternalExtension {
         public static final DoubleProperty CPS_MAX = BUILDER.ofDouble(
                 "cps-max",
                 "CPS Max",
-                new String[]{"--killaura-cps-max", "--killaura-cpsm"},
+                new String[]{"--killaura-cps-max"},
                 "Maximum CPS for the killaura",
                 12.0d,
                 0.1d,
