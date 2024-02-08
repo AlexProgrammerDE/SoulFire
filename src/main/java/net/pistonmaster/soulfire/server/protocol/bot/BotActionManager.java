@@ -41,6 +41,7 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.PlayerListState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.RawEntity;
 import net.pistonmaster.soulfire.server.settings.BotSettings;
+import net.pistonmaster.soulfire.server.util.Segment;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -231,6 +232,43 @@ public class BotActionManager {
         dataManager.clientEntity().pitch(pitch);
     }
 
+    public void lookAt(@NonNull Vector3d vec) {
+        double x = vec.getX() - dataManager.clientEntity().x();
+        double y = vec.getY() - (dataManager.clientEntity().y() + EYE_HEIGHT); // Eye height
+        double z = vec.getZ() - dataManager.clientEntity().z();
+
+        double distance = Math.sqrt(x * x + y * y + z * z);
+
+        float yaw = (float) Math.toDegrees(Math.atan2(z, x)) - 90;
+        float pitch = (float) -Math.toDegrees(Math.atan2(y, distance));
+
+        dataManager.clientEntity().yaw(yaw);
+        dataManager.clientEntity().pitch(pitch);
+    }
+
+    public Vector3d getEntityVisiblePoint(Entity entity) {
+        List<Vector3d> points = new ArrayList<>();
+        double halfWidth = entity.width() / 2;
+        double halfHeight = entity.height() / 2;
+        for (int x = -1; x <= 1; x++) {
+            for (int y = 0; y <= 1; y++) {
+                for (int z = -1; z <= 1; z++) {
+                    points.add(Vector3d.from(entity.x() + halfWidth * x, entity.y() + halfHeight * y, entity.z() + halfWidth * z));
+                }
+            }
+        }
+
+        // sort by distance to the bot
+        points.sort(Comparator.comparingDouble(this::distanceTo));
+        for (Vector3d point : points) {
+            if (canSee(point)) {
+                return point;
+            }
+        }
+
+        return null;
+    }
+
     public void attack(@NonNull Entity entity, boolean swingArm) {
         if (!entity.canBeInterracted()) {
             System.err.println("Entity " + entity.entityId() + " can't be interacted with!");
@@ -245,7 +283,7 @@ public class BotActionManager {
         lastHit = System.currentTimeMillis();
     }
 
-    public Entity getClosestEntity(double range, String whitelistedUser, boolean ignoreBots, boolean onlyInterractable, boolean musteBeSeen) {
+    public Entity getClosestEntity(double range, String whitelistedUser, boolean ignoreBots, boolean onlyInterractable, boolean mustBeSeen) {
         if (dataManager.clientEntity() == null) {
             return null;
         }
@@ -266,7 +304,7 @@ public class BotActionManager {
             }
 
             if (onlyInterractable && !entity.canBeInterracted()) continue;
-            if (musteBeSeen && !canSee(entity)) continue;
+            if (mustBeSeen && !canSee(entity)) continue;
 
 
             if (whitelistedUser != null && !whitelistedUser.isEmpty() && entity.entityType() == EntityType.PLAYER) {
@@ -321,9 +359,7 @@ public class BotActionManager {
     }
 
     public boolean canSee(Entity entity) {
-        double middleHeight = entity.y() + entity.height() / 2f;
-        Vector3d vec = Vector3d.from(entity.x(), middleHeight, entity.z());
-        return canSee(vec);
+        return getEntityVisiblePoint(entity) != null;
     }
 
     public boolean canSee(Vector3d vec) {
@@ -332,11 +368,11 @@ public class BotActionManager {
             return false;
         }
         Vector3d eye = dataManager.clientEntity().getEyePosition();
+        Segment segment = new Segment(eye, vec);
         for (Map.Entry<String, LevelState> entry : dataManager.levels().entrySet()) {
-            for (AABB box : entry.getValue().getCollisionBoxes(new AABB(eye, vec))) {
-                if (box.intersects(new AABB(eye, vec)) || new AABB(eye, vec).intersects(box)) {
-                    return false;
-                }
+            List<AABB> boxes = entry.getValue().getCollisionBoxes(new AABB(eye, vec));
+            if (segment.intersects(boxes)) {
+                return false;
             }
         }
 
