@@ -38,7 +38,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class KillAura implements InternalExtension {
     public static void onPre(BotPreTickEvent event) {
         var bot = event.connection();
-        if (!bot.settingsHolder().get(KillauraSettings.ENABLE)) return;
+        if (!bot.settingsHolder().get(KillAuraSettings.ENABLE)) return;
 
         var manager = bot.sessionDataManager().botActionManager();
 
@@ -51,15 +51,15 @@ public class KillAura implements InternalExtension {
             return;
         }
 
-        var whitelistedUser = bot.settingsHolder().get(KillauraSettings.WHITELISTED_USER);
+        var whitelistedUser = bot.settingsHolder().get(KillAuraSettings.WHITELISTED_USER);
 
-        var lookRange = bot.settingsHolder().get(KillauraSettings.LOOK_RANGE);
-        var hitRange = bot.settingsHolder().get(KillauraSettings.HIT_RANGE);
-        var swingRange = bot.settingsHolder().get(KillauraSettings.SWING_RANGE);
+        var lookRange = bot.settingsHolder().get(KillAuraSettings.LOOK_RANGE);
+        var hitRange = bot.settingsHolder().get(KillAuraSettings.HIT_RANGE);
+        var swingRange = bot.settingsHolder().get(KillAuraSettings.SWING_RANGE);
 
         var max = Math.max(lookRange, Math.max(hitRange, swingRange));
 
-        var entity = manager.getClosestEntity(max, whitelistedUser, true, true, bot.settingsHolder().get(KillauraSettings.CHECK_WALLS));
+        var entity = manager.getClosestEntity(max, whitelistedUser, true, true, bot.settingsHolder().get(KillAuraSettings.CHECK_WALLS));
         if (entity == null) {
             return;
         }
@@ -81,9 +81,9 @@ public class KillAura implements InternalExtension {
         }
 
         var ver = bot.meta().protocolVersion();
-        if (ver.getVersion() < ProtocolVersion.v1_9.getVersion() || bot.settingsHolder().get(KillauraSettings.IGNORE_COOLDOWN)) {
-            var cpsMin = bot.settingsHolder().get(KillauraSettings.CPS_MIN);
-            var cpsMax = bot.settingsHolder().get(KillauraSettings.CPS_MAX);
+        if (ver.getVersion() < ProtocolVersion.v1_9.getVersion() || bot.settingsHolder().get(KillAuraSettings.IGNORE_COOLDOWN)) {
+            var cpsMin = bot.settingsHolder().get(KillAuraSettings.CPS_MIN);
+            var cpsMax = bot.settingsHolder().get(KillAuraSettings.CPS_MAX);
             var randomDelay = 1000.0d / ThreadLocalRandom.current().nextDouble(cpsMin, cpsMax);
             manager.extraData().put("next_hit", manager.lastHit() + randomDelay);
         } else {
@@ -93,7 +93,7 @@ public class KillAura implements InternalExtension {
 
     @EventHandler
     public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
-        event.settingsRegistry().addClass(KillauraSettings.class, "KillAura");
+        event.settingsRegistry().addClass(KillAuraSettings.class, "KillAura");
     }
 
     @Override
@@ -103,7 +103,7 @@ public class KillAura implements InternalExtension {
     }
 
     @NoArgsConstructor(access = AccessLevel.NONE)
-    private static class KillauraSettings implements SettingsObject {
+    private static class KillAuraSettings implements SettingsObject {
         private static final Property.Builder BUILDER = Property.builder("kill-aura");
         public static final BooleanProperty ENABLE = BUILDER.ofBoolean(
                 "enable",
