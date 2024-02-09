@@ -25,59 +25,56 @@ import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
-import net.pistonmaster.soulfire.server.protocol.BotConnection;
-import net.pistonmaster.soulfire.server.protocol.bot.BotActionManager;
-import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
 import net.pistonmaster.soulfire.server.settings.BotSettings;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.DoubleProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
-import org.cloudburstmc.math.vector.Vector3d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Killaura implements InternalExtension {
     private static final Random RANDOM = new Random();
     private static final Logger LOGGER = LoggerFactory.getLogger(Killaura.class);
 
     public static void onPre(BotPreTickEvent event) {
-        BotConnection bot = event.connection();
+        var bot = event.connection();
         if (!bot.settingsHolder().get(KillauraSettings.ENABLE)) return;
 
-        BotActionManager manager = bot.sessionDataManager().botActionManager();
+        var manager = bot.sessionDataManager().botActionManager();
 
         if (!manager.extraData().containsKey("next_hit")) {
             manager.extraData().put("next_hit", System.currentTimeMillis());
         }
 
-        long nextHit = (long) manager.extraData().get("next_hit");
+        var nextHit = (long) manager.extraData().get("next_hit");
         if (nextHit > System.currentTimeMillis()) {
             return;
         }
 
-        String whitelistedUser = bot.settingsHolder().get(KillauraSettings.WHITELISTED_USER);
+        var whitelistedUser = bot.settingsHolder().get(KillauraSettings.WHITELISTED_USER);
 
-        double lookRange = bot.settingsHolder().get(KillauraSettings.LOOK_RANGE);
-        double hitRange = bot.settingsHolder().get(KillauraSettings.HIT_RANGE);
-        double swingRange = bot.settingsHolder().get(KillauraSettings.SWING_RANGE);
+        var lookRange = bot.settingsHolder().get(KillauraSettings.LOOK_RANGE);
+        var hitRange = bot.settingsHolder().get(KillauraSettings.HIT_RANGE);
+        var swingRange = bot.settingsHolder().get(KillauraSettings.SWING_RANGE);
 
-        double max = Math.max(lookRange, Math.max(hitRange, swingRange));
+        var max = Math.max(lookRange, Math.max(hitRange, swingRange));
 
-        Entity entity = manager.getClosestEntity(max, whitelistedUser, true, true, bot.settingsHolder().get(KillauraSettings.CHECK_WALLS));
+        var entity = manager.getClosestEntity(max, whitelistedUser, true, true, bot.settingsHolder().get(KillauraSettings.CHECK_WALLS));
         if (entity == null) {
             return;
         }
 
-        double distance = manager.distanceTo(entity);
-        Vector3d bestVisiblePoint = manager.getEntityVisiblePoint(entity);
+        var distance = manager.distanceTo(entity);
+        var bestVisiblePoint = manager.getEntityVisiblePoint(entity);
         if (bestVisiblePoint != null) {
             distance = manager.distanceTo(bestVisiblePoint);
         }
-        boolean swing = distance <= swingRange;
+        var swing = distance <= swingRange;
         if (distance <= lookRange) {
             manager.lookAt(bestVisiblePoint == null ? entity.pos() : bestVisiblePoint);
         }
@@ -88,11 +85,11 @@ public class Killaura implements InternalExtension {
             manager.swingArm();
         }
 
-        ProtocolVersion ver = bot.sessionDataManager().settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+        var ver = bot.sessionDataManager().settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
         if (ver.getVersion() < ProtocolVersion.v1_9.getVersion() || bot.settingsHolder().get(KillauraSettings.IGNORE_COOLDOWN)) {
-            double cpsMin = bot.settingsHolder().get(KillauraSettings.CPS_MIN);
-            double cpsMax = bot.settingsHolder().get(KillauraSettings.CPS_MAX);
-            double randomDelay = 1000.0d / (RANDOM.nextDouble() * (cpsMax - cpsMin) + cpsMin);
+            var cpsMin = bot.settingsHolder().get(KillauraSettings.CPS_MIN);
+            var cpsMax = bot.settingsHolder().get(KillauraSettings.CPS_MAX);
+            var randomDelay = 1000.0d / ThreadLocalRandom.current().nextDouble(cpsMin, cpsMax);
             manager.extraData().put("next_hit", manager.lastHit() + randomDelay);
         } else {
             manager.extraData().put("next_hit", System.currentTimeMillis() + manager.getCooldownRemainingTime());

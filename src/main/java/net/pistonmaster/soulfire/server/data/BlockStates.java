@@ -32,7 +32,7 @@ public record BlockStates(BlockState defaultState, List<BlockState> possibleStat
             var stateId = stateObject.get("id").getAsInt();
             var defaultStateValue = stateObject.get("default") != null;
 
-            BlockStateProperties properties = new BlockStateProperties(stateObject.getAsJsonObject("properties"));
+            var properties = new BlockStateProperties(stateObject.getAsJsonObject("properties"));
 
             var blockState = new BlockState(
                     stateId,

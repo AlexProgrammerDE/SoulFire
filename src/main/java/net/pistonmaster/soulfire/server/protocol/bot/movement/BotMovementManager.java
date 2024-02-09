@@ -21,7 +21,6 @@ import it.unimi.dsi.fastutil.Pair;
 import lombok.Getter;
 import net.pistonmaster.soulfire.server.data.*;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
-import net.pistonmaster.soulfire.server.protocol.bot.state.AttributeState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.LevelState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.ClientEntity;
@@ -464,7 +463,7 @@ public class BotMovementManager {
 
     public float getSpeed() {
         var attribute = movementState.entity().attributeState();
-        AttributeState playerSpeedAttribute = attribute.getOrCreateAttribute(AttributeType.GENERIC_MOVEMENT_SPEED);
+        var playerSpeedAttribute = attribute.getOrCreateAttribute(AttributeType.GENERIC_MOVEMENT_SPEED);
 
         if (controlState.sprinting()) {
             if (playerSpeedAttribute.modifiers().stream().noneMatch(modifier ->

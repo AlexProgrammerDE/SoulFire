@@ -17,7 +17,6 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot;
 
-import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
@@ -33,11 +32,7 @@ import net.pistonmaster.soulfire.server.data.AttributeType;
 import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.EntityType;
 import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
-import net.pistonmaster.soulfire.server.protocol.bot.container.SWItemStack;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
-import net.pistonmaster.soulfire.server.protocol.bot.state.EntityTrackerState;
-import net.pistonmaster.soulfire.server.protocol.bot.state.LevelState;
-import net.pistonmaster.soulfire.server.protocol.bot.state.PlayerListState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.RawEntity;
 import net.pistonmaster.soulfire.server.settings.BotSettings;
@@ -206,13 +201,13 @@ public class BotActionManager {
     }
 
     public void lookAt(@NonNull Entity entity) {
-        double x = entity.x() - dataManager.clientEntity().x();
-        double y = (entity.y() + entity.height() / 2f) // Center of entity
+        var x = entity.x() - dataManager.clientEntity().x();
+        var y = (entity.y() + entity.height() / 2f) // Center of entity
                 - (dataManager.clientEntity().y() + EYE_HEIGHT); // Eye height
 
-        final int VER_1_14 = ProtocolVersion.v1_14.getVersion();
-        ProtocolVersion ver = dataManager.settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
-        int version = ver.getVersion();
+        final var VER_1_14 = ProtocolVersion.v1_14.getVersion();
+        var ver = dataManager.settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+        var version = ver.getVersion();
 
         if (dataManager.controlState().sneaking()) {
             if (version >= VER_1_14) {
@@ -221,26 +216,26 @@ public class BotActionManager {
             }
         }
 
-        double z = entity.z() - dataManager.clientEntity().z();
+        var z = entity.z() - dataManager.clientEntity().z();
 
-        double distance = Math.sqrt(x * x + y * y + z * z);
+        var distance = Math.sqrt(x * x + y * y + z * z);
 
-        float yaw = (float) Math.toDegrees(Math.atan2(z, x)) - 90;
-        float pitch = (float) -Math.toDegrees(Math.atan2(y, distance));
+        var yaw = (float) Math.toDegrees(Math.atan2(z, x)) - 90;
+        var pitch = (float) -Math.toDegrees(Math.atan2(y, distance));
 
         dataManager.clientEntity().yaw(yaw);
         dataManager.clientEntity().pitch(pitch);
     }
 
     public void lookAt(@NonNull Vector3d vec) {
-        double x = vec.getX() - dataManager.clientEntity().x();
-        double y = vec.getY() - (dataManager.clientEntity().y() + EYE_HEIGHT); // Eye height
-        double z = vec.getZ() - dataManager.clientEntity().z();
+        var x = vec.getX() - dataManager.clientEntity().x();
+        var y = vec.getY() - (dataManager.clientEntity().y() + EYE_HEIGHT); // Eye height
+        var z = vec.getZ() - dataManager.clientEntity().z();
 
-        double distance = Math.sqrt(x * x + y * y + z * z);
+        var distance = Math.sqrt(x * x + y * y + z * z);
 
-        float yaw = (float) Math.toDegrees(Math.atan2(z, x)) - 90;
-        float pitch = (float) -Math.toDegrees(Math.atan2(y, distance));
+        var yaw = (float) Math.toDegrees(Math.atan2(z, x)) - 90;
+        var pitch = (float) -Math.toDegrees(Math.atan2(y, distance));
 
         dataManager.clientEntity().yaw(yaw);
         dataManager.clientEntity().pitch(pitch);
@@ -250,9 +245,9 @@ public class BotActionManager {
         List<Vector3d> points = new ArrayList<>();
         double halfWidth = entity.width() / 2;
         double halfHeight = entity.height() / 2;
-        for (int x = -1; x <= 1; x++) {
-            for (int y = 0; y <= 1; y++) {
-                for (int z = -1; z <= 1; z++) {
+        for (var x = -1; x <= 1; x++) {
+            for (var y = 0; y <= 1; y++) {
+                for (var z = -1; z <= 1; z++) {
                     points.add(Vector3d.from(entity.x() + halfWidth * x, entity.y() + halfHeight * y, entity.z() + halfWidth * z));
                 }
             }
@@ -260,7 +255,7 @@ public class BotActionManager {
 
         // sort by distance to the bot
         points.sort(Comparator.comparingDouble(this::distanceTo));
-        for (Vector3d point : points) {
+        for (var point : points) {
             if (canSee(point)) {
                 return point;
             }
@@ -278,7 +273,7 @@ public class BotActionManager {
         if (swingArm) {
             swingArm();
         }
-        ServerboundInteractPacket packet = new ServerboundInteractPacket(entity.entityId(), InteractAction.ATTACK, dataManager.controlState().sneaking());
+        var packet = new ServerboundInteractPacket(entity.entityId(), InteractAction.ATTACK, dataManager.controlState().sneaking());
         dataManager.sendPacket(packet);
         lastHit = System.currentTimeMillis();
     }
@@ -288,17 +283,17 @@ public class BotActionManager {
             return null;
         }
 
-        double x = dataManager.clientEntity().x();
-        double y = dataManager.clientEntity().y();
-        double z = dataManager.clientEntity().z();
+        var x = dataManager.clientEntity().x();
+        var y = dataManager.clientEntity().y();
+        var z = dataManager.clientEntity().z();
 
-        EntityTrackerState ets = dataManager.entityTrackerState();
+        var ets = dataManager.entityTrackerState();
         Map<Integer, Entity> entities = ets.entities();
 
         Entity closest = null;
-        double closestDistance = Double.MAX_VALUE;
+        var closestDistance = Double.MAX_VALUE;
 
-        for (Entity entity : entities.values()) {
+        for (var entity : entities.values()) {
             if (entity.entityId() == dataManager.clientEntity().entityId()) {
                 continue;
             }
@@ -307,8 +302,8 @@ public class BotActionManager {
             if (mustBeSeen && !canSee(entity)) continue;
 
             if (whitelistedUser != null && !whitelistedUser.isEmpty() && entity.entityType() == EntityType.PLAYER) {
-                PlayerListState connectedUsers = dataManager.playerListState();
-                PlayerListEntry playerListEntry = connectedUsers.entries().get(((RawEntity) entity).uuid());
+                var connectedUsers = dataManager.playerListState();
+                var playerListEntry = connectedUsers.entries().get(((RawEntity) entity).uuid());
                 if (playerListEntry.getProfile() != null) {
                     if (playerListEntry.getProfile().getName().equalsIgnoreCase(whitelistedUser))
                         continue;
@@ -326,7 +321,7 @@ public class BotActionManager {
                 if (botIds.contains(rawEntity.entityId())) continue;
             }
 
-            double distance = Math.sqrt(Math.pow(entity.x() - x, 2) + Math.pow(entity.y() - y, 2) + Math.pow(entity.z() - z, 2));
+            var distance = Math.sqrt(Math.pow(entity.x() - x, 2) + Math.pow(entity.y() - y, 2) + Math.pow(entity.z() - z, 2));
             if (distance > range) continue;
 
             if (distance < closestDistance) {
@@ -339,8 +334,8 @@ public class BotActionManager {
     }
 
     public double distanceTo(Entity entity) {
-        double middleHeight = entity.y() + entity.height() / 2f;
-        Vector3d vec = Vector3d.from(entity.x(), middleHeight, entity.z());
+        var middleHeight = entity.y() + entity.height() / 2f;
+        var vec = Vector3d.from(entity.x(), middleHeight, entity.z());
         return distanceTo(vec);
     }
 
@@ -349,9 +344,9 @@ public class BotActionManager {
             return -1;
         }
 
-        double x = vec.getX() - dataManager.clientEntity().x();
-        double y = vec.getY() - (dataManager.clientEntity().y() + 1.80f); // Eye height
-        double z = vec.getZ() - dataManager.clientEntity().z();
+        var x = vec.getX() - dataManager.clientEntity().x();
+        var y = vec.getY() - (dataManager.clientEntity().y() + 1.80f); // Eye height
+        var z = vec.getZ() - dataManager.clientEntity().z();
 
         return Math.sqrt(x * x + y * y + z * z);
     }
@@ -361,14 +356,14 @@ public class BotActionManager {
     }
 
     public boolean canSee(Vector3d vec) {
-        double distance = distanceTo(vec);
+        var distance = distanceTo(vec);
         if (distance >= 256) {
             return false;
         }
-        Vector3d eye = dataManager.clientEntity().getEyePosition();
-        Segment segment = new Segment(eye, vec);
-        for (Map.Entry<String, LevelState> entry : dataManager.levels().entrySet()) {
-            List<AABB> boxes = entry.getValue().getCollisionBoxes(new AABB(eye, vec));
+        var eye = dataManager.clientEntity().getEyePosition();
+        var segment = new Segment(eye, vec);
+        for (var entry : dataManager.levels().entrySet()) {
+            var boxes = entry.getValue().getCollisionBoxes(new AABB(eye, vec));
             if (segment.intersects(boxes)) {
                 return false;
             }
@@ -378,7 +373,7 @@ public class BotActionManager {
     }
 
     public void swingArm() {
-        ServerboundSwingPacket swingPacket = new ServerboundSwingPacket(Hand.MAIN_HAND);
+        var swingPacket = new ServerboundSwingPacket(Hand.MAIN_HAND);
         dataManager.sendPacket(swingPacket);
     }
 
@@ -387,19 +382,19 @@ public class BotActionManager {
             return 2000;
         }
 
-        int itemSlot = dataManager.inventoryManager().heldItemSlot();
-        SWItemStack item = dataManager.inventoryManager().getPlayerInventory().hotbarSlot(itemSlot).item();
-        int cooldown = 500; // Default cooldown when you hit with your hand
+        var itemSlot = dataManager.inventoryManager().heldItemSlot();
+        var item = dataManager.inventoryManager().getPlayerInventory().hotbarSlot(itemSlot).item();
+        var cooldown = 500; // Default cooldown when you hit with your hand
         if (item != null) {
             cooldown = dataManager.itemCoolDowns().get(item.type().id()) * 50; // 50ms per tick
             if (cooldown == 0) { // if the server hasn't changed the cooldown
                 double attackSpeedModifier = item.type().attributes().stream()
                         .filter(attribute -> attribute.type() == AttributeType.GENERIC_ATTACK_SPEED)
-                        .map(attribute -> attribute.modifiers().get(0).amount())
+                        .map(attribute -> attribute.modifiers().getFirst().amount())
                         .findFirst()
                         .orElse(0d); // Default attack speed
 
-                double attackSpeed = 4.0 + attackSpeedModifier;
+                var attackSpeed = 4.0 + attackSpeedModifier;
                 cooldown = (int) ((1 / attackSpeed) * 1000);
 
             }

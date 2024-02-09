@@ -24,7 +24,7 @@ import java.util.List;
 
 public record Segment(Vector3d startPoint, Vector3d endPoint) {
     public boolean intersects(List<AABB> boxes) {
-        for (AABB box : boxes) {
+        for (var box : boxes) {
             if (isInside(box)) { // if both points are inside the box, we can skip this box
                 continue;
             }
@@ -37,14 +37,14 @@ public record Segment(Vector3d startPoint, Vector3d endPoint) {
     }
 
     public boolean isInside(AABB box) {
-        boolean originInside = startPoint.getX() >= box.minX &&
+        var originInside = startPoint.getX() >= box.minX &&
                 startPoint.getX() <= box.maxX &&
                 startPoint.getY() >= box.minY &&
                 startPoint.getY() <= box.maxY &&
                 startPoint.getZ() >= box.minZ &&
                 startPoint.getZ() <= box.maxZ;
 
-        boolean directionInside = endPoint.getX() >= box.minX &&
+        var directionInside = endPoint.getX() >= box.minX &&
                 endPoint.getX() <= box.maxX &&
                 endPoint.getY() >= box.minY &&
                 endPoint.getY() <= box.maxY &&
@@ -55,20 +55,20 @@ public record Segment(Vector3d startPoint, Vector3d endPoint) {
     }
 
     private boolean intersectsBox(AABB box) {
-        double tmin = (box.minX - startPoint.getX()) / (endPoint.getX() - startPoint.getX());
-        double tmax = (box.maxX - startPoint.getX()) / (endPoint.getX() - startPoint.getX());
+        var tmin = (box.minX - startPoint.getX()) / (endPoint.getX() - startPoint.getX());
+        var tmax = (box.maxX - startPoint.getX()) / (endPoint.getX() - startPoint.getX());
 
         if (tmin > tmax) {
-            double temp = tmin;
+            var temp = tmin;
             tmin = tmax;
             tmax = temp;
         }
 
-        double tymin = (box.minY - startPoint.getY()) / (endPoint.getY() - startPoint.getY());
-        double tymax = (box.maxY - startPoint.getY()) / (endPoint.getY() - startPoint.getY());
+        var tymin = (box.minY - startPoint.getY()) / (endPoint.getY() - startPoint.getY());
+        var tymax = (box.maxY - startPoint.getY()) / (endPoint.getY() - startPoint.getY());
 
         if (tymin > tymax) {
-            double temp = tymin;
+            var temp = tymin;
             tymin = tymax;
             tymax = temp;
         }
@@ -85,11 +85,11 @@ public record Segment(Vector3d startPoint, Vector3d endPoint) {
             tmax = tymax;
         }
 
-        double tzmin = (box.minZ - startPoint.getZ()) / (endPoint.getZ() - startPoint.getZ());
-        double tzmax = (box.maxZ - startPoint.getZ()) / (endPoint.getZ() - startPoint.getZ());
+        var tzmin = (box.minZ - startPoint.getZ()) / (endPoint.getZ() - startPoint.getZ());
+        var tzmax = (box.maxZ - startPoint.getZ()) / (endPoint.getZ() - startPoint.getZ());
 
         if (tzmin > tzmax) {
-            double temp = tzmin;
+            var temp = tzmin;
             tzmin = tzmax;
             tzmax = temp;
         }

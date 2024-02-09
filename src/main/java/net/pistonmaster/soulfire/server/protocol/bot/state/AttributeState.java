@@ -36,13 +36,13 @@ public class AttributeState {
     private List<Attribute.Modifier> modifiers;
 
     public double calculateValue() {
-        double value = baseValue;
+        var value = baseValue;
 
         for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.ADDITION)) {
             value += attributeModifier.amount();
         }
 
-        double finalValue = value;
+        var finalValue = value;
 
         for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.MULTIPLY_BASE)) {
             finalValue += value * attributeModifier.amount();

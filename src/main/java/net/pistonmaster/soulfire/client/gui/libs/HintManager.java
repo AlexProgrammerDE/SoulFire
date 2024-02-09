@@ -205,7 +205,7 @@ public class HintManager {
         private void initComponents() {
             // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
             hintLabel = new JLabel();
-            JButton gotItButton = new JButton();
+            var gotItButton = new JButton();
 
             //======== this ========
             setLayout(new MigLayout(

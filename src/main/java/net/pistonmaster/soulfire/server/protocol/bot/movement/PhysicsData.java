@@ -17,8 +17,11 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.movement;
 
+import lombok.Data;
+
 import java.util.UUID;
 
+@Data
 public class PhysicsData {
     public double gravity = 0.08;
     public float airdrag = 0.98F;

@@ -117,7 +117,7 @@ public class BotControlAPI {
 
     public void registerPluginChannels(String... channels) {
         var buffer = Unpooled.buffer();
-        for (int i = 0; i < channels.length; i++) {
+        for (var i = 0; i < channels.length; i++) {
             var channel = channels[i];
             buffer.writeBytes(channel.getBytes(StandardCharsets.UTF_8));
 
