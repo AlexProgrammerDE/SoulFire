@@ -17,7 +17,10 @@
  */
 package net.pistonmaster.soulfire.server.settings.lib;
 
-import it.unimi.dsi.fastutil.objects.*;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMaps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.proxy.SWProxy;
 import net.pistonmaster.soulfire.server.settings.lib.property.*;

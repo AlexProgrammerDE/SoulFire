@@ -240,7 +240,7 @@ public class BotMovementManager {
         var pos = movementState.pos;
 
         {
-            var playerBB = clientEntity.boundingBox(pos.toImmutable());
+            var playerBB = clientEntity.boundingBox();
             var waterBB = playerBB.deflate(0.001, 0.401, 0.001);
             var lavaBB = playerBB.deflate(0.1, 0.4, 0.1);
 

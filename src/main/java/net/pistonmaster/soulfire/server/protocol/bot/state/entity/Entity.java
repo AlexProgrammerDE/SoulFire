@@ -19,11 +19,7 @@ package net.pistonmaster.soulfire.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
 import lombok.Data;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.data.AttributeType;
 import net.pistonmaster.soulfire.server.data.EntityType;
@@ -35,17 +31,9 @@ import net.pistonmaster.soulfire.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-
 @Slf4j
 @Data
 public abstract class Entity {
-    private static final Map<Integer, Boolean> interract = new HashMap<>();
     private final EntityMetadataState metadataState = new EntityMetadataState();
     private final EntityAttributeState attributeState = new EntityAttributeState();
     private final EntityEffectState effectState = new EntityEffectState();
@@ -161,22 +149,6 @@ public abstract class Entity {
         var w = width() / 2F;
         var h = height();
         return new AABB(x - w, y, z - w, x + w, y + h, z + w);
-    }
-
-    @SneakyThrows
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public synchronized boolean canBeInterracted() {
-        if (interract.isEmpty()) {
-            Gson gson = new Gson();
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("minecraft/entities_interraction.json");
-            if (inputStream == null) {
-                throw new FileNotFoundException("Resource file minecraft/entities_interraction.json not found");
-            }
-            JsonReader reader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            JsonObject jsonObject = gson.fromJson(reader, JsonObject.class);
-            jsonObject.entrySet().forEach(entry -> interract.put(Integer.parseInt(entry.getKey()), entry.getValue().getAsBoolean()));
-        }
-        return interract.getOrDefault(entityType.id(), true);
     }
 
     public double getAttributeValue(AttributeType type) {
