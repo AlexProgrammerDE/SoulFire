@@ -270,8 +270,8 @@ public class BotActionManager {
     }
 
     public void attack(@NonNull Entity entity, boolean swingArm) {
-        if (!entity.canBeInterracted()) {
-            System.err.println("Entity " + entity.entityId() + " can't be interacted with!");
+        if (!entity.entityType().attackable()) {
+            System.err.println("Entity " + entity.entityId() + " can't be attacked!");
             return;
         }
 
@@ -283,7 +283,7 @@ public class BotActionManager {
         lastHit = System.currentTimeMillis();
     }
 
-    public Entity getClosestEntity(double range, String whitelistedUser, boolean ignoreBots, boolean onlyInterractable, boolean mustBeSeen) {
+    public Entity getClosestEntity(double range, String whitelistedUser, boolean ignoreBots, boolean onlyInteractable, boolean mustBeSeen) {
         if (dataManager.clientEntity() == null) {
             return null;
         }
@@ -303,9 +303,8 @@ public class BotActionManager {
                 continue;
             }
 
-            if (onlyInterractable && !entity.canBeInterracted()) continue;
+            if (onlyInteractable && !entity.entityType().attackable()) continue;
             if (mustBeSeen && !canSee(entity)) continue;
-
 
             if (whitelistedUser != null && !whitelistedUser.isEmpty() && entity.entityType() == EntityType.PLAYER) {
                 PlayerListState connectedUsers = dataManager.playerListState();
@@ -315,7 +314,6 @@ public class BotActionManager {
                         continue;
                 }
             }
-
 
             if (ignoreBots && entity instanceof RawEntity rawEntity) {
                 Set<Integer> botIds = new HashSet<>();
@@ -399,7 +397,7 @@ public class BotActionManager {
                         .filter(attribute -> attribute.type() == AttributeType.GENERIC_ATTACK_SPEED)
                         .map(attribute -> attribute.modifiers().get(0).amount())
                         .findFirst()
-                        .orElse(0d);  // Default attack speed
+                        .orElse(0d); // Default attack speed
 
                 double attackSpeed = 4.0 + attackSpeedModifier;
                 cooldown = (int) ((1 / attackSpeed) * 1000);

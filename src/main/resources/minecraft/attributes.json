@@ -1,97 +1,83 @@
 [
   {
-    "id": 0,
     "name": "generic.armor",
     "min": 0.0,
     "max": 30.0,
     "defaultValue": 0.0
   },
   {
-    "id": 1,
     "name": "generic.armor_toughness",
     "min": 0.0,
     "max": 20.0,
     "defaultValue": 0.0
   },
   {
-    "id": 2,
     "name": "generic.attack_damage",
     "min": 0.0,
     "max": 2048.0,
     "defaultValue": 2.0
   },
   {
-    "id": 3,
     "name": "generic.attack_knockback",
     "min": 0.0,
     "max": 5.0,
     "defaultValue": 0.0
   },
   {
-    "id": 4,
     "name": "generic.attack_speed",
     "min": 0.0,
     "max": 1024.0,
     "defaultValue": 4.0
   },
   {
-    "id": 5,
     "name": "generic.flying_speed",
     "min": 0.0,
     "max": 1024.0,
     "defaultValue": 0.4000000059604645
   },
   {
-    "id": 6,
     "name": "generic.follow_range",
     "min": 0.0,
     "max": 2048.0,
     "defaultValue": 32.0
   },
   {
-    "id": 7,
     "name": "horse.jump_strength",
     "min": 0.0,
     "max": 2.0,
     "defaultValue": 0.7
   },
   {
-    "id": 8,
     "name": "generic.knockback_resistance",
     "min": 0.0,
     "max": 1.0,
     "defaultValue": 0.0
   },
   {
-    "id": 9,
     "name": "generic.luck",
     "min": -1024.0,
     "max": 1024.0,
     "defaultValue": 0.0
   },
   {
-    "id": 10,
     "name": "generic.max_absorption",
     "min": 0.0,
     "max": 2048.0,
     "defaultValue": 0.0
   },
   {
-    "id": 11,
     "name": "generic.max_health",
     "min": 1.0,
     "max": 1024.0,
     "defaultValue": 20.0
   },
   {
-    "id": 12,
     "name": "generic.movement_speed",
     "min": 0.0,
     "max": 1024.0,
     "defaultValue": 0.699999988079071
   },
   {
-    "id": 13,
     "name": "zombie.spawn_reinforcements",
     "min": 0.0,
     "max": 1.0,

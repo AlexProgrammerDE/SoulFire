@@ -17,7 +17,6 @@
  */
 package net.pistonmaster.soulfire.data;
 
-import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.AccessLevel;

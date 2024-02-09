@@ -22,7 +22,8 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 
 @SuppressWarnings("unused")
 public record EntityType(int id, String name, float width, float height,
-                         String category, boolean friendly) {
+                         String category, boolean friendly,
+                         boolean summonable, boolean attackable) {
     public static final Int2ReferenceMap<EntityType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
     // VALUES REPLACE

@@ -6,7 +6,8 @@
     "height": 0.6,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 1,
@@ -15,7 +16,8 @@
     "height": 0.5,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 2,
@@ -24,7 +26,8 @@
     "height": 1.975,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 3,
@@ -33,7 +36,7 @@
     "height": 0.5,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true
   },
   {
     "id": 4,
@@ -42,7 +45,8 @@
     "height": 0.42,
     "category": "axolotls",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 5,
@@ -51,7 +55,8 @@
     "height": 0.9,
     "category": "ambient",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 6,
@@ -60,7 +65,8 @@
     "height": 0.6,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 7,
@@ -68,8 +74,8 @@
     "width": 0.6,
     "height": 1.8,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 8,
@@ -78,7 +84,8 @@
     "height": 0.0,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 9,
@@ -87,7 +94,8 @@
     "height": 0.5625,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 10,
@@ -95,8 +103,8 @@
     "width": 0.6,
     "height": 1.7,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 11,
@@ -105,7 +113,8 @@
     "height": 2.375,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 12,
@@ -114,7 +123,8 @@
     "height": 0.7,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 13,
@@ -122,8 +132,8 @@
     "width": 0.7,
     "height": 0.5,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 14,
@@ -132,7 +142,8 @@
     "height": 0.5625,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 15,
@@ -141,7 +152,8 @@
     "height": 0.7,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 16,
@@ -150,7 +162,8 @@
     "height": 0.7,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 17,
@@ -159,7 +172,8 @@
     "height": 0.3,
     "category": "water_ambient",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 18,
@@ -168,7 +182,8 @@
     "height": 0.7,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 19,
@@ -177,7 +192,8 @@
     "height": 1.4,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 20,
@@ -185,8 +201,8 @@
     "width": 0.6,
     "height": 1.7,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 21,
@@ -195,7 +211,8 @@
     "height": 0.6,
     "category": "water_creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 22,
@@ -204,7 +221,8 @@
     "height": 1.5,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 23,
@@ -213,7 +231,8 @@
     "height": 1.0,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 24,
@@ -221,8 +240,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 25,
@@ -231,7 +250,8 @@
     "height": 0.25,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 26,
@@ -239,8 +259,8 @@
     "width": 1.9975,
     "height": 1.9975,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 27,
@@ -249,7 +269,8 @@
     "height": 2.0,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 28,
@@ -257,8 +278,8 @@
     "width": 16.0,
     "height": 8.0,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 29,
@@ -267,7 +288,8 @@
     "height": 0.25,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 30,
@@ -275,8 +297,8 @@
     "width": 0.6,
     "height": 2.9,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 31,
@@ -284,8 +306,8 @@
     "width": 0.4,
     "height": 0.3,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 32,
@@ -293,8 +315,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 33,
@@ -303,7 +325,8 @@
     "height": 0.8,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 34,
@@ -312,7 +335,8 @@
     "height": 0.25,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 35,
@@ -321,7 +345,7 @@
     "height": 0.5,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true
   },
   {
     "id": 36,
@@ -330,7 +354,7 @@
     "height": 0.25,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true
   },
   {
     "id": 37,
@@ -339,7 +363,7 @@
     "height": 0.98,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true
   },
   {
     "id": 38,
@@ -348,7 +372,7 @@
     "height": 0.25,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true
   },
   {
     "id": 39,
@@ -357,7 +381,8 @@
     "height": 0.7,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 40,
@@ -366,7 +391,8 @@
     "height": 0.5,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 41,
@@ -375,7 +401,8 @@
     "height": 0.7,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 42,
@@ -383,8 +410,8 @@
     "width": 4.0,
     "height": 4.0,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 43,
@@ -392,8 +419,8 @@
     "width": 3.6,
     "height": 12.0,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 44,
@@ -402,7 +429,8 @@
     "height": 0.5,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 45,
@@ -411,7 +439,8 @@
     "height": 0.8,
     "category": "underground_water_creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 46,
@@ -420,7 +449,8 @@
     "height": 1.3,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 47,
@@ -428,8 +458,8 @@
     "width": 0.85,
     "height": 0.85,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 48,
@@ -437,8 +467,8 @@
     "width": 1.3964844,
     "height": 1.4,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 49,
@@ -447,7 +477,8 @@
     "height": 0.7,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 50,
@@ -456,7 +487,8 @@
     "height": 1.6,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 51,
@@ -464,8 +496,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 52,
@@ -473,8 +505,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 53,
@@ -483,7 +515,8 @@
     "height": 0.0,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 54,
@@ -492,7 +525,8 @@
     "height": 2.7,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 55,
@@ -501,7 +535,7 @@
     "height": 0.25,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true
   },
   {
     "id": 56,
@@ -510,7 +544,8 @@
     "height": 0.0,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 57,
@@ -519,7 +554,8 @@
     "height": 0.5,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 58,
@@ -528,7 +564,8 @@
     "height": 1.0,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 59,
@@ -537,7 +574,8 @@
     "height": 0.5,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 60,
@@ -546,7 +584,8 @@
     "height": 0.0,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 61,
@@ -555,7 +594,8 @@
     "height": 1.87,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 62,
@@ -564,7 +604,8 @@
     "height": 0.25,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 63,
@@ -572,8 +613,8 @@
     "width": 2.04,
     "height": 2.04,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 64,
@@ -582,7 +623,8 @@
     "height": 0.0,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 65,
@@ -591,7 +633,8 @@
     "height": 0.7,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 66,
@@ -600,7 +643,8 @@
     "height": 1.4,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 67,
@@ -609,7 +653,8 @@
     "height": 1.6,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 68,
@@ -618,7 +663,8 @@
     "height": 0.7,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 69,
@@ -627,7 +673,8 @@
     "height": 0.5,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 70,
@@ -636,7 +683,8 @@
     "height": 1.25,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 71,
@@ -645,7 +693,8 @@
     "height": 0.9,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 72,
@@ -653,8 +702,8 @@
     "width": 0.9,
     "height": 0.5,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 73,
@@ -663,7 +712,8 @@
     "height": 0.9,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 74,
@@ -671,8 +721,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 75,
@@ -680,8 +730,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 76,
@@ -689,8 +739,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 77,
@@ -699,7 +749,8 @@
     "height": 1.4,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 78,
@@ -708,7 +759,8 @@
     "height": 0.25,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 79,
@@ -717,7 +769,8 @@
     "height": 0.7,
     "category": "water_ambient",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 80,
@@ -726,7 +779,8 @@
     "height": 0.5,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 81,
@@ -734,8 +788,8 @@
     "width": 1.95,
     "height": 2.2,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 82,
@@ -744,7 +798,8 @@
     "height": 0.4,
     "category": "water_ambient",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 83,
@@ -753,7 +808,8 @@
     "height": 1.3,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 84,
@@ -761,8 +817,8 @@
     "width": 1.0,
     "height": 1.0,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 85,
@@ -771,7 +827,8 @@
     "height": 0.3125,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 86,
@@ -779,8 +836,8 @@
     "width": 0.4,
     "height": 0.3,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 87,
@@ -788,8 +845,8 @@
     "width": 0.6,
     "height": 1.99,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 88,
@@ -798,7 +855,8 @@
     "height": 1.6,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 89,
@@ -806,8 +864,8 @@
     "width": 2.04,
     "height": 2.04,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 90,
@@ -816,7 +874,8 @@
     "height": 0.3125,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 91,
@@ -825,7 +884,8 @@
     "height": 1.75,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 92,
@@ -834,7 +894,8 @@
     "height": 1.9,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 93,
@@ -843,7 +904,8 @@
     "height": 0.25,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 94,
@@ -852,7 +914,8 @@
     "height": 0.7,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 95,
@@ -861,7 +924,7 @@
     "height": 0.5,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true
   },
   {
     "id": 96,
@@ -869,8 +932,8 @@
     "width": 1.4,
     "height": 0.9,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 97,
@@ -879,7 +942,8 @@
     "height": 0.8,
     "category": "water_creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 98,
@@ -887,8 +951,8 @@
     "width": 0.6,
     "height": 1.99,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 99,
@@ -897,7 +961,8 @@
     "height": 1.7,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 100,
@@ -906,7 +971,8 @@
     "height": 0.3,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 101,
@@ -915,7 +981,8 @@
     "height": 0.0,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 102,
@@ -924,7 +991,8 @@
     "height": 0.98,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 103,
@@ -933,7 +1001,8 @@
     "height": 0.7,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 104,
@@ -942,7 +1011,8 @@
     "height": 1.87,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 105,
@@ -951,7 +1021,7 @@
     "height": 0.5,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true
   },
   {
     "id": 106,
@@ -960,7 +1030,8 @@
     "height": 0.4,
     "category": "water_ambient",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 107,
@@ -969,7 +1040,8 @@
     "height": 0.4,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 108,
@@ -977,8 +1049,8 @@
     "width": 0.4,
     "height": 0.8,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 109,
@@ -987,7 +1059,8 @@
     "height": 1.95,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 110,
@@ -995,8 +1068,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 111,
@@ -1005,7 +1078,8 @@
     "height": 1.95,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 112,
@@ -1013,8 +1087,8 @@
     "width": 0.9,
     "height": 2.9,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 113,
@@ -1023,7 +1097,8 @@
     "height": 0.3125,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 114,
@@ -1031,8 +1106,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 115,
@@ -1040,8 +1115,8 @@
     "width": 0.9,
     "height": 3.5,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 116,
@@ -1049,8 +1124,8 @@
     "width": 0.7,
     "height": 2.4,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 117,
@@ -1059,7 +1134,8 @@
     "height": 0.3125,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 118,
@@ -1068,7 +1144,8 @@
     "height": 0.85,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 119,
@@ -1076,8 +1153,8 @@
     "width": 1.3964844,
     "height": 1.4,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 120,
@@ -1085,8 +1162,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 121,
@@ -1095,7 +1172,8 @@
     "height": 1.6,
     "category": "creature",
     "friendly": true,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 122,
@@ -1103,8 +1181,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 123,
@@ -1112,8 +1190,8 @@
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
-    "friendly": false,
-    "can_interact_with": true
+    "summonable": true,
+    "attackable": true
   },
   {
     "id": 124,
@@ -1122,7 +1200,7 @@
     "height": 1.8,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": true
+    "attackable": true
   },
   {
     "id": 125,
@@ -1131,6 +1209,6 @@
     "height": 0.25,
     "category": "misc",
     "friendly": true,
-    "can_interact_with": false
+    "attackable": true
   }
 ]
