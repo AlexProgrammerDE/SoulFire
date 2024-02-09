@@ -194,7 +194,7 @@ public class SoulFireServer {
                 new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
                 new ModLoaderSupport(), // Needs to be before ForwardingBypass to not break it
                 new ForwardingBypass(),
-                new Killaura()
+                new KillAura()
         );
 
         plugins.forEach(SoulFireAPI::registerServerExtension);

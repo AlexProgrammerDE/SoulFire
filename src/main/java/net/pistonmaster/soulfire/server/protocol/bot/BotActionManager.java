@@ -35,7 +35,6 @@ import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.RawEntity;
-import net.pistonmaster.soulfire.server.settings.BotSettings;
 import net.pistonmaster.soulfire.server.util.Segment;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
@@ -206,7 +205,7 @@ public class BotActionManager {
                 - (dataManager.clientEntity().y() + EYE_HEIGHT); // Eye height
 
         final var VER_1_14 = ProtocolVersion.v1_14.getVersion();
-        var ver = dataManager.settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+        var ver = dataManager.connection().meta().protocolVersion();
         var version = ver.getVersion();
 
         if (dataManager.controlState().sneaking()) {

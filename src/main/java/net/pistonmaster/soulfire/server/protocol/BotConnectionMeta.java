@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.server.protocol;
 
 import com.github.steveice10.mc.protocol.data.ProtocolState;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
@@ -33,15 +34,18 @@ import java.io.IOException;
 public class BotConnectionMeta {
     private final MinecraftAccount minecraftAccount;
     private final ProtocolState targetState;
+    private final ProtocolVersion protocolVersion;
     private final SWSessionService sessionService;
     @Setter
     private SessionDataManager sessionDataManager;
     @Setter
     private BotControlAPI botControlAPI;
 
-    public BotConnectionMeta(MinecraftAccount minecraftAccount, ProtocolState targetState, SWProxy proxyData) {
+    public BotConnectionMeta(MinecraftAccount minecraftAccount, ProtocolState targetState,
+                             ProtocolVersion protocolVersion, SWProxy proxyData) {
         this.minecraftAccount = minecraftAccount;
         this.targetState = targetState;
+        this.protocolVersion = protocolVersion;
         this.sessionService = minecraftAccount.isPremiumJava() ? new SWSessionService(minecraftAccount.authType(), proxyData) : null;
     }
 

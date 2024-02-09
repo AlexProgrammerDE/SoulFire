@@ -57,7 +57,6 @@ import com.github.steveice10.opennbt.tag.builtin.ListTag;
 import com.github.steveice10.opennbt.tag.builtin.StringTag;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.github.steveice10.packetlib.packet.Packet;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.*;
@@ -86,7 +85,6 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.entity.ClientEntity;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.RawEntity;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
-import net.pistonmaster.soulfire.server.settings.BotSettings;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 import net.pistonmaster.soulfire.server.util.PrimitiveHelper;
 import net.pistonmaster.soulfire.server.viaversion.SWVersionConstants;
@@ -948,7 +946,7 @@ public final class SessionDataManager {
             return;
         }
 
-        var version = settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+        var version = connection.meta().protocolVersion();
         if (SWVersionConstants.isBedrock(version)) {
             sendPacket(new ServerboundResourcePackPacket(
                     packet.getId(),

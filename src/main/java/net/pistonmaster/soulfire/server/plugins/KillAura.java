@@ -20,27 +20,22 @@ package net.pistonmaster.soulfire.server.plugins;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
-import net.pistonmaster.soulfire.server.settings.BotSettings;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.DoubleProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Killaura implements InternalExtension {
-    private static final Random RANDOM = new Random();
-    private static final Logger LOGGER = LoggerFactory.getLogger(Killaura.class);
-
+@Slf4j
+public class KillAura implements InternalExtension {
     public static void onPre(BotPreTickEvent event) {
         var bot = event.connection();
         if (!bot.settingsHolder().get(KillauraSettings.ENABLE)) return;
@@ -85,7 +80,7 @@ public class Killaura implements InternalExtension {
             manager.swingArm();
         }
 
-        var ver = bot.sessionDataManager().settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+        var ver = bot.meta().protocolVersion();
         if (ver.getVersion() < ProtocolVersion.v1_9.getVersion() || bot.settingsHolder().get(KillauraSettings.IGNORE_COOLDOWN)) {
             var cpsMin = bot.settingsHolder().get(KillauraSettings.CPS_MIN);
             var cpsMax = bot.settingsHolder().get(KillauraSettings.CPS_MAX);
@@ -103,19 +98,17 @@ public class Killaura implements InternalExtension {
 
     @Override
     public void onLoad() {
-        LOGGER.info("KillAura plugin is loading...");
-        SoulFireAPI.registerListeners(Killaura.class);
-        PluginHelper.registerBotEventConsumer(BotPreTickEvent.class, Killaura::onPre);
-        LOGGER.info("KillAura plugin has been loaded!");
+        SoulFireAPI.registerListeners(KillAura.class);
+        PluginHelper.registerBotEventConsumer(BotPreTickEvent.class, KillAura::onPre);
     }
 
     @NoArgsConstructor(access = AccessLevel.NONE)
     private static class KillauraSettings implements SettingsObject {
-        private static final Property.Builder BUILDER = Property.builder("plugin-killaura");
+        private static final Property.Builder BUILDER = Property.builder("kill-aura");
         public static final BooleanProperty ENABLE = BUILDER.ofBoolean(
                 "enable",
                 "Enable",
-                new String[]{"--enable-killaura"},
+                new String[]{"--kill-aura"},
                 "Enable KillAura",
                 false
         );
@@ -123,16 +116,16 @@ public class Killaura implements InternalExtension {
         public static final StringProperty WHITELISTED_USER = BUILDER.ofString(
                 "whitelisted-user",
                 "Whitelisted User",
-                new String[]{"--killaura-whitelisted-user", "--killaura-whitelisted-username", "--kwu"},
-                "This iser will be ignored by the KillAura",
+                new String[]{"--kill-aura-whitelisted-user", "--kill-aura-whitelisted-username", "--kwu"},
+                "This user will be ignored by the kill aura",
                 "Pansexuel"
         );
 
         public static final DoubleProperty HIT_RANGE = BUILDER.ofDouble(
                 "hit-range",
                 "Hit Range",
-                new String[]{"--killaura-hit-range", "--killaura-hit-distance", "--khr"},
-                "Distance for the killaura where the bot will start hitting the entity",
+                new String[]{"--kill-aura-hit-range", "--kill-aura-hit-distance", "--khr"},
+                "Distance for the kill aura where the bot will start hitting the entity",
                 3.0d,
                 0.5d,
                 6.0d,
@@ -141,8 +134,8 @@ public class Killaura implements InternalExtension {
         public static final DoubleProperty SWING_RANGE = BUILDER.ofDouble(
                 "swing-range",
                 "Swing Range",
-                new String[]{"--killaura-swing-range", "--killaura-swing-distance", "--ksr"},
-                "Distance for the killaura where the bot will start swinging arm, set to 0 to disable",
+                new String[]{"--kill-aura-swing-range", "--kill-aura-swing-distance", "--ksr"},
+                "Distance for the kill aura where the bot will start swinging arm, set to 0 to disable",
                 3.5d,
                 0.0d,
                 10.0d,
@@ -152,8 +145,8 @@ public class Killaura implements InternalExtension {
         public static final DoubleProperty LOOK_RANGE = BUILDER.ofDouble(
                 "look-range",
                 "Look Range",
-                new String[]{"--killaura-look-range", "--killaura-look-distance", "--klr"},
-                "Distance for the killaura where the bot will start looking at the entity, set to 0 to disable",
+                new String[]{"--kill-aura-look-range", "--kill-aura-look-distance", "--klr"},
+                "Distance for the kill aura where the bot will start looking at the entity, set to 0 to disable",
                 4.8d,
                 0.0d,
                 25.0d,
@@ -163,7 +156,7 @@ public class Killaura implements InternalExtension {
         public static final BooleanProperty CHECK_WALLS = BUILDER.ofBoolean(
                 "check-walls",
                 "Check Walls",
-                new String[]{"--killaura-check-walls", "--killaura-cw"},
+                new String[]{"--kill-aura-check-walls", "--kill-aura-cw"},
                 "Check if the entity is behind a wall",
                 true
         );
@@ -171,16 +164,16 @@ public class Killaura implements InternalExtension {
         public static final BooleanProperty IGNORE_COOLDOWN = BUILDER.ofBoolean(
                 "ignore-cooldown",
                 "Ignore Cooldown",
-                new String[]{"--killaura-ignore-cooldown", "--killaura-ic"},
-                "Ignore the 1.9+ attack cooldown to act like a 1.8 killaura",
+                new String[]{"--kill-aura-ignore-cooldown", "--kill-aura-ic"},
+                "Ignore the 1.9+ attack cooldown to act like a 1.8 kill aura",
                 false
         );
 
         public static final DoubleProperty CPS_MIN = BUILDER.ofDouble(
                 "cps-min",
                 "CPS Min",
-                new String[]{"--killaura-cps-min"},
-                "Minimum CPS for the killaura",
+                new String[]{"--kill-aura-cps-min"},
+                "Minimum CPS for the kill aura",
                 8.0d,
                 0.1d,
                 20.0d,
@@ -190,8 +183,8 @@ public class Killaura implements InternalExtension {
         public static final DoubleProperty CPS_MAX = BUILDER.ofDouble(
                 "cps-max",
                 "CPS Max",
-                new String[]{"--killaura-cps-max"},
-                "Maximum CPS for the killaura",
+                new String[]{"--kill-aura-cps-max"},
+                "Maximum CPS for the kill aura",
                 12.0d,
                 0.1d,
                 20.0d,

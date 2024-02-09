@@ -26,7 +26,6 @@ import com.github.steveice10.packetlib.event.session.PacketSendingEvent;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpSession;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.exception.CancelCodecException;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
@@ -40,12 +39,9 @@ import net.pistonmaster.soulfire.account.service.BedrockData;
 import net.pistonmaster.soulfire.proxy.SWProxy;
 import net.pistonmaster.soulfire.server.protocol.BotConnectionMeta;
 import net.pistonmaster.soulfire.server.protocol.SWProtocolConstants;
-import net.pistonmaster.soulfire.server.settings.BotSettings;
-import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 import net.pistonmaster.soulfire.server.viaversion.FrameCodec;
 import net.pistonmaster.soulfire.server.viaversion.SWVersionConstants;
 import net.pistonmaster.soulfire.server.viaversion.StorableSession;
-import net.pistonmaster.soulfire.server.viaversion.StorableSettingsHolder;
 import net.raphimc.viabedrock.api.protocol.BedrockBaseProtocol;
 import net.raphimc.viabedrock.netty.BatchLengthCodec;
 import net.raphimc.viabedrock.netty.PacketEncapsulationCodec;
@@ -77,7 +73,6 @@ public class ViaClientSession extends TcpSession {
     private final int bindPort;
     private final SWProxy proxy;
     private final PacketCodecHelper codecHelper;
-    private final SettingsHolder settingsHolder;
     @Getter
     private final EventLoopGroup eventLoopGroup;
     @Getter
@@ -87,8 +82,7 @@ public class ViaClientSession extends TcpSession {
 
     public ViaClientSession(InetSocketAddress targetAddress, Logger logger,
                             PacketProtocol protocol, SWProxy proxy,
-                            SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup,
-                            BotConnectionMeta meta) {
+                            EventLoopGroup eventLoopGroup, BotConnectionMeta meta) {
         super(null, -1, protocol);
         this.logger = logger;
         this.targetAddress = targetAddress;
@@ -96,7 +90,6 @@ public class ViaClientSession extends TcpSession {
         this.bindPort = 0;
         this.proxy = proxy;
         this.codecHelper = protocol.createHelper();
-        this.settingsHolder = settingsHolder;
         this.eventLoopGroup = eventLoopGroup;
         this.meta = meta;
     }
@@ -108,7 +101,7 @@ public class ViaClientSession extends TcpSession {
         }
 
         try {
-            var version = settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+            var version = meta.protocolVersion();
             var isLegacy = SWVersionConstants.isLegacy(version);
             var isBedrock = SWVersionConstants.isBedrock(version);
             var bootstrap = new Bootstrap();
@@ -165,7 +158,6 @@ public class ViaClientSession extends TcpSession {
 
                     // This does the extra magic
                     var userConnection = new UserConnectionImpl(channel, true);
-                    userConnection.put(new StorableSettingsHolder(settingsHolder));
                     userConnection.put(new StorableSession(ViaClientSession.this));
 
                     if (isBedrock && meta.minecraftAccount().isPremiumBedrock()) {
