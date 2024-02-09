@@ -27,6 +27,7 @@ import net.pistonmaster.soulfire.client.ClientCommandManager;
 import net.pistonmaster.soulfire.client.grpc.RPCClient;
 import net.pistonmaster.soulfire.client.settings.SettingsManager;
 import net.pistonmaster.soulfire.grpc.generated.ClientDataRequest;
+import net.pistonmaster.soulfire.grpc.generated.ComboOption;
 import net.pistonmaster.soulfire.grpc.generated.DoubleSetting;
 import net.pistonmaster.soulfire.grpc.generated.IntSetting;
 import net.pistonmaster.soulfire.server.settings.lib.property.PropertyKey;
@@ -152,6 +153,8 @@ public class CLIManager {
                                         .type(String.class)
                                         .initialValue(comboEntry.getOptionsList().get(comboEntry.getDef()).getId())
                                         .hasInitialValue(true)
+                                        .completionCandidates(comboEntry.getOptionsList().stream()
+                                                .map(ComboOption::getId)::iterator)
                                         .setter(new CommandLine.Model.ISetter() {
                                             @Override
                                             public <T> T set(T value) {
@@ -160,13 +163,7 @@ public class CLIManager {
                                         })
                                         .build();
 
-                                settingsManager.registerListener(propertyKey,
-                                        s -> reference.set(comboEntry.getOptionsList().stream()
-                                                .filter(o -> o.getId().equals(s.getAsString()))
-                                                .findFirst()
-                                                .orElseThrow()
-                                                .getId()
-                                        ));
+                                settingsManager.registerListener(propertyKey, s -> reference.set(s.getAsString()));
                                 settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
 
                                 yield optionSpec;

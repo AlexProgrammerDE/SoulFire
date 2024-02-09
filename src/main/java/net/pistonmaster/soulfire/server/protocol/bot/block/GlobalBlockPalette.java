@@ -18,9 +18,11 @@
 package net.pistonmaster.soulfire.server.protocol.bot.block;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.ToString;
 import net.pistonmaster.soulfire.server.data.BlockState;
+import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.protocol.bot.state.ChunkData;
 
 @ToString
@@ -30,6 +32,18 @@ public class GlobalBlockPalette {
     @Getter
     private final int blockBitsPerEntry;
     private final BlockState[] stateIdToBlockState;
+    public static final GlobalBlockPalette INSTANCE;
+
+    static {
+        var stateMap = new Int2ObjectOpenHashMap<BlockState>();
+        for (var blockEntry : BlockType.FROM_ID.values()) {
+            for (var state : blockEntry.statesData().possibleStates()) {
+                stateMap.put(state.id(), state);
+            }
+        }
+
+        INSTANCE = new GlobalBlockPalette(stateMap);
+    }
 
     public GlobalBlockPalette(Int2ObjectMap<BlockState> states) {
         this.maxStates = states.size();
