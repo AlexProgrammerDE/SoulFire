@@ -245,7 +245,7 @@ public class BotActionManager {
         double halfWidth = entity.width() / 2;
         double halfHeight = entity.height() / 2;
         for (var x = -1; x <= 1; x++) {
-            for (var y = 0; y <= 1; y++) {
+            for (var y = 0; y <= 2; y++) {
                 for (var z = -1; z <= 1; z++) {
                     points.add(Vector3d.from(entity.x() + halfWidth * x, entity.y() + halfHeight * y, entity.z() + halfWidth * z));
                 }
