@@ -236,7 +236,6 @@ public class BotMovementManager {
         if (world == null) return;
 
         var vel = movementState.vel;
-        var pos = movementState.pos;
 
         {
             var playerBB = clientEntity.boundingBox();
@@ -477,8 +476,13 @@ public class BotMovementManager {
         } else {
             // Client-side sprinting (don't rely on server-side sprinting)
             // setSprinting in LivingEntity.java
-            playerSpeedAttribute.modifiers().removeIf(modifier ->
-                    modifier.uuid().equals(physics.sprintingUUID));
+            //playerSpeedAttribute.modifiers().removeIf(modifier ->
+            //        modifier.uuid().equals(physics.sprintingUUID));
+
+            // TODO: 2/10/24 you should make the List mutable by default, this "fix" is a workaround that should be removed
+            List<Attribute.Modifier> modifiers = new ArrayList<>(playerSpeedAttribute.modifiers());
+            modifiers.removeIf(modifier -> modifier.uuid().equals(physics.sprintingUUID));
+            playerSpeedAttribute.modifiers(modifiers);
         }
 
         return (float) clientEntity.getAttributeValue(AttributeType.GENERIC_MOVEMENT_SPEED);
