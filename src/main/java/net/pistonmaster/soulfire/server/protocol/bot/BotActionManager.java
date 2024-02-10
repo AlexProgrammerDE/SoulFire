@@ -200,9 +200,14 @@ public class BotActionManager {
     }
 
     public void lookAt(@NonNull Entity entity) {
-        var x = entity.x() - dataManager.clientEntity().x();
-        var y = (entity.y() + entity.height() / 2f) // Center of entity
-                - (dataManager.clientEntity().y() + EYE_HEIGHT); // Eye height
+        Vector3d vec = Vector3d.from(entity.x(), entity.y() + entity.height()/2, entity.z());
+        lookAt(vec);
+    }
+
+    public void lookAt(@NonNull Vector3d vec) {
+        var x = vec.getX() - dataManager.clientEntity().x();
+        var y = vec.getY() - (dataManager.clientEntity().y() + EYE_HEIGHT); // Eye height
+        var z = vec.getZ() - dataManager.clientEntity().z();
 
         final var VER_1_14 = ProtocolVersion.v1_14.getVersion();
         var ver = dataManager.connection().meta().protocolVersion();
@@ -214,22 +219,6 @@ public class BotActionManager {
                 y += 0.15f * 2;
             }
         }
-
-        var z = entity.z() - dataManager.clientEntity().z();
-
-        var distance = Math.sqrt(x * x + y * y + z * z);
-
-        var yaw = (float) Math.toDegrees(Math.atan2(z, x)) - 90;
-        var pitch = (float) -Math.toDegrees(Math.atan2(y, distance));
-
-        dataManager.clientEntity().yaw(yaw);
-        dataManager.clientEntity().pitch(pitch);
-    }
-
-    public void lookAt(@NonNull Vector3d vec) {
-        var x = vec.getX() - dataManager.clientEntity().x();
-        var y = vec.getY() - (dataManager.clientEntity().y() + EYE_HEIGHT); // Eye height
-        var z = vec.getZ() - dataManager.clientEntity().z();
 
         var distance = Math.sqrt(x * x + y * y + z * z);
 
