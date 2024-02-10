@@ -28,7 +28,6 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import net.pistonmaster.soulfire.server.data.AttributeType;
 import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.EntityType;
 import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
@@ -200,7 +199,7 @@ public class BotActionManager {
     }
 
     public void lookAt(@NonNull Entity entity) {
-        Vector3d vec = Vector3d.from(entity.x(), entity.y() + entity.height()/2, entity.z());
+        Vector3d vec = Vector3d.from(entity.x(), entity.y() + entity.height() / 2, entity.z());
         lookAt(vec);
     }
 
@@ -258,11 +257,11 @@ public class BotActionManager {
             return;
         }
 
+        var packet = new ServerboundInteractPacket(entity.entityId(), InteractAction.ATTACK, dataManager.controlState().sneaking());
+        dataManager.sendPacket(packet);
         if (swingArm) {
             swingArm();
         }
-        var packet = new ServerboundInteractPacket(entity.entityId(), InteractAction.ATTACK, dataManager.controlState().sneaking());
-        dataManager.sendPacket(packet);
         lastHit = System.currentTimeMillis();
     }
 
@@ -292,7 +291,7 @@ public class BotActionManager {
             if (whitelistedUser != null && !whitelistedUser.isEmpty() && entity.entityType() == EntityType.PLAYER) {
                 var connectedUsers = dataManager.playerListState();
                 var playerListEntry = connectedUsers.entries().get(((RawEntity) entity).uuid());
-                if (playerListEntry !=null && playerListEntry.getProfile() != null) {
+                if (playerListEntry != null && playerListEntry.getProfile() != null) {
                     if (playerListEntry.getProfile().getName().equalsIgnoreCase(whitelistedUser))
                         continue;
                 }
@@ -376,18 +375,20 @@ public class BotActionManager {
         if (item != null) {
             cooldown = dataManager.itemCoolDowns().get(item.type().id()) * 50; // 50ms per tick
             if (cooldown == 0) { // if the server hasn't changed the cooldown
-                if (item.type().attributes() != null) {
-                    double attackSpeedModifier = item.type().attributes().stream()
-                            .filter(attribute -> attribute.type() == AttributeType.GENERIC_ATTACK_SPEED)
-                            .map(attribute -> attribute.modifiers().getFirst().amount())
-                            .findFirst()
-                            .orElse(0d); // Default attack speed
+                System.out.println(item.type().attributes()); // TODO: fix that, attribute.type() is always null
 
-                    var attackSpeed = 4.0 + attackSpeedModifier;
-                    cooldown = (int) ((1 / attackSpeed) * 1000);
-                } else {
-                    cooldown = 500; // Default cooldown when you hit with your hand
+                double attackSpeedModifier = 0d;
+                for (var attribute : item.type().attributes()) {
+                    for (var modifier : attribute.modifiers()) {
+                        if (modifier.uuid().equals(UUID.fromString("fa233e1c-4180-4865-b01b-bcce9785aca3"))) {
+                            attackSpeedModifier = modifier.amount();
+                            break;
+                        }
+                    }
                 }
+
+                var attackSpeed = 4.0 + attackSpeedModifier;
+                cooldown = (int) ((1 / attackSpeed) * 1000);
             }
         }
         return lastHit + cooldown - System.currentTimeMillis();
