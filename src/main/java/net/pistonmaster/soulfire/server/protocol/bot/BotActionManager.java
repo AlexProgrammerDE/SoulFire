@@ -32,6 +32,7 @@ import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.EntityType;
 import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
+import net.pistonmaster.soulfire.server.protocol.bot.state.LevelState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.RawEntity;
 import net.pistonmaster.soulfire.server.util.Segment;
@@ -281,19 +282,20 @@ public class BotActionManager {
         var closestDistance = Double.MAX_VALUE;
 
         for (var entity : entities.values()) {
-            if (entity.entityId() == dataManager.clientEntity().entityId()) {
-                continue;
-            }
+            if (entity.entityId() == dataManager.clientEntity().entityId()) continue;
+
+            var distance = Math.sqrt(Math.pow(entity.x() - x, 2) + Math.pow(entity.y() - y, 2) + Math.pow(entity.z() - z, 2));
+            if (distance > range) continue;
 
             if (onlyInteractable && !entity.entityType().attackable()) continue;
-            if (mustBeSeen && !canSee(entity)) continue;
 
             if (whitelistedUser != null && !whitelistedUser.isEmpty() && entity.entityType() == EntityType.PLAYER) {
                 var connectedUsers = dataManager.playerListState();
                 var playerListEntry = connectedUsers.entries().get(((RawEntity) entity).uuid());
                 if (playerListEntry != null && playerListEntry.getProfile() != null) {
-                    if (playerListEntry.getProfile().getName().equalsIgnoreCase(whitelistedUser))
+                    if (playerListEntry.getProfile().getName().equalsIgnoreCase(whitelistedUser)) {
                         continue;
+                    }
                 }
             }
 
@@ -308,8 +310,7 @@ public class BotActionManager {
                 if (botIds.contains(rawEntity.entityId())) continue;
             }
 
-            var distance = Math.sqrt(Math.pow(entity.x() - x, 2) + Math.pow(entity.y() - y, 2) + Math.pow(entity.z() - z, 2));
-            if (distance > range) continue;
+            if (mustBeSeen && !canSee(entity)) continue;
 
             if (distance < closestDistance) {
                 closest = entity;
@@ -327,9 +328,7 @@ public class BotActionManager {
     }
 
     public double distanceTo(Vector3d vec) {
-        if (dataManager.clientEntity() == null) {
-            return -1;
-        }
+        if (dataManager.clientEntity() == null) return -1;
 
         var x = vec.getX() - dataManager.clientEntity().x();
         var y = vec.getY() - (dataManager.clientEntity().y() + 1.80f); // Eye height
@@ -343,20 +342,17 @@ public class BotActionManager {
     }
 
     public boolean canSee(Vector3d vec) {
-        var distance = distanceTo(vec);
-        if (distance >= 256) {
-            return false;
-        }
-        var eye = dataManager.clientEntity().getEyePosition();
-        var segment = new Segment(eye, vec);
-        for (var entry : dataManager.levels().entrySet()) {
-            var boxes = entry.getValue().getCollisionBoxes(new AABB(eye, vec));
-            if (segment.intersects(boxes)) {
-                return false;
-            }
-        }
+        LevelState level = dataManager.getCurrentLevel();
+        if (level == null) return false;
 
-        return true;
+        var distance = distanceTo(vec);
+        if (distance >= 256) return false;
+
+        var eye = dataManager.clientEntity().getEyePosition();
+        if (!level.isChunkLoaded(Vector3i.from(vec.getX(), vec.getY(), vec.getZ()))) return false;
+        var segment = new Segment(eye, vec);
+        var boxes = dataManager.getCurrentLevel().getCollisionBoxes(new AABB(eye, vec));
+        return !segment.intersects(boxes);
     }
 
     public void swingArm() {
@@ -375,7 +371,6 @@ public class BotActionManager {
         if (item != null) {
             cooldown = dataManager.itemCoolDowns().get(item.type().id()) * 50; // 50ms per tick
             if (cooldown == 0) { // if the server hasn't changed the cooldown
-                System.out.println(item.type().attributes()); // TODO: fix that, attribute.type() is always null
 
                 double attackSpeedModifier = 0d;
                 for (var attribute : item.type().attributes()) {

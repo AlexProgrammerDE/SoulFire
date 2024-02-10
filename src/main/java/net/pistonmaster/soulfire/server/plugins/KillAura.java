@@ -52,7 +52,9 @@ public class KillAura implements InternalExtension {
 
         var max = Math.max(lookRange, Math.max(hitRange, swingRange));
 
+        long start = System.currentTimeMillis();
         var entity = manager.getClosestEntity(max, whitelistedUser, true, true, bot.settingsHolder().get(KillAuraSettings.CHECK_WALLS));
+        System.out.println("Took " + (System.currentTimeMillis() - start) + "ms to find entity");
         if (entity == null) return;
 
 
