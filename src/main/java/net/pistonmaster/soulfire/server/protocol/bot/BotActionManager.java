@@ -292,7 +292,7 @@ public class BotActionManager {
             if (whitelistedUser != null && !whitelistedUser.isEmpty() && entity.entityType() == EntityType.PLAYER) {
                 var connectedUsers = dataManager.playerListState();
                 var playerListEntry = connectedUsers.entries().get(((RawEntity) entity).uuid());
-                if (playerListEntry.getProfile() != null) {
+                if (playerListEntry !=null && playerListEntry.getProfile() != null) {
                     if (playerListEntry.getProfile().getName().equalsIgnoreCase(whitelistedUser))
                         continue;
                 }
@@ -376,15 +376,18 @@ public class BotActionManager {
         if (item != null) {
             cooldown = dataManager.itemCoolDowns().get(item.type().id()) * 50; // 50ms per tick
             if (cooldown == 0) { // if the server hasn't changed the cooldown
-                double attackSpeedModifier = item.type().attributes().stream()
-                        .filter(attribute -> attribute.type() == AttributeType.GENERIC_ATTACK_SPEED)
-                        .map(attribute -> attribute.modifiers().getFirst().amount())
-                        .findFirst()
-                        .orElse(0d); // Default attack speed
+                if (item.type().attributes() != null) {
+                    double attackSpeedModifier = item.type().attributes().stream()
+                            .filter(attribute -> attribute.type() == AttributeType.GENERIC_ATTACK_SPEED)
+                            .map(attribute -> attribute.modifiers().getFirst().amount())
+                            .findFirst()
+                            .orElse(0d); // Default attack speed
 
-                var attackSpeed = 4.0 + attackSpeedModifier;
-                cooldown = (int) ((1 / attackSpeed) * 1000);
-
+                    var attackSpeed = 4.0 + attackSpeedModifier;
+                    cooldown = (int) ((1 / attackSpeed) * 1000);
+                } else {
+                    cooldown = 500; // Default cooldown when you hit with your hand
+                }
             }
         }
         return lastHit + cooldown - System.currentTimeMillis();
