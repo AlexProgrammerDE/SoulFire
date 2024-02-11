@@ -236,6 +236,8 @@ public class BotActionManager {
         for (var x = -1; x <= 1; x++) {
             for (var y = 0; y <= 2; y++) {
                 for (var z = -1; z <= 1; z++) {
+                    // skip the middle point because you're supposed to look at hitbox faces
+                    if (x == 0 && y == 1 && z == 0) continue;
                     points.add(Vector3d.from(entity.x() + halfWidth * x, entity.y() + halfHeight * y, entity.z() + halfWidth * z));
                 }
             }
@@ -243,6 +245,11 @@ public class BotActionManager {
 
         // sort by distance to the bot
         points.sort(Comparator.comparingDouble(this::distanceTo));
+
+        // remove the farthest points because they're not "visible"
+        for (var i = 0; i < 4; i++)
+            points.remove(points.size() - 1);
+
         for (var point : points) {
             if (canSee(point)) {
                 return point;
@@ -341,7 +348,7 @@ public class BotActionManager {
         return getEntityVisiblePoint(entity) != null;
     }
 
-    public boolean canSee(Vector3d vec) {
+    public boolean canSee(Vector3d vec) { // intensive method, don't use it too often
         LevelState level = dataManager.getCurrentLevel();
         if (level == null) return false;
 
