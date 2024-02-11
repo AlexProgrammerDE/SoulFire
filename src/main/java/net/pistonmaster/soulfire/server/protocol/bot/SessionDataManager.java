@@ -321,31 +321,31 @@ public final class SessionDataManager {
     public void onPlayerChat(ClientboundPlayerChatPacket packet) {
         var message = packet.getUnsignedContent();
         if (message != null) {
-            onChat(message);
+            onChat(packet.getTimeStamp(), message);
             return;
         }
 
         ChatMessageReceiveEvent.ChatMessageSender sender =
                 ChatMessageReceiveEvent.ChatMessageSender.fromClientboundPlayerChatPacket(packet);
 
-        onChat(Component.text(packet.getContent()), sender);
+        onChat(packet.getTimeStamp(), Component.text(packet.getContent()), sender);
     }
 
     @EventHandler
     public void onServerChat(ClientboundSystemChatPacket packet) {
-        onChat(packet.getContent());
+        onChat(System.currentTimeMillis(), packet.getContent());
     }
 
     @EventHandler
     public void onDisguisedChat(ClientboundDisguisedChatPacket packet) {
     }
 
-    private void onChat(Component message) {
-        connection.eventBus().call(new ChatMessageReceiveEvent(connection, message, null));
+    private void onChat(long stamp, Component message) {
+        connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message, null));
     }
 
-    private void onChat(Component message, ChatMessageReceiveEvent.ChatMessageSender sender) {
-        connection.eventBus().call(new ChatMessageReceiveEvent(connection, message, sender));
+    private void onChat(long stamp, Component message, ChatMessageReceiveEvent.ChatMessageSender sender) {
+        connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message, sender));
     }
 
     //

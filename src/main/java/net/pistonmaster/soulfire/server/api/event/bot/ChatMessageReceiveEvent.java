@@ -32,7 +32,12 @@ import java.util.UUID;
  * @param connection The bot connection instance.
  * @param message    The message that was received.
  */
-public record ChatMessageReceiveEvent(BotConnection connection, Component message, @Nullable ChatMessageSender sender) implements SoulFireBotEvent {
+public record ChatMessageReceiveEvent(
+        BotConnection connection,
+        long timestamp,
+        Component message,
+        @Nullable ChatMessageSender sender
+) implements SoulFireBotEvent {
     public String parseToText() {
         return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(message);
     }

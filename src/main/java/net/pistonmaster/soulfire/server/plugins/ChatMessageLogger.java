@@ -35,7 +35,7 @@ import java.util.Set;
 
 public class ChatMessageLogger implements InternalExtension {
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageLogger.class);
-    private static final Set<String> chatMessages = new LinkedHashSet<>(5);
+    private static final Set<Long> chatMessages = new LinkedHashSet<>(50); // in case of huge lag
     public static void onMessage(ChatMessageReceiveEvent event) {
         if (event.connection().settingsHolder().get(ChatMessageSettings.ENABLED)) {
             StringBuilder content = new StringBuilder();
@@ -47,16 +47,16 @@ public class ChatMessageLogger implements InternalExtension {
             content.append(event.parseToText());
 
             // usage of synchronized method so that the chatMessages set is not modified while being iterated
-            logChatMessage(content.toString());
+            logChatMessage(content.toString(), event.timestamp());
         }
     }
 
-    private static synchronized void logChatMessage(String message) {
-        if (chatMessages.contains(message)) return;
+    private static synchronized void logChatMessage(String message, Long timestamp) {
+        if (chatMessages.contains(timestamp)) return;
         if (chatMessages.size() == 5)
             chatMessages.remove(chatMessages.iterator().next());
 
-        chatMessages.add(message);
+        chatMessages.add(timestamp);
         logger.info(message);
     }
 
