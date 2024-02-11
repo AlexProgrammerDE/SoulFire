@@ -17,10 +17,14 @@
  */
 package net.pistonmaster.soulfire.server.api.event.bot;
 
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.soulfire.server.SoulFireServer;
 import net.pistonmaster.soulfire.server.api.event.SoulFireBotEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
+
+import javax.annotation.Nullable;
+import java.util.UUID;
 
 /**
  * This event is called when a chat message is received from the server.
@@ -28,8 +32,20 @@ import net.pistonmaster.soulfire.server.protocol.BotConnection;
  * @param connection The bot connection instance.
  * @param message    The message that was received.
  */
-public record ChatMessageReceiveEvent(BotConnection connection, Component message) implements SoulFireBotEvent {
+public record ChatMessageReceiveEvent(BotConnection connection, Component message, @Nullable ChatMessageSender sender) implements SoulFireBotEvent {
     public String parseToText() {
         return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(message);
+    }
+
+    public boolean isFromPlayer() {
+        return sender != null;
+    }
+
+    public record ChatMessageSender(UUID senderUUID, String senderName) {
+        public static ChatMessageSender fromClientboundPlayerChatPacket(ClientboundPlayerChatPacket packet) {
+            UUID senderUUID = packet.getSender();
+            String senderName = SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(packet.getName());
+            return new ChatMessageSender(senderUUID, senderName);
+        }
     }
 }

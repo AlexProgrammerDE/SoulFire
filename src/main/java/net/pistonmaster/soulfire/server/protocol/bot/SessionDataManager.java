@@ -325,7 +325,10 @@ public final class SessionDataManager {
             return;
         }
 
-        onChat(Component.text(packet.getContent()));
+        ChatMessageReceiveEvent.ChatMessageSender sender =
+                ChatMessageReceiveEvent.ChatMessageSender.fromClientboundPlayerChatPacket(packet);
+
+        onChat(Component.text(packet.getContent()), sender);
     }
 
     @EventHandler
@@ -338,7 +341,11 @@ public final class SessionDataManager {
     }
 
     private void onChat(Component message) {
-        connection.eventBus().call(new ChatMessageReceiveEvent(connection, message));
+        connection.eventBus().call(new ChatMessageReceiveEvent(connection, message, null));
+    }
+
+    private void onChat(Component message, ChatMessageReceiveEvent.ChatMessageSender sender) {
+        connection.eventBus().call(new ChatMessageReceiveEvent(connection, message, sender));
     }
 
     //
