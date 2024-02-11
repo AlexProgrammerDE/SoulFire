@@ -28,11 +28,13 @@ import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class ChatMessageLogger implements InternalExtension {
+    private static final Logger logger = LoggerFactory.getLogger(ChatMessageLogger.class);
     private static final Set<String> chatMessages = new LinkedHashSet<>(5);
     public static void onMessage(ChatMessageReceiveEvent event) {
         if (event.connection().settingsHolder().get(ChatMessageSettings.ENABLED)) {
@@ -45,19 +47,17 @@ public class ChatMessageLogger implements InternalExtension {
             content.append(event.parseToText());
 
             // usage of synchronized method so that the chatMessages set is not modified while being iterated
-            logChatMessage(content.toString(), event.connection().logger());
+            logChatMessage(content.toString());
         }
     }
 
-    private static synchronized void logChatMessage(String message, Logger logger) {
-        if (chatMessages.contains(message)) {
-            return;
-        }
-        if (chatMessages.size() == 5) {
+    private static synchronized void logChatMessage(String message) {
+        if (chatMessages.contains(message)) return;
+        if (chatMessages.size() == 5)
             chatMessages.remove(chatMessages.iterator().next());
-        }
+
         chatMessages.add(message);
-        logger.info("[Chat] {}", message);
+        logger.info(message);
     }
 
     @EventHandler
