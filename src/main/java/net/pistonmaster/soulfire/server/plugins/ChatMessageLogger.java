@@ -22,36 +22,42 @@ import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
-import net.pistonmaster.soulfire.server.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.soulfire.server.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
-import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
-import net.pistonmaster.soulfire.server.settings.lib.property.IntProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import org.slf4j.Logger;
 
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 public class ChatMessageLogger implements InternalExtension {
-    public static void onConnectionInit(BotConnectionInitEvent event) {
-        var connection = event.connection();
-        var settingsHolder = connection.settingsHolder();
-        if (!settingsHolder.get(ChatMessageSettings.ENABLED)) {
+    private static final Set<String> chatMessages = new LinkedHashSet<>(5);
+    public static void onMessage(ChatMessageReceiveEvent event) {
+        if (event.connection().settingsHolder().get(ChatMessageSettings.ENABLED)) {
+            StringBuilder content = new StringBuilder();
+            // if it's a player message, add username
+            if (event.isFromPlayer())
+                content.append("<").append(event.sender().senderName()).append("> ");
+            else content.append("<Server> ");
+
+            content.append(event.parseToText());
+
+            // usage of synchronized method so that the chatMessages set is not modified while being iterated
+            logChatMessage(content.toString(), event.connection().logger());
+        }
+    }
+
+    private static synchronized void logChatMessage(String message, Logger logger) {
+        if (chatMessages.contains(message)) {
             return;
         }
-
-        connection.eventBus().register(ChatMessageReceiveEvent.class,
-                new BotChatListener(connection.connectionId(), connection.logger(),
-                        connection.executorManager().newScheduledExecutorService(connection, "Chat"),
-                        new LinkedHashSet<>(), settingsHolder));
+        if (chatMessages.size() == 5) {
+            chatMessages.remove(chatMessages.iterator().next());
+        }
+        chatMessages.add(message);
+        logger.info("[Chat] {}", message);
     }
 
     @EventHandler
@@ -62,35 +68,7 @@ public class ChatMessageLogger implements InternalExtension {
     @Override
     public void onLoad() {
         SoulFireAPI.registerListeners(ChatMessageLogger.class);
-        PluginHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, ChatMessageLogger::onConnectionInit);
-    }
-
-    private record BotChatListener(UUID connectionId, Logger logger, ScheduledExecutorService executor,
-                                   Set<String> messageQueue, SettingsHolder settingsHolder)
-            implements Consumer<ChatMessageReceiveEvent> {
-        public BotChatListener {
-            executor.scheduleWithFixedDelay(() -> {
-                var iter = messageQueue.iterator();
-                while (!messageQueue.isEmpty()) {
-                    var message = iter.next();
-                    iter.remove();
-                    if (!Objects.nonNull(message)) {
-                        continue;
-                    }
-
-                    logger.info("[Chat] Received Message: {}", message);
-                }
-            }, 0, settingsHolder.get(ChatMessageSettings.INTERVAL), TimeUnit.SECONDS);
-        }
-
-        @Override
-        public void accept(ChatMessageReceiveEvent event) {
-            if (!event.connection().connectionId().equals(connectionId)) {
-                return;
-            }
-
-            messageQueue.add(event.parseToText().replace("\n", "\\n"));
-        }
+        PluginHelper.registerBotEventConsumer(ChatMessageReceiveEvent.class, ChatMessageLogger::onMessage);
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -102,16 +80,6 @@ public class ChatMessageLogger implements InternalExtension {
                 new String[]{"--log-chat"},
                 "Log all received chat messages to the terminal",
                 true
-        );
-        public static final IntProperty INTERVAL = BUILDER.ofInt(
-                "interval",
-                "Interval between logging chat messages",
-                new String[]{"--chat-interval"},
-                "This is the minimum delay between logging chat messages",
-                2,
-                0,
-                Integer.MAX_VALUE,
-                1
         );
     }
 }
