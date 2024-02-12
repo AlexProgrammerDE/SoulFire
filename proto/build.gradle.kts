@@ -36,16 +36,6 @@ tasks.withType<Checkstyle> {
     exclude("**/net/pistonmaster/soulfire/grpc/generated**")
 }
 
-// Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
-sourceSets {
-    main {
-        java {
-            srcDirs("${protobuf.generatedFilesBaseDir}/main/grpc")
-            srcDirs("${protobuf.generatedFilesBaseDir}/main/java")
-        }
-    }
-}
-
 idea {
     module {
         generatedSourceDirs.addAll(
