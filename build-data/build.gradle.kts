@@ -15,3 +15,15 @@ sourceSets {
         }
     }
 }
+
+idea {
+    module {
+        generatedSourceDirs.addAll(
+            listOf(
+                project.layout.buildDirectory
+                    .dir("generated/sources/blossom/main/java")
+                    .get().asFile,
+            )
+        )
+    }
+}

@@ -1,6 +1,5 @@
 plugins {
     application
-    idea
     id("sf.java-conventions")
     alias(libs.plugins.jmh)
 }
