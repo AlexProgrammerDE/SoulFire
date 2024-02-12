@@ -85,6 +85,10 @@ public abstract class Entity {
         log.debug("Unhandled entity event for entity {}: {}", entityId, event.name());
     }
 
+    public void lookAt(RotationOrigin origin, RotationOrigin entityOrigin, Entity entity) {
+        lookAt(origin, entityOrigin == RotationOrigin.EYES ? entity.getEyePosition() : entity.pos());
+    }
+
     /**
      * Updates the rotation to look at a given block or location.
      *

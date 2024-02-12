@@ -17,23 +17,34 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot;
 
+import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
+import com.github.steveice10.mc.protocol.data.game.entity.player.InteractAction;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerState;
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundInteractPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerCommandPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundSwingPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import net.pistonmaster.soulfire.server.data.EntityType;
+import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
+import net.pistonmaster.soulfire.server.protocol.bot.state.LevelState;
+import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
+import net.pistonmaster.soulfire.server.protocol.bot.state.entity.RawEntity;
+import net.pistonmaster.soulfire.server.util.Segment;
+import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.BitSet;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * This class is used to control the bot.
@@ -41,34 +52,35 @@ import java.util.Collections;
  */
 @RequiredArgsConstructor
 public class BotControlAPI {
-    private final SessionDataManager sessionDataManager;
+    private final SessionDataManager dataManager;
     private final SecureRandom secureRandom = new SecureRandom();
     @Getter
-    @Setter
-    private int sequenceNumber = 0;
+    private final Map<String, Object> extraData = new HashMap<>();
+    @Getter
+    private long lastHit = 0;
 
     public boolean toggleFlight() {
-        var abilitiesData = sessionDataManager.abilitiesData();
+        var abilitiesData = dataManager.abilitiesData();
         if (abilitiesData != null && !abilitiesData.allowFlying()) {
             throw new IllegalStateException("You can't fly! (Server said so)");
         }
 
-        var newFly = !sessionDataManager.controlState().flying();
-        sessionDataManager.controlState().flying(newFly);
+        var newFly = !dataManager.controlState().flying();
+        dataManager.controlState().flying(newFly);
 
         // Let the server know we are flying
-        sessionDataManager.sendPacket(new ServerboundPlayerAbilitiesPacket(newFly));
+        dataManager.sendPacket(new ServerboundPlayerAbilitiesPacket(newFly));
 
         return newFly;
     }
 
     public boolean toggleSprint() {
-        var newSprint = !sessionDataManager.controlState().sprinting();
-        sessionDataManager.controlState().sprinting(newSprint);
+        var newSprint = !dataManager.controlState().sprinting();
+        dataManager.controlState().sprinting(newSprint);
 
         // Let the server know we are sprinting
-        sessionDataManager.sendPacket(new ServerboundPlayerCommandPacket(
-                sessionDataManager.clientEntity().entityId(),
+        dataManager.sendPacket(new ServerboundPlayerCommandPacket(
+                dataManager.clientEntity().entityId(),
                 newSprint ? PlayerState.START_SPRINTING : PlayerState.STOP_SPRINTING
         ));
 
@@ -76,12 +88,12 @@ public class BotControlAPI {
     }
 
     public boolean toggleSneak() {
-        var newSneak = !sessionDataManager.controlState().sneaking();
-        sessionDataManager.controlState().sneaking(newSneak);
+        var newSneak = !dataManager.controlState().sneaking();
+        dataManager.controlState().sneaking(newSneak);
 
         // Let the server know we are sneaking
-        sessionDataManager.sendPacket(new ServerboundPlayerCommandPacket(
-                sessionDataManager.clientEntity().entityId(),
+        dataManager.sendPacket(new ServerboundPlayerCommandPacket(
+                dataManager.clientEntity().entityId(),
                 newSneak ? PlayerState.START_SNEAKING : PlayerState.STOP_SNEAKING
         ));
 
@@ -94,7 +106,7 @@ public class BotControlAPI {
             var command = message.substring(1);
             // We only sign chat at the moment because commands require the entire command tree to be handled
             // Command signing is signing every string parameter in the command because of reporting /msg
-            sessionDataManager.sendPacket(new ServerboundChatCommandPacket(
+            dataManager.sendPacket(new ServerboundChatCommandPacket(
                     command,
                     now.toEpochMilli(),
                     0L,
@@ -104,7 +116,7 @@ public class BotControlAPI {
             ));
         } else {
             var salt = secureRandom.nextLong();
-            sessionDataManager.sendPacket(new ServerboundChatPacket(
+            dataManager.sendPacket(new ServerboundChatPacket(
                     message,
                     now.toEpochMilli(),
                     salt,
@@ -137,9 +149,175 @@ public class BotControlAPI {
     }
 
     public void sendPluginMessage(String channel, byte[] data) {
-        sessionDataManager.sendPacket(new ServerboundCustomPayloadPacket(
+        dataManager.sendPacket(new ServerboundCustomPayloadPacket(
                 channel,
                 data
         ));
+    }
+
+    public Vector3d getEntityVisiblePoint(Entity entity) {
+        List<Vector3d> points = new ArrayList<>();
+        double halfWidth = entity.width() / 2;
+        double halfHeight = entity.height() / 2;
+        for (var x = -1; x <= 1; x++) {
+            for (var y = 0; y <= 2; y++) {
+                for (var z = -1; z <= 1; z++) {
+                    // skip the middle point because you're supposed to look at hitbox faces
+                    if (x == 0 && y == 1 && z == 0) continue;
+                    points.add(Vector3d.from(entity.x() + halfWidth * x, entity.y() + halfHeight * y, entity.z() + halfWidth * z));
+                }
+            }
+        }
+
+        // sort by distance to the bot
+        points.sort(Comparator.comparingDouble(this::distanceTo));
+
+        // remove the farthest points because they're not "visible"
+        for (var i = 0; i < 4; i++)
+            points.remove(points.size() - 1);
+
+        for (var point : points) {
+            if (canSee(point)) {
+                return point;
+            }
+        }
+
+        return null;
+    }
+
+    public void attack(@NonNull Entity entity, boolean swingArm) {
+        if (!entity.entityType().attackable()) {
+            System.err.println("Entity " + entity.entityId() + " can't be attacked!");
+            return;
+        }
+
+        var packet = new ServerboundInteractPacket(entity.entityId(), InteractAction.ATTACK, dataManager.controlState().sneaking());
+        dataManager.sendPacket(packet);
+        if (swingArm) {
+            swingArm();
+        }
+        lastHit = System.currentTimeMillis();
+    }
+
+    public Entity getClosestEntity(double range, String whitelistedUser, boolean ignoreBots, boolean onlyInteractable, boolean mustBeSeen) {
+        if (dataManager.clientEntity() == null) {
+            return null;
+        }
+
+        var x = dataManager.clientEntity().x();
+        var y = dataManager.clientEntity().y();
+        var z = dataManager.clientEntity().z();
+
+        var ets = dataManager.entityTrackerState();
+        Map<Integer, Entity> entities = ets.entities();
+
+        Entity closest = null;
+        var closestDistance = Double.MAX_VALUE;
+
+        for (var entity : entities.values()) {
+            if (entity.entityId() == dataManager.clientEntity().entityId()) continue;
+
+            var distance = Math.sqrt(Math.pow(entity.x() - x, 2) + Math.pow(entity.y() - y, 2) + Math.pow(entity.z() - z, 2));
+            if (distance > range) continue;
+
+            if (onlyInteractable && !entity.entityType().attackable()) continue;
+
+            if (whitelistedUser != null && !whitelistedUser.isEmpty() && entity.entityType() == EntityType.PLAYER) {
+                var connectedUsers = dataManager.playerListState();
+                var playerListEntry = connectedUsers.entries().get(((RawEntity) entity).uuid());
+                if (playerListEntry != null && playerListEntry.getProfile() != null) {
+                    if (playerListEntry.getProfile().getName().equalsIgnoreCase(whitelistedUser)) {
+                        continue;
+                    }
+                }
+            }
+
+            if (ignoreBots && entity instanceof RawEntity rawEntity) {
+                Set<Integer> botIds = new HashSet<>();
+                dataManager.connection().attackManager().botConnections().forEach(b -> {
+                    if (b.sessionDataManager() != null && b.sessionDataManager().clientEntity() != null) {
+                        botIds.add(b.sessionDataManager().clientEntity().entityId());
+                    }
+                });
+
+                if (botIds.contains(rawEntity.entityId())) continue;
+            }
+
+            if (mustBeSeen && !canSee(entity)) continue;
+
+            if (distance < closestDistance) {
+                closest = entity;
+                closestDistance = distance;
+            }
+        }
+
+        return closest;
+    }
+
+    public double distanceTo(Entity entity) {
+        var middleHeight = entity.y() + entity.height() / 2f;
+        var vec = Vector3d.from(entity.x(), middleHeight, entity.z());
+        return distanceTo(vec);
+    }
+
+    public double distanceTo(Vector3d vec) {
+        if (dataManager.clientEntity() == null) return -1;
+
+        var x = vec.getX() - dataManager.clientEntity().x();
+        var y = vec.getY() - (dataManager.clientEntity().y() + 1.80f); // Eye height
+        var z = vec.getZ() - dataManager.clientEntity().z();
+
+        return Math.sqrt(x * x + y * y + z * z);
+    }
+
+    public boolean canSee(Entity entity) {
+        return getEntityVisiblePoint(entity) != null;
+    }
+
+    public boolean canSee(Vector3d vec) { // intensive method, don't use it too often
+        LevelState level = dataManager.getCurrentLevel();
+        if (level == null) return false;
+
+        var distance = distanceTo(vec);
+        if (distance >= 256) return false;
+
+        var eye = dataManager.clientEntity().getEyePosition();
+        if (!level.isChunkLoaded(Vector3i.from(vec.getX(), vec.getY(), vec.getZ()))) return false;
+        var segment = new Segment(eye, vec);
+        var boxes = dataManager.getCurrentLevel().getCollisionBoxes(new AABB(eye, vec));
+        return !segment.intersects(boxes);
+    }
+
+    public void swingArm() {
+        var swingPacket = new ServerboundSwingPacket(Hand.MAIN_HAND);
+        dataManager.sendPacket(swingPacket);
+    }
+
+    public long getCooldownRemainingTime() {
+        if (dataManager == null || dataManager.inventoryManager() == null || dataManager.inventoryManager().getPlayerInventory() == null) {
+            return 2000;
+        }
+
+        var itemSlot = dataManager.inventoryManager().heldItemSlot();
+        var item = dataManager.inventoryManager().getPlayerInventory().hotbarSlot(itemSlot).item();
+        var cooldown = 500; // Default cooldown when you hit with your hand
+        if (item != null) {
+            cooldown = dataManager.itemCoolDowns().get(item.type().id()) * 50; // 50ms per tick
+            if (cooldown == 0) { // if the server hasn't changed the cooldown
+                double attackSpeedModifier = 0d;
+                for (var attribute : item.type().attributes()) {
+                    for (var modifier : attribute.modifiers()) {
+                        if (modifier.uuid().equals(UUID.fromString("fa233e1c-4180-4865-b01b-bcce9785aca3"))) {
+                            attackSpeedModifier = modifier.amount();
+                            break;
+                        }
+                    }
+                }
+
+                var attackSpeed = 4.0 + attackSpeedModifier;
+                cooldown = (int) ((1 / attackSpeed) * 1000);
+            }
+        }
+        return lastHit + cooldown - System.currentTimeMillis();
     }
 }

@@ -22,6 +22,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -122,7 +123,15 @@ public class ClientEntity extends Entity {
 
     @Override
     public double getEyeHeight() {
-        return this.controlState.sneaking() ? 1.50F : 1.62F;
+        final var VER_1_14 = ProtocolVersion.v1_14.getVersion();
+        var ver = sessionDataManager.connection().meta().protocolVersion();
+        var version = ver.getVersion();
+
+        if (this.controlState.sneaking()) {
+            return version >= VER_1_14 ? 1.27F : 1.54F;
+        } else {
+            return 1.62F;
+        }
     }
 
     public void sendPosRot() {
