@@ -32,12 +32,12 @@ import io.netty.buffer.Unpooled;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.data.AttributeType;
 import net.pistonmaster.soulfire.server.data.EntityType;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
-import net.pistonmaster.soulfire.server.protocol.bot.state.entity.RawEntity;
 import net.pistonmaster.soulfire.server.util.Segment;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -45,7 +45,10 @@ import org.cloudburstmc.math.vector.Vector3i;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * This class is used to control the bot.
@@ -57,8 +60,7 @@ public class BotControlAPI {
     private final SessionDataManager dataManager;
     private final SecureRandom secureRandom = new SecureRandom();
     @Getter
-    private final Map<String, Object> extraData = new HashMap<>();
-    @Getter
+    @Setter
     private int attackCooldownTicks = 0;
 
     public void tick() {
@@ -201,7 +203,7 @@ public class BotControlAPI {
 
     public void attack(@NonNull Entity entity, boolean swingArm) {
         if (!entity.entityType().attackable()) {
-            log.error("Entity " + entity.entityId() + " can't be attacked!");
+            log.error("Entity {} can't be attacked!", entity.entityId());
             return;
         }
 
@@ -236,7 +238,7 @@ public class BotControlAPI {
 
             if (whitelistedUser != null && !whitelistedUser.isEmpty() && entity.entityType() == EntityType.PLAYER) {
                 var connectedUsers = dataManager.playerListState();
-                var playerListEntry = connectedUsers.entries().get(((RawEntity) entity).uuid());
+                var playerListEntry = connectedUsers.entries().get(entity.uuid());
                 if (playerListEntry != null && playerListEntry.getProfile() != null) {
                     if (playerListEntry.getProfile().getName().equalsIgnoreCase(whitelistedUser)) {
                         continue;
@@ -244,13 +246,12 @@ public class BotControlAPI {
                 }
             }
 
-            if (ignoreBots && entity instanceof RawEntity rawEntity
-                    && dataManager.connection().attackManager().botConnections().stream().anyMatch(b -> {
-                if (b.sessionDataManager() == null || b.sessionDataManager().clientEntity() == null) {
+            if (ignoreBots && dataManager.connection().attackManager().botConnections().stream().anyMatch(b -> {
+                if (b.sessionDataManager().clientEntity() == null) {
                     return false;
                 }
 
-                return b.sessionDataManager().clientEntity().entityId() == rawEntity.entityId();
+                return b.sessionDataManager().clientEntity().uuid().equals(entity.uuid());
             })) {
                 continue;
             }

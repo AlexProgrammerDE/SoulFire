@@ -34,6 +34,8 @@ import net.pistonmaster.soulfire.server.protocol.bot.movement.PlayerMovementStat
 import net.pistonmaster.soulfire.server.util.MathHelper;
 import net.raphimc.vialoader.util.VersionEnum;
 
+import java.util.UUID;
+
 /**
  * Represents the bot itself as an entity.
  */
@@ -56,8 +58,8 @@ public class ClientEntity extends Entity {
     private boolean lastOnGround = false;
     private int positionReminder = 0;
 
-    public ClientEntity(int entityId, SessionDataManager sessionDataManager, ControlState controlState) {
-        super(entityId, EntityType.PLAYER);
+    public ClientEntity(int entityId, UUID uuid, SessionDataManager sessionDataManager, ControlState controlState) {
+        super(entityId, uuid, EntityType.PLAYER);
         this.sessionDataManager = sessionDataManager;
         this.controlState = controlState;
         this.movementState = new PlayerMovementState(this, sessionDataManager.inventoryManager().playerInventory());

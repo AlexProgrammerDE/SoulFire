@@ -28,10 +28,7 @@ import net.pistonmaster.soulfire.server.api.event.bot.BotPreEntityTickEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TickHookContext;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
-import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
-import net.pistonmaster.soulfire.server.settings.lib.property.DoubleProperty;
-import net.pistonmaster.soulfire.server.settings.lib.property.Property;
-import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.*;
 import net.raphimc.vialoader.util.VersionEnum;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -87,6 +84,8 @@ public class KillAura implements InternalExtension {
             }
 
             TickHookContext.INSTANCE.get().addHook(TickHookContext.HookType.POST_ENTITY_TICK, () -> {
+                if (control.attackCooldownTicks() > 0) return;
+
                 var swing = distance <= swingRange;
                 if (distance <= hitRange) {
                     control.attack(target, swing);
@@ -96,12 +95,11 @@ public class KillAura implements InternalExtension {
 
                 if (bot.meta().versionEnum().isOlderThan(VersionEnum.r1_9)
                         || bot.settingsHolder().get(KillAuraSettings.IGNORE_COOLDOWN)) {
-                    var cpsMin = bot.settingsHolder().get(KillAuraSettings.CPS_MIN);
-                    var cpsMax = bot.settingsHolder().get(KillAuraSettings.CPS_MAX);
-                    var randomDelay = 1000.0d / ThreadLocalRandom.current().nextDouble(cpsMin, cpsMax);
-                    // control.extraData().put("next_hit", control.lastHit() + randomDelay);
-                } else {
-                    control.extraData().put("next_hit", control.getHitItemCooldownTicks());
+                    var randomTickDelay = ThreadLocalRandom.current().nextDouble(
+                            bot.settingsHolder().get(KillAuraSettings.ATTACK_DELAY_TICKS.min()),
+                            bot.settingsHolder().get(KillAuraSettings.ATTACK_DELAY_TICKS.max())
+                    );
+                    control.attackCooldownTicks((int) randomTickDelay);
                 }
             });
         });
@@ -117,7 +115,6 @@ public class KillAura implements InternalExtension {
                 "Enable KillAura",
                 false
         );
-
         public static final StringProperty WHITELISTED_USER = BUILDER.ofString(
                 "whitelisted-user",
                 "Whitelisted User",
@@ -125,7 +122,6 @@ public class KillAura implements InternalExtension {
                 "This user will be ignored by the kill aura",
                 "Pansexuel"
         );
-
         public static final DoubleProperty HIT_RANGE = BUILDER.ofDouble(
                 "hit-range",
                 "Hit Range",
@@ -146,7 +142,6 @@ public class KillAura implements InternalExtension {
                 10.0d,
                 0.0d
         );
-
         public static final DoubleProperty LOOK_RANGE = BUILDER.ofDouble(
                 "look-range",
                 "Look Range",
@@ -157,7 +152,6 @@ public class KillAura implements InternalExtension {
                 25.0d,
                 0.0d
         );
-
         public static final BooleanProperty CHECK_WALLS = BUILDER.ofBoolean(
                 "check-walls",
                 "Check Walls",
@@ -165,7 +159,6 @@ public class KillAura implements InternalExtension {
                 "Check if the entity is behind a wall",
                 true
         );
-
         public static final BooleanProperty IGNORE_COOLDOWN = BUILDER.ofBoolean(
                 "ignore-cooldown",
                 "Ignore Cooldown",
@@ -173,27 +166,27 @@ public class KillAura implements InternalExtension {
                 "Ignore the 1.9+ attack cooldown to act like a 1.8 kill aura",
                 false
         );
-
-        public static final DoubleProperty CPS_MIN = BUILDER.ofDouble(
-                "cps-min",
-                "CPS Min",
-                new String[]{"--kill-aura-cps-min"},
-                "Minimum CPS for the kill aura",
-                8.0d,
-                0.1d,
-                20.0d,
-                0.1d
-        );
-
-        public static final DoubleProperty CPS_MAX = BUILDER.ofDouble(
-                "cps-max",
-                "CPS Max",
-                new String[]{"--kill-aura-cps-max"},
-                "Maximum CPS for the kill aura",
-                12.0d,
-                0.1d,
-                20.0d,
-                0.1d
+        public static final MinMaxPropertyLink ATTACK_DELAY_TICKS = new MinMaxPropertyLink(
+                BUILDER.ofInt(
+                        "attack-delay-ticks-min",
+                        "Attack Delay Ticks Min",
+                        new String[]{"--kill-aura-adt-min"},
+                        "Minimum tick delay between attacks on pre-1.9 versions",
+                        8,
+                        1,
+                        20,
+                        1
+                ),
+                BUILDER.ofInt(
+                        "attack-delay-ticks-max",
+                        "Attack Delay Ticks Max",
+                        new String[]{"--kill-aura-adt-max"},
+                        "Maximum tick delay between attacks on pre-1.9 versions",
+                        12,
+                        1,
+                        20,
+                        1
+                )
         );
     }
 }

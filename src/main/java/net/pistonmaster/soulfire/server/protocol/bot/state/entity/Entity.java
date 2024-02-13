@@ -31,6 +31,8 @@ import net.pistonmaster.soulfire.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
+import java.util.UUID;
+
 @Slf4j
 @Data
 public abstract class Entity {
@@ -38,6 +40,7 @@ public abstract class Entity {
     private final EntityAttributeState attributeState = new EntityAttributeState();
     private final EntityEffectState effectState = new EntityEffectState();
     private final int entityId;
+    private final UUID uuid;
     private final EntityType entityType;
     protected double x;
     protected double y;
