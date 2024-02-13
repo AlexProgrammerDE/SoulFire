@@ -46,7 +46,7 @@ public class AutoTotem implements InternalExtension {
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
             var sessionDataManager = connection.sessionDataManager();
             var inventoryManager = sessionDataManager.inventoryManager();
-            var playerInventory = inventoryManager.getPlayerInventory();
+            var playerInventory = inventoryManager.playerInventory();
             var offhandSlot = playerInventory.getOffhand();
 
             // We only want to use totems if there are no items in the offhand

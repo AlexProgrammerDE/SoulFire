@@ -353,7 +353,7 @@ public class ServerCommandManager {
                                     Objects.requireNonNull(sessionDataManager.getCurrentLevel(), "Level is null!").chunks().immutableCopy()
                             ),
                             new ProjectedInventory(
-                                    sessionDataManager.inventoryManager().getPlayerInventory()
+                                    sessionDataManager.inventoryManager().playerInventory()
                             )
                     );
                     logger.info("Starting calculations at: {}", start);

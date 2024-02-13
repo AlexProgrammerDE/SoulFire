@@ -17,23 +17,15 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.movement;
 
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeModifier;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.ModifierOperation;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.Getter;
-import net.pistonmaster.soulfire.server.data.BlockState;
-import net.pistonmaster.soulfire.server.data.BlockTags;
-import net.pistonmaster.soulfire.server.data.BlockType;
+import net.pistonmaster.soulfire.server.data.*;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
-import net.pistonmaster.soulfire.server.protocol.bot.state.EntityAttributeState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.LevelState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.ClientEntity;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
 import net.pistonmaster.soulfire.server.util.MathHelper;
-import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
@@ -243,10 +235,9 @@ public class BotMovementManager {
         if (world == null) return;
 
         var vel = movementState.vel;
-        var pos = movementState.pos;
 
         {
-            var playerBB = clientEntity.boundingBox(pos.toImmutable());
+            var playerBB = clientEntity.boundingBox();
             var waterBB = playerBB.deflate(0.001, 0.401, 0.001);
             var lavaBB = playerBB.deflate(0.1, 0.4, 0.1);
 
@@ -434,8 +425,8 @@ public class BotMovementManager {
             applyHeading(strafe, forward, frictionInfluencedSpeed);
 
             if (isClimbable(world, pos.toImmutableInt())) {
-                vel.x = GenericMath.clamp(vel.x, -physics.climbMaxSpeed, physics.climbMaxSpeed);
-                vel.z = GenericMath.clamp(vel.z, -physics.climbMaxSpeed, physics.climbMaxSpeed);
+                vel.x = MathHelper.doubleClamp(vel.x, -physics.climbMaxSpeed, physics.climbMaxSpeed);
+                vel.z = MathHelper.doubleClamp(vel.z, -physics.climbMaxSpeed, physics.climbMaxSpeed);
                 vel.y = Math.max(vel.y, controlState.sneaking() ? 0 : -physics.climbMaxSpeed);
             }
 
@@ -470,32 +461,21 @@ public class BotMovementManager {
 
     public float getSpeed() {
         var attribute = movementState.entity().attributeState();
-        Attribute playerSpeedAttribute;
-        if (attribute.hasAttribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED)) {
-            // Use server-side player attributes
-            playerSpeedAttribute = attribute.getAttribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED);
-        } else {
-            // Create an attribute if the player does not have it
-            playerSpeedAttribute = new Attribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED, physics.playerSpeed);
-        }
+        var playerSpeedAttribute = attribute.getOrCreateAttribute(AttributeType.GENERIC_MOVEMENT_SPEED);
 
         if (controlState.sprinting()) {
-            if (playerSpeedAttribute.getModifiers().stream().noneMatch(modifier ->
-                    modifier.getUuid().equals(physics.sprintingUUID))) {
-                playerSpeedAttribute.getModifiers().add(new AttributeModifier(
-                        physics.sprintingUUID,
-                        physics.sprintSpeed,
-                        ModifierOperation.MULTIPLY
-                ));
-            }
+            playerSpeedAttribute.modifiers().putIfAbsent(physics.sprintingUUID, new Attribute.Modifier(
+                    physics.sprintingUUID,
+                    physics.sprintSpeed,
+                    ModifierOperation.MULTIPLY_TOTAL
+            ));
         } else {
             // Client-side sprinting (don't rely on server-side sprinting)
             // setSprinting in LivingEntity.java
-            playerSpeedAttribute.getModifiers().removeIf(modifier ->
-                    modifier.getUuid().equals(physics.sprintingUUID));
+            playerSpeedAttribute.modifiers().remove(physics.sprintingUUID);
         }
 
-        return (float) EntityAttributeState.getAttributeValue(playerSpeedAttribute);
+        return (float) clientEntity.getAttributeValue(AttributeType.GENERIC_MOVEMENT_SPEED);
     }
 
     public void moveEntity(LevelState world, double dx, double dy, double dz) {

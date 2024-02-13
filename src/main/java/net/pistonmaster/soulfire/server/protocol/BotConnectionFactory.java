@@ -19,6 +19,7 @@ package net.pistonmaster.soulfire.server.protocol;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
@@ -41,14 +42,15 @@ import java.util.UUID;
 public record BotConnectionFactory(AttackManager attackManager, ResolveUtil.ResolvedAddress resolvedAddress,
                                    SettingsHolder settingsHolder, Logger logger,
                                    MinecraftProtocol protocol, MinecraftAccount minecraftAccount,
+                                   ProtocolVersion protocolVersion,
                                    SWProxy proxyData, EventLoopGroup eventLoopGroup) {
     public BotConnection prepareConnection() {
         return prepareConnectionInternal(ProtocolState.LOGIN);
     }
 
     public BotConnection prepareConnectionInternal(ProtocolState targetState) {
-        var meta = new BotConnectionMeta(minecraftAccount, targetState, proxyData);
-        var session = new ViaClientSession(resolvedAddress.resolvedAddress(), logger, protocol, proxyData, settingsHolder, eventLoopGroup, meta);
+        var meta = new BotConnectionMeta(minecraftAccount, targetState, protocolVersion, proxyData);
+        var session = new ViaClientSession(resolvedAddress.resolvedAddress(), logger, protocol, proxyData, eventLoopGroup, meta);
         var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.soulFireServer(),
                 settingsHolder, logger, protocol, session, resolvedAddress, new ExecutorManager("SoulFire-Attack-" + attackManager.id()), meta,
                 LambdaManager.basic(new ASMGenerator())

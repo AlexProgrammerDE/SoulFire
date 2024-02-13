@@ -34,7 +34,7 @@ public class SWViaBedrock implements ViaBedrockPlatform {
 
     public void init() {
         var configFile = dataFolder.resolve("config.yml").toFile();
-        ViaBedrockConfig config = new ViaBedrockConfig(configFile);
+        var config = new ViaBedrockConfig(configFile);
         config.reload();
         config.set("translate-resource-packs", false);
         config.save();

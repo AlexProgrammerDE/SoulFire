@@ -20,9 +20,8 @@ package net.pistonmaster.soulfire.client.settings;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.*;
-import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.account.AuthType;
@@ -72,9 +71,9 @@ public class SettingsManager {
         try {
             var settingsSerialized = deserializeGson.fromJson(json, RootDataStructure.class);
             var settingsData = settingsSerialized.settings();
-            var intProperties = new Object2IntArrayMap<PropertyKey>();
-            var booleanProperties = new Object2BooleanArrayMap<PropertyKey>();
-            var stringProperties = new Object2ObjectArrayMap<PropertyKey, String>();
+            var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
+            var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
+            var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();
 
             for (var entry : settingsData.entrySet()) {
                 var namespace = entry.getKey();
@@ -95,7 +94,7 @@ public class SettingsManager {
                         if (primitive.isBoolean()) {
                             booleanProperties.put(propertyKey, primitive.getAsBoolean());
                         } else if (primitive.isNumber()) {
-                            intProperties.put(propertyKey, primitive.getAsInt());
+                            numberProperties.put(propertyKey, primitive.getAsNumber());
                         } else if (primitive.isString()) {
                             stringProperties.put(propertyKey, primitive.getAsString());
                         } else {
@@ -117,7 +116,7 @@ public class SettingsManager {
             }
 
             return new SettingsHolder(
-                    intProperties,
+                    numberProperties,
                     booleanProperties,
                     stringProperties,
                     settingsSerialized.accounts(),

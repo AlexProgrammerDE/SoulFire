@@ -17,7 +17,10 @@
  */
 package net.pistonmaster.soulfire.server.settings.lib;
 
-import it.unimi.dsi.fastutil.objects.*;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMaps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.proxy.SWProxy;
 import net.pistonmaster.soulfire.server.settings.lib.property.*;
@@ -26,14 +29,14 @@ import java.util.List;
 import java.util.function.Function;
 
 public record SettingsHolder(
-        Object2IntMap<PropertyKey> intProperties,
+        Object2ObjectMap<PropertyKey, Number> numberProperties,
         Object2BooleanMap<PropertyKey> booleanProperties,
         Object2ObjectMap<PropertyKey, String> stringProperties,
         List<MinecraftAccount> accounts,
         List<SWProxy> proxies
 ) {
     public static final SettingsHolder EMPTY = new SettingsHolder(
-            Object2IntMaps.emptyMap(),
+            Object2ObjectMaps.emptyMap(),
             Object2BooleanMaps.emptyMap(),
             Object2ObjectMaps.emptyMap(),
             List.of(),
@@ -41,7 +44,11 @@ public record SettingsHolder(
     );
 
     public int get(IntProperty property) {
-        return intProperties.getOrDefault(property.propertyKey(), property.defaultValue());
+        return numberProperties.getOrDefault(property.propertyKey(), property.defaultValue()).intValue();
+    }
+
+    public double get(DoubleProperty property) {
+        return numberProperties.getOrDefault(property.propertyKey(), property.defaultValue()).doubleValue();
     }
 
     public boolean get(BooleanProperty property) {

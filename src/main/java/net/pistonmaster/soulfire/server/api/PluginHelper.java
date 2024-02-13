@@ -22,8 +22,10 @@ import net.pistonmaster.soulfire.server.api.event.SoulFireAttackEvent;
 import net.pistonmaster.soulfire.server.api.event.SoulFireBotEvent;
 import net.pistonmaster.soulfire.server.api.event.attack.AttackInitEvent;
 import net.pistonmaster.soulfire.server.api.event.attack.BotConnectionInitEvent;
+import net.pistonmaster.soulfire.server.protocol.BotConnection;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * This class contains helper methods for plugins to use to make their life easier.
@@ -60,5 +62,11 @@ public class PluginHelper {
         SoulFireAPI.registerListener(AttackInitEvent.class, event ->
                 EventUtil.runAndAssertChanged(event.attackManager().eventBus(), () ->
                         event.attackManager().eventBus().registerConsumer(consumer, clazz)));
+    }
+
+    public static void registerBotContextFactory(Function<BotConnection, BotContext> contextFactory) {
+        registerAttackEventConsumer(BotConnectionInitEvent.class, event ->
+                EventUtil.runAndAssertChanged(event.connection().eventBus(), () ->
+                        event.connection().eventBus().register(contextFactory.apply(event.connection()))));
     }
 }

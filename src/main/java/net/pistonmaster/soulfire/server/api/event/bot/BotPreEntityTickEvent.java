@@ -15,27 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.soulfire.server.protocol.bot.state.entity;
+package net.pistonmaster.soulfire.server.api.event.bot;
 
-import com.github.steveice10.mc.protocol.data.game.entity.object.ObjectData;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import net.pistonmaster.soulfire.server.data.EntityType;
+import net.pistonmaster.soulfire.server.api.event.SoulFireBotEvent;
+import net.pistonmaster.soulfire.server.protocol.BotConnection;
 
-import java.util.UUID;
-
-@Getter
-@Setter
-@EqualsAndHashCode(callSuper = true)
-public class RawEntity extends Entity {
-    private final ObjectData data;
-    private float yaw;
-    private float headYaw;
-    private float pitch;
-
-    public RawEntity(int entityId, UUID uuid, EntityType type, ObjectData data) {
-        super(entityId, uuid, type);
-        this.data = data;
-    }
+/**
+ * Called when the bot entity tracker is about to tick. This event is called inside the tick loop.
+ *
+ * @param connection The bot connection instance.
+ */
+public record BotPreEntityTickEvent(BotConnection connection) implements SoulFireBotEvent {
 }

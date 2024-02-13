@@ -21,8 +21,8 @@ import java.util.Arrays;
 
 public class PrimitiveHelper {
     public static byte[][] split(byte[] data, byte separator) {
-        int count = 0;
-        for (byte b : data) {
+        var count = 0;
+        for (var b : data) {
             if (b == separator) {
                 count++;
             }
@@ -32,10 +32,10 @@ public class PrimitiveHelper {
             return new byte[][]{data};
         }
 
-        byte[][] result = new byte[count + 1][];
-        int last = 0;
-        int index = 0;
-        for (int i = 0; i < data.length; i++) {
+        var result = new byte[count + 1][];
+        var last = 0;
+        var index = 0;
+        for (var i = 0; i < data.length; i++) {
             if (data[i] == separator) {
                 result[index++] = Arrays.copyOfRange(data, last, i);
                 last = i + 1;

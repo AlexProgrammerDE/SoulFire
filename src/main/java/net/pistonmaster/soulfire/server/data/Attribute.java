@@ -15,27 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.soulfire.server.protocol.bot.state.entity;
+package net.pistonmaster.soulfire.server.data;
 
-import com.github.steveice10.mc.protocol.data.game.entity.object.ObjectData;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import net.pistonmaster.soulfire.server.data.EntityType;
-
+import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Setter
-@EqualsAndHashCode(callSuper = true)
-public class RawEntity extends Entity {
-    private final ObjectData data;
-    private float yaw;
-    private float headYaw;
-    private float pitch;
-
-    public RawEntity(int entityId, UUID uuid, EntityType type, ObjectData data) {
-        super(entityId, uuid, type);
-        this.data = data;
+public record Attribute(AttributeType type, List<Modifier> modifiers) {
+    public record Modifier(UUID uuid, double amount, ModifierOperation operation) {
     }
 }

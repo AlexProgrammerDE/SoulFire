@@ -59,7 +59,7 @@ public final class BlockBreakAction implements WorldAction {
 
         var levelState = sessionDataManager.getCurrentLevel();
         var inventoryManager = sessionDataManager.inventoryManager();
-        var playerInventory = inventoryManager.getPlayerInventory();
+        var playerInventory = inventoryManager.playerInventory();
 
         if (levelState == null) {
             return;
@@ -120,7 +120,7 @@ public final class BlockBreakAction implements WorldAction {
         }
 
         if (!putOnHotbar && bestItemStack != null) {
-            var heldSlot = playerInventory.hotbarSlot(inventoryManager.heldItemSlot());
+            var heldSlot = playerInventory.getHeldItem();
             if (heldSlot.item() != null) {
                 var item = heldSlot.item();
                 if (item.equalsShape(bestItemStack)) {
@@ -162,7 +162,7 @@ public final class BlockBreakAction implements WorldAction {
                 try {
                     inventoryManager.leftClickSlot(slot.slot());
                     TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-                    inventoryManager.leftClickSlot(playerInventory.hotbarSlot(inventoryManager.heldItemSlot()).slot());
+                    inventoryManager.leftClickSlot(playerInventory.getHeldItem().slot());
                     TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
 
                     if (inventoryManager.cursorItem() != null) {
@@ -195,8 +195,8 @@ public final class BlockBreakAction implements WorldAction {
                     sessionDataManager.tagsState(),
                     sessionDataManager.clientEntity().effectState(),
                     clientEntity.onGround(),
-                    sessionDataManager.inventoryManager().getPlayerInventory()
-                            .hotbarSlot(sessionDataManager.inventoryManager().heldItemSlot())
+                    sessionDataManager.inventoryManager().playerInventory()
+                            .getHeldItem()
                             .item(),
                     optionalBlockType
             ).ticks();

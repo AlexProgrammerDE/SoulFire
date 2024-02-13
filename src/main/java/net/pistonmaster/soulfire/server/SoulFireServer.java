@@ -193,7 +193,8 @@ public class SoulFireServer {
                 new ChatMessageLogger(), new ServerListBypass(),
                 new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
                 new ModLoaderSupport(), // Needs to be before ForwardingBypass to not break it
-                new ForwardingBypass()
+                new ForwardingBypass(),
+                new KillAura()
         );
 
         plugins.forEach(SoulFireAPI::registerServerExtension);

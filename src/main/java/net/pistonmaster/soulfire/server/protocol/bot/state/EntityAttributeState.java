@@ -17,49 +17,39 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.state;
 
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Data;
+import net.pistonmaster.soulfire.server.data.Attribute;
+import net.pistonmaster.soulfire.server.data.AttributeType;
+import net.pistonmaster.soulfire.server.data.ItemType;
 
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Data
 public class EntityAttributeState {
-    private final Map<AttributeType, Attribute> attributeStore = new Object2ObjectOpenHashMap<>();
+    private final Map<AttributeType, AttributeState> attributeStore = new Object2ObjectOpenHashMap<>();
 
-    public static double getAttributeValue(Attribute attribute) {
-        var value = attribute.getValue();
+    public AttributeState getOrCreateAttribute(AttributeType type) {
+        return attributeStore.computeIfAbsent(type, k -> new AttributeState(type, type.defaultValue()));
+    }
 
-        for (var modifier : attribute.getModifiers()) {
-            switch (modifier.getOperation()) {
-                case ADD -> value += modifier.getAmount();
-                case ADD_MULTIPLIED -> value += modifier.getAmount() * value;
-                case MULTIPLY -> value *= modifier.getAmount();
+    public void putItemModifiers(ItemType type) {
+        for (var attribute : type.attributes()) {
+            getOrCreateAttribute(attribute.type())
+                    .modifiers().putAll(attribute.modifiers()
+                            .stream()
+                            .collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
+        }
+    }
+
+    public void removeItemModifiers(ItemType type) {
+        for (var attribute : type.attributes()) {
+            for (var modifier : attribute.modifiers()) {
+                getOrCreateAttribute(attribute.type())
+                        .modifiers().remove(modifier.uuid());
             }
         }
-
-        return value;
-    }
-
-    public boolean hasAttribute(AttributeType type) {
-        return attributeStore.containsKey(type);
-    }
-
-    public Attribute getAttribute(AttributeType type) {
-        return attributeStore.get(type);
-    }
-
-    public double getAttributeValue(AttributeType type) {
-        var attribute = attributeStore.get(type);
-        if (attribute == null) {
-            throw new IllegalArgumentException("Attribute " + type + " not found!");
-        }
-
-        return getAttributeValue(attribute);
-    }
-
-    public void setAttribute(Attribute attribute) {
-        this.attributeStore.put(attribute.getType(), attribute);
     }
 }

@@ -17,36 +17,38 @@
  */
 package net.pistonmaster.soulfire.data;
 
-import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import lombok.AccessLevel;
+import lombok.With;
 
 @SuppressWarnings("unused")
-public record EntityType(int id, String name, float width, float height,
-                         String category, boolean friendly,
-                         boolean summonable, boolean attackable) {
-    public static final Int2ReferenceMap<EntityType> FROM_ID = new Int2ReferenceOpenHashMap<>();
+@With(value = AccessLevel.PRIVATE)
+public record AttributeType(String name, double min, double max, double defaultValue) {
+    public static final Object2ReferenceMap<String, AttributeType> FROM_NAME = new Object2ReferenceOpenHashMap<>();
 
     // VALUES REPLACE
 
-    public static EntityType register(String name) {
-        var entityType = GsonDataHelper.fromJson("/minecraft/entities.json", name, EntityType.class);
-        FROM_ID.put(entityType.id(), entityType);
-        return entityType;
+    public static AttributeType register(String name) {
+        var attributeType = GsonDataHelper.fromJson("/minecraft/attributes.json", name, AttributeType.class);
+
+        FROM_NAME.put(attributeType.name(), attributeType);
+        return attributeType;
     }
 
-    public static EntityType getById(int id) {
-        return FROM_ID.get(id);
+    public static AttributeType getByName(String name) {
+        return FROM_NAME.get(name.replace("minecraft:", ""));
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof EntityType entityType)) return false;
-        return id == entityType.id;
+        if (!(o instanceof AttributeType attributeType)) return false;
+        return name.equals(attributeType.name);
     }
 
     @Override
     public int hashCode() {
-        return id;
+        return name.hashCode();
     }
 }
