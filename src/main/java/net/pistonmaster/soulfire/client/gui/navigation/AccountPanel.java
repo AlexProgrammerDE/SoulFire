@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.client.gui.navigation;
 
+import net.lenni0451.commons.swing.GBC;
 import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.client.gui.GUIFrame;
@@ -36,17 +37,15 @@ import java.util.ArrayList;
 public class AccountPanel extends NavigationItem {
     @Inject
     public AccountPanel(GUIManager guiManager, GUIFrame parent, CardsContainer cardsContainer) {
-        setLayout(new GridLayout(0, 1, 10, 10));
-
-        var accountOptionsPanel = new JPanel();
-        accountOptionsPanel.setLayout(new GridLayout(0, 1, 10, 10));
+        setLayout(new GridBagLayout());
+        var insets = new Insets(10, 0, 0, 0);
 
         var accountSettingsPanel = new JPanel();
-        accountSettingsPanel.setLayout(new GridLayout(0, 2));
+        accountSettingsPanel.setLayout(new GridBagLayout());
 
         GeneratedPanel.addComponents(accountSettingsPanel, cardsContainer.getByNamespace(BuiltinSettingsConstants.ACCOUNT_SETTINGS_ID), guiManager.settingsManager());
 
-        accountOptionsPanel.add(accountSettingsPanel);
+        GBC.create(this).grid(0, 0).fill(GBC.HORIZONTAL).weightx(1).add(accountSettingsPanel);
 
         var addAccountPanel = new JPanel();
         addAccountPanel.setLayout(new GridLayout(0, 3, 10, 10));
@@ -57,9 +56,7 @@ public class AccountPanel extends NavigationItem {
         addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.THE_ALTENING));
         addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.EASYMC));
 
-        accountOptionsPanel.add(addAccountPanel);
-
-        add(accountOptionsPanel);
+        GBC.create(this).grid(0, 1).insets(insets).fill(GBC.HORIZONTAL).weightx(1).add(addAccountPanel);
 
         var accountListPanel = new JPanel();
         accountListPanel.setLayout(new GridLayout(0, 1));
@@ -126,9 +123,7 @@ public class AccountPanel extends NavigationItem {
 
         var scrollPane = new JScrollPane(accountList);
 
-        accountListPanel.add(scrollPane);
-
-        add(accountListPanel);
+        GBC.create(this).grid(0, 2).insets(insets).fill(GBC.BOTH).weight(1, 1).add(scrollPane);
     }
 
     private static JButton createAccountLoadButton(GUIManager guiManager, GUIFrame parent, AuthType type) {

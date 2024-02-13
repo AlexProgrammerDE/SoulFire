@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.client.gui.navigation;
 
 import lombok.extern.slf4j.Slf4j;
+import net.lenni0451.commons.swing.GBC;
 import net.pistonmaster.soulfire.client.gui.GUIManager;
 import net.pistonmaster.soulfire.client.gui.LogPanel;
 import net.pistonmaster.soulfire.client.gui.libs.JFXFileHelper;
@@ -35,24 +36,25 @@ import java.util.Map;
 public class DeveloperPanel extends NavigationItem {
     @Inject
     public DeveloperPanel(GUIManager guiManager, LogPanel logPanel, CardsContainer cardsContainer) {
-        setLayout(new GridLayout(0, 2));
+        setLayout(new GridBagLayout());
 
-        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace(BuiltinSettingsConstants.DEV_SETTINGS_ID), guiManager.settingsManager());
+        int row = GeneratedPanel.addComponents(this, cardsContainer.getByNamespace(BuiltinSettingsConstants.DEV_SETTINGS_ID), guiManager.settingsManager());
 
-        add(new JLabel("Save Log"));
-        var saveLog = new JButton("Click to save");
-        add(saveLog);
-
-        saveLog.addActionListener(listener -> JFXFileHelper.showSaveDialog(SWPathConstants.DATA_FOLDER, Map.of(
-                "Log Files", "log"
-        ), "log.txt").ifPresent(file -> {
-            try (var writer = Files.newBufferedWriter(file)) {
-                writer.write(logPanel.messageLogPanel().getLogs());
-                log.info("Saved log to: {}", file);
-            } catch (IOException e) {
-                log.error("Failed to save log!", e);
-            }
-        }));
+        GBC.create(this).grid(0, row).anchor(GBC.LINE_START).add(new JLabel("Save Log"));
+        GBC.create(this).grid(1, row++).insets(0, 10, 0, 0).fill(GBC.HORIZONTAL).weightx(1).add(() -> {
+            var saveLog = new JButton("Click to save");
+            saveLog.addActionListener(listener -> JFXFileHelper.showSaveDialog(SWPathConstants.DATA_FOLDER, Map.of(
+                    "Log Files", "log"
+            ), "log.txt").ifPresent(file -> {
+                try (var writer = Files.newBufferedWriter(file)) {
+                    writer.write(logPanel.messageLogPanel().getLogs());
+                    log.info("Saved log to: {}", file);
+                } catch (IOException e) {
+                    log.error("Failed to save log!", e);
+                }
+            }));
+            return saveLog;
+        });
     }
 
     @Override
