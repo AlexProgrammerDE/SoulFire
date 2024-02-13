@@ -58,21 +58,29 @@ public class KillAura implements InternalExtension {
 
         control.extraData().put("kill_aura_target", entity);
 
-        var distance = control.distanceTo(entity);
+        double distance;
         var bestVisiblePoint = control.getEntityVisiblePoint(entity);
         if (bestVisiblePoint != null) {
-            distance = control.distanceTo(bestVisiblePoint);
+            distance = bestVisiblePoint.distance(
+                    bot.sessionDataManager().clientEntity().getEyePosition()
+            );
+        } else {
+            distance = entity.getEyePosition().distance(
+                    bot.sessionDataManager().clientEntity().getEyePosition()
+            );
         }
 
-        if (distance <= lookRange) {
-            if (bestVisiblePoint != null) {
-                bot.sessionDataManager().clientEntity().lookAt(RotationOrigin.EYES, bestVisiblePoint);
-            } else {
-                bot.sessionDataManager().clientEntity().lookAt(RotationOrigin.EYES, RotationOrigin.EYES, entity);
-            }
-
-            control.extraData().put("kill_aura_looked_at", true);
+        if (distance > lookRange) {
+            return;
         }
+
+        if (bestVisiblePoint != null) {
+            bot.sessionDataManager().clientEntity().lookAt(RotationOrigin.EYES, bestVisiblePoint);
+        } else {
+            bot.sessionDataManager().clientEntity().lookAt(RotationOrigin.EYES, RotationOrigin.EYES, entity);
+        }
+
+        control.extraData().put("kill_aura_looked_at", true);
     }
 
     public static void onPost(BotPostTickEvent event) {
@@ -81,12 +89,9 @@ public class KillAura implements InternalExtension {
 
         var control = bot.botControl();
 
-        if (!control.extraData().containsKey("next_hit")) {
-            control.extraData().put("next_hit", System.currentTimeMillis());
-        }
-
-        var nextHit = (long) control.extraData().get("next_hit");
-        if (nextHit > System.currentTimeMillis()) {
+        var currentTime = System.currentTimeMillis();
+        var nextHit = (long) control.extraData().computeIfAbsent("next_hit", k -> currentTime);
+        if (nextHit > currentTime) {
             return;
         }
 
@@ -94,25 +99,31 @@ public class KillAura implements InternalExtension {
         var hitRange = bot.settingsHolder().get(KillAuraSettings.HIT_RANGE);
         var swingRange = bot.settingsHolder().get(KillAuraSettings.SWING_RANGE);
 
-        Entity target = null;
-        if (control.extraData().containsKey("kill_aura_target")) {
-            target = (Entity) control.extraData().get("kill_aura_target");
+        var target = (Entity) control.extraData().get("kill_aura_target");
+        if (target != null) {
             control.extraData().remove("kill_aura_target");
         }
         if (target == null) return;
 
-        var lookedAt = false;
-        if (control.extraData().containsKey("kill_aura_looked_at")) {
-            lookedAt = (boolean) control.extraData().get("kill_aura_looked_at");
+        var lookedAt = (Boolean) control.extraData().get("kill_aura_looked_at");
+        if (lookedAt != null) {
             control.extraData().remove("kill_aura_looked_at");
+        } else {
+            lookedAt = false;
         }
 
         if (!lookedAt && lookRange != 0) return;
 
-        var distance = control.distanceTo(target);
+        double distance;
         var bestVisiblePoint = control.getEntityVisiblePoint(target);
         if (bestVisiblePoint != null) {
-            distance = control.distanceTo(bestVisiblePoint);
+            distance = bestVisiblePoint.distance(
+                    bot.sessionDataManager().clientEntity().getEyePosition()
+            );
+        } else {
+            distance = target.getEyePosition().distance(
+                    bot.sessionDataManager().clientEntity().getEyePosition()
+            );
         }
 
         var swing = distance <= swingRange;

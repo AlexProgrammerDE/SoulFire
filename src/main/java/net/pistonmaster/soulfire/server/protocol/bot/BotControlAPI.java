@@ -34,7 +34,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.server.data.EntityType;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
-import net.pistonmaster.soulfire.server.protocol.bot.state.LevelState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.RawEntity;
 import net.pistonmaster.soulfire.server.util.Segment;
@@ -156,7 +155,7 @@ public class BotControlAPI {
     }
 
     public Vector3d getEntityVisiblePoint(Entity entity) {
-        List<Vector3d> points = new ArrayList<>();
+        var points = new ArrayList<Vector3d>();
         double halfWidth = entity.width() / 2;
         double halfHeight = entity.height() / 2;
         for (var x = -1; x <= 1; x++) {
@@ -164,17 +163,23 @@ public class BotControlAPI {
                 for (var z = -1; z <= 1; z++) {
                     // skip the middle point because you're supposed to look at hitbox faces
                     if (x == 0 && y == 1 && z == 0) continue;
-                    points.add(Vector3d.from(entity.x() + halfWidth * x, entity.y() + halfHeight * y, entity.z() + halfWidth * z));
+                    points.add(Vector3d.from(
+                            entity.x() + halfWidth * x,
+                            entity.y() + halfHeight * y,
+                            entity.z() + halfWidth * z
+                    ));
                 }
             }
         }
 
+        var eye = dataManager.clientEntity().getEyePosition();
+
         // sort by distance to the bot
-        points.sort(Comparator.comparingDouble(this::distanceTo));
+        points.sort(Comparator.comparingDouble(eye::distance));
 
         // remove the farthest points because they're not "visible"
         for (var i = 0; i < 4; i++)
-            points.remove(points.size() - 1);
+            points.removeLast();
 
         for (var point : points) {
             if (canSee(point)) {
@@ -207,8 +212,6 @@ public class BotControlAPI {
         var x = dataManager.clientEntity().x();
         var y = dataManager.clientEntity().y();
         var z = dataManager.clientEntity().z();
-
-        var ets = dataManager.entityTrackerState();
 
         Entity closest = null;
         var closestDistance = Double.MAX_VALUE;
@@ -253,35 +256,20 @@ public class BotControlAPI {
         return closest;
     }
 
-    public double distanceTo(Entity entity) {
-        var middleHeight = entity.y() + entity.height() / 2f;
-        var vec = Vector3d.from(entity.x(), middleHeight, entity.z());
-        return distanceTo(vec);
-    }
-
-    public double distanceTo(Vector3d vec) {
-        if (dataManager.clientEntity() == null) return -1;
-
-        var x = vec.getX() - dataManager.clientEntity().x();
-        var y = vec.getY() - (dataManager.clientEntity().y() + 1.80f); // Eye height
-        var z = vec.getZ() - dataManager.clientEntity().z();
-
-        return Math.sqrt(x * x + y * y + z * z);
-    }
-
     public boolean canSee(Entity entity) {
         return getEntityVisiblePoint(entity) != null;
     }
 
     public boolean canSee(Vector3d vec) { // intensive method, don't use it too often
-        LevelState level = dataManager.getCurrentLevel();
+        var level = dataManager.getCurrentLevel();
         if (level == null) return false;
 
-        var distance = distanceTo(vec);
+        var eye = dataManager.clientEntity().getEyePosition();
+        var distance = eye.distance(vec);
         if (distance >= 256) return false;
 
-        var eye = dataManager.clientEntity().getEyePosition();
         if (!level.isChunkLoaded(Vector3i.from(vec.getX(), vec.getY(), vec.getZ()))) return false;
+
         var segment = new Segment(eye, vec);
         var boxes = dataManager.getCurrentLevel().getCollisionBoxes(new AABB(eye, vec));
         return !segment.intersects(boxes);
@@ -303,7 +291,7 @@ public class BotControlAPI {
         if (item != null) {
             cooldown = dataManager.itemCoolDowns().get(item.type().id()) * 50; // 50ms per tick
             if (cooldown == 0) { // if the server hasn't changed the cooldown
-                double attackSpeedModifier = 0d;
+                var attackSpeedModifier = 0d;
                 for (var attribute : item.type().attributes()) {
                     for (var modifier : attribute.modifiers()) {
                         if (modifier.uuid().equals(UUID.fromString("fa233e1c-4180-4865-b01b-bcce9785aca3"))) {
