@@ -22,7 +22,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,6 +32,7 @@ import net.pistonmaster.soulfire.server.protocol.bot.movement.ControlState;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.PhysicsData;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.PlayerMovementState;
 import net.pistonmaster.soulfire.server.util.MathHelper;
+import net.raphimc.vialoader.util.VersionEnum;
 
 /**
  * Represents the bot itself as an entity.
@@ -123,12 +123,9 @@ public class ClientEntity extends Entity {
 
     @Override
     public double getEyeHeight() {
-        final var VER_1_14 = ProtocolVersion.v1_14.getVersion();
-        var ver = sessionDataManager.connection().meta().protocolVersion();
-        var version = ver.getVersion();
-
         if (this.controlState.sneaking()) {
-            return version >= VER_1_14 ? 1.27F : 1.54F;
+            return VersionEnum.fromProtocolVersion(sessionDataManager.connection().meta().protocolVersion())
+                    .isNewerThanOrEqualTo(VersionEnum.r1_14) ? 1.27F : 1.54F;
         } else {
             return 1.62F;
         }
