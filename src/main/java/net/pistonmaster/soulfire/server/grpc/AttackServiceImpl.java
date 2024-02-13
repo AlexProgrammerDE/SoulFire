@@ -21,6 +21,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.grpc.generated.*;
 import net.pistonmaster.soulfire.server.SoulFireServer;
+import net.pistonmaster.soulfire.server.settings.lib.ProfileDataStructure;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 
 import javax.inject.Inject;
@@ -31,7 +32,8 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
 
     @Override
     public void startAttack(AttackStartRequest request, StreamObserver<AttackStartResponse> responseObserver) {
-        var settingsHolder = SettingsHolder.createSettingsHolder(request.getSettings(), null, null, null);
+        var settingsHolder = SettingsHolder.createSettingsHolder(ProfileDataStructure.deserialize(request.getSettings()),
+                null, null, null);
 
         var id = soulFireServer.startAttack(settingsHolder);
         responseObserver.onNext(AttackStartResponse.newBuilder().setId(id).build());

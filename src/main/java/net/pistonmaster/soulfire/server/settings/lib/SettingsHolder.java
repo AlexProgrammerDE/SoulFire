@@ -18,18 +18,12 @@
 package net.pistonmaster.soulfire.server.settings.lib;
 
 import com.google.common.collect.Multimap;
-import com.google.gson.*;
+import com.google.gson.JsonElement;
 import it.unimi.dsi.fastutil.objects.*;
-import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
-import net.pistonmaster.soulfire.account.service.AccountData;
 import net.pistonmaster.soulfire.proxy.SWProxy;
 import net.pistonmaster.soulfire.server.settings.lib.property.*;
-import net.pistonmaster.soulfire.util.GsonAdapters;
 
-import java.lang.reflect.Type;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -48,71 +42,61 @@ public record SettingsHolder(
             List.of(),
             List.of()
     );
-    private static final Gson DESERIALIZE_GSON = new GsonBuilder()
-            .registerTypeHierarchyAdapter(ECPublicKey.class, new GsonAdapters.ECPublicKeyAdapter())
-            .registerTypeHierarchyAdapter(ECPrivateKey.class, new GsonAdapters.ECPrivateKeyAdapter())
-            .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
-            .create();
 
-    public static SettingsHolder createSettingsHolder(String json, Multimap<PropertyKey, Consumer<JsonElement>> listeners,
+    public static SettingsHolder createSettingsHolder(ProfileDataStructure settingsSerialized, Multimap<PropertyKey, Consumer<JsonElement>> listeners,
                                                       Consumer<List<MinecraftAccount>> accountRegistryCallback,
                                                       Consumer<List<SWProxy>> proxyRegistryCallback) {
-        try {
-            var settingsSerialized = DESERIALIZE_GSON.fromJson(json, RootDataStructure.class);
-            var settingsData = settingsSerialized.settings();
-            var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
-            var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
-            var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();
+        var settingsData = settingsSerialized.settings();
+        var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
+        var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
+        var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();
 
-            for (var entry : settingsData.entrySet()) {
-                var namespace = entry.getKey();
-                for (var setting : entry.getValue().getAsJsonObject().entrySet()) {
-                    var key = setting.getKey();
-                    var settingData = setting.getValue();
+        for (var entry : settingsData.entrySet()) {
+            var namespace = entry.getKey();
+            for (var setting : entry.getValue().entrySet()) {
+                var key = setting.getKey();
+                var settingData = setting.getValue();
 
-                    var propertyKey = new PropertyKey(namespace, key);
+                var propertyKey = new PropertyKey(namespace, key);
 
-                    if (listeners != null) {
-                        // Notify all listeners that this setting has been loaded
-                        listeners.get(propertyKey).forEach(listener -> listener.accept(settingData));
-                    }
+                if (listeners != null) {
+                    // Notify all listeners that this setting has been loaded
+                    listeners.get(propertyKey).forEach(listener -> listener.accept(settingData));
+                }
 
-                    if (settingData.isJsonPrimitive()) {
-                        var primitive = settingData.getAsJsonPrimitive();
-                        if (primitive.isBoolean()) {
-                            booleanProperties.put(propertyKey, primitive.getAsBoolean());
-                        } else if (primitive.isNumber()) {
-                            numberProperties.put(propertyKey, primitive.getAsNumber());
-                        } else if (primitive.isString()) {
-                            stringProperties.put(propertyKey, primitive.getAsString());
-                        } else {
-                            throw new IllegalArgumentException("Unknown primitive type: " + primitive);
-                        }
+                if (settingData.isJsonPrimitive()) {
+                    var primitive = settingData.getAsJsonPrimitive();
+                    if (primitive.isBoolean()) {
+                        booleanProperties.put(propertyKey, primitive.getAsBoolean());
+                    } else if (primitive.isNumber()) {
+                        numberProperties.put(propertyKey, primitive.getAsNumber());
+                    } else if (primitive.isString()) {
+                        stringProperties.put(propertyKey, primitive.getAsString());
                     } else {
-                        throw new IllegalArgumentException("Unknown type: " + settingData);
+                        throw new IllegalArgumentException("Unknown primitive type: " + primitive);
                     }
+                } else {
+                    throw new IllegalArgumentException("Unknown type: " + settingData);
                 }
             }
-
-            // Apply loaded accounts & proxies
-            if (accountRegistryCallback != null) {
-                accountRegistryCallback.accept(settingsSerialized.accounts());
-            }
-
-            if (proxyRegistryCallback != null) {
-                proxyRegistryCallback.accept(settingsSerialized.proxies());
-            }
-
-            return new SettingsHolder(
-                    numberProperties,
-                    booleanProperties,
-                    stringProperties,
-                    settingsSerialized.accounts(),
-                    settingsSerialized.proxies()
-            );
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
         }
+
+        // Apply loaded accounts & proxies
+        if (accountRegistryCallback != null) {
+            accountRegistryCallback.accept(settingsSerialized.accounts());
+        }
+
+        if (proxyRegistryCallback != null) {
+            proxyRegistryCallback.accept(settingsSerialized.proxies());
+        }
+
+        return new SettingsHolder(
+                numberProperties,
+                booleanProperties,
+                stringProperties,
+                settingsSerialized.accounts(),
+                settingsSerialized.proxies()
+        );
     }
 
     public int get(IntProperty property) {
@@ -137,31 +121,5 @@ public record SettingsHolder(
 
     public <T extends Enum<T>> T get(ComboProperty property, Class<T> clazz) {
         return get(property, s -> Enum.valueOf(clazz, s));
-    }
-
-    private static class MinecraftAccountAdapter implements JsonDeserializer<MinecraftAccount> {
-        @Override
-        public MinecraftAccount deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            var authType = context.<AuthType>deserialize(json.getAsJsonObject().get("authType"), AuthType.class);
-
-            return new GsonBuilder()
-                    .registerTypeAdapter(AccountData.class, new AccountDataAdapter(authType))
-                    .create()
-                    .fromJson(json, MinecraftAccount.class);
-        }
-
-        private record AccountDataAdapter(AuthType authType) implements JsonDeserializer<AccountData> {
-            @Override
-            public AccountData deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                return context.deserialize(json, authType.accountDataClass());
-            }
-        }
-    }
-
-    public record RootDataStructure(
-            JsonObject settings,
-            List<MinecraftAccount> accounts,
-            List<SWProxy> proxies
-    ) {
     }
 }
