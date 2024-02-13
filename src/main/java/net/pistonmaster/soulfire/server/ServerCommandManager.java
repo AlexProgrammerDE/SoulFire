@@ -32,7 +32,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.brigadier.CommandHelpWrapper;
 import net.pistonmaster.soulfire.brigadier.ConsoleSubject;
-import net.pistonmaster.soulfire.client.gui.LogPanel;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.EventUtil;
 import net.pistonmaster.soulfire.server.api.event.bot.BotPreTickEvent;
@@ -106,14 +105,6 @@ public class ServerCommandManager {
         })));
         dispatcher.register(literal("clear-history").executes(help("Wipes the command history data", c -> {
             clearCommandHistory();
-
-            return Command.SINGLE_SUCCESS;
-        })));
-        dispatcher.register(literal("clear-console").executes(help("Clears the GUIs log panel", c -> {
-            var logPanel = soulFireServer.injector().getIfAvailable(LogPanel.class);
-            if (logPanel != null) {
-                logPanel.messageLogPanel().clear();
-            }
 
             return Command.SINGLE_SUCCESS;
         })));
