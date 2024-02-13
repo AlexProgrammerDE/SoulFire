@@ -67,7 +67,10 @@ public class RPCClient {
     }
 
     private <T extends AbstractStub<T>> T prepareChannel(T channel, CallCredentials callCredentials) {
-        return channel.withCallCredentials(callCredentials).withCompression("gzip");
+        return channel.withCallCredentials(callCredentials)
+                .withCompression("gzip")
+                .withMaxInboundMessageSize(Integer.MAX_VALUE)
+                .withMaxOutboundMessageSize(Integer.MAX_VALUE);
     }
 
     public void shutdown() throws InterruptedException {
