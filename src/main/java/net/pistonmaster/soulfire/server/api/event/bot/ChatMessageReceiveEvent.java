@@ -30,7 +30,9 @@ import java.util.UUID;
  * This event is called when a chat message is received from the server.
  *
  * @param connection The bot connection instance.
+ * @param timestamp  The timestamp when the message was received.
  * @param message    The message that was received.
+ * @param sender     The sender of the message or null if it's from the server.
  */
 public record ChatMessageReceiveEvent(
         BotConnection connection,
@@ -48,8 +50,8 @@ public record ChatMessageReceiveEvent(
 
     public record ChatMessageSender(UUID senderUUID, String senderName) {
         public static ChatMessageSender fromClientboundPlayerChatPacket(ClientboundPlayerChatPacket packet) {
-            UUID senderUUID = packet.getSender();
-            String senderName = SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(packet.getName());
+            var senderUUID = packet.getSender();
+            var senderName = SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(packet.getName());
             return new ChatMessageSender(senderUUID, senderName);
         }
     }

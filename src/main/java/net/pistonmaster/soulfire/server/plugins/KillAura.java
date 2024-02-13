@@ -18,7 +18,6 @@
 package net.pistonmaster.soulfire.server.plugins;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +33,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.DoubleProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
+import net.raphimc.vialoader.util.VersionEnum;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -56,7 +56,7 @@ public class KillAura implements InternalExtension {
         var entity = control.getClosestEntity(max, whitelistedUser, true, true, bot.settingsHolder().get(KillAuraSettings.CHECK_WALLS));
         if (entity == null) return;
 
-        control.extraData().put("killaura_target", entity);
+        control.extraData().put("kill_aura_target", entity);
 
         var distance = control.distanceTo(entity);
         var bestVisiblePoint = control.getEntityVisiblePoint(entity);
@@ -67,9 +67,11 @@ public class KillAura implements InternalExtension {
         if (distance <= lookRange) {
             if (bestVisiblePoint != null) {
                 bot.sessionDataManager().clientEntity().lookAt(RotationOrigin.EYES, bestVisiblePoint);
+            } else {
+                bot.sessionDataManager().clientEntity().lookAt(RotationOrigin.EYES, RotationOrigin.EYES, entity);
             }
-            else bot.sessionDataManager().clientEntity().lookAt(RotationOrigin.EYES, RotationOrigin.EYES, entity);
-            control.extraData().put("killaura_looked_at", true);
+
+            control.extraData().put("kill_aura_looked_at", true);
         }
     }
 
@@ -93,20 +95,19 @@ public class KillAura implements InternalExtension {
         var swingRange = bot.settingsHolder().get(KillAuraSettings.SWING_RANGE);
 
         Entity target = null;
-        if (control.extraData().containsKey("killaura_target")) {
-            target = (Entity) control.extraData().get("killaura_target");
-            control.extraData().remove("killaura_target");
+        if (control.extraData().containsKey("kill_aura_target")) {
+            target = (Entity) control.extraData().get("kill_aura_target");
+            control.extraData().remove("kill_aura_target");
         }
         if (target == null) return;
 
-        boolean lookedAt = false;
-        if (control.extraData().containsKey("killaura_looked_at")) {
+        var lookedAt = false;
+        if (control.extraData().containsKey("kill_aura_looked_at")) {
             lookedAt = (boolean) control.extraData().get("killaura_looked_at");
-            control.extraData().remove("killaura_looked_at");
+            control.extraData().remove("kill_aura_looked_at");
         }
 
         if (!lookedAt && lookRange != 0) return;
-
 
         var distance = control.distanceTo(target);
         var bestVisiblePoint = control.getEntityVisiblePoint(target);
@@ -121,8 +122,8 @@ public class KillAura implements InternalExtension {
             control.swingArm();
         }
 
-        var ver = bot.meta().protocolVersion();
-        if (ver.getVersion() < ProtocolVersion.v1_9.getVersion() || bot.settingsHolder().get(KillAuraSettings.IGNORE_COOLDOWN)) {
+        if (bot.meta().versionEnum().isOlderThan(VersionEnum.r1_9)
+                || bot.settingsHolder().get(KillAuraSettings.IGNORE_COOLDOWN)) {
             var cpsMin = bot.settingsHolder().get(KillAuraSettings.CPS_MIN);
             var cpsMax = bot.settingsHolder().get(KillAuraSettings.CPS_MAX);
             var randomDelay = 1000.0d / ThreadLocalRandom.current().nextDouble(cpsMin, cpsMax);
@@ -134,7 +135,7 @@ public class KillAura implements InternalExtension {
 
     @EventHandler
     public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
-        event.settingsRegistry().addClass(KillAuraSettings.class, "KillAura");
+        event.settingsRegistry().addClass(KillAuraSettings.class, "Kill Aura");
     }
 
     @Override

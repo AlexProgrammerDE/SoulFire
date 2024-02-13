@@ -124,7 +124,7 @@ public class ClientEntity extends Entity {
     @Override
     public double getEyeHeight() {
         if (this.controlState.sneaking()) {
-            return VersionEnum.fromProtocolVersion(sessionDataManager.connection().meta().protocolVersion())
+            return sessionDataManager.connection().meta().versionEnum()
                     .isNewerThanOrEqualTo(VersionEnum.r1_14) ? 1.27F : 1.54F;
         } else {
             return 1.62F;

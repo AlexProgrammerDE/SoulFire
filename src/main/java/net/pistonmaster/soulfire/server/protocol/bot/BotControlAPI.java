@@ -209,12 +209,11 @@ public class BotControlAPI {
         var z = dataManager.clientEntity().z();
 
         var ets = dataManager.entityTrackerState();
-        Map<Integer, Entity> entities = ets.entities();
 
         Entity closest = null;
         var closestDistance = Double.MAX_VALUE;
 
-        for (var entity : entities.values()) {
+        for (var entity : dataManager.entityTrackerState().getEntities()) {
             if (entity.entityId() == dataManager.clientEntity().entityId()) continue;
 
             var distance = Math.sqrt(Math.pow(entity.x() - x, 2) + Math.pow(entity.y() - y, 2) + Math.pow(entity.z() - z, 2));
@@ -232,15 +231,15 @@ public class BotControlAPI {
                 }
             }
 
-            if (ignoreBots && entity instanceof RawEntity rawEntity) {
-                Set<Integer> botIds = new HashSet<>();
-                dataManager.connection().attackManager().botConnections().forEach(b -> {
-                    if (b.sessionDataManager() != null && b.sessionDataManager().clientEntity() != null) {
-                        botIds.add(b.sessionDataManager().clientEntity().entityId());
-                    }
-                });
+            if (ignoreBots && entity instanceof RawEntity rawEntity
+                    && dataManager.connection().attackManager().botConnections().stream().anyMatch(b -> {
+                if (b.sessionDataManager() == null || b.sessionDataManager().clientEntity() == null) {
+                    return false;
+                }
 
-                if (botIds.contains(rawEntity.entityId())) continue;
+                return b.sessionDataManager().clientEntity().entityId() == rawEntity.entityId();
+            })) {
+                continue;
             }
 
             if (mustBeSeen && !canSee(entity)) continue;

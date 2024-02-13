@@ -36,9 +36,10 @@ import java.util.Set;
 public class ChatMessageLogger implements InternalExtension {
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageLogger.class);
     private static final Set<Long> chatMessages = new LinkedHashSet<>(50); // in case of huge lag
+
     public static void onMessage(ChatMessageReceiveEvent event) {
         if (event.connection().settingsHolder().get(ChatMessageSettings.ENABLED)) {
-            StringBuilder content = new StringBuilder();
+            var content = new StringBuilder();
             // if it's a player message, add username
             if (event.isFromPlayer())
                 content.append("<").append(event.sender().senderName()).append("> ");
