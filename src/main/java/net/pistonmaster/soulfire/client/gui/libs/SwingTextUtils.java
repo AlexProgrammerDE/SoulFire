@@ -45,13 +45,15 @@ public class SwingTextUtils {
         pane.setBackground(null);
         pane.setBorder(null);
         pane.addHyperlinkListener(event -> {
-            if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED
-                    && Desktop.isDesktopSupported()) {
-                try {
-                    Desktop.getDesktop().browse(event.getURL().toURI());
-                } catch (IOException | URISyntaxException e) {
-                    log.error("Failed to open link!", e);
-                }
+            if (event.getEventType() != HyperlinkEvent.EventType.ACTIVATED
+                    || !Desktop.isDesktopSupported()) {
+                return;
+            }
+
+            try {
+                Desktop.getDesktop().browse(event.getURL().toURI());
+            } catch (IOException | URISyntaxException e) {
+                log.error("Failed to open link!", e);
             }
         });
 

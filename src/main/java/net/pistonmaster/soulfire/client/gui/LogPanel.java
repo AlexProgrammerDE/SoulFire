@@ -17,7 +17,7 @@
  */
 package net.pistonmaster.soulfire.client.gui;
 
-import io.grpc.stub.StreamObserver;
+import io.grpc.Context;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.client.gui.libs.MessageLogPanel;
 import net.pistonmaster.soulfire.client.gui.libs.SwingTextUtils;
 import net.pistonmaster.soulfire.grpc.generated.LogRequest;
-import net.pistonmaster.soulfire.grpc.generated.LogResponse;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -49,19 +48,15 @@ public class LogPanel extends JPanel {
         this.guiManager = guiManager;
 
         var request = LogRequest.newBuilder().setPrevious(300).build();
-        guiManager.rpcClient().logStub().subscribe(request, new StreamObserver<>() {
-            @Override
-            public void onNext(LogResponse value) {
-                messageLogPanel.log(value.getMessage() + "\n");
-            }
 
-            @Override
-            public void onError(Throwable t) {
-                log.error("Error while logging!", t);
-            }
-
-            @Override
-            public void onCompleted() {
+        guiManager.threadPool().submit(() -> {
+            try (var context = Context.current().withCancellation()) {
+                guiManager.rpcClient().contexts().add(context);
+                context.run(() -> {
+                    guiManager.rpcClient().logStubBlocking().subscribe(request).forEachRemaining(response -> {
+                        messageLogPanel.log(response.getMessage() + "\n");
+                    });
+                });
             }
         });
 

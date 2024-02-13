@@ -17,10 +17,7 @@
  */
 package net.pistonmaster.soulfire.client.grpc;
 
-import io.grpc.CallCredentials;
-import io.grpc.Grpc;
-import io.grpc.InsecureChannelCredentials;
-import io.grpc.ManagedChannel;
+import io.grpc.*;
 import io.grpc.stub.AbstractStub;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -30,13 +27,16 @@ import net.pistonmaster.soulfire.grpc.generated.CommandServiceGrpc;
 import net.pistonmaster.soulfire.grpc.generated.ConfigServiceGrpc;
 import net.pistonmaster.soulfire.grpc.generated.LogsServiceGrpc;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Getter
 public class RPCClient {
+    private final List<Context.CancellableContext> contexts = new ArrayList<>();
     private final ManagedChannel channel;
-    private final LogsServiceGrpc.LogsServiceStub logStub;
+    private final LogsServiceGrpc.LogsServiceBlockingStub logStubBlocking;
     private final CommandServiceGrpc.CommandServiceStub commandStub;
     private final CommandServiceGrpc.CommandServiceBlockingStub commandStubBlocking;
     private final AttackServiceGrpc.AttackServiceStub attackStub;
@@ -59,7 +59,7 @@ public class RPCClient {
 
     public RPCClient(CallCredentials callCredentials, ManagedChannel managedChannel) {
         channel = managedChannel;
-        logStub = prepareChannel(LogsServiceGrpc.newStub(channel), callCredentials);
+        logStubBlocking = prepareChannel(LogsServiceGrpc.newBlockingStub(channel), callCredentials);
         commandStub = prepareChannel(CommandServiceGrpc.newStub(channel), callCredentials);
         commandStubBlocking = prepareChannel(CommandServiceGrpc.newBlockingStub(channel), callCredentials);
         attackStub = prepareChannel(AttackServiceGrpc.newStub(channel), callCredentials);
@@ -71,6 +71,10 @@ public class RPCClient {
     }
 
     public void shutdown() throws InterruptedException {
+        for (var context : contexts) {
+            context.cancel(new RuntimeException("Shutting down"));
+        }
+
         if (!channel.shutdown().awaitTermination(3, TimeUnit.SECONDS)
                 && !channel.shutdownNow().awaitTermination(3, TimeUnit.SECONDS)) {
             throw new RuntimeException("Unable to shutdown gRPC client");

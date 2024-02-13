@@ -35,15 +35,12 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
 @Getter
 public class GUIManager {
-    public static final Queue<Runnable> MAIN_THREAD_QUEUE = new ConcurrentLinkedQueue<>();
     private final RPCClient rpcClient;
     private final ClientCommandManager clientCommandManager;
     private final Injector injector = new InjectorBuilder()

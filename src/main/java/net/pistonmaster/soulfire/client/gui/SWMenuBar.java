@@ -175,6 +175,10 @@ public class SWMenuBar extends JMenuBar {
     }
 
     private void openHome() {
+        if (!Desktop.isDesktopSupported()) {
+            return;
+        }
+
         try {
             Desktop.getDesktop().browse(SWPathConstants.DATA_FOLDER.toUri());
         } catch (IOException e) {

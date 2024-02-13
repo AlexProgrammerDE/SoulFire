@@ -46,12 +46,11 @@ public record SettingsHolder(
     public static SettingsHolder createSettingsHolder(ProfileDataStructure settingsSerialized, Multimap<PropertyKey, Consumer<JsonElement>> listeners,
                                                       Consumer<List<MinecraftAccount>> accountRegistryCallback,
                                                       Consumer<List<SWProxy>> proxyRegistryCallback) {
-        var settingsData = settingsSerialized.settings();
         var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
         var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
         var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();
 
-        for (var entry : settingsData.entrySet()) {
+        for (var entry : settingsSerialized.settings().entrySet()) {
             var namespace = entry.getKey();
             for (var setting : entry.getValue().entrySet()) {
                 var key = setting.getKey();
