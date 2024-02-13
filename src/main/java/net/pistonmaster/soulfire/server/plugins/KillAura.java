@@ -103,7 +103,7 @@ public class KillAura implements InternalExtension {
 
         var lookedAt = false;
         if (control.extraData().containsKey("kill_aura_looked_at")) {
-            lookedAt = (boolean) control.extraData().get("killaura_looked_at");
+            lookedAt = (boolean) control.extraData().get("kill_aura_looked_at");
             control.extraData().remove("kill_aura_looked_at");
         }
 
