@@ -19,6 +19,7 @@ package net.pistonmaster.soulfire.account;
 
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.raphimc.minecraftauth.MinecraftAuth;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -45,7 +46,7 @@ public class HttpHelper {
     }
 
     public static HttpClient createLenniMCAuthHttpClient(SWProxy proxyData) {
-        return new HttpClient();
+        return MinecraftAuth.createHttpClient();
     }
 
     public static CloseableHttpClient createHttpClient(List<Header> headers, SWProxy proxyData) {
