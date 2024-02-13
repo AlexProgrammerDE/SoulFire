@@ -175,6 +175,7 @@ public class AttackManager {
                     LoggerFactory.getLogger(minecraftAccount.username()),
                     protocol,
                     minecraftAccount,
+                    protocolVersion,
                     proxyData,
                     attackEventLoopGroup
             ));

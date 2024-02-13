@@ -56,7 +56,7 @@ public final class BlockPlaceAction implements WorldAction {
 
         if (!putOnHotbar) {
             var inventoryManager = sessionDataManager.inventoryManager();
-            var playerInventory = inventoryManager.getPlayerInventory();
+            var playerInventory = inventoryManager.playerInventory();
 
             SWItemStack leastHardItem = null;
             var leastDestroyTime = 0F;
@@ -78,7 +78,7 @@ public final class BlockPlaceAction implements WorldAction {
                 }
             }
 
-            var heldSlot = playerInventory.hotbarSlot(inventoryManager.heldItemSlot());
+            var heldSlot = playerInventory.getHeldItem();
             if (heldSlot.item() != null) {
                 var item = heldSlot.item();
                 if (ItemTypeHelper.isSafeFullBlockItem(item.type())) {
@@ -120,7 +120,7 @@ public final class BlockPlaceAction implements WorldAction {
                 try {
                     inventoryManager.leftClickSlot(slot.slot());
                     TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-                    inventoryManager.leftClickSlot(playerInventory.hotbarSlot(inventoryManager.heldItemSlot()).slot());
+                    inventoryManager.leftClickSlot(playerInventory.getHeldItem().slot());
                     TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
 
                     if (inventoryManager.cursorItem() != null) {

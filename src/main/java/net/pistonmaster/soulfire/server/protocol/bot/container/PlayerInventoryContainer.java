@@ -21,6 +21,7 @@ import lombok.Getter;
 
 @Getter
 public class PlayerInventoryContainer extends Container {
+    private final InventoryManager inventoryManager;
     private final ContainerSlot[] mainInventory = getSlots(9, 35);
     private final ContainerSlot[] hotbar = getSlots(36, 44);
     /**
@@ -33,8 +34,13 @@ public class PlayerInventoryContainer extends Container {
     @Getter
     private final ContainerSlot[] craftingGrid = getSlots(1, 4);
 
-    public PlayerInventoryContainer() {
+    public PlayerInventoryContainer(InventoryManager inventoryManager) {
         super(46, 0);
+        this.inventoryManager = inventoryManager;
+    }
+
+    public ContainerSlot getHeldItem() {
+        return hotbarSlot(inventoryManager.heldItemSlot());
     }
 
     public ContainerSlot hotbarSlot(int slot) {

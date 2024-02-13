@@ -41,6 +41,8 @@ public class DataGenerators {
             new EntitiesJavaGenerator(),
             new ItemsDataGenerator(),
             new ItemsJavaGenerator(),
+            new AttributesDataGenerator(),
+            new AttributesJavaGenerator(),
             new LanguageDataGenerator(),
             new InstrumentsDataGenerator(),
             new TagsDataGenerator.BlockTagsDataGenerator(),

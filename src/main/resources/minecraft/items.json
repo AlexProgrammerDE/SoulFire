@@ -4009,7 +4009,30 @@
         "scute"
       ],
       "maxDamage": 275
-    }
+    },
+    "attributeSlot": "HEAD",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 2.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 794,
@@ -4154,7 +4177,30 @@
         "warped_planks"
       ],
       "maxDamage": 59
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.4000000953674316,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 815,
@@ -4180,7 +4226,30 @@
         "warped_planks"
       ],
       "maxDamage": 59
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 1.5,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 816,
@@ -4206,7 +4275,30 @@
         "warped_planks"
       ],
       "maxDamage": 59
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 1.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.799999952316284,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 817,
@@ -4232,7 +4324,30 @@
         "warped_planks"
       ],
       "maxDamage": 59
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 6.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.200000047683716,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 818,
@@ -4258,7 +4373,30 @@
         "warped_planks"
       ],
       "maxDamage": 59
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 819,
@@ -4276,7 +4414,30 @@
         "blackstone"
       ],
       "maxDamage": 131
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 4.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.4000000953674316,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 820,
@@ -4294,7 +4455,30 @@
         "blackstone"
       ],
       "maxDamage": 131
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 2.5,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 821,
@@ -4312,7 +4496,30 @@
         "blackstone"
       ],
       "maxDamage": 131
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 2.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.799999952316284,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 822,
@@ -4330,7 +4537,30 @@
         "blackstone"
       ],
       "maxDamage": 131
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 8.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.200000047683716,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 823,
@@ -4348,7 +4578,30 @@
         "blackstone"
       ],
       "maxDamage": 131
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 824,
@@ -4364,7 +4617,30 @@
         "gold_ingot"
       ],
       "maxDamage": 32
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.4000000953674316,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 825,
@@ -4380,7 +4656,30 @@
         "gold_ingot"
       ],
       "maxDamage": 32
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 1.5,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 826,
@@ -4396,7 +4695,30 @@
         "gold_ingot"
       ],
       "maxDamage": 32
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 1.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.799999952316284,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 827,
@@ -4412,7 +4734,30 @@
         "gold_ingot"
       ],
       "maxDamage": 32
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 6.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 828,
@@ -4428,7 +4773,30 @@
         "gold_ingot"
       ],
       "maxDamage": 32
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 829,
@@ -4444,7 +4812,30 @@
         "iron_ingot"
       ],
       "maxDamage": 250
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 5.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.4000000953674316,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 830,
@@ -4460,7 +4851,30 @@
         "iron_ingot"
       ],
       "maxDamage": 250
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 3.5,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 831,
@@ -4476,7 +4890,30 @@
         "iron_ingot"
       ],
       "maxDamage": 250
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.799999952316284,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 832,
@@ -4492,7 +4929,30 @@
         "iron_ingot"
       ],
       "maxDamage": 250
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 8.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.0999999046325684,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 833,
@@ -4508,7 +4968,30 @@
         "iron_ingot"
       ],
       "maxDamage": 250
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -1.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 834,
@@ -4524,7 +5007,30 @@
         "diamond"
       ],
       "maxDamage": 1561
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 6.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.4000000953674316,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 835,
@@ -4540,7 +5046,30 @@
         "diamond"
       ],
       "maxDamage": 1561
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 4.5,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 836,
@@ -4556,7 +5085,30 @@
         "diamond"
       ],
       "maxDamage": 1561
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 4.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.799999952316284,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 837,
@@ -4572,7 +5124,30 @@
         "diamond"
       ],
       "maxDamage": 1561
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 8.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 838,
@@ -4588,7 +5163,30 @@
         "diamond"
       ],
       "maxDamage": 1561
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 839,
@@ -4604,7 +5202,30 @@
         "netherite_ingot"
       ],
       "maxDamage": 2031
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 7.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.4000000953674316,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 840,
@@ -4620,7 +5241,30 @@
         "netherite_ingot"
       ],
       "maxDamage": 2031
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 5.5,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 841,
@@ -4636,7 +5280,30 @@
         "netherite_ingot"
       ],
       "maxDamage": 2031
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 5.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.799999952316284,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 842,
@@ -4652,7 +5319,30 @@
         "netherite_ingot"
       ],
       "maxDamage": 2031
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 9.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 843,
@@ -4668,7 +5358,30 @@
         "netherite_ingot"
       ],
       "maxDamage": 2031
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 844,
@@ -4739,7 +5452,30 @@
         "leather"
       ],
       "maxDamage": 55
-    }
+    },
+    "attributeSlot": "HEAD",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 1.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 854,
@@ -4757,7 +5493,30 @@
         "leather"
       ],
       "maxDamage": 80
-    }
+    },
+    "attributeSlot": "CHEST",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+            "amount": 3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 855,
@@ -4775,7 +5534,30 @@
         "leather"
       ],
       "maxDamage": 75
-    }
+    },
+    "attributeSlot": "LEGS",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+            "amount": 2.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 856,
@@ -4793,7 +5575,30 @@
         "leather"
       ],
       "maxDamage": 65
-    }
+    },
+    "attributeSlot": "FEET",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+            "amount": 1.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 857,
@@ -4811,7 +5616,30 @@
         "iron_ingot"
       ],
       "maxDamage": 165
-    }
+    },
+    "attributeSlot": "HEAD",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 2.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 858,
@@ -4829,7 +5657,30 @@
         "iron_ingot"
       ],
       "maxDamage": 240
-    }
+    },
+    "attributeSlot": "CHEST",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+            "amount": 5.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 859,
@@ -4847,7 +5698,30 @@
         "iron_ingot"
       ],
       "maxDamage": 225
-    }
+    },
+    "attributeSlot": "LEGS",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+            "amount": 4.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 860,
@@ -4865,7 +5739,30 @@
         "iron_ingot"
       ],
       "maxDamage": 195
-    }
+    },
+    "attributeSlot": "FEET",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+            "amount": 1.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 861,
@@ -4883,7 +5780,30 @@
         "iron_ingot"
       ],
       "maxDamage": 165
-    }
+    },
+    "attributeSlot": "HEAD",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 2.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 862,
@@ -4901,7 +5821,30 @@
         "iron_ingot"
       ],
       "maxDamage": 240
-    }
+    },
+    "attributeSlot": "CHEST",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+            "amount": 6.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 863,
@@ -4919,7 +5862,30 @@
         "iron_ingot"
       ],
       "maxDamage": 225
-    }
+    },
+    "attributeSlot": "LEGS",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+            "amount": 5.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 864,
@@ -4937,7 +5903,30 @@
         "iron_ingot"
       ],
       "maxDamage": 195
-    }
+    },
+    "attributeSlot": "FEET",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+            "amount": 2.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 865,
@@ -4955,7 +5944,30 @@
         "diamond"
       ],
       "maxDamage": 363
-    }
+    },
+    "attributeSlot": "HEAD",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 2.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 866,
@@ -4973,7 +5985,30 @@
         "diamond"
       ],
       "maxDamage": 528
-    }
+    },
+    "attributeSlot": "CHEST",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+            "amount": 8.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+            "amount": 2.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 867,
@@ -4991,7 +6026,30 @@
         "diamond"
       ],
       "maxDamage": 495
-    }
+    },
+    "attributeSlot": "LEGS",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+            "amount": 6.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+            "amount": 2.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 868,
@@ -5009,7 +6067,30 @@
         "diamond"
       ],
       "maxDamage": 429
-    }
+    },
+    "attributeSlot": "FEET",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+            "amount": 3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+            "amount": 2.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 869,
@@ -5027,7 +6108,30 @@
         "gold_ingot"
       ],
       "maxDamage": 77
-    }
+    },
+    "attributeSlot": "HEAD",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 2.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 870,
@@ -5045,7 +6149,30 @@
         "gold_ingot"
       ],
       "maxDamage": 112
-    }
+    },
+    "attributeSlot": "CHEST",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+            "amount": 5.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 871,
@@ -5063,7 +6190,30 @@
         "gold_ingot"
       ],
       "maxDamage": 105
-    }
+    },
+    "attributeSlot": "LEGS",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+            "amount": 3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 872,
@@ -5081,7 +6231,30 @@
         "gold_ingot"
       ],
       "maxDamage": 91
-    }
+    },
+    "attributeSlot": "FEET",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+            "amount": 1.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+            "amount": 0.0,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 873,
@@ -5099,7 +6272,40 @@
         "netherite_ingot"
       ],
       "maxDamage": 407
-    }
+    },
+    "attributeSlot": "HEAD",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.knockback_resistance",
+        "modifiers": [
+          {
+            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+            "amount": 0.10000000149011612,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 874,
@@ -5117,7 +6323,40 @@
         "netherite_ingot"
       ],
       "maxDamage": 592
-    }
+    },
+    "attributeSlot": "CHEST",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+            "amount": 8.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+            "amount": 3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.knockback_resistance",
+        "modifiers": [
+          {
+            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+            "amount": 0.10000000149011612,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 875,
@@ -5135,7 +6374,40 @@
         "netherite_ingot"
       ],
       "maxDamage": 555
-    }
+    },
+    "attributeSlot": "LEGS",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+            "amount": 6.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+            "amount": 3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.knockback_resistance",
+        "modifiers": [
+          {
+            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+            "amount": 0.10000000149011612,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 876,
@@ -5153,7 +6425,40 @@
         "netherite_ingot"
       ],
       "maxDamage": 481
-    }
+    },
+    "attributeSlot": "FEET",
+    "attributes": [
+      {
+        "name": "generic.armor",
+        "modifiers": [
+          {
+            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+            "amount": 3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.armor_toughness",
+        "modifiers": [
+          {
+            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+            "amount": 3.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.knockback_resistance",
+        "modifiers": [
+          {
+            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+            "amount": 0.10000000149011612,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 877,
@@ -6890,7 +8195,30 @@
     ],
     "depletionData": {
       "maxDamage": 250
-    }
+    },
+    "attributeSlot": "MAINHAND",
+    "attributes": [
+      {
+        "name": "generic.attack_damage",
+        "modifiers": [
+          {
+            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+            "amount": 8.0,
+            "operation": "ADDITION"
+          }
+        ]
+      },
+      {
+        "name": "generic.attack_speed",
+        "modifiers": [
+          {
+            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+            "amount": -2.9000000953674316,
+            "operation": "ADDITION"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 1179,

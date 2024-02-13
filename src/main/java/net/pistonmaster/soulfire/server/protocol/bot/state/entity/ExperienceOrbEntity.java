@@ -21,13 +21,15 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import net.pistonmaster.soulfire.server.data.EntityType;
 
+import java.util.UUID;
+
 @Getter
 @EqualsAndHashCode(callSuper = true)
 public class ExperienceOrbEntity extends Entity {
     private final int expValue;
 
     public ExperienceOrbEntity(int entityId, int expValue) {
-        super(entityId, EntityType.EXPERIENCE_ORB);
+        super(entityId, UUID.randomUUID(), EntityType.EXPERIENCE_ORB);
         this.expValue = expValue;
     }
 }

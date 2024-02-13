@@ -34,7 +34,6 @@ import java.util.function.Function;
 @Slf4j
 @RequiredArgsConstructor
 public class TranslationMapper implements Function<TranslatableComponent, String> {
-    private final Map<String, String> mojangTranslations;
     public static final TranslationMapper INSTANCE;
 
     static {
@@ -54,6 +53,8 @@ public class TranslationMapper implements Function<TranslatableComponent, String
 
         INSTANCE = new TranslationMapper(mojangTranslations);
     }
+
+    private final Map<String, String> mojangTranslations;
 
     @Override
     public String apply(TranslatableComponent component) {

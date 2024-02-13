@@ -15,27 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.soulfire.server.protocol.bot.state.entity;
+package net.pistonmaster.soulfire.generator.mixin;
 
-import com.github.steveice10.mc.protocol.data.game.entity.object.ObjectData;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import net.pistonmaster.soulfire.server.data.EntityType;
+import net.minecraft.world.flag.FeatureFlagSet;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.UUID;
-
-@Getter
-@Setter
-@EqualsAndHashCode(callSuper = true)
-public class RawEntity extends Entity {
-    private final ObjectData data;
-    private float yaw;
-    private float headYaw;
-    private float pitch;
-
-    public RawEntity(int entityId, UUID uuid, EntityType type, ObjectData data) {
-        super(entityId, uuid, type);
-        this.data = data;
+@Mixin(FeatureFlagSet.class)
+public class FeatureFlagSetMixin {
+    @Inject(method = "isSubsetOf", at = @At("HEAD"), cancellable = true)
+    private void init(CallbackInfoReturnable<Boolean> cir) {
+        cir.setReturnValue(true);
     }
 }

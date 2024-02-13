@@ -32,6 +32,9 @@ import net.pistonmaster.soulfire.server.protocol.bot.movement.ControlState;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.PhysicsData;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.PlayerMovementState;
 import net.pistonmaster.soulfire.server.util.MathHelper;
+import net.raphimc.vialoader.util.VersionEnum;
+
+import java.util.UUID;
 
 /**
  * Represents the bot itself as an entity.
@@ -55,11 +58,11 @@ public class ClientEntity extends Entity {
     private boolean lastOnGround = false;
     private int positionReminder = 0;
 
-    public ClientEntity(int entityId, SessionDataManager sessionDataManager, ControlState controlState) {
-        super(entityId, EntityType.PLAYER);
+    public ClientEntity(int entityId, UUID uuid, SessionDataManager sessionDataManager, ControlState controlState) {
+        super(entityId, uuid, EntityType.PLAYER);
         this.sessionDataManager = sessionDataManager;
         this.controlState = controlState;
-        this.movementState = new PlayerMovementState(this, sessionDataManager.inventoryManager().getPlayerInventory());
+        this.movementState = new PlayerMovementState(this, sessionDataManager.inventoryManager().playerInventory());
         this.botMovementManager = new BotMovementManager(sessionDataManager, movementState, this);
         this.yaw = -180;
     }
@@ -122,7 +125,12 @@ public class ClientEntity extends Entity {
 
     @Override
     public double getEyeHeight() {
-        return this.controlState.sneaking() ? 1.50F : 1.62F;
+        if (this.controlState.sneaking()) {
+            return sessionDataManager.connection().meta().versionEnum()
+                    .isNewerThanOrEqualTo(VersionEnum.r1_14) ? 1.27F : 1.54F;
+        } else {
+            return 1.62F;
+        }
     }
 
     public void sendPosRot() {

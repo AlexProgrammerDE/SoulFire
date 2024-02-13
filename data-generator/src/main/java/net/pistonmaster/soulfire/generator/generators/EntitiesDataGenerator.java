@@ -20,7 +20,9 @@ package net.pistonmaster.soulfire.generator.generators;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.pistonmaster.soulfire.generator.util.MCHelper;
 
 public class EntitiesDataGenerator implements IDataGenerator {
 
@@ -31,14 +33,34 @@ public class EntitiesDataGenerator implements IDataGenerator {
         entityDesc.addProperty("name", BuiltInRegistries.ENTITY_TYPE.getKey(entityType).getPath());
 
         var dimensions = entityType.getDimensions();
+
         entityDesc.addProperty("width", dimensions.width);
         entityDesc.addProperty("height", dimensions.height);
 
         var category = entityType.getCategory();
         entityDesc.addProperty("category", category.getName());
-        entityDesc.addProperty("friendly", category.isFriendly());
+        if (category.isFriendly()) {
+            entityDesc.addProperty("friendly", true);
+        }
+
+        if (entityType.canSummon()) {
+            entityDesc.addProperty("summonable", true);
+        }
+
+        var defaultEntity = createEntity(entityType);
+        if (defaultEntity.isAttackable()) {
+            entityDesc.addProperty("attackable", true);
+        }
 
         return entityDesc;
+    }
+
+    private static <T extends Entity> T createEntity(EntityType<T> entityType) {
+        if (entityType == EntityType.PLAYER) {
+            return entityType.tryCast(MCHelper.getGameTestHelper().makeMockPlayer());
+        }
+
+        return entityType.create(MCHelper.getLevel());
     }
 
     @Override

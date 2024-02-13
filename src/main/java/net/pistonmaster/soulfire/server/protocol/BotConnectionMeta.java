@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.server.protocol;
 
 import com.github.steveice10.mc.protocol.data.ProtocolState;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
@@ -26,6 +27,7 @@ import net.pistonmaster.soulfire.proxy.SWProxy;
 import net.pistonmaster.soulfire.server.protocol.bot.BotControlAPI;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
+import net.raphimc.vialoader.util.VersionEnum;
 
 import java.io.IOException;
 
@@ -33,15 +35,18 @@ import java.io.IOException;
 public class BotConnectionMeta {
     private final MinecraftAccount minecraftAccount;
     private final ProtocolState targetState;
+    private final ProtocolVersion protocolVersion;
     private final SWSessionService sessionService;
     @Setter
     private SessionDataManager sessionDataManager;
     @Setter
     private BotControlAPI botControlAPI;
 
-    public BotConnectionMeta(MinecraftAccount minecraftAccount, ProtocolState targetState, SWProxy proxyData) {
+    public BotConnectionMeta(MinecraftAccount minecraftAccount, ProtocolState targetState,
+                             ProtocolVersion protocolVersion, SWProxy proxyData) {
         this.minecraftAccount = minecraftAccount;
         this.targetState = targetState;
+        this.protocolVersion = protocolVersion;
         this.sessionService = minecraftAccount.isPremiumJava() ? new SWSessionService(minecraftAccount.authType(), proxyData) : null;
     }
 
@@ -53,5 +58,9 @@ public class BotConnectionMeta {
         } catch (IOException e) {
             session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
         }
+    }
+
+    public VersionEnum versionEnum() {
+        return VersionEnum.fromProtocolVersion(protocolVersion);
     }
 }

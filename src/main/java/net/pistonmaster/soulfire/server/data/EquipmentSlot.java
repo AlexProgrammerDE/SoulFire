@@ -15,14 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.soulfire.server.viaversion;
+package net.pistonmaster.soulfire.server.data;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
-import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
-
-public record StorableSettingsHolder(SettingsHolder settingsHolder) implements StorableObject {
-    @Override
-    public boolean clearOnServerSwitch() {
-        return false;
-    }
+public enum EquipmentSlot {
+    MAINHAND,
+    OFFHAND,
+    FEET,
+    LEGS,
+    CHEST,
+    HEAD
 }

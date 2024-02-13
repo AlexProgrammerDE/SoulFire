@@ -46,11 +46,9 @@ import com.github.steveice10.packetlib.event.session.ConnectedEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.viaversion.viaversion.api.connection.UserConnection;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
-import net.pistonmaster.soulfire.server.settings.BotSettings;
 import net.pistonmaster.soulfire.server.viaversion.SWVersionConstants;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 
@@ -82,7 +80,7 @@ public class SWBaseListener extends SessionAdapter {
                 }
 
                 var auth = authSupport;
-                var isLegacy = SWVersionConstants.isLegacy(botConnection.settingsHolder().get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest));
+                var isLegacy = SWVersionConstants.isLegacy(botConnection.meta().protocolVersion());
                 if (auth && isLegacy) {
                     auth = Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
                 }

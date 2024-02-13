@@ -24,8 +24,6 @@ import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.data.game.ResourcePackStatus;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.GlobalPos;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerSpawnInfo;
@@ -59,7 +57,6 @@ import com.github.steveice10.opennbt.tag.builtin.ListTag;
 import com.github.steveice10.opennbt.tag.builtin.StringTag;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.github.steveice10.packetlib.packet.Packet;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.*;
@@ -69,10 +66,13 @@ import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.soulfire.server.SoulFireServer;
 import net.pistonmaster.soulfire.server.api.event.bot.BotJoinedEvent;
-import net.pistonmaster.soulfire.server.api.event.bot.BotPostTickEvent;
-import net.pistonmaster.soulfire.server.api.event.bot.BotPreTickEvent;
+import net.pistonmaster.soulfire.server.api.event.bot.BotPostEntityTickEvent;
+import net.pistonmaster.soulfire.server.api.event.bot.BotPreEntityTickEvent;
 import net.pistonmaster.soulfire.server.api.event.bot.ChatMessageReceiveEvent;
+import net.pistonmaster.soulfire.server.data.Attribute;
+import net.pistonmaster.soulfire.server.data.AttributeType;
 import net.pistonmaster.soulfire.server.data.EntityType;
+import net.pistonmaster.soulfire.server.data.ModifierOperation;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.soulfire.server.protocol.bot.container.InventoryManager;
@@ -85,7 +85,6 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.entity.ClientEntity;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.RawEntity;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
-import net.pistonmaster.soulfire.server.settings.BotSettings;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 import net.pistonmaster.soulfire.server.util.PrimitiveHelper;
 import net.pistonmaster.soulfire.server.viaversion.SWVersionConstants;
@@ -100,6 +99,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Getter
 @ToString
@@ -212,9 +213,7 @@ public final class SessionDataManager {
         processSpawnInfo(packet.getCommonPlayerSpawnInfo());
 
         // Init client entity
-        inventoryManager.initPlayerInventory();
-
-        clientEntity = new ClientEntity(packet.getEntityId(), this, controlState);
+        clientEntity = new ClientEntity(packet.getEntityId(), botProfile.getId(), this, controlState);
         clientEntity.showReducedDebug(packet.isReducedDebugInfo());
         entityTrackerState.addEntity(clientEntity);
     }
@@ -322,24 +321,30 @@ public final class SessionDataManager {
     public void onPlayerChat(ClientboundPlayerChatPacket packet) {
         var message = packet.getUnsignedContent();
         if (message != null) {
-            onChat(message);
+            onChat(packet.getTimeStamp(), message);
             return;
         }
 
-        onChat(Component.text(packet.getContent()));
+        var sender = ChatMessageReceiveEvent.ChatMessageSender.fromClientboundPlayerChatPacket(packet);
+
+        onChat(packet.getTimeStamp(), Component.text(packet.getContent()), sender);
     }
 
     @EventHandler
     public void onServerChat(ClientboundSystemChatPacket packet) {
-        onChat(packet.getContent());
+        onChat(System.currentTimeMillis(), packet.getContent());
     }
 
     @EventHandler
     public void onDisguisedChat(ClientboundDisguisedChatPacket packet) {
     }
 
-    private void onChat(Component message) {
-        connection.eventBus().call(new ChatMessageReceiveEvent(connection, message));
+    private void onChat(long stamp, Component message) {
+        connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message, null));
+    }
+
+    private void onChat(long stamp, Component message, ChatMessageReceiveEvent.ChatMessageSender sender) {
+        connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message, sender));
     }
 
     //
@@ -412,8 +417,8 @@ public final class SessionDataManager {
         );
 
         var attributeState = clientEntity.attributeState();
-        attributeState.setAttribute(new Attribute(AttributeType.Builtin.GENERIC_MOVEMENT_SPEED, abilitiesData.walkSpeed()));
-        attributeState.setAttribute(new Attribute(AttributeType.Builtin.GENERIC_FLYING_SPEED, abilitiesData.flySpeed()));
+        attributeState.getOrCreateAttribute(AttributeType.GENERIC_MOVEMENT_SPEED).baseValue(abilitiesData.walkSpeed());
+        attributeState.getOrCreateAttribute(AttributeType.GENERIC_FLYING_SPEED).baseValue(abilitiesData.flySpeed());
 
         controlState.flying(abilitiesData.flying());
     }
@@ -797,7 +802,26 @@ public final class SessionDataManager {
         }
 
         for (var entry : packet.getAttributes()) {
-            state.attributeState().setAttribute(entry);
+            var attributeType = AttributeType.getByName(entry.getType().getIdentifier());
+            if (attributeType == null) {
+                log.warn("Received unknown attribute type {}", entry.getType().getIdentifier());
+                continue;
+            }
+
+            var attribute = state.attributeState()
+                    .getOrCreateAttribute(attributeType)
+                    .baseValue(entry.getValue());
+
+            attribute.modifiers().clear();
+            attribute.modifiers().putAll(entry.getModifiers().stream().map(modifier -> new Attribute.Modifier(
+                    modifier.getUuid(),
+                    modifier.getAmount(),
+                    switch (modifier.getOperation()) {
+                        case ADD -> ModifierOperation.ADDITION;
+                        case ADD_MULTIPLIED -> ModifierOperation.MULTIPLY_BASE;
+                        case MULTIPLY -> ModifierOperation.MULTIPLY_TOTAL;
+                    }
+            )).collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
         }
     }
 
@@ -931,7 +955,7 @@ public final class SessionDataManager {
             return;
         }
 
-        var version = settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+        var version = connection.meta().protocolVersion();
         if (SWVersionConstants.isBedrock(version)) {
             sendPacket(new ServerboundResourcePackPacket(
                     packet.getId(),
@@ -1014,8 +1038,6 @@ public final class SessionDataManager {
     }
 
     public void tick() {
-        connection.eventBus().call(new BotPreTickEvent(connection));
-
         // Tick border changes
         if (borderState != null) {
             borderState.tick();
@@ -1024,10 +1046,16 @@ public final class SessionDataManager {
         // Tick item cooldowns
         tickCoolDowns();
 
+        var tickHookState = TickHookContext.INSTANCE.get();
+
+        connection.eventBus().call(new BotPreEntityTickEvent(connection));
+        tickHookState.callHooks(TickHookContext.HookType.PRE_ENTITY_TICK);
+
         // Tick entities
         entityTrackerState.tick();
 
-        connection.eventBus().call(new BotPostTickEvent(connection));
+        connection.eventBus().call(new BotPostEntityTickEvent(connection));
+        tickHookState.callHooks(TickHookContext.HookType.POST_ENTITY_TICK);
     }
 
     private void tickCoolDowns() {

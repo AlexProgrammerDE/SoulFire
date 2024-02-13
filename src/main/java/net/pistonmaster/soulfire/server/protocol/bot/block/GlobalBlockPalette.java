@@ -27,11 +27,6 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.ChunkData;
 
 @ToString
 public class GlobalBlockPalette {
-    @Getter
-    private final int maxStates;
-    @Getter
-    private final int blockBitsPerEntry;
-    private final BlockState[] stateIdToBlockState;
     public static final GlobalBlockPalette INSTANCE;
 
     static {
@@ -44,6 +39,12 @@ public class GlobalBlockPalette {
 
         INSTANCE = new GlobalBlockPalette(stateMap);
     }
+
+    @Getter
+    private final int maxStates;
+    @Getter
+    private final int blockBitsPerEntry;
+    private final BlockState[] stateIdToBlockState;
 
     public GlobalBlockPalette(Int2ObjectMap<BlockState> states) {
         this.maxStates = states.size();

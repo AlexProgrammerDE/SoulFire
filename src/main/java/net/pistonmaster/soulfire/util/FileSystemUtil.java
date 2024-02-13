@@ -28,7 +28,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class FileSystemUtil {
 
@@ -55,7 +54,7 @@ public class FileSystemUtil {
     }
 
     private static Map<Path, byte[]> getFilesInPath(final Path path) throws IOException {
-        try (Stream<Path> stream = Files.walk(path)) {
+        try (var stream = Files.walk(path)) {
             return stream
                     .filter(Files::isRegularFile)
                     .sorted(Comparator.comparing(Path::toString))
@@ -75,7 +74,7 @@ public class FileSystemUtil {
         try {
             return action.apply(FileSystems.getFileSystem(uri));
         } catch (FileSystemNotFoundException e) {
-            try (FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
+            try (var fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
                 return action.apply(fileSystem);
             } catch (IOException e1) {
                 throw new UncheckedIOException(e1);

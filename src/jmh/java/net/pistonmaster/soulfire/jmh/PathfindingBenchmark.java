@@ -96,7 +96,7 @@ public class PathfindingBenchmark {
             initialState = new BotEntityState(
                     new SWVec3i(0, safeY, 0),
                     new ProjectedLevelState(accessor),
-                    new ProjectedInventory(new PlayerInventoryContainer())
+                    new ProjectedInventory(new PlayerInventoryContainer(null))
             );
 
             log.info("Done loading! Testing...");
