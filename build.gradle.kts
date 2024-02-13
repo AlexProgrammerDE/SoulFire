@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.bundles.flatlaf)
     implementation(libs.xchart)
     implementation(libs.miglayout.swing)
+    implementation(libs.commons.swing)
 
     val lwjglVersion = "3.3.3"
     val lwjglPlatforms = listOf("linux", "macos", "macos-arm64", "windows")

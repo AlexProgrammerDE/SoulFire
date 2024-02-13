@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.client.gui.navigation;
 
+import net.lenni0451.commons.swing.GBC;
 import net.pistonmaster.soulfire.client.gui.GUIFrame;
 import net.pistonmaster.soulfire.client.gui.GUIManager;
 import net.pistonmaster.soulfire.client.gui.libs.JEnumComboBox;
@@ -36,17 +37,15 @@ import java.util.ArrayList;
 public class ProxyPanel extends NavigationItem {
     @Inject
     public ProxyPanel(GUIManager guiManager, GUIFrame parent, CardsContainer cardsContainer) {
-        setLayout(new GridLayout(0, 1, 10, 10));
-
-        var proxyOptionsPanel = new JPanel();
-        proxyOptionsPanel.setLayout(new GridLayout(0, 1, 10, 10));
+        setLayout(new GridBagLayout());
+        var insets = new Insets(10, 0, 0, 0);
 
         var proxySettingsPanel = new JPanel();
-        proxySettingsPanel.setLayout(new GridLayout(0, 2));
+        proxySettingsPanel.setLayout(new GridBagLayout());
 
         GeneratedPanel.addComponents(proxySettingsPanel, cardsContainer.getByNamespace(BuiltinSettingsConstants.PROXY_SETTINGS_ID), guiManager.settingsManager());
 
-        proxyOptionsPanel.add(proxySettingsPanel);
+        GBC.create(this).grid(0, 0).fill(GBC.HORIZONTAL).weightx(1).add(proxySettingsPanel);
 
         var addProxyPanel = new JPanel();
         addProxyPanel.setLayout(new GridLayout(0, 3, 10, 10));
@@ -55,12 +54,7 @@ public class ProxyPanel extends NavigationItem {
         addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS4));
         addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS5));
 
-        proxyOptionsPanel.add(addProxyPanel);
-
-        add(proxyOptionsPanel);
-
-        var proxyListPanel = new JPanel();
-        proxyListPanel.setLayout(new GridLayout(0, 1));
+        GBC.create(this).grid(0, 1).insets(insets).fill(GBC.HORIZONTAL).weightx(1).add(addProxyPanel);
 
         var columnNames = new String[]{"IP", "Port", "Username", "Password", "Type", "Enabled"};
         var model = new DefaultTableModel(columnNames, 0) {
@@ -130,9 +124,7 @@ public class ProxyPanel extends NavigationItem {
 
         var scrollPane = new JScrollPane(proxyList);
 
-        proxyListPanel.add(scrollPane);
-
-        add(proxyListPanel);
+        GBC.create(this).grid(0, 2).insets(insets).fill(GBC.BOTH).weight(1, 1).add(scrollPane);
     }
 
     private static JButton createProxyLoadButton(GUIManager guiManager, GUIFrame parent, ProxyType type) {
