@@ -325,8 +325,7 @@ public final class SessionDataManager {
             return;
         }
 
-        ChatMessageReceiveEvent.ChatMessageSender sender =
-                ChatMessageReceiveEvent.ChatMessageSender.fromClientboundPlayerChatPacket(packet);
+        var sender = ChatMessageReceiveEvent.ChatMessageSender.fromClientboundPlayerChatPacket(packet);
 
         onChat(packet.getTimeStamp(), Component.text(packet.getContent()), sender);
     }

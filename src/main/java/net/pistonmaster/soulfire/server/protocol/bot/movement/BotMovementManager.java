@@ -26,7 +26,6 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.ClientEntity;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
 import net.pistonmaster.soulfire.server.util.MathHelper;
-import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
@@ -426,8 +425,8 @@ public class BotMovementManager {
             applyHeading(strafe, forward, frictionInfluencedSpeed);
 
             if (isClimbable(world, pos.toImmutableInt())) {
-                vel.x = GenericMath.clamp(vel.x, -physics.climbMaxSpeed, physics.climbMaxSpeed);
-                vel.z = GenericMath.clamp(vel.z, -physics.climbMaxSpeed, physics.climbMaxSpeed);
+                vel.x = MathHelper.doubleClamp(vel.x, -physics.climbMaxSpeed, physics.climbMaxSpeed);
+                vel.z = MathHelper.doubleClamp(vel.z, -physics.climbMaxSpeed, physics.climbMaxSpeed);
                 vel.y = Math.max(vel.y, controlState.sneaking() ? 0 : -physics.climbMaxSpeed);
             }
 

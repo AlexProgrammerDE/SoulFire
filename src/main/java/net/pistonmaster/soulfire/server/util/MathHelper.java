@@ -37,7 +37,11 @@ public class MathHelper {
     }
 
     public static double doubleClamp(double value, double min, double max) {
-        return Math.max(min, Math.min(value, max));
+        if (value < min) {
+            return min;
+        } else {
+            return Math.min(value, max);
+        }
     }
 
     public static double lengthSquared(double x, double y, double z) {
