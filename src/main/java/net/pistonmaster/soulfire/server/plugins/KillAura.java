@@ -22,6 +22,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
+import net.pistonmaster.soulfire.server.api.BotContext;
 import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.bot.BotPostTickEvent;
@@ -39,111 +40,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 public class KillAura implements InternalExtension {
-    public static void onPre(BotPreTickEvent event) {
-        var bot = event.connection();
-        if (!bot.settingsHolder().get(KillAuraSettings.ENABLE)) return;
-
-        var control = bot.botControl();
-
-        var whitelistedUser = bot.settingsHolder().get(KillAuraSettings.WHITELISTED_USER);
-
-        var lookRange = bot.settingsHolder().get(KillAuraSettings.LOOK_RANGE);
-        var hitRange = bot.settingsHolder().get(KillAuraSettings.HIT_RANGE);
-        var swingRange = bot.settingsHolder().get(KillAuraSettings.SWING_RANGE);
-
-        var max = Math.max(lookRange, Math.max(hitRange, swingRange));
-
-        var entity = control.getClosestEntity(max, whitelistedUser, true, true, bot.settingsHolder().get(KillAuraSettings.CHECK_WALLS));
-        if (entity == null) return;
-
-        control.extraData().put("kill_aura_target", entity);
-
-        double distance;
-        var bestVisiblePoint = control.getEntityVisiblePoint(entity);
-        if (bestVisiblePoint != null) {
-            distance = bestVisiblePoint.distance(
-                    bot.sessionDataManager().clientEntity().getEyePosition()
-            );
-        } else {
-            distance = entity.getEyePosition().distance(
-                    bot.sessionDataManager().clientEntity().getEyePosition()
-            );
-        }
-
-        if (distance > lookRange) {
-            return;
-        }
-
-        if (bestVisiblePoint != null) {
-            bot.sessionDataManager().clientEntity().lookAt(RotationOrigin.EYES, bestVisiblePoint);
-        } else {
-            bot.sessionDataManager().clientEntity().lookAt(RotationOrigin.EYES, RotationOrigin.EYES, entity);
-        }
-
-        control.extraData().put("kill_aura_looked_at", true);
-    }
-
-    public static void onPost(BotPostTickEvent event) {
-        var bot = event.connection();
-        if (!bot.settingsHolder().get(KillAuraSettings.ENABLE)) return;
-
-        var control = bot.botControl();
-
-        var currentTime = System.currentTimeMillis();
-        var nextHit = (long) control.extraData().computeIfAbsent("next_hit", k -> currentTime);
-        if (nextHit > currentTime) {
-            return;
-        }
-
-        var lookRange = bot.settingsHolder().get(KillAuraSettings.LOOK_RANGE);
-        var hitRange = bot.settingsHolder().get(KillAuraSettings.HIT_RANGE);
-        var swingRange = bot.settingsHolder().get(KillAuraSettings.SWING_RANGE);
-
-        var target = (Entity) control.extraData().get("kill_aura_target");
-        if (target != null) {
-            control.extraData().remove("kill_aura_target");
-        }
-        if (target == null) return;
-
-        var lookedAt = (Boolean) control.extraData().get("kill_aura_looked_at");
-        if (lookedAt != null) {
-            control.extraData().remove("kill_aura_looked_at");
-        } else {
-            lookedAt = false;
-        }
-
-        if (!lookedAt && lookRange != 0) return;
-
-        double distance;
-        var bestVisiblePoint = control.getEntityVisiblePoint(target);
-        if (bestVisiblePoint != null) {
-            distance = bestVisiblePoint.distance(
-                    bot.sessionDataManager().clientEntity().getEyePosition()
-            );
-        } else {
-            distance = target.getEyePosition().distance(
-                    bot.sessionDataManager().clientEntity().getEyePosition()
-            );
-        }
-
-        var swing = distance <= swingRange;
-        if (distance <= hitRange) {
-            control.attack(target, swing);
-        } else if (swing) {
-            control.swingArm();
-        }
-
-        if (bot.meta().versionEnum().isOlderThan(VersionEnum.r1_9)
-                || bot.settingsHolder().get(KillAuraSettings.IGNORE_COOLDOWN)) {
-            var cpsMin = bot.settingsHolder().get(KillAuraSettings.CPS_MIN);
-            var cpsMax = bot.settingsHolder().get(KillAuraSettings.CPS_MAX);
-            var randomDelay = 1000.0d / ThreadLocalRandom.current().nextDouble(cpsMin, cpsMax);
-            control.extraData().put("next_hit", control.lastHit() + randomDelay);
-        } else {
-            control.extraData().put("next_hit", System.currentTimeMillis() + control.getCooldownRemainingTime());
-        }
-    }
-
     @EventHandler
     public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
         event.settingsRegistry().addClass(KillAuraSettings.class, "Kill Aura");
@@ -152,8 +48,114 @@ public class KillAura implements InternalExtension {
     @Override
     public void onLoad() {
         SoulFireAPI.registerListeners(KillAura.class);
-        PluginHelper.registerBotEventConsumer(BotPreTickEvent.class, KillAura::onPre);
-        PluginHelper.registerBotEventConsumer(BotPostTickEvent.class, KillAura::onPost);
+        PluginHelper.registerBotContextFactory(connection -> new BotContext() {
+            @EventHandler
+            public void onPre(BotPreTickEvent event) {
+                var bot = event.connection();
+                if (!bot.settingsHolder().get(KillAuraSettings.ENABLE)) return;
+
+                var control = bot.botControl();
+
+                var whitelistedUser = bot.settingsHolder().get(KillAuraSettings.WHITELISTED_USER);
+
+                var lookRange = bot.settingsHolder().get(KillAuraSettings.LOOK_RANGE);
+                var hitRange = bot.settingsHolder().get(KillAuraSettings.HIT_RANGE);
+                var swingRange = bot.settingsHolder().get(KillAuraSettings.SWING_RANGE);
+
+                var max = Math.max(lookRange, Math.max(hitRange, swingRange));
+
+                var entity = control.getClosestEntity(max, whitelistedUser, true, true, bot.settingsHolder().get(KillAuraSettings.CHECK_WALLS));
+                if (entity == null) return;
+
+                control.extraData().put("kill_aura_target", entity);
+
+                double distance;
+                var bestVisiblePoint = control.getEntityVisiblePoint(entity);
+                if (bestVisiblePoint != null) {
+                    distance = bestVisiblePoint.distance(
+                            bot.sessionDataManager().clientEntity().getEyePosition()
+                    );
+                } else {
+                    distance = entity.getEyePosition().distance(
+                            bot.sessionDataManager().clientEntity().getEyePosition()
+                    );
+                }
+
+                if (distance > lookRange) {
+                    return;
+                }
+
+                if (bestVisiblePoint != null) {
+                    bot.sessionDataManager().clientEntity().lookAt(RotationOrigin.EYES, bestVisiblePoint);
+                } else {
+                    bot.sessionDataManager().clientEntity().lookAt(RotationOrigin.EYES, RotationOrigin.EYES, entity);
+                }
+
+                control.extraData().put("kill_aura_looked_at", true);
+            }
+
+            @EventHandler
+            public void onPost(BotPostTickEvent event) {
+                var bot = event.connection();
+                if (!bot.settingsHolder().get(KillAuraSettings.ENABLE)) return;
+
+                var control = bot.botControl();
+
+                var currentTime = System.currentTimeMillis();
+                var nextHit = (long) control.extraData().computeIfAbsent("next_hit", k -> currentTime);
+                if (nextHit > currentTime) {
+                    return;
+                }
+
+                var lookRange = bot.settingsHolder().get(KillAuraSettings.LOOK_RANGE);
+                var hitRange = bot.settingsHolder().get(KillAuraSettings.HIT_RANGE);
+                var swingRange = bot.settingsHolder().get(KillAuraSettings.SWING_RANGE);
+
+                var target = (Entity) control.extraData().get("kill_aura_target");
+                if (target != null) {
+                    control.extraData().remove("kill_aura_target");
+                }
+                if (target == null) return;
+
+                var lookedAt = (Boolean) control.extraData().get("kill_aura_looked_at");
+                if (lookedAt != null) {
+                    control.extraData().remove("kill_aura_looked_at");
+                } else {
+                    lookedAt = false;
+                }
+
+                if (!lookedAt && lookRange != 0) return;
+
+                double distance;
+                var bestVisiblePoint = control.getEntityVisiblePoint(target);
+                if (bestVisiblePoint != null) {
+                    distance = bestVisiblePoint.distance(
+                            bot.sessionDataManager().clientEntity().getEyePosition()
+                    );
+                } else {
+                    distance = target.getEyePosition().distance(
+                            bot.sessionDataManager().clientEntity().getEyePosition()
+                    );
+                }
+
+                var swing = distance <= swingRange;
+                if (distance <= hitRange) {
+                    control.attack(target, swing);
+                } else if (swing) {
+                    control.swingArm();
+                }
+
+                if (bot.meta().versionEnum().isOlderThan(VersionEnum.r1_9)
+                        || bot.settingsHolder().get(KillAuraSettings.IGNORE_COOLDOWN)) {
+                    var cpsMin = bot.settingsHolder().get(KillAuraSettings.CPS_MIN);
+                    var cpsMax = bot.settingsHolder().get(KillAuraSettings.CPS_MAX);
+                    var randomDelay = 1000.0d / ThreadLocalRandom.current().nextDouble(cpsMin, cpsMax);
+                    // control.extraData().put("next_hit", control.lastHit() + randomDelay);
+                } else {
+                    control.extraData().put("next_hit", control.getHitItemCooldownTicks());
+                }
+            }
+        });
     }
 
     @NoArgsConstructor(access = AccessLevel.NONE)

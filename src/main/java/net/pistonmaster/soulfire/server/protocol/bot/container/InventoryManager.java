@@ -29,15 +29,23 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import net.pistonmaster.soulfire.server.data.EquipmentSlot;
+import net.pistonmaster.soulfire.server.data.ItemType;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Data
 @RequiredArgsConstructor
 public class InventoryManager {
-    private final Int2ObjectMap<Container> containerData = new Int2ObjectOpenHashMap<>();
+    private final PlayerInventoryContainer playerInventory = new PlayerInventoryContainer(this);
+    private final Int2ObjectMap<Container> containerData = new Int2ObjectOpenHashMap<>(Map.of(
+            0, playerInventory
+    ));
+    private final Map<EquipmentSlot, ItemType> lastInEquipment = new EnumMap<>(EquipmentSlot.class);
     private final ReentrantLock inventoryControlLock = new ReentrantLock();
     @ToString.Exclude
     private final SessionDataManager dataManager;
@@ -62,15 +70,6 @@ public class InventoryManager {
         inventoryControlLock.unlock();
     }
 
-    @ApiStatus.Internal
-    public void initPlayerInventory() {
-        containerData.put(0, new PlayerInventoryContainer());
-    }
-
-    public PlayerInventoryContainer getPlayerInventory() {
-        return (PlayerInventoryContainer) containerData.get(0);
-    }
-
     public Container getContainer(int containerId) {
         return containerData.get(containerId);
     }
@@ -93,7 +92,7 @@ public class InventoryManager {
     }
 
     public void openPlayerInventory() {
-        openContainer = getPlayerInventory();
+        openContainer = playerInventory();
     }
 
     public void leftClickSlot(int slot) {
@@ -141,5 +140,40 @@ public class InventoryManager {
                 cursorItem,
                 changes
         ));
+    }
+
+    public void applyItemAttributes() {
+        applyIfMatches(playerInventory.getHeldItem().item(), EquipmentSlot.MAINHAND);
+        applyIfMatches(playerInventory.getOffhand().item(), EquipmentSlot.OFFHAND);
+        applyIfMatches(playerInventory.getHelmet().item(), EquipmentSlot.HEAD);
+        applyIfMatches(playerInventory.getChestplate().item(), EquipmentSlot.CHEST);
+        applyIfMatches(playerInventory.getLeggings().item(), EquipmentSlot.LEGS);
+        applyIfMatches(playerInventory.getBoots().item(), EquipmentSlot.FEET);
+    }
+
+    private void applyIfMatches(@Nullable SWItemStack item, EquipmentSlot equipmentSlot) {
+        var previousItem = lastInEquipment.get(equipmentSlot);
+        boolean hasChanged;
+        if (previousItem != null) {
+            if (item == null || previousItem != item.type()) {
+                // Item before, but we don't have one now, or it's different
+                hasChanged = true;
+
+                // Remove the old item's modifiers
+                dataManager.clientEntity().attributeState().removeItemModifiers(previousItem);
+            } else {
+                // Item before, and we have the same one now
+                hasChanged = false;
+            }
+        } else {
+            // No item before, but we have one now
+            hasChanged = item != null;
+        }
+
+        if (hasChanged && item != null && item.type().attributeSlot() == equipmentSlot) {
+            dataManager.clientEntity().attributeState().putItemModifiers(item.type());
+        }
+
+        lastInEquipment.put(equipmentSlot, item == null ? null : item.type());
     }
 }

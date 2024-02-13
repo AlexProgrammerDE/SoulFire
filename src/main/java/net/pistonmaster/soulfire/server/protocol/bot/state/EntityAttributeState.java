@@ -19,9 +19,13 @@ package net.pistonmaster.soulfire.server.protocol.bot.state;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Data;
+import net.pistonmaster.soulfire.server.data.Attribute;
 import net.pistonmaster.soulfire.server.data.AttributeType;
+import net.pistonmaster.soulfire.server.data.ItemType;
 
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Data
 public class EntityAttributeState {
@@ -29,5 +33,23 @@ public class EntityAttributeState {
 
     public AttributeState getOrCreateAttribute(AttributeType type) {
         return attributeStore.computeIfAbsent(type, k -> new AttributeState(type, type.defaultValue()));
+    }
+
+    public void putItemModifiers(ItemType type) {
+        for (var attribute : type.attributes()) {
+            getOrCreateAttribute(attribute.type())
+                    .modifiers().putAll(attribute.modifiers()
+                            .stream()
+                            .collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
+        }
+    }
+
+    public void removeItemModifiers(ItemType type) {
+        for (var attribute : type.attributes()) {
+            for (var modifier : attribute.modifiers()) {
+                getOrCreateAttribute(attribute.type())
+                        .modifiers().remove(modifier.uuid());
+            }
+        }
     }
 }

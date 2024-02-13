@@ -101,7 +101,7 @@ public class AutoArmor implements InternalExtension {
         ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
             var sessionDataManager = connection.sessionDataManager();
             var inventoryManager = sessionDataManager.inventoryManager();
-            var playerInventory = inventoryManager.getPlayerInventory();
+            var playerInventory = inventoryManager.playerInventory();
 
             var armorTypes = Map.of(
                     ArmorType.HELMET, playerInventory.getHelmet(),

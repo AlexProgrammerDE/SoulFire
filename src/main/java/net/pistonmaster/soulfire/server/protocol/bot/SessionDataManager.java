@@ -213,8 +213,6 @@ public final class SessionDataManager {
         processSpawnInfo(packet.getCommonPlayerSpawnInfo());
 
         // Init client entity
-        inventoryManager.initPlayerInventory();
-
         clientEntity = new ClientEntity(packet.getEntityId(), this, controlState);
         clientEntity.showReducedDebug(packet.isReducedDebugInfo());
         entityTrackerState.addEntity(clientEntity);
@@ -810,17 +808,20 @@ public final class SessionDataManager {
                 continue;
             }
 
-            state.attributeState().getOrCreateAttribute(attributeType)
-                    .baseValue(entry.getValue())
-                    .modifiers().putAll(entry.getModifiers().stream().map(modifier -> new Attribute.Modifier(
-                            modifier.getUuid(),
-                            modifier.getAmount(),
-                            switch (modifier.getOperation()) {
-                                case ADD -> ModifierOperation.ADDITION;
-                                case ADD_MULTIPLIED -> ModifierOperation.MULTIPLY_BASE;
-                                case MULTIPLY -> ModifierOperation.MULTIPLY_TOTAL;
-                            }
-                    )).collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
+            var attribute = state.attributeState()
+                    .getOrCreateAttribute(attributeType)
+                    .baseValue(entry.getValue());
+
+            attribute.modifiers().clear();
+            attribute.modifiers().putAll(entry.getModifiers().stream().map(modifier -> new Attribute.Modifier(
+                    modifier.getUuid(),
+                    modifier.getAmount(),
+                    switch (modifier.getOperation()) {
+                        case ADD -> ModifierOperation.ADDITION;
+                        case ADD_MULTIPLIED -> ModifierOperation.MULTIPLY_BASE;
+                        case MULTIPLY -> ModifierOperation.MULTIPLY_TOTAL;
+                    }
+            )).collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
         }
     }
 

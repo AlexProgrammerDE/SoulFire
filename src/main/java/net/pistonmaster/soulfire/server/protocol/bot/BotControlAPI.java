@@ -32,6 +32,8 @@ import io.netty.buffer.Unpooled;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.soulfire.server.data.AttributeType;
 import net.pistonmaster.soulfire.server.data.EntityType;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
@@ -49,6 +51,7 @@ import java.util.*;
  * This class is used to control the bot.
  * The goal is to reduce friction for doing simple things.
  */
+@Slf4j
 @RequiredArgsConstructor
 public class BotControlAPI {
     private final SessionDataManager dataManager;
@@ -56,7 +59,13 @@ public class BotControlAPI {
     @Getter
     private final Map<String, Object> extraData = new HashMap<>();
     @Getter
-    private long lastHit = 0;
+    private int attackCooldownTicks = 0;
+
+    public void tick() {
+        if (attackCooldownTicks > 0) {
+            attackCooldownTicks--;
+        }
+    }
 
     public boolean toggleFlight() {
         var abilitiesData = dataManager.abilitiesData();
@@ -192,7 +201,7 @@ public class BotControlAPI {
 
     public void attack(@NonNull Entity entity, boolean swingArm) {
         if (!entity.entityType().attackable()) {
-            System.err.println("Entity " + entity.entityId() + " can't be attacked!");
+            log.error("Entity " + entity.entityId() + " can't be attacked!");
             return;
         }
 
@@ -201,7 +210,8 @@ public class BotControlAPI {
         if (swingArm) {
             swingArm();
         }
-        lastHit = System.currentTimeMillis();
+
+        attackCooldownTicks = (int) getHitItemCooldownTicks();
     }
 
     public Entity getClosestEntity(double range, String whitelistedUser, boolean ignoreBots, boolean onlyInteractable, boolean mustBeSeen) {
@@ -280,31 +290,9 @@ public class BotControlAPI {
         dataManager.sendPacket(swingPacket);
     }
 
-    public long getCooldownRemainingTime() {
-        if (dataManager == null || dataManager.inventoryManager() == null || dataManager.inventoryManager().getPlayerInventory() == null) {
-            return 2000;
-        }
+    public float getHitItemCooldownTicks() {
+        dataManager.inventoryManager().applyItemAttributes();
 
-        var itemSlot = dataManager.inventoryManager().heldItemSlot();
-        var item = dataManager.inventoryManager().getPlayerInventory().hotbarSlot(itemSlot).item();
-        var cooldown = 500; // Default cooldown when you hit with your hand
-        if (item != null) {
-            cooldown = dataManager.itemCoolDowns().get(item.type().id()) * 50; // 50ms per tick
-            if (cooldown == 0) { // if the server hasn't changed the cooldown
-                var attackSpeedModifier = 0d;
-                for (var attribute : item.type().attributes()) {
-                    for (var modifier : attribute.modifiers()) {
-                        if (modifier.uuid().equals(UUID.fromString("fa233e1c-4180-4865-b01b-bcce9785aca3"))) {
-                            attackSpeedModifier = modifier.amount();
-                            break;
-                        }
-                    }
-                }
-
-                var attackSpeed = 4.0 + attackSpeedModifier;
-                cooldown = (int) ((1 / attackSpeed) * 1000);
-            }
-        }
-        return lastHit + cooldown - System.currentTimeMillis();
+        return (float) (1.0 / dataManager.clientEntity().getAttributeValue(AttributeType.GENERIC_ATTACK_SPEED) * 20.0);
     }
 }

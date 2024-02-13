@@ -60,7 +60,7 @@ public class ClientEntity extends Entity {
         super(entityId, EntityType.PLAYER);
         this.sessionDataManager = sessionDataManager;
         this.controlState = controlState;
-        this.movementState = new PlayerMovementState(this, sessionDataManager.inventoryManager().getPlayerInventory());
+        this.movementState = new PlayerMovementState(this, sessionDataManager.inventoryManager().playerInventory());
         this.botMovementManager = new BotMovementManager(sessionDataManager, movementState, this);
         this.yaw = -180;
     }

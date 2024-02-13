@@ -64,6 +64,7 @@ public record BotConnection(UUID connectionId, BotConnectionFactory factory, Att
         session.tick(); // Ensure all packets are handled before ticking
         for (var i = 0; i < ticks; i++) {
             try {
+                botControl().tick();
                 sessionDataManager().tick();
             } catch (Throwable t) {
                 logger.error("Error while ticking bot!", t);

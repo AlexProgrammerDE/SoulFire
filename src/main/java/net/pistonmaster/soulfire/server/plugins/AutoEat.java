@@ -53,7 +53,7 @@ public class AutoEat implements InternalExtension {
             }
 
             var inventoryManager = sessionDataManager.inventoryManager();
-            var playerInventory = inventoryManager.getPlayerInventory();
+            var playerInventory = inventoryManager.playerInventory();
 
             var i = 0;
             for (var slot : playerInventory.hotbar()) {
@@ -101,7 +101,7 @@ public class AutoEat implements InternalExtension {
 
                 try {
                     inventoryManager.leftClickSlot(slot.slot());
-                    inventoryManager.leftClickSlot(playerInventory.hotbarSlot(inventoryManager.heldItemSlot()).slot());
+                    inventoryManager.leftClickSlot(playerInventory.getHeldItem().slot());
                     if (inventoryManager.cursorItem() != null) {
                         inventoryManager.leftClickSlot(slot.slot());
                     }
