@@ -21,7 +21,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Data;
 import net.pistonmaster.soulfire.server.data.AttributeType;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 @Data
@@ -29,6 +28,6 @@ public class EntityAttributeState {
     private final Map<AttributeType, AttributeState> attributeStore = new Object2ObjectOpenHashMap<>();
 
     public AttributeState getOrCreateAttribute(AttributeType type) {
-        return attributeStore.computeIfAbsent(type, k -> new AttributeState(type, type.defaultValue(), new ArrayList<>()));
+        return attributeStore.computeIfAbsent(type, k -> new AttributeState(type, type.defaultValue()));
     }
 }

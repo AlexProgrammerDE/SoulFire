@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.state;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,15 +26,16 @@ import net.pistonmaster.soulfire.server.data.AttributeType;
 import net.pistonmaster.soulfire.server.data.ModifierOperation;
 import net.pistonmaster.soulfire.server.util.MathHelper;
 
-import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Setter
 @Getter
 @AllArgsConstructor
 public class AttributeState {
     private final AttributeType type;
+    private final Map<UUID, Attribute.Modifier> modifiers = new Object2ObjectOpenHashMap<>();
     private double baseValue;
-    private List<Attribute.Modifier> modifiers;
 
     public double calculateValue() {
         var value = baseValue;
@@ -55,7 +57,7 @@ public class AttributeState {
         return MathHelper.doubleClamp(finalValue, type.min(), type.max());
     }
 
-    private List<Attribute.Modifier> getModifiersOrEmpty(ModifierOperation operation) {
-        return modifiers.stream().filter(modifier -> modifier.operation() == operation).toList();
+    private Iterable<Attribute.Modifier> getModifiersOrEmpty(ModifierOperation operation) {
+        return modifiers.values().stream().filter(modifier -> modifier.operation() == operation)::iterator;
     }
 }

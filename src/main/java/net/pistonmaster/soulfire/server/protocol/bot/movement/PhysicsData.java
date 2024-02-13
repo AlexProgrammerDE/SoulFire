@@ -28,7 +28,7 @@ public class PhysicsData {
     public double yawSpeed = 3.0;
     public double pitchSpeed = 3.0;
     public double playerSpeed = 0.1;
-    public double sprintSpeed = 0.3;
+    public double sprintSpeed = 0.3F;
     public double sneakSpeed = 0.3;
     public double stepHeight = 0.6F;
     public double negligeableVelocity = 0.003;

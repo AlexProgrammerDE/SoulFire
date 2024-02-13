@@ -99,6 +99,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Getter
 @ToString
@@ -810,7 +812,7 @@ public final class SessionDataManager {
 
             state.attributeState().getOrCreateAttribute(attributeType)
                     .baseValue(entry.getValue())
-                    .modifiers(entry.getModifiers().stream().map(modifier -> new Attribute.Modifier(
+                    .modifiers().putAll(entry.getModifiers().stream().map(modifier -> new Attribute.Modifier(
                             modifier.getUuid(),
                             modifier.getAmount(),
                             switch (modifier.getOperation()) {
@@ -818,7 +820,7 @@ public final class SessionDataManager {
                                 case ADD_MULTIPLIED -> ModifierOperation.MULTIPLY_BASE;
                                 case MULTIPLY -> ModifierOperation.MULTIPLY_TOTAL;
                             }
-                    )).toList());
+                    )).collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
         }
     }
 
