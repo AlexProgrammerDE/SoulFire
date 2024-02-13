@@ -23,8 +23,11 @@ import net.lenni0451.lambdaevents.LambdaManager;
 import net.pistonmaster.soulfire.server.AttackManager;
 import net.pistonmaster.soulfire.server.SoulFireServer;
 import net.pistonmaster.soulfire.server.api.event.attack.PreBotConnectEvent;
+import net.pistonmaster.soulfire.server.api.event.bot.BotPostTickEvent;
+import net.pistonmaster.soulfire.server.api.event.bot.BotPreTickEvent;
 import net.pistonmaster.soulfire.server.protocol.bot.BotControlAPI;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
+import net.pistonmaster.soulfire.server.protocol.bot.state.TickHookContext;
 import net.pistonmaster.soulfire.server.protocol.netty.ResolveUtil;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
@@ -64,8 +67,17 @@ public record BotConnection(UUID connectionId, BotConnectionFactory factory, Att
         session.tick(); // Ensure all packets are handled before ticking
         for (var i = 0; i < ticks; i++) {
             try {
-                botControl().tick();
+                var tickHookState = TickHookContext.INSTANCE.get();
+                tickHookState.clear();
+
+                eventBus.call(new BotPreTickEvent(this));
+                tickHookState.callHooks(TickHookContext.HookType.PRE_TICK);
+
                 sessionDataManager().tick();
+                botControl().tick();
+
+                eventBus.call(new BotPostTickEvent(this));
+                tickHookState.callHooks(TickHookContext.HookType.POST_TICK);
             } catch (Throwable t) {
                 logger.error("Error while ticking bot!", t);
             }

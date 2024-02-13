@@ -66,8 +66,8 @@ import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.soulfire.server.SoulFireServer;
 import net.pistonmaster.soulfire.server.api.event.bot.BotJoinedEvent;
-import net.pistonmaster.soulfire.server.api.event.bot.BotPostTickEvent;
-import net.pistonmaster.soulfire.server.api.event.bot.BotPreTickEvent;
+import net.pistonmaster.soulfire.server.api.event.bot.BotPostEntityTickEvent;
+import net.pistonmaster.soulfire.server.api.event.bot.BotPreEntityTickEvent;
 import net.pistonmaster.soulfire.server.api.event.bot.ChatMessageReceiveEvent;
 import net.pistonmaster.soulfire.server.data.Attribute;
 import net.pistonmaster.soulfire.server.data.AttributeType;
@@ -1038,8 +1038,6 @@ public final class SessionDataManager {
     }
 
     public void tick() {
-        connection.eventBus().call(new BotPreTickEvent(connection));
-
         // Tick border changes
         if (borderState != null) {
             borderState.tick();
@@ -1048,10 +1046,16 @@ public final class SessionDataManager {
         // Tick item cooldowns
         tickCoolDowns();
 
+        var tickHookState = TickHookContext.INSTANCE.get();
+
+        connection.eventBus().call(new BotPreEntityTickEvent(connection));
+        tickHookState.callHooks(TickHookContext.HookType.PRE_ENTITY_TICK);
+
         // Tick entities
         entityTrackerState.tick();
 
-        connection.eventBus().call(new BotPostTickEvent(connection));
+        connection.eventBus().call(new BotPostEntityTickEvent(connection));
+        tickHookState.callHooks(TickHookContext.HookType.POST_ENTITY_TICK);
     }
 
     private void tickCoolDowns() {
