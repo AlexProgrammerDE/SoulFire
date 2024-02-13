@@ -1,0 +1,6 @@
+version: "1.0"
+
+profile:
+  name: qodana.recommended
+
+linter: jetbrains/qodana-jvm-community:latest

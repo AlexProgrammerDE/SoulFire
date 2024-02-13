@@ -1,4 +1,5 @@
 plugins {
+    idea
     `java-library`
     `maven-publish`
     id("sf.license-conventions")

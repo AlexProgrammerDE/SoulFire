@@ -1,7 +1,6 @@
 import com.google.protobuf.gradle.id
 
 plugins {
-    idea
     id("sf.java-conventions")
     alias(libs.plugins.protobuf)
 }
@@ -32,7 +31,6 @@ protobuf {
         }
     }
 }
-
 
 tasks.withType<Checkstyle> {
     exclude("**/net/pistonmaster/soulfire/grpc/generated**")
