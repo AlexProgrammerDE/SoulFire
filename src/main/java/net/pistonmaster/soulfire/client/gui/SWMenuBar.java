@@ -26,6 +26,7 @@ import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDarker
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicIJTheme;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import com.formdev.flatlaf.util.SystemInfo;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.client.gui.libs.JFXFileHelper;
 import net.pistonmaster.soulfire.client.gui.popups.AboutPopup;
@@ -110,11 +111,14 @@ public class SWMenuBar extends JMenuBar {
 
         fileMenu.add(saveProfile);
 
-        fileMenu.addSeparator();
+        if (!SystemInfo.isMacOS) {
+            fileMenu.addSeparator();
 
-        var exit = new JMenuItem("Exit");
-        exit.addActionListener(e -> guiManager.shutdown());
-        fileMenu.add(exit);
+            var exit = new JMenuItem("Exit");
+            exit.addActionListener(e -> guiManager.shutdown());
+            fileMenu.add(exit);
+        }
+
         add(fileMenu);
 
         var viewMenu = new JMenu("View");
@@ -168,11 +172,14 @@ public class SWMenuBar extends JMenuBar {
         }));
         helpMenu.add(saveLogs);
 
-        helpMenu.addSeparator();
+        if (!SystemInfo.isMacOS) {
+            helpMenu.addSeparator();
 
-        var about = new JMenuItem("About");
-        about.addActionListener(e -> showAboutDialog());
-        helpMenu.add(about);
+            var about = new JMenuItem("About");
+            about.addActionListener(e -> showAboutDialog());
+            helpMenu.add(about);
+        }
+
         add(helpMenu);
 
         var desktop = Desktop.getDesktop();

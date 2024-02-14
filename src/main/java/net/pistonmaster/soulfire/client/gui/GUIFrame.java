@@ -81,9 +81,14 @@ public class GUIFrame extends JFrame {
     }
 
     public void initComponents(Injector injector) {
-        if (SystemInfo.isMacOS) {
+        if (SystemInfo.isMacOS && SystemInfo.isMacFullWindowContentSupported) {
+            var rootPane = getRootPane();
+            // expand window content into window title bar and make title bar transparent
+            rootPane.putClientProperty("apple.awt.fullWindowContent", true);
+            rootPane.putClientProperty("apple.awt.transparentTitleBar", true);
+
             // Hide window title because we want to avoid dark-mode name issues
-            getRootPane().putClientProperty("apple.awt.windowTitleVisible", false);
+            rootPane.putClientProperty("apple.awt.windowTitleVisible", false);
         }
 
         setResizable(true);
