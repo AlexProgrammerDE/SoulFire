@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.client.gui.navigation;
 
 import com.google.gson.JsonPrimitive;
+import net.lenni0451.commons.swing.GBC;
 import net.pistonmaster.soulfire.client.gui.libs.JMinMaxHelper;
 import net.pistonmaster.soulfire.client.gui.libs.SwingTextUtils;
 import net.pistonmaster.soulfire.client.settings.SettingsManager;
@@ -38,7 +39,7 @@ public class GeneratedPanel extends NavigationItem {
     public GeneratedPanel(SettingsManager settingsManager, ClientPluginSettingsPage settingsPage) {
         this.settingsPage = settingsPage;
 
-        setLayout(new GridLayout(0, 2));
+        setLayout(new GridBagLayout());
 
         addComponents(this, settingsPage, settingsManager);
     }
@@ -67,18 +68,17 @@ public class GeneratedPanel extends NavigationItem {
         return spinner;
     }
 
-    public static void addComponents(JPanel panel, ClientPluginSettingsPage settingsPage, SettingsManager settingsManager) {
+    public static int addComponents(JPanel panel, ClientPluginSettingsPage settingsPage, SettingsManager settingsManager) {
+        int row = 0;
         for (var settingEntry : settingsPage.getEntriesList()) {
             switch (settingEntry.getValueCase()) {
                 case SINGLE -> {
                     var singleEntry = settingEntry.getSingle();
                     var propertyKey = new PropertyKey(settingsPage.getNamespace(), singleEntry.getKey());
 
-                    var label = new JLabel(singleEntry.getUiName());
-                    label.setToolTipText(singleEntry.getDescription());
-                    panel.add(label);
+                    GBC.create(panel).grid(0, row).anchor(GBC.LINE_START).add(new JLabel(singleEntry.getUiName()), label -> label.setToolTipText(singleEntry.getDescription()));
                     var settingType = singleEntry.getType();
-                    panel.add(switch (settingType.getValueCase()) {
+                    Component component = switch (settingType.getValueCase()) {
                         case STRING -> {
                             var stringEntry = settingType.getString();
                             var textField = stringEntry.getSecret() ? new JPasswordField(stringEntry.getDef())
@@ -125,35 +125,32 @@ public class GeneratedPanel extends NavigationItem {
 
                             yield comboBox;
                         }
-                        case VALUE_NOT_SET ->
-                                throw new IllegalStateException("Unexpected value: " + settingType.getValueCase());
-                    });
+                        case VALUE_NOT_SET -> throw new IllegalStateException("Unexpected value: " + settingType.getValueCase());
+                    };
+                    GBC.create(panel).grid(1, row++).insets(0, 10, 0, 0).fill(GBC.HORIZONTAL).weightx(1).add(component);
                 }
                 case MINMAXPAIR -> {
                     var minMaxEntry = settingEntry.getMinMaxPair();
 
                     var minPropertyKey = new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMin().getKey());
                     var min = minMaxEntry.getMin();
-                    var minLabel = new JLabel(min.getUiName());
-                    minLabel.setToolTipText(min.getDescription());
-                    panel.add(minLabel);
+                    GBC.create(panel).grid(0, row).anchor(GBC.LINE_START).add(new JLabel(min.getUiName()), label -> label.setToolTipText(min.getDescription()));
                     var minSpinner = createIntObject(minPropertyKey, settingsManager, min.getIntSetting());
-                    panel.add(minSpinner);
+                    GBC.create(panel).grid(1, row++).insets(0, 10, 0, 0).fill(GBC.HORIZONTAL).weightx(1).add(minSpinner);
 
                     var maxPropertyKey = new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMax().getKey());
                     var max = minMaxEntry.getMax();
-                    var maxLabel = new JLabel(max.getUiName());
-                    maxLabel.setToolTipText(max.getDescription());
-                    panel.add(maxLabel);
+                    GBC.create(panel).grid(0, row).anchor(GBC.LINE_START).add(new JLabel(max.getUiName()), label -> label.setToolTipText(max.getDescription()));
                     var maxSpinner = createIntObject(maxPropertyKey, settingsManager, max.getIntSetting());
-                    panel.add(maxSpinner);
+                    GBC.create(panel).grid(1, row++).insets(0, 10, 0, 0).fill(GBC.HORIZONTAL).weightx(1).add(maxSpinner);
 
                     JMinMaxHelper.applyLink(minSpinner, maxSpinner);
                 }
-                case VALUE_NOT_SET ->
-                        throw new IllegalStateException("Unexpected value: " + settingEntry.getValueCase());
+                case VALUE_NOT_SET -> throw new IllegalStateException("Unexpected value: " + settingEntry.getValueCase());
             }
         }
+        GBC.fillVerticalSpace(panel);
+        return row + 1;
     }
 
     @Override
