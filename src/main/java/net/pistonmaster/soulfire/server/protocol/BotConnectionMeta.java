@@ -27,7 +27,6 @@ import net.pistonmaster.soulfire.proxy.SWProxy;
 import net.pistonmaster.soulfire.server.protocol.bot.BotControlAPI;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
-import net.raphimc.vialoader.util.VersionEnum;
 
 import java.io.IOException;
 
@@ -58,9 +57,5 @@ public class BotConnectionMeta {
         } catch (IOException e) {
             session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
         }
-    }
-
-    public VersionEnum versionEnum() {
-        return VersionEnum.fromProtocolVersion(protocolVersion);
     }
 }

@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.server.plugins;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,6 @@ import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInit
 import net.pistonmaster.soulfire.server.protocol.bot.state.TickHookContext;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.*;
-import net.raphimc.vialoader.util.VersionEnum;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -93,7 +93,7 @@ public class KillAura implements InternalExtension {
                     control.swingArm();
                 }
 
-                if (bot.meta().versionEnum().isOlderThan(VersionEnum.r1_9)
+                if (bot.meta().protocolVersion().olderThan(ProtocolVersion.v1_9)
                         || bot.settingsHolder().get(KillAuraSettings.IGNORE_COOLDOWN)) {
                     var randomTickDelay = ThreadLocalRandom.current().nextDouble(
                             bot.settingsHolder().get(KillAuraSettings.ATTACK_DELAY_TICKS.min()),

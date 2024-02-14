@@ -22,6 +22,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +33,6 @@ import net.pistonmaster.soulfire.server.protocol.bot.movement.ControlState;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.PhysicsData;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.PlayerMovementState;
 import net.pistonmaster.soulfire.server.util.MathHelper;
-import net.raphimc.vialoader.util.VersionEnum;
 
 import java.util.UUID;
 
@@ -126,8 +126,8 @@ public class ClientEntity extends Entity {
     @Override
     public double getEyeHeight() {
         if (this.controlState.sneaking()) {
-            return sessionDataManager.connection().meta().versionEnum()
-                    .isNewerThanOrEqualTo(VersionEnum.r1_14) ? 1.27F : 1.54F;
+            return sessionDataManager.connection().meta().protocolVersion()
+                    .newerThanOrEquals(ProtocolVersion.v1_14) ? 1.27F : 1.54F;
         } else {
             return 1.62F;
         }

@@ -19,9 +19,10 @@ package net.pistonmaster.soulfire.server.viaversion;
 
 import com.viaversion.viaversion.api.platform.ViaInjector;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.libs.fastutil.ints.IntLinkedOpenHashSet;
-import com.viaversion.viaversion.libs.fastutil.ints.IntSortedSet;
 import com.viaversion.viaversion.libs.gson.JsonObject;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
+
+import java.util.SortedSet;
 
 public class SWViaInjector implements ViaInjector {
     @Override
@@ -33,17 +34,17 @@ public class SWViaInjector implements ViaInjector {
     }
 
     @Override
-    public IntSortedSet getServerProtocolVersions() {
+    public SortedSet<ProtocolVersion> getServerProtocolVersions() {
         // On the client-side we can connect to any server version
-        IntSortedSet versions = new IntLinkedOpenHashSet();
-        versions.add(ProtocolVersion.v1_7_1.getOriginalVersion());
-        versions.add(SWVersionConstants.CURRENT_PROTOCOL_VERSION.getOriginalVersion());
+        SortedSet<ProtocolVersion> versions = new ObjectLinkedOpenHashSet<>();
+        versions.add(ProtocolVersion.v1_7_1);
+        versions.add(SWVersionConstants.CURRENT_PROTOCOL_VERSION);
         return versions;
     }
 
     @Override
-    public int getServerProtocolVersion() {
-        return getServerProtocolVersions().firstInt();
+    public ProtocolVersion getServerProtocolVersion() {
+        return getServerProtocolVersions().first();
     }
 
     @Override
