@@ -151,7 +151,7 @@ public class ViaClientSession extends TcpSession {
                     }
 
                     // This monitors the traffic
-                    var trafficHandler = new GlobalTrafficShapingHandler(eventLoopGroup.next(), 0, 0, 1000);
+                    var trafficHandler = new GlobalTrafficShapingHandler(channel.eventLoop(), 0, 0, 1000);
                     pipeline.addLast("traffic", trafficHandler);
                     setFlag(SWProtocolConstants.TRAFFIC_HANDLER, trafficHandler);
 
