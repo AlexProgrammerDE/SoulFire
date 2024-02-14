@@ -22,6 +22,8 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
+import com.formdev.flatlaf.fonts.inter.FlatInterFont;
+import com.formdev.flatlaf.util.FontUtils;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,6 +58,10 @@ public class ThemeUtil {
 
             UIManager.setLookAndFeel(theme);
 
+            var font = UIManager.getFont("defaultFont");
+            var newFont = FontUtils.getCompositeFont(FlatInterFont.FAMILY, font.getStyle(), font.getSize());
+            UIManager.put("defaultFont", newFont);
+
             FlatLaf.updateUI();
 
             FlatAnimatedLafChange.hideSnapshotWithAnimation();
@@ -70,6 +76,7 @@ public class ThemeUtil {
         ToolTipManager.sharedInstance().setInitialDelay(100);
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
         UIManager.put("PasswordField.showRevealButton", true);
+        FlatInterFont.install();
 
         if (SystemInfo.isMacOS) {
             // Use top screen menu bar on macOS
