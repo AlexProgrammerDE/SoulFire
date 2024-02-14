@@ -20,9 +20,9 @@ package net.pistonmaster.soulfire.server.viaversion.providers;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.soulfire.server.viaversion.StorableSession;
-import net.raphimc.viabedrock.netty.AesEncryption;
-import net.raphimc.viabedrock.netty.SnappyCompression;
-import net.raphimc.viabedrock.netty.ZLibCompression;
+import net.raphimc.viabedrock.api.io.compression.ProtocolCompression;
+import net.raphimc.viabedrock.netty.AesEncryptionCodec;
+import net.raphimc.viabedrock.netty.CompressionCodec;
 import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
 
 import javax.crypto.SecretKey;
@@ -30,22 +30,16 @@ import java.util.Objects;
 
 public class SWViaNettyPipelineProvider extends NettyPipelineProvider {
     @Override
-    public void enableCompression(UserConnection user, int threshold, int algorithm) {
+    public void enableCompression(UserConnection user, ProtocolCompression protocolCompression) {
         var clientSession = Objects.requireNonNull(user.get(StorableSession.class)).session();
         var channel = clientSession.getChannel();
 
-        try {
-            if (channel.pipeline().get(ViaClientSession.COMPRESSION_NAME) != null) {
-                channel.pipeline().remove(ViaClientSession.COMPRESSION_NAME);
-            }
+        if (channel.pipeline().names().contains(ViaClientSession.COMPRESSION_NAME)) {
+            throw new IllegalStateException("Compression already enabled");
+        }
 
-            switch (algorithm) {
-                case 0 ->
-                        channel.pipeline().addBefore(ViaClientSession.SIZER_NAME, ViaClientSession.COMPRESSION_NAME, new ZLibCompression());
-                case 1 ->
-                        channel.pipeline().addBefore(ViaClientSession.SIZER_NAME, ViaClientSession.COMPRESSION_NAME, new SnappyCompression());
-                default -> throw new IllegalStateException("Invalid compression algorithm: " + algorithm);
-            }
+        try {
+            channel.pipeline().addBefore(ViaClientSession.SIZER_NAME, ViaClientSession.COMPRESSION_NAME, new CompressionCodec(protocolCompression));
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
@@ -56,12 +50,12 @@ public class SWViaNettyPipelineProvider extends NettyPipelineProvider {
         var clientSession = Objects.requireNonNull(user.get(StorableSession.class)).session();
         final var channel = clientSession.getChannel();
 
-        try {
-            if (channel.pipeline().get(ViaClientSession.ENCRYPTION_NAME) != null) {
-                channel.pipeline().remove(ViaClientSession.ENCRYPTION_NAME);
-            }
+        if (channel.pipeline().names().contains(ViaClientSession.ENCRYPTION_NAME)) {
+            throw new IllegalStateException("Encryption already enabled");
+        }
 
-            channel.pipeline().addAfter("vb-frame-encapsulation", ViaClientSession.ENCRYPTION_NAME, new AesEncryption(key));
+        try {
+            channel.pipeline().addAfter("vb-frame-encapsulation", ViaClientSession.ENCRYPTION_NAME, new AesEncryptionCodec(key));
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

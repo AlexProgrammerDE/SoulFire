@@ -99,22 +99,29 @@ public record ProfileDataStructure(
         public MinecraftAccount deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             var authType = context.<AuthType>deserialize(json.getAsJsonObject().get("authType"), AuthType.class);
 
-            return new GsonBuilder()
-                    .registerTypeAdapter(AccountData.class, new AccountDataAdapter(authType))
-                    .create()
-                    .fromJson(json, MinecraftAccount.class);
+            return createGson(authType).fromJson(json, MinecraftAccount.class);
         }
 
         @Override
         public JsonElement serialize(MinecraftAccount src, Type typeOfSrc, JsonSerializationContext context) {
-            // Only deserialization needs authType to know the interface class. We don't need it for serialization.
-            return context.serialize(src);
+            return createGson(src.authType()).toJsonTree(src, MinecraftAccount.class);
         }
 
-        private record AccountDataAdapter(AuthType authType) implements JsonDeserializer<AccountData> {
+        private Gson createGson(AuthType authType) {
+            return new GsonBuilder()
+                    .registerTypeAdapter(AccountData.class, new AccountDataAdapter(authType))
+                    .create();
+        }
+
+        private record AccountDataAdapter(AuthType authType) implements JsonDeserializer<AccountData>, JsonSerializer<AccountData> {
             @Override
             public AccountData deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                return context.deserialize(json, authType.accountDataClass());
+                return PROFILE_GSON.fromJson(json, authType.accountDataClass());
+            }
+
+            @Override
+            public JsonElement serialize(AccountData src, Type typeOfSrc, JsonSerializationContext context) {
+                return PROFILE_GSON.toJsonTree(src, authType.accountDataClass());
             }
         }
     }
