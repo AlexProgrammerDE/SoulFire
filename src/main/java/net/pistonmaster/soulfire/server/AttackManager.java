@@ -147,11 +147,8 @@ public class AttackManager {
             proxyUseMap.put(proxy, 0);
         }
 
-        // Prepare an event loop group with enough threads for the attack
-        var threads = botAmount;
-        threads *= 2; // We need a monitor thread for each bot
-
-        var attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(threads, String.format("Attack-%d", id));
+        // Prepare an event loop group for the attack
+        var attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(0, String.format("Attack-%d", id));
 
         var protocolVersion = settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
         var isBedrock = SWVersionConstants.isBedrock(protocolVersion);

@@ -45,6 +45,7 @@ import net.pistonmaster.soulfire.server.viaversion.StorableSession;
 import net.raphimc.viabedrock.api.protocol.BedrockBaseProtocol;
 import net.raphimc.viabedrock.netty.BatchLengthCodec;
 import net.raphimc.viabedrock.netty.PacketEncapsulationCodec;
+import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viabedrock.protocol.storage.AuthChainData;
 import net.raphimc.vialegacy.api.protocol.PreNettyBaseProtocol;
 import net.raphimc.vialegacy.netty.PreNettyLengthCodec;
@@ -123,13 +124,15 @@ public class ViaClientSession extends TcpSession {
 
             if (isBedrock) {
                 bootstrap
-                        .option(RakChannelOption.RAK_PROTOCOL_VERSION, 11)
+                        .option(RakChannelOption.RAK_PROTOCOL_VERSION, ProtocolConstants.BEDROCK_RAKNET_PROTOCOL_VERSION)
                         .option(RakChannelOption.RAK_CONNECT_TIMEOUT, 4_000L)
                         .option(RakChannelOption.RAK_SESSION_TIMEOUT, 30_000L)
                         .option(RakChannelOption.RAK_GUID, ThreadLocalRandom.current().nextLong());
             } else {
                 bootstrap
-                        .option(ChannelOption.TCP_NODELAY, true);
+                        .option(ChannelOption.TCP_NODELAY, true)
+                        .option(ChannelOption.SO_KEEPALIVE, true)
+                        .option(ChannelOption.TCP_FASTOPEN_CONNECT, true);
             }
 
             bootstrap.handler(new ChannelInitializer<>() {
@@ -137,10 +140,6 @@ public class ViaClientSession extends TcpSession {
                 public void initChannel(Channel channel) {
                     var protocol = getPacketProtocol();
                     protocol.newClientSession(ViaClientSession.this);
-
-                    if (!isBedrock) {
-                        channel.config().setOption(ChannelOption.TCP_FASTOPEN_CONNECT, true);
-                    }
 
                     var pipeline = channel.pipeline();
 
