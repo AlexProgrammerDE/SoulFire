@@ -33,13 +33,17 @@ public class ThemeUtil {
     private ThemeUtil() {
     }
 
+    public static String getThemeClassName() {
+        return GUIClientProps.getString("theme", FlatDarculaLaf.class.getName());
+    }
+
     /**
      * Apply the current theme that is set in the settings.
      * This will also save the theme to the settings.
      * You need to invoke SwingUtilities.updateComponentTreeUI(frame); after this method.
      */
     public static void setLookAndFeel() {
-        var themeSettings = GUIClientProps.getString("theme", FlatDarculaLaf.class.getName());
+        var themeSettings = getThemeClassName();
         if (themeSettings.equals(UIManager.getLookAndFeel().getClass().getName())) {
             return;
         }

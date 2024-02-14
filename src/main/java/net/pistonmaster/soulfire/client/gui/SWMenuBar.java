@@ -119,14 +119,20 @@ public class SWMenuBar extends JMenuBar {
 
         var viewMenu = new JMenu("View");
         var themeSelector = new JMenu("Theme");
+        var updateCallbacks = new ArrayList<Runnable>();
         for (var theme : THEMES) {
-            var themeItem = new JMenuItem(theme.getSimpleName());
+            var themeItem = new JRadioButtonMenuItem(theme.getSimpleName());
+            updateCallbacks.add(() -> {
+                themeItem.setSelected(theme.getName().equals(ThemeUtil.getThemeClassName()));
+            });
             themeItem.addActionListener(e -> {
                 GUIClientProps.setString("theme", theme.getName());
                 SwingUtilities.invokeLater(ThemeUtil::setLookAndFeel);
+                updateCallbacks.forEach(Runnable::run);
             });
             themeSelector.add(themeItem);
         }
+        updateCallbacks.forEach(Runnable::run);
         viewMenu.add(themeSelector);
 
         /*
