@@ -38,6 +38,7 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import java.awt.*;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,10 +68,12 @@ public class SWMenuBar extends JMenuBar {
         THEMES = List.copyOf(tempThemes);
     }
 
+    private final GUIManager guiManager;
     private final GUIFrame guiFrame;
 
     @Inject
-    public SWMenuBar(GUIManager guiManager, GUIFrame guiFrame) {
+    public SWMenuBar(GUIManager guiManager, LogPanel logPanel, GUIFrame guiFrame) {
+        this.guiManager = guiManager;
         this.guiFrame = guiFrame;
 
         var fileMenu = new JMenu("File");
@@ -146,6 +149,21 @@ public class SWMenuBar extends JMenuBar {
 
         helpMenu.addSeparator();
 
+        var saveLogs = new JMenuItem("Save logs");
+        saveLogs.addActionListener(listener -> JFXFileHelper.showSaveDialog(SWPathConstants.DATA_FOLDER, Map.of(
+                "Log Files", "log"
+        ), "log.txt").ifPresent(file -> {
+            try {
+                Files.writeString(file, logPanel.messageLogPanel().getLogs());
+                log.info("Saved log to: {}", file);
+            } catch (IOException e) {
+                log.error("Failed to save log!", e);
+            }
+        }));
+        helpMenu.add(saveLogs);
+
+        helpMenu.addSeparator();
+
         var about = new JMenuItem("About");
         about.addActionListener(e -> showAboutDialog());
         helpMenu.add(about);
@@ -175,14 +193,6 @@ public class SWMenuBar extends JMenuBar {
     }
 
     private void openHome() {
-        if (!Desktop.isDesktopSupported()) {
-            return;
-        }
-
-        try {
-            Desktop.getDesktop().browse(SWPathConstants.DATA_FOLDER.toUri());
-        } catch (IOException e) {
-            log.warn("Failed to open home page!", e);
-        }
+        guiManager.browse(SWPathConstants.DATA_FOLDER.toUri());
     }
 }

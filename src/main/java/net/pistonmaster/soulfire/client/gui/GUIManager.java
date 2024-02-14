@@ -34,6 +34,7 @@ import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.net.URI;
 import java.nio.file.Files;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -123,5 +124,20 @@ public class GUIManager {
 
     public void shutdown() {
         shutdownManager.shutdownSoftware(true);
+    }
+
+    public void browse(URI uri) {
+        if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            log.error("Desktop not supported!");
+            return;
+        }
+
+        threadPool.submit(() -> {
+            try {
+                Desktop.getDesktop().browse(uri);
+            } catch (IOException e) {
+                log.error("Failed to open browser!", e);
+            }
+        });
     }
 }

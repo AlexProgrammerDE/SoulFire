@@ -52,11 +52,9 @@ public class LogPanel extends JPanel {
         guiManager.threadPool().submit(() -> {
             try (var context = Context.current().withCancellation()) {
                 guiManager.rpcClient().contexts().add(context);
-                context.run(() -> {
-                    guiManager.rpcClient().logStubBlocking().subscribe(request).forEachRemaining(response -> {
-                        messageLogPanel.log(response.getMessage() + "\n");
-                    });
-                });
+                context.run(() -> guiManager.rpcClient().logStubBlocking().subscribe(request).forEachRemaining(response -> {
+                    messageLogPanel.log(response.getMessage() + "\n");
+                }));
             }
         });
 

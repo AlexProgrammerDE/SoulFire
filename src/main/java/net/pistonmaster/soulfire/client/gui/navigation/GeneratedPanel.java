@@ -68,8 +68,8 @@ public class GeneratedPanel extends NavigationItem {
         return spinner;
     }
 
-    public static int addComponents(JPanel panel, ClientPluginSettingsPage settingsPage, SettingsManager settingsManager) {
-        int row = 0;
+    public static void addComponents(JPanel panel, ClientPluginSettingsPage settingsPage, SettingsManager settingsManager) {
+        var row = 0;
         for (var settingEntry : settingsPage.getEntriesList()) {
             switch (settingEntry.getValueCase()) {
                 case SINGLE -> {
@@ -149,8 +149,8 @@ public class GeneratedPanel extends NavigationItem {
                 case VALUE_NOT_SET -> throw new IllegalStateException("Unexpected value: " + settingEntry.getValueCase());
             }
         }
+
         GBC.fillVerticalSpace(panel);
-        return row + 1;
     }
 
     @Override

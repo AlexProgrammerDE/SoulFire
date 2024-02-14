@@ -53,28 +53,20 @@ public class SettingsManager {
     }
 
     public void loadProfile(Path path) throws IOException {
-        try {
-            SettingsHolder.createSettingsHolder(ProfileDataStructure.deserialize(Files.readString(path)),
-                    listeners, accounts -> {
-                        accountRegistry.setAccounts(accounts);
-                        accountRegistry.callLoadHooks();
-                    }, proxies -> {
-                        proxyRegistry.setProxies(proxies);
-                        proxyRegistry.callLoadHooks();
-                    });
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+        SettingsHolder.createSettingsHolder(ProfileDataStructure.deserialize(Files.readString(path)),
+                listeners, accounts -> {
+                    accountRegistry.setAccounts(accounts);
+                    accountRegistry.callLoadHooks();
+                }, proxies -> {
+                    proxyRegistry.setProxies(proxies);
+                    proxyRegistry.callLoadHooks();
+                });
     }
 
     public void saveProfile(Path path) throws IOException {
         Files.createDirectories(path.getParent());
 
-        try {
-            Files.writeString(path, exportSettings());
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+        Files.writeString(path, exportSettings());
     }
 
     public String exportSettings() {

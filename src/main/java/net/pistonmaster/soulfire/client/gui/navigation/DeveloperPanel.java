@@ -18,19 +18,12 @@
 package net.pistonmaster.soulfire.client.gui.navigation;
 
 import lombok.extern.slf4j.Slf4j;
-import net.lenni0451.commons.swing.GBC;
 import net.pistonmaster.soulfire.client.gui.GUIManager;
 import net.pistonmaster.soulfire.client.gui.LogPanel;
-import net.pistonmaster.soulfire.client.gui.libs.JFXFileHelper;
 import net.pistonmaster.soulfire.util.BuiltinSettingsConstants;
-import net.pistonmaster.soulfire.util.SWPathConstants;
 
 import javax.inject.Inject;
-import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Map;
 
 @Slf4j
 public class DeveloperPanel extends NavigationItem {
@@ -38,23 +31,7 @@ public class DeveloperPanel extends NavigationItem {
     public DeveloperPanel(GUIManager guiManager, LogPanel logPanel, CardsContainer cardsContainer) {
         setLayout(new GridBagLayout());
 
-        int row = GeneratedPanel.addComponents(this, cardsContainer.getByNamespace(BuiltinSettingsConstants.DEV_SETTINGS_ID), guiManager.settingsManager());
-
-        GBC.create(this).grid(0, row).anchor(GBC.LINE_START).add(new JLabel("Save Log"));
-        GBC.create(this).grid(1, row++).insets(0, 10, 0, 0).fill(GBC.HORIZONTAL).weightx(1).add(() -> {
-            var saveLog = new JButton("Click to save");
-            saveLog.addActionListener(listener -> JFXFileHelper.showSaveDialog(SWPathConstants.DATA_FOLDER, Map.of(
-                    "Log Files", "log"
-            ), "log.txt").ifPresent(file -> {
-                try (var writer = Files.newBufferedWriter(file)) {
-                    writer.write(logPanel.messageLogPanel().getLogs());
-                    log.info("Saved log to: {}", file);
-                } catch (IOException e) {
-                    log.error("Failed to save log!", e);
-                }
-            }));
-            return saveLog;
-        });
+        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace(BuiltinSettingsConstants.DEV_SETTINGS_ID), guiManager.settingsManager());
     }
 
     @Override
