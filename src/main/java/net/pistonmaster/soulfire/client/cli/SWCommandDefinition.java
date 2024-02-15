@@ -25,6 +25,7 @@ import net.pistonmaster.soulfire.builddata.BuildData;
 import net.pistonmaster.soulfire.client.SWTerminalConsole;
 import net.pistonmaster.soulfire.proxy.ProxyType;
 import net.pistonmaster.soulfire.server.viaversion.SWVersionConstants;
+import net.raphimc.vialoader.util.ProtocolVersionList;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -89,7 +90,7 @@ public class SWCommandDefinition implements Callable<Integer> {
             var yesEmoji = "✅";
             var noEmoji = "❌";
 
-            SWVersionConstants.getVersionsSorted().forEach(version -> {
+            ProtocolVersionList.getProtocolsNewToOld().forEach(version -> {
                 var nativeVersion = SWVersionConstants.CURRENT_PROTOCOL_VERSION == version ? yesEmoji : noEmoji;
                 var bedrockVersion = SWVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
                 var javaVersion = !SWVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;

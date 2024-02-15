@@ -17,37 +17,16 @@
  */
 package net.pistonmaster.soulfire.server.viaversion;
 
+import com.github.steveice10.mc.protocol.codec.MinecraftCodec;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.raphimc.viaaprilfools.api.AprilFoolsProtocolVersion;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 
-import java.util.Collections;
-import java.util.List;
-
 public class SWVersionConstants {
-    public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.v1_20_3;
-
-    static {
-        // Initialize all classes
-        doNothing(
-                ProtocolVersion.getProtocols(),
-                LegacyProtocolVersion.PROTOCOLS,
-                BedrockProtocolVersion.PROTOCOLS,
-                AprilFoolsProtocolVersion.PROTOCOLS
-        );
-    }
+    public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.getProtocol(MinecraftCodec.CODEC.getProtocolVersion());
 
     private SWVersionConstants() {
-    }
-
-    @SuppressWarnings("unused")
-    private static void doNothing(Object... objects) {
-        // Do nothing
-    }
-
-    public static List<ProtocolVersion> getVersionsSorted() {
-        return Collections.unmodifiableList(ProtocolVersion.getProtocols());
     }
 
     public static boolean isLegacy(ProtocolVersion version) {

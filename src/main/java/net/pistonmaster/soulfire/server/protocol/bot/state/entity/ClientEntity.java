@@ -127,7 +127,7 @@ public class ClientEntity extends Entity {
     public double getEyeHeight() {
         if (this.controlState.sneaking()) {
             return sessionDataManager.connection().meta().protocolVersion()
-                    .newerThanOrEquals(ProtocolVersion.v1_14) ? 1.27F : 1.54F;
+                    .newerThanOrEqualTo(ProtocolVersion.v1_14) ? 1.27F : 1.54F;
         } else {
             return 1.62F;
         }

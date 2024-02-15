@@ -21,11 +21,14 @@ import com.viaversion.viaversion.ViaAPIBase;
 import com.viaversion.viaversion.api.ViaAPI;
 import com.viaversion.viaversion.api.command.ViaCommandSender;
 import com.viaversion.viaversion.api.configuration.ViaVersionConfig;
+import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.platform.ViaInjector;
 import com.viaversion.viaversion.api.platform.ViaPlatform;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.configuration.AbstractViaConfig;
 import com.viaversion.viaversion.libs.gson.JsonObject;
 import com.viaversion.viaversion.util.VersionInfo;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.EventLoop;
 import io.netty.util.concurrent.Future;
@@ -48,10 +51,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RequiredArgsConstructor
-public class SWViaPlatform implements ViaPlatform<UUID> {
+public class SWViaPlatform implements ViaPlatform<UserConnection> {
     private final Path dataFolder;
     private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaVersion"));
-    private final ViaAPI<UUID> api = new ViaAPIBase<>() {
+    private final ViaAPI<UserConnection> api = new ViaAPIBase<>() {
+        @Override
+        public ProtocolVersion getPlayerProtocolVersion(final UserConnection player) {
+            return player.getProtocolInfo().protocolVersion();
+        }
+
+        @Override
+        public void sendRawPacket(final UserConnection player, final ByteBuf packet) {
+            player.scheduleSendRawPacket(packet);
+        }
     };
     @Getter
     private final ViaInjector injector = new SWViaInjector();
@@ -196,7 +208,7 @@ public class SWViaPlatform implements ViaPlatform<UUID> {
     }
 
     @Override
-    public ViaAPI<UUID> getApi() {
+    public ViaAPI<UserConnection> getApi() {
         return api;
     }
 

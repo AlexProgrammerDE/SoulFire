@@ -17,12 +17,18 @@
  */
 package net.pistonmaster.soulfire.server.settings;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import net.lenni0451.reflect.Classes;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.*;
 import net.pistonmaster.soulfire.server.viaversion.SWVersionConstants;
 import net.pistonmaster.soulfire.util.BuiltinSettingsConstants;
+import net.raphimc.viaaprilfools.api.AprilFoolsProtocolVersion;
+import net.raphimc.viabedrock.api.BedrockProtocolVersion;
+import net.raphimc.vialegacy.api.LegacyProtocolVersion;
+import net.raphimc.vialoader.util.ProtocolVersionList;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BotSettings implements SettingsObject {
@@ -72,7 +78,7 @@ public class BotSettings implements SettingsObject {
             new String[]{"--protocol-version"},
             "Minecraft protocol version to use",
             getProtocolVersionOptions(),
-            0
+            getLatestProtocolVersionIndex()
     );
     public static final IntProperty READ_TIMEOUT = BUILDER.ofInt(
             "read-timeout",
@@ -123,17 +129,16 @@ public class BotSettings implements SettingsObject {
     );
 
     private static ComboProperty.ComboOption[] getProtocolVersionOptions() {
-        return SWVersionConstants.getVersionsSorted().stream().map(version -> {
-            String displayName;
-            if (SWVersionConstants.isBedrock(version)) {
-                displayName = String.format("%s (%s)", version.getName(), version.getVersion() - 1_000_000);
-            } else if (SWVersionConstants.isLegacy(version)) {
-                displayName = String.format("%s (%s)", version.getName(), Math.abs(version.getVersion()) >> 2);
-            } else {
-                displayName = version.toString();
-            }
+        Classes.ensureInitialized(ProtocolVersion.class);
+        Classes.ensureInitialized(LegacyProtocolVersion.class);
+        Classes.ensureInitialized(BedrockProtocolVersion.class);
+        Classes.ensureInitialized(AprilFoolsProtocolVersion.class);
+        return ProtocolVersionList.getProtocolsNewToOld().stream()
+                .map(version -> new ComboProperty.ComboOption(version.getName(), version.toString()))
+                .toArray(ComboProperty.ComboOption[]::new);
+    }
 
-            return new ComboProperty.ComboOption(version.getName(), displayName);
-        }).toArray(ComboProperty.ComboOption[]::new);
+    private static int getLatestProtocolVersionIndex() {
+        return ProtocolVersionList.getProtocolsNewToOld().indexOf(SWVersionConstants.CURRENT_PROTOCOL_VERSION);
     }
 }
