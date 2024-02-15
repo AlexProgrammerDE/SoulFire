@@ -39,6 +39,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Files;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +50,7 @@ import java.util.List;
  */
 @Slf4j
 public class SoulFireBootstrap {
+    public static final Instant START_TIME = Instant.now();
     public static final PluginManager PLUGIN_MANAGER = new JarPluginManager(SFPathConstants.PLUGINS_FOLDER);
 
     static {

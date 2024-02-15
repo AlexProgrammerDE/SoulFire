@@ -69,12 +69,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Getter
@@ -97,7 +99,6 @@ public class SoulFireServer {
     private final RPCServer rpcServer;
     private final ServerSettingsRegistry settingsRegistry;
     private final SecretKey jwtSecretKey;
-    private boolean outdated;
 
     public SoulFireServer(String host, int port) {
         // Register into injector
@@ -171,12 +172,17 @@ public class SoulFireServer {
             manager.onServerLoaded();
         });
 
+        var newVersion = new AtomicReference<String>();
         var updateCheck = CompletableFuture.runAsync(() -> {
             log.info("Checking for updates...");
-            outdated = checkForUpdates();
+            newVersion.set(checkForUpdates());
         });
 
         CompletableFuture.allOf(rpcServerStart, viaStart, updateCheck).join();
+
+        if (newVersion.get() != null) {
+            log.warn("SoulFire is outdated! Current version: {}, latest version: {}", BuildData.VERSION, newVersion.get());
+        }
 
         registerInternalServerExtensions();
         registerServerExtensions();
@@ -192,7 +198,9 @@ public class SoulFireServer {
                 .addClass(AccountSettings.class, "Account Settings", true)
                 .addClass(ProxySettings.class, "Proxy Settings", true)));
 
-        log.info("Finished loading!");
+        log.info("Finished loading! (Took {}ms)", Duration.between(
+                SoulFireBootstrap.START_TIME, Instant.now()
+        ).toMillis());
     }
 
     private static void registerInternalServerExtensions() {
@@ -215,10 +223,10 @@ public class SoulFireServer {
                 .forEach(SoulFireAPI::registerServerExtension);
     }
 
-    private static boolean checkForUpdates() {
+    private static String checkForUpdates() {
         if (Boolean.getBoolean("soulfire.disable-updates")) {
             log.info("Skipping update check because of system property");
-            return false;
+            return null;
         }
 
         try {
@@ -231,7 +239,7 @@ public class SoulFireServer {
 
             if (connection.getResponseCode() != 200) {
                 log.warn("Failed to check for updates: {}", connection.getResponseCode());
-                return false;
+                return null;
             }
 
             JsonObject response;
@@ -241,14 +249,13 @@ public class SoulFireServer {
 
             var latestVersion = response.get("tag_name").getAsString();
             if (VersionComparator.isNewer(BuildData.VERSION, latestVersion)) {
-                log.warn("SoulFire is outdated! Current version: {}, latest version: {}", BuildData.VERSION, latestVersion);
-                return true;
+                return latestVersion;
             }
         } catch (IOException e) {
             log.warn("Failed to check for updates", e);
         }
 
-        return false;
+        return null;
     }
 
     @SuppressWarnings("UnstableApiUsage")
