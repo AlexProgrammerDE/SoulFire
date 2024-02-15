@@ -4,9 +4,11 @@ plugins {
     alias(libs.plugins.jmh)
 }
 
+val mavenVersion: String by project
+
 allprojects {
     group = "net.pistonmaster"
-    version = "1.6.0-SNAPSHOT"
+    version = mavenVersion
     description = "Advanced Minecraft Server-Stresser Tool."
 
     // Uppercase all artifacts
