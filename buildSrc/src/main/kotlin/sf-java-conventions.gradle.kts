@@ -2,7 +2,7 @@ plugins {
     idea
     `java-library`
     `maven-publish`
-    id("sf.license-conventions")
+    id("sf-license-conventions")
     id("net.kyori.indra")
     id("net.kyori.indra.publishing")
     id("net.kyori.indra.git")

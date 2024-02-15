@@ -1,7 +1,7 @@
 import com.google.protobuf.gradle.id
 
 plugins {
-    id("sf.java-conventions")
+    id("sf-java-conventions")
     alias(libs.plugins.protobuf)
 }
 
