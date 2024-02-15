@@ -16,16 +16,10 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
       - name: Build with Gradle
-        run: ./gradlew build
+        uses: gradle/gradle-build-action@v3
+        with:
+          arguments: build test --stacktrace --scan
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
