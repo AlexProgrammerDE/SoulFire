@@ -25,9 +25,7 @@ jobs:
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          # Artifact name
           name: SoulFire
-          # A file, directory or wildcard pattern that describes what to upload
           path: |
             build/libs/SoulFire-*.jar
             !build/libs/SoulFire-*-unshaded.jar
@@ -51,3 +49,9 @@ jobs:
         run: |
           projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
           jpackage --app-version $projectVersion --main-jar SoulFire-$projectVersion.jar --verbose "@jpackage.cfg" "@jpackage-linux.cfg"
+      - name: Upload installer
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-installer
+          path: |
+            build/distributions/*
