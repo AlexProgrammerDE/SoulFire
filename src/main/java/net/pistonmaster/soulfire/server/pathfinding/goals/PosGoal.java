@@ -18,12 +18,12 @@
 package net.pistonmaster.soulfire.server.pathfinding.goals;
 
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
 
-public record PosGoal(SWVec3i goal) implements GoalScorer {
+public record PosGoal(SFVec3i goal) implements GoalScorer {
     public PosGoal(int x, int y, int z) {
-        this(SWVec3i.from(x, y, z));
+        this(SFVec3i.from(x, y, z));
     }
 
     @Override

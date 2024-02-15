@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.Costs;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.execution.BlockBreakAction;
 import net.pistonmaster.soulfire.server.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.BlockDirection;
@@ -32,8 +32,8 @@ import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.Movem
 import java.util.List;
 
 public final class DownMovement extends GraphAction implements Cloneable {
-    private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
-    private final SWVec3i targetToMineBlock;
+    private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
+    private final SFVec3i targetToMineBlock;
     @Getter
     @Setter
     private MovementMiningCost blockBreakCosts;
@@ -45,12 +45,12 @@ public final class DownMovement extends GraphAction implements Cloneable {
         this.targetToMineBlock = FEET_POSITION_RELATIVE_BLOCK.sub(0, 1, 0);
     }
 
-    public SWVec3i blockToBreak() {
+    public SFVec3i blockToBreak() {
         return targetToMineBlock;
     }
 
-    public List<SWVec3i> listSafetyCheckBlocks() {
-        var requiredFreeBlocks = new ObjectArrayList<SWVec3i>();
+    public List<SFVec3i> listSafetyCheckBlocks() {
+        var requiredFreeBlocks = new ObjectArrayList<SFVec3i>();
 
         // Falls one block
         requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0));

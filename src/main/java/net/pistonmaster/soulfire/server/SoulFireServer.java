@@ -47,18 +47,18 @@ import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInit
 import net.pistonmaster.soulfire.server.data.TranslationMapper;
 import net.pistonmaster.soulfire.server.grpc.RPCServer;
 import net.pistonmaster.soulfire.server.plugins.*;
-import net.pistonmaster.soulfire.server.protocol.packet.SWClientboundStatusResponsePacket;
+import net.pistonmaster.soulfire.server.protocol.packet.SFClientboundStatusResponsePacket;
 import net.pistonmaster.soulfire.server.settings.AccountSettings;
 import net.pistonmaster.soulfire.server.settings.BotSettings;
 import net.pistonmaster.soulfire.server.settings.DevSettings;
 import net.pistonmaster.soulfire.server.settings.ProxySettings;
 import net.pistonmaster.soulfire.server.settings.lib.ServerSettingsRegistry;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
-import net.pistonmaster.soulfire.server.util.SWLogAppender;
+import net.pistonmaster.soulfire.server.util.SFLogAppender;
 import net.pistonmaster.soulfire.server.util.VersionComparator;
-import net.pistonmaster.soulfire.server.viaversion.SWViaLoader;
+import net.pistonmaster.soulfire.server.viaversion.SFViaLoader;
 import net.pistonmaster.soulfire.server.viaversion.platform.*;
-import net.pistonmaster.soulfire.util.SWPathConstants;
+import net.pistonmaster.soulfire.util.SFPathConstants;
 import net.pistonmaster.soulfire.util.ShutdownManager;
 import org.apache.logging.log4j.LogManager;
 
@@ -72,6 +72,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -91,16 +92,12 @@ public class SoulFireServer {
             .create();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final Map<String, String> serviceServerConfig = new HashMap<>();
-    private final ServerSettingsRegistry settingsRegistry = new ServerSettingsRegistry()
-            .addClass(BotSettings.class, "Bot Settings", true)
-            .addClass(DevSettings.class, "Dev Settings", true)
-            .addClass(AccountSettings.class, "Account Settings", true)
-            .addClass(ProxySettings.class, "Proxy Settings", true);
-    private final boolean outdated;
+    private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
     private final Int2ObjectMap<AttackManager> attacks = Int2ObjectMaps.synchronize(new Int2ObjectArrayMap<>());
     private final RPCServer rpcServer;
-    private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
+    private final ServerSettingsRegistry settingsRegistry;
     private final SecretKey jwtSecretKey;
+    private boolean outdated;
 
     public SoulFireServer(String host, int port) {
         // Register into injector
@@ -111,9 +108,9 @@ public class SoulFireServer {
 
         injector.register(ShutdownManager.class, shutdownManager);
 
-        var logAppender = new SWLogAppender();
+        var logAppender = new SFLogAppender();
         logAppender.start();
-        injector.register(SWLogAppender.class, logAppender);
+        injector.register(SFLogAppender.class, logAppender);
         ((org.apache.logging.log4j.core.Logger) LogManager.getRootLogger()).addAppender(logAppender);
 
         try {
@@ -124,51 +121,62 @@ public class SoulFireServer {
         }
 
         rpcServer = new RPCServer(host, port, injector, jwtSecretKey);
-        try {
-            rpcServer.start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        var rpcServerStart = CompletableFuture.runAsync(() -> {
+            try {
+                rpcServer.start();
+            } catch (IOException e) {
+                throw new CompletionException(e);
+            }
+        });
 
         log.info("Starting SoulFire v{}...", BuildData.VERSION);
 
         // Override status packet, so we can support any version
         MinecraftCodec.CODEC.getCodec(ProtocolState.STATUS)
                 .registerClientbound(new PacketDefinition<>(0x00,
-                        SWClientboundStatusResponsePacket.class,
-                        new MinecraftPacketSerializer<>(SWClientboundStatusResponsePacket::new)));
+                        SFClientboundStatusResponsePacket.class,
+                        new MinecraftPacketSerializer<>(SFClientboundStatusResponsePacket::new)));
 
-        // Init via
-        var viaPath = SWPathConstants.CONFIG_FOLDER.resolve("ViaVersion");
-        var platform = new SWViaPlatform(viaPath);
+        var viaStart = CompletableFuture.runAsync(() -> {
+            // Init via
+            var viaPath = SFPathConstants.CONFIG_FOLDER.resolve("ViaVersion");
+            var platform = new SFViaPlatform(viaPath);
 
-        Via.init(ViaManagerImpl.builder()
-                .platform(platform)
-                .injector(platform.injector())
-                .loader(new SWViaLoader())
-                .build());
+            Via.init(ViaManagerImpl.builder()
+                    .platform(platform)
+                    .injector(platform.injector())
+                    .loader(new SFViaLoader())
+                    .build());
 
-        platform.init();
+            platform.init();
 
-        // for ViaLegacy
-        Via.getManager().getProtocolManager().setMaxProtocolPathSize(Integer.MAX_VALUE);
-        Via.getManager().getProtocolManager().setMaxPathDeltaIncrease(-1);
-        ((ProtocolManagerImpl) Via.getManager().getProtocolManager()).refreshVersions();
+            // For ViaLegacy
+            Via.getManager().getProtocolManager().setMaxProtocolPathSize(Integer.MAX_VALUE);
+            Via.getManager().getProtocolManager().setMaxPathDeltaIncrease(-1);
+            ((ProtocolManagerImpl) Via.getManager().getProtocolManager()).refreshVersions();
 
-        Via.getManager().addEnableListener(() -> {
-            new SWViaRewind(SWPathConstants.CONFIG_FOLDER.resolve("ViaRewind")).init();
-            new SWViaBackwards(SWPathConstants.CONFIG_FOLDER.resolve("ViaBackwards")).init();
-            new SWViaAprilFools(SWPathConstants.CONFIG_FOLDER.resolve("ViaAprilFools")).init();
-            new SWViaLegacy(SWPathConstants.CONFIG_FOLDER.resolve("ViaLegacy")).init();
-            new SWViaBedrock(SWPathConstants.CONFIG_FOLDER.resolve("ViaBedrock")).init();
+            Via.getManager().addEnableListener(() -> {
+                new SFViaRewind(SFPathConstants.CONFIG_FOLDER.resolve("ViaRewind")).init();
+                new SFViaBackwards(SFPathConstants.CONFIG_FOLDER.resolve("ViaBackwards")).init();
+                new SFViaAprilFools(SFPathConstants.CONFIG_FOLDER.resolve("ViaAprilFools")).init();
+                new SFViaLegacy(SFPathConstants.CONFIG_FOLDER.resolve("ViaLegacy")).init();
+                new SFViaBedrock(SFPathConstants.CONFIG_FOLDER.resolve("ViaBedrock")).init();
+            });
+
+            var manager = (ViaManagerImpl) Via.getManager();
+            manager.init();
+
+            manager.getPlatform().getConf().setCheckForUpdates(false);
+
+            manager.onServerLoaded();
         });
 
-        var manager = (ViaManagerImpl) Via.getManager();
-        manager.init();
+        var updateCheck = CompletableFuture.runAsync(() -> {
+            log.info("Checking for updates...");
+            outdated = checkForUpdates();
+        });
 
-        manager.getPlatform().getConf().setCheckForUpdates(false);
-
-        manager.onServerLoaded();
+        CompletableFuture.allOf(rpcServerStart, viaStart, updateCheck).join();
 
         registerInternalServerExtensions();
         registerServerExtensions();
@@ -177,10 +185,12 @@ public class SoulFireServer {
             serverExtension.onEnable(this);
         }
 
-        SoulFireAPI.postEvent(new SettingsRegistryInitEvent(settingsRegistry));
-
-        log.info("Checking for updates...");
-        outdated = checkForUpdates();
+        SoulFireAPI.postEvent(new SettingsRegistryInitEvent(settingsRegistry = new ServerSettingsRegistry()
+                // Needs Via loaded to have all protocol versions
+                .addClass(BotSettings.class, "Bot Settings", true)
+                .addClass(DevSettings.class, "Dev Settings", true)
+                .addClass(AccountSettings.class, "Account Settings", true)
+                .addClass(ProxySettings.class, "Proxy Settings", true)));
 
         log.info("Finished loading!");
     }

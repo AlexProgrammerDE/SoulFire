@@ -18,7 +18,7 @@
 package net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement;
 
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 
 @RequiredArgsConstructor
 public enum BodyPart {
@@ -32,7 +32,7 @@ public enum BodyPart {
             BodyPart.FEET
     };
 
-    public SWVec3i offset(SWVec3i position) {
+    public SFVec3i offset(SFVec3i position) {
         return switch (this) {
             case FEET -> position;
             case HEAD -> position.add(0, 1, 0);

@@ -35,7 +35,7 @@ public class BotConnectionMeta {
     private final MinecraftAccount minecraftAccount;
     private final ProtocolState targetState;
     private final ProtocolVersion protocolVersion;
-    private final SWSessionService sessionService;
+    private final SFSessionService sessionService;
     @Setter
     private SessionDataManager sessionDataManager;
     @Setter
@@ -46,7 +46,7 @@ public class BotConnectionMeta {
         this.minecraftAccount = minecraftAccount;
         this.targetState = targetState;
         this.protocolVersion = protocolVersion;
-        this.sessionService = minecraftAccount.isPremiumJava() ? new SWSessionService(minecraftAccount.authType(), proxyData) : null;
+        this.sessionService = minecraftAccount.isPremiumJava() ? new SFSessionService(minecraftAccount.authType(), proxyData) : null;
     }
 
     public void joinServerId(String serverId, ViaClientSession session) {

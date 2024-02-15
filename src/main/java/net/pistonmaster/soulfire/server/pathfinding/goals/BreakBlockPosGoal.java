@@ -19,11 +19,11 @@ package net.pistonmaster.soulfire.server.pathfinding.goals;
 
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.soulfire.server.util.BlockTypeHelper;
 
-public record BreakBlockPosGoal(SWVec3i goal) implements GoalScorer {
+public record BreakBlockPosGoal(SFVec3i goal) implements GoalScorer {
     @Override
     public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
         var distance = entityState.blockPosition().distance(goal);

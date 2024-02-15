@@ -94,7 +94,7 @@ public class GUIFrame extends JFrame {
         setResizable(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        setJMenuBar(injector.getSingleton(SWMenuBar.class));
+        setJMenuBar(injector.getSingleton(SFMenuBar.class));
 
         setLayout(new CardLayout());
         add(injector.newInstance(MainPanel.class), MAIN_MENU);

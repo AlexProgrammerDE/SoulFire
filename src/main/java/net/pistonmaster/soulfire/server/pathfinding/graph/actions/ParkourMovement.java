@@ -20,7 +20,7 @@ package net.pistonmaster.soulfire.server.pathfinding.graph.actions;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.Costs;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.execution.GapJumpAction;
 import net.pistonmaster.soulfire.server.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.ParkourDirection;
@@ -28,17 +28,17 @@ import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.Parko
 import java.util.List;
 
 public final class ParkourMovement extends GraphAction implements Cloneable {
-    private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
+    private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
     private final ParkourDirection direction;
-    private final SWVec3i targetFeetBlock;
+    private final SFVec3i targetFeetBlock;
 
     public ParkourMovement(ParkourDirection direction) {
         this.direction = direction;
         this.targetFeetBlock = direction.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
     }
 
-    public List<SWVec3i> listRequiredFreeBlocks() {
-        var requiredFreeBlocks = new ObjectArrayList<SWVec3i>();
+    public List<SFVec3i> listRequiredFreeBlocks() {
+        var requiredFreeBlocks = new ObjectArrayList<SFVec3i>();
 
         // Make head block free (maybe head block is a slab)
         requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0));
@@ -63,12 +63,12 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
         return requiredFreeBlocks;
     }
 
-    public SWVec3i requiredUnsafeBlock() {
+    public SFVec3i requiredUnsafeBlock() {
         // The gap to jump over, needs to be unsafe for this movement to be possible
         return direction.offset(FEET_POSITION_RELATIVE_BLOCK).sub(0, 1, 0);
     }
 
-    public SWVec3i requiredSolidBlock() {
+    public SFVec3i requiredSolidBlock() {
         // Floor block
         return targetFeetBlock.sub(0, 1, 0);
     }

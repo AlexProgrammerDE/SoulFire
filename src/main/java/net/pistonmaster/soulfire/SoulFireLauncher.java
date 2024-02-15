@@ -17,7 +17,7 @@
  */
 package net.pistonmaster.soulfire;
 
-import net.pistonmaster.soulfire.util.SWContextClassLoader;
+import net.pistonmaster.soulfire.util.SFContextClassLoader;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ import java.util.List;
  * This is so we can merge plugin and server classes.
  */
 public class SoulFireLauncher {
-    private static final SWContextClassLoader SW_CONTEXT_CLASS_LOADER = new SWContextClassLoader();
+    private static final SFContextClassLoader SW_CONTEXT_CLASS_LOADER = new SFContextClassLoader();
 
     public static void main(String[] args) {
         Thread.currentThread().setContextClassLoader(SW_CONTEXT_CLASS_LOADER);

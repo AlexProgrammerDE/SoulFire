@@ -22,12 +22,12 @@ import net.pistonmaster.soulfire.server.data.ItemType;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.NoRouteFoundException;
 import net.pistonmaster.soulfire.server.pathfinding.RouteFinder;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.goals.PosGoal;
 import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.soulfire.server.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.soulfire.server.pathfinding.graph.ProjectedLevelState;
-import net.pistonmaster.soulfire.server.protocol.bot.container.SWItemStack;
+import net.pistonmaster.soulfire.server.protocol.bot.container.SFItemStack;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.test.utils.TestBlockAccessor;
 import org.junit.jupiter.api.Test;
@@ -55,7 +55,7 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of())
         );
@@ -79,7 +79,7 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of())
         );
@@ -101,7 +101,7 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of())
         );
@@ -124,7 +124,7 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of())
         );
@@ -151,7 +151,7 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of())
         );
@@ -178,7 +178,7 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of())
         );
@@ -205,7 +205,7 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of())
         );
@@ -232,7 +232,7 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of())
         );
@@ -258,10 +258,10 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of(
-                        SWItemStack.forTypeSingle(ItemType.STONE)
+                        SFItemStack.forTypeSingle(ItemType.STONE)
                 ))
         );
 
@@ -281,10 +281,10 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of(
-                        SWItemStack.forTypeSingle(ItemType.STONE).withAmount(amount)
+                        SFItemStack.forTypeSingle(ItemType.STONE).withAmount(amount)
                 ))
         );
 
@@ -309,10 +309,10 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of(
-                        SWItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
+                        SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
                 ))
         );
 
@@ -336,10 +336,10 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of(
-                        SWItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
+                        SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
                 ))
         );
 
@@ -363,10 +363,10 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of(
-                        SWItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
+                        SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
                 ))
         );
 
@@ -397,10 +397,10 @@ public class PathfindingTest {
         );
 
         var initialState = new BotEntityState(
-                new SWVec3i(0, 1, 0),
+                new SFVec3i(0, 1, 0),
                 new ProjectedLevelState(accessor),
                 new ProjectedInventory(List.of(
-                        SWItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
+                        SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
                 ))
         );
 

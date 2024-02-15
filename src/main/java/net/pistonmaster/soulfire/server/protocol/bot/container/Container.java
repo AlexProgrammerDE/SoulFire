@@ -39,7 +39,7 @@ public class Container {
         this.id = id;
     }
 
-    public void setSlot(int slot, @Nullable SWItemStack item) {
+    public void setSlot(int slot, @Nullable SFItemStack item) {
         slots[slot].setItem(item);
     }
 

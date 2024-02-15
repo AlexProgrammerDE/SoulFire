@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.pathfinding.Costs;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.protocol.bot.block.BlockAccessor;
 import net.pistonmaster.soulfire.server.util.Vec2ObjectOpenHashMap;
 
@@ -35,7 +35,7 @@ public class ProjectedLevelState {
     private static final BlockState AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.AIR);
 
     private final BlockAccessor accessor;
-    private final Vec2ObjectOpenHashMap<SWVec3i, BlockState> blockChanges;
+    private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blockChanges;
 
     public ProjectedLevelState(BlockAccessor accessor) {
         this(
@@ -44,21 +44,21 @@ public class ProjectedLevelState {
         );
     }
 
-    public ProjectedLevelState withChangeToSolidBlock(SWVec3i position) {
+    public ProjectedLevelState withChangeToSolidBlock(SFVec3i position) {
         var blockChanges = this.blockChanges.clone();
         blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
 
         return new ProjectedLevelState(accessor, blockChanges);
     }
 
-    public ProjectedLevelState withChangeToAir(SWVec3i position) {
+    public ProjectedLevelState withChangeToAir(SFVec3i position) {
         var blockChanges = this.blockChanges.clone();
         blockChanges.put(position, AIR_BLOCK_STATE);
 
         return new ProjectedLevelState(accessor, blockChanges);
     }
 
-    public ProjectedLevelState withChanges(SWVec3i[] air, SWVec3i solid) {
+    public ProjectedLevelState withChanges(SFVec3i[] air, SFVec3i solid) {
         var blockChanges = this.blockChanges.clone();
         blockChanges.ensureCapacity(blockChanges.size()
                 + (air != null ? air.length : 0)
@@ -81,7 +81,7 @@ public class ProjectedLevelState {
         return new ProjectedLevelState(accessor, blockChanges);
     }
 
-    public BlockState getBlockStateAt(SWVec3i position) {
+    public BlockState getBlockStateAt(SFVec3i position) {
         var blockChange = blockChanges.get(position);
         if (blockChange != null) {
             return blockChange;
@@ -90,7 +90,7 @@ public class ProjectedLevelState {
         return accessor.getBlockStateAt(position.x, position.y, position.z);
     }
 
-    public boolean isChanged(SWVec3i position) {
+    public boolean isChanged(SFVec3i position) {
         return blockChanges.containsKey(position);
     }
 }

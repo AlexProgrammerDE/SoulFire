@@ -28,7 +28,7 @@ import net.pistonmaster.soulfire.server.api.MixinExtension;
 import net.pistonmaster.soulfire.server.settings.DevSettings;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 import net.pistonmaster.soulfire.server.util.CustomClassProvider;
-import net.pistonmaster.soulfire.util.SWPathConstants;
+import net.pistonmaster.soulfire.util.SFPathConstants;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.fusesource.jansi.AnsiConsole;
@@ -49,7 +49,7 @@ import java.util.List;
  */
 @Slf4j
 public class SoulFireBootstrap {
-    public static final PluginManager PLUGIN_MANAGER = new JarPluginManager(SWPathConstants.PLUGINS_FOLDER);
+    public static final PluginManager PLUGIN_MANAGER = new JarPluginManager(SFPathConstants.PLUGINS_FOLDER);
 
     static {
         System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
@@ -143,7 +143,7 @@ public class SoulFireBootstrap {
 
     private static void initPlugins(List<ClassLoader> classLoaders) {
         try {
-            Files.createDirectories(SWPathConstants.PLUGINS_FOLDER);
+            Files.createDirectories(SFPathConstants.PLUGINS_FOLDER);
         } catch (IOException e) {
             log.error("Failed to create plugin directory", e);
         }

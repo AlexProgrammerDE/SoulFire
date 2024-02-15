@@ -20,7 +20,7 @@ package net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement;
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 
 @Getter
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public enum BlockDirection {
     private final Direction direction;
 
     @SuppressWarnings("DuplicatedCode")
-    public SWVec3i offset(SWVec3i vector) {
+    public SFVec3i offset(SFVec3i vector) {
         return switch (this) {
             case NORTH -> vector.add(0, 0, -1);
             case SOUTH -> vector.add(0, 0, 1);

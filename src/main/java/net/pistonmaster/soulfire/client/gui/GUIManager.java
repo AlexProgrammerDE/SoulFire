@@ -23,10 +23,10 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.reflect.Modules;
 import net.pistonmaster.soulfire.client.ClientCommandManager;
-import net.pistonmaster.soulfire.client.SWTerminalConsole;
+import net.pistonmaster.soulfire.client.SFTerminalConsole;
 import net.pistonmaster.soulfire.client.grpc.RPCClient;
 import net.pistonmaster.soulfire.client.settings.SettingsManager;
-import net.pistonmaster.soulfire.util.SWPathConstants;
+import net.pistonmaster.soulfire.util.SFPathConstants;
 import net.pistonmaster.soulfire.util.ShutdownManager;
 
 import javax.swing.*;
@@ -72,12 +72,12 @@ public class GUIManager {
 
     public void initGUI() {
         try {
-            Files.createDirectories(SWPathConstants.PROFILES_FOLDER);
+            Files.createDirectories(SFPathConstants.PROFILES_FOLDER);
         } catch (IOException e) {
             log.error("Failed to create profiles folder!", e);
         }
 
-        SWTerminalConsole.setupTerminalConsole(threadPool, shutdownManager, clientCommandManager);
+        SFTerminalConsole.setupTerminalConsole(threadPool, shutdownManager, clientCommandManager);
 
         // Override the title in AWT (GNOME displays the class name otherwise)
         setAppTitle();

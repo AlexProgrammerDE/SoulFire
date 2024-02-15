@@ -29,7 +29,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.pistonmaster.soulfire.server.data.BlockState;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
@@ -192,6 +192,6 @@ public class BotActionManager {
         dataManager.sendPacket(new ServerboundSwingPacket(Hand.MAIN_HAND));
     }
 
-    public record BlockPlaceData(SWVec3i againstPos, Direction blockFace) {
+    public record BlockPlaceData(SFVec3i againstPos, Direction blockFace) {
     }
 }

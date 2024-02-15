@@ -85,7 +85,7 @@ public record BotConnection(UUID connectionId, BotConnectionFactory factory, Att
     }
 
     public GlobalTrafficShapingHandler getTrafficHandler() {
-        return session.getFlag(SWProtocolConstants.TRAFFIC_HANDLER);
+        return session.getFlag(SFProtocolConstants.TRAFFIC_HANDLER);
     }
 
     public CompletableFuture<?> gracefulDisconnect() {

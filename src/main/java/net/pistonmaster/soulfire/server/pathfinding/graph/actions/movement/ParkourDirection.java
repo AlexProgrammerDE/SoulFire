@@ -17,7 +17,7 @@
  */
 package net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement;
 
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 
 public enum ParkourDirection {
     NORTH,
@@ -28,7 +28,7 @@ public enum ParkourDirection {
     public static final ParkourDirection[] VALUES = values();
 
     @SuppressWarnings("DuplicatedCode")
-    public SWVec3i offset(SWVec3i vector) {
+    public SFVec3i offset(SFVec3i vector) {
         return switch (this) {
             case NORTH -> vector.add(0, 0, -1);
             case SOUTH -> vector.add(0, 0, 1);

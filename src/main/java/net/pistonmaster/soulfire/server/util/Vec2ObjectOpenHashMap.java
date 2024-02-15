@@ -20,7 +20,7 @@ package net.pistonmaster.soulfire.server.util;
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.HashCommon;
 import it.unimi.dsi.fastutil.objects.*;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serial;
@@ -36,7 +36,7 @@ import static it.unimi.dsi.fastutil.HashCommon.maxFill;
 // Fork of Object2ObjectCustomOpenHashMap
 // The main difference is that it uses native equals and hashcode methods
 // It also does not support null keys, if you provide one, the map will behave unexpectedly
-public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2ObjectMap<K, V> implements Serializable, Cloneable, Hash {
+public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2ObjectMap<K, V> implements Serializable, Cloneable, Hash {
     @Serial
     private static final long serialVersionUID = 0L;
     private static final boolean ASSERTS = false;
@@ -61,7 +61,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         minN = n = arraySize(expected, f);
         mask = n - 1;
         maxFill = maxFill(n, f);
-        key = (K[]) new SWVec3i[n + 1];
+        key = (K[]) new SFVec3i[n + 1];
         value = (V[]) new Object[n + 1];
     }
 
@@ -69,11 +69,11 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         this(DEFAULT_INITIAL_SIZE, DEFAULT_LOAD_FACTOR);
     }
 
-    private static int hashVec(SWVec3i vec) {
+    private static int hashVec(SFVec3i vec) {
         return vec.hashCode();
     }
 
-    private static boolean equalsVec(SWVec3i a, SWVec3i b) {
+    private static boolean equalsVec(SFVec3i a, SFVec3i b) {
         if (b == null) {
             return false;
         }
@@ -378,7 +378,7 @@ public class Vec2ObjectOpenHashMap<K extends SWVec3i, V> extends AbstractObject2
         final var key = this.key;
         final var value = this.value;
         final var mask = newN - 1; // Note that this is used by the hashing macro
-        final var newKey = (K[]) new SWVec3i[newN + 1];
+        final var newKey = (K[]) new SFVec3i[newN + 1];
         final var newValue = (V[]) new Object[newN + 1];
         var i = n;
         int pos;

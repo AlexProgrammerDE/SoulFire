@@ -30,11 +30,11 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.entity.ClientEntity;
  * @param levelState    The level state of the world the bot is in.
  * @param inventory     The inventory state of the bot.
  */
-public record BotEntityState(SWVec3i blockPosition, ProjectedLevelState levelState,
+public record BotEntityState(SFVec3i blockPosition, ProjectedLevelState levelState,
                              ProjectedInventory inventory) {
     public static BotEntityState initialState(ClientEntity clientEntity, ProjectedLevelState levelState, ProjectedInventory inventory) {
         return new BotEntityState(
-                SWVec3i.fromDouble(clientEntity.pos()),
+                SFVec3i.fromDouble(clientEntity.pos()),
                 levelState,
                 inventory
         );

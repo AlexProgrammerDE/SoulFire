@@ -24,7 +24,7 @@ import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.pathfinding.Costs;
 import net.pistonmaster.soulfire.server.protocol.bot.container.ContainerSlot;
 import net.pistonmaster.soulfire.server.protocol.bot.container.PlayerInventoryContainer;
-import net.pistonmaster.soulfire.server.protocol.bot.container.SWItemStack;
+import net.pistonmaster.soulfire.server.protocol.bot.container.SFItemStack;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.util.ItemTypeHelper;
 
@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ProjectedInventory {
     private final int usableBlockItems;
     @Getter
-    private final SWItemStack[] usableToolsAndNull;
+    private final SFItemStack[] usableToolsAndNull;
     private final Map<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
 
     public ProjectedInventory(PlayerInventoryContainer playerInventory) {
@@ -53,9 +53,9 @@ public class ProjectedInventory {
                 .toList());
     }
 
-    public ProjectedInventory(List<SWItemStack> items) {
+    public ProjectedInventory(List<SFItemStack> items) {
         var blockItems = 0;
-        var usableToolsAndNull = new HashSet<SWItemStack>();
+        var usableToolsAndNull = new HashSet<SFItemStack>();
 
         // Empty slot
         usableToolsAndNull.add(null);
@@ -70,7 +70,7 @@ public class ProjectedInventory {
 
         this.usableBlockItems = blockItems;
 
-        this.usableToolsAndNull = usableToolsAndNull.toArray(new SWItemStack[0]);
+        this.usableToolsAndNull = usableToolsAndNull.toArray(new SFItemStack[0]);
 
         this.sharedMiningCosts = new ConcurrentHashMap<>();
     }

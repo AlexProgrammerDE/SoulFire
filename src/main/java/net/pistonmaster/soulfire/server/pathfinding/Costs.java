@@ -23,7 +23,7 @@ import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.data.ItemType;
 import net.pistonmaster.soulfire.server.data.ToolSpeedType;
 import net.pistonmaster.soulfire.server.pathfinding.graph.ProjectedInventory;
-import net.pistonmaster.soulfire.server.protocol.bot.container.SWItemStack;
+import net.pistonmaster.soulfire.server.protocol.bot.container.SFItemStack;
 import net.pistonmaster.soulfire.server.protocol.bot.state.EntityEffectState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.util.MathHelper;
@@ -61,7 +61,7 @@ public class Costs {
 
     public static BlockMiningCosts calculateBlockBreakCost(TagsState tagsState, ProjectedInventory inventory, BlockType blockType) {
         var lowestMiningTicks = Integer.MAX_VALUE;
-        SWItemStack bestItem = null;
+        SFItemStack bestItem = null;
         var correctToolUsed = false;
         for (var slot : inventory.usableToolsAndNull()) {
             var miningTicks = getRequiredMiningTicks(tagsState, null, true, slot, blockType);
@@ -88,7 +88,7 @@ public class Costs {
     public static TickResult getRequiredMiningTicks(TagsState tagsState,
                                                     @Nullable EntityEffectState effectState,
                                                     boolean onGround,
-                                                    @Nullable SWItemStack itemStack,
+                                                    @Nullable SFItemStack itemStack,
                                                     BlockType blockType) {
         float speedMultiplier;
         if (itemStack == null) {
@@ -175,7 +175,7 @@ public class Costs {
                 .orElseGet(OptionalInt::empty);
     }
 
-    public record BlockMiningCosts(double miningCost, @Nullable SWItemStack usedTool, boolean willDrop) {
+    public record BlockMiningCosts(double miningCost, @Nullable SFItemStack usedTool, boolean willDrop) {
     }
 
     public record TickResult(int ticks, boolean willDrop) {

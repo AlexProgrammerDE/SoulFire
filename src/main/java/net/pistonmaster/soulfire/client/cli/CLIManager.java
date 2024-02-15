@@ -67,7 +67,7 @@ public class CLIManager {
     }
 
     public void initCLI(String[] args) {
-        var soulFireCommand = new SWCommandDefinition(this);
+        var soulFireCommand = new SFCommandDefinition(this);
         var commandLine = new CommandLine(soulFireCommand);
         soulFireCommand.commandLine(commandLine);
         commandLine.setCaseInsensitiveEnumValuesAllowed(true);

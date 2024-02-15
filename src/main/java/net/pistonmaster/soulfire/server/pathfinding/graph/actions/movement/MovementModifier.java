@@ -18,7 +18,7 @@
 package net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement;
 
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 
 @RequiredArgsConstructor
 public enum MovementModifier {
@@ -30,7 +30,7 @@ public enum MovementModifier {
 
     public static final MovementModifier[] VALUES = values();
 
-    public SWVec3i offset(SWVec3i vector) {
+    public SFVec3i offset(SFVec3i vector) {
         return switch (this) {
             case NORMAL -> vector;
             case FALL_1 -> vector.add(0, -1, 0);
@@ -40,7 +40,7 @@ public enum MovementModifier {
         };
     }
 
-    public SWVec3i offsetIfJump(SWVec3i vector) {
+    public SFVec3i offsetIfJump(SFVec3i vector) {
         return this == MovementModifier.JUMP ? vector.add(0, 1, 0) : vector;
     }
 }

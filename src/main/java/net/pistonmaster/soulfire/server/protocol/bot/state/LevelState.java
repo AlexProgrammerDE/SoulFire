@@ -21,7 +21,7 @@ import com.github.steveice10.opennbt.tag.builtin.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.server.data.BlockState;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
 import net.pistonmaster.soulfire.server.protocol.bot.nbt.MCUniform;
@@ -127,7 +127,7 @@ public class LevelState {
         return chunks.getBlockStateAt(block.getX(), block.getY(), block.getZ());
     }
 
-    public BlockState getBlockStateAt(SWVec3i block) {
+    public BlockState getBlockStateAt(SFVec3i block) {
         return chunks.getBlockStateAt(block.x, block.y, block.z);
     }
 

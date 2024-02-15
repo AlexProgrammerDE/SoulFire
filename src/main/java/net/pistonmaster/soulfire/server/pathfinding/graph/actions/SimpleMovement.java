@@ -24,7 +24,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.Costs;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.execution.BlockBreakAction;
 import net.pistonmaster.soulfire.server.pathfinding.execution.BlockPlaceAction;
 import net.pistonmaster.soulfire.server.pathfinding.execution.MovementAction;
@@ -37,11 +37,11 @@ import java.util.List;
 
 @Slf4j
 public final class SimpleMovement extends GraphAction implements Cloneable {
-    private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
+    private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
     private final MovementDirection direction;
     private final MovementSide side;
     private final MovementModifier modifier;
-    private final SWVec3i targetFeetBlock;
+    private final SFVec3i targetFeetBlock;
     @Getter
     private final boolean diagonal;
     @Getter
@@ -104,8 +104,8 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
                 };
     }
 
-    public List<SWVec3i> listRequiredFreeBlocks() {
-        var requiredFreeBlocks = new ObjectArrayList<SWVec3i>(freeCapacity());
+    public List<SFVec3i> listRequiredFreeBlocks() {
+        var requiredFreeBlocks = new ObjectArrayList<SFVec3i>(freeCapacity());
 
         if (modifier == MovementModifier.JUMP) {
             // Make head block free (maybe head block is a slab)
@@ -148,7 +148,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         return requiredFreeBlocks;
     }
 
-    private SWVec3i getCorner(MovementSide side) {
+    private SFVec3i getCorner(MovementSide side) {
         return (switch (direction) {
             case NORTH_EAST -> switch (side) {
                 case LEFT -> MovementDirection.NORTH;
@@ -170,12 +170,12 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         }).offset(FEET_POSITION_RELATIVE_BLOCK);
     }
 
-    public List<SWVec3i> listAddCostIfSolidBlocks() {
+    public List<SFVec3i> listAddCostIfSolidBlocks() {
         if (!diagonal) {
             return List.of();
         }
 
-        var list = new ObjectArrayList<SWVec3i>(2);
+        var list = new ObjectArrayList<SFVec3i>(2);
 
         // If these blocks are solid, the bot moves slower because the bot is running around a corner
         var corner = getCorner(side.opposite());
@@ -187,7 +187,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         return list;
     }
 
-    public SWVec3i requiredSolidBlock() {
+    public SFVec3i requiredSolidBlock() {
         // Floor block
         return targetFeetBlock.sub(0, 1, 0);
     }
@@ -321,9 +321,9 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         var cost = this.cost;
 
         var blocksToBreak = blockBreakCosts == null ? 0 : blockBreakCosts.length;
-        var blockToBreakArray = blocksToBreak > 0 ? new SWVec3i[blocksToBreak] : null;
+        var blockToBreakArray = blocksToBreak > 0 ? new SFVec3i[blocksToBreak] : null;
         var blockToPlace = requiresAgainstBlock ? 1 : 0;
-        SWVec3i blockToPlacePosition = null;
+        SFVec3i blockToPlacePosition = null;
 
         var actions = new ObjectArrayList<WorldAction>(1 + blocksToBreak + blockToPlace);
         if (blockBreakCosts != null) {

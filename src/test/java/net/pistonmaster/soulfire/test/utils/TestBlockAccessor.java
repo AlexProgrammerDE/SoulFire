@@ -19,12 +19,12 @@ package net.pistonmaster.soulfire.test.utils;
 
 import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.BlockType;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.protocol.bot.block.BlockAccessor;
 import net.pistonmaster.soulfire.server.util.Vec2ObjectOpenHashMap;
 
 public class TestBlockAccessor implements BlockAccessor {
-    private final Vec2ObjectOpenHashMap<SWVec3i, BlockState> blocks = new Vec2ObjectOpenHashMap<>();
+    private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blocks = new Vec2ObjectOpenHashMap<>();
     private final BlockState defaultBlock;
 
     public TestBlockAccessor() {
@@ -36,11 +36,11 @@ public class TestBlockAccessor implements BlockAccessor {
     }
 
     public void setBlockAt(int x, int y, int z, BlockType block) {
-        blocks.put(new SWVec3i(x, y, z), BlockState.forDefaultBlockType(block));
+        blocks.put(new SFVec3i(x, y, z), BlockState.forDefaultBlockType(block));
     }
 
     @Override
     public BlockState getBlockStateAt(int x, int y, int z) {
-        return blocks.getOrDefault(new SWVec3i(x, y, z), defaultBlock);
+        return blocks.getOrDefault(new SFVec3i(x, y, z), defaultBlock);
     }
 }

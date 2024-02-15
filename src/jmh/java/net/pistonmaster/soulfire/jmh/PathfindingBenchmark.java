@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.RouteFinder;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.goals.PosGoal;
 import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.soulfire.server.pathfinding.graph.ProjectedInventory;
@@ -94,7 +94,7 @@ public class PathfindingBenchmark {
             );
 
             initialState = new BotEntityState(
-                    new SWVec3i(0, safeY, 0),
+                    new SFVec3i(0, safeY, 0),
                     new ProjectedLevelState(accessor),
                     new ProjectedInventory(new PlayerInventoryContainer(null))
             );

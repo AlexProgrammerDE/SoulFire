@@ -27,7 +27,7 @@ import net.pistonmaster.soulfire.server.data.BlockItems;
 import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.*;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.*;
 import net.pistonmaster.soulfire.server.protocol.bot.BotActionManager;
@@ -41,14 +41,14 @@ import java.util.function.Predicate;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {
-    private static final Object2ObjectFunction<? super SWVec3i, ? extends ObjectList<BlockSubscription>> CREATE_MISSING_FUNCTION =
+    private static final Object2ObjectFunction<? super SFVec3i, ? extends ObjectList<BlockSubscription>> CREATE_MISSING_FUNCTION =
             k -> new ObjectArrayList<>();
     private static final GraphAction[] ACTIONS_TEMPLATE;
-    private static final SWVec3i[] SUBSCRIPTION_KEYS;
+    private static final SFVec3i[] SUBSCRIPTION_KEYS;
     private static final BlockSubscription[][] SUBSCRIPTION_VALUES;
 
     static {
-        var blockSubscribers = new Vec2ObjectOpenHashMap<SWVec3i, ObjectList<BlockSubscription>>();
+        var blockSubscribers = new Vec2ObjectOpenHashMap<SFVec3i, ObjectList<BlockSubscription>>();
 
         var actions = new ObjectArrayList<GraphAction>();
         for (var direction : MovementDirection.VALUES) {
@@ -93,7 +93,7 @@ public record MinecraftGraph(TagsState tagsState) {
         ));
 
         ACTIONS_TEMPLATE = actions.toArray(new GraphAction[0]);
-        SUBSCRIPTION_KEYS = new SWVec3i[blockSubscribers.size()];
+        SUBSCRIPTION_KEYS = new SFVec3i[blockSubscribers.size()];
         SUBSCRIPTION_VALUES = new BlockSubscription[blockSubscribers.size()][];
 
         var entrySetDescending = blockSubscribers.object2ObjectEntrySet().stream()
@@ -106,7 +106,7 @@ public record MinecraftGraph(TagsState tagsState) {
         }
     }
 
-    private static SimpleMovement registerMovement(Object2ObjectMap<SWVec3i, ObjectList<BlockSubscription>> blockSubscribers,
+    private static SimpleMovement registerMovement(Object2ObjectMap<SFVec3i, ObjectList<BlockSubscription>> blockSubscribers,
                                                    SimpleMovement movement, int movementIndex) {
         {
             var blockId = 0;
@@ -158,7 +158,7 @@ public record MinecraftGraph(TagsState tagsState) {
         return movement;
     }
 
-    private static ParkourMovement registerParkourMovement(Object2ObjectMap<SWVec3i, ObjectList<BlockSubscription>> blockSubscribers,
+    private static ParkourMovement registerParkourMovement(Object2ObjectMap<SFVec3i, ObjectList<BlockSubscription>> blockSubscribers,
                                                            ParkourMovement movement, int movementIndex) {
         {
             var blockId = 0;
@@ -184,7 +184,7 @@ public record MinecraftGraph(TagsState tagsState) {
         return movement;
     }
 
-    private static DownMovement registerDownMovement(Object2ObjectMap<SWVec3i, ObjectList<BlockSubscription>> blockSubscribers,
+    private static DownMovement registerDownMovement(Object2ObjectMap<SFVec3i, ObjectList<BlockSubscription>> blockSubscribers,
                                                      DownMovement movement, int movementIndex) {
         {
             for (var safetyBlock : movement.listSafetyCheckBlocks()) {
@@ -218,7 +218,7 @@ public record MinecraftGraph(TagsState tagsState) {
         return movement;
     }
 
-    private static UpMovement registerUpMovement(Object2ObjectMap<SWVec3i, ObjectList<BlockSubscription>> blockSubscribers,
+    private static UpMovement registerUpMovement(Object2ObjectMap<SFVec3i, ObjectList<BlockSubscription>> blockSubscribers,
                                                  UpMovement movement, int movementIndex) {
         {
             var blockId = 0;
@@ -253,7 +253,7 @@ public record MinecraftGraph(TagsState tagsState) {
                 && !blockState.blockType().fluidSource());
     }
 
-    public void insertActions(BotEntityState node, Consumer<GraphInstructions> callback, Predicate<SWVec3i> alreadySeen) {
+    public void insertActions(BotEntityState node, Consumer<GraphInstructions> callback, Predicate<SFVec3i> alreadySeen) {
         log.debug("Inserting actions for node: {}", node.blockPosition());
         calculateActions(node, generateTemplateActions(node), callback, alreadySeen);
     }
@@ -267,7 +267,7 @@ public record MinecraftGraph(TagsState tagsState) {
         return actions;
     }
 
-    private void calculateActions(BotEntityState node, GraphAction[] actions, Consumer<GraphInstructions> callback, Predicate<SWVec3i> alreadySeen) {
+    private void calculateActions(BotEntityState node, GraphAction[] actions, Consumer<GraphInstructions> callback, Predicate<SFVec3i> alreadySeen) {
         for (var i = 0; i < SUBSCRIPTION_KEYS.length; i++) {
             processSubscription(node, actions, callback, i);
         }
@@ -278,7 +278,7 @@ public record MinecraftGraph(TagsState tagsState) {
         var value = SUBSCRIPTION_VALUES[i];
 
         BlockState blockState = null;
-        SWVec3i absolutePositionBlock = null;
+        SFVec3i absolutePositionBlock = null;
 
         // We cache only this, but not solid because solid will only occur a single time
         var isFreeReference = new ObjectReference<>(TriState.NOT_SET);
@@ -312,8 +312,8 @@ public record MinecraftGraph(TagsState tagsState) {
         }
     }
 
-    private SubscriptionSingleResult processSubscriptionAction(SWVec3i key, BlockSubscription subscriber, GraphAction action, ObjectReference<TriState> isFreeReference,
-                                                               BlockState blockState, SWVec3i absolutePositionBlock,
+    private SubscriptionSingleResult processSubscriptionAction(SFVec3i key, BlockSubscription subscriber, GraphAction action, ObjectReference<TriState> isFreeReference,
+                                                               BlockState blockState, SFVec3i absolutePositionBlock,
                                                                BotEntityState node) {
         return switch (action) {
             case SimpleMovement simpleMovement ->
@@ -327,7 +327,7 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     private SubscriptionSingleResult processMovementSubscription(BlockSubscription subscriber, ObjectReference<TriState> isFreeReference,
-                                                                 BlockState blockState, SWVec3i absolutePositionBlock,
+                                                                 BlockState blockState, SFVec3i absolutePositionBlock,
                                                                  BotEntityState node, SimpleMovement simpleMovement) {
         return switch (subscriber.type) {
             case MOVEMENT_FREE -> {
@@ -492,8 +492,8 @@ public record MinecraftGraph(TagsState tagsState) {
         };
     }
 
-    private SubscriptionSingleResult processDownSubscription(SWVec3i key, BlockSubscription subscriber,
-                                                             BlockState blockState, SWVec3i absolutePositionBlock,
+    private SubscriptionSingleResult processDownSubscription(SFVec3i key, BlockSubscription subscriber,
+                                                             BlockState blockState, SFVec3i absolutePositionBlock,
                                                              BotEntityState node, DownMovement downMovement) {
         return switch (subscriber.type) {
             case MOVEMENT_FREE -> {
@@ -550,7 +550,7 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     private SubscriptionSingleResult processUpSubscription(BlockSubscription subscriber, ObjectReference<TriState> isFreeReference,
-                                                           BlockState blockState, SWVec3i absolutePositionBlock,
+                                                           BlockState blockState, SFVec3i absolutePositionBlock,
                                                            BotEntityState node, UpMovement upMovement) {
         return switch (subscriber.type) {
             case MOVEMENT_FREE -> {

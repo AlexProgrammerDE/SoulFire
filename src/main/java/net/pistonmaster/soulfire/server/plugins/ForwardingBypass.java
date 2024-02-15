@@ -32,8 +32,8 @@ import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.soulfire.server.SoulFireServer;
 import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
-import net.pistonmaster.soulfire.server.api.event.bot.SWPacketReceiveEvent;
-import net.pistonmaster.soulfire.server.api.event.bot.SWPacketSendingEvent;
+import net.pistonmaster.soulfire.server.api.event.bot.SFPacketReceiveEvent;
+import net.pistonmaster.soulfire.server.api.event.bot.SFPacketSendingEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
@@ -150,11 +150,11 @@ public class ForwardingBypass implements InternalExtension {
     @Override
     public void onLoad() {
         SoulFireAPI.registerListeners(ForwardingBypass.class);
-        PluginHelper.registerBotEventConsumer(SWPacketSendingEvent.class, this::onPacket);
-        PluginHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, this::onPacketReceive);
+        PluginHelper.registerBotEventConsumer(SFPacketSendingEvent.class, this::onPacket);
+        PluginHelper.registerBotEventConsumer(SFPacketReceiveEvent.class, this::onPacketReceive);
     }
 
-    public void onPacket(SWPacketSendingEvent event) {
+    public void onPacket(SFPacketSendingEvent event) {
         if (!(event.packet() instanceof ClientIntentionPacket handshake)) {
             return;
         }
@@ -172,7 +172,7 @@ public class ForwardingBypass implements InternalExtension {
         }
     }
 
-    public void onPacketReceive(SWPacketReceiveEvent event) {
+    public void onPacketReceive(SFPacketReceiveEvent event) {
         if (!(event.packet() instanceof ClientboundCustomQueryPacket loginPluginMessage)) {
             return;
         }

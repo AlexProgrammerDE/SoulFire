@@ -21,7 +21,7 @@ import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.pathfinding.MovementConstants;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.util.MathHelper;
 import net.pistonmaster.soulfire.server.util.VectorHelper;
@@ -29,7 +29,7 @@ import net.pistonmaster.soulfire.server.util.VectorHelper;
 @Slf4j
 @RequiredArgsConstructor
 public final class MovementAction implements WorldAction {
-    private final SWVec3i blockPosition;
+    private final SFVec3i blockPosition;
     // Corner jumps normally require you to stand closer to the block to jump
     private final boolean walkFewTicksNoJump;
     private boolean didLook = false;

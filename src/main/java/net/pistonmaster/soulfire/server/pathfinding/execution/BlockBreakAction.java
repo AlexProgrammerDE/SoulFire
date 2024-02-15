@@ -22,9 +22,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.pathfinding.Costs;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
-import net.pistonmaster.soulfire.server.protocol.bot.container.SWItemStack;
+import net.pistonmaster.soulfire.server.protocol.bot.container.SFItemStack;
 import net.pistonmaster.soulfire.server.util.TimeUtil;
 import net.pistonmaster.soulfire.server.util.VectorHelper;
 
@@ -33,12 +33,12 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @RequiredArgsConstructor
 public final class BlockBreakAction implements WorldAction {
-    private final SWVec3i blockPosition;
+    private final SFVec3i blockPosition;
     boolean finishedDigging = false;
     private boolean didLook = false;
     private boolean putOnHotbar = false;
     private boolean calculatedBestItemStack = false;
-    private SWItemStack bestItemStack = null;
+    private SFItemStack bestItemStack = null;
     private int remainingTicks = -1;
 
     @Override
@@ -82,7 +82,7 @@ public final class BlockBreakAction implements WorldAction {
         }
 
         if (!calculatedBestItemStack) {
-            SWItemStack itemStack = null;
+            SFItemStack itemStack = null;
             var bestCost = Integer.MAX_VALUE;
             var sawEmpty = false;
             for (var slot : playerInventory.storage()) {

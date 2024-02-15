@@ -22,7 +22,7 @@ import net.pistonmaster.soulfire.proxy.SWProxy;
 
 import java.io.IOException;
 
-public sealed interface MCAuthService<T> permits SWBedrockMicrosoftAuthService, SWEasyMCAuthService, SWJavaMicrosoftAuthService, SWOfflineAuthService, SWTheAlteningAuthService {
+public sealed interface MCAuthService<T> permits SFBedrockMicrosoftAuthService, SFEasyMCAuthService, SFJavaMicrosoftAuthService, SFOfflineAuthService, SFTheAlteningAuthService {
     MinecraftAccount login(T data, SWProxy proxyData) throws IOException;
 
     T createData(String data);

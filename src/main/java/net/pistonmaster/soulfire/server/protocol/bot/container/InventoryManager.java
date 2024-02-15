@@ -52,7 +52,7 @@ public class InventoryManager {
     private Container openContainer;
     private int heldItemSlot = 0;
     private int lastStateId = -1;
-    private SWItemStack cursorItem;
+    private SFItemStack cursorItem;
 
     /**
      * The inventory has a control lock to prevent multiple threads from moving items at the same time.
@@ -104,7 +104,7 @@ public class InventoryManager {
             openPlayerInventory();
         }
 
-        SWItemStack slotItem;
+        SFItemStack slotItem;
         {
             var containerSlot = openContainer.getSlot(slot);
             if (containerSlot.item() == null) {
@@ -151,7 +151,7 @@ public class InventoryManager {
         applyIfMatches(playerInventory.getBoots().item(), EquipmentSlot.FEET);
     }
 
-    private void applyIfMatches(@Nullable SWItemStack item, EquipmentSlot equipmentSlot) {
+    private void applyIfMatches(@Nullable SFItemStack item, EquipmentSlot equipmentSlot) {
         var previousItem = lastInEquipment.get(equipmentSlot);
         boolean hasChanged;
         if (previousItem != null) {

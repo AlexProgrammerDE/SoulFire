@@ -48,7 +48,7 @@ import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.soulfire.server.pathfinding.graph.ProjectedInventory;
 import net.pistonmaster.soulfire.server.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
-import net.pistonmaster.soulfire.util.SWPathConstants;
+import net.pistonmaster.soulfire.util.SFPathConstants;
 import org.apache.commons.io.FileUtils;
 import org.cloudburstmc.math.vector.Vector3d;
 
@@ -72,7 +72,7 @@ public class ServerCommandManager {
     private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
     private final SoulFireServer soulFireServer;
     private final List<Map.Entry<Instant, String>> commandHistory = Collections.synchronizedList(new ArrayList<>());
-    private final Path targetFile = SWPathConstants.DATA_FOLDER.resolve(".command_history");
+    private final Path targetFile = SFPathConstants.DATA_FOLDER.resolve(".command_history");
 
     @PostConstruct
     public void postConstruct() {

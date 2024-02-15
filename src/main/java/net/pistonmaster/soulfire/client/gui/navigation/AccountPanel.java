@@ -26,7 +26,7 @@ import net.pistonmaster.soulfire.client.gui.libs.JEnumComboBox;
 import net.pistonmaster.soulfire.client.gui.libs.SwingTextUtils;
 import net.pistonmaster.soulfire.client.gui.popups.ImportTextDialog;
 import net.pistonmaster.soulfire.util.BuiltinSettingsConstants;
-import net.pistonmaster.soulfire.util.SWPathConstants;
+import net.pistonmaster.soulfire.util.SFPathConstants;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -130,7 +130,7 @@ public class AccountPanel extends NavigationItem {
         var button = new JButton(SwingTextUtils.htmlCenterText(String.format("Add %s accounts", type)));
 
         button.addActionListener(e -> new ImportTextDialog(
-                SWPathConstants.WORKING_DIRECTORY,
+                SFPathConstants.WORKING_DIRECTORY,
                 String.format("Add %s accounts", type),
                 String.format("%s list file", type),
                 guiManager,

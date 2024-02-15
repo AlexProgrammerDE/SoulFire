@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
-import net.pistonmaster.soulfire.server.api.event.bot.SWPacketSendingEvent;
+import net.pistonmaster.soulfire.server.api.event.bot.SFPacketSendingEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
@@ -32,7 +32,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
 public class FakeVirtualHost implements InternalExtension {
-    public static void onPacket(SWPacketSendingEvent event) {
+    public static void onPacket(SFPacketSendingEvent event) {
         if (event.packet() instanceof ClientIntentionPacket intentionPacket) {
             var settingsHolder = event.connection().settingsHolder();
 
@@ -55,7 +55,7 @@ public class FakeVirtualHost implements InternalExtension {
     @Override
     public void onLoad() {
         SoulFireAPI.registerListeners(FakeVirtualHost.class);
-        PluginHelper.registerBotEventConsumer(SWPacketSendingEvent.class, FakeVirtualHost::onPacket);
+        PluginHelper.registerBotEventConsumer(SFPacketSendingEvent.class, FakeVirtualHost::onPacket);
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)

@@ -23,7 +23,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.Costs;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.execution.BlockBreakAction;
 import net.pistonmaster.soulfire.server.pathfinding.execution.JumpAndPlaceBelowAction;
 import net.pistonmaster.soulfire.server.pathfinding.execution.WorldAction;
@@ -37,8 +37,8 @@ import java.util.List;
 
 @Slf4j
 public final class UpMovement extends GraphAction implements Cloneable {
-    private static final SWVec3i FEET_POSITION_RELATIVE_BLOCK = SWVec3i.ZERO;
-    private final SWVec3i targetFeetBlock;
+    private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
+    private final SFVec3i targetFeetBlock;
     @Getter
     private MovementMiningCost[] blockBreakCosts;
     @Getter
@@ -58,8 +58,8 @@ public final class UpMovement extends GraphAction implements Cloneable {
         return 1;
     }
 
-    public List<SWVec3i> listRequiredFreeBlocks() {
-        var requiredFreeBlocks = new ObjectArrayList<SWVec3i>(freeCapacity());
+    public List<SFVec3i> listRequiredFreeBlocks() {
+        var requiredFreeBlocks = new ObjectArrayList<SFVec3i>(freeCapacity());
 
         // The one above the head to jump
         requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0));

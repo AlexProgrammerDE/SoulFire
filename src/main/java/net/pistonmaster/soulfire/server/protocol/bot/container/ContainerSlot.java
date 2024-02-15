@@ -25,17 +25,17 @@ import java.util.Objects;
 @AllArgsConstructor
 public final class ContainerSlot {
     private final int slot;
-    private SWItemStack item;
+    private SFItemStack item;
 
     public int slot() {
         return slot;
     }
 
-    public SWItemStack item() {
+    public SFItemStack item() {
         return item;
     }
 
-    void setItem(@Nullable SWItemStack item) {
+    void setItem(@Nullable SFItemStack item) {
         this.item = item;
     }
 

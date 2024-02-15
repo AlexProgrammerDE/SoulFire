@@ -17,17 +17,12 @@
  */
 package net.pistonmaster.soulfire.server.settings;
 
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.lenni0451.reflect.Classes;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.*;
-import net.pistonmaster.soulfire.server.viaversion.SWVersionConstants;
+import net.pistonmaster.soulfire.server.viaversion.SFVersionConstants;
 import net.pistonmaster.soulfire.util.BuiltinSettingsConstants;
-import net.raphimc.viaaprilfools.api.AprilFoolsProtocolVersion;
-import net.raphimc.viabedrock.api.BedrockProtocolVersion;
-import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import net.raphimc.vialoader.util.ProtocolVersionList;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -129,16 +124,12 @@ public class BotSettings implements SettingsObject {
     );
 
     private static ComboProperty.ComboOption[] getProtocolVersionOptions() {
-        Classes.ensureInitialized(ProtocolVersion.class);
-        Classes.ensureInitialized(LegacyProtocolVersion.class);
-        Classes.ensureInitialized(BedrockProtocolVersion.class);
-        Classes.ensureInitialized(AprilFoolsProtocolVersion.class);
         return ProtocolVersionList.getProtocolsNewToOld().stream()
                 .map(version -> new ComboProperty.ComboOption(version.getName(), version.toString()))
                 .toArray(ComboProperty.ComboOption[]::new);
     }
 
     private static int getLatestProtocolVersionIndex() {
-        return ProtocolVersionList.getProtocolsNewToOld().indexOf(SWVersionConstants.CURRENT_PROTOCOL_VERSION);
+        return ProtocolVersionList.getProtocolsNewToOld().indexOf(SFVersionConstants.CURRENT_PROTOCOL_VERSION);
     }
 }

@@ -38,9 +38,9 @@ import net.kyori.adventure.text.Component;
 import net.pistonmaster.soulfire.account.service.BedrockData;
 import net.pistonmaster.soulfire.proxy.SWProxy;
 import net.pistonmaster.soulfire.server.protocol.BotConnectionMeta;
-import net.pistonmaster.soulfire.server.protocol.SWProtocolConstants;
+import net.pistonmaster.soulfire.server.protocol.SFProtocolConstants;
 import net.pistonmaster.soulfire.server.viaversion.FrameCodec;
-import net.pistonmaster.soulfire.server.viaversion.SWVersionConstants;
+import net.pistonmaster.soulfire.server.viaversion.SFVersionConstants;
 import net.pistonmaster.soulfire.server.viaversion.StorableSession;
 import net.raphimc.viabedrock.api.protocol.BedrockBaseProtocol;
 import net.raphimc.viabedrock.netty.BatchLengthCodec;
@@ -103,8 +103,8 @@ public class ViaClientSession extends TcpSession {
 
         try {
             var version = meta.protocolVersion();
-            var isLegacy = SWVersionConstants.isLegacy(version);
-            var isBedrock = SWVersionConstants.isBedrock(version);
+            var isLegacy = SFVersionConstants.isLegacy(version);
+            var isBedrock = SFVersionConstants.isBedrock(version);
             var bootstrap = new Bootstrap();
 
             bootstrap.group(eventLoopGroup);
@@ -113,9 +113,9 @@ public class ViaClientSession extends TcpSession {
                     throw new IllegalStateException("Proxy must support UDP! (Only SOCKS5 is supported)");
                 }
 
-                bootstrap.channelFactory(RakChannelFactory.client(SWNettyHelper.DATAGRAM_CHANNEL_CLASS));
+                bootstrap.channelFactory(RakChannelFactory.client(SFNettyHelper.DATAGRAM_CHANNEL_CLASS));
             } else {
-                bootstrap.channel(SWNettyHelper.CHANNEL_CLASS);
+                bootstrap.channel(SFNettyHelper.CHANNEL_CLASS);
             }
 
             bootstrap
@@ -147,13 +147,13 @@ public class ViaClientSession extends TcpSession {
                     refreshWriteTimeoutHandler(channel);
 
                     if (proxy != null) {
-                        SWNettyHelper.addProxy(pipeline, proxy);
+                        SFNettyHelper.addProxy(pipeline, proxy);
                     }
 
                     // This monitors the traffic
                     var trafficHandler = new GlobalTrafficShapingHandler(channel.eventLoop(), 0, 0, 1000);
                     pipeline.addLast("traffic", trafficHandler);
-                    setFlag(SWProtocolConstants.TRAFFIC_HANDLER, trafficHandler);
+                    setFlag(SFProtocolConstants.TRAFFIC_HANDLER, trafficHandler);
 
                     // This does the extra magic
                     var userConnection = new UserConnectionImpl(channel, true);
@@ -171,7 +171,7 @@ public class ViaClientSession extends TcpSession {
                         ));
                     }
 
-                    setFlag(SWProtocolConstants.VIA_USER_CONNECTION, userConnection);
+                    setFlag(SFProtocolConstants.VIA_USER_CONNECTION, userConnection);
 
                     var protocolPipeline = new ProtocolPipelineImpl(userConnection);
 
@@ -194,7 +194,7 @@ public class ViaClientSession extends TcpSession {
                     // Inject Via codec
                     pipeline.addLast("via-codec", new ViaCodec(userConnection));
 
-                    pipeline.addLast("codec", new SWTcpPacketCodec(ViaClientSession.this));
+                    pipeline.addLast("codec", new SFTcpPacketCodec(ViaClientSession.this));
                     pipeline.addLast("manager", ViaClientSession.this);
 
                     addHAProxySupport(pipeline);

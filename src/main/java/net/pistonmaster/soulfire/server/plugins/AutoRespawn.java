@@ -26,7 +26,7 @@ import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.soulfire.server.SoulFireServer;
 import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
-import net.pistonmaster.soulfire.server.api.event.bot.SWPacketReceiveEvent;
+import net.pistonmaster.soulfire.server.api.event.bot.SFPacketReceiveEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
@@ -37,7 +37,7 @@ import net.pistonmaster.soulfire.server.util.RandomUtil;
 import java.util.concurrent.TimeUnit;
 
 public class AutoRespawn implements InternalExtension {
-    public static void onPacket(SWPacketReceiveEvent event) {
+    public static void onPacket(SFPacketReceiveEvent event) {
         if (event.packet() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
             var connection = event.connection();
             var settingsHolder = connection.settingsHolder();
@@ -63,7 +63,7 @@ public class AutoRespawn implements InternalExtension {
     @Override
     public void onLoad() {
         SoulFireAPI.registerListeners(AutoRespawn.class);
-        PluginHelper.registerBotEventConsumer(SWPacketReceiveEvent.class, AutoRespawn::onPacket);
+        PluginHelper.registerBotEventConsumer(SFPacketReceiveEvent.class, AutoRespawn::onPacket);
     }
 
     @NoArgsConstructor(access = AccessLevel.NONE)

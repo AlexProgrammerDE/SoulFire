@@ -20,7 +20,7 @@ package net.pistonmaster.soulfire.server.pathfinding.execution;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.util.MathHelper;
 import net.pistonmaster.soulfire.server.util.VectorHelper;
@@ -28,7 +28,7 @@ import net.pistonmaster.soulfire.server.util.VectorHelper;
 @Slf4j
 @RequiredArgsConstructor
 public final class GapJumpAction implements WorldAction {
-    private final SWVec3i blockPosition;
+    private final SFVec3i blockPosition;
     private boolean didLook = false;
     private boolean lockYaw = false;
     private int noJumpTicks = 0;

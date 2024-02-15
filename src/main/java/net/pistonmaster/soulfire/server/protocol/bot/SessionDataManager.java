@@ -76,7 +76,7 @@ import net.pistonmaster.soulfire.server.data.ModifierOperation;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.protocol.bot.block.GlobalBlockPalette;
 import net.pistonmaster.soulfire.server.protocol.bot.container.InventoryManager;
-import net.pistonmaster.soulfire.server.protocol.bot.container.SWItemStack;
+import net.pistonmaster.soulfire.server.protocol.bot.container.SFItemStack;
 import net.pistonmaster.soulfire.server.protocol.bot.container.WindowContainer;
 import net.pistonmaster.soulfire.server.protocol.bot.model.*;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.ControlState;
@@ -87,7 +87,7 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.entity.RawEntity;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 import net.pistonmaster.soulfire.server.util.PrimitiveHelper;
-import net.pistonmaster.soulfire.server.viaversion.SWVersionConstants;
+import net.pistonmaster.soulfire.server.viaversion.SFVersionConstants;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -477,7 +477,7 @@ public final class SessionDataManager {
         }
 
         for (var i = 0; i < packet.getItems().length; i++) {
-            container.setSlot(i, SWItemStack.from(packet.getItems()[i]));
+            container.setSlot(i, SFItemStack.from(packet.getItems()[i]));
         }
     }
 
@@ -485,7 +485,7 @@ public final class SessionDataManager {
     public void onSetContainerSlot(ClientboundContainerSetSlotPacket packet) {
         inventoryManager.lastStateId(packet.getStateId());
         if (packet.getContainerId() == -1 && packet.getSlot() == -1) {
-            inventoryManager.cursorItem(SWItemStack.from(packet.getItem()));
+            inventoryManager.cursorItem(SFItemStack.from(packet.getItem()));
             return;
         }
 
@@ -496,7 +496,7 @@ public final class SessionDataManager {
             return;
         }
 
-        container.setSlot(packet.getSlot(), SWItemStack.from(packet.getItem()));
+        container.setSlot(packet.getSlot(), SFItemStack.from(packet.getItem()));
     }
 
     @EventHandler
@@ -956,7 +956,7 @@ public final class SessionDataManager {
         }
 
         var version = connection.meta().protocolVersion();
-        if (SWVersionConstants.isBedrock(version)) {
+        if (SFVersionConstants.isBedrock(version)) {
             sendPacket(new ServerboundResourcePackPacket(
                     packet.getId(),
                     ResourcePackStatus.DECLINED

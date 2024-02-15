@@ -21,10 +21,10 @@ import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.data.BlockItems;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.protocol.bot.BotActionManager;
-import net.pistonmaster.soulfire.server.protocol.bot.container.SWItemStack;
+import net.pistonmaster.soulfire.server.protocol.bot.container.SFItemStack;
 import net.pistonmaster.soulfire.server.util.BlockTypeHelper;
 import net.pistonmaster.soulfire.server.util.ItemTypeHelper;
 import net.pistonmaster.soulfire.server.util.TimeUtil;
@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @RequiredArgsConstructor
 public final class BlockPlaceAction implements WorldAction {
-    private final SWVec3i blockPosition;
+    private final SFVec3i blockPosition;
     private final BotActionManager.BlockPlaceData blockPlaceData;
     private boolean putOnHotbar = false;
     private boolean finishedPlacing = false;
@@ -58,7 +58,7 @@ public final class BlockPlaceAction implements WorldAction {
             var inventoryManager = sessionDataManager.inventoryManager();
             var playerInventory = inventoryManager.playerInventory();
 
-            SWItemStack leastHardItem = null;
+            SFItemStack leastHardItem = null;
             var leastDestroyTime = 0F;
             for (var slot : playerInventory.storage()) {
                 if (slot.item() == null) {

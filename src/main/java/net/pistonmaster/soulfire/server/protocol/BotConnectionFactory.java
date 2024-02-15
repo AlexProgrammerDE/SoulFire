@@ -71,8 +71,8 @@ public record BotConnectionFactory(AttackManager attackManager, ResolveUtil.Reso
         session.setReadTimeout(settingsHolder.get(BotSettings.READ_TIMEOUT));
         session.setWriteTimeout(settingsHolder.get(BotSettings.WRITE_TIMEOUT));
 
-        session.addListener(new SWBaseListener(botConnection, targetState));
-        session.addListener(new SWSessionListener(sessionDataManager, botConnection));
+        session.addListener(new SFBaseListener(botConnection, targetState));
+        session.addListener(new SFSessionListener(sessionDataManager, botConnection));
 
         attackManager.eventBus().call(new BotConnectionInitEvent(botConnection));
 

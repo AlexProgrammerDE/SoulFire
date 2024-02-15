@@ -28,7 +28,7 @@ import lombok.Setter;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
-import net.pistonmaster.soulfire.account.service.SWOfflineAuthService;
+import net.pistonmaster.soulfire.account.service.SFOfflineAuthService;
 import net.pistonmaster.soulfire.proxy.SWProxy;
 import net.pistonmaster.soulfire.server.api.AttackState;
 import net.pistonmaster.soulfire.server.api.event.EventExceptionHandler;
@@ -38,14 +38,14 @@ import net.pistonmaster.soulfire.server.api.event.attack.AttackStartEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.protocol.BotConnectionFactory;
 import net.pistonmaster.soulfire.server.protocol.netty.ResolveUtil;
-import net.pistonmaster.soulfire.server.protocol.netty.SWNettyHelper;
+import net.pistonmaster.soulfire.server.protocol.netty.SFNettyHelper;
 import net.pistonmaster.soulfire.server.settings.AccountSettings;
 import net.pistonmaster.soulfire.server.settings.BotSettings;
 import net.pistonmaster.soulfire.server.settings.ProxySettings;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 import net.pistonmaster.soulfire.server.util.RandomUtil;
 import net.pistonmaster.soulfire.server.util.TimeUtil;
-import net.pistonmaster.soulfire.server.viaversion.SWVersionConstants;
+import net.pistonmaster.soulfire.server.viaversion.SFVersionConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +77,7 @@ public class AttackManager {
 
     private static MinecraftAccount getAccount(SettingsHolder settingsHolder, List<MinecraftAccount> accounts, int botId) {
         if (accounts.isEmpty()) {
-            return SWOfflineAuthService.createAccount(String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), botId));
+            return SFOfflineAuthService.createAccount(String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), botId));
         }
 
         return accounts.removeFirst();
@@ -148,10 +148,10 @@ public class AttackManager {
         }
 
         // Prepare an event loop group for the attack
-        var attackEventLoopGroup = SWNettyHelper.createEventLoopGroup(0, String.format("Attack-%d", id));
+        var attackEventLoopGroup = SFNettyHelper.createEventLoopGroup(0, String.format("Attack-%d", id));
 
         var protocolVersion = settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
-        var isBedrock = SWVersionConstants.isBedrock(protocolVersion);
+        var isBedrock = SFVersionConstants.isBedrock(protocolVersion);
         var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder, attackEventLoopGroup);
 
         var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);

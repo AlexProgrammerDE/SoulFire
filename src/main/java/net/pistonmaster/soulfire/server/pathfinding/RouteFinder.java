@@ -59,7 +59,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         var stopwatch = Stopwatch.createStarted();
 
         // Store block positions and the best route to them
-        var routeIndex = new Vec2ObjectOpenHashMap<SWVec3i, MinecraftRouteNode>();
+        var routeIndex = new Vec2ObjectOpenHashMap<SFVec3i, MinecraftRouteNode>();
 
         // Store block positions that we need to look at
         var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>(1);

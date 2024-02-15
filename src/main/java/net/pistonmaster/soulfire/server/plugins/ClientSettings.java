@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
-import net.pistonmaster.soulfire.server.api.event.bot.SWPacketSentEvent;
+import net.pistonmaster.soulfire.server.api.event.bot.SFPacketSentEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.*;
@@ -38,7 +38,7 @@ import java.util.ArrayList;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientSettings implements InternalExtension {
-    public static void onPacket(SWPacketSentEvent event) {
+    public static void onPacket(SFPacketSentEvent event) {
         if (event.packet() instanceof ServerboundLoginAcknowledgedPacket) {
             var connection = event.connection();
             var settingsHolder = connection.settingsHolder();
@@ -90,7 +90,7 @@ public class ClientSettings implements InternalExtension {
     @Override
     public void onLoad() {
         SoulFireAPI.registerListeners(ClientSettings.class);
-        PluginHelper.registerBotEventConsumer(SWPacketSentEvent.class, ClientSettings::onPacket);
+        PluginHelper.registerBotEventConsumer(SFPacketSentEvent.class, ClientSettings::onPacket);
     }
 
     @NoArgsConstructor(access = AccessLevel.NONE)

@@ -20,13 +20,13 @@ package net.pistonmaster.soulfire.server.pathfinding.goals;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.Costs;
-import net.pistonmaster.soulfire.server.pathfinding.SWVec3i;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
 
 // TODO: Extract into having more fine behaviour control
-public record PlaceBlockGoal(SWVec3i goal, BlockType blockType) implements GoalScorer {
+public record PlaceBlockGoal(SFVec3i goal, BlockType blockType) implements GoalScorer {
     public PlaceBlockGoal(int x, int y, int z, BlockType blockType) {
-        this(new SWVec3i(x, y, z), blockType);
+        this(new SFVec3i(x, y, z), blockType);
     }
 
     @Override

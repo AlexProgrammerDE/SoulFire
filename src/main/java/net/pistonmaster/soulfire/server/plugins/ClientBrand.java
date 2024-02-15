@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
-import net.pistonmaster.soulfire.server.api.event.bot.SWPacketSentEvent;
+import net.pistonmaster.soulfire.server.api.event.bot.SFPacketSentEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
@@ -34,7 +34,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
 public class ClientBrand implements InternalExtension {
-    public static void onPacket(SWPacketSentEvent event) {
+    public static void onPacket(SFPacketSentEvent event) {
         if (event.packet() instanceof ServerboundLoginAcknowledgedPacket) {
             var connection = event.connection();
             var settingsHolder = connection.settingsHolder();
@@ -62,7 +62,7 @@ public class ClientBrand implements InternalExtension {
     @Override
     public void onLoad() {
         SoulFireAPI.registerListeners(ClientBrand.class);
-        PluginHelper.registerBotEventConsumer(SWPacketSentEvent.class, ClientBrand::onPacket);
+        PluginHelper.registerBotEventConsumer(SFPacketSentEvent.class, ClientBrand::onPacket);
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)

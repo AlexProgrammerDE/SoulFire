@@ -18,7 +18,7 @@
 package net.pistonmaster.soulfire.client.gui;
 
 import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.soulfire.util.SWPathConstants;
+import net.pistonmaster.soulfire.util.SFPathConstants;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -32,7 +32,7 @@ import java.util.Properties;
 
 @Slf4j
 public class GUIClientProps {
-    private static final Path SETTINGS_PATH = SWPathConstants.DATA_FOLDER.resolve("gui-data.properties");
+    private static final Path SETTINGS_PATH = SFPathConstants.DATA_FOLDER.resolve("gui-data.properties");
     private static final Properties SETTINGS = new Properties();
 
     private GUIClientProps() {
