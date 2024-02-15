@@ -96,7 +96,27 @@ public class SFViaPlatform implements ViaPlatform<UserConnection> {
             }
 
             @Override
+            public String getBlockConnectionMethod() {
+                return "packet";
+            }
+
+            @Override
+            public boolean is1_12QuickMoveActionFix() {
+                return false;
+            }
+
+            @Override
             public boolean isItemCache() {
+                return false;
+            }
+
+            @Override
+            public boolean is1_9HitboxFix() {
+                return false;
+            }
+
+            @Override
+            public boolean is1_14HitboxFix() {
                 return false;
             }
 
@@ -169,6 +189,11 @@ public class SFViaPlatform implements ViaPlatform<UserConnection> {
 
     @Override
     public void sendMessage(UUID uuid, String message) {
+        if (uuid == null) {
+            this.getLogger().info(message);
+        } else {
+            this.getLogger().info("[" + uuid + "] " + message);
+        }
     }
 
     @Override
@@ -178,7 +203,7 @@ public class SFViaPlatform implements ViaPlatform<UserConnection> {
 
     @Override
     public boolean isPluginEnabled() {
-        return false;
+        return true;
     }
 
     @Override
