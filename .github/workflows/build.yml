@@ -30,7 +30,7 @@ jobs:
           # A file, directory or wildcard pattern that describes what to upload
           path: |
             build/libs/SoulFire-*.jar
-            !build/libs/SoulFire-*-unshaded.jar
+            !build/libs/SoulFire-*-*.jar
   jpackage-linux:
     needs: build
     runs-on: ubuntu-latest
@@ -50,4 +50,4 @@ jobs:
       - name: Package with jpackage
         run: |
           projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
-          jpackage --app-version $projectVersion --main-jar ./build/libs/*.jar --verbose "@jpackage.cfg" "@jpackage-linux.cfg"
+          jpackage --app-version $projectVersion --main-jar ./build/libs/*-$projectVersion.jar --verbose "@jpackage.cfg" "@jpackage-linux.cfg"
