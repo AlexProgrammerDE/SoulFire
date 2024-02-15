@@ -50,4 +50,4 @@ jobs:
       - name: Package with jpackage
         run: |
           projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
-          jpackage --app-version $projectVersion --verbose "@jpackage.cfg" "@jpackage-linux.cfg"
+          jpackage --app-version $projectVersion --main-jar ./build/libs/*.jar --verbose "@jpackage.cfg" "@jpackage-linux.cfg"
