@@ -1,7 +1,13 @@
+import com.github.jk1.license.filter.LicenseBundleNormalizer
+import com.github.jk1.license.filter.ReduceDuplicateLicensesFilter
+import com.github.jk1.license.render.CsvReportRenderer
+import com.github.jk1.license.render.InventoryHtmlReportRenderer
+
 plugins {
     application
     `sf-java-conventions`
     alias(libs.plugins.jmh)
+    alias(libs.plugins.license.report)
 }
 
 val mavenVersion: String by project
@@ -50,7 +56,9 @@ dependencies {
 
     // For GUI support
     implementation(libs.bundles.flatlaf)
-    implementation(libs.xchart)
+    implementation(libs.xchart) {
+        exclude("org.junit.jupiter")
+    }
     implementation(libs.miglayout.swing)
     implementation(libs.commons.swing)
 
@@ -204,4 +212,13 @@ publishing {
             name = "codemc"
         }
     }
+}
+
+licenseReport {
+    projects = arrayOf(rootProject)
+
+    renderers = arrayOf(InventoryHtmlReportRenderer(), CsvReportRenderer())
+    filters = arrayOf(LicenseBundleNormalizer(), ReduceDuplicateLicensesFilter())
+
+    excludeBoms = true
 }

@@ -177,7 +177,7 @@ public class ForwardingBypass implements InternalExtension {
             return;
         }
 
-        if (!loginPluginMessage.getChannel().equals("velocity:player_info")) {
+        if (!loginPluginMessage.getChannel().equals(VelocityConstants.VELOCITY_IP_FORWARDING_CHANNEL)) {
             return;
         }
 
