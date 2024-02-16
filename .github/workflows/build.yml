@@ -50,7 +50,7 @@ jobs:
           projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
           jpackage --app-version $projectVersion --main-jar SoulFire-$projectVersion.jar --verbose "@jpackage.cfg" "@jpackage-linux.cfg"
       - name: Upload installer
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-installer
           path: |
