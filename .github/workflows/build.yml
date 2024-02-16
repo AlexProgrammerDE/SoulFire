@@ -73,7 +73,7 @@ jobs:
           distribution: 'temurin'
       - name: Package with jpackage
         run: |
-          $projectVersion = Select-String -Path gradle.properties -Pattern '^mavenVersion=' | ForEach-Object { $_.ToString().Split('=')[1] }
+          $projectVersion = Select-String -Path gradle.properties -Pattern '^mavenVersion=' | ForEach-Object { $_.ToString().Split('=')[1] -replace '-SNAPSHOT', '' }
           jpackage --app-version $projectVersion --main-jar "SoulFire-$projectVersion.jar" "@jpackage.cfg" "@jpackage-windows.cfg"
       - name: Upload installer
         uses: actions/upload-artifact@v4
