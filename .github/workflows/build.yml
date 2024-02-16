@@ -100,12 +100,12 @@ jobs:
           distribution: 'temurin'
       - name: Package with jpackage
         run: |
-            projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
-            projectVersionStripped=${projectVersion/-SNAPSHOT/}
-            jpackage --app-version $projectVersionStripped --main-jar "SoulFire-$projectVersion.jar" "@jpackage.cfg" "@jpackage-mac.cfg"
+          projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
+          projectVersionStripped=${projectVersion/-SNAPSHOT/}
+          jpackage --app-version $projectVersionStripped --main-jar "SoulFire-$projectVersion.jar" "@jpackage.cfg" "@jpackage-mac.cfg"
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installer
+          name: mac-installer
           path: |
             build/distributions/*
