@@ -73,8 +73,8 @@ jobs:
           distribution: 'temurin'
       - name: Package with jpackage
         run: |
-          projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
-          jpackage --app-version $projectVersion --main-jar SoulFire-$projectVersion.jar "@jpackage.cfg" "@jpackage-windows.cfg"
+          for /f "tokens=2 delims==" %%V in ('findstr /r "^mavenVersion=" gradle.properties') do set projectVersion=%%V
+          jpackage --app-version $projectVersion --main-jar SoulFire-%projectVersion%.jar "@jpackage.cfg" "@jpackage-windows.cfg"
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
