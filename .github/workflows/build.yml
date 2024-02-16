@@ -31,10 +31,7 @@ jobs:
             !build/libs/SoulFire-*-unshaded.jar
   jpackage-linux:
     needs: build
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -57,5 +54,31 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-installer
+          path: |
+            build/distributions/*
+  jpackage-windows:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: SoulFire
+          path: build/libs
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Package with jpackage
+        run: |
+          projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
+          jpackage --app-version $projectVersion --main-jar SoulFire-$projectVersion.jar "@jpackage.cfg" "@jpackage-windows.cfg"
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
           path: |
             build/distributions/*
