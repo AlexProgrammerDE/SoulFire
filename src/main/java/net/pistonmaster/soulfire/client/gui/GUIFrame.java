@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.client.gui;
 
 import ch.jalu.injector.Injector;
+import com.formdev.flatlaf.extras.FlatSVGUtils;
 import com.formdev.flatlaf.util.SystemInfo;
 import net.pistonmaster.soulfire.builddata.BuildData;
 import net.pistonmaster.soulfire.client.gui.libs.HintManager;
@@ -94,6 +95,7 @@ public class GUIFrame extends JFrame {
         setResizable(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
+        setIconImages(FlatSVGUtils.createWindowIconImages("/icons/icon.svg"));
         setJMenuBar(injector.getSingleton(SFMenuBar.class));
 
         setLayout(new CardLayout());
