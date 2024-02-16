@@ -50,10 +50,13 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+      - name: Install rpm
+        run: sudo apt-get install rpm
       - name: Package with jpackage
         run: |
           projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
-          jpackage --app-version $projectVersion --main-jar "SoulFire-$projectVersion.jar" "@jpackage.cfg" "@jpackage-linux.cfg"
+          jpackage --app-version $projectVersion --main-jar "SoulFire-$projectVersion.jar" "@jpackage.cfg" "@jpackage-linux.cfg" --type rpm
+          jpackage --app-version $projectVersion --main-jar "SoulFire-$projectVersion.jar" "@jpackage.cfg" "@jpackage-linux.cfg" --type deb
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
