@@ -49,7 +49,6 @@ jobs:
         run: |
           projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
           jpackage --app-version $projectVersion --main-jar SoulFire-$projectVersion.jar --type deb "@jpackage.cfg" "@jpackage-linux.cfg"
-          jpackage --app-version $projectVersion --main-jar SoulFire-$projectVersion.jar --type app-image "@jpackage.cfg" "@jpackage-linux.cfg"
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
