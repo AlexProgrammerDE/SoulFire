@@ -22,13 +22,18 @@ jobs:
         uses: gradle/gradle-build-action@v3
         with:
           arguments: build test --stacktrace --scan
+      - name: Prepare Upload
+        run: |
+          projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
+          mkdir build/upload
+          cp build/libs/SoulFire-$projectVersion.jar build/upload
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: SoulFire
+          if-no-files-found: error
           path: |
-            build/libs/SoulFire-*.jar
-            !build/libs/SoulFire-*-unshaded.jar
+            build/upload/SoulFire-*.jar
   jpackage-linux:
     needs: build
     runs-on: ubuntu-latest
@@ -53,6 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-installer
+          if-no-files-found: error
           path: |
             build/distributions/*
   jpackage-windows:
@@ -80,6 +86,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-installer
+          if-no-files-found: error
           path: |
             build/distributions/*
   jpackage-mac:
@@ -107,5 +114,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mac-installer
+          if-no-files-found: error
           path: |
             build/distributions/*
