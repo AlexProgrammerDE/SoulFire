@@ -19,12 +19,7 @@ package net.pistonmaster.soulfire.server;
 
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
-import com.github.steveice10.mc.protocol.codec.MinecraftCodec;
-import com.github.steveice10.mc.protocol.codec.MinecraftPacketSerializer;
-import com.github.steveice10.mc.protocol.data.ProtocolState;
-import com.github.steveice10.packetlib.codec.PacketDefinition;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
@@ -47,7 +42,6 @@ import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInit
 import net.pistonmaster.soulfire.server.data.TranslationMapper;
 import net.pistonmaster.soulfire.server.grpc.RPCServer;
 import net.pistonmaster.soulfire.server.plugins.*;
-import net.pistonmaster.soulfire.server.protocol.packet.SFClientboundStatusResponsePacket;
 import net.pistonmaster.soulfire.server.settings.AccountSettings;
 import net.pistonmaster.soulfire.server.settings.BotSettings;
 import net.pistonmaster.soulfire.server.settings.DevSettings;
@@ -55,19 +49,16 @@ import net.pistonmaster.soulfire.server.settings.ProxySettings;
 import net.pistonmaster.soulfire.server.settings.lib.ServerSettingsRegistry;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 import net.pistonmaster.soulfire.server.util.SFLogAppender;
-import net.pistonmaster.soulfire.server.util.VersionComparator;
 import net.pistonmaster.soulfire.server.viaversion.SFViaLoader;
 import net.pistonmaster.soulfire.server.viaversion.platform.*;
 import net.pistonmaster.soulfire.util.SFPathConstants;
+import net.pistonmaster.soulfire.util.SFUpdateChecker;
 import net.pistonmaster.soulfire.util.ShutdownManager;
 import org.apache.logging.log4j.LogManager;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
@@ -132,12 +123,6 @@ public class SoulFireServer {
 
         log.info("Starting SoulFire v{}...", BuildData.VERSION);
 
-        // Override status packet, so we can support any version
-        MinecraftCodec.CODEC.getCodec(ProtocolState.STATUS)
-                .registerClientbound(new PacketDefinition<>(0x00,
-                        SFClientboundStatusResponsePacket.class,
-                        new MinecraftPacketSerializer<>(SFClientboundStatusResponsePacket::new)));
-
         var viaStart = CompletableFuture.runAsync(() -> {
             // Init via
             var viaPath = SFPathConstants.CONFIG_FOLDER.resolve("ViaVersion");
@@ -175,7 +160,7 @@ public class SoulFireServer {
         var newVersion = new AtomicReference<String>();
         var updateCheck = CompletableFuture.runAsync(() -> {
             log.info("Checking for updates...");
-            newVersion.set(checkForUpdates());
+            newVersion.set(SFUpdateChecker.getInstance().join().getUpdateVersion().orElse(null));
         });
 
         CompletableFuture.allOf(rpcServerStart, viaStart, updateCheck).join();
@@ -221,41 +206,6 @@ public class SoulFireServer {
     private static void registerServerExtensions() {
         SoulFireBootstrap.PLUGIN_MANAGER.getExtensions(ServerExtension.class)
                 .forEach(SoulFireAPI::registerServerExtension);
-    }
-
-    private static String checkForUpdates() {
-        if (Boolean.getBoolean("soulfire.disable-updates")) {
-            log.info("Skipping update check because of system property");
-            return null;
-        }
-
-        try {
-            var url = URI.create("https://api.github.com/repos/AlexProgrammerDE/SoulFire/releases/latest").toURL();
-            var connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("User-Agent", "SoulFire");
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
-
-            if (connection.getResponseCode() != 200) {
-                log.warn("Failed to check for updates: {}", connection.getResponseCode());
-                return null;
-            }
-
-            JsonObject response;
-            try (var stream = connection.getInputStream()) {
-                response = GENERAL_GSON.fromJson(new InputStreamReader(stream), JsonObject.class);
-            }
-
-            var latestVersion = response.get("tag_name").getAsString();
-            if (VersionComparator.isNewer(BuildData.VERSION, latestVersion)) {
-                return latestVersion;
-            }
-        } catch (IOException e) {
-            log.warn("Failed to check for updates", e);
-        }
-
-        return null;
     }
 
     @SuppressWarnings("UnstableApiUsage")
