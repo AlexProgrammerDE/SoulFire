@@ -129,6 +129,8 @@ dependencies {
 
     // For class injection
     api(libs.injector)
+
+    testImplementation(libs.junit)
 }
 
 fun Manifest.applySFAttributes() {
