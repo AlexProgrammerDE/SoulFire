@@ -38,8 +38,8 @@ public class TagsState {
         case "minecraft:block" -> handleBlocks(registry.getValue());
         case "minecraft:item" -> handleItems(registry.getValue());
         case "minecraft:entity_type" -> handleEntities(registry.getValue());
-          // Ignore everything else, we just need these three for now
       }
+      // Ignore everything else, we just need these three for now
     }
   }
 

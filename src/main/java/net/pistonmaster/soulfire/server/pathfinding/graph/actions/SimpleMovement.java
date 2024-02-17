@@ -65,8 +65,9 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     this.cost =
         (diagonal ? Costs.DIAGONAL : Costs.STRAIGHT)
-            + switch (modifier) { // Add additional "discouraged" costs to prevent the bot from
-                                  // doing too much parkour
+            // Add additional "discouraged" costs to prevent the bot from
+            // doing too much parkour
+            + switch (modifier) {
               case NORMAL -> 0;
               case FALL_1 -> Costs.FALL_1;
               case FALL_2 -> Costs.FALL_2;

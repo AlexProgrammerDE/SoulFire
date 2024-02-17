@@ -529,10 +529,10 @@ public record MinecraftGraph(TagsState tagsState) {
 
         yield SubscriptionSingleResult.IMPOSSIBLE;
       }
+      case PARKOUR_UNSAFE_TO_STAND_ON -> {
         // We only want to jump over dangerous blocks/gaps
         // So either a non-full-block like water or lava or magma
         // since it hurts to stand on.
-      case PARKOUR_UNSAFE_TO_STAND_ON -> {
         if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
           yield SubscriptionSingleResult.IMPOSSIBLE;
         }

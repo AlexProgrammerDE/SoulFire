@@ -105,8 +105,7 @@ public class ModLoaderSupport implements InternalExtension {
     var buffer = Unpooled.wrappedBuffer(pluginMessage.getData());
     var discriminator = buffer.readByte();
     switch (discriminator) {
-        // ServerHello
-      case 0 -> {
+      case 0 -> { // ServerHello
         var fmlProtocolVersion = buffer.readByte();
         var helper = botConnection.session().getCodecHelper();
         if (fmlProtocolVersion > 1) {
@@ -120,39 +119,29 @@ public class ModLoaderSupport implements InternalExtension {
         sendFMLClientHello(botConnection, fmlProtocolVersion);
         sendFMLModList(botConnection, List.of());
       }
-        // ModList
-      case 2 -> {
-        // WAITINGSERVERDATA
-        sendFMLHandshakeAck(botConnection, (byte) 2);
-      }
-        // RegistryData
-      case 3 -> {
+      case 2 -> // ModList
+          // WAITINGSERVERDATA
+          sendFMLHandshakeAck(botConnection, (byte) 2);
+      case 3 -> { // RegistryData
         var hasMore = buffer.readBoolean();
         if (!hasMore) {
           // WAITINGSERVERCOMPLETE
           sendFMLHandshakeAck(botConnection, (byte) 3);
         }
       }
-        // HandshakeAck
-      case -1 -> {
+      case -1 -> { // HandshakeAck
         var phase = buffer.readByte();
         switch (phase) {
-            // WAITINGCACK
-          case 2 -> {
-            // PENDINGCOMPLETE
-            sendFMLHandshakeAck(botConnection, (byte) 4);
-          }
-            // COMPLETE
-          case 3 -> {
-            // COMPLETE
-            sendFMLHandshakeAck(botConnection, (byte) 5);
-          }
+          case 2 -> // WAITINGCACK
+              // PENDINGCOMPLETE
+              sendFMLHandshakeAck(botConnection, (byte) 4);
+          case 3 -> // COMPLETE
+              // COMPLETE
+              sendFMLHandshakeAck(botConnection, (byte) 5);
         }
       }
-        // HandshakeReset
-      case -2 -> {
-        log.debug("FML handshake reset");
-      }
+      case -2 -> // HandshakeReset
+          log.debug("FML handshake reset");
     }
   }
 
