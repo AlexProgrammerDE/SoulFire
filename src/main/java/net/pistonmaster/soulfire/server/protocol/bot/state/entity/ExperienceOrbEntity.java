@@ -26,10 +26,10 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 public class ExperienceOrbEntity extends Entity {
-    private final int expValue;
+  private final int expValue;
 
-    public ExperienceOrbEntity(int entityId, int expValue) {
-        super(entityId, UUID.randomUUID(), EntityType.EXPERIENCE_ORB);
-        this.expValue = expValue;
-    }
+  public ExperienceOrbEntity(int entityId, int expValue) {
+    super(entityId, UUID.randomUUID(), EntityType.EXPERIENCE_ORB);
+    this.expValue = expValue;
+  }
 }

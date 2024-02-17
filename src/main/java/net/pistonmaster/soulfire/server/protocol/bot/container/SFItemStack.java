@@ -32,97 +32,97 @@ import java.util.Objects;
 
 @Getter
 public class SFItemStack extends ItemStack {
-    private final ItemType type;
-    private final Object2ShortMap<String> enchantments;
-    private final int precalculatedHash;
+  private final ItemType type;
+  private final Object2ShortMap<String> enchantments;
+  private final int precalculatedHash;
 
-    private SFItemStack(SFItemStack clone, int amount) {
-        super(clone.getId(), amount, clone.getNbt());
-        this.type = clone.type;
-        this.enchantments = clone.enchantments;
-        this.precalculatedHash = clone.precalculatedHash;
-    }
+  private SFItemStack(SFItemStack clone, int amount) {
+    super(clone.getId(), amount, clone.getNbt());
+    this.type = clone.type;
+    this.enchantments = clone.enchantments;
+    this.precalculatedHash = clone.precalculatedHash;
+  }
 
-    private SFItemStack(ItemStack itemStack) {
-        super(itemStack.getId(), itemStack.getAmount(), itemStack.getNbt());
-        this.type = ItemType.getById(itemStack.getId());
-        var compound = itemStack.getNbt();
-        if (compound == null) {
-            this.enchantments = Object2ShortMaps.emptyMap();
-        } else {
-            var enchantmentsList = compound.<ListTag>get("Enchantments");
-            if (enchantmentsList != null) {
-                this.enchantments = new Object2ShortArrayMap<>(enchantmentsList.size());
-                for (var enchantment : enchantmentsList) {
-                    var enchantmentCompound = (CompoundTag) enchantment;
+  private SFItemStack(ItemStack itemStack) {
+    super(itemStack.getId(), itemStack.getAmount(), itemStack.getNbt());
+    this.type = ItemType.getById(itemStack.getId());
+    var compound = itemStack.getNbt();
+    if (compound == null) {
+      this.enchantments = Object2ShortMaps.emptyMap();
+    } else {
+      var enchantmentsList = compound.<ListTag>get("Enchantments");
+      if (enchantmentsList != null) {
+        this.enchantments = new Object2ShortArrayMap<>(enchantmentsList.size());
+        for (var enchantment : enchantmentsList) {
+          var enchantmentCompound = (CompoundTag) enchantment;
 
-                    this.enchantments.put(
-                            enchantmentCompound.<StringTag>get("id").getValue(),
-                            enchantmentCompound.<ShortTag>get("lvl").getValue().shortValue()
-                    );
-                }
-            } else {
-                this.enchantments = Object2ShortMaps.emptyMap();
-            }
+          this.enchantments.put(
+              enchantmentCompound.<StringTag>get("id").getValue(),
+              enchantmentCompound.<ShortTag>get("lvl").getValue().shortValue()
+          );
         }
-
-        this.precalculatedHash = Objects.hash(this.type, this.enchantments);
-    }
-
-    private SFItemStack(ItemType itemType, int amount) {
-        super(itemType.id(), amount, null);
-        this.type = itemType;
+      } else {
         this.enchantments = Object2ShortMaps.emptyMap();
-        this.precalculatedHash = Objects.hash(this.type, this.enchantments);
+      }
     }
 
-    public static SFItemStack from(ItemStack itemStack) {
-        if (itemStack == null) {
-            return null;
-        }
+    this.precalculatedHash = Objects.hash(this.type, this.enchantments);
+  }
 
-        return new SFItemStack(itemStack);
+  private SFItemStack(ItemType itemType, int amount) {
+    super(itemType.id(), amount, null);
+    this.type = itemType;
+    this.enchantments = Object2ShortMaps.emptyMap();
+    this.precalculatedHash = Objects.hash(this.type, this.enchantments);
+  }
+
+  public static SFItemStack from(ItemStack itemStack) {
+    if (itemStack == null) {
+      return null;
     }
 
-    public static SFItemStack forTypeSingle(ItemType itemType) {
-        return new SFItemStack(itemType, 1);
+    return new SFItemStack(itemStack);
+  }
+
+  public static SFItemStack forTypeSingle(ItemType itemType) {
+    return new SFItemStack(itemType, 1);
+  }
+
+  public static SFItemStack forTypeStack(ItemType itemType) {
+    return new SFItemStack(itemType, itemType.stackSize());
+  }
+
+  public short getEnchantmentLevel(String enchantment) {
+    return this.enchantments.getShort(enchantment);
+  }
+
+  public SFItemStack withAmount(int amount) {
+    return new SFItemStack(this, amount);
+  }
+
+  public boolean equalsShape(SFItemStack other) {
+    if (other == null) {
+      return false;
     }
 
-    public static SFItemStack forTypeStack(ItemType itemType) {
-        return new SFItemStack(itemType, itemType.stackSize());
+    return this.type == other.type && this.enchantments.equals(other.enchantments);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
     }
 
-    public short getEnchantmentLevel(String enchantment) {
-        return this.enchantments.getShort(enchantment);
+    if (obj instanceof SFItemStack other) {
+      return this.equalsShape(other) && this.getAmount() == other.getAmount();
     }
 
-    public SFItemStack withAmount(int amount) {
-        return new SFItemStack(this, amount);
-    }
+    return false;
+  }
 
-    public boolean equalsShape(SFItemStack other) {
-        if (other == null) {
-            return false;
-        }
-
-        return this.type == other.type && this.enchantments.equals(other.enchantments);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj instanceof SFItemStack other) {
-            return this.equalsShape(other) && this.getAmount() == other.getAmount();
-        }
-
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return this.precalculatedHash;
-    }
+  @Override
+  public int hashCode() {
+    return this.precalculatedHash;
+  }
 }

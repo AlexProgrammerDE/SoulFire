@@ -26,13 +26,13 @@ import javax.crypto.SecretKey;
 import java.util.Objects;
 
 public class SFViaEncryptionProvider extends EncryptionProvider {
-    @Override
-    public void enableDecryption(UserConnection user) {
-        var session = Objects.requireNonNull(user.get(StorableSession.class)).session();
-        SecretKey key = session.getFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY);
-        Objects.requireNonNull(key, "Key is null!");
-        session.setFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY, null);
+  @Override
+  public void enableDecryption(UserConnection user) {
+    var session = Objects.requireNonNull(user.get(StorableSession.class)).session();
+    SecretKey key = session.getFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY);
+    Objects.requireNonNull(key, "Key is null!");
+    session.setFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY, null);
 
-        session.enableJavaEncryption(key);
-    }
+    session.enableJavaEncryption(key);
+  }
 }

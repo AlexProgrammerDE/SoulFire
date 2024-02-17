@@ -19,37 +19,36 @@ package net.pistonmaster.soulfire.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.Objects;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 
-import java.util.Objects;
-
 public class AttributesDataGenerator implements IDataGenerator {
-    public static JsonObject generateAttribute(Attribute attribute) {
-        var attributeDesc = new JsonObject();
+  public static JsonObject generateAttribute(Attribute attribute) {
+    var attributeDesc = new JsonObject();
 
-        attributeDesc.addProperty("name", Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(attribute)).getPath());
+    attributeDesc.addProperty("name", Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(attribute)).getPath());
 
-        var rangedAttribute = (RangedAttribute) attribute;
-        attributeDesc.addProperty("min", rangedAttribute.getMinValue());
-        attributeDesc.addProperty("max", rangedAttribute.getMaxValue());
+    var rangedAttribute = (RangedAttribute) attribute;
+    attributeDesc.addProperty("min", rangedAttribute.getMinValue());
+    attributeDesc.addProperty("max", rangedAttribute.getMaxValue());
 
-        attributeDesc.addProperty("defaultValue", rangedAttribute.getDefaultValue());
+    attributeDesc.addProperty("defaultValue", rangedAttribute.getDefaultValue());
 
-        return attributeDesc;
-    }
+    return attributeDesc;
+  }
 
-    @Override
-    public String getDataName() {
-        return "attributes.json";
-    }
+  @Override
+  public String getDataName() {
+    return "attributes.json";
+  }
 
-    @Override
-    public JsonArray generateDataJson() {
-        var resultAttributesArray = new JsonArray();
+  @Override
+  public JsonArray generateDataJson() {
+    var resultAttributesArray = new JsonArray();
 
-        BuiltInRegistries.ATTRIBUTE.forEach(attribute -> resultAttributesArray.add(generateAttribute(attribute)));
-        return resultAttributesArray;
-    }
+    BuiltInRegistries.ATTRIBUTE.forEach(attribute -> resultAttributesArray.add(generateAttribute(attribute)));
+    return resultAttributesArray;
+  }
 }

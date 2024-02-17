@@ -44,62 +44,62 @@ public record BotConnection(UUID connectionId, BotConnectionFactory factory, Att
                             ResolveUtil.ResolvedAddress resolvedAddress,
                             ExecutorManager executorManager, BotConnectionMeta meta,
                             LambdaManager eventBus) {
-    public CompletableFuture<?> connect() {
-        return CompletableFuture.runAsync(() -> {
-            attackManager.eventBus().call(new PreBotConnectEvent(this));
-            session.connect(true);
-        });
+  public CompletableFuture<?> connect() {
+    return CompletableFuture.runAsync(() -> {
+      attackManager.eventBus().call(new PreBotConnectEvent(this));
+      session.connect(true);
+    });
+  }
+
+  public boolean isOnline() {
+    return session.isConnected();
+  }
+
+  public SessionDataManager sessionDataManager() {
+    return meta.sessionDataManager();
+  }
+
+  public BotControlAPI botControl() {
+    return meta.botControlAPI();
+  }
+
+  public void tick(long ticks, float partialTicks) {
+    session.tick(); // Ensure all packets are handled before ticking
+    for (var i = 0; i < ticks; i++) {
+      try {
+        var tickHookState = TickHookContext.INSTANCE.get();
+        tickHookState.clear();
+
+        eventBus.call(new BotPreTickEvent(this));
+        tickHookState.callHooks(TickHookContext.HookType.PRE_TICK);
+
+        sessionDataManager().tick();
+        botControl().tick();
+
+        eventBus.call(new BotPostTickEvent(this));
+        tickHookState.callHooks(TickHookContext.HookType.POST_TICK);
+      } catch (Throwable t) {
+        logger.error("Error while ticking bot!", t);
+      }
     }
+  }
 
-    public boolean isOnline() {
-        return session.isConnected();
-    }
+  public GlobalTrafficShapingHandler getTrafficHandler() {
+    return session.getFlag(SFProtocolConstants.TRAFFIC_HANDLER);
+  }
 
-    public SessionDataManager sessionDataManager() {
-        return meta.sessionDataManager();
-    }
+  public CompletableFuture<?> gracefulDisconnect() {
+    return CompletableFuture.runAsync(() -> {
+      session.disconnect("Disconnect");
 
-    public BotControlAPI botControl() {
-        return meta.botControlAPI();
-    }
+      // Give the server one second to handle the disconnect
+      TimeUtil.waitTime(1, TimeUnit.SECONDS);
 
-    public void tick(long ticks, float partialTicks) {
-        session.tick(); // Ensure all packets are handled before ticking
-        for (var i = 0; i < ticks; i++) {
-            try {
-                var tickHookState = TickHookContext.INSTANCE.get();
-                tickHookState.clear();
+      // Shut down all executors
+      executorManager.shutdownAll();
 
-                eventBus.call(new BotPreTickEvent(this));
-                tickHookState.callHooks(TickHookContext.HookType.PRE_TICK);
-
-                sessionDataManager().tick();
-                botControl().tick();
-
-                eventBus.call(new BotPostTickEvent(this));
-                tickHookState.callHooks(TickHookContext.HookType.POST_TICK);
-            } catch (Throwable t) {
-                logger.error("Error while ticking bot!", t);
-            }
-        }
-    }
-
-    public GlobalTrafficShapingHandler getTrafficHandler() {
-        return session.getFlag(SFProtocolConstants.TRAFFIC_HANDLER);
-    }
-
-    public CompletableFuture<?> gracefulDisconnect() {
-        return CompletableFuture.runAsync(() -> {
-            session.disconnect("Disconnect");
-
-            // Give the server one second to handle the disconnect
-            TimeUtil.waitTime(1, TimeUnit.SECONDS);
-
-            // Shut down all executors
-            executorManager.shutdownAll();
-
-            // Let threads finish that didn't immediately interrupt
-            TimeUtil.waitTime(100, TimeUnit.MILLISECONDS);
-        });
-    }
+      // Let threads finish that didn't immediately interrupt
+      TimeUtil.waitTime(100, TimeUnit.MILLISECONDS);
+    });
+  }
 }

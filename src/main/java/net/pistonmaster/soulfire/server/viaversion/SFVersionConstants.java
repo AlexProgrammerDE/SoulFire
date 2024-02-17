@@ -24,20 +24,20 @@ import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 
 public class SFVersionConstants {
-    public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.getProtocol(MinecraftCodec.CODEC.getProtocolVersion());
+  public static final ProtocolVersion CURRENT_PROTOCOL_VERSION = ProtocolVersion.getProtocol(MinecraftCodec.CODEC.getProtocolVersion());
 
-    private SFVersionConstants() {
-    }
+  private SFVersionConstants() {
+  }
 
-    public static boolean isLegacy(ProtocolVersion version) {
-        return LegacyProtocolVersion.PROTOCOLS.contains(version);
-    }
+  public static boolean isLegacy(ProtocolVersion version) {
+    return LegacyProtocolVersion.PROTOCOLS.contains(version);
+  }
 
-    public static boolean isBedrock(ProtocolVersion version) {
-        return BedrockProtocolVersion.PROTOCOLS.contains(version);
-    }
+  public static boolean isBedrock(ProtocolVersion version) {
+    return BedrockProtocolVersion.PROTOCOLS.contains(version);
+  }
 
-    public static boolean isAprilFools(ProtocolVersion version) {
-        return AprilFoolsProtocolVersion.PROTOCOLS.contains(version);
-    }
+  public static boolean isAprilFools(ProtocolVersion version) {
+    return AprilFoolsProtocolVersion.PROTOCOLS.contains(version);
+  }
 }

@@ -27,56 +27,56 @@ import org.cloudburstmc.math.vector.Vector3i;
 @AllArgsConstructor
 @ToString
 public class MutableVector3d {
-    public double x;
-    public double y;
-    public double z;
+  public double x;
+  public double y;
+  public double z;
 
-    public Vector3d toImmutable() {
-        return Vector3d.from(x, y, z);
+  public Vector3d toImmutable() {
+    return Vector3d.from(x, y, z);
+  }
+
+  public Vector3i toImmutableInt() {
+    return Vector3i.from(x, y, z);
+  }
+
+  public MutableVector3d offset(double x, double v, double z) {
+    return new MutableVector3d(this.x + x, this.y + v, this.z + z);
+  }
+
+  public MutableVector3d floored() {
+    return new MutableVector3d(Math.floor(x), Math.floor(y), Math.floor(z));
+  }
+
+  public void add(Vector3i vector3i) {
+    this.x += vector3i.getX();
+    this.y += vector3i.getY();
+    this.z += vector3i.getZ();
+  }
+
+  public void add(Vector3d vector3d) {
+    this.x += vector3d.getX();
+    this.y += vector3d.getY();
+    this.z += vector3d.getZ();
+  }
+
+  public double norm() {
+    return Math.sqrt(x * x + y * y + z * z);
+  }
+
+  public MutableVector3d normalize() {
+    var norm = norm();
+    if (norm != 0) {
+      x /= norm;
+      y /= norm;
+      z /= norm;
     }
 
-    public Vector3i toImmutableInt() {
-        return Vector3i.from(x, y, z);
-    }
+    return this;
+  }
 
-    public MutableVector3d offset(double x, double v, double z) {
-        return new MutableVector3d(this.x + x, this.y + v, this.z + z);
-    }
-
-    public MutableVector3d floored() {
-        return new MutableVector3d(Math.floor(x), Math.floor(y), Math.floor(z));
-    }
-
-    public void add(Vector3i vector3i) {
-        this.x += vector3i.getX();
-        this.y += vector3i.getY();
-        this.z += vector3i.getZ();
-    }
-
-    public void add(Vector3d vector3d) {
-        this.x += vector3d.getX();
-        this.y += vector3d.getY();
-        this.z += vector3d.getZ();
-    }
-
-    public double norm() {
-        return Math.sqrt(x * x + y * y + z * z);
-    }
-
-    public MutableVector3d normalize() {
-        var norm = norm();
-        if (norm != 0) {
-            x /= norm;
-            y /= norm;
-            z /= norm;
-        }
-
-        return this;
-    }
-
-    public void translate(int i, int i1, int i2) {
-        x += i;
-        y += i1;
-        z += i2;
-    }
+  public void translate(int i, int i1, int i2) {
+    x += i;
+    y += i1;
+    z += i2;
+  }
 }

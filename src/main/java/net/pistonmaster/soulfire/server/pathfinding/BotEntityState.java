@@ -32,11 +32,11 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.entity.ClientEntity;
  */
 public record BotEntityState(SFVec3i blockPosition, ProjectedLevelState levelState,
                              ProjectedInventory inventory) {
-    public static BotEntityState initialState(ClientEntity clientEntity, ProjectedLevelState levelState, ProjectedInventory inventory) {
-        return new BotEntityState(
-                SFVec3i.fromDouble(clientEntity.pos()),
-                levelState,
-                inventory
-        );
-    }
+  public static BotEntityState initialState(ClientEntity clientEntity, ProjectedLevelState levelState, ProjectedInventory inventory) {
+    return new BotEntityState(
+        SFVec3i.fromDouble(clientEntity.pos()),
+        levelState,
+        inventory
+    );
+  }
 }

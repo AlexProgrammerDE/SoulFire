@@ -22,12 +22,13 @@ import net.pistonmaster.soulfire.proxy.SWProxy;
 
 import java.io.IOException;
 
-public sealed interface MCAuthService<T> permits SFBedrockMicrosoftAuthService, SFEasyMCAuthService, SFJavaMicrosoftAuthService, SFOfflineAuthService, SFTheAlteningAuthService {
-    MinecraftAccount login(T data, SWProxy proxyData) throws IOException;
+public sealed interface MCAuthService<T>
+    permits SFBedrockMicrosoftAuthService, SFEasyMCAuthService, SFJavaMicrosoftAuthService, SFOfflineAuthService, SFTheAlteningAuthService {
+  MinecraftAccount login(T data, SWProxy proxyData) throws IOException;
 
-    T createData(String data);
+  T createData(String data);
 
-    default MinecraftAccount createDataAndLogin(String data, SWProxy proxyData) throws IOException {
-        return login(createData(data), proxyData);
-    }
+  default MinecraftAccount createDataAndLogin(String data, SWProxy proxyData) throws IOException {
+    return login(createData(data), proxyData);
+  }
 }

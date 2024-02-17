@@ -28,39 +28,39 @@ import lombok.ToString;
 @Getter
 @ToString
 public class MapDataState {
-    private byte scale;
-    private boolean locked;
-    private MapIcon[] icons;
-    private MapData mapData;
+  private byte scale;
+  private boolean locked;
+  private MapIcon[] icons;
+  private MapData mapData;
 
-    public void update(ClientboundMapItemDataPacket packet) {
-        this.scale = packet.getScale();
-        this.locked = packet.isLocked();
-        this.icons = packet.getIcons();
+  public void update(ClientboundMapItemDataPacket packet) {
+    this.scale = packet.getScale();
+    this.locked = packet.isLocked();
+    this.icons = packet.getIcons();
 
-        if (packet.getData() != null) {
-            if (this.mapData == null) {
-                this.mapData = new MapData(128, 128, 0, 0, new byte[128 * 128]);
-            }
+    if (packet.getData() != null) {
+      if (this.mapData == null) {
+        this.mapData = new MapData(128, 128, 0, 0, new byte[128 * 128]);
+      }
 
-            this.mergeIntoMap(packet.getData());
-        }
+      this.mergeIntoMap(packet.getData());
     }
+  }
 
-    private void mergeIntoMap(MapData source) {
-        var width = source.getColumns();
-        var height = source.getRows();
+  private void mergeIntoMap(MapData source) {
+    var width = source.getColumns();
+    var height = source.getRows();
 
-        var xOffset = source.getX();
-        var yOffset = source.getY();
-        for (var i = 0; i < width; ++i) {
-            for (var j = 0; j < height; ++j) {
-                var colorData = source.getData()[i + j * width];
+    var xOffset = source.getX();
+    var yOffset = source.getY();
+    for (var i = 0; i < width; ++i) {
+      for (var j = 0; j < height; ++j) {
+        var colorData = source.getData()[i + j * width];
 
-                var x = xOffset + i;
-                var y = yOffset + j;
-                this.mapData.getData()[x + y * 128] = colorData;
-            }
-        }
+        var x = xOffset + i;
+        var y = yOffset + j;
+        this.mapData.getData()[x + y * 128] = colorData;
+      }
     }
+  }
 }

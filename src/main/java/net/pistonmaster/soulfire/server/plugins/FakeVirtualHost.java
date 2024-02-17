@@ -32,59 +32,59 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
 public class FakeVirtualHost implements InternalExtension {
-    public static void onPacket(SFPacketSendingEvent event) {
-        if (event.packet() instanceof ClientIntentionPacket intentionPacket) {
-            var settingsHolder = event.connection().settingsHolder();
+  public static void onPacket(SFPacketSendingEvent event) {
+    if (event.packet() instanceof ClientIntentionPacket intentionPacket) {
+      var settingsHolder = event.connection().settingsHolder();
 
-            if (!settingsHolder.get(FakeVirtualHostSettings.ENABLED)) {
-                return;
-            }
+      if (!settingsHolder.get(FakeVirtualHostSettings.ENABLED)) {
+        return;
+      }
 
-            event.packet(intentionPacket
-                    .withHostname(settingsHolder.get(FakeVirtualHostSettings.HOSTNAME))
-                    .withPort(settingsHolder.get(FakeVirtualHostSettings.PORT))
-            );
-        }
+      event.packet(intentionPacket
+          .withHostname(settingsHolder.get(FakeVirtualHostSettings.HOSTNAME))
+          .withPort(settingsHolder.get(FakeVirtualHostSettings.PORT))
+      );
     }
+  }
 
-    @EventHandler
-    public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
-        event.settingsRegistry().addClass(FakeVirtualHostSettings.class, "Fake Virtual Host");
-    }
+  @EventHandler
+  public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(FakeVirtualHostSettings.class, "Fake Virtual Host");
+  }
 
-    @Override
-    public void onLoad() {
-        SoulFireAPI.registerListeners(FakeVirtualHost.class);
-        PluginHelper.registerBotEventConsumer(SFPacketSendingEvent.class, FakeVirtualHost::onPacket);
-    }
+  @Override
+  public void onLoad() {
+    SoulFireAPI.registerListeners(FakeVirtualHost.class);
+    PluginHelper.registerBotEventConsumer(SFPacketSendingEvent.class, FakeVirtualHost::onPacket);
+  }
 
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    private static class FakeVirtualHostSettings implements SettingsObject {
-        private static final Property.Builder BUILDER = Property.builder("fake-virtual-host");
-        public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
-                "enabled",
-                "Fake virtual host",
-                new String[]{"--fake-virtual-host"},
-                "Whether to fake the virtual host or not",
-                false
-        );
-        public static final StringProperty HOSTNAME = BUILDER.ofString(
-                "hostname",
-                "Hostname",
-                new String[]{"--fake-virtual-host-hostname"},
-                "The hostname to fake",
-                "localhost"
-        );
-        public static final IntProperty PORT = BUILDER.ofInt(
-                "port",
-                "Port",
-                new String[]{"--fake-virtual-host-port"},
-                "The port to fake",
-                25565,
-                1,
-                65535,
-                1,
-                "#"
-        );
-    }
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  private static class FakeVirtualHostSettings implements SettingsObject {
+    private static final Property.Builder BUILDER = Property.builder("fake-virtual-host");
+    public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
+        "enabled",
+        "Fake virtual host",
+        new String[] {"--fake-virtual-host"},
+        "Whether to fake the virtual host or not",
+        false
+    );
+    public static final StringProperty HOSTNAME = BUILDER.ofString(
+        "hostname",
+        "Hostname",
+        new String[] {"--fake-virtual-host-hostname"},
+        "The hostname to fake",
+        "localhost"
+    );
+    public static final IntProperty PORT = BUILDER.ofInt(
+        "port",
+        "Port",
+        new String[] {"--fake-virtual-host-port"},
+        "The port to fake",
+        25565,
+        1,
+        65535,
+        1,
+        "#"
+    );
+  }
 }

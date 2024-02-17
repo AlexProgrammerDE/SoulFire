@@ -17,34 +17,38 @@
  */
 package net.pistonmaster.soulfire.client.gui.navigation;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 public class NavigationWrapper {
-    private NavigationWrapper() {
-    }
+  private NavigationWrapper() {
+  }
 
-    public static JPanel createBackWrapper(CardsContainer container, String target, NavigationItem item) {
-        var panel = new JPanel(new BorderLayout());
+  public static JPanel createBackWrapper(CardsContainer container, String target, NavigationItem item) {
+    var panel = new JPanel(new BorderLayout());
 
-        var topBar = new JPanel(new BorderLayout());
+    var topBar = new JPanel(new BorderLayout());
 
-        var back = new JButton("Back");
-        back.addActionListener(action -> container.show(target));
+    var back = new JButton("Back");
+    back.addActionListener(action -> container.show(target));
 
-        topBar.add(back, BorderLayout.PAGE_END);
-        topBar.setSize(new Dimension(topBar.getWidth(), 20));
-        topBar.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+    topBar.add(back, BorderLayout.PAGE_END);
+    topBar.setSize(new Dimension(topBar.getWidth(), 20));
+    topBar.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
-        panel.add(topBar, BorderLayout.NORTH);
+    panel.add(topBar, BorderLayout.NORTH);
 
-        var scrollPane = new JScrollPane(item);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+    var scrollPane = new JScrollPane(item);
+    scrollPane.setBorder(BorderFactory.createEmptyBorder());
+    scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-        panel.add(scrollPane, BorderLayout.CENTER);
+    panel.add(scrollPane, BorderLayout.CENTER);
 
-        return panel;
-    }
+    return panel;
+  }
 }

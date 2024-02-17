@@ -18,44 +18,49 @@
 package net.pistonmaster.soulfire.server.grpc;
 
 import io.grpc.stub.StreamObserver;
-import lombok.RequiredArgsConstructor;
-import net.pistonmaster.soulfire.grpc.generated.*;
-import net.pistonmaster.soulfire.server.ServerCommandManager;
-
 import javax.inject.Inject;
+import lombok.RequiredArgsConstructor;
+import net.pistonmaster.soulfire.grpc.generated.CommandCompletionRequest;
+import net.pistonmaster.soulfire.grpc.generated.CommandCompletionResponse;
+import net.pistonmaster.soulfire.grpc.generated.CommandHistoryRequest;
+import net.pistonmaster.soulfire.grpc.generated.CommandHistoryResponse;
+import net.pistonmaster.soulfire.grpc.generated.CommandRequest;
+import net.pistonmaster.soulfire.grpc.generated.CommandResponse;
+import net.pistonmaster.soulfire.grpc.generated.CommandServiceGrpc;
+import net.pistonmaster.soulfire.server.ServerCommandManager;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBase {
-    private final ServerCommandManager serverCommandManager;
+  private final ServerCommandManager serverCommandManager;
 
-    @Override
-    public void executeCommand(CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
-        var code = serverCommandManager.execute(request.getCommand());
+  @Override
+  public void executeCommand(CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
+    var code = serverCommandManager.execute(request.getCommand());
 
-        responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());
-        responseObserver.onCompleted();
+    responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());
+    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void tabCompleteCommand(CommandCompletionRequest request, StreamObserver<CommandCompletionResponse> responseObserver) {
+    var suggestions = serverCommandManager.getCompletionSuggestions(request.getCommand());
+
+    responseObserver.onNext(CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());
+    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void getCommandHistory(CommandHistoryRequest request, StreamObserver<CommandHistoryResponse> responseObserver) {
+    var history = serverCommandManager.getCommandHistory();
+    var builder = CommandHistoryResponse.newBuilder();
+    for (var entry : history) {
+      builder.addEntriesBuilder()
+          .setTimestamp(entry.getKey().getEpochSecond())
+          .setCommand(entry.getValue())
+          .build();
     }
 
-    @Override
-    public void tabCompleteCommand(CommandCompletionRequest request, StreamObserver<CommandCompletionResponse> responseObserver) {
-        var suggestions = serverCommandManager.getCompletionSuggestions(request.getCommand());
-
-        responseObserver.onNext(CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());
-        responseObserver.onCompleted();
-    }
-
-    @Override
-    public void getCommandHistory(CommandHistoryRequest request, StreamObserver<CommandHistoryResponse> responseObserver) {
-        var history = serverCommandManager.getCommandHistory();
-        var builder = CommandHistoryResponse.newBuilder();
-        for (var entry : history) {
-            builder.addEntriesBuilder()
-                    .setTimestamp(entry.getKey().getEpochSecond())
-                    .setCommand(entry.getValue())
-                    .build();
-        }
-
-        responseObserver.onNext(builder.build());
-        responseObserver.onCompleted();
-    }
+    responseObserver.onNext(builder.build());
+    responseObserver.onCompleted();
+  }
 }

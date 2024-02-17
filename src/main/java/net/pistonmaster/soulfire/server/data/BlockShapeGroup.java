@@ -20,111 +20,114 @@ package net.pistonmaster.soulfire.server.data;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
-import org.cloudburstmc.math.vector.Vector3i;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
+import org.cloudburstmc.math.vector.Vector3i;
 
 @SuppressWarnings("unused")
 public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highestY) {
-    public static final Int2ObjectMap<BlockShapeGroup> FROM_ID = new Int2ObjectOpenHashMap<>();
-    public static final BlockShapeGroup EMPTY;
+  public static final Int2ObjectMap<BlockShapeGroup> FROM_ID = new Int2ObjectOpenHashMap<>();
+  public static final BlockShapeGroup EMPTY;
 
-    static {
-        try (var inputStream = BlockShapeGroup.class.getClassLoader().getResourceAsStream("minecraft/blockshapes.txt")) {
-            if (inputStream == null) {
-                throw new IllegalStateException("blockshapes.txt not found!");
-            }
+  static {
+    try (var inputStream = BlockShapeGroup.class.getClassLoader().getResourceAsStream("minecraft/blockshapes.txt")) {
+      if (inputStream == null) {
+        throw new IllegalStateException("blockshapes.txt not found!");
+      }
 
-            new String(inputStream.readAllBytes(), StandardCharsets.UTF_8).lines().forEach(line -> {
-                var parts = line.split("\\|");
+      new String(inputStream.readAllBytes(), StandardCharsets.UTF_8).lines().forEach(line -> {
+        var parts = line.split("\\|");
 
-                var id = Integer.parseInt(parts[0]);
-                var blockShapes = new ObjectArrayList<BlockShape>();
+        var id = Integer.parseInt(parts[0]);
+        var blockShapes = new ObjectArrayList<BlockShape>();
 
-                if (parts.length > 1) {
-                    for (var i = 1; i < parts.length; i++) {
-                        var part = parts[i];
-                        var subParts = part.split(",");
-                        var shape = new BlockShape(
-                                Double.parseDouble(subParts[0]),
-                                Double.parseDouble(subParts[1]),
-                                Double.parseDouble(subParts[2]),
-                                Double.parseDouble(subParts[3]),
-                                Double.parseDouble(subParts[4]),
-                                Double.parseDouble(subParts[5])
-                        );
-                        blockShapes.add(shape);
-                    }
-                }
-
-                FROM_ID.put(id, new BlockShapeGroup(
-                        id,
-                        blockShapes,
-                        blockShapes.stream()
-                                .mapToDouble(BlockShape::maxY)
-                                .max()
-                                .orElse(0)
-                ));
-            });
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-
-        EMPTY = getById(0);
-    }
-
-    public static BlockShapeGroup getById(int id) {
-        return FROM_ID.get(id);
-    }
-
-    public List<AABB> getCollisionBoxes(Vector3i block, BlockType blockType) {
-        var collisionBoxes = new ObjectArrayList<AABB>(blockShapes.size());
-        for (var shape : blockShapes) {
-            var shapeBB = new AABB(
-                    shape.minX(),
-                    shape.minY(),
-                    shape.minZ(),
-                    shape.maxX(),
-                    shape.maxY(),
-                    shape.maxZ()
+        if (parts.length > 1) {
+          for (var i = 1; i < parts.length; i++) {
+            var part = parts[i];
+            var subParts = part.split(",");
+            var shape = new BlockShape(
+                Double.parseDouble(subParts[0]),
+                Double.parseDouble(subParts[1]),
+                Double.parseDouble(subParts[2]),
+                Double.parseDouble(subParts[3]),
+                Double.parseDouble(subParts[4]),
+                Double.parseDouble(subParts[5])
             );
-
-            // Apply random offset if needed
-            shapeBB = shapeBB.move(OffsetHelper.getOffsetForBlock(blockType, block));
-
-            // Apply block offset
-            shapeBB = shapeBB.move(block.getX(), block.getY(), block.getZ());
-
-            collisionBoxes.add(shapeBB);
+            blockShapes.add(shape);
+          }
         }
 
-        return collisionBoxes;
+        FROM_ID.put(id, new BlockShapeGroup(
+            id,
+            blockShapes,
+            blockShapes.stream()
+                .mapToDouble(BlockShape::maxY)
+                .max()
+                .orElse(0)
+        ));
+      });
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
     }
 
-    public boolean isFullBlock() {
-        if (blockShapes.size() != 1) {
-            return false;
-        }
+    EMPTY = getById(0);
+  }
 
-        return blockShapes.getFirst().isFullBlock();
+  public static BlockShapeGroup getById(int id) {
+    return FROM_ID.get(id);
+  }
+
+  public List<AABB> getCollisionBoxes(Vector3i block, BlockType blockType) {
+    var collisionBoxes = new ObjectArrayList<AABB>(blockShapes.size());
+    for (var shape : blockShapes) {
+      var shapeBB = new AABB(
+          shape.minX(),
+          shape.minY(),
+          shape.minZ(),
+          shape.maxX(),
+          shape.maxY(),
+          shape.maxZ()
+      );
+
+      // Apply random offset if needed
+      shapeBB = shapeBB.move(OffsetHelper.getOffsetForBlock(blockType, block));
+
+      // Apply block offset
+      shapeBB = shapeBB.move(block.getX(), block.getY(), block.getZ());
+
+      collisionBoxes.add(shapeBB);
     }
 
-    public boolean hasNoCollisions() {
-        return blockShapes.isEmpty();
+    return collisionBoxes;
+  }
+
+  public boolean isFullBlock() {
+    if (blockShapes.size() != 1) {
+      return false;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BlockShapeGroup blockShapeGroup)) return false;
-        return id == blockShapeGroup.id;
-    }
+    return blockShapes.getFirst().isFullBlock();
+  }
 
-    @Override
-    public int hashCode() {
-        return id;
+  public boolean hasNoCollisions() {
+    return blockShapes.isEmpty();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
+    if (!(o instanceof BlockShapeGroup blockShapeGroup)) {
+      return false;
+    }
+    return id == blockShapeGroup.id;
+  }
+
+  @Override
+  public int hashCode() {
+    return id;
+  }
 }

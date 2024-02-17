@@ -24,24 +24,24 @@ import java.util.function.BooleanSupplier;
  * Simple class to make waiting easier and less verbose.
  */
 public class TimeUtil {
-    private TimeUtil() {
-    }
+  private TimeUtil() {
+  }
 
-    public static void waitTime(long time, TimeUnit unit) {
-        try {
-            unit.sleep(time);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+  public static void waitTime(long time, TimeUnit unit) {
+    try {
+      unit.sleep(time);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
     }
+  }
 
-    public static void waitCondition(BooleanSupplier condition) {
-        while (condition.getAsBoolean()) {
-            try {
-                TimeUnit.MILLISECONDS.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
+  public static void waitCondition(BooleanSupplier condition) {
+    while (condition.getAsBoolean()) {
+      try {
+        TimeUnit.MILLISECONDS.sleep(100);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
     }
+  }
 }

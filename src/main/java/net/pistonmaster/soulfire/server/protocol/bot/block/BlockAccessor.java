@@ -21,9 +21,9 @@ import net.pistonmaster.soulfire.server.data.BlockState;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public interface BlockAccessor {
-    BlockState getBlockStateAt(int x, int y, int z);
+  BlockState getBlockStateAt(int x, int y, int z);
 
-    default BlockState getBlockStateAt(Vector3i pos) {
-        return getBlockStateAt(pos.getX(), pos.getY(), pos.getZ());
-    }
+  default BlockState getBlockStateAt(Vector3i pos) {
+    return getBlockStateAt(pos.getX(), pos.getY(), pos.getZ());
+  }
 }

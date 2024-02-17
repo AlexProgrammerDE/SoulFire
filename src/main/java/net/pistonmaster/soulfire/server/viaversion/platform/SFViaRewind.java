@@ -27,15 +27,15 @@ import java.util.logging.Logger;
 
 @RequiredArgsConstructor
 public class SFViaRewind implements ViaRewindPlatform {
-    private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaRewind"));
-    private final Path dataFolder;
+  private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaRewind"));
+  private final Path dataFolder;
 
-    public void init() {
-        init(dataFolder.resolve("config.yml").toFile());
-    }
+  public void init() {
+    init(dataFolder.resolve("config.yml").toFile());
+  }
 
-    @Override
-    public Logger getLogger() {
-        return logger;
-    }
+  @Override
+  public Logger getLogger() {
+    return logger;
+  }
 }

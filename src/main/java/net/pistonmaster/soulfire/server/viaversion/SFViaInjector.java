@@ -25,38 +25,38 @@ import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import java.util.SortedSet;
 
 public class SFViaInjector implements ViaInjector {
-    @Override
-    public void inject() {
-    }
+  @Override
+  public void inject() {
+  }
 
-    @Override
-    public void uninject() {
-    }
+  @Override
+  public void uninject() {
+  }
 
-    @Override
-    public ProtocolVersion getServerProtocolVersion() {
-        return getServerProtocolVersions().first();
-    }
+  @Override
+  public ProtocolVersion getServerProtocolVersion() {
+    return getServerProtocolVersions().first();
+  }
 
-    @Override
-    public SortedSet<ProtocolVersion> getServerProtocolVersions() {
-        final SortedSet<ProtocolVersion> versions = new ObjectLinkedOpenHashSet<>();
-        versions.addAll(ProtocolVersion.getProtocols());
-        return versions;
-    }
+  @Override
+  public SortedSet<ProtocolVersion> getServerProtocolVersions() {
+    final SortedSet<ProtocolVersion> versions = new ObjectLinkedOpenHashSet<>();
+    versions.addAll(ProtocolVersion.getProtocols());
+    return versions;
+  }
 
-    @Override
-    public String getEncoderName() {
-        return getDecoderName();
-    }
+  @Override
+  public String getEncoderName() {
+    return getDecoderName();
+  }
 
-    @Override
-    public String getDecoderName() {
-        return "via-codec";
-    }
+  @Override
+  public String getDecoderName() {
+    return "via-codec";
+  }
 
-    @Override
-    public JsonObject getDump() {
-        return new JsonObject();
-    }
+  @Override
+  public JsonObject getDump() {
+    return new JsonObject();
+  }
 }

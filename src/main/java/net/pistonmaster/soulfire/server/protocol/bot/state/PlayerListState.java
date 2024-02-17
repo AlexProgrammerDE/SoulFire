@@ -27,7 +27,7 @@ import java.util.UUID;
 
 @Data
 public class PlayerListState {
-    private final Map<UUID, PlayerListEntry> entries = new LinkedHashMap<>();
-    private Component header;
-    private Component footer;
+  private final Map<UUID, PlayerListEntry> entries = new LinkedHashMap<>();
+  private Component header;
+  private Component footer;
 }

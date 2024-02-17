@@ -18,41 +18,40 @@
 package net.pistonmaster.soulfire.server.data;
 
 import com.google.gson.JsonArray;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public record BlockStates(BlockState defaultState, List<BlockState> possibleStates) {
-    public static BlockStates fromJsonArray(BlockType blockType, JsonArray array) {
-        BlockState defaultState = null;
-        List<BlockState> possibleStates = new ArrayList<>();
-        var i = 0;
-        for (var state : array) {
-            var stateObject = state.getAsJsonObject();
-            var stateId = stateObject.get("id").getAsInt();
-            var defaultStateValue = stateObject.get("default") != null;
+  public static BlockStates fromJsonArray(BlockType blockType, JsonArray array) {
+    BlockState defaultState = null;
+    List<BlockState> possibleStates = new ArrayList<>();
+    var i = 0;
+    for (var state : array) {
+      var stateObject = state.getAsJsonObject();
+      var stateId = stateObject.get("id").getAsInt();
+      var defaultStateValue = stateObject.get("default") != null;
 
-            var properties = new BlockStateProperties(stateObject.getAsJsonObject("properties"));
+      var properties = new BlockStateProperties(stateObject.getAsJsonObject("properties"));
 
-            var blockState = new BlockState(
-                    stateId,
-                    defaultStateValue,
-                    properties,
-                    blockType,
-                    i
-            );
+      var blockState = new BlockState(
+          stateId,
+          defaultStateValue,
+          properties,
+          blockType,
+          i
+      );
 
-            if (defaultStateValue) {
-                defaultState = blockState;
-            }
+      if (defaultStateValue) {
+        defaultState = blockState;
+      }
 
-            possibleStates.add(blockState);
-            i++;
-        }
-
-        return new BlockStates(
-                defaultState,
-                possibleStates
-        );
+      possibleStates.add(blockState);
+      i++;
     }
+
+    return new BlockStates(
+        defaultState,
+        possibleStates
+    );
+  }
 }

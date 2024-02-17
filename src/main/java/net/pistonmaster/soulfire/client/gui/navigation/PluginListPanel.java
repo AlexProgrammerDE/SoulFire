@@ -17,42 +17,42 @@
  */
 package net.pistonmaster.soulfire.client.gui.navigation;
 
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import javax.inject.Inject;
+import javax.swing.JButton;
 import lombok.Getter;
 import net.pistonmaster.soulfire.client.gui.libs.SwingTextUtils;
 
-import javax.inject.Inject;
-import javax.swing.*;
-import java.awt.*;
-
 @Getter
 public class PluginListPanel extends NavigationItem {
-    public static final String NAVIGATION_ID = "plugin-menu";
+  public static final String NAVIGATION_ID = "plugin-menu";
 
-    @Inject
-    public PluginListPanel(CardsContainer container) {
-        setLayout(new GridLayout(0, 3, 10, 10));
+  @Inject
+  public PluginListPanel(CardsContainer container) {
+    setLayout(new GridLayout(0, 3, 10, 10));
 
-        for (var item : container.pluginPages()) {
-            if (item.getHidden()) {
-                continue;
-            }
+    for (var item : container.pluginPages()) {
+      if (item.getHidden()) {
+        continue;
+      }
 
-            var button = new JButton(SwingTextUtils.htmlCenterText(item.getPageName()));
+      var button = new JButton(SwingTextUtils.htmlCenterText(item.getPageName()));
 
-            button.addActionListener(action -> container.show(item.getNamespace()));
-            button.setSize(new Dimension(50, 50));
+      button.addActionListener(action -> container.show(item.getNamespace()));
+      button.setSize(new Dimension(50, 50));
 
-            add(button);
-        }
+      add(button);
     }
+  }
 
-    @Override
-    public String getNavigationName() {
-        return "Plugins";
-    }
+  @Override
+  public String getNavigationName() {
+    return "Plugins";
+  }
 
-    @Override
-    public String getNavigationId() {
-        return NAVIGATION_ID;
-    }
+  @Override
+  public String getNavigationId() {
+    return NAVIGATION_ID;
+  }
 }

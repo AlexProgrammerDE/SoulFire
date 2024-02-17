@@ -26,36 +26,36 @@ import org.apache.logging.log4j.core.layout.AbstractStringLayout;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 public class SFLogAppender extends AbstractAppender {
-    private final AbstractStringLayout.Serializer formatter = new PatternLayout.SerializerBuilder()
-            .setAlwaysWriteExceptions(true)
-            .setDisableAnsi(true)
-            .setNoConsoleNoAnsi(true)
-            .setDefaultPattern("[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx")
-            .build();
-    private final AbstractStringLayout.Serializer builtInFormatter = new PatternLayout.SerializerBuilder()
-            .setAlwaysWriteExceptions(true)
-            .setDisableAnsi(true)
-            .setNoConsoleNoAnsi(true)
-            .setDefaultPattern("[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx")
-            .build();
+  private final AbstractStringLayout.Serializer formatter = new PatternLayout.SerializerBuilder()
+      .setAlwaysWriteExceptions(true)
+      .setDisableAnsi(true)
+      .setNoConsoleNoAnsi(true)
+      .setDefaultPattern("[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx")
+      .build();
+  private final AbstractStringLayout.Serializer builtInFormatter = new PatternLayout.SerializerBuilder()
+      .setAlwaysWriteExceptions(true)
+      .setDisableAnsi(true)
+      .setNoConsoleNoAnsi(true)
+      .setDefaultPattern("[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx")
+      .build();
 
-    public SFLogAppender() {
-        super("LogPanelAppender", null, null, false, Property.EMPTY_ARRAY);
+  public SFLogAppender() {
+    super("LogPanelAppender", null, null, false, Property.EMPTY_ARRAY);
+  }
+
+  @Override
+  public void append(LogEvent event) {
+    String formatted;
+    if (event.getLoggerName().startsWith("net.pistonmaster.soulfire")) {
+      formatted = builtInFormatter.toSerializable(event);
+    } else {
+      formatted = formatter.toSerializable(event);
     }
 
-    @Override
-    public void append(LogEvent event) {
-        String formatted;
-        if (event.getLoggerName().startsWith("net.pistonmaster.soulfire")) {
-            formatted = builtInFormatter.toSerializable(event);
-        } else {
-            formatted = formatter.toSerializable(event);
-        }
-
-        if (formatted.isBlank()) {
-            return;
-        }
-
-        SoulFireAPI.postEvent(new SystemLogEvent(formatted));
+    if (formatted.isBlank()) {
+      return;
     }
+
+    SoulFireAPI.postEvent(new SystemLogEvent(formatted));
+  }
 }

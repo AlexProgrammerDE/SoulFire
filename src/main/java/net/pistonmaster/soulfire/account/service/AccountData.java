@@ -20,5 +20,5 @@ package net.pistonmaster.soulfire.account.service;
 import java.util.UUID;
 
 public sealed interface AccountData permits BedrockData, OfflineJavaData, OnlineJavaData {
-    UUID profileId();
+  UUID profileId();
 }

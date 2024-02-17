@@ -18,23 +18,23 @@
 package net.pistonmaster.soulfire.server.api;
 
 public enum AttackState {
-    RUNNING,
-    PAUSED,
-    STOPPED;
+  RUNNING,
+  PAUSED,
+  STOPPED;
 
-    public boolean isRunning() {
-        return this == RUNNING;
-    }
+  public boolean isRunning() {
+    return this == RUNNING;
+  }
 
-    public boolean isPaused() {
-        return this == PAUSED;
-    }
+  public boolean isPaused() {
+    return this == PAUSED;
+  }
 
-    public boolean isStopped() {
-        return this == STOPPED;
-    }
+  public boolean isStopped() {
+    return this == STOPPED;
+  }
 
-    public boolean isInactive() {
-        return isPaused() || isStopped();
-    }
+  public boolean isInactive() {
+    return isPaused() || isStopped();
+  }
 }

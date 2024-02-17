@@ -18,12 +18,12 @@
 package net.pistonmaster.soulfire.server.settings.lib.property;
 
 public record StringProperty(
-        String namespace,
-        String key,
-        String uiName,
-        String[] cliFlags,
-        String description,
-        String defaultValue,
-        boolean secret
+    String namespace,
+    String key,
+    String uiName,
+    String[] cliFlags,
+    String description,
+    String defaultValue,
+    boolean secret
 ) implements SingleProperty {
 }

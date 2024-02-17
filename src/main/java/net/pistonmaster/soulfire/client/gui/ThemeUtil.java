@@ -25,72 +25,75 @@ import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.fonts.inter.FlatInterFont;
 import com.formdev.flatlaf.util.FontUtils;
 import com.formdev.flatlaf.util.SystemInfo;
-import lombok.extern.slf4j.Slf4j;
-
-import javax.swing.*;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.basic.BasicLookAndFeel;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ThemeUtil {
-    private ThemeUtil() {
+  private ThemeUtil() {
+  }
+
+  public static String getThemeClassName() {
+    return GUIClientProps.getString("theme", FlatDarculaLaf.class.getName());
+  }
+
+  /**
+   * Apply the current theme that is set in the settings.
+   * This will also save the theme to the settings.
+   * You need to invoke SwingUtilities.updateComponentTreeUI(frame); after this method.
+   */
+  public static void setLookAndFeel() {
+    var themeSettings = getThemeClassName();
+    if (themeSettings.equals(UIManager.getLookAndFeel().getClass().getName())) {
+      return;
     }
 
-    public static String getThemeClassName() {
-        return GUIClientProps.getString("theme", FlatDarculaLaf.class.getName());
+    try {
+      var theme = Class.forName(themeSettings)
+          .asSubclass(BasicLookAndFeel.class).getDeclaredConstructor().newInstance();
+
+      FlatAnimatedLafChange.showSnapshot();
+
+      UIManager.setLookAndFeel(theme);
+
+      var font = UIManager.getFont("defaultFont");
+      var newFont = FontUtils.getCompositeFont(FlatInterFont.FAMILY, font.getStyle(), font.getSize());
+      UIManager.put("defaultFont", newFont);
+
+      FlatLaf.updateUI();
+
+      FlatAnimatedLafChange.hideSnapshotWithAnimation();
+    } catch (UnsupportedLookAndFeelException | ReflectiveOperationException e) {
+      log.error("Failed to set theme!", e);
     }
+  }
 
-    /**
-     * Apply the current theme that is set in the settings.
-     * This will also save the theme to the settings.
-     * You need to invoke SwingUtilities.updateComponentTreeUI(frame); after this method.
-     */
-    public static void setLookAndFeel() {
-        var themeSettings = getThemeClassName();
-        if (themeSettings.equals(UIManager.getLookAndFeel().getClass().getName())) {
-            return;
-        }
+  public static void initFlatLaf() {
+    FlatInspector.install("ctrl shift I");
+    FlatUIDefaultsInspector.install("ctrl shift O");
+    ToolTipManager.sharedInstance().setInitialDelay(100);
+    ToolTipManager.sharedInstance().setDismissDelay(10_000);
+    UIManager.put("PasswordField.showRevealButton", true);
+    FlatInterFont.install();
 
-        try {
-            var theme = Class.forName(themeSettings)
-                    .asSubclass(BasicLookAndFeel.class).getDeclaredConstructor().newInstance();
+    if (SystemInfo.isMacOS) {
+      // Use top screen menu bar on macOS
+      System.setProperty("apple.laf.useScreenMenuBar", "true");
 
-            FlatAnimatedLafChange.showSnapshot();
+      // Set name in top menu bar
+      System.setProperty("apple.awt.application.name", "SoulFire");
 
-            UIManager.setLookAndFeel(theme);
-
-            var font = UIManager.getFont("defaultFont");
-            var newFont = FontUtils.getCompositeFont(FlatInterFont.FAMILY, font.getStyle(), font.getSize());
-            UIManager.put("defaultFont", newFont);
-
-            FlatLaf.updateUI();
-
-            FlatAnimatedLafChange.hideSnapshotWithAnimation();
-        } catch (UnsupportedLookAndFeelException | ReflectiveOperationException e) {
-            log.error("Failed to set theme!", e);
-        }
+      // Color the frame
+      System.setProperty("apple.awt.application.appearance", "system");
+    } else if (SystemInfo.isLinux) {
+      // Make window decorations like on windows
+      JFrame.setDefaultLookAndFeelDecorated(true);
+      JDialog.setDefaultLookAndFeelDecorated(true);
     }
-
-    public static void initFlatLaf() {
-        FlatInspector.install("ctrl shift I");
-        FlatUIDefaultsInspector.install("ctrl shift O");
-        ToolTipManager.sharedInstance().setInitialDelay(100);
-        ToolTipManager.sharedInstance().setDismissDelay(10_000);
-        UIManager.put("PasswordField.showRevealButton", true);
-        FlatInterFont.install();
-
-        if (SystemInfo.isMacOS) {
-            // Use top screen menu bar on macOS
-            System.setProperty("apple.laf.useScreenMenuBar", "true");
-
-            // Set name in top menu bar
-            System.setProperty("apple.awt.application.name", "SoulFire");
-
-            // Color the frame
-            System.setProperty("apple.awt.application.appearance", "system");
-        } else if (SystemInfo.isLinux) {
-            // Make window decorations like on windows
-            JFrame.setDefaultLookAndFeelDecorated(true);
-            JDialog.setDefaultLookAndFeelDecorated(true);
-        }
-    }
+  }
 }

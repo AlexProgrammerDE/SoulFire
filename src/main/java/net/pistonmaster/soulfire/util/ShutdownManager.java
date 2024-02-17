@@ -17,44 +17,43 @@
  */
 package net.pistonmaster.soulfire.util;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.SoulFireBootstrap;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 @Slf4j
 @RequiredArgsConstructor
 public class ShutdownManager {
-    private final Runnable shutdownHook;
-    private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
-    @Getter
-    private boolean shutdown = false;
+  private final Runnable shutdownHook;
+  private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
+  @Getter
+  private boolean shutdown = false;
 
-    /**
-     * Shuts down the software if it is running.
-     *
-     * @param explicitExit whether the user explicitly shut down the software
-     */
-    public void shutdownSoftware(boolean explicitExit) {
-        if (!shutdownInProgress.compareAndSet(false, true)) {
-            return;
-        }
-
-        if (explicitExit) {
-            log.info("Shutting down...");
-        }
-
-        shutdownHook.run();
-
-        SoulFireBootstrap.PLUGIN_MANAGER.stopPlugins();
-        SoulFireBootstrap.PLUGIN_MANAGER.unloadPlugins();
-
-        shutdown = true;
-
-        if (explicitExit) {
-            System.exit(0);
-        }
+  /**
+   * Shuts down the software if it is running.
+   *
+   * @param explicitExit whether the user explicitly shut down the software
+   */
+  public void shutdownSoftware(boolean explicitExit) {
+    if (!shutdownInProgress.compareAndSet(false, true)) {
+      return;
     }
+
+    if (explicitExit) {
+      log.info("Shutting down...");
+    }
+
+    shutdownHook.run();
+
+    SoulFireBootstrap.PLUGIN_MANAGER.stopPlugins();
+    SoulFireBootstrap.PLUGIN_MANAGER.unloadPlugins();
+
+    shutdown = true;
+
+    if (explicitExit) {
+      System.exit(0);
+    }
+  }
 }

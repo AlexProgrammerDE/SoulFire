@@ -28,5 +28,5 @@ import net.pistonmaster.soulfire.server.api.event.SoulFireGlobalEvent;
  * @param commandDispatcher The command dispatcher.
  */
 public record DispatcherInitEvent(
-        CommandDispatcher<ConsoleSubject> commandDispatcher) implements SoulFireGlobalEvent {
+    CommandDispatcher<ConsoleSubject> commandDispatcher) implements SoulFireGlobalEvent {
 }

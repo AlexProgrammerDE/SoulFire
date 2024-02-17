@@ -17,9 +17,8 @@
  */
 package net.pistonmaster.soulfire.server.api;
 
-import org.pf4j.ExtensionPoint;
-
 import java.util.Set;
+import org.pf4j.ExtensionPoint;
 
 /**
  * This interface is used to load mixins from third-party plugins.
@@ -30,10 +29,10 @@ import java.util.Set;
  * for all transformers in the package and sub packages <i>(e.g. <b>package.**</b>)</i><br>
  */
 public interface MixinExtension extends ExtensionPoint {
-    /**
-     * This method is used to inject into SoulFire classes.
-     *
-     * @return A list of mixin paths.
-     */
-    Set<String> getMixinPaths();
+  /**
+   * This method is used to inject into SoulFire classes.
+   *
+   * @return A list of mixin paths.
+   */
+  Set<String> getMixinPaths();
 }

@@ -35,66 +35,66 @@ import java.util.UUID;
 
 @Slf4j
 public final class SFEasyMCAuthService implements MCAuthService<SFEasyMCAuthService.EasyMCAuthData> {
-    private static final URI AUTHENTICATE_ENDPOINT = URI.create("https://api.easymc.io/v1/token/redeem");
-    private final Gson gson = new Gson();
+  private static final URI AUTHENTICATE_ENDPOINT = URI.create("https://api.easymc.io/v1/token/redeem");
+  private final Gson gson = new Gson();
 
-    @Override
-    public MinecraftAccount login(EasyMCAuthData data, SWProxy proxyData) throws IOException {
-        try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-            var request = new AuthenticationRequest(data.altToken);
-            var httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
-            httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
-            var response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
-                    TokenRedeemResponse.class);
+  @Override
+  public MinecraftAccount login(EasyMCAuthData data, SWProxy proxyData) throws IOException {
+    try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
+      var request = new AuthenticationRequest(data.altToken);
+      var httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
+      httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
+      var response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
+          TokenRedeemResponse.class);
 
-            if (response.error() != null) {
-                log.error("EasyMC has returned a error: {}", response.error());
-                throw new IOException(response.error());
-            }
+      if (response.error() != null) {
+        log.error("EasyMC has returned a error: {}", response.error());
+        throw new IOException(response.error());
+      }
 
-            if (response.message() != null) {
-                log.info("EasyMC has a message for you (This is not a error): {}", response.message());
-            }
+      if (response.message() != null) {
+        log.info("EasyMC has a message for you (This is not a error): {}", response.message());
+      }
 
-            return new MinecraftAccount(
-                    AuthType.EASYMC,
-                    response.mcName(),
-                    new OnlineJavaData(
-                            UUID.fromString(response.uuid()),
-                            response.session(),
-                            -1
-                    ),
-                    true
-            );
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+      return new MinecraftAccount(
+          AuthType.EASYMC,
+          response.mcName(),
+          new OnlineJavaData(
+              UUID.fromString(response.uuid()),
+              response.session(),
+              -1
+          ),
+          true
+      );
+    } catch (Exception e) {
+      throw new IOException(e);
+    }
+  }
+
+  @Override
+  public EasyMCAuthData createData(String data) {
+    var split = data.split(":");
+
+    if (split.length != 1) {
+      throw new IllegalArgumentException("Invalid data!");
     }
 
-    @Override
-    public EasyMCAuthData createData(String data) {
-        var split = data.split(":");
+    return new EasyMCAuthData(split[0].trim());
+  }
 
-        if (split.length != 1) {
-            throw new IllegalArgumentException("Invalid data!");
-        }
+  public record EasyMCAuthData(String altToken) {
+  }
 
-        return new EasyMCAuthData(split[0].trim());
-    }
+  private record AuthenticationRequest(String token) {
+  }
 
-    public record EasyMCAuthData(String altToken) {
-    }
-
-    private record AuthenticationRequest(String token) {
-    }
-
-    @SuppressWarnings("unused") // Used by GSON
-    @Getter
-    private static class TokenRedeemResponse {
-        private String mcName;
-        private String uuid;
-        private String session;
-        private String message;
-        private String error;
-    }
+  @SuppressWarnings("unused") // Used by GSON
+  @Getter
+  private static class TokenRedeemResponse {
+    private String mcName;
+    private String uuid;
+    private String session;
+    private String message;
+    private String error;
+  }
 }

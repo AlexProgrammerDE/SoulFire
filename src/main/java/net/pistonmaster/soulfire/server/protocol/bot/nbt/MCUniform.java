@@ -21,7 +21,7 @@ import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
 import com.github.steveice10.opennbt.tag.builtin.IntTag;
 
 public record MCUniform(int maxInclusive, int minInclusive) implements UniformOrInt {
-    public MCUniform(CompoundTag tag) {
-        this(tag.<IntTag>get("max_inclusive").getValue(), tag.<IntTag>get("min_inclusive").getValue());
-    }
+  public MCUniform(CompoundTag tag) {
+    this(tag.<IntTag>get("max_inclusive").getValue(), tag.<IntTag>get("min_inclusive").getValue());
+  }
 }

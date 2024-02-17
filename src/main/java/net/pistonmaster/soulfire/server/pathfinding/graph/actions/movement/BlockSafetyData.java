@@ -20,8 +20,8 @@ package net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement;
 import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 
 public record BlockSafetyData(SFVec3i position, BlockSafetyType type) {
-    public enum BlockSafetyType {
-        FALLING_AND_FLUIDS,
-        FLUIDS
-    }
+  public enum BlockSafetyType {
+    FALLING_AND_FLUIDS,
+    FLUIDS
+  }
 }

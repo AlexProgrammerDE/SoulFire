@@ -22,44 +22,44 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class JLoggerToSLF4J extends Logger {
-    private final org.slf4j.Logger base;
+  private final org.slf4j.Logger base;
 
-    public JLoggerToSLF4J(org.slf4j.Logger logger) {
-        super("logger", null);
-        this.base = logger;
-    }
+  public JLoggerToSLF4J(org.slf4j.Logger logger) {
+    super("logger", null);
+    this.base = logger;
+  }
 
-    @Override
-    public void log(Level level, String msg) {
-        this.base.atLevel(toSLF4JLevel(level)).log(msg);
-    }
+  @Override
+  public void log(Level level, String msg) {
+    this.base.atLevel(toSLF4JLevel(level)).log(msg);
+  }
 
-    @Override
-    public void log(Level level, String msg, Object param1) {
-        this.base.atLevel(toSLF4JLevel(level)).log(msg, param1);
-    }
+  @Override
+  public void log(Level level, String msg, Object param1) {
+    this.base.atLevel(toSLF4JLevel(level)).log(msg, param1);
+  }
 
-    @Override
-    public void log(Level level, String msg, Object... params) {
-        log(level, MessageFormat.format(msg, params));
-    }
+  @Override
+  public void log(Level level, String msg, Object... params) {
+    log(level, MessageFormat.format(msg, params));
+  }
 
-    @Override
-    public void log(Level level, String msg, Throwable params) {
-        this.base.atLevel(toSLF4JLevel(level)).log(msg, params);
-    }
+  @Override
+  public void log(Level level, String msg, Throwable params) {
+    this.base.atLevel(toSLF4JLevel(level)).log(msg, params);
+  }
 
-    private org.slf4j.event.Level toSLF4JLevel(Level level) {
-        if (level == Level.FINE) {
-            return org.slf4j.event.Level.DEBUG;
-        } else if (level == Level.WARNING) {
-            return org.slf4j.event.Level.WARN;
-        } else if (level == Level.SEVERE) {
-            return org.slf4j.event.Level.ERROR;
-        } else if (level == Level.INFO) {
-            return org.slf4j.event.Level.INFO;
-        } else {
-            return org.slf4j.event.Level.TRACE;
-        }
+  private org.slf4j.event.Level toSLF4JLevel(Level level) {
+    if (level == Level.FINE) {
+      return org.slf4j.event.Level.DEBUG;
+    } else if (level == Level.WARNING) {
+      return org.slf4j.event.Level.WARN;
+    } else if (level == Level.SEVERE) {
+      return org.slf4j.event.Level.ERROR;
+    } else if (level == Level.INFO) {
+      return org.slf4j.event.Level.INFO;
+    } else {
+      return org.slf4j.event.Level.TRACE;
     }
+  }
 }

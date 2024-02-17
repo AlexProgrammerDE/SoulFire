@@ -29,35 +29,35 @@ import javax.crypto.SecretKey;
 import java.util.Objects;
 
 public class SFViaNettyPipelineProvider extends NettyPipelineProvider {
-    @Override
-    public void enableCompression(UserConnection user, ProtocolCompression protocolCompression) {
-        var clientSession = Objects.requireNonNull(user.get(StorableSession.class)).session();
-        var channel = clientSession.getChannel();
+  @Override
+  public void enableCompression(UserConnection user, ProtocolCompression protocolCompression) {
+    var clientSession = Objects.requireNonNull(user.get(StorableSession.class)).session();
+    var channel = clientSession.getChannel();
 
-        if (channel.pipeline().names().contains(ViaClientSession.COMPRESSION_NAME)) {
-            throw new IllegalStateException("Compression already enabled");
-        }
-
-        try {
-            channel.pipeline().addBefore(ViaClientSession.SIZER_NAME, ViaClientSession.COMPRESSION_NAME, new CompressionCodec(protocolCompression));
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
+    if (channel.pipeline().names().contains(ViaClientSession.COMPRESSION_NAME)) {
+      throw new IllegalStateException("Compression already enabled");
     }
 
-    @Override
-    public void enableEncryption(UserConnection user, SecretKey key) {
-        var clientSession = Objects.requireNonNull(user.get(StorableSession.class)).session();
-        final var channel = clientSession.getChannel();
-
-        if (channel.pipeline().names().contains(ViaClientSession.ENCRYPTION_NAME)) {
-            throw new IllegalStateException("Encryption already enabled");
-        }
-
-        try {
-            channel.pipeline().addAfter("vb-frame-encapsulation", ViaClientSession.ENCRYPTION_NAME, new AesEncryptionCodec(key));
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
+    try {
+      channel.pipeline().addBefore(ViaClientSession.SIZER_NAME, ViaClientSession.COMPRESSION_NAME, new CompressionCodec(protocolCompression));
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public void enableEncryption(UserConnection user, SecretKey key) {
+    var clientSession = Objects.requireNonNull(user.get(StorableSession.class)).session();
+    final var channel = clientSession.getChannel();
+
+    if (channel.pipeline().names().contains(ViaClientSession.ENCRYPTION_NAME)) {
+      throw new IllegalStateException("Encryption already enabled");
+    }
+
+    try {
+      channel.pipeline().addAfter("vb-frame-encapsulation", ViaClientSession.ENCRYPTION_NAME, new AesEncryptionCodec(key));
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

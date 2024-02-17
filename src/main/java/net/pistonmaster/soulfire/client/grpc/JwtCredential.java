@@ -20,27 +20,26 @@ package net.pistonmaster.soulfire.client.grpc;
 import io.grpc.CallCredentials;
 import io.grpc.Metadata;
 import io.grpc.Status;
+import java.util.concurrent.Executor;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.util.RPCConstants;
 
-import java.util.concurrent.Executor;
-
 @RequiredArgsConstructor
 public class JwtCredential extends CallCredentials {
-    private final String jwt;
+  private final String jwt;
 
-    @Override
-    public void applyRequestMetadata(final RequestInfo requestInfo, final Executor executor,
-                                     final MetadataApplier metadataApplier) {
-        executor.execute(() -> {
-            try {
-                var headers = new Metadata();
-                headers.put(RPCConstants.AUTHORIZATION_METADATA_KEY,
-                        String.format("%s %s", RPCConstants.BEARER_TYPE, jwt));
-                metadataApplier.apply(headers);
-            } catch (Throwable e) {
-                metadataApplier.fail(Status.UNAUTHENTICATED.withCause(e));
-            }
-        });
-    }
+  @Override
+  public void applyRequestMetadata(final RequestInfo requestInfo, final Executor executor,
+                                   final MetadataApplier metadataApplier) {
+    executor.execute(() -> {
+      try {
+        var headers = new Metadata();
+        headers.put(RPCConstants.AUTHORIZATION_METADATA_KEY,
+            String.format("%s %s", RPCConstants.BEARER_TYPE, jwt));
+        metadataApplier.apply(headers);
+      } catch (Throwable e) {
+        metadataApplier.fail(Status.UNAUTHENTICATED.withCause(e));
+      }
+    });
+  }
 }

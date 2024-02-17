@@ -20,5 +20,5 @@ package net.pistonmaster.soulfire.generator.util;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public interface BlockSettingsAccessor {
-    BlockBehaviour.OffsetType soulfire$getOffsetType();
+  BlockBehaviour.OffsetType soulfire$getOffsetType();
 }

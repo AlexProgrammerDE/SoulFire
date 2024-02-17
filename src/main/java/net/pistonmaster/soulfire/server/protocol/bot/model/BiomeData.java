@@ -22,7 +22,7 @@ import com.github.steveice10.opennbt.tag.builtin.IntTag;
 import com.github.steveice10.opennbt.tag.builtin.StringTag;
 
 public record BiomeData(String name, int id) {
-    public BiomeData(CompoundTag data) {
-        this(data.<StringTag>get("name").getValue(), data.<IntTag>get("id").getValue());
-    }
+  public BiomeData(CompoundTag data) {
+    this(data.<StringTag>get("name").getValue(), data.<IntTag>get("id").getValue());
+  }
 }

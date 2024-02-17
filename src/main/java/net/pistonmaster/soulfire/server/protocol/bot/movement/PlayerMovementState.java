@@ -30,81 +30,81 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.entity.ClientEntity;
 @Setter
 @RequiredArgsConstructor
 public class PlayerMovementState {
-    private final ClientEntity entity;
-    private final PlayerInventoryContainer inventoryContainer;
+  private final ClientEntity entity;
+  private final PlayerInventoryContainer inventoryContainer;
 
-    // Position
-    public MutableVector3d pos;
+  // Position
+  public MutableVector3d pos;
 
-    // Motion
-    public MutableVector3d vel;
+  // Motion
+  public MutableVector3d vel;
 
-    // Collision
-    public boolean onGround;
-    public boolean isCollidedHorizontally;
-    public boolean isCollidedVertically;
-    public boolean isInWater;
-    public boolean isInLava;
-    public boolean isInWeb;
+  // Collision
+  public boolean onGround;
+  public boolean isCollidedHorizontally;
+  public boolean isCollidedVertically;
+  public boolean isInWater;
+  public boolean isInLava;
+  public boolean isInWeb;
 
-    // State
-    public boolean elytraFlying;
-    public int jumpTicks;
-    public boolean jumpQueued;
-    public int fireworkRocketDuration;
+  // State
+  public boolean elytraFlying;
+  public int jumpTicks;
+  public boolean jumpQueued;
+  public int fireworkRocketDuration;
 
-    // Effects
-    public int jumpBoost;
-    public int speed;
-    public int slowness;
-    public int dolphinsGrace;
-    public int slowFalling;
-    public int levitation;
-    public int depthStrider;
+  // Effects
+  public int jumpBoost;
+  public int speed;
+  public int slowness;
+  public int dolphinsGrace;
+  public int slowFalling;
+  public int levitation;
+  public int depthStrider;
 
-    // Inventory
-    public boolean elytraEquipped;
+  // Inventory
+  public boolean elytraEquipped;
 
-    // Flying (creative)
-    public boolean flying;
+  // Flying (creative)
+  public boolean flying;
 
-    public void updateData() {
-        pos = new MutableVector3d(
-                entity.x(),
-                entity.y(),
-                entity.z()
-        );
+  public void updateData() {
+    pos = new MutableVector3d(
+        entity.x(),
+        entity.y(),
+        entity.z()
+    );
 
-        vel = new MutableVector3d(
-                entity.motionX(),
-                entity.motionY(),
-                entity.motionZ()
-        );
+    vel = new MutableVector3d(
+        entity.motionX(),
+        entity.motionY(),
+        entity.motionZ()
+    );
 
-        var effectState = entity.effectState();
-        jumpBoost = effectState.getEffect(Effect.JUMP_BOOST).map(EffectData::amplifier).orElse(0);
-        speed = effectState.getEffect(Effect.SPEED).map(EffectData::amplifier).orElse(0);
-        slowness = effectState.getEffect(Effect.SLOWNESS).map(EffectData::amplifier).orElse(0);
-        dolphinsGrace = effectState.getEffect(Effect.DOLPHINS_GRACE).map(EffectData::amplifier).orElse(0);
-        slowFalling = effectState.getEffect(Effect.SLOW_FALLING).map(EffectData::amplifier).orElse(0);
-        levitation = effectState.getEffect(Effect.LEVITATION).map(EffectData::amplifier).orElse(0);
+    var effectState = entity.effectState();
+    jumpBoost = effectState.getEffect(Effect.JUMP_BOOST).map(EffectData::amplifier).orElse(0);
+    speed = effectState.getEffect(Effect.SPEED).map(EffectData::amplifier).orElse(0);
+    slowness = effectState.getEffect(Effect.SLOWNESS).map(EffectData::amplifier).orElse(0);
+    dolphinsGrace = effectState.getEffect(Effect.DOLPHINS_GRACE).map(EffectData::amplifier).orElse(0);
+    slowFalling = effectState.getEffect(Effect.SLOW_FALLING).map(EffectData::amplifier).orElse(0);
+    levitation = effectState.getEffect(Effect.LEVITATION).map(EffectData::amplifier).orElse(0);
 
-        var bootsItem = inventoryContainer.getBoots().item();
-        depthStrider = bootsItem == null ? 0 : bootsItem.getEnchantmentLevel("minecraft:depth_strider");
+    var bootsItem = inventoryContainer.getBoots().item();
+    depthStrider = bootsItem == null ? 0 : bootsItem.getEnchantmentLevel("minecraft:depth_strider");
 
-        var chestItem = inventoryContainer.getChestplate().item();
-        elytraEquipped = chestItem != null && chestItem.type() == ItemType.ELYTRA;
-    }
+    var chestItem = inventoryContainer.getChestplate().item();
+    elytraEquipped = chestItem != null && chestItem.type() == ItemType.ELYTRA;
+  }
 
-    public void applyData() {
-        entity.x(pos.x);
-        entity.y(pos.y);
-        entity.z(pos.z);
+  public void applyData() {
+    entity.x(pos.x);
+    entity.y(pos.y);
+    entity.z(pos.z);
 
-        entity.onGround(onGround);
+    entity.onGround(onGround);
 
-        entity.motionX(vel.x);
-        entity.motionY(vel.y);
-        entity.motionZ(vel.z);
-    }
+    entity.motionX(vel.x);
+    entity.motionY(vel.y);
+    entity.motionZ(vel.z);
+  }
 }

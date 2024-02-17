@@ -25,18 +25,18 @@ import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
 
 // TODO: Extract into having more fine behaviour control
 public record PlaceBlockGoal(SFVec3i goal, BlockType blockType) implements GoalScorer {
-    public PlaceBlockGoal(int x, int y, int z, BlockType blockType) {
-        this(new SFVec3i(x, y, z), blockType);
-    }
+  public PlaceBlockGoal(int x, int y, int z, BlockType blockType) {
+    this(new SFVec3i(x, y, z), blockType);
+  }
 
-    @Override
-    public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-        // We normally stand right next to the block, not inside, so we need to subtract 1.
-        return entityState.blockPosition().distance(goal) - 1 + Costs.PLACE_BLOCK;
-    }
+  @Override
+  public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
+    // We normally stand right next to the block, not inside, so we need to subtract 1.
+    return entityState.blockPosition().distance(goal) - 1 + Costs.PLACE_BLOCK;
+  }
 
-    @Override
-    public boolean isFinished(BotEntityState entityState) {
-        return entityState.levelState().isChanged(goal);
-    }
+  @Override
+  public boolean isFinished(BotEntityState entityState) {
+    return entityState.levelState().isChanged(goal);
+  }
 }

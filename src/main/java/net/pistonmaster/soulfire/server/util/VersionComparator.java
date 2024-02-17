@@ -23,36 +23,36 @@ import java.util.Arrays;
 
 @Slf4j
 public class VersionComparator {
-    private VersionComparator() {
-    }
+  private VersionComparator() {
+  }
 
-    public static boolean isNewer(String currentVersion, String checkVersion) {
-        currentVersion = currentVersion.replace("-SNAPSHOT", "");
-        checkVersion = checkVersion.replace("-SNAPSHOT", "");
+  public static boolean isNewer(String currentVersion, String checkVersion) {
+    currentVersion = currentVersion.replace("-SNAPSHOT", "");
+    checkVersion = checkVersion.replace("-SNAPSHOT", "");
 
-        try {
-            var currentVersionData = Arrays.stream(currentVersion.split("\\."))
-                    .mapToInt(Integer::parseInt).toArray();
-            var checkVersionData = Arrays.stream(checkVersion.split("\\."))
-                    .mapToInt(Integer::parseInt).toArray();
+    try {
+      var currentVersionData = Arrays.stream(currentVersion.split("\\."))
+          .mapToInt(Integer::parseInt).toArray();
+      var checkVersionData = Arrays.stream(checkVersion.split("\\."))
+          .mapToInt(Integer::parseInt).toArray();
 
-            var i = 0;
-            for (var version : checkVersionData) {
-                if (i == currentVersionData.length) {
-                    return true;
-                }
-
-                if (version > currentVersionData[i]) {
-                    return true;
-                } else if (version < currentVersionData[i]) {
-                    return false;
-                }
-
-                i++;
-            }
-        } catch (NumberFormatException e) {
-            log.error("Error while parsing version!", e);
+      var i = 0;
+      for (var version : checkVersionData) {
+        if (i == currentVersionData.length) {
+          return true;
         }
-        return false;
+
+        if (version > currentVersionData[i]) {
+          return true;
+        } else if (version < currentVersionData[i]) {
+          return false;
+        }
+
+        i++;
+      }
+    } catch (NumberFormatException e) {
+      log.error("Error while parsing version!", e);
     }
+    return false;
+  }
 }

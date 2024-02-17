@@ -18,7 +18,7 @@
 package net.pistonmaster.soulfire.generator.generators;
 
 public interface IDataGenerator {
-    String getDataName();
+  String getDataName();
 
-    Object generateDataJson();
+  Object generateDataJson();
 }

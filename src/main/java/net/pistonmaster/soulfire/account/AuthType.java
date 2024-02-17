@@ -24,18 +24,18 @@ import net.pistonmaster.soulfire.account.service.*;
 @Getter
 @RequiredArgsConstructor
 public enum AuthType {
-    MICROSOFT_JAVA("Microsoft Java", OnlineJavaData.class, new SFJavaMicrosoftAuthService()),
-    MICROSOFT_BEDROCK("Microsoft Bedrock", BedrockData.class, new SFBedrockMicrosoftAuthService()),
-    THE_ALTENING("The Altening", OnlineJavaData.class, new SFTheAlteningAuthService()),
-    EASYMC("EasyMC", OnlineJavaData.class, new SFEasyMCAuthService()),
-    OFFLINE("Offline", OfflineJavaData.class, new SFOfflineAuthService());
+  MICROSOFT_JAVA("Microsoft Java", OnlineJavaData.class, new SFJavaMicrosoftAuthService()),
+  MICROSOFT_BEDROCK("Microsoft Bedrock", BedrockData.class, new SFBedrockMicrosoftAuthService()),
+  THE_ALTENING("The Altening", OnlineJavaData.class, new SFTheAlteningAuthService()),
+  EASYMC("EasyMC", OnlineJavaData.class, new SFEasyMCAuthService()),
+  OFFLINE("Offline", OfflineJavaData.class, new SFOfflineAuthService());
 
-    private final String displayName;
-    private final Class<? extends AccountData> accountDataClass;
-    private final MCAuthService<?> authService;
+  private final String displayName;
+  private final Class<? extends AccountData> accountDataClass;
+  private final MCAuthService<?> authService;
 
-    @Override
-    public String toString() {
-        return displayName;
-    }
+  @Override
+  public String toString() {
+    return displayName;
+  }
 }

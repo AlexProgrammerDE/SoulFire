@@ -20,19 +20,19 @@ package net.pistonmaster.soulfire.server.util;
 import java.util.UUID;
 
 public class UUIDHelper {
-    private UUIDHelper() {
-    }
+  private UUIDHelper() {
+  }
 
-    public static UUID convertToDashed(String noDashes) {
-        var idBuff = new StringBuilder(noDashes);
-        idBuff.insert(20, '-');
-        idBuff.insert(16, '-');
-        idBuff.insert(12, '-');
-        idBuff.insert(8, '-');
-        return UUID.fromString(idBuff.toString());
-    }
+  public static UUID convertToDashed(String noDashes) {
+    var idBuff = new StringBuilder(noDashes);
+    idBuff.insert(20, '-');
+    idBuff.insert(16, '-');
+    idBuff.insert(12, '-');
+    idBuff.insert(8, '-');
+    return UUID.fromString(idBuff.toString());
+  }
 
-    public static String convertToNoDashes(UUID uuid) {
-        return uuid.toString().replace("-", "");
-    }
+  public static String convertToNoDashes(UUID uuid) {
+    return uuid.toString().replace("-", "");
+  }
 }

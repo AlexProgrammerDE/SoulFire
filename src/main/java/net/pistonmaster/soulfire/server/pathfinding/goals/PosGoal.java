@@ -22,17 +22,17 @@ import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
 
 public record PosGoal(SFVec3i goal) implements GoalScorer {
-    public PosGoal(int x, int y, int z) {
-        this(SFVec3i.from(x, y, z));
-    }
+  public PosGoal(int x, int y, int z) {
+    this(SFVec3i.from(x, y, z));
+  }
 
-    @Override
-    public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-        return entityState.blockPosition().distance(goal);
-    }
+  @Override
+  public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
+    return entityState.blockPosition().distance(goal);
+  }
 
-    @Override
-    public boolean isFinished(BotEntityState entityState) {
-        return entityState.blockPosition().equals(goal);
-    }
+  @Override
+  public boolean isFinished(BotEntityState entityState) {
+    return entityState.blockPosition().equals(goal);
+  }
 }

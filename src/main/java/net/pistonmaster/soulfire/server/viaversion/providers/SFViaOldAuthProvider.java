@@ -24,9 +24,9 @@ import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.provider
 import java.util.Objects;
 
 public class SFViaOldAuthProvider extends OldAuthProvider {
-    @Override
-    public void sendAuthRequest(UserConnection user, String serverId) {
-        var session = Objects.requireNonNull(user.get(StorableSession.class)).session();
-        session.meta().joinServerId(serverId, session);
-    }
+  @Override
+  public void sendAuthRequest(UserConnection user, String serverId) {
+    var session = Objects.requireNonNull(user.get(StorableSession.class)).session();
+    session.meta().joinServerId(serverId, session);
+  }
 }

@@ -29,13 +29,13 @@ import java.util.UUID;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 public class RawEntity extends Entity {
-    private final ObjectData data;
-    private float yaw;
-    private float headYaw;
-    private float pitch;
+  private final ObjectData data;
+  private float yaw;
+  private float headYaw;
+  private float pitch;
 
-    public RawEntity(int entityId, UUID uuid, EntityType type, ObjectData data) {
-        super(entityId, uuid, type);
-        this.data = data;
-    }
+  public RawEntity(int entityId, UUID uuid, EntityType type, ObjectData data) {
+    super(entityId, uuid, type);
+    this.data = data;
+  }
 }

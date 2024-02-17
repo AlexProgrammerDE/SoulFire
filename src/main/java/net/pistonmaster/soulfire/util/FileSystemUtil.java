@@ -21,7 +21,12 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.*;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -31,55 +36,55 @@ import java.util.stream.Collectors;
 
 public class FileSystemUtil {
 
-    public static Map<Path, byte[]> getFilesInDirectory(final String assetPath) throws IOException, URISyntaxException {
-        var resource = FileSystemUtil.class.getResource(assetPath);
-        if (resource == null) {
-            return Collections.emptyMap();
-        }
-
-        var uri = resource.toURI();
-        if (uri.getScheme().equals("file")) {
-            return getFilesInPath(Paths.get(uri));
-        } else if (uri.getScheme().equals("jar")) {
-            return runInFileSystem(uri, fileSystem -> {
-                try {
-                    return getFilesInPath(fileSystem.getPath(assetPath));
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-        } else {
-            throw new IllegalArgumentException("Unsupported URI scheme: " + uri.getScheme());
-        }
+  public static Map<Path, byte[]> getFilesInDirectory(final String assetPath) throws IOException, URISyntaxException {
+    var resource = FileSystemUtil.class.getResource(assetPath);
+    if (resource == null) {
+      return Collections.emptyMap();
     }
 
-    private static Map<Path, byte[]> getFilesInPath(final Path path) throws IOException {
-        try (var stream = Files.walk(path)) {
-            return stream
-                    .filter(Files::isRegularFile)
-                    .sorted(Comparator.comparing(Path::toString))
-                    .collect(Collectors.toMap(f -> f, f -> {
-                        try {
-                            return Files.readAllBytes(f);
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e);
-                        }
-                    }, (u, v) -> {
-                        throw new IllegalStateException("Duplicate key");
-                    }, LinkedHashMap::new));
-        }
-    }
-
-    private static <R> R runInFileSystem(final URI uri, final Function<FileSystem, R> action) {
+    var uri = resource.toURI();
+    if (uri.getScheme().equals("file")) {
+      return getFilesInPath(Paths.get(uri));
+    } else if (uri.getScheme().equals("jar")) {
+      return runInFileSystem(uri, fileSystem -> {
         try {
-            return action.apply(FileSystems.getFileSystem(uri));
-        } catch (FileSystemNotFoundException e) {
-            try (var fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
-                return action.apply(fileSystem);
-            } catch (IOException e1) {
-                throw new UncheckedIOException(e1);
-            }
+          return getFilesInPath(fileSystem.getPath(assetPath));
+        } catch (IOException e) {
+          throw new UncheckedIOException(e);
         }
+      });
+    } else {
+      throw new IllegalArgumentException("Unsupported URI scheme: " + uri.getScheme());
     }
+  }
+
+  private static Map<Path, byte[]> getFilesInPath(final Path path) throws IOException {
+    try (var stream = Files.walk(path)) {
+      return stream
+          .filter(Files::isRegularFile)
+          .sorted(Comparator.comparing(Path::toString))
+          .collect(Collectors.toMap(f -> f, f -> {
+            try {
+              return Files.readAllBytes(f);
+            } catch (IOException e) {
+              throw new UncheckedIOException(e);
+            }
+          }, (u, v) -> {
+            throw new IllegalStateException("Duplicate key");
+          }, LinkedHashMap::new));
+    }
+  }
+
+  private static <R> R runInFileSystem(final URI uri, final Function<FileSystem, R> action) {
+    try {
+      return action.apply(FileSystems.getFileSystem(uri));
+    } catch (FileSystemNotFoundException e) {
+      try (var fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
+        return action.apply(fileSystem);
+      } catch (IOException e1) {
+        throw new UncheckedIOException(e1);
+      }
+    }
+  }
 
 }

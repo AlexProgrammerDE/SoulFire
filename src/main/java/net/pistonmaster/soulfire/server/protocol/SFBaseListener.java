@@ -59,120 +59,120 @@ import java.util.Objects;
 
 @RequiredArgsConstructor
 public class SFBaseListener extends SessionAdapter {
-    private final BotConnection botConnection;
-    private final @NonNull ProtocolState targetState;
+  private final BotConnection botConnection;
+  private final @NonNull ProtocolState targetState;
 
-    @Override
-    public void packetReceived(Session session, Packet packet) {
-        if (!(session instanceof ViaClientSession viaSession)) {
-            throw new IllegalStateException("Session is not a ViaSession!");
-        }
-
-        var protocol = (MinecraftProtocol) session.getPacketProtocol();
-        if (protocol.getState() == ProtocolState.LOGIN) {
-            if (packet instanceof ClientboundHelloPacket helloPacket) {
-                var minecraftAccount = botConnection.meta().minecraftAccount();
-                UserConnection viaUserConnection = session.getFlag(SFProtocolConstants.VIA_USER_CONNECTION);
-
-                var authSupport = minecraftAccount.isPremiumJava();
-                if (!authSupport) {
-                    botConnection.logger().info("Server sent a encryption request, but we're offline mode. Not authenticating with mojang.");
-                }
-
-                var auth = authSupport;
-                var isLegacy = SFVersionConstants.isLegacy(botConnection.meta().protocolVersion());
-                if (auth && isLegacy) {
-                    auth = Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
-                }
-
-                botConnection.logger().debug("Performing mojang request: {}", auth);
-
-                SecretKey key;
-                try {
-                    var gen = KeyGenerator.getInstance("AES");
-                    gen.init(128);
-                    key = gen.generateKey();
-                } catch (NoSuchAlgorithmException e) {
-                    throw new IllegalStateException("Failed to generate shared key.", e);
-                }
-
-                if (auth) {
-                    var serverId = SFSessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
-                    botConnection.meta().joinServerId(serverId, viaSession);
-                }
-
-                session.send(new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
-
-                if (!isLegacy) { // Legacy encryption is handled in SWViaEncryptionProvider
-                    viaSession.enableJavaEncryption(key);
-                } else {
-                    botConnection.logger().debug("Storing legacy secret key.");
-                    session.setFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY, key);
-                }
-            } else if (packet instanceof ClientboundGameProfilePacket) {
-                session.send(new ServerboundLoginAcknowledgedPacket());
-            } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {
-                session.disconnect(loginDisconnectPacket.getReason());
-            } else if (packet instanceof ClientboundLoginCompressionPacket loginCompressionPacket) {
-                viaSession.setCompressionThreshold(loginCompressionPacket.getThreshold());
-            }
-        } else if (protocol.getState() == ProtocolState.STATUS) {
-            if (packet instanceof ClientboundStatusResponsePacket) {
-                session.send(new ServerboundPingRequestPacket(System.currentTimeMillis()));
-            } else if (packet instanceof ClientboundPongResponsePacket) {
-                session.disconnect("Finished");
-            }
-        } else if (protocol.getState() == ProtocolState.GAME) {
-            if (packet instanceof ClientboundKeepAlivePacket keepAlivePacket) {
-                session.send(new ServerboundKeepAlivePacket(keepAlivePacket.getPingId()));
-            } else if (packet instanceof ClientboundPingPacket pingPacket) {
-                session.send(new ServerboundPongPacket(pingPacket.getId()));
-            } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
-                session.disconnect(disconnectPacket.getReason());
-            } else if (packet instanceof ClientboundStartConfigurationPacket) {
-                session.send(new ServerboundConfigurationAcknowledgedPacket());
-            }
-        } else if (protocol.getState() == ProtocolState.CONFIGURATION) {
-            if (packet instanceof ClientboundFinishConfigurationPacket) {
-                session.send(new ServerboundFinishConfigurationPacket());
-            }
-        }
+  @Override
+  public void packetReceived(Session session, Packet packet) {
+    if (!(session instanceof ViaClientSession viaSession)) {
+      throw new IllegalStateException("Session is not a ViaSession!");
     }
 
-    @Override
-    public void packetSent(Session session, Packet packet) {
-        var protocol = (MinecraftProtocol) session.getPacketProtocol();
-        if (packet instanceof ClientIntentionPacket) {
-            // Once the HandshakePacket has been sent, switch to the next protocol mode.
-            protocol.setState(this.targetState);
+    var protocol = (MinecraftProtocol) session.getPacketProtocol();
+    if (protocol.getState() == ProtocolState.LOGIN) {
+      if (packet instanceof ClientboundHelloPacket helloPacket) {
+        var minecraftAccount = botConnection.meta().minecraftAccount();
+        UserConnection viaUserConnection = session.getFlag(SFProtocolConstants.VIA_USER_CONNECTION);
 
-            if (this.targetState == ProtocolState.LOGIN) {
-                var minecraftAccount = botConnection.meta().minecraftAccount();
-
-                session.send(new ServerboundHelloPacket(
-                        minecraftAccount.username(),
-                        minecraftAccount.uniqueId()
-                ));
-            } else {
-                session.send(new ServerboundStatusRequestPacket());
-            }
+        var authSupport = minecraftAccount.isPremiumJava();
+        if (!authSupport) {
+          botConnection.logger().info("Server sent a encryption request, but we're offline mode. Not authenticating with mojang.");
         }
+
+        var auth = authSupport;
+        var isLegacy = SFVersionConstants.isLegacy(botConnection.meta().protocolVersion());
+        if (auth && isLegacy) {
+          auth = Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
+        }
+
+        botConnection.logger().debug("Performing mojang request: {}", auth);
+
+        SecretKey key;
+        try {
+          var gen = KeyGenerator.getInstance("AES");
+          gen.init(128);
+          key = gen.generateKey();
+        } catch (NoSuchAlgorithmException e) {
+          throw new IllegalStateException("Failed to generate shared key.", e);
+        }
+
+        if (auth) {
+          var serverId = SFSessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
+          botConnection.meta().joinServerId(serverId, viaSession);
+        }
+
+        session.send(new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
+
+        if (!isLegacy) { // Legacy encryption is handled in SWViaEncryptionProvider
+          viaSession.enableJavaEncryption(key);
+        } else {
+          botConnection.logger().debug("Storing legacy secret key.");
+          session.setFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY, key);
+        }
+      } else if (packet instanceof ClientboundGameProfilePacket) {
+        session.send(new ServerboundLoginAcknowledgedPacket());
+      } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {
+        session.disconnect(loginDisconnectPacket.getReason());
+      } else if (packet instanceof ClientboundLoginCompressionPacket loginCompressionPacket) {
+        viaSession.setCompressionThreshold(loginCompressionPacket.getThreshold());
+      }
+    } else if (protocol.getState() == ProtocolState.STATUS) {
+      if (packet instanceof ClientboundStatusResponsePacket) {
+        session.send(new ServerboundPingRequestPacket(System.currentTimeMillis()));
+      } else if (packet instanceof ClientboundPongResponsePacket) {
+        session.disconnect("Finished");
+      }
+    } else if (protocol.getState() == ProtocolState.GAME) {
+      if (packet instanceof ClientboundKeepAlivePacket keepAlivePacket) {
+        session.send(new ServerboundKeepAlivePacket(keepAlivePacket.getPingId()));
+      } else if (packet instanceof ClientboundPingPacket pingPacket) {
+        session.send(new ServerboundPongPacket(pingPacket.getId()));
+      } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
+        session.disconnect(disconnectPacket.getReason());
+      } else if (packet instanceof ClientboundStartConfigurationPacket) {
+        session.send(new ServerboundConfigurationAcknowledgedPacket());
+      }
+    } else if (protocol.getState() == ProtocolState.CONFIGURATION) {
+      if (packet instanceof ClientboundFinishConfigurationPacket) {
+        session.send(new ServerboundFinishConfigurationPacket());
+      }
     }
+  }
 
-    @Override
-    public void connected(ConnectedEvent event) {
-        var protocol = (MinecraftProtocol) event.getSession().getPacketProtocol();
-        var originalAddress = botConnection.resolvedAddress().originalAddress();
+  @Override
+  public void packetSent(Session session, Packet packet) {
+    var protocol = (MinecraftProtocol) session.getPacketProtocol();
+    if (packet instanceof ClientIntentionPacket) {
+      // Once the HandshakePacket has been sent, switch to the next protocol mode.
+      protocol.setState(this.targetState);
 
-        event.getSession().send(new ClientIntentionPacket(
-                protocol.getCodec().getProtocolVersion(),
-                originalAddress.host(),
-                originalAddress.port(),
-                switch (this.targetState) {
-                    case LOGIN -> HandshakeIntent.LOGIN;
-                    case STATUS -> HandshakeIntent.STATUS;
-                    default -> throw new IllegalStateException("Unexpected value: " + this.targetState);
-                }
+      if (this.targetState == ProtocolState.LOGIN) {
+        var minecraftAccount = botConnection.meta().minecraftAccount();
+
+        session.send(new ServerboundHelloPacket(
+            minecraftAccount.username(),
+            minecraftAccount.uniqueId()
         ));
+      } else {
+        session.send(new ServerboundStatusRequestPacket());
+      }
     }
+  }
+
+  @Override
+  public void connected(ConnectedEvent event) {
+    var protocol = (MinecraftProtocol) event.getSession().getPacketProtocol();
+    var originalAddress = botConnection.resolvedAddress().originalAddress();
+
+    event.getSession().send(new ClientIntentionPacket(
+        protocol.getCodec().getProtocolVersion(),
+        originalAddress.host(),
+        originalAddress.port(),
+        switch (this.targetState) {
+          case LOGIN -> HandshakeIntent.LOGIN;
+          case STATUS -> HandshakeIntent.STATUS;
+          default -> throw new IllegalStateException("Unexpected value: " + this.targetState);
+        }
+    ));
+  }
 }

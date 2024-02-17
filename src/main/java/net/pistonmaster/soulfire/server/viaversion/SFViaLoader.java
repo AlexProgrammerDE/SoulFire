@@ -29,28 +29,28 @@ import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.
 import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.providers.GameProfileFetcher;
 
 public class SFViaLoader implements ViaPlatformLoader {
-    @Override
-    public void load() {
-        Via.getManager().getProviders().use(VersionProvider.class, new SFViaVersionProvider());
-        Via.getManager().getProviders().use(CompressionProvider.class, new SFViaCompressionProvider());
+  @Override
+  public void load() {
+    Via.getManager().getProviders().use(VersionProvider.class, new SFViaVersionProvider());
+    Via.getManager().getProviders().use(CompressionProvider.class, new SFViaCompressionProvider());
 
-        // For ViaLegacy
-        Via.getManager().getProviders().use(GameProfileFetcher.class, new SFViaGameProfileFetcher());
-        Via.getManager().getProviders().use(EncryptionProvider.class, new SFViaEncryptionProvider());
-        Via.getManager().getProviders().use(OldAuthProvider.class, new SFViaOldAuthProvider());
+    // For ViaLegacy
+    Via.getManager().getProviders().use(GameProfileFetcher.class, new SFViaGameProfileFetcher());
+    Via.getManager().getProviders().use(EncryptionProvider.class, new SFViaEncryptionProvider());
+    Via.getManager().getProviders().use(OldAuthProvider.class, new SFViaOldAuthProvider());
 
-        // For ViaBedrock
-        Via.getManager().getProviders().use(NettyPipelineProvider.class, new SFViaNettyPipelineProvider());
+    // For ViaBedrock
+    Via.getManager().getProviders().use(NettyPipelineProvider.class, new SFViaNettyPipelineProvider());
 
-        // For Forge
-        Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FML|HS", "fml:hs"); // Forge 1.7 - 1.12.2
-        Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FML|MP", "fml:mp"); // Forge 1.7 - 1.12.2
-        Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FML", "fml:fml"); // Forge 1.7
-        Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FORGE", "fml:forge"); // Forge
-        Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("Forge", "fml:old_forge"); // Forge
-    }
+    // For Forge
+    Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FML|HS", "fml:hs"); // Forge 1.7 - 1.12.2
+    Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FML|MP", "fml:mp"); // Forge 1.7 - 1.12.2
+    Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FML", "fml:fml"); // Forge 1.7
+    Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FORGE", "fml:forge"); // Forge
+    Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("Forge", "fml:old_forge"); // Forge
+  }
 
-    @Override
-    public void unload() {
-    }
+  @Override
+  public void unload() {
+  }
 }

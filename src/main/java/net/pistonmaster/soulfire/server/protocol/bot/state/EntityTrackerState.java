@@ -27,25 +27,25 @@ import java.util.Collection;
 
 @Data
 public class EntityTrackerState {
-    private final Int2ObjectMap<Entity> entitiesMap = new Int2ObjectOpenHashMap<>();
+  private final Int2ObjectMap<Entity> entitiesMap = new Int2ObjectOpenHashMap<>();
 
-    public void addEntity(Entity entity) {
-        entitiesMap.put(entity.entityId(), entity);
-    }
+  public void addEntity(Entity entity) {
+    entitiesMap.put(entity.entityId(), entity);
+  }
 
-    public void removeEntity(int entityId) {
-        entitiesMap.remove(entityId);
-    }
+  public void removeEntity(int entityId) {
+    entitiesMap.remove(entityId);
+  }
 
-    public @Nullable Entity getEntity(int entityId) {
-        return entitiesMap.get(entityId);
-    }
+  public @Nullable Entity getEntity(int entityId) {
+    return entitiesMap.get(entityId);
+  }
 
-    public Collection<Entity> getEntities() {
-        return entitiesMap.values();
-    }
+  public Collection<Entity> getEntities() {
+    return entitiesMap.values();
+  }
 
-    public void tick() {
-        entitiesMap.values().forEach(Entity::tick);
-    }
+  public void tick() {
+    entitiesMap.values().forEach(Entity::tick);
+  }
 }

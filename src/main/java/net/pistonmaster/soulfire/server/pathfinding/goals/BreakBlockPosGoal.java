@@ -24,39 +24,39 @@ import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
 import net.pistonmaster.soulfire.server.util.BlockTypeHelper;
 
 public record BreakBlockPosGoal(SFVec3i goal) implements GoalScorer {
-    @Override
-    public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-        var distance = entityState.blockPosition().distance(goal);
-        var blockStateMeta = entityState.levelState().getBlockStateAt(goal);
+  @Override
+  public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
+    var distance = entityState.blockPosition().distance(goal);
+    var blockStateMeta = entityState.levelState().getBlockStateAt(goal);
 
-        // Instead of failing when the block is not in render distance, we just return the distance.
-        if (blockStateMeta.blockType() == BlockType.VOID_AIR) {
-            return distance;
-        }
-
-        // Don't try to find a way to dig bedrock
-        if (!BlockTypeHelper.isDiggable(blockStateMeta.blockType())) {
-            throw new IllegalStateException("Block is not diggable!");
-        }
-
-        // We only want to dig full blocks (not slabs, stairs, etc.), removes a lot of edge cases
-        if (!blockStateMeta.blockShapeGroup().isFullBlock()) {
-            throw new IllegalStateException("Block is not a full block!");
-        }
-
-        var breakCost = entityState.inventory().getMiningCosts(
-                graph.tagsState(),
-                blockStateMeta
-        ).miningCost();
-
-        return distance + breakCost;
+    // Instead of failing when the block is not in render distance, we just return the distance.
+    if (blockStateMeta.blockType() == BlockType.VOID_AIR) {
+      return distance;
     }
 
-    @Override
-    public boolean isFinished(BotEntityState entityState) {
-        return entityState.levelState()
-                .getBlockStateAt(goal)
-                .blockType()
-                .air();
+    // Don't try to find a way to dig bedrock
+    if (!BlockTypeHelper.isDiggable(blockStateMeta.blockType())) {
+      throw new IllegalStateException("Block is not diggable!");
     }
+
+    // We only want to dig full blocks (not slabs, stairs, etc.), removes a lot of edge cases
+    if (!blockStateMeta.blockShapeGroup().isFullBlock()) {
+      throw new IllegalStateException("Block is not a full block!");
+    }
+
+    var breakCost = entityState.inventory().getMiningCosts(
+        graph.tagsState(),
+        blockStateMeta
+    ).miningCost();
+
+    return distance + breakCost;
+  }
+
+  @Override
+  public boolean isFinished(BotEntityState entityState) {
+    return entityState.levelState()
+        .getBlockStateAt(goal)
+        .blockType()
+        .air();
+  }
 }

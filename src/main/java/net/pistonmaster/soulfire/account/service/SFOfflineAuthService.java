@@ -22,20 +22,20 @@ import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.proxy.SWProxy;
 
 public final class SFOfflineAuthService implements MCAuthService<SFOfflineAuthService.OfflineAuthData> {
-    public static MinecraftAccount createAccount(String username) {
-        return new MinecraftAccount(AuthType.OFFLINE, username, new OfflineJavaData(username), true);
-    }
+  public static MinecraftAccount createAccount(String username) {
+    return new MinecraftAccount(AuthType.OFFLINE, username, new OfflineJavaData(username), true);
+  }
 
-    @Override
-    public MinecraftAccount login(OfflineAuthData data, SWProxy proxyData) {
-        return createAccount(data.username());
-    }
+  @Override
+  public MinecraftAccount login(OfflineAuthData data, SWProxy proxyData) {
+    return createAccount(data.username());
+  }
 
-    @Override
-    public OfflineAuthData createData(String data) {
-        return new OfflineAuthData(data);
-    }
+  @Override
+  public OfflineAuthData createData(String data) {
+    return new OfflineAuthData(data);
+  }
 
-    public record OfflineAuthData(String username) {
-    }
+  public record OfflineAuthData(String username) {
+  }
 }

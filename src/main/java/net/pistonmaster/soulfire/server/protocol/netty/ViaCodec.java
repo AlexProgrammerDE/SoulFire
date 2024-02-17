@@ -34,63 +34,69 @@ import java.util.Objects;
 
 @RequiredArgsConstructor
 public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
-    private final UserConnection info;
+  private final UserConnection info;
 
-    @Override
-    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
-        if (!ctx.channel().isActive() || !info.checkServerboundPacket()) throw CancelEncoderException.generate(null);
-        if (!info.shouldTransformPacket()) {
-            out.add(msg.retain());
-            return;
-        }
-
-        var transformedBuf = ctx.alloc().buffer().writeBytes(msg);
-        try {
-            info.transformServerbound(transformedBuf, CancelEncoderException::generate);
-            out.add(transformedBuf.retain());
-        } finally {
-            transformedBuf.release();
-        }
+  @Override
+  protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
+    if (!ctx.channel().isActive() || !info.checkServerboundPacket()) {
+      throw CancelEncoderException.generate(null);
+    }
+    if (!info.shouldTransformPacket()) {
+      out.add(msg.retain());
+      return;
     }
 
-    @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
-        if (!ctx.channel().isActive()) return;
-        if (!info.checkClientboundPacket()) throw CancelDecoderException.generate(null);
-        if (!info.shouldTransformPacket()) {
-            out.add(msg.retain());
-            return;
-        }
+    var transformedBuf = ctx.alloc().buffer().writeBytes(msg);
+    try {
+      info.transformServerbound(transformedBuf, CancelEncoderException::generate);
+      out.add(transformedBuf.retain());
+    } finally {
+      transformedBuf.release();
+    }
+  }
 
-        var transformedBuf = ctx.alloc().buffer().writeBytes(msg);
-        try {
-            info.transformClientbound(transformedBuf, CancelDecoderException::generate);
-            out.add(transformedBuf.retain());
-        } finally {
-            transformedBuf.release();
-        }
+  @Override
+  protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
+    if (!ctx.channel().isActive()) {
+      return;
+    }
+    if (!info.checkClientboundPacket()) {
+      throw CancelDecoderException.generate(null);
+    }
+    if (!info.shouldTransformPacket()) {
+      out.add(msg.retain());
+      return;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if (PipelineUtil.containsCause(cause, CancelCodecException.class)
-                || PipelineUtil.containsCause(cause, CancelException.class)) {
-            return;
-        }
-
-        super.exceptionCaught(ctx, cause);
-
-        if (cause instanceof EncoderException) {
-            return;
-        }
-
-        // Decoder exception
-        if ((PipelineUtil.containsCause(cause, InformativeException.class)
-                && info.getProtocolInfo().getServerState() != State.HANDSHAKE)
-                || Via.getManager().debugHandler().enabled()) {
-            Objects.requireNonNull(info.get(StorableSession.class), "Storable Session missing")
-                    .session().logger().error("A ViaVersion error has occurred:", cause);
-        }
+    var transformedBuf = ctx.alloc().buffer().writeBytes(msg);
+    try {
+      info.transformClientbound(transformedBuf, CancelDecoderException::generate);
+      out.add(transformedBuf.retain());
+    } finally {
+      transformedBuf.release();
     }
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  @Override
+  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    if (PipelineUtil.containsCause(cause, CancelCodecException.class)
+        || PipelineUtil.containsCause(cause, CancelException.class)) {
+      return;
+    }
+
+    super.exceptionCaught(ctx, cause);
+
+    if (cause instanceof EncoderException) {
+      return;
+    }
+
+    // Decoder exception
+    if ((PipelineUtil.containsCause(cause, InformativeException.class)
+        && info.getProtocolInfo().getServerState() != State.HANDSHAKE)
+        || Via.getManager().debugHandler().enabled()) {
+      Objects.requireNonNull(info.get(StorableSession.class), "Storable Session missing")
+          .session().logger().error("A ViaVersion error has occurred:", cause);
+    }
+  }
 }

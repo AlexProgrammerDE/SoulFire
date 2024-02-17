@@ -25,9 +25,9 @@ import org.pf4j.ExtensionPoint;
  * Therefore, you can also use this to load server-only classes.
  */
 public interface ServerExtension extends ExtensionPoint {
-    default void onLoad() {
-    }
+  default void onLoad() {
+  }
 
-    default void onEnable(SoulFireServer soulFireServer) {
-    }
+  default void onEnable(SoulFireServer soulFireServer) {
+  }
 }

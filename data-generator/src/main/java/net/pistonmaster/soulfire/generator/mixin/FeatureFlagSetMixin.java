@@ -25,8 +25,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(FeatureFlagSet.class)
 public class FeatureFlagSetMixin {
-    @Inject(method = "isSubsetOf", at = @At("HEAD"), cancellable = true)
-    private void init(CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(true);
-    }
+  @Inject(method = "isSubsetOf", at = @At("HEAD"), cancellable = true)
+  private void init(CallbackInfoReturnable<Boolean> cir) {
+    cir.setReturnValue(true);
+  }
 }

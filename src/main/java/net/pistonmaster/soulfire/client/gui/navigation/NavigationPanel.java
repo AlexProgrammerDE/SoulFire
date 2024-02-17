@@ -18,28 +18,28 @@
 package net.pistonmaster.soulfire.client.gui.navigation;
 
 import ch.jalu.injector.Injector;
+import java.awt.GridLayout;
+import javax.inject.Inject;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 import net.pistonmaster.soulfire.client.gui.libs.SwingTextUtils;
 
-import javax.inject.Inject;
-import javax.swing.*;
-import java.awt.*;
-
 public class NavigationPanel extends JPanel {
-    public static final String NAVIGATION_ID = "navigation-menu";
+  public static final String NAVIGATION_ID = "navigation-menu";
 
-    @Inject
-    public NavigationPanel(CardsContainer container, Injector injector) {
-        setLayout(new GridLayout(0, 2, 10, 10));
+  @Inject
+  public NavigationPanel(CardsContainer container, Injector injector) {
+    setLayout(new GridLayout(0, 2, 10, 10));
 
-        for (var item : container.panels()) {
-            var button = new JButton(SwingTextUtils.htmlCenterText(item.getNavigationName()));
+    for (var item : container.panels()) {
+      var button = new JButton(SwingTextUtils.htmlCenterText(item.getNavigationName()));
 
-            button.addActionListener(action -> container.show(item.getNavigationId()));
-            container.putClientProperty(item.getNavigationId() + "-button", button);
+      button.addActionListener(action -> container.show(item.getNavigationId()));
+      container.putClientProperty(item.getNavigationId() + "-button", button);
 
-            add(button);
-        }
-
-        add(injector.getSingleton(ControlPanel.class));
+      add(button);
     }
+
+    add(injector.getSingleton(ControlPanel.class));
+  }
 }

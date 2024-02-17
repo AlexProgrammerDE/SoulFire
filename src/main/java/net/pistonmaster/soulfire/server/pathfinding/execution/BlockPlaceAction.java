@@ -34,126 +34,126 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @RequiredArgsConstructor
 public final class BlockPlaceAction implements WorldAction {
-    private final SFVec3i blockPosition;
-    private final BotActionManager.BlockPlaceData blockPlaceData;
-    private boolean putOnHotbar = false;
-    private boolean finishedPlacing = false;
+  private final SFVec3i blockPosition;
+  private final BotActionManager.BlockPlaceData blockPlaceData;
+  private boolean putOnHotbar = false;
+  private boolean finishedPlacing = false;
 
-    @Override
-    public boolean isCompleted(BotConnection connection) {
-        var levelState = connection.sessionDataManager().getCurrentLevel();
-        if (levelState == null) {
-            return false;
+  @Override
+  public boolean isCompleted(BotConnection connection) {
+    var levelState = connection.sessionDataManager().getCurrentLevel();
+    if (levelState == null) {
+      return false;
+    }
+
+    return BlockTypeHelper.isFullBlock(levelState.getBlockStateAt(blockPosition));
+  }
+
+  @Override
+  public void tick(BotConnection connection) {
+    var sessionDataManager = connection.sessionDataManager();
+    sessionDataManager.controlState().resetAll();
+
+    if (!putOnHotbar) {
+      var inventoryManager = sessionDataManager.inventoryManager();
+      var playerInventory = inventoryManager.playerInventory();
+
+      SFItemStack leastHardItem = null;
+      var leastDestroyTime = 0F;
+      for (var slot : playerInventory.storage()) {
+        if (slot.item() == null) {
+          continue;
         }
 
-        return BlockTypeHelper.isFullBlock(levelState.getBlockStateAt(blockPosition));
-    }
-
-    @Override
-    public void tick(BotConnection connection) {
-        var sessionDataManager = connection.sessionDataManager();
-        sessionDataManager.controlState().resetAll();
-
-        if (!putOnHotbar) {
-            var inventoryManager = sessionDataManager.inventoryManager();
-            var playerInventory = inventoryManager.playerInventory();
-
-            SFItemStack leastHardItem = null;
-            var leastDestroyTime = 0F;
-            for (var slot : playerInventory.storage()) {
-                if (slot.item() == null) {
-                    continue;
-                }
-
-                var item = slot.item();
-                var blockType = BlockItems.getBlockType(item.type());
-                if (blockType.isEmpty()) {
-                    continue;
-                }
-
-                var destroyTime = blockType.get().destroyTime();
-                if (leastHardItem == null || destroyTime < leastDestroyTime) {
-                    leastHardItem = item;
-                    leastDestroyTime = destroyTime;
-                }
-            }
-
-            var heldSlot = playerInventory.getHeldItem();
-            if (heldSlot.item() != null) {
-                var item = heldSlot.item();
-                if (ItemTypeHelper.isSafeFullBlockItem(item.type())) {
-                    putOnHotbar = true;
-                    return;
-                }
-            }
-
-            for (var hotbarSlot : playerInventory.hotbar()) {
-                if (hotbarSlot.item() == null) {
-                    continue;
-                }
-
-                var item = hotbarSlot.item();
-                if (!ItemTypeHelper.isSafeFullBlockItem(item.type())) {
-                    continue;
-                }
-
-                inventoryManager.heldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
-                inventoryManager.sendHeldItemChange();
-                putOnHotbar = true;
-                return;
-            }
-
-            for (var slot : playerInventory.mainInventory()) {
-                if (slot.item() == null) {
-                    continue;
-                }
-
-                var item = slot.item();
-                if (!ItemTypeHelper.isSafeFullBlockItem(item.type())) {
-                    continue;
-                }
-
-                if (!inventoryManager.tryInventoryControl()) {
-                    return;
-                }
-
-                try {
-                    inventoryManager.leftClickSlot(slot.slot());
-                    TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-                    inventoryManager.leftClickSlot(playerInventory.getHeldItem().slot());
-                    TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-
-                    if (inventoryManager.cursorItem() != null) {
-                        inventoryManager.leftClickSlot(slot.slot());
-                        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-                    }
-                } finally {
-                    inventoryManager.unlockInventoryControl();
-                }
-
-                putOnHotbar = true;
-                return;
-            }
-
-            throw new IllegalStateException("Failed to find item stack");
+        var item = slot.item();
+        var blockType = BlockItems.getBlockType(item.type());
+        if (blockType.isEmpty()) {
+          continue;
         }
 
-        if (finishedPlacing) {
-            return;
+        var destroyTime = blockType.get().destroyTime();
+        if (leastHardItem == null || destroyTime < leastDestroyTime) {
+          leastHardItem = item;
+          leastDestroyTime = destroyTime;
+        }
+      }
+
+      var heldSlot = playerInventory.getHeldItem();
+      if (heldSlot.item() != null) {
+        var item = heldSlot.item();
+        if (ItemTypeHelper.isSafeFullBlockItem(item.type())) {
+          putOnHotbar = true;
+          return;
+        }
+      }
+
+      for (var hotbarSlot : playerInventory.hotbar()) {
+        if (hotbarSlot.item() == null) {
+          continue;
         }
 
-        connection.sessionDataManager().botActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceData);
-        finishedPlacing = true;
+        var item = hotbarSlot.item();
+        if (!ItemTypeHelper.isSafeFullBlockItem(item.type())) {
+          continue;
+        }
+
+        inventoryManager.heldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
+        inventoryManager.sendHeldItemChange();
+        putOnHotbar = true;
+        return;
+      }
+
+      for (var slot : playerInventory.mainInventory()) {
+        if (slot.item() == null) {
+          continue;
+        }
+
+        var item = slot.item();
+        if (!ItemTypeHelper.isSafeFullBlockItem(item.type())) {
+          continue;
+        }
+
+        if (!inventoryManager.tryInventoryControl()) {
+          return;
+        }
+
+        try {
+          inventoryManager.leftClickSlot(slot.slot());
+          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+          inventoryManager.leftClickSlot(playerInventory.getHeldItem().slot());
+          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+
+          if (inventoryManager.cursorItem() != null) {
+            inventoryManager.leftClickSlot(slot.slot());
+            TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+          }
+        } finally {
+          inventoryManager.unlockInventoryControl();
+        }
+
+        putOnHotbar = true;
+        return;
+      }
+
+      throw new IllegalStateException("Failed to find item stack");
     }
 
-    @Override
-    public int getAllowedTicks() {
-        // 3-seconds max to place a block
-        return 3 * 20;
+    if (finishedPlacing) {
+      return;
     }
 
-    @Override
-    public String toString() {
-        return "BlockPlaceAction -> " + blockPosition.formatXYZ();
-    }
+    connection.sessionDataManager().botActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceData);
+    finishedPlacing = true;
+  }
+
+  @Override
+  public int getAllowedTicks() {
+    // 3-seconds max to place a block
+    return 3 * 20;
+  }
+
+  @Override
+  public String toString() {
+    return "BlockPlaceAction -> " + blockPosition.formatXYZ();
+  }
 }

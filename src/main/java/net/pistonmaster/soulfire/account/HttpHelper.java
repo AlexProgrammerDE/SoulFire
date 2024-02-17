@@ -35,49 +35,49 @@ import org.apache.http.message.BasicHeader;
 import java.util.List;
 
 public class HttpHelper {
-    private HttpHelper() {
+  private HttpHelper() {
+  }
+
+  public static CloseableHttpClient createMCAuthHttpClient(SWProxy proxyData) {
+    return createHttpClient(List.of(
+        new BasicHeader("Accept", ContentType.APPLICATION_JSON.getMimeType()),
+        new BasicHeader("Accept-Language", "en-US,en")
+    ), proxyData);
+  }
+
+  public static HttpClient createLenniMCAuthHttpClient(SWProxy proxyData) {
+    return MinecraftAuth.createHttpClient();
+  }
+
+  public static CloseableHttpClient createHttpClient(List<Header> headers, SWProxy proxyData) {
+    var httpBuilder = HttpClientBuilder.create()
+        .setDefaultHeaders(headers);
+
+    var timeout = 5;
+    var requestBuilder = RequestConfig.custom()
+        .setConnectTimeout(timeout * 1000)
+        .setConnectionRequestTimeout(timeout * 1000)
+        .setSocketTimeout(timeout * 1000);
+
+    if (proxyData != null) {
+      var proxy = new HttpHost(proxyData.host(), proxyData.port());
+
+      if (proxyData.username() != null && proxyData.password() != null) {
+        var credentials = new UsernamePasswordCredentials(proxyData.username(), proxyData.password());
+
+        var authScope = new AuthScope(proxy);
+
+        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(authScope, credentials);
+
+        httpBuilder.setDefaultCredentialsProvider(credentialsProvider);
+      }
+
+      requestBuilder.setProxy(proxy);
     }
 
-    public static CloseableHttpClient createMCAuthHttpClient(SWProxy proxyData) {
-        return createHttpClient(List.of(
-                new BasicHeader("Accept", ContentType.APPLICATION_JSON.getMimeType()),
-                new BasicHeader("Accept-Language", "en-US,en")
-        ), proxyData);
-    }
+    httpBuilder.setDefaultRequestConfig(requestBuilder.build());
 
-    public static HttpClient createLenniMCAuthHttpClient(SWProxy proxyData) {
-        return MinecraftAuth.createHttpClient();
-    }
-
-    public static CloseableHttpClient createHttpClient(List<Header> headers, SWProxy proxyData) {
-        var httpBuilder = HttpClientBuilder.create()
-                .setDefaultHeaders(headers);
-
-        var timeout = 5;
-        var requestBuilder = RequestConfig.custom()
-                .setConnectTimeout(timeout * 1000)
-                .setConnectionRequestTimeout(timeout * 1000)
-                .setSocketTimeout(timeout * 1000);
-
-        if (proxyData != null) {
-            var proxy = new HttpHost(proxyData.host(), proxyData.port());
-
-            if (proxyData.username() != null && proxyData.password() != null) {
-                var credentials = new UsernamePasswordCredentials(proxyData.username(), proxyData.password());
-
-                var authScope = new AuthScope(proxy);
-
-                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-                credentialsProvider.setCredentials(authScope, credentials);
-
-                httpBuilder.setDefaultCredentialsProvider(credentialsProvider);
-            }
-
-            requestBuilder.setProxy(proxy);
-        }
-
-        httpBuilder.setDefaultRequestConfig(requestBuilder.build());
-
-        return httpBuilder.build();
-    }
+    return httpBuilder.build();
+  }
 }

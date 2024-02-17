@@ -18,56 +18,61 @@
 package net.pistonmaster.soulfire.server.data;
 
 import com.google.gson.JsonObject;
-import it.unimi.dsi.fastutil.objects.*;
+import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import lombok.ToString;
 
 @ToString
 public class BlockStateProperties {
-    private final Object2BooleanMap<String> booleanProperties;
-    private final Object2IntMap<String> intProperties;
-    private final Object2ObjectMap<String, String> stringProperties;
+  private final Object2BooleanMap<String> booleanProperties;
+  private final Object2IntMap<String> intProperties;
+  private final Object2ObjectMap<String, String> stringProperties;
 
-    public BlockStateProperties(JsonObject properties) {
-        this.booleanProperties = new Object2BooleanArrayMap<>();
-        this.intProperties = new Object2IntArrayMap<>();
-        this.stringProperties = new Object2ObjectArrayMap<>();
+  public BlockStateProperties(JsonObject properties) {
+    this.booleanProperties = new Object2BooleanArrayMap<>();
+    this.intProperties = new Object2IntArrayMap<>();
+    this.stringProperties = new Object2ObjectArrayMap<>();
 
-        if (properties == null) {
-            return;
-        }
-
-        for (var property : properties.entrySet()) {
-            var key = property.getKey();
-            var value = property.getValue().toString();
-
-            if (value.equals("true") || value.equals("false")) {
-                booleanProperties.put(key, Boolean.parseBoolean(value));
-            } else if (isNumeric(value)) {
-                intProperties.put(key, Integer.parseInt(value));
-            } else {
-                stringProperties.put(key, value);
-            }
-        }
+    if (properties == null) {
+      return;
     }
 
-    private static boolean isNumeric(String strNum) {
-        try {
-            Integer.parseInt(strNum);
-            return true;
-        } catch (NumberFormatException nfe) {
-            return false;
-        }
-    }
+    for (var property : properties.entrySet()) {
+      var key = property.getKey();
+      var value = property.getValue().toString();
 
-    public boolean getBoolean(String key) {
-        return booleanProperties.getBoolean(key);
+      if (value.equals("true") || value.equals("false")) {
+        booleanProperties.put(key, Boolean.parseBoolean(value));
+      } else if (isNumeric(value)) {
+        intProperties.put(key, Integer.parseInt(value));
+      } else {
+        stringProperties.put(key, value);
+      }
     }
+  }
 
-    public int getInt(String key) {
-        return intProperties.getInt(key);
+  private static boolean isNumeric(String strNum) {
+    try {
+      Integer.parseInt(strNum);
+      return true;
+    } catch (NumberFormatException nfe) {
+      return false;
     }
+  }
 
-    public String getString(String key) {
-        return stringProperties.get(key);
-    }
+  public boolean getBoolean(String key) {
+    return booleanProperties.getBoolean(key);
+  }
+
+  public int getInt(String key) {
+    return intProperties.getInt(key);
+  }
+
+  public String getString(String key) {
+    return stringProperties.get(key);
+  }
 }

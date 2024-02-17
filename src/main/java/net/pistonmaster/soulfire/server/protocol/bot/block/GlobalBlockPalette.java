@@ -27,35 +27,35 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.ChunkData;
 
 @ToString
 public class GlobalBlockPalette {
-    public static final GlobalBlockPalette INSTANCE;
+  public static final GlobalBlockPalette INSTANCE;
 
-    static {
-        var stateMap = new Int2ObjectOpenHashMap<BlockState>();
-        for (var blockEntry : BlockType.FROM_ID.values()) {
-            for (var state : blockEntry.statesData().possibleStates()) {
-                stateMap.put(state.id(), state);
-            }
-        }
-
-        INSTANCE = new GlobalBlockPalette(stateMap);
+  static {
+    var stateMap = new Int2ObjectOpenHashMap<BlockState>();
+    for (var blockEntry : BlockType.FROM_ID.values()) {
+      for (var state : blockEntry.statesData().possibleStates()) {
+        stateMap.put(state.id(), state);
+      }
     }
 
-    @Getter
-    private final int maxStates;
-    @Getter
-    private final int blockBitsPerEntry;
-    private final BlockState[] stateIdToBlockState;
+    INSTANCE = new GlobalBlockPalette(stateMap);
+  }
 
-    public GlobalBlockPalette(Int2ObjectMap<BlockState> states) {
-        this.maxStates = states.size();
-        this.blockBitsPerEntry = ChunkData.log2RoundUp(maxStates);
-        this.stateIdToBlockState = new BlockState[maxStates];
-        for (var entry : states.int2ObjectEntrySet()) {
-            this.stateIdToBlockState[entry.getIntKey()] = entry.getValue();
-        }
-    }
+  @Getter
+  private final int maxStates;
+  @Getter
+  private final int blockBitsPerEntry;
+  private final BlockState[] stateIdToBlockState;
 
-    public BlockState getBlockStateForStateId(int id) {
-        return stateIdToBlockState[id];
+  public GlobalBlockPalette(Int2ObjectMap<BlockState> states) {
+    this.maxStates = states.size();
+    this.blockBitsPerEntry = ChunkData.log2RoundUp(maxStates);
+    this.stateIdToBlockState = new BlockState[maxStates];
+    for (var entry : states.int2ObjectEntrySet()) {
+      this.stateIdToBlockState[entry.getIntKey()] = entry.getValue();
     }
+  }
+
+  public BlockState getBlockStateForStateId(int id) {
+    return stateIdToBlockState[id];
+  }
 }

@@ -18,13 +18,12 @@
 package net.pistonmaster.soulfire.server.api.event.bot;
 
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
+import java.util.UUID;
+import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.soulfire.server.SoulFireServer;
 import net.pistonmaster.soulfire.server.api.event.SoulFireBotEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
-
-import javax.annotation.Nullable;
-import java.util.UUID;
 
 /**
  * This event is called when a chat message is received from the server.
@@ -35,24 +34,24 @@ import java.util.UUID;
  * @param sender     The sender of the message or null if it's from the server.
  */
 public record ChatMessageReceiveEvent(
-        BotConnection connection,
-        long timestamp,
-        Component message,
-        @Nullable ChatMessageSender sender
+    BotConnection connection,
+    long timestamp,
+    Component message,
+    @Nullable ChatMessageSender sender
 ) implements SoulFireBotEvent {
-    public String parseToText() {
-        return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(message);
-    }
+  public String parseToText() {
+    return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(message);
+  }
 
-    public boolean isFromPlayer() {
-        return sender != null;
-    }
+  public boolean isFromPlayer() {
+    return sender != null;
+  }
 
-    public record ChatMessageSender(UUID senderUUID, String senderName) {
-        public static ChatMessageSender fromClientboundPlayerChatPacket(ClientboundPlayerChatPacket packet) {
-            var senderUUID = packet.getSender();
-            var senderName = SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(packet.getName());
-            return new ChatMessageSender(senderUUID, senderName);
-        }
+  public record ChatMessageSender(UUID senderUUID, String senderName) {
+    public static ChatMessageSender fromClientboundPlayerChatPacket(ClientboundPlayerChatPacket packet) {
+      var senderUUID = packet.getSender();
+      var senderName = SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(packet.getName());
+      return new ChatMessageSender(senderUUID, senderName);
     }
+  }
 }

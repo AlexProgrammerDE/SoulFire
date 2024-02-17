@@ -21,5 +21,5 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class ObjectReference<T> {
-    public T value;
+  public T value;
 }

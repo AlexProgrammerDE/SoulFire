@@ -29,92 +29,92 @@ import net.pistonmaster.soulfire.server.util.VectorHelper;
 @Slf4j
 @RequiredArgsConstructor
 public final class MovementAction implements WorldAction {
-    private final SFVec3i blockPosition;
-    // Corner jumps normally require you to stand closer to the block to jump
-    private final boolean walkFewTicksNoJump;
-    private boolean didLook = false;
-    private boolean lockYaw = false;
-    private int noJumpTicks = 0;
+  private final SFVec3i blockPosition;
+  // Corner jumps normally require you to stand closer to the block to jump
+  private final boolean walkFewTicksNoJump;
+  private boolean didLook = false;
+  private boolean lockYaw = false;
+  private int noJumpTicks = 0;
 
-    @Override
-    public boolean isCompleted(BotConnection connection) {
-        var clientEntity = connection.sessionDataManager().clientEntity();
-        var botPosition = clientEntity.pos();
-        var levelState = connection.sessionDataManager().getCurrentLevel();
-        if (levelState == null) {
-            return false;
-        }
-
-        var blockMeta = levelState.getBlockStateAt(blockPosition);
-        var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
-        if (MathHelper.isOutsideTolerance(botPosition.getY(), targetMiddleBlock.getY(), 0.2)) {
-            // We want to be on the same Y level
-            return false;
-        } else {
-            var distance = botPosition.distance(targetMiddleBlock);
-            // Close enough to be able to bridge up
-            return distance <= 0.2;
-        }
+  @Override
+  public boolean isCompleted(BotConnection connection) {
+    var clientEntity = connection.sessionDataManager().clientEntity();
+    var botPosition = clientEntity.pos();
+    var levelState = connection.sessionDataManager().getCurrentLevel();
+    if (levelState == null) {
+      return false;
     }
 
-    @Override
-    public void tick(BotConnection connection) {
-        var clientEntity = connection.sessionDataManager().clientEntity();
-        clientEntity.controlState().resetAll();
+    var blockMeta = levelState.getBlockStateAt(blockPosition);
+    var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
+    if (MathHelper.isOutsideTolerance(botPosition.getY(), targetMiddleBlock.getY(), 0.2)) {
+      // We want to be on the same Y level
+      return false;
+    } else {
+      var distance = botPosition.distance(targetMiddleBlock);
+      // Close enough to be able to bridge up
+      return distance <= 0.2;
+    }
+  }
 
-        var levelState = connection.sessionDataManager().getCurrentLevel();
-        if (levelState == null) {
-            return;
-        }
+  @Override
+  public void tick(BotConnection connection) {
+    var clientEntity = connection.sessionDataManager().clientEntity();
+    clientEntity.controlState().resetAll();
 
-        var blockMeta = levelState.getBlockStateAt(blockPosition);
-        var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
-
-        var previousYaw = clientEntity.yaw();
-        clientEntity.lookAt(RotationOrigin.EYES, targetMiddleBlock);
-        clientEntity.pitch(0);
-        var newYaw = clientEntity.yaw();
-
-        var yawDifference = Math.abs(MathHelper.wrapDegrees(newYaw - previousYaw));
-
-        // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
-        if (!didLook) {
-            didLook = true;
-        } else if (yawDifference > 5 || lockYaw) {
-            lockYaw = true;
-            clientEntity.lastYaw(newYaw);
-        }
-
-        clientEntity.controlState().forward(true);
-
-        var botPosition = clientEntity.pos();
-        if (targetMiddleBlock.getY() - MovementConstants.STEP_HEIGHT > botPosition.getY() && shouldJump()) {
-            clientEntity.controlState().jumping(true);
-        }
+    var levelState = connection.sessionDataManager().getCurrentLevel();
+    if (levelState == null) {
+      return;
     }
 
-    private boolean shouldJump() {
-        if (!walkFewTicksNoJump) {
-            return true;
-        }
+    var blockMeta = levelState.getBlockStateAt(blockPosition);
+    var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
 
-        if (noJumpTicks < 4) {
-            noJumpTicks++;
-            return false;
-        } else {
-            noJumpTicks = 0;
-            return true;
-        }
+    var previousYaw = clientEntity.yaw();
+    clientEntity.lookAt(RotationOrigin.EYES, targetMiddleBlock);
+    clientEntity.pitch(0);
+    var newYaw = clientEntity.yaw();
+
+    var yawDifference = Math.abs(MathHelper.wrapDegrees(newYaw - previousYaw));
+
+    // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
+    if (!didLook) {
+      didLook = true;
+    } else if (yawDifference > 5 || lockYaw) {
+      lockYaw = true;
+      clientEntity.lastYaw(newYaw);
     }
 
-    @Override
-    public int getAllowedTicks() {
-        // 5-seconds max to walk to a block
-        return 5 * 20;
+    clientEntity.controlState().forward(true);
+
+    var botPosition = clientEntity.pos();
+    if (targetMiddleBlock.getY() - MovementConstants.STEP_HEIGHT > botPosition.getY() && shouldJump()) {
+      clientEntity.controlState().jumping(true);
+    }
+  }
+
+  private boolean shouldJump() {
+    if (!walkFewTicksNoJump) {
+      return true;
     }
 
-    @Override
-    public String toString() {
-        return "MovementAction -> " + blockPosition.formatXYZ();
+    if (noJumpTicks < 4) {
+      noJumpTicks++;
+      return false;
+    } else {
+      noJumpTicks = 0;
+      return true;
     }
+  }
+
+  @Override
+  public int getAllowedTicks() {
+    // 5-seconds max to walk to a block
+    return 5 * 20;
+  }
+
+  @Override
+  public String toString() {
+    return "MovementAction -> " + blockPosition.formatXYZ();
+  }
 }

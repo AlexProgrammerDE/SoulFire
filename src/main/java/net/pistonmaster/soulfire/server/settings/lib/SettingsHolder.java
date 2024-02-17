@@ -29,96 +29,96 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public record SettingsHolder(
-        Object2ObjectMap<PropertyKey, Number> numberProperties,
-        Object2BooleanMap<PropertyKey> booleanProperties,
-        Object2ObjectMap<PropertyKey, String> stringProperties,
-        List<MinecraftAccount> accounts,
-        List<SWProxy> proxies
+    Object2ObjectMap<PropertyKey, Number> numberProperties,
+    Object2BooleanMap<PropertyKey> booleanProperties,
+    Object2ObjectMap<PropertyKey, String> stringProperties,
+    List<MinecraftAccount> accounts,
+    List<SWProxy> proxies
 ) {
-    public static final SettingsHolder EMPTY = new SettingsHolder(
-            Object2ObjectMaps.emptyMap(),
-            Object2BooleanMaps.emptyMap(),
-            Object2ObjectMaps.emptyMap(),
-            List.of(),
-            List.of()
+  public static final SettingsHolder EMPTY = new SettingsHolder(
+      Object2ObjectMaps.emptyMap(),
+      Object2BooleanMaps.emptyMap(),
+      Object2ObjectMaps.emptyMap(),
+      List.of(),
+      List.of()
+  );
+
+  public static SettingsHolder createSettingsHolder(ProfileDataStructure settingsSerialized, Multimap<PropertyKey, Consumer<JsonElement>> listeners,
+                                                    Consumer<List<MinecraftAccount>> accountRegistryCallback,
+                                                    Consumer<List<SWProxy>> proxyRegistryCallback) {
+    var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
+    var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
+    var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();
+
+    for (var entry : settingsSerialized.settings().entrySet()) {
+      var namespace = entry.getKey();
+      for (var setting : entry.getValue().entrySet()) {
+        var key = setting.getKey();
+        var settingData = setting.getValue();
+
+        var propertyKey = new PropertyKey(namespace, key);
+
+        if (listeners != null) {
+          // Notify all listeners that this setting has been loaded
+          listeners.get(propertyKey).forEach(listener -> listener.accept(settingData));
+        }
+
+        if (settingData.isJsonPrimitive()) {
+          var primitive = settingData.getAsJsonPrimitive();
+          if (primitive.isBoolean()) {
+            booleanProperties.put(propertyKey, primitive.getAsBoolean());
+          } else if (primitive.isNumber()) {
+            numberProperties.put(propertyKey, primitive.getAsNumber());
+          } else if (primitive.isString()) {
+            stringProperties.put(propertyKey, primitive.getAsString());
+          } else {
+            throw new IllegalArgumentException("Unknown primitive type: " + primitive);
+          }
+        } else {
+          throw new IllegalArgumentException("Unknown type: " + settingData);
+        }
+      }
+    }
+
+    // Apply loaded accounts & proxies
+    if (accountRegistryCallback != null) {
+      accountRegistryCallback.accept(settingsSerialized.accounts());
+    }
+
+    if (proxyRegistryCallback != null) {
+      proxyRegistryCallback.accept(settingsSerialized.proxies());
+    }
+
+    return new SettingsHolder(
+        numberProperties,
+        booleanProperties,
+        stringProperties,
+        settingsSerialized.accounts(),
+        settingsSerialized.proxies()
     );
+  }
 
-    public static SettingsHolder createSettingsHolder(ProfileDataStructure settingsSerialized, Multimap<PropertyKey, Consumer<JsonElement>> listeners,
-                                                      Consumer<List<MinecraftAccount>> accountRegistryCallback,
-                                                      Consumer<List<SWProxy>> proxyRegistryCallback) {
-        var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
-        var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
-        var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();
+  public int get(IntProperty property) {
+    return numberProperties.getOrDefault(property.propertyKey(), property.defaultValue()).intValue();
+  }
 
-        for (var entry : settingsSerialized.settings().entrySet()) {
-            var namespace = entry.getKey();
-            for (var setting : entry.getValue().entrySet()) {
-                var key = setting.getKey();
-                var settingData = setting.getValue();
+  public double get(DoubleProperty property) {
+    return numberProperties.getOrDefault(property.propertyKey(), property.defaultValue()).doubleValue();
+  }
 
-                var propertyKey = new PropertyKey(namespace, key);
+  public boolean get(BooleanProperty property) {
+    return booleanProperties.getOrDefault(property.propertyKey(), property.defaultValue());
+  }
 
-                if (listeners != null) {
-                    // Notify all listeners that this setting has been loaded
-                    listeners.get(propertyKey).forEach(listener -> listener.accept(settingData));
-                }
+  public String get(StringProperty property) {
+    return stringProperties.getOrDefault(property.propertyKey(), property.defaultValue());
+  }
 
-                if (settingData.isJsonPrimitive()) {
-                    var primitive = settingData.getAsJsonPrimitive();
-                    if (primitive.isBoolean()) {
-                        booleanProperties.put(propertyKey, primitive.getAsBoolean());
-                    } else if (primitive.isNumber()) {
-                        numberProperties.put(propertyKey, primitive.getAsNumber());
-                    } else if (primitive.isString()) {
-                        stringProperties.put(propertyKey, primitive.getAsString());
-                    } else {
-                        throw new IllegalArgumentException("Unknown primitive type: " + primitive);
-                    }
-                } else {
-                    throw new IllegalArgumentException("Unknown type: " + settingData);
-                }
-            }
-        }
+  public <T> T get(ComboProperty property, Function<String, T> converter) {
+    return converter.apply(stringProperties.getOrDefault(property.propertyKey(), property.options()[property.defaultValue()].id()));
+  }
 
-        // Apply loaded accounts & proxies
-        if (accountRegistryCallback != null) {
-            accountRegistryCallback.accept(settingsSerialized.accounts());
-        }
-
-        if (proxyRegistryCallback != null) {
-            proxyRegistryCallback.accept(settingsSerialized.proxies());
-        }
-
-        return new SettingsHolder(
-                numberProperties,
-                booleanProperties,
-                stringProperties,
-                settingsSerialized.accounts(),
-                settingsSerialized.proxies()
-        );
-    }
-
-    public int get(IntProperty property) {
-        return numberProperties.getOrDefault(property.propertyKey(), property.defaultValue()).intValue();
-    }
-
-    public double get(DoubleProperty property) {
-        return numberProperties.getOrDefault(property.propertyKey(), property.defaultValue()).doubleValue();
-    }
-
-    public boolean get(BooleanProperty property) {
-        return booleanProperties.getOrDefault(property.propertyKey(), property.defaultValue());
-    }
-
-    public String get(StringProperty property) {
-        return stringProperties.getOrDefault(property.propertyKey(), property.defaultValue());
-    }
-
-    public <T> T get(ComboProperty property, Function<String, T> converter) {
-        return converter.apply(stringProperties.getOrDefault(property.propertyKey(), property.options()[property.defaultValue()].id()));
-    }
-
-    public <T extends Enum<T>> T get(ComboProperty property, Class<T> clazz) {
-        return get(property, s -> Enum.valueOf(clazz, s));
-    }
+  public <T extends Enum<T>> T get(ComboProperty property, Class<T> clazz) {
+    return get(property, s -> Enum.valueOf(clazz, s));
+  }
 }

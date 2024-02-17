@@ -32,13 +32,13 @@ import net.pistonmaster.soulfire.server.protocol.BotConnection;
  */
 @AllArgsConstructor
 public class SFPacketReceiveEvent extends AbstractCancellable implements SoulFireBotEvent {
-    private final BotConnection connection;
-    @Getter
-    @Setter
-    private MinecraftPacket packet;
+  private final BotConnection connection;
+  @Getter
+  @Setter
+  private MinecraftPacket packet;
 
-    @Override
-    public BotConnection connection() {
-        return connection;
-    }
+  @Override
+  public BotConnection connection() {
+    return connection;
+  }
 }

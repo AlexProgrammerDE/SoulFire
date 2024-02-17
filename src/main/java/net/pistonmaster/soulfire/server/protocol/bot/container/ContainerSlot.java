@@ -24,39 +24,43 @@ import java.util.Objects;
 
 @AllArgsConstructor
 public final class ContainerSlot {
-    private final int slot;
-    private SFItemStack item;
+  private final int slot;
+  private SFItemStack item;
 
-    public int slot() {
-        return slot;
-    }
+  public int slot() {
+    return slot;
+  }
 
-    public SFItemStack item() {
-        return item;
-    }
+  public SFItemStack item() {
+    return item;
+  }
 
-    void setItem(@Nullable SFItemStack item) {
-        this.item = item;
-    }
+  void setItem(@Nullable SFItemStack item) {
+    this.item = item;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (ContainerSlot) obj;
-        return this.slot == that.slot &&
-                Objects.equals(this.item, that.item);
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) {
+      return true;
     }
+    if (obj == null || obj.getClass() != this.getClass()) {
+      return false;
+    }
+    var that = (ContainerSlot) obj;
+    return this.slot == that.slot &&
+        Objects.equals(this.item, that.item);
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(slot, item);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(slot, item);
+  }
 
-    @Override
-    public String toString() {
-        return "ContainerSlot[" +
-                "slot=" + slot + ", " +
-                "item=" + item + ']';
-    }
+  @Override
+  public String toString() {
+    return "ContainerSlot[" +
+        "slot=" + slot + ", " +
+        "item=" + item + ']';
+  }
 }

@@ -18,10 +18,10 @@
 package net.pistonmaster.soulfire.server.data;
 
 public enum EquipmentSlot {
-    MAINHAND,
-    OFFHAND,
-    FEET,
-    LEGS,
-    CHEST,
-    HEAD
+  MAINHAND,
+  OFFHAND,
+  FEET,
+  LEGS,
+  CHEST,
+  HEAD
 }

@@ -18,57 +18,56 @@
 package net.pistonmaster.soulfire.server.data;
 
 import com.google.gson.JsonObject;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.TranslationArgumentLike;
-import net.pistonmaster.soulfire.server.SoulFireServer;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.TranslationArgumentLike;
+import net.pistonmaster.soulfire.server.SoulFireServer;
 
 @Slf4j
 @RequiredArgsConstructor
 public class TranslationMapper implements Function<TranslatableComponent, String> {
-    public static final TranslationMapper INSTANCE;
+  public static final TranslationMapper INSTANCE;
 
-    static {
-        JsonObject translations;
-        try (var stream = TranslationMapper.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
-            Objects.requireNonNull(stream, "en_us.json not found");
-            translations = SoulFireServer.GENERAL_GSON
-                    .fromJson(new InputStreamReader(stream), JsonObject.class);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-
-        var mojangTranslations = new HashMap<String, String>();
-        for (var translationEntry : translations.entrySet()) {
-            mojangTranslations.put(translationEntry.getKey(), translationEntry.getValue().getAsString());
-        }
-
-        INSTANCE = new TranslationMapper(mojangTranslations);
+  static {
+    JsonObject translations;
+    try (var stream = TranslationMapper.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
+      Objects.requireNonNull(stream, "en_us.json not found");
+      translations = SoulFireServer.GENERAL_GSON
+          .fromJson(new InputStreamReader(stream), JsonObject.class);
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
     }
 
-    private final Map<String, String> mojangTranslations;
-
-    @Override
-    public String apply(TranslatableComponent component) {
-        var translation = mojangTranslations.get(component.key());
-
-        if (translation == null) {
-            log.warn("Missing translation for key: {}", component.key());
-            return component.key();
-        }
-
-        var args = component.arguments().stream()
-                .map(TranslationArgumentLike::asComponent)
-                .map(SoulFireServer.PLAIN_MESSAGE_SERIALIZER::serialize)
-                .toArray(String[]::new);
-        return String.format(translation, (Object[]) args);
+    var mojangTranslations = new HashMap<String, String>();
+    for (var translationEntry : translations.entrySet()) {
+      mojangTranslations.put(translationEntry.getKey(), translationEntry.getValue().getAsString());
     }
+
+    INSTANCE = new TranslationMapper(mojangTranslations);
+  }
+
+  private final Map<String, String> mojangTranslations;
+
+  @Override
+  public String apply(TranslatableComponent component) {
+    var translation = mojangTranslations.get(component.key());
+
+    if (translation == null) {
+      log.warn("Missing translation for key: {}", component.key());
+      return component.key();
+    }
+
+    var args = component.arguments().stream()
+        .map(TranslationArgumentLike::asComponent)
+        .map(SoulFireServer.PLAIN_MESSAGE_SERIALIZER::serialize)
+        .toArray(String[]::new);
+    return String.format(translation, (Object[]) args);
+  }
 }

@@ -26,17 +26,17 @@ import java.util.List;
  * This is so we can merge plugin and server classes.
  */
 public class SoulFireLauncher {
-    private static final SFContextClassLoader SW_CONTEXT_CLASS_LOADER = new SFContextClassLoader();
+  private static final SFContextClassLoader SW_CONTEXT_CLASS_LOADER = new SFContextClassLoader();
 
-    public static void main(String[] args) {
-        Thread.currentThread().setContextClassLoader(SW_CONTEXT_CLASS_LOADER);
+  public static void main(String[] args) {
+    Thread.currentThread().setContextClassLoader(SW_CONTEXT_CLASS_LOADER);
 
-        try {
-            SW_CONTEXT_CLASS_LOADER.loadClass("net.pistonmaster.soulfire.SoulFireBootstrap")
-                    .getDeclaredMethod("bootstrap", String[].class, List.class)
-                    .invoke(null, args, SW_CONTEXT_CLASS_LOADER.childClassLoaders());
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
+    try {
+      SW_CONTEXT_CLASS_LOADER.loadClass("net.pistonmaster.soulfire.SoulFireBootstrap")
+          .getDeclaredMethod("bootstrap", String[].class, List.class)
+          .invoke(null, args, SW_CONTEXT_CLASS_LOADER.childClassLoaders());
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(e);
     }
+  }
 }

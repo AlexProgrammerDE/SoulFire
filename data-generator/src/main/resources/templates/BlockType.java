@@ -31,47 +31,51 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
                         boolean air, boolean fallingBlock, boolean replaceable,
                         boolean requiresCorrectToolForDrops, boolean fluidSource,
                         OffsetData offsetData, BlockStates statesData) {
-    public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
-    public static final Object2ReferenceMap<String, BlockType> FROM_NAME = new Object2ReferenceOpenHashMap<>();
+  public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
+  public static final Object2ReferenceMap<String, BlockType> FROM_NAME = new Object2ReferenceOpenHashMap<>();
 
-    // VALUES REPLACE
+  // VALUES REPLACE
 
-    public static BlockType register(String name) {
-        var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class);
-        blockType = blockType.withStatesData(BlockStates.fromJsonArray(
-                blockType,
-                GsonDataHelper.fromJson("/minecraft/blocks.json", name, JsonObject.class)
-                        .getAsJsonArray("states")));
+  public static BlockType register(String name) {
+    var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class);
+    blockType = blockType.withStatesData(BlockStates.fromJsonArray(
+        blockType,
+        GsonDataHelper.fromJson("/minecraft/blocks.json", name, JsonObject.class)
+            .getAsJsonArray("states")));
 
-        FROM_ID.put(blockType.id(), blockType);
-        FROM_NAME.put(blockType.name(), blockType);
-        return blockType;
+    FROM_ID.put(blockType.id(), blockType);
+    FROM_NAME.put(blockType.name(), blockType);
+    return blockType;
+  }
+
+  public static BlockType getById(int id) {
+    return FROM_ID.get(id);
+  }
+
+  public static BlockType getByName(String name) {
+    return FROM_NAME.get(name.replace("minecraft:", ""));
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
-
-    public static BlockType getById(int id) {
-        return FROM_ID.get(id);
+    if (!(o instanceof BlockType blockType)) {
+      return false;
     }
+    return id == blockType.id;
+  }
 
-    public static BlockType getByName(String name) {
-        return FROM_NAME.get(name.replace("minecraft:", ""));
-    }
+  @Override
+  public int hashCode() {
+    return id;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BlockType blockType)) return false;
-        return id == blockType.id;
+  public record OffsetData(float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType) {
+    public enum OffsetType {
+      XZ,
+      XYZ
     }
-
-    @Override
-    public int hashCode() {
-        return id;
-    }
-
-    public record OffsetData(float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType) {
-        public enum OffsetType {
-            XZ,
-            XYZ
-        }
-    }
+  }
 }

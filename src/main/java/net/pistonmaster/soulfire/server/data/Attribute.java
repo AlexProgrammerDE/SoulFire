@@ -21,6 +21,6 @@ import java.util.List;
 import java.util.UUID;
 
 public record Attribute(AttributeType type, List<Modifier> modifiers) {
-    public record Modifier(UUID uuid, double amount, ModifierOperation operation) {
-    }
+  public record Modifier(UUID uuid, double amount, ModifierOperation operation) {
+  }
 }

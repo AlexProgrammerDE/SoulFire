@@ -28,48 +28,48 @@ import org.apache.commons.validator.routines.EmailValidator;
 import java.io.IOException;
 
 public final class SFBedrockMicrosoftAuthService implements MCAuthService<SFBedrockMicrosoftAuthService.BedrockMicrosoftAuthData> {
-    @Override
-    public MinecraftAccount login(BedrockMicrosoftAuthData data, SWProxy proxyData) throws IOException {
-        try {
-            var fullBedrockSession = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(HttpHelper.createLenniMCAuthHttpClient(proxyData),
-                    new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
+  @Override
+  public MinecraftAccount login(BedrockMicrosoftAuthData data, SWProxy proxyData) throws IOException {
+    try {
+      var fullBedrockSession = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(HttpHelper.createLenniMCAuthHttpClient(proxyData),
+          new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
 
-            var mcChain = fullBedrockSession.getMcChain();
-            var xblXsts = mcChain.getXblXsts();
-            var deviceId = xblXsts.getInitialXblSession().getXblDeviceToken().getId();
-            var playFabId = fullBedrockSession.getPlayFabToken().getPlayFabId();
-            return new MinecraftAccount(AuthType.MICROSOFT_BEDROCK, mcChain.getDisplayName(),
-                    new BedrockData(
-                            mcChain.getMojangJwt(),
-                            mcChain.getIdentityJwt(),
-                            mcChain.getPublicKey(),
-                            mcChain.getPrivateKey(),
-                            deviceId,
-                            playFabId
-                    ),
-                    true);
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+      var mcChain = fullBedrockSession.getMcChain();
+      var xblXsts = mcChain.getXblXsts();
+      var deviceId = xblXsts.getInitialXblSession().getXblDeviceToken().getId();
+      var playFabId = fullBedrockSession.getPlayFabToken().getPlayFabId();
+      return new MinecraftAccount(AuthType.MICROSOFT_BEDROCK, mcChain.getDisplayName(),
+          new BedrockData(
+              mcChain.getMojangJwt(),
+              mcChain.getIdentityJwt(),
+              mcChain.getPublicKey(),
+              mcChain.getPrivateKey(),
+              deviceId,
+              playFabId
+          ),
+          true);
+    } catch (Exception e) {
+      throw new IOException(e);
+    }
+  }
+
+  @Override
+  public BedrockMicrosoftAuthData createData(String data) {
+    var split = data.split(":");
+
+    if (split.length != 2) {
+      throw new IllegalArgumentException("Invalid data!");
     }
 
-    @Override
-    public BedrockMicrosoftAuthData createData(String data) {
-        var split = data.split(":");
-
-        if (split.length != 2) {
-            throw new IllegalArgumentException("Invalid data!");
-        }
-
-        var email = split[0].trim();
-        var password = split[1].trim();
-        if (!EmailValidator.getInstance().isValid(email)) {
-            throw new IllegalArgumentException("Invalid email!");
-        }
-
-        return new BedrockMicrosoftAuthData(email, password);
+    var email = split[0].trim();
+    var password = split[1].trim();
+    if (!EmailValidator.getInstance().isValid(email)) {
+      throw new IllegalArgumentException("Invalid email!");
     }
 
-    public record BedrockMicrosoftAuthData(String email, String password) {
-    }
+    return new BedrockMicrosoftAuthData(email, password);
+  }
+
+  public record BedrockMicrosoftAuthData(String email, String password) {
+  }
 }

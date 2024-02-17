@@ -31,8 +31,8 @@ import net.pistonmaster.soulfire.server.protocol.BotConnection;
  * @param connection The bot connection instance.
  */
 public record PreBotConnectEvent(BotConnection connection) implements SoulFireAttackEvent {
-    @Override
-    public AttackManager attackManager() {
-        return connection.attackManager();
-    }
+  @Override
+  public AttackManager attackManager() {
+    return connection.attackManager();
+  }
 }

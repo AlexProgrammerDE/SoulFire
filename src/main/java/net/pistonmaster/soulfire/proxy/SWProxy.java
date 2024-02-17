@@ -17,27 +17,26 @@
  */
 package net.pistonmaster.soulfire.proxy;
 
-import lombok.NonNull;
-
 import java.net.InetSocketAddress;
+import lombok.NonNull;
 
 public record SWProxy(@NonNull ProxyType type,
                       @NonNull String host, int port,
                       String username, String password,
                       boolean enabled) {
-    public SWProxy {
-        if (type == ProxyType.SOCKS4 && password != null) {
-            throw new IllegalArgumentException("SOCKS4 does not support passwords!");
-        } else if (username == null && password != null) {
-            throw new IllegalArgumentException("Username must be set if password is set!");
-        } else if (username != null && username.isBlank()) {
-            throw new IllegalArgumentException("Username must not be blank! (Should be null)");
-        } else if (password != null && password.isBlank()) {
-            throw new IllegalArgumentException("Password must not be blank! (Should be null)");
-        }
+  public SWProxy {
+    if (type == ProxyType.SOCKS4 && password != null) {
+      throw new IllegalArgumentException("SOCKS4 does not support passwords!");
+    } else if (username == null && password != null) {
+      throw new IllegalArgumentException("Username must be set if password is set!");
+    } else if (username != null && username.isBlank()) {
+      throw new IllegalArgumentException("Username must not be blank! (Should be null)");
+    } else if (password != null && password.isBlank()) {
+      throw new IllegalArgumentException("Password must not be blank! (Should be null)");
     }
+  }
 
-    public InetSocketAddress getInetSocketAddress() {
-        return new InetSocketAddress(host, port);
-    }
+  public InetSocketAddress getInetSocketAddress() {
+    return new InetSocketAddress(host, port);
+  }
 }

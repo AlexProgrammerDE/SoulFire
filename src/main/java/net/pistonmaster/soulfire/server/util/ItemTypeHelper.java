@@ -22,23 +22,23 @@ import net.pistonmaster.soulfire.server.data.ItemType;
 import net.pistonmaster.soulfire.server.data.TierType;
 
 public class ItemTypeHelper {
-    private ItemTypeHelper() {
-    }
+  private ItemTypeHelper() {
+  }
 
-    public static boolean isSafeFullBlockItem(ItemType type) {
-        return BlockItems.getBlockType(type).isPresent() && !isUnsafeToPlace(type);
-    }
+  public static boolean isSafeFullBlockItem(ItemType type) {
+    return BlockItems.getBlockType(type).isPresent() && !isUnsafeToPlace(type);
+  }
 
-    public static boolean isTool(ItemType type) {
-        return TierType.getTier(type).isPresent() || type == ItemType.SHEARS;
-    }
+  public static boolean isTool(ItemType type) {
+    return TierType.getTier(type).isPresent() || type == ItemType.SHEARS;
+  }
 
-    public static boolean isUnsafeToPlace(ItemType type) {
-        return type == ItemType.SAND
-                || type == ItemType.GRAVEL;
-    }
+  public static boolean isUnsafeToPlace(ItemType type) {
+    return type == ItemType.SAND
+        || type == ItemType.GRAVEL;
+  }
 
-    public static boolean isGoodEdibleFood(ItemType type) {
-        return type.foodProperties() != null && !type.foodProperties().possiblyHarmful();
-    }
+  public static boolean isGoodEdibleFood(ItemType type) {
+    return type.foodProperties() != null && !type.foodProperties().possiblyHarmful();
+  }
 }

@@ -34,53 +34,58 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class ChatMessageLogger implements InternalExtension {
-    private static final Logger logger = LoggerFactory.getLogger(ChatMessageLogger.class);
-    private static final Set<Long> chatMessages = new LinkedHashSet<>(50); // in case of huge lag
+  private static final Logger logger = LoggerFactory.getLogger(ChatMessageLogger.class);
+  private static final Set<Long> chatMessages = new LinkedHashSet<>(50); // in case of huge lag
 
-    public static void onMessage(ChatMessageReceiveEvent event) {
-        if (event.connection().settingsHolder().get(ChatMessageSettings.ENABLED)) {
-            var content = new StringBuilder();
-            // if it's a player message, add username
-            if (event.isFromPlayer())
-                content.append("<").append(event.sender().senderName()).append("> ");
-            else content.append("<Server> ");
+  public static void onMessage(ChatMessageReceiveEvent event) {
+    if (event.connection().settingsHolder().get(ChatMessageSettings.ENABLED)) {
+      var content = new StringBuilder();
+      // if it's a player message, add username
+      if (event.isFromPlayer()) {
+        content.append("<").append(event.sender().senderName()).append("> ");
+      } else {
+        content.append("<Server> ");
+      }
 
-            content.append(event.parseToText());
+      content.append(event.parseToText());
 
-            // usage of synchronized method so that the chatMessages set is not modified while being iterated
-            logChatMessage(content.toString(), event.timestamp());
-        }
+      // usage of synchronized method so that the chatMessages set is not modified while being iterated
+      logChatMessage(content.toString(), event.timestamp());
+    }
+  }
+
+  private static synchronized void logChatMessage(String message, Long timestamp) {
+    if (chatMessages.contains(timestamp)) {
+      return;
+    }
+    if (chatMessages.size() == 5) {
+      chatMessages.remove(chatMessages.iterator().next());
     }
 
-    private static synchronized void logChatMessage(String message, Long timestamp) {
-        if (chatMessages.contains(timestamp)) return;
-        if (chatMessages.size() == 5)
-            chatMessages.remove(chatMessages.iterator().next());
+    chatMessages.add(timestamp);
+    logger.info(message);
+  }
 
-        chatMessages.add(timestamp);
-        logger.info(message);
-    }
+  @EventHandler
+  public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(ChatMessageSettings.class, "Chat Message Logger");
+  }
 
-    @EventHandler
-    public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
-        event.settingsRegistry().addClass(ChatMessageSettings.class, "Chat Message Logger");
-    }
+  @Override
+  public void onLoad() {
+    SoulFireAPI.registerListeners(ChatMessageLogger.class);
+    PluginHelper.registerBotEventConsumer(ChatMessageReceiveEvent.class, ChatMessageLogger::onMessage);
+  }
 
-    @Override
-    public void onLoad() {
-        SoulFireAPI.registerListeners(ChatMessageLogger.class);
-        PluginHelper.registerBotEventConsumer(ChatMessageReceiveEvent.class, ChatMessageLogger::onMessage);
-    }
-
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    private static class ChatMessageSettings implements SettingsObject {
-        private static final Property.Builder BUILDER = Property.builder("chat-message-logger");
-        public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
-                "enabled",
-                "Log chat to terminal",
-                new String[]{"--log-chat"},
-                "Log all received chat messages to the terminal",
-                true
-        );
-    }
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  private static class ChatMessageSettings implements SettingsObject {
+    private static final Property.Builder BUILDER = Property.builder("chat-message-logger");
+    public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
+        "enabled",
+        "Log chat to terminal",
+        new String[] {"--log-chat"},
+        "Log all received chat messages to the terminal",
+        true
+    );
+  }
 }

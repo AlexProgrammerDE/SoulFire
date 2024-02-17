@@ -21,10 +21,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConsoleSubject {
-    public static final ConsoleSubject INSTANCE = new ConsoleSubject();
-    private static final Logger log = LoggerFactory.getLogger("Console");
+  public static final ConsoleSubject INSTANCE = new ConsoleSubject();
+  private static final Logger log = LoggerFactory.getLogger("Console");
 
-    public void sendMessage(String message) {
-        log.info(message);
-    }
+  public void sendMessage(String message) {
+    log.info(message);
+  }
 }

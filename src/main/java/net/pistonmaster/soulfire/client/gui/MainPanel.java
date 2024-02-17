@@ -18,43 +18,45 @@
 package net.pistonmaster.soulfire.client.gui;
 
 import ch.jalu.injector.Injector;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.client.gui.navigation.CardsContainer;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.swing.*;
-import java.awt.*;
-
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MainPanel extends JPanel {
-    private final Injector injector;
+  private final Injector injector;
 
-    @PostConstruct
-    public void postConstruct() {
-        injector.register(MainPanel.class, this);
+  @PostConstruct
+  public void postConstruct() {
+    injector.register(MainPanel.class, this);
 
-        setLayout(new GridLayout(1, 1));
+    setLayout(new GridLayout(1, 1));
 
-        var cardsContainer = injector.newInstance(CardsContainer.class);
-        cardsContainer.setMinimumSize(new Dimension(600, 0));
+    var cardsContainer = injector.newInstance(CardsContainer.class);
+    cardsContainer.setMinimumSize(new Dimension(600, 0));
 
-        var logPanel = injector.getSingleton(LogPanel.class);
-        logPanel.setMinimumSize(new Dimension(600, 0));
+    var logPanel = injector.getSingleton(LogPanel.class);
+    logPanel.setMinimumSize(new Dimension(600, 0));
 
-        cardsContainer.setPreferredSize(new Dimension(600,
-                cardsContainer.getPreferredSize().height));
-        logPanel.setPreferredSize(new Dimension(600,
-                logPanel.getPreferredSize().height));
+    cardsContainer.setPreferredSize(new Dimension(600,
+        cardsContainer.getPreferredSize().height));
+    logPanel.setPreferredSize(new Dimension(600,
+        logPanel.getPreferredSize().height));
 
-        var splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, cardsContainer, logPanel);
+    var splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, cardsContainer, logPanel);
 
-        splitPane.setOneTouchExpandable(true);
-        splitPane.setResizeWeight(0.5d);
-        splitPane.setContinuousLayout(true);
+    splitPane.setOneTouchExpandable(true);
+    splitPane.setResizeWeight(0.5d);
+    splitPane.setContinuousLayout(true);
 
-        splitPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+    splitPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
-        add(splitPane);
-    }
+    add(splitPane);
+  }
 }

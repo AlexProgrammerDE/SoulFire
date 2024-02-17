@@ -30,44 +30,44 @@ import java.util.Optional;
 
 @Data
 public class EntityEffectState {
-    private final Map<Effect, InternalEffectState> effects = new EnumMap<>(Effect.class);
+  private final Map<Effect, InternalEffectState> effects = new EnumMap<>(Effect.class);
 
-    public void updateEffect(Effect effect, int amplifier, int duration, boolean ambient, boolean showParticles) {
-        effects.put(effect, new InternalEffectState(amplifier, ambient, showParticles, duration));
+  public void updateEffect(Effect effect, int amplifier, int duration, boolean ambient, boolean showParticles) {
+    effects.put(effect, new InternalEffectState(amplifier, ambient, showParticles, duration));
+  }
+
+  public void removeEffect(Effect effect) {
+    effects.remove(effect);
+  }
+
+  public Optional<EffectData> getEffect(Effect effect) {
+    var state = effects.get(effect);
+
+    if (state == null) {
+      return Optional.empty();
     }
 
-    public void removeEffect(Effect effect) {
-        effects.remove(effect);
-    }
+    return Optional.of(new EffectData(
+        effect,
+        state.amplifier(),
+        state.duration(),
+        state.ambient(),
+        state.showParticles()
+    ));
+  }
 
-    public Optional<EffectData> getEffect(Effect effect) {
-        var state = effects.get(effect);
+  public void tick() {
+    effects.values().forEach(effect -> effect.duration(effect.duration() - 1));
+    effects.values().removeIf(effect -> effect.duration() <= 0);
+  }
 
-        if (state == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(new EffectData(
-                effect,
-                state.amplifier(),
-                state.duration(),
-                state.ambient(),
-                state.showParticles()
-        ));
-    }
-
-    public void tick() {
-        effects.values().forEach(effect -> effect.duration(effect.duration() - 1));
-        effects.values().removeIf(effect -> effect.duration() <= 0);
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    private static class InternalEffectState {
-        private final int amplifier;
-        private final boolean ambient;
-        private final boolean showParticles;
-        private int duration;
-    }
+  @Getter
+  @Setter
+  @AllArgsConstructor
+  private static class InternalEffectState {
+    private final int amplifier;
+    private final boolean ambient;
+    private final boolean showParticles;
+    private int duration;
+  }
 }

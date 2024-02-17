@@ -25,7 +25,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 public final class WeatherState {
-    private boolean raining;
-    private float rainStrength;
-    private float thunderStrength;
+  private boolean raining;
+  private float rainStrength;
+  private float thunderStrength;
 }

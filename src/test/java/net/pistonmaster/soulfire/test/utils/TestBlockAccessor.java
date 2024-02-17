@@ -24,23 +24,23 @@ import net.pistonmaster.soulfire.server.protocol.bot.block.BlockAccessor;
 import net.pistonmaster.soulfire.server.util.Vec2ObjectOpenHashMap;
 
 public class TestBlockAccessor implements BlockAccessor {
-    private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blocks = new Vec2ObjectOpenHashMap<>();
-    private final BlockState defaultBlock;
+  private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blocks = new Vec2ObjectOpenHashMap<>();
+  private final BlockState defaultBlock;
 
-    public TestBlockAccessor() {
-        this(BlockState.forDefaultBlockType(BlockType.AIR));
-    }
+  public TestBlockAccessor() {
+    this(BlockState.forDefaultBlockType(BlockType.AIR));
+  }
 
-    public TestBlockAccessor(BlockState defaultBlock) {
-        this.defaultBlock = defaultBlock;
-    }
+  public TestBlockAccessor(BlockState defaultBlock) {
+    this.defaultBlock = defaultBlock;
+  }
 
-    public void setBlockAt(int x, int y, int z, BlockType block) {
-        blocks.put(new SFVec3i(x, y, z), BlockState.forDefaultBlockType(block));
-    }
+  public void setBlockAt(int x, int y, int z, BlockType block) {
+    blocks.put(new SFVec3i(x, y, z), BlockState.forDefaultBlockType(block));
+  }
 
-    @Override
-    public BlockState getBlockStateAt(int x, int y, int z) {
-        return blocks.getOrDefault(new SFVec3i(x, y, z), defaultBlock);
-    }
+  @Override
+  public BlockState getBlockStateAt(int x, int y, int z) {
+    return blocks.getOrDefault(new SFVec3i(x, y, z), defaultBlock);
+  }
 }

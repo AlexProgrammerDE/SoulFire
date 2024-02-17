@@ -18,42 +18,47 @@
 package net.pistonmaster.soulfire.server.grpc;
 
 import io.grpc.stub.StreamObserver;
+import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
-import net.pistonmaster.soulfire.grpc.generated.*;
+import net.pistonmaster.soulfire.grpc.generated.AttackServiceGrpc;
+import net.pistonmaster.soulfire.grpc.generated.AttackStartRequest;
+import net.pistonmaster.soulfire.grpc.generated.AttackStartResponse;
+import net.pistonmaster.soulfire.grpc.generated.AttackStateToggleRequest;
+import net.pistonmaster.soulfire.grpc.generated.AttackStateToggleResponse;
+import net.pistonmaster.soulfire.grpc.generated.AttackStopRequest;
+import net.pistonmaster.soulfire.grpc.generated.AttackStopResponse;
 import net.pistonmaster.soulfire.server.SoulFireServer;
 import net.pistonmaster.soulfire.server.settings.lib.ProfileDataStructure;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 
-import javax.inject.Inject;
-
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
-    private final SoulFireServer soulFireServer;
+  private final SoulFireServer soulFireServer;
 
-    @Override
-    public void startAttack(AttackStartRequest request, StreamObserver<AttackStartResponse> responseObserver) {
-        var settingsHolder = SettingsHolder.createSettingsHolder(ProfileDataStructure.deserialize(request.getSettings()),
-                null, null, null);
+  @Override
+  public void startAttack(AttackStartRequest request, StreamObserver<AttackStartResponse> responseObserver) {
+    var settingsHolder = SettingsHolder.createSettingsHolder(ProfileDataStructure.deserialize(request.getSettings()),
+        null, null, null);
 
-        var id = soulFireServer.startAttack(settingsHolder);
-        responseObserver.onNext(AttackStartResponse.newBuilder().setId(id).build());
-        responseObserver.onCompleted();
-    }
+    var id = soulFireServer.startAttack(settingsHolder);
+    responseObserver.onNext(AttackStartResponse.newBuilder().setId(id).build());
+    responseObserver.onCompleted();
+  }
 
-    @Override
-    public void toggleAttackState(AttackStateToggleRequest request, StreamObserver<AttackStateToggleResponse> responseObserver) {
-        soulFireServer.toggleAttackState(request.getId(), switch (request.getNewState()) {
-            case PAUSE -> true;
-            case RESUME, UNRECOGNIZED -> false;
-        });
-        responseObserver.onNext(AttackStateToggleResponse.newBuilder().build());
-        responseObserver.onCompleted();
-    }
+  @Override
+  public void toggleAttackState(AttackStateToggleRequest request, StreamObserver<AttackStateToggleResponse> responseObserver) {
+    soulFireServer.toggleAttackState(request.getId(), switch (request.getNewState()) {
+      case PAUSE -> true;
+      case RESUME, UNRECOGNIZED -> false;
+    });
+    responseObserver.onNext(AttackStateToggleResponse.newBuilder().build());
+    responseObserver.onCompleted();
+  }
 
-    @Override
-    public void stopAttack(AttackStopRequest request, StreamObserver<AttackStopResponse> responseObserver) {
-        soulFireServer.stopAttack(request.getId());
-        responseObserver.onNext(AttackStopResponse.newBuilder().build());
-        responseObserver.onCompleted();
-    }
+  @Override
+  public void stopAttack(AttackStopRequest request, StreamObserver<AttackStopResponse> responseObserver) {
+    soulFireServer.stopAttack(request.getId());
+    responseObserver.onNext(AttackStopResponse.newBuilder().build());
+    responseObserver.onCompleted();
+  }
 }

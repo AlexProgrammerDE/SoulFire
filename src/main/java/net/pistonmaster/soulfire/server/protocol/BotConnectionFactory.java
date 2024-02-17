@@ -44,38 +44,38 @@ public record BotConnectionFactory(AttackManager attackManager, ResolveUtil.Reso
                                    MinecraftProtocol protocol, MinecraftAccount minecraftAccount,
                                    ProtocolVersion protocolVersion,
                                    SWProxy proxyData, EventLoopGroup eventLoopGroup) {
-    public BotConnection prepareConnection() {
-        return prepareConnectionInternal(ProtocolState.LOGIN);
-    }
+  public BotConnection prepareConnection() {
+    return prepareConnectionInternal(ProtocolState.LOGIN);
+  }
 
-    public BotConnection prepareConnectionInternal(ProtocolState targetState) {
-        var meta = new BotConnectionMeta(minecraftAccount, targetState, protocolVersion, proxyData);
-        var session = new ViaClientSession(resolvedAddress.resolvedAddress(), logger, protocol, proxyData, eventLoopGroup, meta);
-        var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.soulFireServer(),
-                settingsHolder, logger, protocol, session, resolvedAddress, new ExecutorManager("SoulFire-Attack-" + attackManager.id()), meta,
-                LambdaManager.basic(new ASMGenerator())
-                        .setExceptionHandler(EventExceptionHandler.INSTANCE)
-                        .setEventFilter((c, h) -> {
-                            if (SoulFireBotEvent.class.isAssignableFrom(c)) {
-                                return true;
-                            } else {
-                                throw new IllegalStateException("This event handler only accepts bot events");
-                            }
-                        }));
+  public BotConnection prepareConnectionInternal(ProtocolState targetState) {
+    var meta = new BotConnectionMeta(minecraftAccount, targetState, protocolVersion, proxyData);
+    var session = new ViaClientSession(resolvedAddress.resolvedAddress(), logger, protocol, proxyData, eventLoopGroup, meta);
+    var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.soulFireServer(),
+        settingsHolder, logger, protocol, session, resolvedAddress, new ExecutorManager("SoulFire-Attack-" + attackManager.id()), meta,
+        LambdaManager.basic(new ASMGenerator())
+            .setExceptionHandler(EventExceptionHandler.INSTANCE)
+            .setEventFilter((c, h) -> {
+              if (SoulFireBotEvent.class.isAssignableFrom(c)) {
+                return true;
+              } else {
+                throw new IllegalStateException("This event handler only accepts bot events");
+              }
+            }));
 
-        var sessionDataManager = new SessionDataManager(botConnection);
-        session.meta().sessionDataManager(sessionDataManager);
-        session.meta().botControlAPI(new BotControlAPI(sessionDataManager));
+    var sessionDataManager = new SessionDataManager(botConnection);
+    session.meta().sessionDataManager(sessionDataManager);
+    session.meta().botControlAPI(new BotControlAPI(sessionDataManager));
 
-        session.setConnectTimeout(settingsHolder.get(BotSettings.CONNECT_TIMEOUT));
-        session.setReadTimeout(settingsHolder.get(BotSettings.READ_TIMEOUT));
-        session.setWriteTimeout(settingsHolder.get(BotSettings.WRITE_TIMEOUT));
+    session.setConnectTimeout(settingsHolder.get(BotSettings.CONNECT_TIMEOUT));
+    session.setReadTimeout(settingsHolder.get(BotSettings.READ_TIMEOUT));
+    session.setWriteTimeout(settingsHolder.get(BotSettings.WRITE_TIMEOUT));
 
-        session.addListener(new SFBaseListener(botConnection, targetState));
-        session.addListener(new SFSessionListener(sessionDataManager, botConnection));
+    session.addListener(new SFBaseListener(botConnection, targetState));
+    session.addListener(new SFSessionListener(sessionDataManager, botConnection));
 
-        attackManager.eventBus().call(new BotConnectionInitEvent(botConnection));
+    attackManager.eventBus().call(new BotConnectionInitEvent(botConnection));
 
-        return botConnection;
-    }
+    return botConnection;
+  }
 }

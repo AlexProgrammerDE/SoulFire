@@ -19,5 +19,5 @@ package net.pistonmaster.soulfire.data;
 
 @SuppressWarnings("unused")
 public class BlockTags {
-    // VALUES REPLACE
+  // VALUES REPLACE
 }
