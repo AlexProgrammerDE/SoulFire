@@ -9,6 +9,7 @@
 <a href="https://github.com/AlexProgrammerDE/SoulFire/releases/latest"><img alt="GitHub all releases downloads" src="https://img.shields.io/github/downloads/AlexProgrammerDE/SoulFire/total"></a>
 <a href="https://github.com/AlexProgrammerDE/SoulFire/releases/latest"><img alt="GitHub latest release downloads" src="https://img.shields.io/github/downloads/AlexProgrammerDE/SoulFire/latest/total"></a>
 <a href="https://github.com/AlexProgrammerDE/SoulFire/releases/latest"><img src="https://img.shields.io/github/release/AlexProgrammerDE/SoulFire.svg" alt="Current Release"></a>
+<a href="https://app.fossa.com/projects/git%2Bgithub.com%2FAlexProgrammerDE%2FSoulFire?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FAlexProgrammerDE%2FSoulFire.svg?type=shield"/></a>
 </p>
 <p align="center"><a href="https://discord.gg/vHgRd6YZmH"><img src="https://discordapp.com/api/guilds/739784741124833301/embed.png" alt="Discord embed"></a></p>
 
@@ -210,3 +211,7 @@ PRs are welcome, too.
     <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=AlexProgrammerDE/SoulFire&type=Date" />
   </picture>
 </a>
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FAlexProgrammerDE%2FSoulFire.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FAlexProgrammerDE%2FSoulFire?ref=badge_large)
