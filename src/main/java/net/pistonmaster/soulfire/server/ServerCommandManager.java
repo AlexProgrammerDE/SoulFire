@@ -177,6 +177,7 @@ public class ServerCommandManager {
                     bot.sessionDataManager().controlState().forward(
                             !bot.sessionDataManager().controlState().forward()
                     );
+                    bot.sessionDataManager().controlState().backward(false);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("backward")
@@ -184,6 +185,7 @@ public class ServerCommandManager {
                     bot.sessionDataManager().controlState().backward(
                             !bot.sessionDataManager().controlState().backward()
                     );
+                    bot.sessionDataManager().controlState().forward(false);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("left")
@@ -191,6 +193,7 @@ public class ServerCommandManager {
                     bot.sessionDataManager().controlState().left(
                             !bot.sessionDataManager().controlState().left()
                     );
+                    bot.sessionDataManager().controlState().right(false);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("right")
@@ -198,6 +201,7 @@ public class ServerCommandManager {
                     bot.sessionDataManager().controlState().right(
                             !bot.sessionDataManager().controlState().right()
                     );
+                    bot.sessionDataManager().controlState().left(false);
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("jump")
