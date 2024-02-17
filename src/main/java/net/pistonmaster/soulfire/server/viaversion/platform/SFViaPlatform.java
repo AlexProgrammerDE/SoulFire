@@ -67,7 +67,7 @@ public class SFViaPlatform implements ViaPlatform<UserConnection> {
 
   public void init() {
     config = new AbstractViaConfig(dataFolder.resolve("config.yml").toFile()) {
-      private final List<String> UNSUPPORTED = List.of(
+      private static final List<String> UNSUPPORTED = List.of(
           "checkforupdates", "bungee-ping-interval", "bungee-ping-save", "bungee-servers",
           "velocity-ping-interval", "velocity-ping-save", "velocity-servers",
           "block-protocols", "block-disconnect-msg", "reload-disconnect-msg", "max-pps",

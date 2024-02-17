@@ -76,24 +76,26 @@ public class SwingTextUtils {
 
     var undoAction = new AbstractAction("Undo") {
       @Override
-      public void actionPerformed(ActionEvent e) {
+      public void actionPerformed(ActionEvent event) {
         try {
           if (undoManager.canUndo()) {
             undoManager.undo();
           }
-        } catch (CannotUndoException ignored) {
+        } catch (CannotUndoException e) {
+          log.error("Failed to undo!", e);
         }
       }
     };
 
     var redoAction = new AbstractAction("Redo") {
       @Override
-      public void actionPerformed(ActionEvent e) {
+      public void actionPerformed(ActionEvent event) {
         try {
           if (undoManager.canRedo()) {
             undoManager.redo();
           }
-        } catch (CannotRedoException ignored) {
+        } catch (CannotRedoException e) {
+          log.error("Failed to redo!", e);
         }
       }
     };

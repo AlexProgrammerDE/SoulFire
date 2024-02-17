@@ -596,8 +596,8 @@ public class BotMovementManager {
       } else if (block.blockType() == BlockType.BUBBLE_COLUMN) {
         var down = !block.properties().getBoolean("drag");
         var aboveBlock = world.getBlockStateAt(cursor.add(0, 1, 0));
-        var bubbleDrag = aboveBlock.blockType() == BlockType.AIR ?
-            physics.bubbleColumnSurfaceDrag : physics.bubbleColumnDrag;
+        var bubbleDrag = aboveBlock.blockType() == BlockType.AIR
+            ? physics.bubbleColumnSurfaceDrag : physics.bubbleColumnDrag;
         if (down) {
           vel.y = Math.max(bubbleDrag.maxDown(), vel.y - bubbleDrag.down());
         } else {

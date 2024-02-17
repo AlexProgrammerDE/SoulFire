@@ -72,14 +72,14 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     this.modifier = modifier;
     this.diagonal = direction.isDiagonal();
 
-    this.cost = (diagonal ? Costs.DIAGONAL : Costs.STRAIGHT) +
-        switch (modifier) { // Add additional "discouraged" costs to prevent the bot from doing too much parkour
-          case NORMAL -> 0;
-          case FALL_1 -> Costs.FALL_1;
-          case FALL_2 -> Costs.FALL_2;
-          case FALL_3 -> Costs.FALL_3;
-          case JUMP -> Costs.JUMP;
-        };
+    this.cost = (diagonal ? Costs.DIAGONAL : Costs.STRAIGHT)
+        + switch (modifier) { // Add additional "discouraged" costs to prevent the bot from doing too much parkour
+      case NORMAL -> 0;
+      case FALL_1 -> Costs.FALL_1;
+      case FALL_2 -> Costs.FALL_2;
+      case FALL_3 -> Costs.FALL_3;
+      case JUMP -> Costs.JUMP;
+    };
 
     this.targetFeetBlock = modifier.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
     this.allowBlockActions = !diagonal && (

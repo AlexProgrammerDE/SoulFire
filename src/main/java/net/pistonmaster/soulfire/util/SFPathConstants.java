@@ -30,4 +30,7 @@ public class SFPathConstants {
   private static Path getApplicationDataFolder() {
     return Path.of(AppDirsFactory.getInstance().getUserDataDir("SoulFire", null, null));
   }
+
+  private SFPathConstants() {
+  }
 }

@@ -42,4 +42,7 @@ public class ResourceHelper {
       throw new RuntimeException("Failed to get file", e);
     }
   }
+
+  private ResourceHelper() {
+  }
 }

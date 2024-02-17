@@ -47,11 +47,11 @@ import javax.swing.text.JTextComponent;
  * Similar logic would apply for horizontal scrolling.
  */
 public class SmartScroller implements AdjustmentListener {
-  public final static int HORIZONTAL = 0;
-  public final static int VERTICAL = 1;
+  public static final int HORIZONTAL = 0;
+  public static final int VERTICAL = 1;
 
-  public final static int START = 0;
-  public final static int END = 1;
+  public static final int START = 0;
+  public static final int END = 1;
 
   private final int viewportPosition;
 

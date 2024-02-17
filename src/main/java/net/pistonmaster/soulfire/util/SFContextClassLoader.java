@@ -87,6 +87,7 @@ public class SFContextClassLoader extends ClassLoader {
         try {
           return loadClassFromClassLoader(platformClassLoader, name, resolve);
         } catch (ClassNotFoundException ignored) {
+          // Ignore
         }
 
         var classData = loadClassData(this.getParent(), name);
@@ -99,6 +100,7 @@ public class SFContextClassLoader extends ClassLoader {
                 return pluginClass;
               }
             } catch (ClassNotFoundException ignored) {
+              // Ignore
             }
           }
 

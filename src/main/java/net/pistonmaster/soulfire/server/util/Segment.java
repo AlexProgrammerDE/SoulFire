@@ -36,19 +36,19 @@ public record Segment(Vector3d startPoint, Vector3d endPoint) {
   }
 
   public boolean isInside(AABB box) {
-    var originInside = startPoint.getX() >= box.minX &&
-        startPoint.getX() <= box.maxX &&
-        startPoint.getY() >= box.minY &&
-        startPoint.getY() <= box.maxY &&
-        startPoint.getZ() >= box.minZ &&
-        startPoint.getZ() <= box.maxZ;
+    var originInside = startPoint.getX() >= box.minX
+        && startPoint.getX() <= box.maxX
+        && startPoint.getY() >= box.minY
+        && startPoint.getY() <= box.maxY
+        && startPoint.getZ() >= box.minZ
+        && startPoint.getZ() <= box.maxZ;
 
-    var directionInside = endPoint.getX() >= box.minX &&
-        endPoint.getX() <= box.maxX &&
-        endPoint.getY() >= box.minY &&
-        endPoint.getY() <= box.maxY &&
-        endPoint.getZ() >= box.minZ &&
-        endPoint.getZ() <= box.maxZ;
+    var directionInside = endPoint.getX() >= box.minX
+        && endPoint.getX() <= box.maxX
+        && endPoint.getY() >= box.minY
+        && endPoint.getY() <= box.maxY
+        && endPoint.getZ() >= box.minZ
+        && endPoint.getZ() <= box.maxZ;
 
     return originInside && directionInside;
   }

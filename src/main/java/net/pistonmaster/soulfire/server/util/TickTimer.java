@@ -18,7 +18,7 @@
 package net.pistonmaster.soulfire.server.util;
 
 /**
- * Taken from: <a href="https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/util/Timer.java">LabyStudio/java-minecraft</a>
+ * Taken from <a href="https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/util/Timer.java">LabyStudio/java-minecraft</a>.
  */
 public class TickTimer {
   private static final long NS_PER_SECOND = 1000000000L;

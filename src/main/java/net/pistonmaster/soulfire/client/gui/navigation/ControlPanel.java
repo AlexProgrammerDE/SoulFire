@@ -38,8 +38,6 @@ public class ControlPanel extends JPanel {
   public ControlPanel(GUIManager guiManager) {
     setLayout(new GridLayout(0, 1));
 
-    var attackId = new AtomicInteger();
-
     var startButton = new JButton("Start");
     var pauseButton = new JButton("Pause");
     var stopButton = new JButton("Stop");
@@ -51,6 +49,8 @@ public class ControlPanel extends JPanel {
     add(startButton);
     add(pauseButton);
     add(stopButton);
+
+    var attackId = new AtomicInteger();
 
     startButton.addActionListener(action -> {
       startButton.setEnabled(false);

@@ -50,8 +50,7 @@ public class AutoReconnect implements InternalExtension {
   public void onDisconnect(BotDisconnectedEvent event) {
     var connection = event.connection();
     var settingsHolder = connection.settingsHolder();
-    if (!settingsHolder.get(AutoReconnectSettings.ENABLED)
-        || connection.attackManager().attackState().isInactive()) {
+    if (!settingsHolder.get(AutoReconnectSettings.ENABLED) || connection.attackManager().attackState().isInactive()) {
       return;
     }
 
@@ -64,8 +63,7 @@ public class AutoReconnect implements InternalExtension {
           connection.gracefulDisconnect().join();
           var newConnection = connection.factory().prepareConnection();
 
-          connection.attackManager().botConnections()
-              .replaceAll(connectionEntry -> connectionEntry == connection ? newConnection : connectionEntry);
+          connection.attackManager().botConnections().replaceAll(connectionEntry -> connectionEntry == connection ? newConnection : connectionEntry);
 
           newConnection.connect();
         }, RandomUtil.getRandomInt(settingsHolder.get(AutoReconnectSettings.DELAY.min()), settingsHolder.get(AutoReconnectSettings.DELAY.max())),
@@ -75,34 +73,12 @@ public class AutoReconnect implements InternalExtension {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class AutoReconnectSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("auto-reconnect");
-    public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
-        "enabled",
-        "Enable Auto Reconnect",
-        new String[] {"--auto-reconnect"},
-        "Reconnect a bot when it times out/is kicked",
-        true
-    );
+    public static final BooleanProperty ENABLED =
+        BUILDER.ofBoolean("enabled", "Enable Auto Reconnect", new String[] {"--auto-reconnect"}, "Reconnect a bot when it times out/is kicked", true);
     public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
-        BUILDER.ofInt(
-            "min-delay",
-            "Min delay (seconds)",
-            new String[] {"--reconnect-min-delay"},
-            "Minimum delay between reconnects",
-            1,
-            0,
-            Integer.MAX_VALUE,
-            1
-        ),
-        BUILDER.ofInt(
-            "max-delay",
-            "Max delay (seconds)",
-            new String[] {"--reconnect-max-delay"},
-            "Maximum delay between reconnects",
-            5,
-            0,
-            Integer.MAX_VALUE,
-            1
-        )
-    );
+        BUILDER.ofInt("min-delay", "Min delay (seconds)", new String[] {"--reconnect-min-delay"}, "Minimum delay between reconnects", 1, 0,
+            Integer.MAX_VALUE, 1),
+        BUILDER.ofInt("max-delay", "Max delay (seconds)", new String[] {"--reconnect-max-delay"}, "Maximum delay between reconnects", 5, 0,
+            Integer.MAX_VALUE, 1));
   }
 }

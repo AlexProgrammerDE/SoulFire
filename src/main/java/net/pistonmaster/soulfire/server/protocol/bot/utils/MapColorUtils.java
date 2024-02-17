@@ -23,7 +23,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 
 /**
- * Big thanks to <a href="https://github.com/LB--/MCModify/blob/java/src/main/java/com/lb_stuff/mcmodify/minecraft/Map.java">MCModify</a>
+ * Big thanks to <a href="https://github.com/LB--/MCModify/blob/java/src/main/java/com/lb_stuff/mcmodify/minecraft/Map.java">MCModify</a>.
  */
 public class MapColorUtils {
   private static final Color[] MAP_COLORS;

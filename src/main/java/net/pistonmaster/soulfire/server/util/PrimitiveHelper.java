@@ -45,4 +45,7 @@ public class PrimitiveHelper {
     result[index] = Arrays.copyOfRange(data, last, data.length);
     return result;
   }
+
+  private PrimitiveHelper() {
+  }
 }

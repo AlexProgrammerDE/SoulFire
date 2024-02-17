@@ -52,6 +52,10 @@ public class MathHelper {
     return x * x;
   }
 
+  public static int square(int x) {
+    return x * x;
+  }
+
   public static long getSeed(int i, int j, int k) {
     var l = (i * 3129871L) ^ (long) k * 116129781L ^ (long) j;
     l = l * l * 42317861L + l * 11L;
@@ -73,9 +77,5 @@ public class MathHelper {
 
   public static boolean isOutsideTolerance(double a, double b, double tolerance) {
     return Math.abs(a - b) > tolerance;
-  }
-
-  public static int square(int x) {
-    return x * x;
   }
 }

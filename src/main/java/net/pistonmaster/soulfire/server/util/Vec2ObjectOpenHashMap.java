@@ -464,7 +464,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
     throw new UnsupportedOperationException();
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "StatementWithEmptyBody"})
   protected void rehash(final int newN) {
     final var key = this.key;
     final var value = this.value;
@@ -474,9 +474,13 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
     var i = n;
     int pos;
     for (var j = realSize(); j-- != 0; ) {
-      while (((key[--i]) == null)) ;
+      while (((key[--i]) == null)) {
+        // Skip
+      }
       if (!((newKey[pos = (HashCommon.mix(hashVec(key[i]))) & mask]) == null)) {
-        while (!((newKey[pos = (pos + 1) & mask]) == null)) ;
+        while (!((newKey[pos = (pos + 1) & mask]) == null)) {
+            // Skip
+        }
       }
       newKey[pos] = key[i];
       newValue[pos] = value[i];
