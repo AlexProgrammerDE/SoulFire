@@ -173,30 +173,45 @@ public class ServerCommandManager {
                                             });
                                         }))))));
         dispatcher.register(literal("forward")
-                .executes(help("Makes all connected bots start walking forward", c -> forEveryBot(bot -> {
-                    bot.sessionDataManager().controlState().forward(true);
+                .executes(help("Toggle walking forward for all connected bots", c -> forEveryBot(bot -> {
+                    bot.sessionDataManager().controlState().forward(
+                            !bot.sessionDataManager().controlState().forward()
+                    );
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("backward")
-                .executes(help("Makes all connected bots start walking backwards", c -> forEveryBot(bot -> {
-                    bot.sessionDataManager().controlState().backward(true);
+                .executes(help("Toggles walking backward for all connected bots", c -> forEveryBot(bot -> {
+                    bot.sessionDataManager().controlState().backward(
+                            !bot.sessionDataManager().controlState().backward()
+                    );
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("left")
-                .executes(help("Makes all connected bots start walking left", c -> forEveryBot(bot -> {
-                    bot.sessionDataManager().controlState().left(true);
+                .executes(help("Toggles walking left for all connected bots", c -> forEveryBot(bot -> {
+                    bot.sessionDataManager().controlState().left(
+                            !bot.sessionDataManager().controlState().left()
+                    );
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("right")
-                .executes(help("Makes all connected bots start walking right", c -> forEveryBot(bot -> {
-                    bot.sessionDataManager().controlState().right(true);
+                .executes(help("Toggles walking right for all connected bots", c -> forEveryBot(bot -> {
+                    bot.sessionDataManager().controlState().right(
+                            !bot.sessionDataManager().controlState().right()
+                    );
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("jump")
-                .executes(help("Makes all connected bots jump up repeatedly", c -> forEveryBot(bot -> {
+                .executes(help("Toggle jumping for all connected bots", c -> forEveryBot(bot -> {
                     var sessionDataManager = bot.sessionDataManager();
 
-                    sessionDataManager.controlState().jumping(true);
+                    sessionDataManager.controlState().jumping(
+                            !sessionDataManager.controlState().jumping()
+                    );
+                    return Command.SINGLE_SUCCESS;
+                }))));
+        dispatcher.register(literal("sneak")
+                .executes(help("Toggle sneaking for all connected bots", c -> forEveryBot(bot -> {
+                    bot.botControl().toggleSneak();
                     return Command.SINGLE_SUCCESS;
                 }))));
         dispatcher.register(literal("reset")
