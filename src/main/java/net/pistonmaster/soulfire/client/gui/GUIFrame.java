@@ -105,7 +105,7 @@ public class GUIFrame extends JFrame {
 
         // Get screen height
         var gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        var displayHeight = gd.getDisplayMode().getHeight();
+        var displayHeight = gd.getDefaultConfiguration().getBounds().height;
 
         // Calculate 16:9 width from height
         var minFrameHeight = displayHeight / 2;
