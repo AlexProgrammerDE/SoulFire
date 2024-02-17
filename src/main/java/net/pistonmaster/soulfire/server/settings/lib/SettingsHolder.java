@@ -19,14 +19,23 @@ package net.pistonmaster.soulfire.server.settings.lib;
 
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
-import it.unimi.dsi.fastutil.objects.*;
-import net.pistonmaster.soulfire.account.MinecraftAccount;
-import net.pistonmaster.soulfire.proxy.SWProxy;
-import net.pistonmaster.soulfire.server.settings.lib.property.*;
-
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMaps;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import net.pistonmaster.soulfire.account.MinecraftAccount;
+import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.ComboProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.DoubleProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.IntProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.PropertyKey;
+import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
 public record SettingsHolder(
     Object2ObjectMap<PropertyKey, Number> numberProperties,

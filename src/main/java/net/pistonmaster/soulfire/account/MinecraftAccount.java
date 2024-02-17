@@ -17,12 +17,11 @@
  */
 package net.pistonmaster.soulfire.account;
 
+import java.util.UUID;
 import lombok.NonNull;
 import net.pistonmaster.soulfire.account.service.AccountData;
 import net.pistonmaster.soulfire.account.service.BedrockData;
 import net.pistonmaster.soulfire.account.service.OnlineJavaData;
-
-import java.util.UUID;
 
 public record MinecraftAccount(@NonNull AuthType authType, @NonNull String username, @NonNull AccountData accountData,
                                boolean enabled) {

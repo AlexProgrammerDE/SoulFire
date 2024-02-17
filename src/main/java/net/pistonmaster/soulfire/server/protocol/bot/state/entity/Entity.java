@@ -19,6 +19,7 @@ package net.pistonmaster.soulfire.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
+import java.util.UUID;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.data.AttributeType;
@@ -30,8 +31,6 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.EntityMetadataState;
 import net.pistonmaster.soulfire.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
-
-import java.util.UUID;
 
 @Slf4j
 @Data

@@ -19,18 +19,17 @@ package net.pistonmaster.soulfire.server.protocol.netty;
 
 import com.google.common.net.HostAndPort;
 import io.netty.channel.EventLoopGroup;
-import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.soulfire.server.settings.BotSettings;
-import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
-
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
 import java.net.IDN;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.Optional;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.soulfire.server.settings.BotSettings;
+import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 
 @Slf4j
 public class ResolveUtil {

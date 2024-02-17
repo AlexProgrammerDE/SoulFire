@@ -21,6 +21,8 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.util.TriState;
 import net.pistonmaster.soulfire.server.data.BlockItems;
@@ -28,16 +30,22 @@ import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
-import net.pistonmaster.soulfire.server.pathfinding.graph.actions.*;
-import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.*;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.DownMovement;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.GraphAction;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.ParkourMovement;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.SimpleMovement;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.UpMovement;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.BlockSafetyData;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.MovementDirection;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.MovementMiningCost;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.MovementModifier;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.MovementSide;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.ParkourDirection;
 import net.pistonmaster.soulfire.server.protocol.bot.BotActionManager;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.util.BlockTypeHelper;
 import net.pistonmaster.soulfire.server.util.ObjectReference;
 import net.pistonmaster.soulfire.server.util.Vec2ObjectOpenHashMap;
-
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {

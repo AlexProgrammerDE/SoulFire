@@ -19,10 +19,9 @@ package net.pistonmaster.soulfire.server.protocol.bot.container;
 
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
-import lombok.Getter;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import lombok.Getter;
 
 public class Container {
   @Getter

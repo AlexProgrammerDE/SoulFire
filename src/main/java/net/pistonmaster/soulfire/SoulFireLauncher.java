@@ -17,9 +17,8 @@
  */
 package net.pistonmaster.soulfire;
 
-import net.pistonmaster.soulfire.util.SFContextClassLoader;
-
 import java.util.List;
+import net.pistonmaster.soulfire.util.SFContextClassLoader;
 
 /**
  * This class only changes the classLoader for the rest of the program.

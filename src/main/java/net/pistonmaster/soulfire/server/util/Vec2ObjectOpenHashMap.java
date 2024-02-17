@@ -17,21 +17,28 @@
  */
 package net.pistonmaster.soulfire.server.util;
 
+import static it.unimi.dsi.fastutil.HashCommon.arraySize;
+import static it.unimi.dsi.fastutil.HashCommon.maxFill;
+
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.HashCommon;
-import it.unimi.dsi.fastutil.objects.*;
-import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
-import org.jetbrains.annotations.NotNull;
-
+import it.unimi.dsi.fastutil.objects.AbstractObject2ObjectMap;
+import it.unimi.dsi.fastutil.objects.AbstractObjectSet;
+import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectCollection;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
+import it.unimi.dsi.fastutil.objects.ObjectSpliterator;
+import it.unimi.dsi.fastutil.objects.ObjectSpliterators;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
-
-import static it.unimi.dsi.fastutil.HashCommon.arraySize;
-import static it.unimi.dsi.fastutil.HashCommon.maxFill;
+import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
+import org.jetbrains.annotations.NotNull;
 
 // Fork of Object2ObjectCustomOpenHashMap
 // The main difference is that it uses native equals and hashcode methods

@@ -22,7 +22,7 @@ public class MathHelper {
   }
 
   /**
-   * Returns the greatest integer less than or equal to the double argument
+   * Returns the greatest integer less than or equal to the double argument.
    *
    * @param value A double
    * @return The greatest integer less than or equal to the double argument

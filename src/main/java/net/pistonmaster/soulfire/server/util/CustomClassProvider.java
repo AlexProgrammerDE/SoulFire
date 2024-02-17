@@ -17,20 +17,19 @@
  */
 package net.pistonmaster.soulfire.server.util;
 
-import com.google.common.reflect.ClassPath;
-import net.lenni0451.classtransform.utils.tree.IClassProvider;
-import org.jetbrains.annotations.NotNull;
+import static net.lenni0451.classtransform.utils.ASMUtils.slash;
+import static net.lenni0451.classtransform.utils.Sneaky.sneakySupply;
 
-import javax.annotation.Nonnull;
+import com.google.common.reflect.ClassPath;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
-
-import static net.lenni0451.classtransform.utils.ASMUtils.slash;
-import static net.lenni0451.classtransform.utils.Sneaky.sneakySupply;
+import javax.annotation.Nonnull;
+import net.lenni0451.classtransform.utils.tree.IClassProvider;
+import org.jetbrains.annotations.NotNull;
 
 public class CustomClassProvider implements IClassProvider {
   private final ClassPath[] classPaths;

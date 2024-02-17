@@ -19,4 +19,7 @@ package net.pistonmaster.soulfire.generator.util;
 
 public class GeneratorConstants {
   public static final String VALUES_REPLACE = "// VALUES REPLACE";
+
+  private GeneratorConstants() {
+  }
 }

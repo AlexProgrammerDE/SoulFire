@@ -93,4 +93,7 @@ public class TagsDataGenerator {
               .toArray(String[]::new)));
     }
   }
+
+  private TagsDataGenerator() {
+  }
 }

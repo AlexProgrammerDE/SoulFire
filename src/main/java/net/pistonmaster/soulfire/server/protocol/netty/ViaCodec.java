@@ -20,17 +20,20 @@ package net.pistonmaster.soulfire.server.protocol.netty;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.packet.State;
-import com.viaversion.viaversion.exception.*;
+import com.viaversion.viaversion.exception.CancelCodecException;
+import com.viaversion.viaversion.exception.CancelDecoderException;
+import com.viaversion.viaversion.exception.CancelEncoderException;
+import com.viaversion.viaversion.exception.CancelException;
+import com.viaversion.viaversion.exception.InformativeException;
 import com.viaversion.viaversion.util.PipelineUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToMessageCodec;
-import lombok.RequiredArgsConstructor;
-import net.pistonmaster.soulfire.server.viaversion.StorableSession;
-
 import java.util.List;
 import java.util.Objects;
+import lombok.RequiredArgsConstructor;
+import net.pistonmaster.soulfire.server.viaversion.StorableSession;
 
 @RequiredArgsConstructor
 public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {

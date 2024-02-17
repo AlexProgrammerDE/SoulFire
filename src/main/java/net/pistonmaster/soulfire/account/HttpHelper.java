@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.account;
 
+import java.util.List;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.pistonmaster.soulfire.proxy.SWProxy;
 import net.raphimc.minecraftauth.MinecraftAuth;
@@ -31,8 +32,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
-
-import java.util.List;
 
 public class HttpHelper {
   private HttpHelper() {

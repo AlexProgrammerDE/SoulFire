@@ -23,10 +23,9 @@ import com.velocitypowered.natives.util.Natives;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
-
-import javax.crypto.SecretKey;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import javax.crypto.SecretKey;
 
 public class CryptoCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
   private final VelocityCipher encoder;

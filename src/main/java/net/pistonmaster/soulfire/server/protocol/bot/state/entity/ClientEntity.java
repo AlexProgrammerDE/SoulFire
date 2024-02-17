@@ -23,6 +23,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,8 +34,6 @@ import net.pistonmaster.soulfire.server.protocol.bot.movement.ControlState;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.PhysicsData;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.PlayerMovementState;
 import net.pistonmaster.soulfire.server.util.MathHelper;
-
-import java.util.UUID;
 
 /**
  * Represents the bot itself as an entity.

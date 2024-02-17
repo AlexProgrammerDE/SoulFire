@@ -17,14 +17,13 @@
  */
 package net.pistonmaster.soulfire.server.plugins;
 
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.util.TickTimer;
 import org.slf4j.MDC;
-
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class BotTicker implements InternalExtension {
   public static void onConnectionInit(BotConnectionInitEvent event) {

@@ -18,13 +18,12 @@
 package net.pistonmaster.soulfire.server.protocol.bot.state;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.pistonmaster.soulfire.server.data.BlockType;
-import net.pistonmaster.soulfire.server.data.EntityType;
-import net.pistonmaster.soulfire.server.data.ItemType;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import net.pistonmaster.soulfire.server.data.BlockType;
+import net.pistonmaster.soulfire.server.data.EntityType;
+import net.pistonmaster.soulfire.server.data.ItemType;
 
 public class TagsState {
   private final Map<String, Set<BlockType>> blockTags = new Object2ObjectOpenHashMap<>();

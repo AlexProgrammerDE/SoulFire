@@ -30,13 +30,13 @@ public class BlocksDataGenerator implements IDataGenerator {
   public static JsonObject generateBlock(Block block) {
     var blockDesc = new JsonObject();
 
-    var defaultState = block.defaultBlockState();
-
     blockDesc.addProperty("id", BuiltInRegistries.BLOCK.getId(block));
     blockDesc.addProperty("name", BuiltInRegistries.BLOCK.getKey(block).getPath());
 
     blockDesc.addProperty("destroyTime", block.defaultDestroyTime());
     blockDesc.addProperty("explosionResistance", block.getExplosionResistance());
+
+    var defaultState = block.defaultBlockState();
     if (defaultState.isAir()) {
       blockDesc.addProperty("air", true);
     }
@@ -60,7 +60,7 @@ public class BlocksDataGenerator implements IDataGenerator {
       offsetData.addProperty("maxVerticalOffset", block.getMaxVerticalOffset());
 
       var blockSettings = ((BlockAccessor) block).properties();
-      var offsetType = ((BlockSettingsAccessor) blockSettings).soulfire$getOffsetType();
+      var offsetType = ((BlockSettingsAccessor) blockSettings).soulfiregetOffsetType();
       offsetData.addProperty("offsetType", offsetType.name());
 
       blockDesc.add("offsetData", offsetData);

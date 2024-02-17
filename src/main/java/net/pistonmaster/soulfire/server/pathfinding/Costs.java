@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.server.pathfinding;
 
 import com.github.steveice10.mc.protocol.data.game.entity.Effect;
+import java.util.OptionalInt;
 import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.data.ItemType;
@@ -28,8 +29,6 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.EntityEffectState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.util.MathHelper;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.OptionalInt;
 
 public class Costs {
   public static final double STRAIGHT = 1;

@@ -18,6 +18,8 @@
 package net.pistonmaster.soulfire.server.protocol.bot.state;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.Map;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,9 +27,6 @@ import net.pistonmaster.soulfire.server.data.Attribute;
 import net.pistonmaster.soulfire.server.data.AttributeType;
 import net.pistonmaster.soulfire.server.data.ModifierOperation;
 import net.pistonmaster.soulfire.server.util.MathHelper;
-
-import java.util.Map;
-import java.util.UUID;
 
 @Setter
 @Getter

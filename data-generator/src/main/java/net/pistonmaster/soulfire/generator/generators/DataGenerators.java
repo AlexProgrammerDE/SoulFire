@@ -98,4 +98,7 @@ public class DataGenerators {
     log.info("Finishing running data generators");
     return generatorsFailed == 0;
   }
+
+  private DataGenerators() {
+  }
 }

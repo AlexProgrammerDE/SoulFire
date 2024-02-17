@@ -17,10 +17,9 @@
  */
 package net.pistonmaster.soulfire.server.pathfinding.graph;
 
+import java.util.List;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.execution.WorldAction;
-
-import java.util.List;
 
 public record GraphInstructions(BotEntityState targetState, double actionCost, List<WorldAction> actions) {
 }

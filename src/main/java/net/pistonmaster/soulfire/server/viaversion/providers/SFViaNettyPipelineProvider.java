@@ -18,15 +18,14 @@
 package net.pistonmaster.soulfire.server.viaversion.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
+import java.util.Objects;
+import javax.crypto.SecretKey;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.soulfire.server.viaversion.StorableSession;
 import net.raphimc.viabedrock.api.io.compression.ProtocolCompression;
 import net.raphimc.viabedrock.netty.AesEncryptionCodec;
 import net.raphimc.viabedrock.netty.CompressionCodec;
 import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
-
-import javax.crypto.SecretKey;
-import java.util.Objects;
 
 public class SFViaNettyPipelineProvider extends NettyPipelineProvider {
   @Override

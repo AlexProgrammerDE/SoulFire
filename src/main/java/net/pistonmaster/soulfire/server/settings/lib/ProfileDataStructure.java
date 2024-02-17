@@ -17,12 +17,15 @@
  */
 package net.pistonmaster.soulfire.server.settings.lib;
 
-import com.google.gson.*;
-import net.pistonmaster.soulfire.account.AuthType;
-import net.pistonmaster.soulfire.account.MinecraftAccount;
-import net.pistonmaster.soulfire.account.service.AccountData;
-import net.pistonmaster.soulfire.proxy.SWProxy;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 import java.security.GeneralSecurityException;
 import java.security.Key;
@@ -34,6 +37,10 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import net.pistonmaster.soulfire.account.AuthType;
+import net.pistonmaster.soulfire.account.MinecraftAccount;
+import net.pistonmaster.soulfire.account.service.AccountData;
+import net.pistonmaster.soulfire.proxy.SWProxy;
 
 // Intermediary class between profile strings and SettingsHolder
 public record ProfileDataStructure(

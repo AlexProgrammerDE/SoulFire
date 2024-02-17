@@ -24,6 +24,15 @@ import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundCus
 import com.google.common.collect.ImmutableList;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.UnaryOperator;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -42,16 +51,6 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 import net.pistonmaster.soulfire.server.util.UUIDHelper;
 import net.pistonmaster.soulfire.server.util.VelocityConstants;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import javax.inject.Inject;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.UnaryOperator;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

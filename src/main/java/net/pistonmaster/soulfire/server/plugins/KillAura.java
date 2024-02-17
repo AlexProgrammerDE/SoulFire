@@ -19,6 +19,7 @@ package net.pistonmaster.soulfire.server.plugins;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import java.util.concurrent.ThreadLocalRandom;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +30,11 @@ import net.pistonmaster.soulfire.server.api.event.bot.BotPreEntityTickEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TickHookContext;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
-import net.pistonmaster.soulfire.server.settings.lib.property.*;
-
-import java.util.concurrent.ThreadLocalRandom;
+import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.DoubleProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.MinMaxPropertyLink;
+import net.pistonmaster.soulfire.server.settings.lib.property.Property;
+import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
 @Slf4j
 public class KillAura implements InternalExtension {

@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.server.pathfinding.graph.actions;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
@@ -28,8 +29,6 @@ import net.pistonmaster.soulfire.server.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.BlockDirection;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.MovementMiningCost;
-
-import java.util.List;
 
 public final class DownMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;

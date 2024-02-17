@@ -18,12 +18,11 @@
 package net.pistonmaster.soulfire.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.ObjectData;
+import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.server.data.EntityType;
-
-import java.util.UUID;
 
 @Getter
 @Setter

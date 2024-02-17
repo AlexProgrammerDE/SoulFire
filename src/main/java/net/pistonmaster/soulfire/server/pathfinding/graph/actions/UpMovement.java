@@ -19,6 +19,7 @@ package net.pistonmaster.soulfire.server.pathfinding.graph.actions;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
@@ -32,8 +33,6 @@ import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.Block
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import net.pistonmaster.soulfire.server.protocol.bot.BotActionManager;
-
-import java.util.List;
 
 @Slf4j
 public final class UpMovement extends GraphAction implements Cloneable {

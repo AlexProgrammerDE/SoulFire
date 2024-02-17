@@ -20,9 +20,8 @@ package net.pistonmaster.soulfire.server.viaversion.providers;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
-import net.pistonmaster.soulfire.server.viaversion.StorableSession;
-
 import java.util.Objects;
+import net.pistonmaster.soulfire.server.viaversion.StorableSession;
 
 public class SFViaVersionProvider implements VersionProvider {
   @Override

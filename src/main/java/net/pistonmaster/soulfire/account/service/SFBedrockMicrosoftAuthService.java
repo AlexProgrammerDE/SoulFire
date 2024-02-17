@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.account.service;
 
+import java.io.IOException;
 import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.HttpHelper;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
@@ -24,8 +25,6 @@ import net.pistonmaster.soulfire.proxy.SWProxy;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
-
-import java.io.IOException;
 
 public final class SFBedrockMicrosoftAuthService implements MCAuthService<SFBedrockMicrosoftAuthService.BedrockMicrosoftAuthData> {
   @Override

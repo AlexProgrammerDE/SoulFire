@@ -17,9 +17,8 @@
  */
 package net.pistonmaster.soulfire.server.util;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Arrays;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class VersionComparator {

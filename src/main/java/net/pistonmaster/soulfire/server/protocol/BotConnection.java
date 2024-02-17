@@ -19,6 +19,9 @@ package net.pistonmaster.soulfire.server.protocol;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.pistonmaster.soulfire.server.AttackManager;
 import net.pistonmaster.soulfire.server.SoulFireServer;
@@ -33,10 +36,6 @@ import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 import net.pistonmaster.soulfire.server.util.TimeUtil;
 import org.slf4j.Logger;
-
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public record BotConnection(UUID connectionId, BotConnectionFactory factory, AttackManager attackManager,
                             SoulFireServer soulFireServer, SettingsHolder settingsHolder,

@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.server.plugins;
 
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
+import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -32,8 +33,6 @@ import net.pistonmaster.soulfire.server.settings.lib.property.MinMaxPropertyLink
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.util.ItemTypeHelper;
 import net.pistonmaster.soulfire.server.util.TimeUtil;
-
-import java.util.concurrent.TimeUnit;
 
 public class AutoEat implements InternalExtension {
   public static void onJoined(BotJoinedEvent event) {

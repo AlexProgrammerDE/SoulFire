@@ -25,10 +25,9 @@ import com.github.steveice10.opennbt.tag.builtin.StringTag;
 import it.unimi.dsi.fastutil.objects.Object2ShortArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ShortMap;
 import it.unimi.dsi.fastutil.objects.Object2ShortMaps;
+import java.util.Objects;
 import lombok.Getter;
 import net.pistonmaster.soulfire.server.data.ItemType;
-
-import java.util.Objects;
 
 @Getter
 public class SFItemStack extends ItemStack {

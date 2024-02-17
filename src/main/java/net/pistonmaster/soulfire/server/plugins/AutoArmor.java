@@ -17,6 +17,9 @@
  */
 package net.pistonmaster.soulfire.server.plugins;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -34,10 +37,6 @@ import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.MinMaxPropertyLink;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.util.TimeUtil;
-
-import java.util.Arrays;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class AutoArmor implements InternalExtension {
   private static void putOn(InventoryManager inventoryManager, PlayerInventoryContainer inventory, ContainerSlot targetSlot, ArmorType armorType) {

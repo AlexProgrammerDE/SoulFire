@@ -17,11 +17,10 @@
  */
 package net.pistonmaster.soulfire.generator.generators;
 
+import java.util.Locale;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.pistonmaster.soulfire.generator.util.GeneratorConstants;
 import net.pistonmaster.soulfire.generator.util.ResourceHelper;
-
-import java.util.Locale;
 
 public class ItemsJavaGenerator implements IDataGenerator {
   @Override

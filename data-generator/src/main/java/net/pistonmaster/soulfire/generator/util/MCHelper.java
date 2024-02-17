@@ -41,4 +41,7 @@ public class MCHelper {
       }
     };
   }
+
+  private MCHelper() {
+  }
 }

@@ -18,15 +18,14 @@
 package net.pistonmaster.soulfire.server.protocol.bot.state;
 
 import com.github.steveice10.mc.protocol.data.game.entity.Effect;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.server.protocol.bot.model.EffectData;
-
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
 
 @Data
 public class EntityEffectState {

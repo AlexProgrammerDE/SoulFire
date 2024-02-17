@@ -17,11 +17,32 @@
  */
 package net.pistonmaster.soulfire.server.settings.lib;
 
-import net.pistonmaster.soulfire.grpc.generated.*;
-import net.pistonmaster.soulfire.server.settings.lib.property.*;
-
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import net.pistonmaster.soulfire.grpc.generated.BoolSetting;
+import net.pistonmaster.soulfire.grpc.generated.ClientPluginSettingEntry;
+import net.pistonmaster.soulfire.grpc.generated.ClientPluginSettingEntryMinMaxPair;
+import net.pistonmaster.soulfire.grpc.generated.ClientPluginSettingEntryMinMaxPairSingle;
+import net.pistonmaster.soulfire.grpc.generated.ClientPluginSettingEntrySingle;
+import net.pistonmaster.soulfire.grpc.generated.ClientPluginSettingType;
+import net.pistonmaster.soulfire.grpc.generated.ClientPluginSettingsPage;
+import net.pistonmaster.soulfire.grpc.generated.ComboOption;
+import net.pistonmaster.soulfire.grpc.generated.ComboSetting;
+import net.pistonmaster.soulfire.grpc.generated.DoubleSetting;
+import net.pistonmaster.soulfire.grpc.generated.IntSetting;
+import net.pistonmaster.soulfire.grpc.generated.StringSetting;
+import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.ComboProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.DoubleProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.IntProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.MinMaxPropertyLink;
+import net.pistonmaster.soulfire.server.settings.lib.property.Property;
+import net.pistonmaster.soulfire.server.settings.lib.property.SingleProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
 public class ServerSettingsRegistry {
   private final Map<String, NamespaceRegistry> namespaceMap = new LinkedHashMap<>();

@@ -19,6 +19,7 @@ package net.pistonmaster.soulfire.server.pathfinding.graph.actions;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +31,14 @@ import net.pistonmaster.soulfire.server.pathfinding.execution.BlockPlaceAction;
 import net.pistonmaster.soulfire.server.pathfinding.execution.MovementAction;
 import net.pistonmaster.soulfire.server.pathfinding.execution.WorldAction;
 import net.pistonmaster.soulfire.server.pathfinding.graph.GraphInstructions;
-import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.*;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.BlockDirection;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.BlockSafetyData;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.BodyPart;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.MovementDirection;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.MovementMiningCost;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.MovementModifier;
+import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.MovementSide;
 import net.pistonmaster.soulfire.server.protocol.bot.BotActionManager;
-
-import java.util.List;
 
 @Slf4j
 public final class SimpleMovement extends GraphAction implements Cloneable {

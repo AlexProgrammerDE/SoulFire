@@ -17,6 +17,11 @@
  */
 package net.pistonmaster.soulfire.server.pathfinding.graph;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.server.data.BlockState;
@@ -27,12 +32,6 @@ import net.pistonmaster.soulfire.server.protocol.bot.container.PlayerInventoryCo
 import net.pistonmaster.soulfire.server.protocol.bot.container.SFItemStack;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.util.ItemTypeHelper;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An immutable representation of a player inventory.

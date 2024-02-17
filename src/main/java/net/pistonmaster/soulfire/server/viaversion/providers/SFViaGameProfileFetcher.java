@@ -17,10 +17,9 @@
  */
 package net.pistonmaster.soulfire.server.viaversion.providers;
 
+import java.util.UUID;
 import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.model.GameProfile;
 import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.providers.GameProfileFetcher;
-
-import java.util.UUID;
 
 public class SFViaGameProfileFetcher extends GameProfileFetcher {
   @Override

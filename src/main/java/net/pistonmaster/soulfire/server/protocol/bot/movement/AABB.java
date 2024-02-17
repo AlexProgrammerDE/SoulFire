@@ -17,10 +17,9 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.movement;
 
+import java.util.Optional;
 import lombok.ToString;
 import org.cloudburstmc.math.vector.Vector3d;
-
-import java.util.Optional;
 
 @ToString
 public class AABB {

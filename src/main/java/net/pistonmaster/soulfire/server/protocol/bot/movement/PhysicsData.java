@@ -17,9 +17,8 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.movement;
 
-import lombok.Data;
-
 import java.util.UUID;
+import lombok.Data;
 
 @Data
 public class PhysicsData {

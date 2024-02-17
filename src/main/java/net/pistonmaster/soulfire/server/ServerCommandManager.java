@@ -17,6 +17,12 @@
  */
 package net.pistonmaster.soulfire.server;
 
+import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
+import static net.pistonmaster.soulfire.brigadier.BrigadierHelper.argument;
+import static net.pistonmaster.soulfire.brigadier.BrigadierHelper.help;
+import static net.pistonmaster.soulfire.brigadier.BrigadierHelper.literal;
+import static net.pistonmaster.soulfire.brigadier.BrigadierHelper.privateCommand;
+
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -27,6 +33,19 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.CommandNode;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.ToIntFunction;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,19 +70,6 @@ import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.util.SFPathConstants;
 import org.apache.commons.io.FileUtils;
 import org.cloudburstmc.math.vector.Vector3d;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.time.Instant;
-import java.util.*;
-import java.util.function.ToIntFunction;
-
-import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
-import static net.pistonmaster.soulfire.brigadier.BrigadierHelper.*;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

@@ -17,14 +17,13 @@
  */
 package net.pistonmaster.soulfire.server.viaversion.platform;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.server.viaversion.JLoggerToSLF4J;
 import net.raphimc.vialegacy.platform.ViaLegacyPlatform;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.util.logging.Logger;
 
 @RequiredArgsConstructor
 public class SFViaLegacy implements ViaLegacyPlatform {

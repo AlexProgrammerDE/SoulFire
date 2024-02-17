@@ -18,14 +18,13 @@
 package net.pistonmaster.soulfire.server.pathfinding.graph.actions;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.List;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.Costs;
 import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 import net.pistonmaster.soulfire.server.pathfinding.execution.GapJumpAction;
 import net.pistonmaster.soulfire.server.pathfinding.graph.GraphInstructions;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.ParkourDirection;
-
-import java.util.List;
 
 public final class ParkourMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;

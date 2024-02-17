@@ -17,6 +17,10 @@
  */
 package net.pistonmaster.soulfire.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+
+import java.util.List;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.data.ItemType;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
@@ -33,11 +37,6 @@ import net.pistonmaster.soulfire.test.utils.TestBlockAccessor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 public class PathfindingTest {
   private static final MinecraftGraph DEFAULT_GRAPH = new MinecraftGraph(new TagsState());

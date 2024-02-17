@@ -18,8 +18,16 @@
 package net.pistonmaster.soulfire.server.protocol.bot.movement;
 
 import it.unimi.dsi.fastutil.Pair;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
 import lombok.Getter;
-import net.pistonmaster.soulfire.server.data.*;
+import net.pistonmaster.soulfire.server.data.Attribute;
+import net.pistonmaster.soulfire.server.data.AttributeType;
+import net.pistonmaster.soulfire.server.data.BlockState;
+import net.pistonmaster.soulfire.server.data.BlockTags;
+import net.pistonmaster.soulfire.server.data.BlockType;
+import net.pistonmaster.soulfire.server.data.ModifierOperation;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.soulfire.server.protocol.bot.state.LevelState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
@@ -29,10 +37,6 @@ import net.pistonmaster.soulfire.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiConsumer;
 
 /**
  * Java port of prismarine-physics

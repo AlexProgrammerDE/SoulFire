@@ -18,6 +18,14 @@
 package net.pistonmaster.soulfire;
 
 import io.netty.util.ResourceLeakDetector;
+import java.awt.GraphicsEnvironment;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.nio.file.Files;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
@@ -34,15 +42,6 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.fusesource.jansi.AnsiConsole;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
-
-import java.awt.*;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.nio.file.Files;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 
 /**
  * This class prepares the earliest work possible, such as loading mixins and

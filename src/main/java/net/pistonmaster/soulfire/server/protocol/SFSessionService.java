@@ -18,16 +18,6 @@
 package net.pistonmaster.soulfire.server.protocol;
 
 import com.google.gson.Gson;
-import lombok.AllArgsConstructor;
-import net.pistonmaster.soulfire.account.AuthType;
-import net.pistonmaster.soulfire.account.HttpHelper;
-import net.pistonmaster.soulfire.proxy.SWProxy;
-import net.pistonmaster.soulfire.server.util.UUIDHelper;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
@@ -36,6 +26,15 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.UUID;
+import javax.crypto.SecretKey;
+import lombok.AllArgsConstructor;
+import net.pistonmaster.soulfire.account.AuthType;
+import net.pistonmaster.soulfire.account.HttpHelper;
+import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.server.util.UUIDHelper;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 
 public class SFSessionService {
   private static final URI MOJANG_JOIN_URI = URI.create("https://sessionserver.mojang.com/session/minecraft/join");

@@ -19,11 +19,10 @@ package net.pistonmaster.soulfire.server.protocol.bot.state;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import java.util.Collection;
 import lombok.Data;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.Entity;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Collection;
 
 @Data
 public class EntityTrackerState {

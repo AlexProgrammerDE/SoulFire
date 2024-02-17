@@ -17,10 +17,9 @@
  */
 package net.pistonmaster.soulfire.server.plugins;
 
+import java.util.Set;
 import net.pistonmaster.soulfire.server.api.MixinExtension;
 import net.pistonmaster.soulfire.server.api.ServerExtension;
-
-import java.util.Set;
 
 public interface InternalExtension extends ServerExtension, MixinExtension {
   @Override

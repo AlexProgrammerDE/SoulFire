@@ -46,16 +46,15 @@ import com.github.steveice10.packetlib.event.session.ConnectedEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.viaversion.viaversion.api.connection.UserConnection;
+import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.soulfire.server.viaversion.SFVersionConstants;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import java.security.NoSuchAlgorithmException;
-import java.util.Objects;
 
 @RequiredArgsConstructor
 public class SFBaseListener extends SessionAdapter {

@@ -22,6 +22,8 @@ import com.github.steveice10.mc.protocol.data.game.setting.ChatVisibility;
 import com.github.steveice10.mc.protocol.data.game.setting.SkinPart;
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundClientInformationPacket;
 import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
+import java.util.ArrayList;
+import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +33,11 @@ import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.bot.SFPacketSentEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
-import net.pistonmaster.soulfire.server.settings.lib.property.*;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
+import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.ComboProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.IntProperty;
+import net.pistonmaster.soulfire.server.settings.lib.property.Property;
+import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientSettings implements InternalExtension {

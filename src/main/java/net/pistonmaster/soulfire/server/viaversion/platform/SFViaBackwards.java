@@ -18,13 +18,12 @@
 package net.pistonmaster.soulfire.server.viaversion.platform;
 
 import com.viaversion.viabackwards.api.ViaBackwardsPlatform;
-import lombok.RequiredArgsConstructor;
-import net.pistonmaster.soulfire.server.viaversion.JLoggerToSLF4J;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.util.logging.Logger;
+import lombok.RequiredArgsConstructor;
+import net.pistonmaster.soulfire.server.viaversion.JLoggerToSLF4J;
+import org.slf4j.LoggerFactory;
 
 @RequiredArgsConstructor
 public class SFViaBackwards implements ViaBackwardsPlatform {

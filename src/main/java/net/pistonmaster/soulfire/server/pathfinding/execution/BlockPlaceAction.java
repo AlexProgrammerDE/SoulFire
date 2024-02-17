@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.server.pathfinding.execution;
 
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.data.BlockItems;
@@ -28,8 +29,6 @@ import net.pistonmaster.soulfire.server.protocol.bot.container.SFItemStack;
 import net.pistonmaster.soulfire.server.util.BlockTypeHelper;
 import net.pistonmaster.soulfire.server.util.ItemTypeHelper;
 import net.pistonmaster.soulfire.server.util.TimeUtil;
-
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor

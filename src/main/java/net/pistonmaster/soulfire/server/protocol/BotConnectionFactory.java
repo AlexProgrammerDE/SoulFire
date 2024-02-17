@@ -21,6 +21,7 @@ import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
+import java.util.UUID;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
@@ -36,8 +37,6 @@ import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
 import net.pistonmaster.soulfire.server.settings.BotSettings;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 import org.slf4j.Logger;
-
-import java.util.UUID;
 
 public record BotConnectionFactory(AttackManager attackManager, ResolveUtil.ResolvedAddress resolvedAddress,
                                    SettingsHolder settingsHolder, Logger logger,

@@ -26,6 +26,9 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -33,10 +36,6 @@ import net.pistonmaster.soulfire.server.data.EquipmentSlot;
 import net.pistonmaster.soulfire.server.data.ItemType;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Data
 @RequiredArgsConstructor

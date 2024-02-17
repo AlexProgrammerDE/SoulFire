@@ -19,6 +19,9 @@ package net.pistonmaster.soulfire.server.protocol.bot.state;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.pistonmaster.soulfire.server.data.BlockState;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.protocol.bot.block.BlockAccessor;
@@ -27,10 +30,6 @@ import net.pistonmaster.soulfire.server.protocol.bot.model.ChunkKey;
 import net.pistonmaster.soulfire.server.protocol.bot.utils.SectionUtils;
 import net.pistonmaster.soulfire.server.util.NoopLock;
 import org.cloudburstmc.math.vector.Vector3i;
-
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ChunkHolder implements BlockAccessor {
   private static final BlockState VOID_AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.VOID_AIR);

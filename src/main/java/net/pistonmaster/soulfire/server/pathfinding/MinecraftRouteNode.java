@@ -17,13 +17,12 @@
  */
 package net.pistonmaster.soulfire.server.pathfinding;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.pistonmaster.soulfire.server.pathfinding.execution.WorldAction;
-
-import java.util.List;
 
 @Getter
 @Setter

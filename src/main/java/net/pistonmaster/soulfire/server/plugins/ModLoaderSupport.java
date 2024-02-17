@@ -21,6 +21,8 @@ import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCu
 import com.github.steveice10.mc.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
 import io.netty.buffer.Unpooled;
+import java.util.List;
+import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +37,6 @@ import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.ComboProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
-
-import javax.inject.Inject;
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

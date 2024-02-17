@@ -17,10 +17,9 @@
  */
 package net.pistonmaster.soulfire.account.service;
 
+import java.io.IOException;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.proxy.SWProxy;
-
-import java.io.IOException;
 
 public sealed interface MCAuthService<T>
     permits SFBedrockMicrosoftAuthService, SFEasyMCAuthService, SFJavaMicrosoftAuthService, SFOfflineAuthService, SFTheAlteningAuthService {

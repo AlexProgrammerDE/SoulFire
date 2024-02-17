@@ -17,6 +17,8 @@
  */
 package net.pistonmaster.soulfire.server.plugins;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -29,9 +31,6 @@ import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 public class ChatMessageLogger implements InternalExtension {
   private static final Logger logger = LoggerFactory.getLogger(ChatMessageLogger.class);

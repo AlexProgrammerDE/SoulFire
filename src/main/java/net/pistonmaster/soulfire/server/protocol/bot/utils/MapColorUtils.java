@@ -18,8 +18,7 @@
 package net.pistonmaster.soulfire.server.protocol.bot.utils;
 
 import com.github.steveice10.mc.protocol.data.game.level.map.MapData;
-
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 

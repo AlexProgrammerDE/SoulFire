@@ -18,6 +18,9 @@
 package net.pistonmaster.soulfire.account.service;
 
 import com.google.gson.Gson;
+import java.io.IOException;
+import java.net.URI;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.account.AuthType;
@@ -29,10 +32,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.UUID;
 
 public final class SFTheAlteningAuthService implements MCAuthService<SFTheAlteningAuthService.TheAlteningAuthData> {
   @SuppressWarnings("HttpUrlsUsage") // The Altening doesn't support encrypted HTTPS

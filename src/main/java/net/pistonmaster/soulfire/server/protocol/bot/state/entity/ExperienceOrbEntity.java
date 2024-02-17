@@ -17,11 +17,10 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.state.entity;
 
+import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import net.pistonmaster.soulfire.server.data.EntityType;
-
-import java.util.UUID;
 
 @Getter
 @EqualsAndHashCode(callSuper = true)

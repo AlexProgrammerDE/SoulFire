@@ -18,17 +18,16 @@
 package net.pistonmaster.soulfire.server.pathfinding.execution;
 
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
-import net.pistonmaster.soulfire.server.api.event.EventUtil;
-import net.pistonmaster.soulfire.server.api.event.bot.BotPreTickEvent;
-import net.pistonmaster.soulfire.server.protocol.BotConnection;
-import net.pistonmaster.soulfire.server.util.TimeUtil;
-
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import net.pistonmaster.soulfire.server.api.event.EventUtil;
+import net.pistonmaster.soulfire.server.api.event.bot.BotPreTickEvent;
+import net.pistonmaster.soulfire.server.protocol.BotConnection;
+import net.pistonmaster.soulfire.server.util.TimeUtil;
 
 public class PathExecutor implements Consumer<BotPreTickEvent> {
   private final Queue<WorldAction> worldActions;

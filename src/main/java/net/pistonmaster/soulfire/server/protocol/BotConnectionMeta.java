@@ -19,6 +19,7 @@ package net.pistonmaster.soulfire.server.protocol;
 
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import java.io.IOException;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
@@ -27,8 +28,6 @@ import net.pistonmaster.soulfire.proxy.SWProxy;
 import net.pistonmaster.soulfire.server.protocol.bot.BotControlAPI;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
-
-import java.io.IOException;
 
 @Getter
 public class BotConnectionMeta {
