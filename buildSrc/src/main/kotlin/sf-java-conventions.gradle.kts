@@ -6,8 +6,8 @@ plugins {
     id("net.kyori.indra")
     id("net.kyori.indra.publishing")
     id("net.kyori.indra.git")
-    id("net.kyori.indra.checkstyle")
     id("io.freefair.lombok")
+    id("sf-checkstyle-conventions")
 }
 
 tasks {
@@ -32,6 +32,12 @@ tasks {
     test {
         useJUnitPlatform()
     }
+}
+
+val checkstyleDir = rootDir.resolve("config").resolve("checkstyle")
+checkstyle {
+    configDirectory = checkstyleDir
+    configFile = checkstyleDir.resolve("checkstyle.xml")
 }
 
 indra {
