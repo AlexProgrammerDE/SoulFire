@@ -34,12 +34,6 @@ tasks {
     }
 }
 
-val checkstyleDir = rootDir.resolve("config").resolve("checkstyle")
-checkstyle {
-    configDirectory = checkstyleDir
-    configFile = checkstyleDir.resolve("checkstyle.xml")
-}
-
 indra {
     github("AlexProgrammerDE", "SoulFire") {
         ci(true)
