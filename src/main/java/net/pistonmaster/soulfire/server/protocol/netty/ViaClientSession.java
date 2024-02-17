@@ -131,8 +131,11 @@ public class ViaClientSession extends TcpSession {
             } else {
                 bootstrap
                         .option(ChannelOption.TCP_NODELAY, true)
-                        .option(ChannelOption.SO_KEEPALIVE, true)
-                        .option(ChannelOption.TCP_FASTOPEN_CONNECT, true);
+                        .option(ChannelOption.SO_KEEPALIVE, true);
+
+                if (SFNettyHelper.SUPPORTS_TPC_FAST_OPEN_CONNECT) {
+                    bootstrap.option(ChannelOption.TCP_FASTOPEN_CONNECT, true);
+                }
             }
 
             bootstrap.handler(new ChannelInitializer<>() {

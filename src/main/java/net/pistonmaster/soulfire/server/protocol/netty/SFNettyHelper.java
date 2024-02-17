@@ -34,6 +34,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.proxy.Socks5ProxyHandler;
+import io.netty.incubator.channel.uring.IOUring;
 import io.netty.incubator.channel.uring.IOUringDatagramChannel;
 import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import io.netty.incubator.channel.uring.IOUringSocketChannel;
@@ -42,6 +43,7 @@ import net.pistonmaster.soulfire.proxy.SWProxy;
 import java.util.concurrent.ThreadFactory;
 
 public class SFNettyHelper {
+    public static final boolean SUPPORTS_TPC_FAST_OPEN_CONNECT = IOUring.isTcpFastOpenClientSideAvailable();
     public static final Class<? extends Channel> CHANNEL_CLASS;
     public static final Class<? extends DatagramChannel> DATAGRAM_CHANNEL_CLASS;
 
