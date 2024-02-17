@@ -26,7 +26,7 @@ import javax.swing.text.Element;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * From <a href="http://tips4java.wordpress.com/2008/10/15/limit-lines-in-document/">tips4java</a>
+ * From <a href="http://tips4java.wordpress.com/2008/10/15/limit-lines-in-document/">tips4java</a>.
  *
  * @author Rob Camick
  */
@@ -52,7 +52,7 @@ public class LimitLinesDocumentListener implements DocumentListener {
   }
 
   /**
-   * Set the maximum number of lines to be stored in the Document
+   * Set the maximum number of lines to be stored in the Document.
    *
    * @param maximumLines number of lines
    */

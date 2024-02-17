@@ -43,7 +43,7 @@ public class DataGenerators {
       new AttributesDataGenerator(),
       new AttributesJavaGenerator(),
       new LanguageDataGenerator(),
-      new InstrumentsDataGenerator(),
+      new MapColorDataGenerator(),
       new TagsDataGenerator.BlockTagsDataGenerator(),
       new TagsDataGenerator.ItemTagsDataGenerator(),
       new TagsDataGenerator.EntityTypeTagsDataGenerator(),

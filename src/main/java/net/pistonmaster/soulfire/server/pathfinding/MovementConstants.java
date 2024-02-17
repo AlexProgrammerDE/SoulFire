@@ -19,4 +19,7 @@ package net.pistonmaster.soulfire.server.pathfinding;
 
 public class MovementConstants {
   public static final double STEP_HEIGHT = 0.6;
+
+  private MovementConstants() {
+  }
 }

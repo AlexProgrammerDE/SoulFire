@@ -154,8 +154,6 @@ public class HintManager {
         return;
       }
 
-      var layeredPane = rootPane.getLayeredPane();
-
       // create a popup panel that has a drop shadow
       popup = new JPanel(new BorderLayout()) {
         @Override
@@ -172,6 +170,8 @@ public class HintManager {
       };
       popup.setOpaque(false);
       popup.add(this);
+
+      var layeredPane = rootPane.getLayeredPane();
 
       // calculate x/y location for hint popup
       var pt = SwingUtilities.convertPoint(hint.owner, 0, 0, layeredPane);
@@ -220,7 +220,6 @@ public class HintManager {
     private void initComponents() {
       // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
       hintLabel = new JLabel();
-      var gotItButton = new JButton();
 
       //======== this ========
       setLayout(new MigLayout(
@@ -235,6 +234,8 @@ public class HintManager {
       add(hintLabel, "cell 0 0");
 
       //---- gotItButton ----
+      var gotItButton = new JButton();
+
       gotItButton.setText("Got it!");
       gotItButton.setFocusable(false);
       gotItButton.addActionListener(e -> gotIt());

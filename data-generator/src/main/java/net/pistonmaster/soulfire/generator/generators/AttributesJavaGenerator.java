@@ -32,7 +32,7 @@ public class AttributesJavaGenerator implements IDataGenerator {
   @Override
   public String generateDataJson() {
     var base = ResourceHelper.getResource("/templates/AttributeType.java");
-    return base.replace(GeneratorConstants.VALUES_REPLACE, String.join("\n    ",
+    return base.replace(GeneratorConstants.VALUES_REPLACE, String.join("\n  ",
         BuiltInRegistries.ATTRIBUTE
             .stream().map(s -> {
               var name = Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(s)).getPath();

@@ -31,7 +31,7 @@ public class EntitiesJavaGenerator implements IDataGenerator {
   @Override
   public String generateDataJson() {
     var base = ResourceHelper.getResource("/templates/EntityType.java");
-    return base.replace(GeneratorConstants.VALUES_REPLACE, String.join("\n    ",
+    return base.replace(GeneratorConstants.VALUES_REPLACE, String.join("\n  ",
         BuiltInRegistries.ENTITY_TYPE
             .stream().map(s -> {
               var name = BuiltInRegistries.ENTITY_TYPE.getKey(s).getPath();

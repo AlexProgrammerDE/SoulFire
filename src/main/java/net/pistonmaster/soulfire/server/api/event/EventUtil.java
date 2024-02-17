@@ -39,4 +39,7 @@ public class EventUtil {
   private static int countTotalHandlers(Map<?, List<?>> handlers) {
     return handlers.values().stream().mapToInt(List::size).sum();
   }
+
+  private EventUtil() {
+  }
 }

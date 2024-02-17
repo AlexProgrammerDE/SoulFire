@@ -20,4 +20,7 @@ package net.pistonmaster.soulfire.data;
 @SuppressWarnings("unused")
 public class EntityTypeTags {
   // VALUES REPLACE
+
+  private EntityTypeTags() {
+  }
 }

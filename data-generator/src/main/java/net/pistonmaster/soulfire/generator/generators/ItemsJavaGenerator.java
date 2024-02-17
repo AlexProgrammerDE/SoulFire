@@ -31,7 +31,7 @@ public class ItemsJavaGenerator implements IDataGenerator {
   @Override
   public String generateDataJson() {
     var base = ResourceHelper.getResource("/templates/ItemType.java");
-    return base.replace(GeneratorConstants.VALUES_REPLACE, String.join("\n    ",
+    return base.replace(GeneratorConstants.VALUES_REPLACE, String.join("\n  ",
         BuiltInRegistries.ITEM
             .stream().map(s -> {
               var name = BuiltInRegistries.ITEM.getKey(s).getPath();

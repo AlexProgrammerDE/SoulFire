@@ -136,8 +136,8 @@ public class SmartScroller implements AdjustmentListener {
     //  The scroll bar listModel contains information needed to determine
     //  whether the viewport should be repositioned or not.
 
-    var jScrollBar = (JScrollBar) e.getSource();
-    var listModel = jScrollBar.getModel();
+    var scrollBar = (JScrollBar) e.getSource();
+    var listModel = scrollBar.getModel();
     var value = listModel.getValue();
     var extent = listModel.getExtent();
     var maximum = listModel.getMaximum();
@@ -161,18 +161,18 @@ public class SmartScroller implements AdjustmentListener {
 
     if (adjustScrollBar && viewportPosition == END) {
       //  Scroll the viewport to the end.
-      jScrollBar.removeAdjustmentListener(this);
+      scrollBar.removeAdjustmentListener(this);
       value = maximum - extent;
-      jScrollBar.setValue(value);
-      jScrollBar.addAdjustmentListener(this);
+      scrollBar.setValue(value);
+      scrollBar.addAdjustmentListener(this);
     }
 
     if (adjustScrollBar && viewportPosition == START) {
       //  Keep the viewport at the same relative viewportPosition
-      jScrollBar.removeAdjustmentListener(this);
+      scrollBar.removeAdjustmentListener(this);
       value = value + maximum - previousMaximum;
-      jScrollBar.setValue(value);
-      jScrollBar.addAdjustmentListener(this);
+      scrollBar.setValue(value);
+      scrollBar.addAdjustmentListener(this);
     }
 
     previousValue = value;

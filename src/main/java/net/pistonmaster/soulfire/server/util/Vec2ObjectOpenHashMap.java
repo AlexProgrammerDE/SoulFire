@@ -48,11 +48,11 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
   private static final long serialVersionUID = 0L;
   private static final boolean ASSERTS = false;
   protected final transient int minN;
-  protected final float f;
+  protected final float loadFactor;
   protected transient K[] key;
   protected transient V[] value;
   protected transient int mask;
-  protected transient int n;
+  protected transient int elements;
   protected transient int maxFill;
   protected int size;
   protected transient FastEntrySet<K, V> entries;
@@ -60,19 +60,19 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
   protected transient ObjectCollection<V> values;
 
   @SuppressWarnings("unchecked")
-  public Vec2ObjectOpenHashMap(final int expected, final float f) {
-    if (f <= 0 || f >= 1) {
+  public Vec2ObjectOpenHashMap(final int expected, final float loadFactor) {
+    if (loadFactor <= 0 || loadFactor >= 1) {
       throw new IllegalArgumentException("Load factor must be greater than 0 and smaller than 1");
     }
     if (expected < 0) {
       throw new IllegalArgumentException("The expected number of elements must be nonnegative");
     }
-    this.f = f;
-    minN = n = arraySize(expected, f);
-    mask = n - 1;
-    maxFill = maxFill(n, f);
-    key = (K[]) new SFVec3i[n + 1];
-    value = (V[]) new Object[n + 1];
+    this.loadFactor = loadFactor;
+    minN = elements = arraySize(expected, loadFactor);
+    mask = elements - 1;
+    maxFill = maxFill(elements, loadFactor);
+    key = (K[]) new SFVec3i[elements + 1];
+    value = (V[]) new Object[elements + 1];
   }
 
   public Vec2ObjectOpenHashMap() {
@@ -102,15 +102,15 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
   }
 
   public void ensureCapacity(final int capacity) {
-    final var needed = arraySize(capacity, f);
-    if (needed > n) {
+    final var needed = arraySize(capacity, loadFactor);
+    if (needed > elements) {
       rehash(needed);
     }
   }
 
   private void tryCapacity(final long capacity) {
-    final var needed = (int) Math.min(1 << 30, Math.max(2, HashCommon.nextPowerOfTwo((long) Math.ceil(capacity / f))));
-    if (needed > n) {
+    final var needed = (int) Math.min(1 << 30, Math.max(2, HashCommon.nextPowerOfTwo((long) Math.ceil(capacity / loadFactor))));
+    if (needed > elements) {
       rehash(needed);
     }
   }
@@ -120,15 +120,15 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
     value[pos] = null;
     size--;
     shiftKeys(pos);
-    if (n > minN && size < maxFill / 4 && n > DEFAULT_INITIAL_SIZE) {
-      rehash(n / 2);
+    if (elements > minN && size < maxFill / 4 && elements > DEFAULT_INITIAL_SIZE) {
+      rehash(elements / 2);
     }
     return oldValue;
   }
 
   @Override
   public void putAll(Map<? extends K, ? extends V> m) {
-    if (f <= .5) {
+    if (loadFactor <= .5) {
       ensureCapacity(m.size()); // The resulting map will be sized for m.size() elements
     } else {
       tryCapacity(size() + m.size()); // The resulting map will be tentatively sized for size() + m.size()
@@ -163,7 +163,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
     key[pos] = k;
     value[pos] = v;
     if (size++ >= maxFill) {
-      rehash(arraySize(size + 1, f));
+      rehash(arraySize(size + 1, loadFactor));
     }
     if (ASSERTS) {
       checkTable();
@@ -282,7 +282,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
   public boolean containsValue(final Object v) {
     final var value = this.value;
     final var key = this.key;
-    for (var i = n; i-- != 0; ) {
+    for (var i = elements; i-- != 0; ) {
       if (!((key[i]) == null) && java.util.Objects.equals(value[i], v)) {
         return true;
       }
@@ -471,7 +471,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
     final var mask = newN - 1; // Note that this is used by the hashing macro
     final var newKey = (K[]) new SFVec3i[newN + 1];
     final var newValue = (V[]) new Object[newN + 1];
-    var i = n;
+    var i = elements;
     int pos;
     for (var j = realSize(); j-- != 0; ) {
       while (((key[--i]) == null)) {
@@ -485,10 +485,10 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
       newKey[pos] = key[i];
       newValue[pos] = value[i];
     }
-    newValue[newN] = value[n];
-    n = newN;
+    newValue[newN] = value[elements];
+    elements = newN;
     this.mask = mask;
-    maxFill = maxFill(n, f);
+    maxFill = maxFill(elements, loadFactor);
     this.key = newKey;
     this.value = newValue;
   }
@@ -563,16 +563,16 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
     }
 
     @Override
+    public it.unimi.dsi.fastutil.Pair<K, V> right(final V v) {
+      value[index] = v;
+      return this;
+    }
+
+    @Override
     public V setValue(final V v) {
       final var oldValue = value[index];
       value[index] = v;
       return oldValue;
-    }
-
-    @Override
-    public it.unimi.dsi.fastutil.Pair<K, V> right(final V v) {
-      value[index] = v;
-      return this;
     }
 
     @SuppressWarnings("unchecked")
@@ -596,24 +596,24 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
     }
   }
 
-  private abstract class MapIterator<ConsumerType> {
-    int pos = n;
+  private abstract class MapIterator<C> {
+    int pos = elements;
     int last = -1;
-    int c = size;
+    int current = size;
     ObjectArrayList<K> wrapped;
 
     @SuppressWarnings("unused")
-    abstract void acceptOnIndex(final ConsumerType action, final int index);
+    abstract void acceptOnIndex(final C action, final int index);
 
     public boolean hasNext() {
-      return c != 0;
+      return current != 0;
     }
 
     public int nextEntry() {
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
-      c--;
+      current--;
       final var key = Vec2ObjectOpenHashMap.this.key;
       for (; ; ) {
         if (--pos < 0) {
@@ -632,9 +632,9 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
       }
     }
 
-    public void forEachRemaining(final ConsumerType action) {
+    public void forEachRemaining(final C action) {
       final var key = Vec2ObjectOpenHashMap.this.key;
-      while (c != 0) {
+      while (current != 0) {
         if (--pos < 0) {
           // We are just enumerating elements from the wrapped list.
           last = Integer.MIN_VALUE;
@@ -644,10 +644,10 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
             p = (p + 1) & mask;
           }
           acceptOnIndex(action, p);
-          c--;
+          current--;
         } else if (!((key[pos]) == null)) {
           acceptOnIndex(action, last = pos);
-          c--;
+          current--;
         }
       }
     }
@@ -687,9 +687,9 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
       if (last == -1) {
         throw new IllegalStateException();
       }
-      if (last == n) {
-        key[n] = null;
-        value[n] = null;
+      if (last == elements) {
+        key[elements] = null;
+        value[elements] = null;
       } else if (pos >= 0) {
         shiftKeys(last);
       } else {
@@ -752,10 +752,10 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
     }
   }
 
-  private abstract class MapSpliterator<ConsumerType, SplitType extends MapSpliterator<ConsumerType, SplitType>> {
+  private abstract class MapSpliterator<C, S extends MapSpliterator<C, S>> {
     int pos = 0;
-    int max = n;
-    int c = 0;
+    int max = elements;
+    int current = 0;
     boolean hasSplit = false;
 
     MapSpliterator() {
@@ -767,15 +767,15 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
       this.hasSplit = hasSplit;
     }
 
-    abstract void acceptOnIndex(final ConsumerType action, final int index);
+    abstract void acceptOnIndex(final C action, final int index);
 
-    abstract SplitType makeForSplit(int pos, int max);
+    abstract S makeForSplit(int pos, int max);
 
-    public boolean tryAdvance(final ConsumerType action) {
+    public boolean tryAdvance(final C action) {
       final var key = Vec2ObjectOpenHashMap.this.key;
       while (pos < max) {
         if (!((key[pos]) == null)) {
-          ++c;
+          ++current;
           acceptOnIndex(action, pos++);
           return true;
         }
@@ -784,12 +784,12 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
       return false;
     }
 
-    public void forEachRemaining(final ConsumerType action) {
+    public void forEachRemaining(final C action) {
       final var key = Vec2ObjectOpenHashMap.this.key;
       while (pos < max) {
         if (!((key[pos]) == null)) {
           acceptOnIndex(action, pos);
-          ++c;
+          ++current;
         }
         ++pos;
       }
@@ -798,16 +798,16 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
     public long estimateSize() {
       if (!hasSplit) {
         // Root spliterator; we know how many are remaining.
-        return size - c;
+        return size - current;
       } else {
         // After we split, we can no longer know exactly how many we have (or at least not efficiently).
         // (size / n) * (max - pos) aka currentTableDensity * numberOfBucketsLeft seems like a good
         // estimate.
-        return Math.min(size - c, (long) (((double) realSize() / n) * (max - pos)));
+        return Math.min(size - current, (long) (((double) realSize() / elements) * (max - pos)));
       }
     }
 
-    public SplitType trySplit() {
+    public S trySplit() {
       if (pos >= max - 1) {
         return null;
       }
@@ -965,7 +965,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
 
     @Override
     public void forEach(final Consumer<? super Entry<K, V>> consumer) {
-      for (var pos = n; pos-- != 0; ) {
+      for (var pos = elements; pos-- != 0; ) {
         if (!((key[pos]) == null)) {
           consumer.accept(new MapEntry(pos));
         }
@@ -975,7 +975,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
     @Override
     public void fastForEach(final Consumer<? super Entry<K, V>> consumer) {
       final var entry = new MapEntry();
-      for (var pos = n; pos-- != 0; ) {
+      for (var pos = elements; pos-- != 0; ) {
         if (!((key[pos]) == null)) {
           entry.index = pos;
           consumer.accept(entry);

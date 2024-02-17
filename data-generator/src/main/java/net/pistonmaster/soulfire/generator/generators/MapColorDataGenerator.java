@@ -19,23 +19,25 @@ package net.pistonmaster.soulfire.generator.generators;
 
 import java.util.Locale;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.material.MapColor;
 import net.pistonmaster.soulfire.generator.util.GeneratorConstants;
 import net.pistonmaster.soulfire.generator.util.ResourceHelper;
 
-public class BlocksJavaGenerator implements IDataGenerator {
+public class MapColorDataGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
-    return "BlockType.java";
+    return "MapColor.java";
   }
 
   @Override
   public String generateDataJson() {
-    var base = ResourceHelper.getResource("/templates/BlockType.java");
+    MapColor
+    var base = ResourceHelper.getResource("/templates/ItemType.java");
     return base.replace(GeneratorConstants.VALUES_REPLACE, String.join("\n  ",
-        BuiltInRegistries.BLOCK
+        BuiltInRegistries.ITEM
             .stream().map(s -> {
-              var name = BuiltInRegistries.BLOCK.getKey(s).getPath();
-              return "public static final BlockType " + name.toUpperCase(Locale.ROOT) + " = register(\"" + name + "\");";
+              var name = BuiltInRegistries.ITEM.getKey(s).getPath();
+              return "public static final ItemType " + name.toUpperCase(Locale.ROOT) + " = register(\"" + name + "\");";
             })
             .toArray(String[]::new)));
   }

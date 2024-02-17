@@ -100,8 +100,8 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   private int freeCapacity() {
-    return 2 + (diagonal ? 2 : 0) +
-        switch (modifier) {
+    return 2 + (diagonal ? 2 : 0)
+        + switch (modifier) {
           case NORMAL -> 0;
           case FALL_1 -> 1;
           case FALL_2, JUMP -> 2;

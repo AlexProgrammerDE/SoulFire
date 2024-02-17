@@ -117,7 +117,8 @@ public class MessageLogPanel extends JPanel {
                 String.join("", toInsert),
                 defaultAttributes
             );
-          } catch (BadLocationException ignored) {
+          } catch (BadLocationException e) {
+            log.debug("Failed to insert text!", e);
           }
           toInsert.clear();
         }
