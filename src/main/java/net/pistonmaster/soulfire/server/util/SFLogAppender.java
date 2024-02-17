@@ -26,18 +26,20 @@ import org.apache.logging.log4j.core.layout.AbstractStringLayout;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 public class SFLogAppender extends AbstractAppender {
-  private final AbstractStringLayout.Serializer formatter = new PatternLayout.SerializerBuilder()
-      .setAlwaysWriteExceptions(true)
-      .setDisableAnsi(true)
-      .setNoConsoleNoAnsi(true)
-      .setDefaultPattern("[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx")
-      .build();
-  private final AbstractStringLayout.Serializer builtInFormatter = new PatternLayout.SerializerBuilder()
-      .setAlwaysWriteExceptions(true)
-      .setDisableAnsi(true)
-      .setNoConsoleNoAnsi(true)
-      .setDefaultPattern("[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx")
-      .build();
+  private final AbstractStringLayout.Serializer formatter =
+      new PatternLayout.SerializerBuilder()
+          .setAlwaysWriteExceptions(true)
+          .setDisableAnsi(true)
+          .setNoConsoleNoAnsi(true)
+          .setDefaultPattern("[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx")
+          .build();
+  private final AbstractStringLayout.Serializer builtInFormatter =
+      new PatternLayout.SerializerBuilder()
+          .setAlwaysWriteExceptions(true)
+          .setDisableAnsi(true)
+          .setNoConsoleNoAnsi(true)
+          .setDefaultPattern("[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx")
+          .build();
 
   public SFLogAppender() {
     super("LogPanelAppender", null, null, false, Property.EMPTY_ARRAY);

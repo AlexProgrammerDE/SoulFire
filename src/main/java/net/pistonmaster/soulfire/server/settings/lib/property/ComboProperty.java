@@ -28,8 +28,8 @@ public record ComboProperty(
     String[] cliFlags,
     String description,
     ComboOption[] options,
-    int defaultValue
-) implements SingleProperty {
+    int defaultValue)
+    implements SingleProperty {
   public ComboProperty {
     if (options.length == 0) {
       throw new IllegalArgumentException("Options must not be empty!");
@@ -41,20 +41,20 @@ public record ComboProperty(
   }
 
   public static <T extends Enum<T>> String capitalizeEnum(T enumValue) {
-    return String.join(" ", Arrays.stream(enumValue.name().split("_"))
-        .map(ComboProperty::capitalizeString)
-        .toArray(String[]::new));
+    return String.join(
+        " ",
+        Arrays.stream(enumValue.name().split("_"))
+            .map(ComboProperty::capitalizeString)
+            .toArray(String[]::new));
   }
 
   public static String capitalizeString(String str) {
     return str.substring(0, 1).toUpperCase(Locale.ROOT) + str.substring(1).toLowerCase(Locale.ROOT);
   }
 
-  public record ComboOption(
-      String id,
-      String displayName
-  ) {
-    public static <T extends Enum<T>> ComboOption[] fromEnum(T[] values, Function<T, String> mapper) {
+  public record ComboOption(String id, String displayName) {
+    public static <T extends Enum<T>> ComboOption[] fromEnum(
+        T[] values, Function<T, String> mapper) {
       var options = new ComboOption[values.length];
 
       for (var i = 0; i < values.length; i++) {

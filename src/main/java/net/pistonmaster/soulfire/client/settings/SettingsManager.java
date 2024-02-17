@@ -36,12 +36,11 @@ import net.pistonmaster.soulfire.server.settings.lib.property.PropertyKey;
 
 @Slf4j
 public class SettingsManager {
-  private final Multimap<PropertyKey, Consumer<JsonElement>> listeners = Multimaps.newListMultimap(new LinkedHashMap<>(), ArrayList::new);
+  private final Multimap<PropertyKey, Consumer<JsonElement>> listeners =
+      Multimaps.newListMultimap(new LinkedHashMap<>(), ArrayList::new);
   private final Map<PropertyKey, Provider<JsonElement>> providers = new LinkedHashMap<>();
-  @Getter
-  private final AccountRegistry accountRegistry = new AccountRegistry();
-  @Getter
-  private final ProxyRegistry proxyRegistry = new ProxyRegistry();
+  @Getter private final AccountRegistry accountRegistry = new AccountRegistry();
+  @Getter private final ProxyRegistry proxyRegistry = new ProxyRegistry();
 
   public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {
     providers.put(property, provider);
@@ -52,11 +51,14 @@ public class SettingsManager {
   }
 
   public void loadProfile(Path path) throws IOException {
-    SettingsHolder.createSettingsHolder(ProfileDataStructure.deserialize(Files.readString(path)),
-        listeners, accounts -> {
+    SettingsHolder.createSettingsHolder(
+        ProfileDataStructure.deserialize(Files.readString(path)),
+        listeners,
+        accounts -> {
           accountRegistry.setAccounts(accounts);
           accountRegistry.callLoadHooks();
-        }, proxies -> {
+        },
+        proxies -> {
           proxyRegistry.setProxies(proxies);
           proxyRegistry.callLoadHooks();
         });
@@ -78,14 +80,11 @@ public class SettingsManager {
       var settingId = property.key();
       var value = provider.get();
 
-      settingsData.computeIfAbsent(namespace, k -> new LinkedHashMap<>())
-          .put(settingId, value);
+      settingsData.computeIfAbsent(namespace, k -> new LinkedHashMap<>()).put(settingId, value);
     }
 
     return new ProfileDataStructure(
-        settingsData,
-        accountRegistry.getAccounts(),
-        proxyRegistry.getProxies()
-    ).serialize();
+            settingsData, accountRegistry.getAccounts(), proxyRegistry.getProxies())
+        .serialize();
   }
 }

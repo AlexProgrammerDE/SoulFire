@@ -22,11 +22,10 @@ import net.pistonmaster.soulfire.brigadier.ConsoleSubject;
 import net.pistonmaster.soulfire.server.api.event.SoulFireGlobalEvent;
 
 /**
- * Add yourself to the command dispatcher to add custom commands.
- * At this stage, all built-in commands are already registered.
+ * Add yourself to the command dispatcher to add custom commands. At this stage, all built-in
+ * commands are already registered.
  *
  * @param commandDispatcher The command dispatcher.
  */
-public record DispatcherInitEvent(
-    CommandDispatcher<ConsoleSubject> commandDispatcher) implements SoulFireGlobalEvent {
-}
+public record DispatcherInitEvent(CommandDispatcher<ConsoleSubject> commandDispatcher)
+    implements SoulFireGlobalEvent {}

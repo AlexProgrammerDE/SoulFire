@@ -72,16 +72,19 @@ public class ClientSettings implements InternalExtension {
         skinParts.add(SkinPart.HAT);
       }
 
-      event.connection().session().send(new ServerboundClientInformationPacket(
-          settingsHolder.get(ClientSettingsSettings.CLIENT_LOCALE),
-          settingsHolder.get(ClientSettingsSettings.RENDER_DISTANCE),
-          settingsHolder.get(ClientSettingsSettings.CHAT_VISIBILITY, ChatVisibility.class),
-          settingsHolder.get(ClientSettingsSettings.USE_CHAT_COLORS),
-          skinParts,
-          settingsHolder.get(ClientSettingsSettings.HAND_PREFERENCE, HandPreference.class),
-          settingsHolder.get(ClientSettingsSettings.TEXT_FILTERING_ENABLED),
-          settingsHolder.get(ClientSettingsSettings.ALLOWS_LISTING)
-      ));
+      event
+          .connection()
+          .session()
+          .send(
+              new ServerboundClientInformationPacket(
+                  settingsHolder.get(ClientSettingsSettings.CLIENT_LOCALE),
+                  settingsHolder.get(ClientSettingsSettings.RENDER_DISTANCE),
+                  settingsHolder.get(ClientSettingsSettings.CHAT_VISIBILITY, ChatVisibility.class),
+                  settingsHolder.get(ClientSettingsSettings.USE_CHAT_COLORS),
+                  skinParts,
+                  settingsHolder.get(ClientSettingsSettings.HAND_PREFERENCE, HandPreference.class),
+                  settingsHolder.get(ClientSettingsSettings.TEXT_FILTERING_ENABLED),
+                  settingsHolder.get(ClientSettingsSettings.ALLOWS_LISTING)));
     }
   }
 
@@ -99,117 +102,117 @@ public class ClientSettings implements InternalExtension {
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class ClientSettingsSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("client-settings");
-    public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
-        "enabled",
-        "Send client settings",
-        new String[] {"--send-client-settings"},
-        "Send client settings to the server when joining",
-        true
-    );
-    public static final StringProperty CLIENT_LOCALE = BUILDER.ofString(
-        "client-locale",
-        "Client locale",
-        new String[] {"--client-locale"},
-        "The locale the client uses for translations",
-        "en_gb"
-    );
-    public static final IntProperty RENDER_DISTANCE = BUILDER.ofInt(
-        "render-distance",
-        "Render distance",
-        new String[] {"--render-distance"},
-        "How far the client renders chunks. (Use this to load more or less chunks from the server)",
-        8,
-        2,
-        32,
-        1
-    );
-    public static final ComboProperty CHAT_VISIBILITY = BUILDER.ofEnumMapped(
-        "chat-visibility",
-        "Chat visibility",
-        new String[] {"--chat-visibility"},
-        "What type of chat messages the client will receive",
-        ChatVisibility.values(),
-        ChatVisibility.FULL,
-        ComboProperty::capitalizeEnum
-    );
-    public static final BooleanProperty USE_CHAT_COLORS = BUILDER.ofBoolean(
-        "use-chat-colors",
-        "Use chat colors",
-        new String[] {"--use-chat-colors"},
-        "Whether the client will use chat colors",
-        true
-    );
-    public static final BooleanProperty CAPE_ENABLED = BUILDER.ofBoolean(
-        "cape-enabled",
-        "Cape enabled",
-        new String[] {"--cape-enabled"},
-        "Whether to display the bots cape if it has one",
-        true
-    );
-    public static final BooleanProperty JACKET_ENABLED = BUILDER.ofBoolean(
-        "jacket-enabled",
-        "Jacket enabled",
-        new String[] {"--jacket-enabled"},
-        "Whether to render the jacket overlay skin layer",
-        true
-    );
-    public static final BooleanProperty LEFT_SLEEVE_ENABLED = BUILDER.ofBoolean(
-        "left-sleeve-enabled",
-        "Left sleeve enabled",
-        new String[] {"--left-sleeve-enabled"},
-        "Whether to render the left overlay skin layer",
-        true
-    );
-    public static final BooleanProperty RIGHT_SLEEVE_ENABLED = BUILDER.ofBoolean(
-        "right-sleeve-enabled",
-        "Right sleeve enabled",
-        new String[] {"--right-sleeve-enabled"},
-        "Whether to render the right overlay skin layer",
-        true
-    );
-    public static final BooleanProperty LEFT_PANTS_LEG_ENABLED = BUILDER.ofBoolean(
-        "left-pants-leg-enabled",
-        "Left pants leg enabled",
-        new String[] {"--left-pants-leg-enabled"},
-        "Whether to render the left pants leg overlay skin layer",
-        true
-    );
-    public static final BooleanProperty RIGHT_PANTS_LEG_ENABLED = BUILDER.ofBoolean(
-        "right-pants-leg-enabled",
-        "Right pants leg enabled",
-        new String[] {"--right-pants-leg-enabled"},
-        "Whether to render the right pants leg overlay skin layer",
-        true
-    );
-    public static final BooleanProperty HAT_ENABLED = BUILDER.ofBoolean(
-        "hat-enabled",
-        "Hat enabled",
-        new String[] {"--hat-enabled"},
-        "Whether to render the hat overlay skin layer",
-        true
-    );
-    public static final ComboProperty HAND_PREFERENCE = BUILDER.ofEnumMapped(
-        "hand-preference",
-        "Hand preference",
-        new String[] {"--hand-preference"},
-        "What hand the client prefers to use for items",
-        HandPreference.values(),
-        HandPreference.RIGHT_HAND,
-        ComboProperty::capitalizeEnum
-    );
-    public static final BooleanProperty TEXT_FILTERING_ENABLED = BUILDER.ofBoolean(
-        "text-filtering-enabled",
-        "Text filtering enabled",
-        new String[] {"--text-filtering-enabled"},
-        "Whether to filter chat messages from the server",
-        true
-    );
-    public static final BooleanProperty ALLOWS_LISTING = BUILDER.ofBoolean(
-        "allows-listing",
-        "Allows listing",
-        new String[] {"--allows-listing"},
-        "Whether the client wants their username to be shown in the server list",
-        true
-    );
+    public static final BooleanProperty ENABLED =
+        BUILDER.ofBoolean(
+            "enabled",
+            "Send client settings",
+            new String[] {"--send-client-settings"},
+            "Send client settings to the server when joining",
+            true);
+    public static final StringProperty CLIENT_LOCALE =
+        BUILDER.ofString(
+            "client-locale",
+            "Client locale",
+            new String[] {"--client-locale"},
+            "The locale the client uses for translations",
+            "en_gb");
+    public static final IntProperty RENDER_DISTANCE =
+        BUILDER.ofInt(
+            "render-distance",
+            "Render distance",
+            new String[] {"--render-distance"},
+            "How far the client renders chunks. (Use this to load more or less chunks from the server)",
+            8,
+            2,
+            32,
+            1);
+    public static final ComboProperty CHAT_VISIBILITY =
+        BUILDER.ofEnumMapped(
+            "chat-visibility",
+            "Chat visibility",
+            new String[] {"--chat-visibility"},
+            "What type of chat messages the client will receive",
+            ChatVisibility.values(),
+            ChatVisibility.FULL,
+            ComboProperty::capitalizeEnum);
+    public static final BooleanProperty USE_CHAT_COLORS =
+        BUILDER.ofBoolean(
+            "use-chat-colors",
+            "Use chat colors",
+            new String[] {"--use-chat-colors"},
+            "Whether the client will use chat colors",
+            true);
+    public static final BooleanProperty CAPE_ENABLED =
+        BUILDER.ofBoolean(
+            "cape-enabled",
+            "Cape enabled",
+            new String[] {"--cape-enabled"},
+            "Whether to display the bots cape if it has one",
+            true);
+    public static final BooleanProperty JACKET_ENABLED =
+        BUILDER.ofBoolean(
+            "jacket-enabled",
+            "Jacket enabled",
+            new String[] {"--jacket-enabled"},
+            "Whether to render the jacket overlay skin layer",
+            true);
+    public static final BooleanProperty LEFT_SLEEVE_ENABLED =
+        BUILDER.ofBoolean(
+            "left-sleeve-enabled",
+            "Left sleeve enabled",
+            new String[] {"--left-sleeve-enabled"},
+            "Whether to render the left overlay skin layer",
+            true);
+    public static final BooleanProperty RIGHT_SLEEVE_ENABLED =
+        BUILDER.ofBoolean(
+            "right-sleeve-enabled",
+            "Right sleeve enabled",
+            new String[] {"--right-sleeve-enabled"},
+            "Whether to render the right overlay skin layer",
+            true);
+    public static final BooleanProperty LEFT_PANTS_LEG_ENABLED =
+        BUILDER.ofBoolean(
+            "left-pants-leg-enabled",
+            "Left pants leg enabled",
+            new String[] {"--left-pants-leg-enabled"},
+            "Whether to render the left pants leg overlay skin layer",
+            true);
+    public static final BooleanProperty RIGHT_PANTS_LEG_ENABLED =
+        BUILDER.ofBoolean(
+            "right-pants-leg-enabled",
+            "Right pants leg enabled",
+            new String[] {"--right-pants-leg-enabled"},
+            "Whether to render the right pants leg overlay skin layer",
+            true);
+    public static final BooleanProperty HAT_ENABLED =
+        BUILDER.ofBoolean(
+            "hat-enabled",
+            "Hat enabled",
+            new String[] {"--hat-enabled"},
+            "Whether to render the hat overlay skin layer",
+            true);
+    public static final ComboProperty HAND_PREFERENCE =
+        BUILDER.ofEnumMapped(
+            "hand-preference",
+            "Hand preference",
+            new String[] {"--hand-preference"},
+            "What hand the client prefers to use for items",
+            HandPreference.values(),
+            HandPreference.RIGHT_HAND,
+            ComboProperty::capitalizeEnum);
+    public static final BooleanProperty TEXT_FILTERING_ENABLED =
+        BUILDER.ofBoolean(
+            "text-filtering-enabled",
+            "Text filtering enabled",
+            new String[] {"--text-filtering-enabled"},
+            "Whether to filter chat messages from the server",
+            true);
+    public static final BooleanProperty ALLOWS_LISTING =
+        BUILDER.ofBoolean(
+            "allows-listing",
+            "Allows listing",
+            new String[] {"--allows-listing"},
+            "Whether the client wants their username to be shown in the server list",
+            true);
   }
 }

@@ -47,7 +47,9 @@ public class AccountPanel extends NavigationItem {
     var accountSettingsPanel = new JPanel();
     accountSettingsPanel.setLayout(new GridBagLayout());
 
-    GeneratedPanel.addComponents(accountSettingsPanel, cardsContainer.getByNamespace(BuiltinSettingsConstants.ACCOUNT_SETTINGS_ID),
+    GeneratedPanel.addComponents(
+        accountSettingsPanel,
+        cardsContainer.getByNamespace(BuiltinSettingsConstants.ACCOUNT_SETTINGS_ID),
         guiManager.settingsManager());
 
     GBC.create(this).grid(0, 0).fill(GBC.HORIZONTAL).weightx(1).add(accountSettingsPanel);
@@ -69,81 +71,87 @@ public class AccountPanel extends NavigationItem {
     accountListPanel.setLayout(new GridLayout(0, 1));
 
     var columnNames = new String[] {"Username", "Type", "Enabled"};
-    var model = new DefaultTableModel(columnNames, 0) {
-      final Class<?>[] columnTypes = new Class<?>[] {String.class, AuthType.class, Boolean.class};
+    var model =
+        new DefaultTableModel(columnNames, 0) {
+          final Class<?>[] columnTypes =
+              new Class<?>[] {String.class, AuthType.class, Boolean.class};
 
-      @Override
-      public Class<?> getColumnClass(int columnIndex) {
-        return columnTypes[columnIndex];
-      }
-    };
+          @Override
+          public Class<?> getColumnClass(int columnIndex) {
+            return columnTypes[columnIndex];
+          }
+        };
 
     var accountList = new JTable(model);
 
     var accountRegistry = guiManager.settingsManager().accountRegistry();
-    accountRegistry.addLoadHook(() -> {
-      model.getDataVector().removeAllElements();
+    accountRegistry.addLoadHook(
+        () -> {
+          model.getDataVector().removeAllElements();
 
-      var accounts = accountRegistry.getAccounts();
-      var registrySize = accounts.size();
-      var dataVector = new Object[registrySize][];
-      for (var i = 0; i < registrySize; i++) {
-        var account = accounts.get(i);
+          var accounts = accountRegistry.getAccounts();
+          var registrySize = accounts.size();
+          var dataVector = new Object[registrySize][];
+          for (var i = 0; i < registrySize; i++) {
+            var account = accounts.get(i);
 
-        dataVector[i] = new Object[] {
-            account.username(),
-            account.authType(),
-            account.enabled()
-        };
-      }
-
-      model.setDataVector(dataVector, columnNames);
-
-      accountList.getColumnModel().getColumn(1)
-          .setCellEditor(new DefaultCellEditor(new JEnumComboBox<>(AuthType.class)));
-
-      model.fireTableDataChanged();
-    });
-
-    accountList.addPropertyChangeListener(evt -> {
-      if ("tableCellEditor".equals(evt.getPropertyName()) && !accountList.isEditing()) {
-        var accounts = new ArrayList<MinecraftAccount>();
-
-        for (var i = 0; i < accountList.getRowCount(); i++) {
-          var row = new Object[accountList.getColumnCount()];
-          for (var j = 0; j < accountList.getColumnCount(); j++) {
-            row[j] = accountList.getValueAt(i, j);
+            dataVector[i] =
+                new Object[] {account.username(), account.authType(), account.enabled()};
           }
 
-          var username = (String) row[0];
-          var authType = (AuthType) row[1];
-          var enabled = (boolean) row[2];
+          model.setDataVector(dataVector, columnNames);
 
-          var account = accountRegistry.getAccount(username, authType);
+          accountList
+              .getColumnModel()
+              .getColumn(1)
+              .setCellEditor(new DefaultCellEditor(new JEnumComboBox<>(AuthType.class)));
 
-          accounts.add(new MinecraftAccount(authType, username, account.accountData(), enabled));
-        }
+          model.fireTableDataChanged();
+        });
 
-        accountRegistry.setAccounts(accounts);
-      }
-    });
+    accountList.addPropertyChangeListener(
+        evt -> {
+          if ("tableCellEditor".equals(evt.getPropertyName()) && !accountList.isEditing()) {
+            var accounts = new ArrayList<MinecraftAccount>();
+
+            for (var i = 0; i < accountList.getRowCount(); i++) {
+              var row = new Object[accountList.getColumnCount()];
+              for (var j = 0; j < accountList.getColumnCount(); j++) {
+                row[j] = accountList.getValueAt(i, j);
+              }
+
+              var username = (String) row[0];
+              var authType = (AuthType) row[1];
+              var enabled = (boolean) row[2];
+
+              var account = accountRegistry.getAccount(username, authType);
+
+              accounts.add(
+                  new MinecraftAccount(authType, username, account.accountData(), enabled));
+            }
+
+            accountRegistry.setAccounts(accounts);
+          }
+        });
 
     var scrollPane = new JScrollPane(accountList);
 
     GBC.create(this).grid(0, 2).insets(insets).fill(GBC.BOTH).weight(1, 1).add(scrollPane);
   }
 
-  private static JButton createAccountLoadButton(GUIManager guiManager, GUIFrame parent, AuthType type) {
+  private static JButton createAccountLoadButton(
+      GUIManager guiManager, GUIFrame parent, AuthType type) {
     var button = new JButton(SwingTextUtils.htmlCenterText(String.format("Add %s accounts", type)));
 
-    button.addActionListener(e -> new ImportTextDialog(
-        SFPathConstants.WORKING_DIRECTORY,
-        String.format("Add %s accounts", type),
-        String.format("%s list file", type),
-        guiManager,
-        parent,
-        text -> guiManager.settingsManager().accountRegistry().loadFromString(text, type)
-    ));
+    button.addActionListener(
+        e ->
+            new ImportTextDialog(
+                SFPathConstants.WORKING_DIRECTORY,
+                String.format("Add %s accounts", type),
+                String.format("%s list file", type),
+                guiManager,
+                parent,
+                text -> guiManager.settingsManager().accountRegistry().loadFromString(text, type)));
 
     return button;
   }

@@ -20,8 +20,7 @@ package net.pistonmaster.soulfire.server.util;
 import java.util.UUID;
 
 public class UUIDHelper {
-  private UUIDHelper() {
-  }
+  private UUIDHelper() {}
 
   public static UUID convertToDashed(String noDashes) {
     var idBuff = new StringBuilder(noDashes);

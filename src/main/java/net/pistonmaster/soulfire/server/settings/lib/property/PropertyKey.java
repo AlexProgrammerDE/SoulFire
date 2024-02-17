@@ -17,5 +17,4 @@
  */
 package net.pistonmaster.soulfire.server.settings.lib.property;
 
-public record PropertyKey(String namespace, String key) {
-}
+public record PropertyKey(String namespace, String key) {}

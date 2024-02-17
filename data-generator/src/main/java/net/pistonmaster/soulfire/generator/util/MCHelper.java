@@ -24,6 +24,8 @@ import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.NotNull;
 
 public class MCHelper {
+  private MCHelper() {}
+
   public static ServerLevel getLevel() {
     return getServer().overworld();
   }
@@ -40,8 +42,5 @@ public class MCHelper {
         return MCHelper.getLevel();
       }
     };
-  }
-
-  private MCHelper() {
   }
 }

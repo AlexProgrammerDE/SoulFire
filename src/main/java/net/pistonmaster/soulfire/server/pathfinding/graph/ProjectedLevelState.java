@@ -26,9 +26,8 @@ import net.pistonmaster.soulfire.server.protocol.bot.block.BlockAccessor;
 import net.pistonmaster.soulfire.server.util.Vec2ObjectOpenHashMap;
 
 /**
- * An immutable representation of the world state.
- * This takes a world state and projects changes onto it.
- * This way we calculate the way we can do actions after a block was broken/placed.
+ * An immutable representation of the world state. This takes a world state and projects changes
+ * onto it. This way we calculate the way we can do actions after a block was broken/placed.
  */
 @RequiredArgsConstructor
 public class ProjectedLevelState {
@@ -38,10 +37,7 @@ public class ProjectedLevelState {
   private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blockChanges;
 
   public ProjectedLevelState(BlockAccessor accessor) {
-    this(
-        accessor,
-        new Vec2ObjectOpenHashMap<>()
-    );
+    this(accessor, new Vec2ObjectOpenHashMap<>());
   }
 
   public ProjectedLevelState withChangeToSolidBlock(SFVec3i position) {
@@ -60,9 +56,8 @@ public class ProjectedLevelState {
 
   public ProjectedLevelState withChanges(SFVec3i[] air, SFVec3i solid) {
     var blockChanges = this.blockChanges.clone();
-    blockChanges.ensureCapacity(blockChanges.size()
-        + (air != null ? air.length : 0)
-        + (solid != null ? 1 : 0));
+    blockChanges.ensureCapacity(
+        blockChanges.size() + (air != null ? air.length : 0) + (solid != null ? 1 : 0));
 
     if (air != null) {
       for (var position : air) {

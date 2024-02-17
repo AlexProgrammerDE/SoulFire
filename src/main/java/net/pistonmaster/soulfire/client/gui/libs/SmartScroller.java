@@ -26,24 +26,17 @@ import javax.swing.text.DefaultCaret;
 import javax.swing.text.JTextComponent;
 
 /**
- * The SmartScroller will attempt to keep the viewport positioned based on
- * the users interaction with the scrollbar. The normal behaviour is to keep
- * the viewport positioned to see new data as it is dynamically added.
- * <br/>
- * Assuming vertical scrolling and data is added to the bottom:
- * <br/>
- * - when the viewport is at the bottom and new data is added,
- * then automatically scroll the viewport to the bottom
- * - when the viewport is not at the bottom and new data is added,
- * then do nothing with the viewport
- * <br/>
- * Assuming vertical scrolling and data is added to the top:
- * <br/>
- * - when the viewport is at the top and new data is added,
- * then do nothing with the viewport
- * - when the viewport is not at the top and new data is added, then adjust
- * the viewport to the relative position it was at before the data was added
- * <br/>
+ * The SmartScroller will attempt to keep the viewport positioned based on the users interaction
+ * with the scrollbar. The normal behaviour is to keep the viewport positioned to see new data as it
+ * is dynamically added. <br>
+ * Assuming vertical scrolling and data is added to the bottom: <br>
+ * - when the viewport is at the bottom and new data is added, then automatically scroll the
+ * viewport to the bottom - when the viewport is not at the bottom and new data is added, then do
+ * nothing with the viewport <br>
+ * Assuming vertical scrolling and data is added to the top: <br>
+ * - when the viewport is at the top and new data is added, then do nothing with the viewport - when
+ * the viewport is not at the top and new data is added, then adjust the viewport to the relative
+ * position it was at before the data was added <br>
  * Similar logic would apply for horizontal scrolling.
  */
 public class SmartScroller implements AdjustmentListener {
@@ -61,8 +54,7 @@ public class SmartScroller implements AdjustmentListener {
   private int previousMaximum = -1;
 
   /**
-   * Convenience constructor.
-   * Scroll direction is VERTICAL and viewport position is at the END.
+   * Convenience constructor. Scroll direction is VERTICAL and viewport position is at the END.
    *
    * @param scrollPane the scroll pane to monitor
    */
@@ -71,10 +63,9 @@ public class SmartScroller implements AdjustmentListener {
   }
 
   /**
-   * Convenience constructor.
-   * Scroll direction is VERTICAL.
+   * Convenience constructor. Scroll direction is VERTICAL.
    *
-   * @param scrollPane       the scroll pane to monitor
+   * @param scrollPane the scroll pane to monitor
    * @param viewportPosition valid values are START and END
    */
   public SmartScroller(JScrollPane scrollPane, int viewportPosition) {
@@ -84,21 +75,18 @@ public class SmartScroller implements AdjustmentListener {
   /**
    * Specify how the SmartScroller will function.
    *
-   * @param scrollPane       the scroll pane to monitor
-   * @param scrollDirection  indicates which JScrollBar to monitor.
-   *                         Valid values are HORIZONTAL and VERTICAL.
-   * @param viewportPosition indicates where the viewport will normally be
-   *                         positioned as data is added.
-   *                         Valid values are START and END
+   * @param scrollPane the scroll pane to monitor
+   * @param scrollDirection indicates which JScrollBar to monitor. Valid values are HORIZONTAL and
+   *     VERTICAL.
+   * @param viewportPosition indicates where the viewport will normally be positioned as data is
+   *     added. Valid values are START and END
    */
   public SmartScroller(JScrollPane scrollPane, int scrollDirection, int viewportPosition) {
-    if (scrollDirection != HORIZONTAL
-        && scrollDirection != VERTICAL) {
+    if (scrollDirection != HORIZONTAL && scrollDirection != VERTICAL) {
       throw new IllegalArgumentException("invalid scroll direction specified");
     }
 
-    if (viewportPosition != START
-        && viewportPosition != END) {
+    if (viewportPosition != START && viewportPosition != END) {
       throw new IllegalArgumentException("invalid viewport position specified");
     }
 

@@ -21,8 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class ResourceHelper {
-  private ResourceHelper() {
-  }
+  private ResourceHelper() {}
 
   public static String getResource(String path) {
     try {

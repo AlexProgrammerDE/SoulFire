@@ -73,7 +73,8 @@ public final class GapJumpAction implements WorldAction {
 
     var yawDifference = Math.abs(MathHelper.wrapDegrees(newYaw - previousYaw));
 
-    // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
+    // We should only set the yaw once to the server to prevent the bot looking weird due to
+    // inaccuracy
     if (!didLook) {
       didLook = true;
     } else if (yawDifference > 5 || lockYaw) {

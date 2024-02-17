@@ -36,9 +36,11 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
   private final SoulFireServer soulFireServer;
 
   @Override
-  public void startAttack(AttackStartRequest request, StreamObserver<AttackStartResponse> responseObserver) {
-    var settingsHolder = SettingsHolder.createSettingsHolder(ProfileDataStructure.deserialize(request.getSettings()),
-        null, null, null);
+  public void startAttack(
+      AttackStartRequest request, StreamObserver<AttackStartResponse> responseObserver) {
+    var settingsHolder =
+        SettingsHolder.createSettingsHolder(
+            ProfileDataStructure.deserialize(request.getSettings()), null, null, null);
 
     var id = soulFireServer.startAttack(settingsHolder);
     responseObserver.onNext(AttackStartResponse.newBuilder().setId(id).build());
@@ -46,17 +48,22 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
   }
 
   @Override
-  public void toggleAttackState(AttackStateToggleRequest request, StreamObserver<AttackStateToggleResponse> responseObserver) {
-    soulFireServer.toggleAttackState(request.getId(), switch (request.getNewState()) {
-      case PAUSE -> true;
-      case RESUME, UNRECOGNIZED -> false;
-    });
+  public void toggleAttackState(
+      AttackStateToggleRequest request,
+      StreamObserver<AttackStateToggleResponse> responseObserver) {
+    soulFireServer.toggleAttackState(
+        request.getId(),
+        switch (request.getNewState()) {
+          case PAUSE -> true;
+          case RESUME, UNRECOGNIZED -> false;
+        });
     responseObserver.onNext(AttackStateToggleResponse.newBuilder().build());
     responseObserver.onCompleted();
   }
 
   @Override
-  public void stopAttack(AttackStopRequest request, StreamObserver<AttackStopResponse> responseObserver) {
+  public void stopAttack(
+      AttackStopRequest request, StreamObserver<AttackStopResponse> responseObserver) {
     soulFireServer.stopAttack(request.getId());
     responseObserver.onNext(AttackStopResponse.newBuilder().build());
     responseObserver.onCompleted();

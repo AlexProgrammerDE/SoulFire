@@ -77,7 +77,8 @@ public final class MovementAction implements WorldAction {
 
     var yawDifference = Math.abs(MathHelper.wrapDegrees(newYaw - previousYaw));
 
-    // We should only set the yaw once to the server to prevent the bot looking weird due to inaccuracy
+    // We should only set the yaw once to the server to prevent the bot looking weird due to
+    // inaccuracy
     if (!didLook) {
       didLook = true;
     } else if (yawDifference > 5 || lockYaw) {
@@ -88,7 +89,8 @@ public final class MovementAction implements WorldAction {
     clientEntity.controlState().forward(true);
 
     var botPosition = clientEntity.pos();
-    if (targetMiddleBlock.getY() - MovementConstants.STEP_HEIGHT > botPosition.getY() && shouldJump()) {
+    if (targetMiddleBlock.getY() - MovementConstants.STEP_HEIGHT > botPosition.getY()
+        && shouldJump()) {
       clientEntity.controlState().jumping(true);
     }
   }

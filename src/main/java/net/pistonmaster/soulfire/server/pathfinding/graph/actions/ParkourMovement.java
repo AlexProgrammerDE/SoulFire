@@ -76,11 +76,13 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   public GraphInstructions getInstructions(BotEntityState previousEntityState) {
     var absoluteTargetFeetBlock = previousEntityState.blockPosition().add(targetFeetBlock);
 
-    return new GraphInstructions(new BotEntityState(
-        absoluteTargetFeetBlock,
-        previousEntityState.levelState(),
-        previousEntityState.inventory()
-    ), Costs.ONE_GAP_JUMP, List.of(new GapJumpAction(absoluteTargetFeetBlock)));
+    return new GraphInstructions(
+        new BotEntityState(
+            absoluteTargetFeetBlock,
+            previousEntityState.levelState(),
+            previousEntityState.inventory()),
+        Costs.ONE_GAP_JUMP,
+        List.of(new GapJumpAction(absoluteTargetFeetBlock)));
   }
 
   @Override

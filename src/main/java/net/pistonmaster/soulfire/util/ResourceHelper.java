@@ -22,14 +22,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class ResourceHelper {
+  private ResourceHelper() {}
+
   public static String getResource(String path) {
     return new String(getResourceBytes(path), StandardCharsets.UTF_8);
   }
 
   public static byte[] getResourceBytes(String path) {
     try {
-      return Objects.requireNonNull(ResourceHelper.class.getResourceAsStream(path))
-          .readAllBytes();
+      return Objects.requireNonNull(ResourceHelper.class.getResourceAsStream(path)).readAllBytes();
     } catch (Exception e) {
       throw new RuntimeException("Failed to get file", e);
     }
@@ -41,8 +42,5 @@ public class ResourceHelper {
     } catch (Exception e) {
       throw new RuntimeException("Failed to get file", e);
     }
-  }
-
-  private ResourceHelper() {
   }
 }

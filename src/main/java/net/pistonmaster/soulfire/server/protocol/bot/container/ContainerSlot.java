@@ -47,8 +47,7 @@ public final class ContainerSlot {
       return false;
     }
     var that = (ContainerSlot) obj;
-    return this.slot == that.slot
-        && Objects.equals(this.item, that.item);
+    return this.slot == that.slot && Objects.equals(this.item, that.item);
   }
 
   @Override
@@ -58,8 +57,6 @@ public final class ContainerSlot {
 
   @Override
   public String toString() {
-    return "ContainerSlot["
-        + "slot=" + slot + ", "
-        + "item=" + item + ']';
+    return "ContainerSlot[" + "slot=" + slot + ", " + "item=" + item + ']';
   }
 }

@@ -28,8 +28,7 @@ import net.pistonmaster.soulfire.SoulFireBootstrap;
 public class ShutdownManager {
   private final Runnable shutdownHook;
   private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
-  @Getter
-  private boolean shutdown = false;
+  @Getter private boolean shutdown = false;
 
   /**
    * Shuts down the software if it is running.

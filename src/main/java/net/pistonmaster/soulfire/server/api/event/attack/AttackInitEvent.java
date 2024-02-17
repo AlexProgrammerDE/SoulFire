@@ -26,5 +26,4 @@ import net.pistonmaster.soulfire.server.api.event.SoulFireGlobalEvent;
  *
  * @param attackManager The attack manager instance.
  */
-public record AttackInitEvent(AttackManager attackManager) implements SoulFireGlobalEvent {
-}
+public record AttackInitEvent(AttackManager attackManager) implements SoulFireGlobalEvent {}

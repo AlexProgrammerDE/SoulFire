@@ -67,13 +67,15 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       var startScore = scorer.computeScore(graph, from);
       log.debug("Start score (Usually distance): {}", startScore);
 
-      var start = new MinecraftRouteNode(
-          from,
-          null,
-          requiresRepositioning ? List.of(new MovementAction(from.blockPosition(), false)) : List.of(),
-          0,
-          startScore
-      );
+      var start =
+          new MinecraftRouteNode(
+              from,
+              null,
+              requiresRepositioning
+                  ? List.of(new MovementAction(from.blockPosition(), false))
+                  : List.of(),
+              0,
+              startScore);
       routeIndex.put(from.blockPosition(), start);
       openSet.enqueue(start);
     }
@@ -90,60 +92,74 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         return getActionTrace(current);
       }
 
-      Consumer<GraphInstructions> callback = instructions -> {
-        var actionCost = instructions.actionCost();
-        var worldActions = instructions.actions();
-        var actionTargetState = instructions.targetState();
-        routeIndex.compute(actionTargetState.blockPosition(), (k, v) -> {
-          // Calculate new distance from start to this connection,
-          // Get distance from the current element
-          // and add the distance from the current element to the next element
-          var newSourceCost = current.sourceCost() + actionCost;
-          var newTotalRouteScore = newSourceCost + scorer.computeScore(graph, actionTargetState);
+      Consumer<GraphInstructions> callback =
+          instructions -> {
+            var actionCost = instructions.actionCost();
+            var worldActions = instructions.actions();
+            var actionTargetState = instructions.targetState();
+            routeIndex.compute(
+                actionTargetState.blockPosition(),
+                (k, v) -> {
+                  // Calculate new distance from start to this connection,
+                  // Get distance from the current element
+                  // and add the distance from the current element to the next element
+                  var newSourceCost = current.sourceCost() + actionCost;
+                  var newTotalRouteScore =
+                      newSourceCost + scorer.computeScore(graph, actionTargetState);
 
-          // The first time we see this node
-          if (v == null) {
-            var node = new MinecraftRouteNode(actionTargetState, current, worldActions, newSourceCost, newTotalRouteScore);
-            log.debug("Found a new node: {}", actionTargetState.blockPosition());
-            openSet.enqueue(node);
+                  // The first time we see this node
+                  if (v == null) {
+                    var node =
+                        new MinecraftRouteNode(
+                            actionTargetState,
+                            current,
+                            worldActions,
+                            newSourceCost,
+                            newTotalRouteScore);
+                    log.debug("Found a new node: {}", actionTargetState.blockPosition());
+                    openSet.enqueue(node);
 
-            return node;
-          }
+                    return node;
+                  }
 
-          // If we found a better route to this node, update it
-          if (newSourceCost < v.sourceCost()) {
-            v.previous(current);
-            v.previousActions(worldActions);
-            v.sourceCost(newSourceCost);
-            v.totalRouteScore(newTotalRouteScore);
+                  // If we found a better route to this node, update it
+                  if (newSourceCost < v.sourceCost()) {
+                    v.previous(current);
+                    v.previousActions(worldActions);
+                    v.sourceCost(newSourceCost);
+                    v.totalRouteScore(newTotalRouteScore);
 
-            log.debug("Found a better route to node: {}", actionTargetState.blockPosition());
-            openSet.enqueue(v);
-          }
+                    log.debug(
+                        "Found a better route to node: {}", actionTargetState.blockPosition());
+                    openSet.enqueue(v);
+                  }
 
-          return v;
-        });
-      };
+                  return v;
+                });
+          };
 
       try {
         graph.insertActions(current.entityState(), callback, routeIndex::containsKey);
       } catch (OutOfLevelException e) {
         log.debug("Found a node out of the level: {}", current.entityState().blockPosition());
         stopwatch.stop();
-        log.info("Took {}ms to find route to reach the edge of view distance", stopwatch.elapsed().toMillis());
+        log.info(
+            "Took {}ms to find route to reach the edge of view distance",
+            stopwatch.elapsed().toMillis());
 
         // The current node is not always the best node. We need to find the best node.
         var bestNode = findBestNode(routeIndex.values());
 
         // This is the best node we found so far
         // We will add a recalculating action and return the best route
-        var recalculateTrace = getActionTrace(new MinecraftRouteNode(
-            bestNode.entityState(),
-            bestNode,
-            List.of(new RecalculatePathAction()),
-            bestNode.sourceCost(),
-            bestNode.totalRouteScore()
-        ));
+        var recalculateTrace =
+            getActionTrace(
+                new MinecraftRouteNode(
+                    bestNode.entityState(),
+                    bestNode,
+                    List.of(new RecalculatePathAction()),
+                    bestNode.sourceCost(),
+                    bestNode.totalRouteScore()));
 
         if (recalculateTrace.size() == (requiresRepositioning ? 2 : 1)) {
           throw new AlreadyClosestException();

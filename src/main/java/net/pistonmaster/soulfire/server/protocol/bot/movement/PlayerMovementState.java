@@ -69,23 +69,16 @@ public class PlayerMovementState {
   public boolean flying;
 
   public void updateData() {
-    pos = new MutableVector3d(
-        entity.x(),
-        entity.y(),
-        entity.z()
-    );
+    pos = new MutableVector3d(entity.x(), entity.y(), entity.z());
 
-    vel = new MutableVector3d(
-        entity.motionX(),
-        entity.motionY(),
-        entity.motionZ()
-    );
+    vel = new MutableVector3d(entity.motionX(), entity.motionY(), entity.motionZ());
 
     var effectState = entity.effectState();
     jumpBoost = effectState.getEffect(Effect.JUMP_BOOST).map(EffectData::amplifier).orElse(0);
     speed = effectState.getEffect(Effect.SPEED).map(EffectData::amplifier).orElse(0);
     slowness = effectState.getEffect(Effect.SLOWNESS).map(EffectData::amplifier).orElse(0);
-    dolphinsGrace = effectState.getEffect(Effect.DOLPHINS_GRACE).map(EffectData::amplifier).orElse(0);
+    dolphinsGrace =
+        effectState.getEffect(Effect.DOLPHINS_GRACE).map(EffectData::amplifier).orElse(0);
     slowFalling = effectState.getEffect(Effect.SLOW_FALLING).map(EffectData::amplifier).orElse(0);
     levitation = effectState.getEffect(Effect.LEVITATION).map(EffectData::amplifier).orElse(0);
 

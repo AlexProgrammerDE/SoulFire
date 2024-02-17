@@ -33,20 +33,27 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 
-public final class SFTheAlteningAuthService implements MCAuthService<SFTheAlteningAuthService.TheAlteningAuthData> {
+public final class SFTheAlteningAuthService
+    implements MCAuthService<SFTheAlteningAuthService.TheAlteningAuthData> {
   @SuppressWarnings("HttpUrlsUsage") // The Altening doesn't support encrypted HTTPS
-  private static final URI AUTHENTICATE_ENDPOINT = URI.create("http://authserver.thealtening.com/authenticate");
-  private static final String PASSWORD = "SoulFireIsCool"; // Password doesn't matter for The Altening
+  private static final URI AUTHENTICATE_ENDPOINT =
+      URI.create("http://authserver.thealtening.com/authenticate");
+
+  private static final String PASSWORD =
+      "SoulFireIsCool"; // Password doesn't matter for The Altening
   private final Gson gson = new Gson();
 
   @Override
   public MinecraftAccount login(TheAlteningAuthData data, SWProxy proxyData) throws IOException {
     try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-      var request = new AuthenticationRequest(data.altToken, PASSWORD, UUID.randomUUID().toString());
+      var request =
+          new AuthenticationRequest(data.altToken, PASSWORD, UUID.randomUUID().toString());
       var httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
       httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
-      var response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
-          AuthenticateRefreshResponse.class);
+      var response =
+          gson.fromJson(
+              EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
+              AuthenticateRefreshResponse.class);
 
       return new MinecraftAccount(
           AuthType.THE_ALTENING,
@@ -54,10 +61,8 @@ public final class SFTheAlteningAuthService implements MCAuthService<SFTheAlteni
           new OnlineJavaData(
               UUIDHelper.convertToDashed(response.selectedProfile().id()),
               response.accessToken(),
-              -1
-          ),
-          true
-      );
+              -1),
+          true);
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -68,11 +73,9 @@ public final class SFTheAlteningAuthService implements MCAuthService<SFTheAlteni
     return new TheAlteningAuthData(data);
   }
 
-  public record TheAlteningAuthData(String altToken) {
-  }
+  public record TheAlteningAuthData(String altToken) {}
 
-  private record Agent(String name, int version) {
-  }
+  private record Agent(String name, int version) {}
 
   @SuppressWarnings("unused") // Used by GSON
   @RequiredArgsConstructor

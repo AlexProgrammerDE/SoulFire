@@ -36,7 +36,10 @@ import java.util.stream.Collectors;
 
 public class FileSystemUtil {
 
-  public static Map<Path, byte[]> getFilesInDirectory(final String assetPath) throws IOException, URISyntaxException {
+  private FileSystemUtil() {}
+
+  public static Map<Path, byte[]> getFilesInDirectory(final String assetPath)
+      throws IOException, URISyntaxException {
     var resource = FileSystemUtil.class.getResource(assetPath);
     if (resource == null) {
       return Collections.emptyMap();
@@ -46,13 +49,15 @@ public class FileSystemUtil {
     if (uri.getScheme().equals("file")) {
       return getFilesInPath(Paths.get(uri));
     } else if (uri.getScheme().equals("jar")) {
-      return runInFileSystem(uri, fileSystem -> {
-        try {
-          return getFilesInPath(fileSystem.getPath(assetPath));
-        } catch (IOException e) {
-          throw new UncheckedIOException(e);
-        }
-      });
+      return runInFileSystem(
+          uri,
+          fileSystem -> {
+            try {
+              return getFilesInPath(fileSystem.getPath(assetPath));
+            } catch (IOException e) {
+              throw new UncheckedIOException(e);
+            }
+          });
     } else {
       throw new IllegalArgumentException("Unsupported URI scheme: " + uri.getScheme());
     }
@@ -63,15 +68,20 @@ public class FileSystemUtil {
       return stream
           .filter(Files::isRegularFile)
           .sorted(Comparator.comparing(Path::toString))
-          .collect(Collectors.toMap(f -> f, f -> {
-            try {
-              return Files.readAllBytes(f);
-            } catch (IOException e) {
-              throw new UncheckedIOException(e);
-            }
-          }, (u, v) -> {
-            throw new IllegalStateException("Duplicate key");
-          }, LinkedHashMap::new));
+          .collect(
+              Collectors.toMap(
+                  f -> f,
+                  f -> {
+                    try {
+                      return Files.readAllBytes(f);
+                    } catch (IOException e) {
+                      throw new UncheckedIOException(e);
+                    }
+                  },
+                  (u, v) -> {
+                    throw new IllegalStateException("Duplicate key");
+                  },
+                  LinkedHashMap::new));
     }
   }
 
@@ -86,8 +96,4 @@ public class FileSystemUtil {
       }
     }
   }
-
-  private FileSystemUtil() {
-  }
-
 }

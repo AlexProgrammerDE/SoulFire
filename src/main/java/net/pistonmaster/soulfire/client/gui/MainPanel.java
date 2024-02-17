@@ -44,10 +44,8 @@ public class MainPanel extends JPanel {
     var logPanel = injector.getSingleton(LogPanel.class);
     logPanel.setMinimumSize(new Dimension(600, 0));
 
-    cardsContainer.setPreferredSize(new Dimension(600,
-        cardsContainer.getPreferredSize().height));
-    logPanel.setPreferredSize(new Dimension(600,
-        logPanel.getPreferredSize().height));
+    cardsContainer.setPreferredSize(new Dimension(600, cardsContainer.getPreferredSize().height));
+    logPanel.setPreferredSize(new Dimension(600, logPanel.getPreferredSize().height));
 
     var splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, cardsContainer, logPanel);
 

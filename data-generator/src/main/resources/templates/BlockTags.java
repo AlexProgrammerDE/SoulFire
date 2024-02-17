@@ -21,6 +21,5 @@ package net.pistonmaster.soulfire.data;
 public class BlockTags {
   // VALUES REPLACE
 
-  private BlockTags() {
-  }
+  private BlockTags() {}
 }

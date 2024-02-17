@@ -22,18 +22,17 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class VersionComparator {
-  private VersionComparator() {
-  }
+  private VersionComparator() {}
 
   public static boolean isNewer(String currentVersion, String checkVersion) {
     currentVersion = currentVersion.replace("-SNAPSHOT", "");
     checkVersion = checkVersion.replace("-SNAPSHOT", "");
 
     try {
-      var currentVersionData = Arrays.stream(currentVersion.split("\\."))
-          .mapToInt(Integer::parseInt).toArray();
-      var checkVersionData = Arrays.stream(checkVersion.split("\\."))
-          .mapToInt(Integer::parseInt).toArray();
+      var currentVersionData =
+          Arrays.stream(currentVersion.split("\\.")).mapToInt(Integer::parseInt).toArray();
+      var checkVersionData =
+          Arrays.stream(checkVersion.split("\\.")).mapToInt(Integer::parseInt).toArray();
 
       var i = 0;
       for (var version : checkVersionData) {

@@ -25,12 +25,10 @@ import java.util.SortedSet;
 
 public class SFViaInjector implements ViaInjector {
   @Override
-  public void inject() {
-  }
+  public void inject() {}
 
   @Override
-  public void uninject() {
-  }
+  public void uninject() {}
 
   @Override
   public ProtocolVersion getServerProtocolVersion() {

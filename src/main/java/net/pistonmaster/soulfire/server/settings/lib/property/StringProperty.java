@@ -24,6 +24,5 @@ public record StringProperty(
     String[] cliFlags,
     String description,
     String defaultValue,
-    boolean secret
-) implements SingleProperty {
-}
+    boolean secret)
+    implements SingleProperty {}

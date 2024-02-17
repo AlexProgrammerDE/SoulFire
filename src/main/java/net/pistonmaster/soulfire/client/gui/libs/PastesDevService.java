@@ -34,8 +34,7 @@ import org.apache.http.util.EntityUtils;
 public class PastesDevService {
   private static final Gson gson = new Gson();
 
-  private PastesDevService() {
-  }
+  private PastesDevService() {}
 
   private static CloseableHttpClient createHttpClient() {
     var headers = new ArrayList<Header>();
@@ -52,7 +51,8 @@ public class PastesDevService {
       httpPost.setEntity(new StringEntity(text, ContentType.APPLICATION_JSON));
       try (var response = httpClient.execute(httpPost)) {
         if (response.getStatusLine().getStatusCode() != 201) {
-          throw new IOException("Failed to upload paste: " + response.getStatusLine().getStatusCode());
+          throw new IOException(
+              "Failed to upload paste: " + response.getStatusLine().getStatusCode());
         }
 
         var responseText = EntityUtils.toString(response.getEntity());
@@ -64,6 +64,5 @@ public class PastesDevService {
     }
   }
 
-  private record BytebinResponse(String key) {
-  }
+  private record BytebinResponse(String key) {}
 }

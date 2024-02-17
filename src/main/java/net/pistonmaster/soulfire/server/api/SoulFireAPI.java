@@ -30,20 +30,21 @@ import net.pistonmaster.soulfire.server.api.event.EventUtil;
 import net.pistonmaster.soulfire.server.api.event.SoulFireGlobalEvent;
 
 public class SoulFireAPI {
-  private static final LambdaManager EVENT_BUS = LambdaManager.basic(new ASMGenerator())
-      .setExceptionHandler(EventExceptionHandler.INSTANCE)
-      .setEventFilter((c, h) -> {
-        if (SoulFireGlobalEvent.class.isAssignableFrom(c)) {
-          return true;
-        } else {
-          throw new IllegalStateException("This event handler only accepts global events");
-        }
-      });
+  private static final LambdaManager EVENT_BUS =
+      LambdaManager.basic(new ASMGenerator())
+          .setExceptionHandler(EventExceptionHandler.INSTANCE)
+          .setEventFilter(
+              (c, h) -> {
+                if (SoulFireGlobalEvent.class.isAssignableFrom(c)) {
+                  return true;
+                } else {
+                  throw new IllegalStateException("This event handler only accepts global events");
+                }
+              });
   private static final List<ServerExtension> SERVER_EXTENSIONS = new ArrayList<>();
   private static SoulFireServer soulFireServer;
 
-  private SoulFireAPI() {
-  }
+  private SoulFireAPI() {}
 
   /**
    * Get the current SoulFire instance for access to internals.
@@ -72,7 +73,8 @@ public class SoulFireAPI {
     EVENT_BUS.call(event);
   }
 
-  public static <T extends SoulFireGlobalEvent> void registerListener(Class<T> clazz, Consumer<? super T> subscriber) {
+  public static <T extends SoulFireGlobalEvent> void registerListener(
+      Class<T> clazz, Consumer<? super T> subscriber) {
     EventUtil.runAndAssertChanged(EVENT_BUS, () -> EVENT_BUS.registerConsumer(subscriber, clazz));
   }
 

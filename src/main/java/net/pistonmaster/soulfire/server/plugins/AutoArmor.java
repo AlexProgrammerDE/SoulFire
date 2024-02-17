@@ -39,21 +39,30 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.util.TimeUtil;
 
 public class AutoArmor implements InternalExtension {
-  private static void putOn(InventoryManager inventoryManager, PlayerInventoryContainer inventory, ContainerSlot targetSlot, ArmorType armorType) {
-    var bestItem = Arrays.stream(inventory.storage()).filter(s -> {
-      if (s.item() == null) {
-        return false;
-      }
+  private static void putOn(
+      InventoryManager inventoryManager,
+      PlayerInventoryContainer inventory,
+      ContainerSlot targetSlot,
+      ArmorType armorType) {
+    var bestItem =
+        Arrays.stream(inventory.storage())
+            .filter(
+                s -> {
+                  if (s.item() == null) {
+                    return false;
+                  }
 
-      return armorType.itemTypes().contains(s.item().type());
-    }).reduce((first, second) -> {
-      assert first.item() != null;
+                  return armorType.itemTypes().contains(s.item().type());
+                })
+            .reduce(
+                (first, second) -> {
+                  assert first.item() != null;
 
-      var firstIndex = armorType.itemTypes().indexOf(first.item().type());
-      var secondIndex = armorType.itemTypes().indexOf(second.item().type());
+                  var firstIndex = armorType.itemTypes().indexOf(first.item().type());
+                  var secondIndex = armorType.itemTypes().indexOf(second.item().type());
 
-      return firstIndex > secondIndex ? first : second;
-    });
+                  return firstIndex > secondIndex ? first : second;
+                });
 
     if (bestItem.isEmpty() || bestItem.get().item() == null) {
       return;
@@ -68,25 +77,26 @@ public class AutoArmor implements InternalExtension {
       }
     }
 
-    bestItem.ifPresent(bestItemSlot -> {
-      if (!inventoryManager.tryInventoryControl()) {
-        return;
-      }
+    bestItem.ifPresent(
+        bestItemSlot -> {
+          if (!inventoryManager.tryInventoryControl()) {
+            return;
+          }
 
-      try {
-        inventoryManager.leftClickSlot(bestItemSlot.slot());
-        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-        inventoryManager.leftClickSlot(targetSlot.slot());
-        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+          try {
+            inventoryManager.leftClickSlot(bestItemSlot.slot());
+            TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+            inventoryManager.leftClickSlot(targetSlot.slot());
+            TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
 
-        if (inventoryManager.cursorItem() != null) {
-          inventoryManager.leftClickSlot(bestItemSlot.slot());
-          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-        }
-      } finally {
-        inventoryManager.unlockInventoryControl();
-      }
-    });
+            if (inventoryManager.cursorItem() != null) {
+              inventoryManager.leftClickSlot(bestItemSlot.slot());
+              TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+            }
+          } finally {
+            inventoryManager.unlockInventoryControl();
+          }
+        });
   }
 
   public static void onJoined(BotJoinedEvent event) {
@@ -97,22 +107,26 @@ public class AutoArmor implements InternalExtension {
     }
 
     var executor = connection.executorManager().newScheduledExecutorService(connection, "AutoJump");
-    ExecutorHelper.executeRandomDelaySeconds(executor, () -> {
-      var sessionDataManager = connection.sessionDataManager();
-      var inventoryManager = sessionDataManager.inventoryManager();
-      var playerInventory = inventoryManager.playerInventory();
+    ExecutorHelper.executeRandomDelaySeconds(
+        executor,
+        () -> {
+          var sessionDataManager = connection.sessionDataManager();
+          var inventoryManager = sessionDataManager.inventoryManager();
+          var playerInventory = inventoryManager.playerInventory();
 
-      var armorTypes = Map.of(
-          ArmorType.HELMET, playerInventory.getHelmet(),
-          ArmorType.CHESTPLATE, playerInventory.getChestplate(),
-          ArmorType.LEGGINGS, playerInventory.getLeggings(),
-          ArmorType.BOOTS, playerInventory.getBoots()
-      );
+          var armorTypes =
+              Map.of(
+                  ArmorType.HELMET, playerInventory.getHelmet(),
+                  ArmorType.CHESTPLATE, playerInventory.getChestplate(),
+                  ArmorType.LEGGINGS, playerInventory.getLeggings(),
+                  ArmorType.BOOTS, playerInventory.getBoots());
 
-      for (var entry : armorTypes.entrySet()) {
-        putOn(inventoryManager, playerInventory, entry.getValue(), entry.getKey());
-      }
-    }, settingsHolder.get(AutoArmorSettings.DELAY.min()), settingsHolder.get(AutoArmorSettings.DELAY.max()));
+          for (var entry : armorTypes.entrySet()) {
+            putOn(inventoryManager, playerInventory, entry.getValue(), entry.getKey());
+          }
+        },
+        settingsHolder.get(AutoArmorSettings.DELAY.min()),
+        settingsHolder.get(AutoArmorSettings.DELAY.max()));
   }
 
   @EventHandler
@@ -129,34 +143,32 @@ public class AutoArmor implements InternalExtension {
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AutoArmorSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("auto-armor");
-    public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
-        "enabled",
-        "Enable Auto Armor",
-        new String[] {"--auto-armor"},
-        "Put on best armor automatically",
-        true
-    );
-    public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
-        BUILDER.ofInt(
-            "min-delay",
-            "Min delay (seconds)",
-            new String[] {"--armor-min-delay"},
-            "Minimum delay between putting on armor",
-            1,
-            0,
-            Integer.MAX_VALUE,
-            1
-        ),
-        BUILDER.ofInt(
-            "max-delay",
-            "Max delay (seconds)",
-            new String[] {"--armor-max-delay"},
-            "Maximum delay between putting on armor",
-            2,
-            0,
-            Integer.MAX_VALUE,
-            1
-        )
-    );
+    public static final BooleanProperty ENABLED =
+        BUILDER.ofBoolean(
+            "enabled",
+            "Enable Auto Armor",
+            new String[] {"--auto-armor"},
+            "Put on best armor automatically",
+            true);
+    public static final MinMaxPropertyLink DELAY =
+        new MinMaxPropertyLink(
+            BUILDER.ofInt(
+                "min-delay",
+                "Min delay (seconds)",
+                new String[] {"--armor-min-delay"},
+                "Minimum delay between putting on armor",
+                1,
+                0,
+                Integer.MAX_VALUE,
+                1),
+            BUILDER.ofInt(
+                "max-delay",
+                "Max delay (seconds)",
+                new String[] {"--armor-max-delay"},
+                "Maximum delay between putting on armor",
+                2,
+                0,
+                Integer.MAX_VALUE,
+                1));
   }
 }

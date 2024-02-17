@@ -27,7 +27,8 @@ import org.slf4j.LoggerFactory;
 
 @RequiredArgsConstructor
 public class SFViaAprilFools implements ViaAprilFoolsPlatform {
-  private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaAprilFools"));
+  private final JLoggerToSLF4J logger =
+      new JLoggerToSLF4J(LoggerFactory.getLogger("ViaAprilFools"));
   private final Path dataFolder;
 
   public void init() {

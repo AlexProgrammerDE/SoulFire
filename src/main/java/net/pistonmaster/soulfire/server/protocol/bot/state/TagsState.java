@@ -38,7 +38,7 @@ public class TagsState {
         case "minecraft:block" -> handleBlocks(registry.getValue());
         case "minecraft:item" -> handleItems(registry.getValue());
         case "minecraft:entity_type" -> handleEntities(registry.getValue());
-        // Ignore everything else, we just need these three for now
+          // Ignore everything else, we just need these three for now
       }
     }
   }
@@ -46,7 +46,8 @@ public class TagsState {
   private void handleBlocks(Map<String, int[]> blocks) {
     for (var block : blocks.entrySet()) {
       var blockKey = block.getKey();
-      var blockSet = blockTags.computeIfAbsent(blockKey, k -> new HashSet<>(block.getValue().length));
+      var blockSet =
+          blockTags.computeIfAbsent(blockKey, k -> new HashSet<>(block.getValue().length));
 
       for (var i : block.getValue()) {
         blockSet.add(BlockType.getById(i));
@@ -68,7 +69,8 @@ public class TagsState {
   private void handleEntities(Map<String, int[]> entities) {
     for (var entity : entities.entrySet()) {
       var entityKey = entity.getKey();
-      var entitySet = entityTags.computeIfAbsent(entityKey, k -> new HashSet<>(entity.getValue().length));
+      var entitySet =
+          entityTags.computeIfAbsent(entityKey, k -> new HashSet<>(entity.getValue().length));
 
       for (var i : entity.getValue()) {
         entitySet.add(EntityType.getById(i));

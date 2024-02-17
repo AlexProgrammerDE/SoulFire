@@ -30,6 +30,8 @@ import net.pistonmaster.soulfire.generator.util.ResourceHelper;
 
 @Slf4j
 public class TagsDataGenerator {
+  private TagsDataGenerator() {}
+
   public static List<String> generateTag(Class<?> tagClass) {
     var resultArray = new ArrayList<String>();
     for (var field : tagClass.getDeclaredFields()) {
@@ -52,11 +54,19 @@ public class TagsDataGenerator {
     @Override
     public String generateDataJson() {
       var base = ResourceHelper.getResource("/templates/BlockTags.java");
-      return base.replace(GeneratorConstants.VALUES_REPLACE, String.join("\n  ",
-          generateTag(BlockTags.class)
-              .stream().map(s -> "public static final String " + s.toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                  + " = \"minecraft:" + s + "\";")
-              .toArray(String[]::new)));
+      return base.replace(
+          GeneratorConstants.VALUES_REPLACE,
+          String.join(
+              "\n  ",
+              generateTag(BlockTags.class).stream()
+                  .map(
+                      s ->
+                          "public static final String "
+                              + s.toUpperCase(Locale.ROOT).replace("/", "_WITH_")
+                              + " = \"minecraft:"
+                              + s
+                              + "\";")
+                  .toArray(String[]::new)));
     }
   }
 
@@ -69,11 +79,19 @@ public class TagsDataGenerator {
     @Override
     public String generateDataJson() {
       var base = ResourceHelper.getResource("/templates/ItemTags.java");
-      return base.replace(GeneratorConstants.VALUES_REPLACE, String.join("\n  ",
-          generateTag(ItemTags.class)
-              .stream().map(s -> "public static final String " + s.toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                  + " = \"minecraft:" + s + "\";")
-              .toArray(String[]::new)));
+      return base.replace(
+          GeneratorConstants.VALUES_REPLACE,
+          String.join(
+              "\n  ",
+              generateTag(ItemTags.class).stream()
+                  .map(
+                      s ->
+                          "public static final String "
+                              + s.toUpperCase(Locale.ROOT).replace("/", "_WITH_")
+                              + " = \"minecraft:"
+                              + s
+                              + "\";")
+                  .toArray(String[]::new)));
     }
   }
 
@@ -86,14 +104,19 @@ public class TagsDataGenerator {
     @Override
     public String generateDataJson() {
       var base = ResourceHelper.getResource("/templates/EntityTypeTags.java");
-      return base.replace(GeneratorConstants.VALUES_REPLACE, String.join("\n  ",
-          generateTag(EntityTypeTags.class)
-              .stream().map(s -> "public static final String " + s.toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                  + " = \"minecraft:" + s + "\";")
-              .toArray(String[]::new)));
+      return base.replace(
+          GeneratorConstants.VALUES_REPLACE,
+          String.join(
+              "\n  ",
+              generateTag(EntityTypeTags.class).stream()
+                  .map(
+                      s ->
+                          "public static final String "
+                              + s.toUpperCase(Locale.ROOT).replace("/", "_WITH_")
+                              + " = \"minecraft:"
+                              + s
+                              + "\";")
+                  .toArray(String[]::new)));
     }
-  }
-
-  private TagsDataGenerator() {
   }
 }

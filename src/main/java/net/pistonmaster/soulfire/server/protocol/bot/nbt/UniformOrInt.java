@@ -17,5 +17,4 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.nbt;
 
-public sealed interface UniformOrInt permits MCUniform, MCUniformInt {
-}
+public sealed interface UniformOrInt permits MCUniform, MCUniformInt {}

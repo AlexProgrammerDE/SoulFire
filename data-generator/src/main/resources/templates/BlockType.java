@@ -27,21 +27,32 @@ import lombok.With;
 
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
-public record BlockType(int id, String name, float destroyTime, float explosionResistance,
-                        boolean air, boolean fallingBlock, boolean replaceable,
-                        boolean requiresCorrectToolForDrops, boolean fluidSource,
-                        OffsetData offsetData, BlockStates statesData) {
+public record BlockType(
+    int id,
+    String name,
+    float destroyTime,
+    float explosionResistance,
+    boolean air,
+    boolean fallingBlock,
+    boolean replaceable,
+    boolean requiresCorrectToolForDrops,
+    boolean fluidSource,
+    OffsetData offsetData,
+    BlockStates statesData) {
   public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
-  public static final Object2ReferenceMap<String, BlockType> FROM_NAME = new Object2ReferenceOpenHashMap<>();
+  public static final Object2ReferenceMap<String, BlockType> FROM_NAME =
+      new Object2ReferenceOpenHashMap<>();
 
   // VALUES REPLACE
 
   public static BlockType register(String name) {
     var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class);
-    blockType = blockType.withStatesData(BlockStates.fromJsonArray(
-        blockType,
-        GsonDataHelper.fromJson("/minecraft/blocks.json", name, JsonObject.class)
-            .getAsJsonArray("states")));
+    blockType =
+        blockType.withStatesData(
+            BlockStates.fromJsonArray(
+                blockType,
+                GsonDataHelper.fromJson("/minecraft/blocks.json", name, JsonObject.class)
+                    .getAsJsonArray("states")));
 
     FROM_ID.put(blockType.id(), blockType);
     FROM_NAME.put(blockType.name(), blockType);
@@ -72,7 +83,8 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
     return id;
   }
 
-  public record OffsetData(float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType) {
+  public record OffsetData(
+      float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType) {
     public enum OffsetType {
       XZ,
       XYZ

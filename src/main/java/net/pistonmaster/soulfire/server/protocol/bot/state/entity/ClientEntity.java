@@ -35,9 +35,7 @@ import net.pistonmaster.soulfire.server.protocol.bot.movement.PhysicsData;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.PlayerMovementState;
 import net.pistonmaster.soulfire.server.util.MathHelper;
 
-/**
- * Represents the bot itself as an entity.
- */
+/** Represents the bot itself as an entity. */
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
@@ -57,11 +55,13 @@ public class ClientEntity extends Entity {
   private boolean lastOnGround = false;
   private int positionReminder = 0;
 
-  public ClientEntity(int entityId, UUID uuid, SessionDataManager sessionDataManager, ControlState controlState) {
+  public ClientEntity(
+      int entityId, UUID uuid, SessionDataManager sessionDataManager, ControlState controlState) {
     super(entityId, uuid, EntityType.PLAYER);
     this.sessionDataManager = sessionDataManager;
     this.controlState = controlState;
-    this.movementState = new PlayerMovementState(this, sessionDataManager.inventoryManager().playerInventory());
+    this.movementState =
+        new PlayerMovementState(this, sessionDataManager.inventoryManager().playerInventory());
     this.botMovementManager = new BotMovementManager(sessionDataManager, movementState, this);
     this.yaw = -180;
   }
@@ -93,7 +93,9 @@ public class ClientEntity extends Entity {
     var zDiff = z - lastZ;
     var yawDiff = (double) (yaw - lastYaw);
     var pitchDiff = (double) (pitch - lastPitch);
-    var sendPos = MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4) || ++positionReminder >= 20;
+    var sendPos =
+        MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4)
+            || ++positionReminder >= 20;
     var sendRot = pitchDiff != 0.0 || yawDiff != 0.0;
     var sendOnGround = onGround != lastOnGround;
 
@@ -125,8 +127,13 @@ public class ClientEntity extends Entity {
   @Override
   public double getEyeHeight() {
     if (this.controlState.sneaking()) {
-      return sessionDataManager.connection().meta().protocolVersion()
-          .newerThanOrEqualTo(ProtocolVersion.v1_14) ? 1.27F : 1.54F;
+      return sessionDataManager
+              .connection()
+              .meta()
+              .protocolVersion()
+              .newerThanOrEqualTo(ProtocolVersion.v1_14)
+          ? 1.27F
+          : 1.54F;
     } else {
       return 1.62F;
     }
@@ -145,7 +152,8 @@ public class ClientEntity extends Entity {
     lastYaw = yaw;
     lastPitch = pitch;
 
-    sessionDataManager.sendPacket(new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
+    sessionDataManager.sendPacket(
+        new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
   }
 
   public void sendPos() {

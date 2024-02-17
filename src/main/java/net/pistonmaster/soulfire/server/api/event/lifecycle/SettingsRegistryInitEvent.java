@@ -20,5 +20,5 @@ package net.pistonmaster.soulfire.server.api.event.lifecycle;
 import net.pistonmaster.soulfire.server.api.event.SoulFireGlobalEvent;
 import net.pistonmaster.soulfire.server.settings.lib.ServerSettingsRegistry;
 
-public record SettingsRegistryInitEvent(ServerSettingsRegistry settingsRegistry) implements SoulFireGlobalEvent {
-}
+public record SettingsRegistryInitEvent(ServerSettingsRegistry settingsRegistry)
+    implements SoulFireGlobalEvent {}

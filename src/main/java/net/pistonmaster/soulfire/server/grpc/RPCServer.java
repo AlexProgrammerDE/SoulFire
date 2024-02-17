@@ -35,50 +35,62 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class RPCServer {
-  @Getter
-  private final String host;
-  @Getter
-  private final int port;
+  @Getter private final String host;
+  @Getter private final int port;
   private final Server server;
 
   public RPCServer(String host, int port, Injector injector, SecretKey jwtKey) {
-    this(jwtKey, NettyServerBuilder.forAddress(new InetSocketAddress(host, port), InsecureServerCredentials.create()), host, port, injector);
+    this(
+        jwtKey,
+        NettyServerBuilder.forAddress(
+            new InetSocketAddress(host, port), InsecureServerCredentials.create()),
+        host,
+        port,
+        injector);
   }
 
-  public RPCServer(SecretKey jwtKey, ServerBuilder<?> serverBuilder, String host, int port, Injector injector) {
+  public RPCServer(
+      SecretKey jwtKey, ServerBuilder<?> serverBuilder, String host, int port, Injector injector) {
     this.host = host;
     this.port = port;
-    server = serverBuilder
-        .intercept(new ServerInterceptor() {
-          @Override
-          public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers,
-                                                                       ServerCallHandler<ReqT, RespT> next) {
-            call.setCompression("gzip");
-            return next.startCall(call, headers);
-          }
-        })
-        .addService(injector.getSingleton(LogServiceImpl.class))
-        .addService(injector.getSingleton(ConfigServiceImpl.class))
-        .addService(injector.getSingleton(CommandServiceImpl.class))
-        .addService(injector.getSingleton(AttackServiceImpl.class))
-        .intercept(new JwtServerInterceptor(jwtKey))
-        .maxInboundMessageSize(Integer.MAX_VALUE)
-        .build();
+    server =
+        serverBuilder
+            .intercept(
+                new ServerInterceptor() {
+                  @Override
+                  public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
+                      ServerCall<ReqT, RespT> call,
+                      Metadata headers,
+                      ServerCallHandler<ReqT, RespT> next) {
+                    call.setCompression("gzip");
+                    return next.startCall(call, headers);
+                  }
+                })
+            .addService(injector.getSingleton(LogServiceImpl.class))
+            .addService(injector.getSingleton(ConfigServiceImpl.class))
+            .addService(injector.getSingleton(CommandServiceImpl.class))
+            .addService(injector.getSingleton(AttackServiceImpl.class))
+            .intercept(new JwtServerInterceptor(jwtKey))
+            .maxInboundMessageSize(Integer.MAX_VALUE)
+            .build();
   }
 
   public void start() throws IOException {
     server.start();
     log.info("RPC Server started, listening on " + port);
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      log.info("*** shutting down gRPC server since JVM is shutting down");
-      try {
-        shutdown();
-      } catch (Throwable e) {
-        log.error("Error while shutting down gRPC server", e);
-        return;
-      }
-      log.info("*** server shut down");
-    }));
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread(
+                () -> {
+                  log.info("*** shutting down gRPC server since JVM is shutting down");
+                  try {
+                    shutdown();
+                  } catch (Throwable e) {
+                    log.error("Error while shutting down gRPC server", e);
+                    return;
+                  }
+                  log.info("*** server shut down");
+                }));
   }
 
   public void shutdown() throws InterruptedException {

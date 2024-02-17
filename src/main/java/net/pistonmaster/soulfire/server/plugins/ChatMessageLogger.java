@@ -48,7 +48,8 @@ public class ChatMessageLogger implements InternalExtension {
 
       content.append(event.parseToText());
 
-      // usage of synchronized method so that the chatMessages set is not modified while being iterated
+      // usage of synchronized method so that the chatMessages set is not modified while being
+      // iterated
       logChatMessage(content.toString(), event.timestamp());
     }
   }
@@ -73,18 +74,19 @@ public class ChatMessageLogger implements InternalExtension {
   @Override
   public void onLoad() {
     SoulFireAPI.registerListeners(ChatMessageLogger.class);
-    PluginHelper.registerBotEventConsumer(ChatMessageReceiveEvent.class, ChatMessageLogger::onMessage);
+    PluginHelper.registerBotEventConsumer(
+        ChatMessageReceiveEvent.class, ChatMessageLogger::onMessage);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ChatMessageSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("chat-message-logger");
-    public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
-        "enabled",
-        "Log chat to terminal",
-        new String[] {"--log-chat"},
-        "Log all received chat messages to the terminal",
-        true
-    );
+    public static final BooleanProperty ENABLED =
+        BUILDER.ofBoolean(
+            "enabled",
+            "Log chat to terminal",
+            new String[] {"--log-chat"},
+            "Log all received chat messages to the terminal",
+            true);
   }
 }

@@ -20,6 +20,8 @@ package net.pistonmaster.soulfire.server.util;
 import java.util.Arrays;
 
 public class PrimitiveHelper {
+  private PrimitiveHelper() {}
+
   public static byte[][] split(byte[] data, byte separator) {
     var count = 0;
     for (var b : data) {
@@ -44,8 +46,5 @@ public class PrimitiveHelper {
 
     result[index] = Arrays.copyOfRange(data, last, data.length);
     return result;
-  }
-
-  private PrimitiveHelper() {
   }
 }

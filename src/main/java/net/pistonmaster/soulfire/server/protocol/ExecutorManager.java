@@ -35,12 +35,14 @@ public class ExecutorManager {
   private final String threadPrefix;
   private boolean shutdown = false;
 
-  public ScheduledExecutorService newScheduledExecutorService(BotConnection botConnection, String threadName) {
+  public ScheduledExecutorService newScheduledExecutorService(
+      BotConnection botConnection, String threadName) {
     if (shutdown) {
       throw new IllegalStateException("Cannot create new executor after shutdown!");
     }
 
-    var executor = Executors.newSingleThreadScheduledExecutor(getThreadFactory(botConnection, threadName));
+    var executor =
+        Executors.newSingleThreadScheduledExecutor(getThreadFactory(botConnection, threadName));
 
     executors.add(executor);
 
@@ -73,11 +75,13 @@ public class ExecutorManager {
 
   private ThreadFactory getThreadFactory(BotConnection botConnection, String threadName) {
     return runnable -> {
-      var thread = new Thread(() -> {
-        BOT_CONNECTION_THREAD_LOCAL.set(botConnection);
-        runnable.run();
-        BOT_CONNECTION_THREAD_LOCAL.remove();
-      });
+      var thread =
+          new Thread(
+              () -> {
+                BOT_CONNECTION_THREAD_LOCAL.set(botConnection);
+                runnable.run();
+                BOT_CONNECTION_THREAD_LOCAL.remove();
+              });
       var usedThreadName = threadName;
       if (runnable instanceof NamedRunnable named) {
         usedThreadName = named.name();

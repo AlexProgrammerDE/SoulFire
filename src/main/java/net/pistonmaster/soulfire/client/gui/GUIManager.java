@@ -44,9 +44,8 @@ import net.pistonmaster.soulfire.util.ShutdownManager;
 public class GUIManager {
   private final RPCClient rpcClient;
   private final ClientCommandManager clientCommandManager;
-  private final Injector injector = new InjectorBuilder()
-      .addDefaultHandlers("net.pistonmaster.soulfire")
-      .create();
+  private final Injector injector =
+      new InjectorBuilder().addDefaultHandlers("net.pistonmaster.soulfire").create();
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
   private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
   private final SettingsManager settingsManager = new SettingsManager();
@@ -96,10 +95,11 @@ public class GUIManager {
 
   private void shutdownHook() {
     threadPool.shutdown();
-    SwingUtilities.invokeLater(() -> {
-      var frame = (GUIFrame) injector.getSingleton(GUIFrame.class);
-      frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
-    });
+    SwingUtilities.invokeLater(
+        () -> {
+          var frame = (GUIFrame) injector.getSingleton(GUIFrame.class);
+          frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+        });
   }
 
   public void setAppTitle() {
@@ -112,9 +112,9 @@ public class GUIManager {
       // Force open this module
       Modules.openModule(xToolkit.getClass());
 
-      var classNameVariable = MethodHandles
-          .privateLookupIn(xToolkit.getClass(), MethodHandles.lookup())
-          .findStaticVarHandle(xToolkit.getClass(), "awtAppClassName", String.class);
+      var classNameVariable =
+          MethodHandles.privateLookupIn(xToolkit.getClass(), MethodHandles.lookup())
+              .findStaticVarHandle(xToolkit.getClass(), "awtAppClassName", String.class);
 
       classNameVariable.set("SoulFire");
     } catch (Exception e) {
@@ -132,12 +132,13 @@ public class GUIManager {
       return;
     }
 
-    threadPool.submit(() -> {
-      try {
-        Desktop.getDesktop().browse(uri);
-      } catch (IOException e) {
-        log.error("Failed to open browser!", e);
-      }
-    });
+    threadPool.submit(
+        () -> {
+          try {
+            Desktop.getDesktop().browse(uri);
+          } catch (IOException e) {
+            log.error("Failed to open browser!", e);
+          }
+        });
   }
 }

@@ -20,10 +20,13 @@ package net.pistonmaster.soulfire.proxy;
 import java.net.InetSocketAddress;
 import lombok.NonNull;
 
-public record SWProxy(@NonNull ProxyType type,
-                      @NonNull String host, int port,
-                      String username, String password,
-                      boolean enabled) {
+public record SWProxy(
+    @NonNull ProxyType type,
+    @NonNull String host,
+    int port,
+    String username,
+    String password,
+    boolean enabled) {
   public SWProxy {
     if (type == ProxyType.SOCKS4 && password != null) {
       throw new IllegalArgumentException("SOCKS4 does not support passwords!");

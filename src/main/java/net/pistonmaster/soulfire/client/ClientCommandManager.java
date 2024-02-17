@@ -45,35 +45,42 @@ import net.pistonmaster.soulfire.grpc.generated.CommandRequest;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientCommandManager {
-  @Getter
-  private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
+  @Getter private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
   private final RPCClient rpcClient;
   private final SettingsManager settingsManager;
 
   @PostConstruct
   public void postConstruct() {
-    dispatcher.register(literal("start-attack")
-        .executes(help("Start a attack using the current settings", c -> {
-          rpcClient.attackStub().startAttack(AttackStartRequest.newBuilder()
-              .setSettings(settingsManager.exportSettings()).build(), new StreamObserver<>() {
-            @Override
-            public void onNext(AttackStartResponse value) {
-              log.debug("Started bot attack with id {}", value.getId());
-              // TODO: Sync with GUI state somehow
-            }
+    dispatcher.register(
+        literal("start-attack")
+            .executes(
+                help(
+                    "Start a attack using the current settings",
+                    c -> {
+                      rpcClient
+                          .attackStub()
+                          .startAttack(
+                              AttackStartRequest.newBuilder()
+                                  .setSettings(settingsManager.exportSettings())
+                                  .build(),
+                              new StreamObserver<>() {
+                                @Override
+                                public void onNext(AttackStartResponse value) {
+                                  log.debug("Started bot attack with id {}", value.getId());
+                                  // TODO: Sync with GUI state somehow
+                                }
 
-            @Override
-            public void onError(Throwable t) {
-              log.error("Error while starting bot attack!", t);
-            }
+                                @Override
+                                public void onError(Throwable t) {
+                                  log.error("Error while starting bot attack!", t);
+                                }
 
-            @Override
-            public void onCompleted() {
-            }
-          });
+                                @Override
+                                public void onCompleted() {}
+                              });
 
-          return Command.SINGLE_SUCCESS;
-        })));
+                      return Command.SINGLE_SUCCESS;
+                    })));
   }
 
   public int execute(String command) {
@@ -83,9 +90,10 @@ public class ClientCommandManager {
         return dispatcher.execute(command, ConsoleSubject.INSTANCE);
       } else {
         log.debug("Executing command {} on server", command);
-        return rpcClient.commandStubBlocking().executeCommand(
-            CommandRequest.newBuilder().setCommand(command).build()
-        ).getCode();
+        return rpcClient
+            .commandStubBlocking()
+            .executeCommand(CommandRequest.newBuilder().setCommand(command).build())
+            .getCode();
       }
     } catch (CommandSyntaxException e) {
       log.error("An error occurred while trying to execute a command.", e);
@@ -101,9 +109,10 @@ public class ClientCommandManager {
 
   public List<String> getCompletionSuggestions(String command) {
     try {
-      return rpcClient.commandStubBlocking().tabCompleteCommand(
-          CommandCompletionRequest.newBuilder().setCommand(command).build()
-      ).getSuggestionsList();
+      return rpcClient
+          .commandStubBlocking()
+          .tabCompleteCommand(CommandCompletionRequest.newBuilder().setCommand(command).build())
+          .getSuggestionsList();
     } catch (Exception e) {
       log.error("An error occurred while trying to perform tab completion.", e);
       return List.of();
@@ -112,9 +121,11 @@ public class ClientCommandManager {
 
   public List<Map.Entry<Instant, String>> getCommandHistory() {
     var history = new ArrayList<Map.Entry<Instant, String>>();
-    for (var entry : rpcClient.commandStubBlocking()
-        .getCommandHistory(CommandHistoryRequest.newBuilder().build())
-        .getEntriesList()) {
+    for (var entry :
+        rpcClient
+            .commandStubBlocking()
+            .getCommandHistory(CommandHistoryRequest.newBuilder().build())
+            .getEntriesList()) {
       history.add(Map.entry(Instant.ofEpochSecond(entry.getTimestamp()), entry.getCommand()));
     }
 

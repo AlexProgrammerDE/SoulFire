@@ -28,15 +28,18 @@ public class GsonDataHelper {
   private static final Gson GSON = new Gson();
 
   public static <T> T fromJson(String dataFile, String dataKey, Class<T> clazz) {
-    var array = LOADED_DATA.computeIfAbsent(dataFile, file -> {
-      var data = new JsonArray();
-      try {
-        data = GSON.fromJson(ResourceHelper.getResource(file), JsonArray.class);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-      return data;
-    });
+    var array =
+        LOADED_DATA.computeIfAbsent(
+            dataFile,
+            file -> {
+              var data = new JsonArray();
+              try {
+                data = GSON.fromJson(ResourceHelper.getResource(file), JsonArray.class);
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
+              return data;
+            });
     for (var element : array) {
       if (element.getAsJsonObject().get("name").getAsString().equals(dataKey)) {
         return GSON.fromJson(element, clazz);

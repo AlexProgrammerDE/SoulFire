@@ -39,13 +39,14 @@ public class SFUpdateChecker {
   }
 
   public static CompletableFuture<SFUpdateChecker> getInstance() {
-    return CompletableFuture.supplyAsync(() -> {
-      if (instance == null) {
-        instance = new SFUpdateChecker();
-      }
+    return CompletableFuture.supplyAsync(
+        () -> {
+          if (instance == null) {
+            instance = new SFUpdateChecker();
+          }
 
-      return instance;
-    });
+          return instance;
+        });
   }
 
   private static String checkForUpdates() {
@@ -55,7 +56,9 @@ public class SFUpdateChecker {
     }
 
     try {
-      var url = URI.create("https://api.github.com/repos/AlexProgrammerDE/SoulFire/releases/latest").toURL();
+      var url =
+          URI.create("https://api.github.com/repos/AlexProgrammerDE/SoulFire/releases/latest")
+              .toURL();
       var connection = (HttpsURLConnection) url.openConnection();
       connection.setRequestMethod("GET");
       connection.setRequestProperty("User-Agent", "SoulFire");

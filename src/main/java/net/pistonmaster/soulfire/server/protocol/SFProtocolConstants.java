@@ -22,6 +22,5 @@ public class SFProtocolConstants {
   public static final String VIA_USER_CONNECTION = "via-user-connection";
   public static final String TRAFFIC_HANDLER = "netty-traffic-handler";
 
-  private SFProtocolConstants() {
-  }
+  private SFProtocolConstants() {}
 }

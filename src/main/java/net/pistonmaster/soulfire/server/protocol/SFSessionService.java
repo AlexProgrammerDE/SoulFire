@@ -37,21 +37,27 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 
 public class SFSessionService {
-  private static final URI MOJANG_JOIN_URI = URI.create("https://sessionserver.mojang.com/session/minecraft/join");
+  private static final URI MOJANG_JOIN_URI =
+      URI.create("https://sessionserver.mojang.com/session/minecraft/join");
+
   @SuppressWarnings("HttpUrlsUsage")
-  private static final URI THE_ALTENING_JOIN_URI = URI.create("http://sessionserver.thealtening.com/session/minecraft/join");
-  private static final URI EASYMC_JOIN_URI = URI.create("https://sessionserver.easymc.io/session/minecraft/join");
+  private static final URI THE_ALTENING_JOIN_URI =
+      URI.create("http://sessionserver.thealtening.com/session/minecraft/join");
+
+  private static final URI EASYMC_JOIN_URI =
+      URI.create("https://sessionserver.easymc.io/session/minecraft/join");
   private final URI joinEndpoint;
   private final SWProxy proxyData;
   private final Gson gson = new Gson();
 
   public SFSessionService(AuthType authType, SWProxy proxyData) {
-    this.joinEndpoint = switch (authType) {
-      case MICROSOFT_JAVA -> MOJANG_JOIN_URI;
-      case THE_ALTENING -> THE_ALTENING_JOIN_URI;
-      case EASYMC -> EASYMC_JOIN_URI;
-      default -> throw new IllegalStateException("Unexpected value: " + authType);
-    };
+    this.joinEndpoint =
+        switch (authType) {
+          case MICROSOFT_JAVA -> MOJANG_JOIN_URI;
+          case THE_ALTENING -> THE_ALTENING_JOIN_URI;
+          case EASYMC -> EASYMC_JOIN_URI;
+          default -> throw new IllegalStateException("Unexpected value: " + authType);
+        };
     this.proxyData = proxyData;
   }
 
@@ -67,13 +73,12 @@ public class SFSessionService {
     }
   }
 
-  public void joinServer(UUID profileId, String authenticationToken, String serverId) throws IOException {
+  public void joinServer(UUID profileId, String authenticationToken, String serverId)
+      throws IOException {
     try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-      var request = new SFSessionService.JoinServerRequest(
-          authenticationToken,
-          UUIDHelper.convertToNoDashes(profileId),
-          serverId
-      );
+      var request =
+          new SFSessionService.JoinServerRequest(
+              authenticationToken, UUIDHelper.convertToNoDashes(profileId), serverId);
 
       var httpPost = new HttpPost(joinEndpoint);
       httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));

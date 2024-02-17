@@ -82,7 +82,8 @@ public class ItemTags {
   public static final String CANDLES = "minecraft:candles";
   public static final String DIRT = "minecraft:dirt";
   public static final String TERRACOTTA = "minecraft:terracotta";
-  public static final String COMPLETES_FIND_TREE_TUTORIAL = "minecraft:completes_find_tree_tutorial";
+  public static final String COMPLETES_FIND_TREE_TUTORIAL =
+      "minecraft:completes_find_tree_tutorial";
   public static final String BOATS = "minecraft:boats";
   public static final String CHEST_BOATS = "minecraft:chest_boats";
   public static final String FISHES = "minecraft:fishes";

@@ -29,7 +29,9 @@ public class EffectsDataGenerator implements IDataGenerator {
     var effectDesc = new JsonObject();
 
     effectDesc.addProperty("id", BuiltInRegistries.MOB_EFFECT.getId(statusEffect));
-    effectDesc.addProperty("name", Objects.requireNonNull(BuiltInRegistries.MOB_EFFECT.getKey(statusEffect)).getPath());
+    effectDesc.addProperty(
+        "name",
+        Objects.requireNonNull(BuiltInRegistries.MOB_EFFECT.getKey(statusEffect)).getPath());
 
     effectDesc.addProperty("type", statusEffect.isBeneficial() ? "good" : "bad");
     return effectDesc;

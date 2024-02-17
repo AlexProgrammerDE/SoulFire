@@ -37,15 +37,13 @@ public class LimitLinesDocumentListener implements DocumentListener {
   private volatile boolean isRemoving;
 
   /**
-   * Specify the number of lines to be stored in the Document. Extra lines
-   * will be removed from the start or end of the Document, depending on
-   * the boolean value specified.
+   * Specify the number of lines to be stored in the Document. Extra lines will be removed from the
+   * start or end of the Document, depending on the boolean value specified.
    *
-   * @param maximumLines      number of lines
+   * @param maximumLines number of lines
    * @param isRemoveFromStart true to remove from the start
    */
-  public LimitLinesDocumentListener(int maximumLines,
-                                    boolean isRemoveFromStart) {
+  public LimitLinesDocumentListener(int maximumLines, boolean isRemoveFromStart) {
     setLimitLines(maximumLines);
     this.isRemoveFromStart = isRemoveFromStart;
     this.isRemoving = false;
@@ -76,12 +74,10 @@ public class LimitLinesDocumentListener implements DocumentListener {
   }
 
   @Override
-  public void removeUpdate(DocumentEvent e) {
-  }
+  public void removeUpdate(DocumentEvent e) {}
 
   @Override
-  public void changedUpdate(DocumentEvent e) {
-  }
+  public void changedUpdate(DocumentEvent e) {}
 
   private void removeLines(DocumentEvent e) {
     // The root Element of the Document will tell us the total number

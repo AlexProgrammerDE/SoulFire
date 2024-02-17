@@ -23,7 +23,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 
 /**
- * Big thanks to <a href="https://github.com/LB--/MCModify/blob/java/src/main/java/com/lb_stuff/mcmodify/minecraft/Map.java">MCModify</a>.
+ * Big thanks to <a
+ * href="https://github.com/LB--/MCModify/blob/java/src/main/java/com/lb_stuff/mcmodify/minecraft/Map.java">MCModify</a>.
  */
 public class MapColorUtils {
   private static final Color[] MAP_COLORS;
@@ -57,12 +58,15 @@ public class MapColorUtils {
     MAP_COLOR_MODEL = new IndexColorModel(8, MAP_COLORS.length, r, g, b, a);
   }
 
-  private MapColorUtils() {
-  }
+  private MapColorUtils() {}
 
   private static Color generateShade(Color c, double shade) {
     shade /= 255.0;
-    return new Color((int) (c.getRed() * shade + 0.5), (int) (c.getGreen() * shade + 0.5), (int) (c.getBlue() * shade + 0.5), c.getAlpha());
+    return new Color(
+        (int) (c.getRed() * shade + 0.5),
+        (int) (c.getGreen() * shade + 0.5),
+        (int) (c.getBlue() * shade + 0.5),
+        c.getAlpha());
   }
 
   public static BufferedImage generateFromData(MapData mapData) {
@@ -79,7 +83,8 @@ public class MapColorUtils {
   }
 
   /**
-   * Keep in sync with: <a href="https://minecraft.wiki/w/Map_item_format#Color_table">Minecraft Wiki Page</a>.
+   * Keep in sync with: <a href="https://minecraft.wiki/w/Map_item_format#Color_table">Minecraft
+   * Wiki Page</a>.
    */
   private enum MapColor {
     NONE(0, 0, 0),

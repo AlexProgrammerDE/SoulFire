@@ -41,20 +41,19 @@ import org.jetbrains.annotations.Nullable;
 @RequiredArgsConstructor
 public class InventoryManager {
   private final PlayerInventoryContainer playerInventory = new PlayerInventoryContainer(this);
-  private final Int2ObjectMap<Container> containerData = new Int2ObjectOpenHashMap<>(Map.of(
-      0, playerInventory
-  ));
+  private final Int2ObjectMap<Container> containerData =
+      new Int2ObjectOpenHashMap<>(Map.of(0, playerInventory));
   private final Map<EquipmentSlot, ItemType> lastInEquipment = new EnumMap<>(EquipmentSlot.class);
   private final ReentrantLock inventoryControlLock = new ReentrantLock();
-  @ToString.Exclude
-  private final SessionDataManager dataManager;
+  @ToString.Exclude private final SessionDataManager dataManager;
   private Container openContainer;
   private int heldItemSlot = 0;
   private int lastStateId = -1;
   private SFItemStack cursorItem;
 
   /**
-   * The inventory has a control lock to prevent multiple threads from moving items at the same time.
+   * The inventory has a control lock to prevent multiple threads from moving items at the same
+   * time.
    */
   public void lockInventoryControl() {
     inventoryControlLock.lock();
@@ -96,7 +95,8 @@ public class InventoryManager {
 
   public void leftClickSlot(int slot) {
     if (!inventoryControlLock.isHeldByCurrentThread()) {
-      throw new IllegalStateException("You need to lock the inventoryControlLock before calling this method!");
+      throw new IllegalStateException(
+          "You need to lock the inventoryControlLock before calling this method!");
     }
 
     if (openContainer == null) {
@@ -131,14 +131,15 @@ public class InventoryManager {
     Int2ObjectMap<ItemStack> changes = new Int2ObjectArrayMap<>(1);
     changes.put(slot, slotItem);
 
-    dataManager.sendPacket(new ServerboundContainerClickPacket(openContainer.id(),
-        lastStateId,
-        slot,
-        ContainerActionType.CLICK_ITEM,
-        ClickItemAction.LEFT_CLICK,
-        cursorItem,
-        changes
-    ));
+    dataManager.sendPacket(
+        new ServerboundContainerClickPacket(
+            openContainer.id(),
+            lastStateId,
+            slot,
+            ContainerActionType.CLICK_ITEM,
+            ClickItemAction.LEFT_CLICK,
+            cursorItem,
+            changes));
   }
 
   public void applyItemAttributes() {

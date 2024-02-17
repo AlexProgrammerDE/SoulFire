@@ -27,10 +27,9 @@ public class SFPathConstants {
   public static final Path CONFIG_FOLDER = DATA_FOLDER.resolve("config");
   public static final Path PROFILES_FOLDER = DATA_FOLDER.resolve("profiles");
 
+  private SFPathConstants() {}
+
   private static Path getApplicationDataFolder() {
     return Path.of(AppDirsFactory.getInstance().getUserDataDir("SoulFire", null, null));
-  }
-
-  private SFPathConstants() {
   }
 }

@@ -44,7 +44,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Modified version of: <a href="https://github.com/SKCraft/Launcher/blob/master/launcher/src/main/java/com/skcraft/launcher/swing/MessageLog.java">SKCraft/Launcher Log Panel</a>.
+ * Modified version of: <a
+ * href="https://github.com/SKCraft/Launcher/blob/master/launcher/src/main/java/com/skcraft/launcher/swing/MessageLog.java">SKCraft/Launcher
+ * Log Panel</a>.
  */
 @Slf4j
 public class MessageLogPanel extends JPanel {
@@ -84,18 +86,16 @@ public class MessageLogPanel extends JPanel {
 
     add(scrollText, BorderLayout.CENTER);
 
-    var executorService = Executors.newSingleThreadScheduledExecutor((r) -> {
-      var thread = new Thread(r);
-      thread.setName("MessageLogPanel");
-      thread.setDaemon(true);
-      return thread;
-    });
+    var executorService =
+        Executors.newSingleThreadScheduledExecutor(
+            (r) -> {
+              var thread = new Thread(r);
+              thread.setName("MessageLogPanel");
+              thread.setDaemon(true);
+              return thread;
+            });
     executorService.scheduleWithFixedDelay(
-        this::updateTextComponent,
-        100,
-        100,
-        TimeUnit.MILLISECONDS
-    );
+        this::updateTextComponent, 100, 100, TimeUnit.MILLISECONDS);
   }
 
   private void updateTextComponent() {
@@ -104,26 +104,23 @@ public class MessageLogPanel extends JPanel {
     }
 
     try {
-      SwingUtilities.invokeAndWait(() -> {
-        noopDocumentFilter.filter(false);
-        if (clearText) {
-          textComponent.setText("");
-          clearText = false;
-        } else {
-          try {
-            var offset = document.getLength();
-            document.insertString(
-                offset,
-                String.join("", toInsert),
-                defaultAttributes
-            );
-          } catch (BadLocationException e) {
-            log.debug("Failed to insert text!", e);
-          }
-          toInsert.clear();
-        }
-        noopDocumentFilter.filter(true);
-      });
+      SwingUtilities.invokeAndWait(
+          () -> {
+            noopDocumentFilter.filter(false);
+            if (clearText) {
+              textComponent.setText("");
+              clearText = false;
+            } else {
+              try {
+                var offset = document.getLength();
+                document.insertString(offset, String.join("", toInsert), defaultAttributes);
+              } catch (BadLocationException e) {
+                log.debug("Failed to insert text!", e);
+              }
+              toInsert.clear();
+            }
+            noopDocumentFilter.filter(true);
+          });
     } catch (InterruptedException | InvocationTargetException e) {
       throw new RuntimeException(e);
     }
@@ -137,17 +134,23 @@ public class MessageLogPanel extends JPanel {
       popupMenu.add(copyItem);
 
       var uploadItem = new JMenuItem("Upload to pastes.dev");
-      uploadItem.addActionListener(e -> {
-        try {
-          var url = "https://pastes.dev/" + PastesDevService.upload(textComponent.getSelectedText());
-          JOptionPane.showMessageDialog(this,
-              SwingTextUtils.createHtmlPane("Uploaded to: <a href='" + url + "'>" + url + "</a>"),
-              "Success", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-          log.error("Failed to upload!", ex);
-          JOptionPane.showMessageDialog(this, "Failed to upload!", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      });
+      uploadItem.addActionListener(
+          e -> {
+            try {
+              var url =
+                  "https://pastes.dev/" + PastesDevService.upload(textComponent.getSelectedText());
+              JOptionPane.showMessageDialog(
+                  this,
+                  SwingTextUtils.createHtmlPane(
+                      "Uploaded to: <a href='" + url + "'>" + url + "</a>"),
+                  "Success",
+                  JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+              log.error("Failed to upload!", ex);
+              JOptionPane.showMessageDialog(
+                  this, "Failed to upload!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+          });
       popupMenu.add(uploadItem);
     }
 
@@ -179,7 +182,8 @@ public class MessageLogPanel extends JPanel {
     private boolean filter = true;
 
     @Override
-    public void remove(DocumentFilter.FilterBypass fb, int offset, int length) throws BadLocationException {
+    public void remove(DocumentFilter.FilterBypass fb, int offset, int length)
+        throws BadLocationException {
       if (filter) {
         return;
       }
@@ -188,7 +192,9 @@ public class MessageLogPanel extends JPanel {
     }
 
     @Override
-    public void insertString(DocumentFilter.FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+    public void insertString(
+        DocumentFilter.FilterBypass fb, int offset, String string, AttributeSet attr)
+        throws BadLocationException {
       if (filter) {
         return;
       }
@@ -197,7 +203,9 @@ public class MessageLogPanel extends JPanel {
     }
 
     @Override
-    public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+    public void replace(
+        DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+        throws BadLocationException {
       if (filter) {
         return;
       }

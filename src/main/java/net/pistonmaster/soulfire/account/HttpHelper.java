@@ -34,14 +34,14 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 
 public class HttpHelper {
-  private HttpHelper() {
-  }
+  private HttpHelper() {}
 
   public static CloseableHttpClient createMCAuthHttpClient(SWProxy proxyData) {
-    return createHttpClient(List.of(
-        new BasicHeader("Accept", ContentType.APPLICATION_JSON.getMimeType()),
-        new BasicHeader("Accept-Language", "en-US,en")
-    ), proxyData);
+    return createHttpClient(
+        List.of(
+            new BasicHeader("Accept", ContentType.APPLICATION_JSON.getMimeType()),
+            new BasicHeader("Accept-Language", "en-US,en")),
+        proxyData);
   }
 
   public static HttpClient createLenniMCAuthHttpClient(SWProxy proxyData) {
@@ -49,20 +49,21 @@ public class HttpHelper {
   }
 
   public static CloseableHttpClient createHttpClient(List<Header> headers, SWProxy proxyData) {
-    var httpBuilder = HttpClientBuilder.create()
-        .setDefaultHeaders(headers);
+    var httpBuilder = HttpClientBuilder.create().setDefaultHeaders(headers);
 
     var timeout = 5;
-    var requestBuilder = RequestConfig.custom()
-        .setConnectTimeout(timeout * 1000)
-        .setConnectionRequestTimeout(timeout * 1000)
-        .setSocketTimeout(timeout * 1000);
+    var requestBuilder =
+        RequestConfig.custom()
+            .setConnectTimeout(timeout * 1000)
+            .setConnectionRequestTimeout(timeout * 1000)
+            .setSocketTimeout(timeout * 1000);
 
     if (proxyData != null) {
       var proxy = new HttpHost(proxyData.host(), proxyData.port());
 
       if (proxyData.username() != null && proxyData.password() != null) {
-        var credentials = new UsernamePasswordCredentials(proxyData.username(), proxyData.password());
+        var credentials =
+            new UsernamePasswordCredentials(proxyData.username(), proxyData.password());
 
         var authScope = new AuthScope(proxy);
 

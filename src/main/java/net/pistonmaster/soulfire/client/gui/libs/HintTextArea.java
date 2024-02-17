@@ -35,7 +35,9 @@ public class HintTextArea extends JTextArea {
   public void paint(Graphics g) {
     super.paint(g);
     if (getText().isEmpty()) {
-      ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+      ((Graphics2D) g)
+          .setRenderingHint(
+              RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
       g.setColor(UIManager.getColor("TextField.placeholderForeground"));
 
       var ins = getInsets();

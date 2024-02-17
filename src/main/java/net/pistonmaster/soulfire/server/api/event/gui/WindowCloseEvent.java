@@ -20,5 +20,4 @@ package net.pistonmaster.soulfire.server.api.event.gui;
 import net.pistonmaster.soulfire.server.api.event.AbstractCancellable;
 import net.pistonmaster.soulfire.server.api.event.SoulFireGlobalEvent;
 
-public class WindowCloseEvent extends AbstractCancellable implements SoulFireGlobalEvent {
-}
+public class WindowCloseEvent extends AbstractCancellable implements SoulFireGlobalEvent {}

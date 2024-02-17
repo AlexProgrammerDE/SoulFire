@@ -20,5 +20,5 @@ package net.pistonmaster.soulfire.server.protocol.bot.model;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
-public record ServerPlayData(Component motd, byte @Nullable [] iconBytes, boolean enforcesSecureChat) {
-}
+public record ServerPlayData(
+    Component motd, byte @Nullable [] iconBytes, boolean enforcesSecureChat) {}

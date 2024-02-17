@@ -79,7 +79,8 @@ public class BlockTags {
   public static final String DIRT = "minecraft:dirt";
   public static final String TERRACOTTA = "minecraft:terracotta";
   public static final String CONCRETE_POWDER = "minecraft:concrete_powder";
-  public static final String COMPLETES_FIND_TREE_TUTORIAL = "minecraft:completes_find_tree_tutorial";
+  public static final String COMPLETES_FIND_TREE_TUTORIAL =
+      "minecraft:completes_find_tree_tutorial";
   public static final String FLOWER_POTS = "minecraft:flower_pots";
   public static final String ENDERMAN_HOLDABLE = "minecraft:enderman_holdable";
   public static final String ICE = "minecraft:ice";
@@ -130,17 +131,21 @@ public class BlockTags {
   public static final String STONE_ORE_REPLACEABLES = "minecraft:stone_ore_replaceables";
   public static final String DEEPSLATE_ORE_REPLACEABLES = "minecraft:deepslate_ore_replaceables";
   public static final String BASE_STONE_NETHER = "minecraft:base_stone_nether";
-  public static final String OVERWORLD_CARVER_REPLACEABLES = "minecraft:overworld_carver_replaceables";
+  public static final String OVERWORLD_CARVER_REPLACEABLES =
+      "minecraft:overworld_carver_replaceables";
   public static final String NETHER_CARVER_REPLACEABLES = "minecraft:nether_carver_replaceables";
   public static final String CANDLE_CAKES = "minecraft:candle_cakes";
   public static final String CAULDRONS = "minecraft:cauldrons";
   public static final String CRYSTAL_SOUND_BLOCKS = "minecraft:crystal_sound_blocks";
   public static final String INSIDE_STEP_SOUND_BLOCKS = "minecraft:inside_step_sound_blocks";
-  public static final String COMBINATION_STEP_SOUND_BLOCKS = "minecraft:combination_step_sound_blocks";
-  public static final String CAMEL_SAND_STEP_SOUND_BLOCKS = "minecraft:camel_sand_step_sound_blocks";
+  public static final String COMBINATION_STEP_SOUND_BLOCKS =
+      "minecraft:combination_step_sound_blocks";
+  public static final String CAMEL_SAND_STEP_SOUND_BLOCKS =
+      "minecraft:camel_sand_step_sound_blocks";
   public static final String OCCLUDES_VIBRATION_SIGNALS = "minecraft:occludes_vibration_signals";
   public static final String DAMPENS_VIBRATIONS = "minecraft:dampens_vibrations";
-  public static final String DRIPSTONE_REPLACEABLE_BLOCKS = "minecraft:dripstone_replaceable_blocks";
+  public static final String DRIPSTONE_REPLACEABLE_BLOCKS =
+      "minecraft:dripstone_replaceable_blocks";
   public static final String CAVE_VINES = "minecraft:cave_vines";
   public static final String MOSS_REPLACEABLE = "minecraft:moss_replaceable";
   public static final String LUSH_GROUND_REPLACEABLE = "minecraft:lush_ground_replaceable";
@@ -157,7 +162,8 @@ public class BlockTags {
   public static final String NEEDS_IRON_TOOL = "minecraft:needs_iron_tool";
   public static final String NEEDS_STONE_TOOL = "minecraft:needs_stone_tool";
   public static final String FEATURES_CANNOT_REPLACE = "minecraft:features_cannot_replace";
-  public static final String LAVA_POOL_STONE_CANNOT_REPLACE = "minecraft:lava_pool_stone_cannot_replace";
+  public static final String LAVA_POOL_STONE_CANNOT_REPLACE =
+      "minecraft:lava_pool_stone_cannot_replace";
   public static final String GEODE_INVALID_BLOCKS = "minecraft:geode_invalid_blocks";
   public static final String FROG_PREFER_JUMP_TO = "minecraft:frog_prefer_jump_to";
   public static final String SCULK_REPLACEABLE = "minecraft:sculk_replaceable";
@@ -169,19 +175,23 @@ public class BlockTags {
   public static final String GOATS_SPAWNABLE_ON = "minecraft:goats_spawnable_on";
   public static final String MOOSHROOMS_SPAWNABLE_ON = "minecraft:mooshrooms_spawnable_on";
   public static final String PARROTS_SPAWNABLE_ON = "minecraft:parrots_spawnable_on";
-  public static final String POLAR_BEARS_SPAWNABLE_ON_ALTERNATE = "minecraft:polar_bears_spawnable_on_alternate";
+  public static final String POLAR_BEARS_SPAWNABLE_ON_ALTERNATE =
+      "minecraft:polar_bears_spawnable_on_alternate";
   public static final String RABBITS_SPAWNABLE_ON = "minecraft:rabbits_spawnable_on";
   public static final String FOXES_SPAWNABLE_ON = "minecraft:foxes_spawnable_on";
   public static final String WOLVES_SPAWNABLE_ON = "minecraft:wolves_spawnable_on";
   public static final String FROGS_SPAWNABLE_ON = "minecraft:frogs_spawnable_on";
   public static final String AZALEA_GROWS_ON = "minecraft:azalea_grows_on";
   public static final String CONVERTABLE_TO_MUD = "minecraft:convertable_to_mud";
-  public static final String MANGROVE_LOGS_CAN_GROW_THROUGH = "minecraft:mangrove_logs_can_grow_through";
-  public static final String MANGROVE_ROOTS_CAN_GROW_THROUGH = "minecraft:mangrove_roots_can_grow_through";
+  public static final String MANGROVE_LOGS_CAN_GROW_THROUGH =
+      "minecraft:mangrove_logs_can_grow_through";
+  public static final String MANGROVE_ROOTS_CAN_GROW_THROUGH =
+      "minecraft:mangrove_roots_can_grow_through";
   public static final String DEAD_BUSH_MAY_PLACE_ON = "minecraft:dead_bush_may_place_on";
   public static final String SNAPS_GOAT_HORN = "minecraft:snaps_goat_horn";
   public static final String REPLACEABLE_BY_TREES = "minecraft:replaceable_by_trees";
-  public static final String SNOW_LAYER_CANNOT_SURVIVE_ON = "minecraft:snow_layer_cannot_survive_on";
+  public static final String SNOW_LAYER_CANNOT_SURVIVE_ON =
+      "minecraft:snow_layer_cannot_survive_on";
   public static final String SNOW_LAYER_CAN_SURVIVE_ON = "minecraft:snow_layer_can_survive_on";
   public static final String INVALID_SPAWN_INSIDE = "minecraft:invalid_spawn_inside";
   public static final String SNIFFER_DIGGABLE_BLOCK = "minecraft:sniffer_diggable_block";
@@ -189,6 +199,7 @@ public class BlockTags {
   public static final String TRAIL_RUINS_REPLACEABLE = "minecraft:trail_ruins_replaceable";
   public static final String REPLACEABLE = "minecraft:replaceable";
   public static final String ENCHANTMENT_POWER_PROVIDER = "minecraft:enchantment_power_provider";
-  public static final String ENCHANTMENT_POWER_TRANSMITTER = "minecraft:enchantment_power_transmitter";
+  public static final String ENCHANTMENT_POWER_TRANSMITTER =
+      "minecraft:enchantment_power_transmitter";
   public static final String MAINTAINS_FARMLAND = "minecraft:maintains_farmland";
 }

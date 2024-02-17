@@ -46,31 +46,40 @@ public class RPCClient {
   private final ConfigServiceGrpc.ConfigServiceBlockingStub configStubBlocking;
 
   public RPCClient(String host, int port, String jwt) {
-    this(new JwtCredential(jwt), Grpc.newChannelBuilderForAddress(host, port, InsecureChannelCredentials.create())
-        .userAgent("SoulFireJavaClient/" + BuildData.VERSION).build());
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      log.info("*** shutting down gRPC client since JVM is shutting down");
-      try {
-        shutdown();
-      } catch (Throwable e) {
-        log.error("Interrupted while shutting down gRPC client", e);
-        return;
-      }
-      log.info("*** client shut down");
-    }));
+    this(
+        new JwtCredential(jwt),
+        Grpc.newChannelBuilderForAddress(host, port, InsecureChannelCredentials.create())
+            .userAgent("SoulFireJavaClient/" + BuildData.VERSION)
+            .build());
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread(
+                () -> {
+                  log.info("*** shutting down gRPC client since JVM is shutting down");
+                  try {
+                    shutdown();
+                  } catch (Throwable e) {
+                    log.error("Interrupted while shutting down gRPC client", e);
+                    return;
+                  }
+                  log.info("*** client shut down");
+                }));
   }
 
   public RPCClient(CallCredentials callCredentials, ManagedChannel managedChannel) {
     channel = managedChannel;
     logStubBlocking = prepareChannel(LogsServiceGrpc.newBlockingStub(channel), callCredentials);
     commandStub = prepareChannel(CommandServiceGrpc.newStub(channel), callCredentials);
-    commandStubBlocking = prepareChannel(CommandServiceGrpc.newBlockingStub(channel), callCredentials);
+    commandStubBlocking =
+        prepareChannel(CommandServiceGrpc.newBlockingStub(channel), callCredentials);
     attackStub = prepareChannel(AttackServiceGrpc.newStub(channel), callCredentials);
-    configStubBlocking = prepareChannel(ConfigServiceGrpc.newBlockingStub(channel), callCredentials);
+    configStubBlocking =
+        prepareChannel(ConfigServiceGrpc.newBlockingStub(channel), callCredentials);
   }
 
   private <T extends AbstractStub<T>> T prepareChannel(T channel, CallCredentials callCredentials) {
-    return channel.withCallCredentials(callCredentials)
+    return channel
+        .withCallCredentials(callCredentials)
         .withCompression("gzip")
         .withMaxInboundMessageSize(Integer.MAX_VALUE)
         .withMaxOutboundMessageSize(Integer.MAX_VALUE);

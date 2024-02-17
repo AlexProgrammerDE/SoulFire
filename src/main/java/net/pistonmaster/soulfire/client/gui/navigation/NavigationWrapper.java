@@ -25,10 +25,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 public class NavigationWrapper {
-  private NavigationWrapper() {
-  }
+  private NavigationWrapper() {}
 
-  public static JPanel createBackWrapper(CardsContainer container, String target, NavigationItem item) {
+  public static JPanel createBackWrapper(
+      CardsContainer container, String target, NavigationItem item) {
     var topBar = new JPanel(new BorderLayout());
 
     var back = new JButton("Back");

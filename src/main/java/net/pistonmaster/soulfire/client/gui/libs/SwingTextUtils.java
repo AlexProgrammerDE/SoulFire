@@ -36,8 +36,7 @@ import org.intellij.lang.annotations.Language;
 
 @Slf4j
 public class SwingTextUtils {
-  private SwingTextUtils() {
-  }
+  private SwingTextUtils() {}
 
   public static JTextPane createHtmlPane(@Language("html") String text) {
     var pane = new JTextPane();
@@ -46,18 +45,19 @@ public class SwingTextUtils {
     pane.setEditable(false);
     pane.setBackground(null);
     pane.setBorder(null);
-    pane.addHyperlinkListener(event -> {
-      if (event.getEventType() != HyperlinkEvent.EventType.ACTIVATED
-          || !Desktop.isDesktopSupported()) {
-        return;
-      }
+    pane.addHyperlinkListener(
+        event -> {
+          if (event.getEventType() != HyperlinkEvent.EventType.ACTIVATED
+              || !Desktop.isDesktopSupported()) {
+            return;
+          }
 
-      try {
-        Desktop.getDesktop().browse(event.getURL().toURI());
-      } catch (IOException | URISyntaxException e) {
-        log.error("Failed to open link!", e);
-      }
-    });
+          try {
+            Desktop.getDesktop().browse(event.getURL().toURI());
+          } catch (IOException | URISyntaxException e) {
+            log.error("Failed to open link!", e);
+          }
+        });
 
     return pane;
   }
@@ -74,35 +74,41 @@ public class SwingTextUtils {
     var undoManager = new UndoManager();
     textComponent.getDocument().addUndoableEditListener(undoManager);
 
-    var undoAction = new AbstractAction("Undo") {
-      @Override
-      public void actionPerformed(ActionEvent event) {
-        try {
-          if (undoManager.canUndo()) {
-            undoManager.undo();
+    var undoAction =
+        new AbstractAction("Undo") {
+          @Override
+          public void actionPerformed(ActionEvent event) {
+            try {
+              if (undoManager.canUndo()) {
+                undoManager.undo();
+              }
+            } catch (CannotUndoException e) {
+              log.error("Failed to undo!", e);
+            }
           }
-        } catch (CannotUndoException e) {
-          log.error("Failed to undo!", e);
-        }
-      }
-    };
+        };
 
-    var redoAction = new AbstractAction("Redo") {
-      @Override
-      public void actionPerformed(ActionEvent event) {
-        try {
-          if (undoManager.canRedo()) {
-            undoManager.redo();
+    var redoAction =
+        new AbstractAction("Redo") {
+          @Override
+          public void actionPerformed(ActionEvent event) {
+            try {
+              if (undoManager.canRedo()) {
+                undoManager.redo();
+              }
+            } catch (CannotRedoException e) {
+              log.error("Failed to redo!", e);
+            }
           }
-        } catch (CannotRedoException e) {
-          log.error("Failed to redo!", e);
-        }
-      }
-    };
+        };
 
     var menuShortcutMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
-    textComponent.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, menuShortcutMask), "undo");
-    textComponent.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, menuShortcutMask), "redo");
+    textComponent
+        .getInputMap()
+        .put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, menuShortcutMask), "undo");
+    textComponent
+        .getInputMap()
+        .put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, menuShortcutMask), "redo");
 
     textComponent.getActionMap().put("undo", undoAction);
     textComponent.getActionMap().put("redo", redoAction);

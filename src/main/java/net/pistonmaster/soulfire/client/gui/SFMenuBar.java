@@ -58,22 +58,23 @@ public class SFMenuBar extends JMenuBar {
   private static final List<Class<? extends BasicLookAndFeel>> THEMES;
 
   static {
-    var tempThemes = new ArrayList<>(List.of(
-        FlatDarculaLaf.class,
-        FlatIntelliJLaf.class,
-        FlatDarkLaf.class,
-        FlatLightLaf.class,
-        FlatMacDarkLaf.class,
-        FlatMacLightLaf.class,
-        FlatOneDarkIJTheme.class,
-        FlatArcOrangeIJTheme.class,
-        FlatArcDarkOrangeIJTheme.class,
-        FlatCyanLightIJTheme.class,
-        FlatDarkPurpleIJTheme.class,
-        FlatMaterialDarkerIJTheme.class,
-        FlatMaterialOceanicIJTheme.class,
-        FlatCarbonIJTheme.class
-    ));
+    var tempThemes =
+        new ArrayList<>(
+            List.of(
+                FlatDarculaLaf.class,
+                FlatIntelliJLaf.class,
+                FlatDarkLaf.class,
+                FlatLightLaf.class,
+                FlatMacDarkLaf.class,
+                FlatMacLightLaf.class,
+                FlatOneDarkIJTheme.class,
+                FlatArcOrangeIJTheme.class,
+                FlatArcDarkOrangeIJTheme.class,
+                FlatCyanLightIJTheme.class,
+                FlatDarkPurpleIJTheme.class,
+                FlatMaterialDarkerIJTheme.class,
+                FlatMaterialOceanicIJTheme.class,
+                FlatCarbonIJTheme.class));
     THEMES = List.copyOf(tempThemes);
   }
 
@@ -87,35 +88,43 @@ public class SFMenuBar extends JMenuBar {
 
     var fileMenu = new JMenu("File");
     var loadProfile = new JMenuItem("Load Profile");
-    loadProfile.addActionListener(e -> JFXFileHelper.showOpenDialog(SFPathConstants.PROFILES_FOLDER, Map.of(
-        "SoulFire profile", "json"
-    )).ifPresent(file -> {
-      try {
-        guiManager.settingsManager().loadProfile(file);
-        log.info("Loaded profile!");
-      } catch (IOException ex) {
-        log.warn("Failed to load profile!", ex);
-      }
-    }));
+    loadProfile.addActionListener(
+        e ->
+            JFXFileHelper.showOpenDialog(
+                    SFPathConstants.PROFILES_FOLDER, Map.of("SoulFire profile", "json"))
+                .ifPresent(
+                    file -> {
+                      try {
+                        guiManager.settingsManager().loadProfile(file);
+                        log.info("Loaded profile!");
+                      } catch (IOException ex) {
+                        log.warn("Failed to load profile!", ex);
+                      }
+                    }));
 
     fileMenu.add(loadProfile);
     var saveProfile = new JMenuItem("Save Profile");
-    saveProfile.addActionListener(e -> JFXFileHelper.showSaveDialog(SFPathConstants.PROFILES_FOLDER, Map.of(
-        "SoulFire profile", "json"
-    ), "profile.json").ifPresent(file -> {
-      // Add .json if not present
-      var path = file.toString();
-      if (!path.endsWith(".json")) {
-        path += ".json";
-      }
+    saveProfile.addActionListener(
+        e ->
+            JFXFileHelper.showSaveDialog(
+                    SFPathConstants.PROFILES_FOLDER,
+                    Map.of("SoulFire profile", "json"),
+                    "profile.json")
+                .ifPresent(
+                    file -> {
+                      // Add .json if not present
+                      var path = file.toString();
+                      if (!path.endsWith(".json")) {
+                        path += ".json";
+                      }
 
-      try {
-        guiManager.settingsManager().saveProfile(Path.of(path));
-        log.info("Saved profile!");
-      } catch (IOException ex) {
-        log.warn("Failed to save profile!", ex);
-      }
-    }));
+                      try {
+                        guiManager.settingsManager().saveProfile(Path.of(path));
+                        log.info("Saved profile!");
+                      } catch (IOException ex) {
+                        log.warn("Failed to save profile!", ex);
+                      }
+                    }));
 
     fileMenu.add(saveProfile);
 
@@ -134,30 +143,32 @@ public class SFMenuBar extends JMenuBar {
     var updateCallbacks = new ArrayList<Runnable>();
     for (var theme : THEMES) {
       var themeItem = new JRadioButtonMenuItem(theme.getSimpleName());
-      updateCallbacks.add(() -> {
-        themeItem.setSelected(theme.getName().equals(ThemeUtil.getThemeClassName()));
-      });
-      themeItem.addActionListener(e -> {
-        GUIClientProps.setString("theme", theme.getName());
-        SwingUtilities.invokeLater(ThemeUtil::setLookAndFeel);
-        updateCallbacks.forEach(Runnable::run);
-      });
+      updateCallbacks.add(
+          () -> {
+            themeItem.setSelected(theme.getName().equals(ThemeUtil.getThemeClassName()));
+          });
+      themeItem.addActionListener(
+          e -> {
+            GUIClientProps.setString("theme", theme.getName());
+            SwingUtilities.invokeLater(ThemeUtil::setLookAndFeel);
+            updateCallbacks.forEach(Runnable::run);
+          });
       themeSelector.add(themeItem);
     }
     updateCallbacks.forEach(Runnable::run);
     viewMenu.add(themeSelector);
 
-        /*
-        viewMenu.addSeparator();
+    /*
+    viewMenu.addSeparator();
 
-        var windowMenu = new JMenu("Window");
-        var trafficGraph = new JMenuItem("Traffic Monitor");
-        trafficGraph.addActionListener(e -> {
-            System.out.println("TODO: Open traffic graph");
-        });
-        windowMenu.add(trafficGraph);
-        viewMenu.add(windowMenu);
-         */
+    var windowMenu = new JMenu("Window");
+    var trafficGraph = new JMenuItem("Traffic Monitor");
+    trafficGraph.addActionListener(e -> {
+        System.out.println("TODO: Open traffic graph");
+    });
+    windowMenu.add(trafficGraph);
+    viewMenu.add(windowMenu);
+     */
     add(viewMenu);
 
     var helpMenu = new JMenu("Help");
@@ -168,16 +179,19 @@ public class SFMenuBar extends JMenuBar {
     helpMenu.addSeparator();
 
     var saveLogs = new JMenuItem("Save logs");
-    saveLogs.addActionListener(listener -> JFXFileHelper.showSaveDialog(SFPathConstants.DATA_FOLDER, Map.of(
-        "Log Files", "log"
-    ), "log.txt").ifPresent(file -> {
-      try {
-        Files.writeString(file, logPanel.messageLogPanel().getLogs());
-        log.info("Saved log to: {}", file);
-      } catch (IOException e) {
-        log.error("Failed to save log!", e);
-      }
-    }));
+    saveLogs.addActionListener(
+        listener ->
+            JFXFileHelper.showSaveDialog(
+                    SFPathConstants.DATA_FOLDER, Map.of("Log Files", "log"), "log.txt")
+                .ifPresent(
+                    file -> {
+                      try {
+                        Files.writeString(file, logPanel.messageLogPanel().getLogs());
+                        log.info("Saved log to: {}", file);
+                      } catch (IOException e) {
+                        log.error("Failed to save log!", e);
+                      }
+                    }));
     helpMenu.add(saveLogs);
 
     if (!SystemInfo.isMacOS) {
@@ -196,16 +210,17 @@ public class SFMenuBar extends JMenuBar {
     }
 
     if (desktop.isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
-      desktop.setQuitHandler((e, response) -> {
-        var event = new WindowCloseEvent();
-        SoulFireAPI.postEvent(event);
-        var canQuit = !event.isCancelled();
-        if (canQuit) {
-          response.performQuit();
-        } else {
-          response.cancelQuit();
-        }
-      });
+      desktop.setQuitHandler(
+          (e, response) -> {
+            var event = new WindowCloseEvent();
+            SoulFireAPI.postEvent(event);
+            var canQuit = !event.isCancelled();
+            if (canQuit) {
+              response.performQuit();
+            } else {
+              response.cancelQuit();
+            }
+          });
     }
   }
 

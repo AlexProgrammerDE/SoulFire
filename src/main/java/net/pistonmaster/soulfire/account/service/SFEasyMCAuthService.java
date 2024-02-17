@@ -33,8 +33,10 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 
 @Slf4j
-public final class SFEasyMCAuthService implements MCAuthService<SFEasyMCAuthService.EasyMCAuthData> {
-  private static final URI AUTHENTICATE_ENDPOINT = URI.create("https://api.easymc.io/v1/token/redeem");
+public final class SFEasyMCAuthService
+    implements MCAuthService<SFEasyMCAuthService.EasyMCAuthData> {
+  private static final URI AUTHENTICATE_ENDPOINT =
+      URI.create("https://api.easymc.io/v1/token/redeem");
   private final Gson gson = new Gson();
 
   @Override
@@ -43,8 +45,10 @@ public final class SFEasyMCAuthService implements MCAuthService<SFEasyMCAuthServ
       var request = new AuthenticationRequest(data.altToken);
       var httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
       httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
-      var response = gson.fromJson(EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
-          TokenRedeemResponse.class);
+      var response =
+          gson.fromJson(
+              EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
+              TokenRedeemResponse.class);
 
       if (response.error() != null) {
         log.error("EasyMC has returned a error: {}", response.error());
@@ -58,13 +62,8 @@ public final class SFEasyMCAuthService implements MCAuthService<SFEasyMCAuthServ
       return new MinecraftAccount(
           AuthType.EASYMC,
           response.mcName(),
-          new OnlineJavaData(
-              UUID.fromString(response.uuid()),
-              response.session(),
-              -1
-          ),
-          true
-      );
+          new OnlineJavaData(UUID.fromString(response.uuid()), response.session(), -1),
+          true);
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -81,11 +80,9 @@ public final class SFEasyMCAuthService implements MCAuthService<SFEasyMCAuthServ
     return new EasyMCAuthData(split[0].trim());
   }
 
-  public record EasyMCAuthData(String altToken) {
-  }
+  public record EasyMCAuthData(String altToken) {}
 
-  private record AuthenticationRequest(String token) {
-  }
+  private record AuthenticationRequest(String token) {}
 
   @SuppressWarnings("unused") // Used by GSON
   @Getter

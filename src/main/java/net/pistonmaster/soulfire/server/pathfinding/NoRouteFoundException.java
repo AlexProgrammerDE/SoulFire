@@ -20,8 +20,7 @@ package net.pistonmaster.soulfire.server.pathfinding;
 import java.io.Serial;
 
 public class NoRouteFoundException extends RuntimeException {
-  @Serial
-  private static final long serialVersionUID = 1L;
+  @Serial private static final long serialVersionUID = 1L;
 
   public NoRouteFoundException() {
     super("No route found!");

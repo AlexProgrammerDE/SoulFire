@@ -29,31 +29,34 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class DataGenerators {
-  private static final List<IDataGenerator> GENERATORS = List.of(
-      new BlockCollisionShapesDataGenerator.BlockShapesGenerator(),
-      new BlockCollisionShapesDataGenerator.BlockStatesGenerator(),
-      new BlocksDataGenerator(),
-      new BlocksJavaGenerator(),
-      new EffectsDataGenerator(),
-      new EnchantmentsDataGenerator(),
-      new EntitiesDataGenerator(),
-      new EntitiesJavaGenerator(),
-      new ItemsDataGenerator(),
-      new ItemsJavaGenerator(),
-      new AttributesDataGenerator(),
-      new AttributesJavaGenerator(),
-      new LanguageDataGenerator(),
-      new TagsDataGenerator.BlockTagsDataGenerator(),
-      new TagsDataGenerator.ItemTagsDataGenerator(),
-      new TagsDataGenerator.EntityTypeTagsDataGenerator(),
-      new WorldExporterGenerator()
-  );
+  private static final List<IDataGenerator> GENERATORS =
+      List.of(
+          new BlockCollisionShapesDataGenerator.BlockShapesGenerator(),
+          new BlockCollisionShapesDataGenerator.BlockStatesGenerator(),
+          new BlocksDataGenerator(),
+          new BlocksJavaGenerator(),
+          new EffectsDataGenerator(),
+          new EnchantmentsDataGenerator(),
+          new EntitiesDataGenerator(),
+          new EntitiesJavaGenerator(),
+          new ItemsDataGenerator(),
+          new ItemsJavaGenerator(),
+          new AttributesDataGenerator(),
+          new AttributesJavaGenerator(),
+          new LanguageDataGenerator(),
+          new TagsDataGenerator.BlockTagsDataGenerator(),
+          new TagsDataGenerator.ItemTagsDataGenerator(),
+          new TagsDataGenerator.EntityTypeTagsDataGenerator(),
+          new WorldExporterGenerator());
+
+  private DataGenerators() {}
 
   public static boolean runDataGenerators(Path outputDirectory) {
     try {
       Files.createDirectories(outputDirectory);
     } catch (IOException exception) {
-      log.error("Failed to create data generator output directory at {}", outputDirectory, exception);
+      log.error(
+          "Failed to create data generator output directory at {}", outputDirectory, exception);
       return false;
     }
 
@@ -68,17 +71,29 @@ public class DataGenerators {
         var outputElement = dataGenerator.generateDataJson();
 
         if (outputElement instanceof JsonElement jsonElement) {
-          try (var writer = Files.newBufferedWriter(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+          try (var writer =
+              Files.newBufferedWriter(
+                  outputFilePath,
+                  StandardOpenOption.CREATE,
+                  StandardOpenOption.TRUNCATE_EXISTING)) {
             var jsonWriter = new JsonWriter(writer);
             jsonWriter.setIndent("  ");
             Streams.write(jsonElement, jsonWriter);
           }
         } else if (outputElement instanceof String string) {
-          try (var writer = Files.newBufferedWriter(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+          try (var writer =
+              Files.newBufferedWriter(
+                  outputFilePath,
+                  StandardOpenOption.CREATE,
+                  StandardOpenOption.TRUNCATE_EXISTING)) {
             writer.write(string);
           }
         } else if (outputElement instanceof byte[] bytes) {
-          try (var outputStream = Files.newOutputStream(outputFilePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+          try (var outputStream =
+              Files.newOutputStream(
+                  outputFilePath,
+                  StandardOpenOption.CREATE,
+                  StandardOpenOption.TRUNCATE_EXISTING)) {
             outputStream.write(bytes);
           }
         } else {
@@ -96,8 +111,5 @@ public class DataGenerators {
 
     log.info("Finishing running data generators");
     return generatorsFailed == 0;
-  }
-
-  private DataGenerators() {
   }
 }

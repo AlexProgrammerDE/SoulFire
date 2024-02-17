@@ -26,16 +26,23 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
 
-public final class SFJavaMicrosoftAuthService implements MCAuthService<SFJavaMicrosoftAuthService.JavaMicrosoftAuthData> {
+public final class SFJavaMicrosoftAuthService
+    implements MCAuthService<SFJavaMicrosoftAuthService.JavaMicrosoftAuthData> {
   @Override
   public MinecraftAccount login(JavaMicrosoftAuthData data, SWProxy proxyData) throws IOException {
     try {
-      var fullJavaSession = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(HttpHelper.createLenniMCAuthHttpClient(proxyData),
-          new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
+      var fullJavaSession =
+          MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(
+              HttpHelper.createLenniMCAuthHttpClient(proxyData),
+              new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
       var mcProfile = fullJavaSession.getMcProfile();
       var mcToken = mcProfile.getMcToken();
-      return new MinecraftAccount(AuthType.MICROSOFT_JAVA, mcProfile.getName(),
-          new OnlineJavaData(mcProfile.getId(), mcToken.getAccessToken(), mcToken.getExpireTimeMs()), true);
+      return new MinecraftAccount(
+          AuthType.MICROSOFT_JAVA,
+          mcProfile.getName(),
+          new OnlineJavaData(
+              mcProfile.getId(), mcToken.getAccessToken(), mcToken.getExpireTimeMs()),
+          true);
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -58,6 +65,5 @@ public final class SFJavaMicrosoftAuthService implements MCAuthService<SFJavaMic
     return new JavaMicrosoftAuthData(email, password);
   }
 
-  public record JavaMicrosoftAuthData(String email, String password) {
-  }
+  public record JavaMicrosoftAuthData(String email, String password) {}
 }

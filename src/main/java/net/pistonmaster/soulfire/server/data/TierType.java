@@ -25,13 +25,60 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum TierType {
-  WOOD(0, 2, Set.of(ItemType.WOODEN_PICKAXE, ItemType.WOODEN_SHOVEL, ItemType.WOODEN_AXE, ItemType.WOODEN_HOE, ItemType.WOODEN_SWORD)),
-  STONE(1, 4, Set.of(ItemType.STONE_PICKAXE, ItemType.STONE_SHOVEL, ItemType.STONE_AXE, ItemType.STONE_HOE, ItemType.STONE_SWORD)),
-  IRON(2, 6, Set.of(ItemType.IRON_PICKAXE, ItemType.IRON_SHOVEL, ItemType.IRON_AXE, ItemType.IRON_HOE, ItemType.IRON_SWORD)),
-  DIAMOND(3, 8, Set.of(ItemType.DIAMOND_PICKAXE, ItemType.DIAMOND_SHOVEL, ItemType.DIAMOND_AXE, ItemType.DIAMOND_HOE, ItemType.DIAMOND_SWORD)),
-  GOLD(0, 12, Set.of(ItemType.GOLDEN_PICKAXE, ItemType.GOLDEN_SHOVEL, ItemType.GOLDEN_AXE, ItemType.GOLDEN_HOE, ItemType.GOLDEN_SWORD)),
-  NETHERITE(4, 9,
-      Set.of(ItemType.NETHERITE_PICKAXE, ItemType.NETHERITE_SHOVEL, ItemType.NETHERITE_AXE, ItemType.NETHERITE_HOE, ItemType.NETHERITE_SWORD));
+  WOOD(
+      0,
+      2,
+      Set.of(
+          ItemType.WOODEN_PICKAXE,
+          ItemType.WOODEN_SHOVEL,
+          ItemType.WOODEN_AXE,
+          ItemType.WOODEN_HOE,
+          ItemType.WOODEN_SWORD)),
+  STONE(
+      1,
+      4,
+      Set.of(
+          ItemType.STONE_PICKAXE,
+          ItemType.STONE_SHOVEL,
+          ItemType.STONE_AXE,
+          ItemType.STONE_HOE,
+          ItemType.STONE_SWORD)),
+  IRON(
+      2,
+      6,
+      Set.of(
+          ItemType.IRON_PICKAXE,
+          ItemType.IRON_SHOVEL,
+          ItemType.IRON_AXE,
+          ItemType.IRON_HOE,
+          ItemType.IRON_SWORD)),
+  DIAMOND(
+      3,
+      8,
+      Set.of(
+          ItemType.DIAMOND_PICKAXE,
+          ItemType.DIAMOND_SHOVEL,
+          ItemType.DIAMOND_AXE,
+          ItemType.DIAMOND_HOE,
+          ItemType.DIAMOND_SWORD)),
+  GOLD(
+      0,
+      12,
+      Set.of(
+          ItemType.GOLDEN_PICKAXE,
+          ItemType.GOLDEN_SHOVEL,
+          ItemType.GOLDEN_AXE,
+          ItemType.GOLDEN_HOE,
+          ItemType.GOLDEN_SWORD)),
+  NETHERITE(
+      4,
+      9,
+      Set.of(
+          ItemType.NETHERITE_PICKAXE,
+          ItemType.NETHERITE_SHOVEL,
+          ItemType.NETHERITE_AXE,
+          ItemType.NETHERITE_HOE,
+          ItemType.NETHERITE_SWORD));
 
   public static final TierType[] VALUES = values();
 

@@ -24,8 +24,7 @@ import net.pistonmaster.soulfire.server.data.BlockType;
 public class BlockTypeHelper {
   private static final double SAFE_BLOCK_MIN_HEIGHT = 0.9;
 
-  private BlockTypeHelper() {
-  }
+  private BlockTypeHelper() {}
 
   public static boolean isFullBlock(BlockState meta) {
     return meta.blockShapeGroup().isFullBlock();
@@ -54,9 +53,7 @@ public class BlockTypeHelper {
     }
 
     var shape = type.blockShapes().getFirst();
-    return shape.isBlockXZCollision()
-        && shape.minY() == 0
-        && shape.maxY() >= SAFE_BLOCK_MIN_HEIGHT;
+    return shape.isBlockXZCollision() && shape.minY() == 0 && shape.maxY() >= SAFE_BLOCK_MIN_HEIGHT;
   }
 
   public static boolean isDiggable(BlockType type) {

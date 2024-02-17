@@ -26,15 +26,16 @@ import net.pistonmaster.soulfire.util.BuiltinSettingsConstants;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProxySettings implements SettingsObject {
-  private static final Property.Builder builder = Property.builder(BuiltinSettingsConstants.PROXY_SETTINGS_ID);
-  public static final IntProperty BOTS_PER_PROXY = builder.ofInt(
-      "bots-per-proxy",
-      "Bots per proxy",
-      new String[] {"--bots-per-proxy"},
-      "Amount of bots that can be on a single proxy",
-      -1,
-      -1,
-      Integer.MAX_VALUE,
-      1
-  );
+  private static final Property.Builder builder =
+      Property.builder(BuiltinSettingsConstants.PROXY_SETTINGS_ID);
+  public static final IntProperty BOTS_PER_PROXY =
+      builder.ofInt(
+          "bots-per-proxy",
+          "Bots per proxy",
+          new String[] {"--bots-per-proxy"},
+          "Amount of bots that can be on a single proxy",
+          -1,
+          -1,
+          Integer.MAX_VALUE,
+          1);
 }

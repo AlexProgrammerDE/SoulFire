@@ -25,24 +25,23 @@ import net.pistonmaster.soulfire.server.protocol.BotConnection;
 public class CollectBlockController {
   private final BlockType blockType;
 
-  public void start(BotConnection botConnection) {
+  public void start(BotConnection botConnection) {}
 
-  }
-
-  public void searchBlockWithinRadiusAndY(BotConnection botConnection, BlockType blockType, int radius, int minY, int maxY) {
+  public void searchBlockWithinRadiusAndY(
+      BotConnection botConnection, BlockType blockType, int radius, int minY, int maxY) {
     var radiusSquared = radius * radius;
 
     for (var x = -radius; x <= radius; x++) {
       for (var y = -radius; y <= radius; y++) {
         for (var z = -radius; z <= radius; z++) {
           if (x * x + y * y + z * z <= radiusSquared) {
-                        /*
-                        Vector3i loc = playerLocation.clone().add(x, y, z);
-                        if (loc.getBlock().getType() == blockType) {
-                            player.sendMessage("Found " + blockType.toString() + " at: " + loc.toString());
-                            // Do something with the found block
-                        }
-                         */
+            /*
+            Vector3i loc = playerLocation.clone().add(x, y, z);
+            if (loc.getBlock().getType() == blockType) {
+                player.sendMessage("Found " + blockType.toString() + " at: " + loc.toString());
+                // Do something with the found block
+            }
+             */
           }
         }
       }

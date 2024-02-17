@@ -30,7 +30,8 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
     return target.name().toLowerCase(Locale.ROOT);
   }
 
-  //Equation enchantment costs follow is a * level + b, so we can easily retrieve a and b by passing zero level
+  // Equation enchantment costs follow is a * level + b, so we can easily retrieve a and b by
+  // passing zero level
   private static JsonObject generateEnchantmentMinPowerCoefficients(Enchantment enchantment) {
     var b = enchantment.getMinCost(0);
     var a = enchantment.getMinCost(1) - b;
@@ -55,7 +56,9 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
     var enchantmentDesc = new JsonObject();
 
     enchantmentDesc.addProperty("id", BuiltInRegistries.ENCHANTMENT.getId(enchantment));
-    enchantmentDesc.addProperty("name", Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(enchantment)).getPath());
+    enchantmentDesc.addProperty(
+        "name",
+        Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(enchantment)).getPath());
 
     enchantmentDesc.addProperty("maxLevel", enchantment.getMaxLevel());
     enchantmentDesc.add("minCost", generateEnchantmentMinPowerCoefficients(enchantment));
@@ -64,14 +67,17 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
     enchantmentDesc.addProperty("treasureOnly", enchantment.isTreasureOnly());
     enchantmentDesc.addProperty("curse", enchantment.isCurse());
 
-    var incompatibleEnchantments = BuiltInRegistries.ENCHANTMENT.stream()
-        .filter(other -> !enchantment.isCompatibleWith(other))
-        .filter(other -> other != enchantment)
-        .toList();
+    var incompatibleEnchantments =
+        BuiltInRegistries.ENCHANTMENT.stream()
+            .filter(other -> !enchantment.isCompatibleWith(other))
+            .filter(other -> other != enchantment)
+            .toList();
 
     var excludes = new JsonArray();
     for (var excludedEnchantment : incompatibleEnchantments) {
-      excludes.add(Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(excludedEnchantment)).getPath());
+      excludes.add(
+          Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(excludedEnchantment))
+              .getPath());
     }
     enchantmentDesc.add("exclude", excludes);
 

@@ -32,101 +32,100 @@ import net.raphimc.vialoader.util.ProtocolVersionList;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BotSettings implements SettingsObject {
-  private static final Property.Builder BUILDER = Property.builder(BuiltinSettingsConstants.BOT_SETTINGS_ID);
-  public static final StringProperty ADDRESS = BUILDER.ofString(
-      "address",
-      "Address",
-      new String[] {"--address"},
-      "Address to connect to",
-      "127.0.0.1:25565"
-  );
-  public static final IntProperty AMOUNT = BUILDER.ofInt(
-      "amount",
-      "Amount",
-      new String[] {"--amount"},
-      "Amount of bots to connect",
-      1,
-      1,
-      Integer.MAX_VALUE,
-      1
-  );
-  public static final MinMaxPropertyLink JOIN_DELAY = new MinMaxPropertyLink(
+  private static final Property.Builder BUILDER =
+      Property.builder(BuiltinSettingsConstants.BOT_SETTINGS_ID);
+  public static final StringProperty ADDRESS =
+      BUILDER.ofString(
+          "address",
+          "Address",
+          new String[] {"--address"},
+          "Address to connect to",
+          "127.0.0.1:25565");
+  public static final IntProperty AMOUNT =
       BUILDER.ofInt(
-          "join-min-delay",
-          "Min Join Delay (ms)",
-          new String[] {"--join-min-delay"},
-          "Minimum delay between joins in milliseconds",
-          1000,
+          "amount",
+          "Amount",
+          new String[] {"--amount"},
+          "Amount of bots to connect",
+          1,
+          1,
+          Integer.MAX_VALUE,
+          1);
+  public static final MinMaxPropertyLink JOIN_DELAY =
+      new MinMaxPropertyLink(
+          BUILDER.ofInt(
+              "join-min-delay",
+              "Min Join Delay (ms)",
+              new String[] {"--join-min-delay"},
+              "Minimum delay between joins in milliseconds",
+              1000,
+              0,
+              Integer.MAX_VALUE,
+              1),
+          BUILDER.ofInt(
+              "join-max-delay",
+              "Max Join Delay (ms)",
+              new String[] {"--join-max-delay"},
+              "Maximum delay between joins in milliseconds",
+              3000,
+              0,
+              Integer.MAX_VALUE,
+              1));
+  public static final ComboProperty PROTOCOL_VERSION =
+      BUILDER.ofCombo(
+          "protocol-version",
+          "Protocol Version",
+          new String[] {"--protocol-version"},
+          "Minecraft protocol version to use",
+          getProtocolVersionOptions(),
+          getLatestProtocolVersionIndex());
+  public static final IntProperty READ_TIMEOUT =
+      BUILDER.ofInt(
+          "read-timeout",
+          "Read Timeout",
+          new String[] {"--read-timeout"},
+          "Read timeout in seconds",
+          30,
           0,
           Integer.MAX_VALUE,
-          1
-      ),
+          1);
+  public static final IntProperty WRITE_TIMEOUT =
       BUILDER.ofInt(
-          "join-max-delay",
-          "Max Join Delay (ms)",
-          new String[] {"--join-max-delay"},
-          "Maximum delay between joins in milliseconds",
-          3000,
+          "write-timeout",
+          "Write Timeout",
+          new String[] {"--write-timeout"},
+          "Write timeout in seconds",
+          0,
           0,
           Integer.MAX_VALUE,
-          1
-      )
-  );
-  public static final ComboProperty PROTOCOL_VERSION = BUILDER.ofCombo(
-      "protocol-version",
-      "Protocol Version",
-      new String[] {"--protocol-version"},
-      "Minecraft protocol version to use",
-      getProtocolVersionOptions(),
-      getLatestProtocolVersionIndex()
-  );
-  public static final IntProperty READ_TIMEOUT = BUILDER.ofInt(
-      "read-timeout",
-      "Read Timeout",
-      new String[] {"--read-timeout"},
-      "Read timeout in seconds",
-      30,
-      0,
-      Integer.MAX_VALUE,
-      1
-  );
-  public static final IntProperty WRITE_TIMEOUT = BUILDER.ofInt(
-      "write-timeout",
-      "Write Timeout",
-      new String[] {"--write-timeout"},
-      "Write timeout in seconds",
-      0,
-      0,
-      Integer.MAX_VALUE,
-      1
-  );
-  public static final IntProperty CONNECT_TIMEOUT = BUILDER.ofInt(
-      "connect-timeout",
-      "Connect Timeout",
-      new String[] {"--connect-timeout"},
-      "Connect timeout in seconds",
-      30,
-      0,
-      Integer.MAX_VALUE,
-      1
-  );
-  public static final BooleanProperty RESOLVE_SRV = BUILDER.ofBoolean(
-      "resolve-srv",
-      "Resolve SRV",
-      new String[] {"--resolve-srv"},
-      "Try to resolve SRV records from the address",
-      true
-  );
-  public static final IntProperty CONCURRENT_CONNECTS = BUILDER.ofInt(
-      "concurrent-connects",
-      "Concurrent Connects",
-      new String[] {"--concurrent-connects"},
-      "Max amount of bots attempting to connect at once",
-      1,
-      1,
-      Integer.MAX_VALUE,
-      1
-  );
+          1);
+  public static final IntProperty CONNECT_TIMEOUT =
+      BUILDER.ofInt(
+          "connect-timeout",
+          "Connect Timeout",
+          new String[] {"--connect-timeout"},
+          "Connect timeout in seconds",
+          30,
+          0,
+          Integer.MAX_VALUE,
+          1);
+  public static final BooleanProperty RESOLVE_SRV =
+      BUILDER.ofBoolean(
+          "resolve-srv",
+          "Resolve SRV",
+          new String[] {"--resolve-srv"},
+          "Try to resolve SRV records from the address",
+          true);
+  public static final IntProperty CONCURRENT_CONNECTS =
+      BUILDER.ofInt(
+          "concurrent-connects",
+          "Concurrent Connects",
+          new String[] {"--concurrent-connects"},
+          "Max amount of bots attempting to connect at once",
+          1,
+          1,
+          Integer.MAX_VALUE,
+          1);
 
   private static ComboProperty.ComboOption[] getProtocolVersionOptions() {
     return ProtocolVersionList.getProtocolsNewToOld().stream()
@@ -135,6 +134,7 @@ public class BotSettings implements SettingsObject {
   }
 
   private static int getLatestProtocolVersionIndex() {
-    return ProtocolVersionList.getProtocolsNewToOld().indexOf(SFVersionConstants.CURRENT_PROTOCOL_VERSION);
+    return ProtocolVersionList.getProtocolsNewToOld()
+        .indexOf(SFVersionConstants.CURRENT_PROTOCOL_VERSION);
   }
 }

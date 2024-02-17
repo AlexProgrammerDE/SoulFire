@@ -23,9 +23,9 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 /**
- * A simple 3D integer vector.
- * This class is used instead of Vector3i because this uses direct field access instead of getters.
- * Even though the JIT compiler could optimize this, it's still faster to use this class.
+ * A simple 3D integer vector. This class is used instead of Vector3i because this uses direct field
+ * access instead of getters. Even though the JIT compiler could optimize this, it's still faster to
+ * use this class.
  */
 @RequiredArgsConstructor
 public class SFVec3i {
@@ -98,6 +98,9 @@ public class SFVec3i {
   }
 
   public double distance(SFVec3i goal) {
-    return Math.sqrt(MathHelper.square(goal.x - x) + MathHelper.square(goal.y - y) + MathHelper.square(goal.z - z));
+    return Math.sqrt(
+        MathHelper.square(goal.x - x)
+            + MathHelper.square(goal.y - y)
+            + MathHelper.square(goal.z - z));
   }
 }

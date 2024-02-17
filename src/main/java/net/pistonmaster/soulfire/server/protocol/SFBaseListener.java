@@ -75,13 +75,18 @@ public class SFBaseListener extends SessionAdapter {
 
         var authSupport = minecraftAccount.isPremiumJava();
         if (!authSupport) {
-          botConnection.logger().info("Server sent a encryption request, but we're offline mode. Not authenticating with mojang.");
+          botConnection
+              .logger()
+              .info(
+                  "Server sent a encryption request, but we're offline mode. Not authenticating with mojang.");
         }
 
         var auth = authSupport;
         var isLegacy = SFVersionConstants.isLegacy(botConnection.meta().protocolVersion());
         if (auth && isLegacy) {
-          auth = Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class)).authenticate;
+          auth =
+              Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class))
+                  .authenticate;
         }
 
         botConnection.logger().debug("Performing mojang request: {}", auth);
@@ -96,11 +101,14 @@ public class SFBaseListener extends SessionAdapter {
         }
 
         if (auth) {
-          var serverId = SFSessionService.getServerId(helloPacket.getServerId(), helloPacket.getPublicKey(), key);
+          var serverId =
+              SFSessionService.getServerId(
+                  helloPacket.getServerId(), helloPacket.getPublicKey(), key);
           botConnection.meta().joinServerId(serverId, viaSession);
         }
 
-        session.send(new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
+        session.send(
+            new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
 
         if (!isLegacy) { // Legacy encryption is handled in SWViaEncryptionProvider
           viaSession.enableJavaEncryption(key);
@@ -148,10 +156,8 @@ public class SFBaseListener extends SessionAdapter {
       if (this.targetState == ProtocolState.LOGIN) {
         var minecraftAccount = botConnection.meta().minecraftAccount();
 
-        session.send(new ServerboundHelloPacket(
-            minecraftAccount.username(),
-            minecraftAccount.uniqueId()
-        ));
+        session.send(
+            new ServerboundHelloPacket(minecraftAccount.username(), minecraftAccount.uniqueId()));
       } else {
         session.send(new ServerboundStatusRequestPacket());
       }
@@ -163,15 +169,18 @@ public class SFBaseListener extends SessionAdapter {
     var protocol = (MinecraftProtocol) event.getSession().getPacketProtocol();
     var originalAddress = botConnection.resolvedAddress().originalAddress();
 
-    event.getSession().send(new ClientIntentionPacket(
-        protocol.getCodec().getProtocolVersion(),
-        originalAddress.host(),
-        originalAddress.port(),
-        switch (this.targetState) {
-          case LOGIN -> HandshakeIntent.LOGIN;
-          case STATUS -> HandshakeIntent.STATUS;
-          default -> throw new IllegalStateException("Unexpected value: " + this.targetState);
-        }
-    ));
+    event
+        .getSession()
+        .send(
+            new ClientIntentionPacket(
+                protocol.getCodec().getProtocolVersion(),
+                originalAddress.host(),
+                originalAddress.port(),
+                switch (this.targetState) {
+                  case LOGIN -> HandshakeIntent.LOGIN;
+                  case STATUS -> HandshakeIntent.STATUS;
+                  default ->
+                      throw new IllegalStateException("Unexpected value: " + this.targetState);
+                }));
   }
 }

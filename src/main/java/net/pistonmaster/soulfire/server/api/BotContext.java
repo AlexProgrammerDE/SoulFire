@@ -17,5 +17,4 @@
  */
 package net.pistonmaster.soulfire.server.api;
 
-public interface BotContext {
-}
+public interface BotContext {}

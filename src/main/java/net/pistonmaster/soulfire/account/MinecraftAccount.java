@@ -23,11 +23,15 @@ import net.pistonmaster.soulfire.account.service.AccountData;
 import net.pistonmaster.soulfire.account.service.BedrockData;
 import net.pistonmaster.soulfire.account.service.OnlineJavaData;
 
-public record MinecraftAccount(@NonNull AuthType authType, @NonNull String username, @NonNull AccountData accountData,
-                               boolean enabled) {
+public record MinecraftAccount(
+    @NonNull AuthType authType,
+    @NonNull String username,
+    @NonNull AccountData accountData,
+    boolean enabled) {
   @Override
   public String toString() {
-    return String.format("MinecraftAccount(authType=%s, username=%s, enabled=%s)", authType, username, enabled);
+    return String.format(
+        "MinecraftAccount(authType=%s, username=%s, enabled=%s)", authType, username, enabled);
   }
 
   public boolean isPremiumJava() {

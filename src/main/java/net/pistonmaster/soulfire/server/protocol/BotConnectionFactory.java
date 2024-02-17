@@ -38,29 +38,49 @@ import net.pistonmaster.soulfire.server.settings.BotSettings;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 import org.slf4j.Logger;
 
-public record BotConnectionFactory(AttackManager attackManager, ResolveUtil.ResolvedAddress resolvedAddress,
-                                   SettingsHolder settingsHolder, Logger logger,
-                                   MinecraftProtocol protocol, MinecraftAccount minecraftAccount,
-                                   ProtocolVersion protocolVersion,
-                                   SWProxy proxyData, EventLoopGroup eventLoopGroup) {
+public record BotConnectionFactory(
+    AttackManager attackManager,
+    ResolveUtil.ResolvedAddress resolvedAddress,
+    SettingsHolder settingsHolder,
+    Logger logger,
+    MinecraftProtocol protocol,
+    MinecraftAccount minecraftAccount,
+    ProtocolVersion protocolVersion,
+    SWProxy proxyData,
+    EventLoopGroup eventLoopGroup) {
   public BotConnection prepareConnection() {
     return prepareConnectionInternal(ProtocolState.LOGIN);
   }
 
   public BotConnection prepareConnectionInternal(ProtocolState targetState) {
     var meta = new BotConnectionMeta(minecraftAccount, targetState, protocolVersion, proxyData);
-    var session = new ViaClientSession(resolvedAddress.resolvedAddress(), logger, protocol, proxyData, eventLoopGroup, meta);
-    var botConnection = new BotConnection(UUID.randomUUID(), this, attackManager, attackManager.soulFireServer(),
-        settingsHolder, logger, protocol, session, resolvedAddress, new ExecutorManager("SoulFire-Attack-" + attackManager.id()), meta,
-        LambdaManager.basic(new ASMGenerator())
-            .setExceptionHandler(EventExceptionHandler.INSTANCE)
-            .setEventFilter((c, h) -> {
-              if (SoulFireBotEvent.class.isAssignableFrom(c)) {
-                return true;
-              } else {
-                throw new IllegalStateException("This event handler only accepts bot events");
-              }
-            }));
+    var session =
+        new ViaClientSession(
+            resolvedAddress.resolvedAddress(), logger, protocol, proxyData, eventLoopGroup, meta);
+    var botConnection =
+        new BotConnection(
+            UUID.randomUUID(),
+            this,
+            attackManager,
+            attackManager.soulFireServer(),
+            settingsHolder,
+            logger,
+            protocol,
+            session,
+            resolvedAddress,
+            new ExecutorManager("SoulFire-Attack-" + attackManager.id()),
+            meta,
+            LambdaManager.basic(new ASMGenerator())
+                .setExceptionHandler(EventExceptionHandler.INSTANCE)
+                .setEventFilter(
+                    (c, h) -> {
+                      if (SoulFireBotEvent.class.isAssignableFrom(c)) {
+                        return true;
+                      } else {
+                        throw new IllegalStateException(
+                            "This event handler only accepts bot events");
+                      }
+                    }));
 
     var sessionDataManager = new SessionDataManager(botConnection);
     session.meta().sessionDataManager(sessionDataManager);

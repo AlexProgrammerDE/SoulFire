@@ -48,15 +48,16 @@ import net.miginfocom.swing.MigLayout;
 import net.pistonmaster.soulfire.client.gui.GUIClientProps;
 
 /**
- * Taken from <a href="https://github.com/JFormDesigner/FlatLaf/blob/0d2f37e1daf43fd103de0f888a4ed01358cdcbd1/flatlaf-demo/src/main/java/com/formdev/flatlaf/demo/HintManager.java">Flatlaf Demo</a>.
+ * Taken from <a
+ * href="https://github.com/JFormDesigner/FlatLaf/blob/0d2f37e1daf43fd103de0f888a4ed01358cdcbd1/flatlaf-demo/src/main/java/com/formdev/flatlaf/demo/HintManager.java">Flatlaf
+ * Demo</a>.
  *
  * @author Karl Tauber
  */
 public class HintManager {
   private static final List<HintPanel> hintPanels = new ArrayList<>();
 
-  private HintManager() {
-  }
+  private HintManager() {}
 
   public static void showHint(Hint hint) {
     // check whether user already closed the hint
@@ -81,23 +82,17 @@ public class HintManager {
   }
 
   public record Hint(
-      String message,
-      Component owner,
-      int position,
-      String prefsKey,
-      Hint nextHint
-  ) {
-  }
+      String message, Component owner, int position, String prefsKey, Hint nextHint) {}
 
-  //---- class HintPanel ----------------------------------------------------
+  // ---- class HintPanel ----------------------------------------------------
 
-  private static class HintPanel
-      extends JPanel {
+  private static class HintPanel extends JPanel {
     private final Hint hint;
 
     private JPanel popup;
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     private JLabel hintLabel;
+
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 
     private HintPanel(Hint hint) {
@@ -112,8 +107,7 @@ public class HintManager {
 
       // grab all mouse events to avoid that components overlapped
       // by the hint panel receive them
-      addMouseListener(new MouseAdapter() {
-      });
+      addMouseListener(new MouseAdapter() {});
     }
 
     @Override
@@ -133,15 +127,18 @@ public class HintManager {
     }
 
     private void updateBalloonBorder() {
-      var direction = switch (hint.position) {
-        case SwingConstants.LEFT -> SwingConstants.RIGHT;
-        case SwingConstants.TOP -> SwingConstants.BOTTOM;
-        case SwingConstants.RIGHT -> SwingConstants.LEFT;
-        case SwingConstants.BOTTOM -> SwingConstants.TOP;
-        default -> throw new IllegalArgumentException();
-      };
+      var direction =
+          switch (hint.position) {
+            case SwingConstants.LEFT -> SwingConstants.RIGHT;
+            case SwingConstants.TOP -> SwingConstants.BOTTOM;
+            case SwingConstants.RIGHT -> SwingConstants.LEFT;
+            case SwingConstants.BOTTOM -> SwingConstants.TOP;
+            default -> throw new IllegalArgumentException();
+          };
 
-      setBorder(new BalloonBorder(direction, FlatUIUtils.getUIColor("PopupMenu.borderColor", Color.gray)));
+      setBorder(
+          new BalloonBorder(
+              direction, FlatUIUtils.getUIColor("PopupMenu.borderColor", Color.gray)));
     }
 
     void showHint() {
@@ -155,19 +152,21 @@ public class HintManager {
       }
 
       // create a popup panel that has a drop shadow
-      popup = new JPanel(new BorderLayout()) {
-        @Override
-        public void updateUI() {
-          super.updateUI();
+      popup =
+          new JPanel(new BorderLayout()) {
+            @Override
+            public void updateUI() {
+              super.updateUI();
 
-          // use invokeLater because at this time the UI delegates
-          // of child components are not yet updated
-          EventQueue.invokeLater(() -> {
-            validate();
-            setSize(getPreferredSize());
-          });
-        }
-      };
+              // use invokeLater because at this time the UI delegates
+              // of child components are not yet updated
+              EventQueue.invokeLater(
+                  () -> {
+                    validate();
+                    setSize(getPreferredSize());
+                  });
+            }
+          };
       popup.setOpaque(false);
       popup.add(this);
 
@@ -221,19 +220,20 @@ public class HintManager {
       // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
       hintLabel = new JLabel();
 
-      //======== this ========
-      setLayout(new MigLayout(
-          "insets dialog,hidemode 3",
-          // columns
-          "[::200,fill]",
-          // rows
-          "[]para[]"));
+      // ======== this ========
+      setLayout(
+          new MigLayout(
+              "insets dialog,hidemode 3",
+              // columns
+              "[::200,fill]",
+              // rows
+              "[]para[]"));
 
-      //---- hintLabel ----
+      // ---- hintLabel ----
       hintLabel.setText("hint");
       add(hintLabel, "cell 0 0");
 
-      //---- gotItButton ----
+      // ---- gotItButton ----
       var gotItButton = new JButton();
 
       gotItButton.setText("Got it!");
@@ -244,10 +244,9 @@ public class HintManager {
     }
   }
 
-  //---- class BalloonBorder ------------------------------------------------
+  // ---- class BalloonBorder ------------------------------------------------
 
-  private static class BalloonBorder
-      extends FlatEmptyBorder {
+  private static class BalloonBorder extends FlatEmptyBorder {
     private static final int ARC = 8;
     private static final int ARROW_XY = 16;
     private static final int ARROW_SIZE = 8;
@@ -273,12 +272,13 @@ public class HintManager {
         case SwingConstants.BOTTOM -> bottom += ARROW_SIZE;
       }
 
-      shadowBorder = UIManager.getLookAndFeel() instanceof FlatLaf
-          ? new FlatDropShadowBorder(
-          UIManager.getColor("Popup.dropShadowColor"),
-          new Insets(SHADOW_SIZE2, SHADOW_SIZE2, SHADOW_SIZE2, SHADOW_SIZE2),
-          FlatUIUtils.getUIFloat("Popup.dropShadowOpacity", 0.5f))
-          : null;
+      shadowBorder =
+          UIManager.getLookAndFeel() instanceof FlatLaf
+              ? new FlatDropShadowBorder(
+                  UIManager.getColor("Popup.dropShadowColor"),
+                  new Insets(SHADOW_SIZE2, SHADOW_SIZE2, SHADOW_SIZE2, SHADOW_SIZE2),
+                  FlatUIUtils.getUIFloat("Popup.dropShadowOpacity", 0.5f))
+              : null;
     }
 
     @Override

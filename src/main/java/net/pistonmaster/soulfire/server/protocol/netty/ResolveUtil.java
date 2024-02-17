@@ -49,13 +49,15 @@ public class ResolveUtil {
     }
   }
 
-  private ResolveUtil() {
-  }
+  private ResolveUtil() {}
 
-  public static Optional<ResolvedAddress> resolveAddress(boolean isBedrock, SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup) {
+  public static Optional<ResolvedAddress> resolveAddress(
+      boolean isBedrock, SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup) {
     var serverAddress = new ServerAddress(settingsHolder.get(BotSettings.ADDRESS));
 
-    if (settingsHolder.get(BotSettings.RESOLVE_SRV) && serverAddress.port() == 25565 && !isBedrock) {
+    if (settingsHolder.get(BotSettings.RESOLVE_SRV)
+        && serverAddress.port() == 25565
+        && !isBedrock) {
       // SRVs can override address on Java, but not Bedrock.
       var resolved = resolveSrv(serverAddress, eventLoopGroup);
       if (resolved.isPresent()) {
@@ -65,17 +67,16 @@ public class ResolveUtil {
       log.debug("Not resolving SRV record for {}", serverAddress.host());
     }
 
-    return resolveByHost(serverAddress)
-        .map(e -> new ResolvedAddress(serverAddress, e));
+    return resolveByHost(serverAddress).map(e -> new ResolvedAddress(serverAddress, e));
   }
 
-  private static Optional<ResolvedAddress> resolveSrv(ServerAddress serverAddress, EventLoopGroup eventLoopGroup) {
+  private static Optional<ResolvedAddress> resolveSrv(
+      ServerAddress serverAddress, EventLoopGroup eventLoopGroup) {
     var name = "_minecraft._tcp." + serverAddress.host();
     log.debug("Attempting SRV lookup for \"{}\".", name);
 
     try {
-      var srvAttribute = DIR_CONTEXT.getAttributes(name, new String[] {"SRV"})
-          .get("srv");
+      var srvAttribute = DIR_CONTEXT.getAttributes(name, new String[] {"SRV"}).get("srv");
       if (srvAttribute != null) {
         var attributeSplit = srvAttribute.get().toString().split(" ", 4);
         log.debug("SRV lookup resolved \"{}\" to \"{}\".", name, srvAttribute.get().toString());
@@ -134,6 +135,5 @@ public class ResolveUtil {
     }
   }
 
-  public record ResolvedAddress(ServerAddress originalAddress, InetSocketAddress resolvedAddress) {
-  }
+  public record ResolvedAddress(ServerAddress originalAddress, InetSocketAddress resolvedAddress) {}
 }

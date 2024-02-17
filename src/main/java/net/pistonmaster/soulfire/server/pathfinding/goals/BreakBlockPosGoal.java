@@ -44,19 +44,14 @@ public record BreakBlockPosGoal(SFVec3i goal) implements GoalScorer {
       throw new IllegalStateException("Block is not a full block!");
     }
 
-    var breakCost = entityState.inventory().getMiningCosts(
-        graph.tagsState(),
-        blockStateMeta
-    ).miningCost();
+    var breakCost =
+        entityState.inventory().getMiningCosts(graph.tagsState(), blockStateMeta).miningCost();
 
     return distance + breakCost;
   }
 
   @Override
   public boolean isFinished(BotEntityState entityState) {
-    return entityState.levelState()
-        .getBlockStateAt(goal)
-        .blockType()
-        .air();
+    return entityState.levelState().getBlockStateAt(goal).blockType().air();
   }
 }

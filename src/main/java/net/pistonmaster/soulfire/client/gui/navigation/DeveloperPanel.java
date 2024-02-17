@@ -30,7 +30,10 @@ public class DeveloperPanel extends NavigationItem {
   public DeveloperPanel(GUIManager guiManager, LogPanel logPanel, CardsContainer cardsContainer) {
     setLayout(new GridBagLayout());
 
-    GeneratedPanel.addComponents(this, cardsContainer.getByNamespace(BuiltinSettingsConstants.DEV_SETTINGS_ID), guiManager.settingsManager());
+    GeneratedPanel.addComponents(
+        this,
+        cardsContainer.getByNamespace(BuiltinSettingsConstants.DEV_SETTINGS_ID),
+        guiManager.settingsManager());
   }
 
   @Override

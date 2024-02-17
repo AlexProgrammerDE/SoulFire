@@ -17,5 +17,4 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.model;
 
-public record HealthData(float health, int food, float saturation) {
-}
+public record HealthData(float health, int food, float saturation) {}

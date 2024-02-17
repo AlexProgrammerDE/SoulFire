@@ -37,17 +37,25 @@ import net.pistonmaster.soulfire.server.settings.lib.SettingsHolder;
 import net.pistonmaster.soulfire.server.util.TimeUtil;
 import org.slf4j.Logger;
 
-public record BotConnection(UUID connectionId, BotConnectionFactory factory, AttackManager attackManager,
-                            SoulFireServer soulFireServer, SettingsHolder settingsHolder,
-                            Logger logger, MinecraftProtocol protocol, ViaClientSession session,
-                            ResolveUtil.ResolvedAddress resolvedAddress,
-                            ExecutorManager executorManager, BotConnectionMeta meta,
-                            LambdaManager eventBus) {
+public record BotConnection(
+    UUID connectionId,
+    BotConnectionFactory factory,
+    AttackManager attackManager,
+    SoulFireServer soulFireServer,
+    SettingsHolder settingsHolder,
+    Logger logger,
+    MinecraftProtocol protocol,
+    ViaClientSession session,
+    ResolveUtil.ResolvedAddress resolvedAddress,
+    ExecutorManager executorManager,
+    BotConnectionMeta meta,
+    LambdaManager eventBus) {
   public CompletableFuture<?> connect() {
-    return CompletableFuture.runAsync(() -> {
-      attackManager.eventBus().call(new PreBotConnectEvent(this));
-      session.connect(true);
-    });
+    return CompletableFuture.runAsync(
+        () -> {
+          attackManager.eventBus().call(new PreBotConnectEvent(this));
+          session.connect(true);
+        });
   }
 
   public boolean isOnline() {
@@ -88,17 +96,18 @@ public record BotConnection(UUID connectionId, BotConnectionFactory factory, Att
   }
 
   public CompletableFuture<?> gracefulDisconnect() {
-    return CompletableFuture.runAsync(() -> {
-      session.disconnect("Disconnect");
+    return CompletableFuture.runAsync(
+        () -> {
+          session.disconnect("Disconnect");
 
-      // Give the server one second to handle the disconnect
-      TimeUtil.waitTime(1, TimeUnit.SECONDS);
+          // Give the server one second to handle the disconnect
+          TimeUtil.waitTime(1, TimeUnit.SECONDS);
 
-      // Shut down all executors
-      executorManager.shutdownAll();
+          // Shut down all executors
+          executorManager.shutdownAll();
 
-      // Let threads finish that didn't immediately interrupt
-      TimeUtil.waitTime(100, TimeUnit.MILLISECONDS);
-    });
+          // Let threads finish that didn't immediately interrupt
+          TimeUtil.waitTime(100, TimeUnit.MILLISECONDS);
+        });
   }
 }

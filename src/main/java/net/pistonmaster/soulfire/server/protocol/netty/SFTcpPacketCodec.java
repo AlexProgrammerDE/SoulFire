@@ -87,7 +87,8 @@ public class SFTcpPacketCodec extends ByteToMessageCodec<Packet> {
       var packet = packetProtocol.createClientboundPacket(id, buf, codecHelper);
 
       if (buf.readableBytes() > 0) {
-        throw new IllegalStateException("Packet \"" + packet.getClass().getSimpleName() + "\" not fully read.");
+        throw new IllegalStateException(
+            "Packet \"" + packet.getClass().getSimpleName() + "\" not fully read.");
       }
 
       out.add(packet);
@@ -103,4 +104,3 @@ public class SFTcpPacketCodec extends ByteToMessageCodec<Packet> {
     }
   }
 }
-

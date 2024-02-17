@@ -44,13 +44,13 @@ import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
 
 /**
- * This class prepares the earliest work possible, such as loading mixins and
- * setting up logging.
+ * This class prepares the earliest work possible, such as loading mixins and setting up logging.
  */
 @Slf4j
 public class SoulFireBootstrap {
   public static final Instant START_TIME = Instant.now();
-  public static final PluginManager PLUGIN_MANAGER = new JarPluginManager(SFPathConstants.PLUGINS_FOLDER);
+  public static final PluginManager PLUGIN_MANAGER =
+      new JarPluginManager(SFPathConstants.PLUGINS_FOLDER);
 
   static {
     System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
@@ -68,8 +68,7 @@ public class SoulFireBootstrap {
     }
   }
 
-  private SoulFireBootstrap() {
-  }
+  private SoulFireBootstrap() {}
 
   @SuppressWarnings("unused")
   public static void bootstrap(String[] args, List<ClassLoader> classLoaders) {
@@ -88,20 +87,24 @@ public class SoulFireBootstrap {
 
   private static void injectMixinsAndRun(boolean runServer, String[] args) {
     var mixinPaths = new HashSet<String>();
-    PLUGIN_MANAGER.getExtensions(MixinExtension.class).forEach(mixinExtension -> {
-      for (var mixinPath : mixinExtension.getMixinPaths()) {
-        if (mixinPaths.add(mixinPath)) {
-          log.info("Added mixin \"{}\"", mixinPath);
-        } else {
-          log.warn("Mixin path \"{}\" is already added!", mixinPath);
-        }
-      }
-    });
+    PLUGIN_MANAGER
+        .getExtensions(MixinExtension.class)
+        .forEach(
+            mixinExtension -> {
+              for (var mixinPath : mixinExtension.getMixinPaths()) {
+                if (mixinPaths.add(mixinPath)) {
+                  log.info("Added mixin \"{}\"", mixinPath);
+                } else {
+                  log.warn("Mixin path \"{}\" is already added!", mixinPath);
+                }
+              }
+            });
 
     var classLoaders = new ArrayList<ClassLoader>();
     classLoaders.add(SoulFireBootstrap.class.getClassLoader());
-    PLUGIN_MANAGER.getPlugins().forEach(pluginWrapper ->
-        classLoaders.add(pluginWrapper.getPluginClassLoader()));
+    PLUGIN_MANAGER
+        .getPlugins()
+        .forEach(pluginWrapper -> classLoaders.add(pluginWrapper.getPluginClassLoader()));
 
     var classProvider = new CustomClassProvider(classLoaders);
     var transformerManager = new TransformerManager(classProvider);
@@ -135,11 +138,12 @@ public class SoulFireBootstrap {
   }
 
   public static void injectExceptionHandler() {
-    Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-      log.error("Exception in thread {}", thread.getName());
-      //noinspection CallToPrintStackTrace
-      throwable.printStackTrace();
-    });
+    Thread.setDefaultUncaughtExceptionHandler(
+        (thread, throwable) -> {
+          log.error("Exception in thread {}", thread.getName());
+          //noinspection CallToPrintStackTrace
+          throwable.printStackTrace();
+        });
   }
 
   private static void initPlugins(List<ClassLoader> classLoaders) {
@@ -161,9 +165,7 @@ public class SoulFireBootstrap {
     }
   }
 
-  /**
-   * RGB support for terminals.
-   */
+  /** RGB support for terminals. */
   private static void injectAnsi() {
     if (System.console() == null) {
       return;

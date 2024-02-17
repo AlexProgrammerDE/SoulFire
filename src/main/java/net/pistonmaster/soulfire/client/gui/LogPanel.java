@@ -51,13 +51,22 @@ public class LogPanel extends JPanel {
 
     var request = LogRequest.newBuilder().setPrevious(300).build();
 
-    guiManager.threadPool().submit(() -> {
-      try (var context = Context.current().withCancellation()) {
-        guiManager.rpcClient().contexts().add(context);
-        context.run(() -> guiManager.rpcClient().logStubBlocking().subscribe(request)
-            .forEachRemaining(response -> messageLogPanel.log(response.getMessage() + "\n")));
-      }
-    });
+    guiManager
+        .threadPool()
+        .submit(
+            () -> {
+              try (var context = Context.current().withCancellation()) {
+                guiManager.rpcClient().contexts().add(context);
+                context.run(
+                    () ->
+                        guiManager
+                            .rpcClient()
+                            .logStubBlocking()
+                            .subscribe(request)
+                            .forEachRemaining(
+                                response -> messageLogPanel.log(response.getMessage() + "\n")));
+              }
+            });
 
     var commands = new JTextField();
     commands.putClientProperty("JTextField.placeholderText", "Type SoulFire commands here...");
@@ -84,12 +93,13 @@ public class LogPanel extends JPanel {
   private class CommandShellAction extends AbstractAction {
     private final UndoManager undoManager;
     private final List<String> commandHistory = new ArrayList<>();
-    @Setter
-    private int pointer = -1;
+    @Setter private int pointer = -1;
 
     public void initHistory() {
-      commandHistory.addAll(guiManager.clientCommandManager().getCommandHistory()
-          .stream().map(Map.Entry::getValue).toList());
+      commandHistory.addAll(
+          guiManager.clientCommandManager().getCommandHistory().stream()
+              .map(Map.Entry::getValue)
+              .toList());
     }
 
     @Override

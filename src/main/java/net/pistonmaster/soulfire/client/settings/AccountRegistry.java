@@ -33,12 +33,13 @@ public class AccountRegistry {
   private final List<Runnable> loadHooks = new ArrayList<>();
 
   public void loadFromString(String data, AuthType authType) {
-    var newAccounts = data.lines()
-        .map(String::strip)
-        .filter(line -> !line.isBlank())
-        .distinct()
-        .map(account -> fromStringSingle(account, authType))
-        .toList();
+    var newAccounts =
+        data.lines()
+            .map(String::strip)
+            .filter(line -> !line.isBlank())
+            .distinct()
+            .map(account -> fromStringSingle(account, authType))
+            .toList();
 
     if (newAccounts.isEmpty()) {
       log.warn("No accounts found in the provided data!");

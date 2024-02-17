@@ -31,11 +31,11 @@ import net.pistonmaster.soulfire.util.SFPathConstants;
 
 @Slf4j
 public class GUIClientProps {
-  private static final Path SETTINGS_PATH = SFPathConstants.DATA_FOLDER.resolve("gui-data.properties");
+  private static final Path SETTINGS_PATH =
+      SFPathConstants.DATA_FOLDER.resolve("gui-data.properties");
   private static final Properties SETTINGS = new Properties();
 
-  private GUIClientProps() {
-  }
+  private GUIClientProps() {}
 
   public static void loadSettings() {
     if (!Files.exists(SETTINGS_PATH)) {
@@ -51,7 +51,9 @@ public class GUIClientProps {
 
   public static void saveSettings() {
     try (var os = Files.newOutputStream(SETTINGS_PATH, StandardOpenOption.CREATE)) {
-      SETTINGS.store(new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8)), "SoulFire GUI Settings");
+      SETTINGS.store(
+          new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8)),
+          "SoulFire GUI Settings");
     } catch (IOException e) {
       log.error("Failed to save settings!", e);
     }

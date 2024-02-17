@@ -29,6 +29,11 @@ public class EventExceptionHandler implements IExceptionHandler {
 
   @Override
   public void handle(@NotNull AHandler handler, @NotNull Object event, @NotNull Throwable t) {
-    log.error("Exception while handling event " + event.getClass().getName() + " in handler " + handler.getClass().getName(), t);
+    log.error(
+        "Exception while handling event "
+            + event.getClass().getName()
+            + " in handler "
+            + handler.getClass().getName(),
+        t);
   }
 }

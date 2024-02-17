@@ -71,7 +71,9 @@ public class SFSessionListener extends SessionAdapter {
       return;
     }
 
-    botConnection.logger().trace("Sending packet: {}", event.getPacket().getClass().getSimpleName());
+    botConnection
+        .logger()
+        .trace("Sending packet: {}", event.getPacket().getClass().getSimpleName());
   }
 
   @Override

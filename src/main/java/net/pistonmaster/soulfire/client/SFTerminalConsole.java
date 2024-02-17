@@ -36,15 +36,16 @@ public class SFTerminalConsole extends SimpleTerminalConsole {
   private final ShutdownManager shutdownManager;
   private final ClientCommandManager clientCommandManager;
 
-  /**
-   * Sets up {@code System.out} and {@code System.err} to redirect to log4j.
-   */
+  /** Sets up {@code System.out} and {@code System.err} to redirect to log4j. */
   public static void setupStreams() {
     System.setOut(IoBuilder.forLogger(logger).setLevel(Level.INFO).buildPrintStream());
     System.setErr(IoBuilder.forLogger(logger).setLevel(Level.ERROR).buildPrintStream());
   }
 
-  public static void setupTerminalConsole(ExecutorService threadPool, ShutdownManager shutdownManager, ClientCommandManager clientCommandManager) {
+  public static void setupTerminalConsole(
+      ExecutorService threadPool,
+      ShutdownManager shutdownManager,
+      ClientCommandManager clientCommandManager) {
     SFTerminalConsole.setupStreams();
     threadPool.execute(new SFTerminalConsole(shutdownManager, clientCommandManager)::start);
   }
@@ -71,14 +72,16 @@ public class SFTerminalConsole extends SimpleTerminalConsole {
       history.add(command.getKey(), command.getValue());
     }
 
-    return super.buildReader(builder
-        .appName("SoulFire")
-        .completer((reader, parsedLine, list) -> {
-          for (var suggestion : clientCommandManager.getCompletionSuggestions(parsedLine.line())) {
-            list.add(new Candidate(suggestion));
-          }
-        })
-        .history(history)
-    );
+    return super.buildReader(
+        builder
+            .appName("SoulFire")
+            .completer(
+                (reader, parsedLine, list) -> {
+                  for (var suggestion :
+                      clientCommandManager.getCompletionSuggestions(parsedLine.line())) {
+                    list.add(new Candidate(suggestion));
+                  }
+                })
+            .history(history));
   }
 }

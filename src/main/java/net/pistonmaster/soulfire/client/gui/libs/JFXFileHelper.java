@@ -35,18 +35,16 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.util.nfd.NFDFilterItem;
 
 public class JFXFileHelper {
-  private JFXFileHelper() {
-  }
+  private JFXFileHelper() {}
 
-  public static Optional<Path> showOpenDialog(@Nullable Path initialDirectory, Map<String, String> filterMap) {
+  public static Optional<Path> showOpenDialog(
+      @Nullable Path initialDirectory, Map<String, String> filterMap) {
     NFD_Init();
     try (var stack = stackPush()) {
       var filters = NFDFilterItem.malloc(filterMap.size());
       var i = 0;
       for (var entry : filterMap.entrySet()) {
-        filters.get(i)
-            .name(stack.UTF8(entry.getKey()))
-            .spec(stack.UTF8(entry.getValue()));
+        filters.get(i).name(stack.UTF8(entry.getKey())).spec(stack.UTF8(entry.getValue()));
         i++;
       }
 
@@ -62,15 +60,14 @@ public class JFXFileHelper {
     }
   }
 
-  public static Optional<Path> showSaveDialog(Path initialDirectory, Map<String, String> filterMap, String defaultName) {
+  public static Optional<Path> showSaveDialog(
+      Path initialDirectory, Map<String, String> filterMap, String defaultName) {
     NFD_Init();
     try (var stack = stackPush()) {
       var filters = NFDFilterItem.malloc(filterMap.size());
       var i = 0;
       for (var entry : filterMap.entrySet()) {
-        filters.get(i)
-            .name(stack.UTF8(entry.getKey()))
-            .spec(stack.UTF8(entry.getValue()));
+        filters.get(i).name(stack.UTF8(entry.getKey())).spec(stack.UTF8(entry.getValue()));
         i++;
       }
 

@@ -28,7 +28,8 @@ import net.pistonmaster.soulfire.server.data.ItemType;
 
 @Data
 public class EntityAttributeState {
-  private final Map<AttributeType, AttributeState> attributeStore = new Object2ObjectOpenHashMap<>();
+  private final Map<AttributeType, AttributeState> attributeStore =
+      new Object2ObjectOpenHashMap<>();
 
   public AttributeState getOrCreateAttribute(AttributeType type) {
     return attributeStore.computeIfAbsent(type, k -> new AttributeState(type, type.defaultValue()));
@@ -37,17 +38,17 @@ public class EntityAttributeState {
   public void putItemModifiers(ItemType type) {
     for (var attribute : type.attributes()) {
       getOrCreateAttribute(attribute.type())
-          .modifiers().putAll(attribute.modifiers()
-              .stream()
-              .collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
+          .modifiers()
+          .putAll(
+              attribute.modifiers().stream()
+                  .collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
     }
   }
 
   public void removeItemModifiers(ItemType type) {
     for (var attribute : type.attributes()) {
       for (var modifier : attribute.modifiers()) {
-        getOrCreateAttribute(attribute.type())
-            .modifiers().remove(modifier.uuid());
+        getOrCreateAttribute(attribute.type()).modifiers().remove(modifier.uuid());
       }
     }
   }

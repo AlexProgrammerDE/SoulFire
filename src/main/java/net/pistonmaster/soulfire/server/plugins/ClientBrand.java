@@ -44,13 +44,14 @@ public class ClientBrand implements InternalExtension {
       }
 
       var buf = Unpooled.buffer();
-      connection.session().getCodecHelper()
+      connection
+          .session()
+          .getCodecHelper()
           .writeString(buf, settingsHolder.get(ClientBrandSettings.CLIENT_BRAND));
 
-      connection.session().send(new ServerboundCustomPayloadPacket(
-          "minecraft:brand",
-          ByteBufUtil.getBytes(buf)
-      ));
+      connection
+          .session()
+          .send(new ServerboundCustomPayloadPacket("minecraft:brand", ByteBufUtil.getBytes(buf)));
     }
   }
 
@@ -68,19 +69,19 @@ public class ClientBrand implements InternalExtension {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ClientBrandSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("client-brand");
-    public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
-        "enabled",
-        "Send client brand",
-        new String[] {"--send-client-brand"},
-        "Send client brand to the server",
-        true
-    );
-    public static final StringProperty CLIENT_BRAND = BUILDER.ofString(
-        "client-brand",
-        "Client brand",
-        new String[] {"--client-brand"},
-        "The client brand to send to the server",
-        "vanilla"
-    );
+    public static final BooleanProperty ENABLED =
+        BUILDER.ofBoolean(
+            "enabled",
+            "Send client brand",
+            new String[] {"--send-client-brand"},
+            "Send client brand to the server",
+            true);
+    public static final StringProperty CLIENT_BRAND =
+        BUILDER.ofString(
+            "client-brand",
+            "Client brand",
+            new String[] {"--client-brand"},
+            "The client brand to send to the server",
+            "vanilla");
   }
 }

@@ -22,21 +22,18 @@ import net.pistonmaster.soulfire.server.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.soulfire.server.protocol.bot.state.entity.ClientEntity;
 
 /**
- * Represents the state of the bot in the level.
- * This means the positions and in the future also inventory.
+ * Represents the state of the bot in the level. This means the positions and in the future also
+ * inventory.
  *
- * @param blockPosition The position of the bot in block coordinates.
- *                      This is the block the bottom of the bot is in, so the "feet" block.
- * @param levelState    The level state of the world the bot is in.
- * @param inventory     The inventory state of the bot.
+ * @param blockPosition The position of the bot in block coordinates. This is the block the bottom
+ *     of the bot is in, so the "feet" block.
+ * @param levelState The level state of the world the bot is in.
+ * @param inventory The inventory state of the bot.
  */
-public record BotEntityState(SFVec3i blockPosition, ProjectedLevelState levelState,
-                             ProjectedInventory inventory) {
-  public static BotEntityState initialState(ClientEntity clientEntity, ProjectedLevelState levelState, ProjectedInventory inventory) {
-    return new BotEntityState(
-        SFVec3i.fromDouble(clientEntity.pos()),
-        levelState,
-        inventory
-    );
+public record BotEntityState(
+    SFVec3i blockPosition, ProjectedLevelState levelState, ProjectedInventory inventory) {
+  public static BotEntityState initialState(
+      ClientEntity clientEntity, ProjectedLevelState levelState, ProjectedInventory inventory) {
+    return new BotEntityState(SFVec3i.fromDouble(clientEntity.pos()), levelState, inventory);
   }
 }

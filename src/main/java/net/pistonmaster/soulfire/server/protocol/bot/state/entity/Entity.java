@@ -94,7 +94,7 @@ public abstract class Entity {
   /**
    * Updates the rotation to look at a given block or location.
    *
-   * @param origin   The rotation origin, either EYES or FEET.
+   * @param origin The rotation origin, either EYES or FEET.
    * @param position The block or location to look at.
    */
   public void lookAt(RotationOrigin origin, Vector3d position) {
@@ -106,8 +106,10 @@ public abstract class Entity {
 
     var sqr = Math.sqrt(dx * dx + dz * dz);
 
-    this.pitch = MathHelper.wrapDegrees((float) (-(Math.atan2(dy, sqr) * 180.0F / (float) Math.PI)));
-    this.yaw = MathHelper.wrapDegrees((float) (Math.atan2(dz, dx) * 180.0F / (float) Math.PI) - 90.0F);
+    this.pitch =
+        MathHelper.wrapDegrees((float) (-(Math.atan2(dy, sqr) * 180.0F / (float) Math.PI)));
+    this.yaw =
+        MathHelper.wrapDegrees((float) (Math.atan2(dz, dx) * 180.0F / (float) Math.PI) - 90.0F);
   }
 
   public double getEyeHeight() {

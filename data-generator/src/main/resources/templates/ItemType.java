@@ -22,12 +22,15 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record ItemType(int id, String name, int stackSize,
-                       List<String> enchantCategories,
-                       DepletionData depletionData,
-                       FoodProperties foodProperties,
-                       EquipmentSlot attributeSlot,
-                       List<Attribute> attributes) {
+public record ItemType(
+    int id,
+    String name,
+    int stackSize,
+    List<String> enchantCategories,
+    DepletionData depletionData,
+    FoodProperties foodProperties,
+    EquipmentSlot attributeSlot,
+    List<Attribute> attributes) {
   public static final Int2ReferenceMap<ItemType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
   // VALUES REPLACE
@@ -58,11 +61,13 @@ public record ItemType(int id, String name, int stackSize,
     return id;
   }
 
-  public record DepletionData(List<String> repairWith, int maxDamage) {
-  }
+  public record DepletionData(List<String> repairWith, int maxDamage) {}
 
-  public record FoodProperties(int nutrition, float saturationModifier,
-                               boolean fastFood, boolean isMeat,
-                               boolean canAlwaysEat, boolean possiblyHarmful) {
-  }
+  public record FoodProperties(
+      int nutrition,
+      float saturationModifier,
+      boolean fastFood,
+      boolean isMeat,
+      boolean canAlwaysEat,
+      boolean possiblyHarmful) {}
 }

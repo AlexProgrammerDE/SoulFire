@@ -45,13 +45,7 @@ public class AABB {
 
   public AABB deflate(double x, double y, double z) {
     return new AABB(
-        this.minX + x,
-        this.minY + y,
-        this.minZ + z,
-        this.maxX - x,
-        this.maxY - y,
-        this.maxZ - z
-    );
+        this.minX + x, this.minY + y, this.minZ + z, this.maxX - x, this.maxY - y, this.maxZ - z);
   }
 
   public AABB expandTowards(Vector3d targetVec) {
@@ -96,13 +90,7 @@ public class AABB {
 
   public AABB move(double x, double y, double z) {
     return new AABB(
-        this.minX + x,
-        this.minY + y,
-        this.minZ + z,
-        this.maxX + x,
-        this.maxY + y,
-        this.maxZ + z
-    );
+        this.minX + x, this.minY + y, this.minZ + z, this.maxX + x, this.maxY + y, this.maxZ + z);
   }
 
   public double computeOffsetX(AABB other, double offsetX) {
@@ -157,9 +145,12 @@ public class AABB {
   }
 
   public boolean intersects(AABB other) {
-    return this.minX < other.maxX && this.maxX > other.minX
-        && this.minY < other.maxY && this.maxY > other.minY
-        && this.minZ < other.maxZ && this.maxZ > other.minZ;
+    return this.minX < other.maxX
+        && this.maxX > other.minX
+        && this.minY < other.maxY
+        && this.maxY > other.minY
+        && this.minZ < other.maxZ
+        && this.maxZ > other.minZ;
   }
 
   public Optional<Vector3d> getIntersection(Vector3d origin, Vector3d direction) {
@@ -177,8 +168,10 @@ public class AABB {
     var tzMin = (this.minZ - z1) / z2;
     var tzMax = (this.maxZ - z1) / z2;
 
-    var tMin = Math.max(Math.max(Math.min(txMin, txMax), Math.min(tyMin, tyMax)), Math.min(tzMin, tzMax));
-    var tMax = Math.min(Math.min(Math.max(txMin, txMax), Math.max(tyMin, tyMax)), Math.max(tzMin, tzMax));
+    var tMin =
+        Math.max(Math.max(Math.min(txMin, txMax), Math.min(tyMin, tyMax)), Math.min(tzMin, tzMax));
+    var tMax =
+        Math.min(Math.min(Math.max(txMin, txMax), Math.max(tyMin, tyMax)), Math.max(tzMin, tzMax));
 
     if (tMax < 0 || tMin > tMax) {
       return Optional.empty();

@@ -38,7 +38,12 @@ public class SFViaNettyPipelineProvider extends NettyPipelineProvider {
     }
 
     try {
-      channel.pipeline().addBefore(ViaClientSession.SIZER_NAME, ViaClientSession.COMPRESSION_NAME, new CompressionCodec(protocolCompression));
+      channel
+          .pipeline()
+          .addBefore(
+              ViaClientSession.SIZER_NAME,
+              ViaClientSession.COMPRESSION_NAME,
+              new CompressionCodec(protocolCompression));
     } catch (Throwable e) {
       throw new RuntimeException(e);
     }
@@ -54,7 +59,12 @@ public class SFViaNettyPipelineProvider extends NettyPipelineProvider {
     }
 
     try {
-      channel.pipeline().addAfter("vb-frame-encapsulation", ViaClientSession.ENCRYPTION_NAME, new AesEncryptionCodec(key));
+      channel
+          .pipeline()
+          .addAfter(
+              "vb-frame-encapsulation",
+              ViaClientSession.ENCRYPTION_NAME,
+              new AesEncryptionCodec(key));
     } catch (Throwable e) {
       throw new RuntimeException(e);
     }

@@ -22,8 +22,7 @@ import net.pistonmaster.soulfire.server.data.ItemType;
 import net.pistonmaster.soulfire.server.data.TierType;
 
 public class ItemTypeHelper {
-  private ItemTypeHelper() {
-  }
+  private ItemTypeHelper() {}
 
   public static boolean isSafeFullBlockItem(ItemType type) {
     return BlockItems.getBlockType(type).isPresent() && !isUnsafeToPlace(type);
@@ -34,8 +33,7 @@ public class ItemTypeHelper {
   }
 
   public static boolean isUnsafeToPlace(ItemType type) {
-    return type == ItemType.SAND
-        || type == ItemType.GRAVEL;
+    return type == ItemType.SAND || type == ItemType.GRAVEL;
   }
 
   public static boolean isGoodEdibleFood(ItemType type) {

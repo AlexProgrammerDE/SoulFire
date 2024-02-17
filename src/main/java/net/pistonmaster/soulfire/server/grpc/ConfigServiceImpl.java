@@ -48,23 +48,22 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
               .setDescription(description)
               .setVersion(version)
               .setProvider(provider)
-              .build()
-      );
+              .build());
     }
 
     return plugins;
   }
 
   @Override
-  public void getUIClientData(ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
+  public void getUIClientData(
+      ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
     var username = RPCConstants.CLIENT_ID_CONTEXT_KEY.get();
     responseObserver.onNext(
         UIClientDataResponse.newBuilder()
             .setUsername(username)
             .addAllPlugins(getExtensions())
             .addAllPluginSettings(soulFireServer.settingsRegistry().exportSettingsMeta())
-            .build()
-    );
+            .build());
     responseObserver.onCompleted();
   }
 }

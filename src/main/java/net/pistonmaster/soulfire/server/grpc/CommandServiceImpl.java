@@ -34,7 +34,8 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
   private final ServerCommandManager serverCommandManager;
 
   @Override
-  public void executeCommand(CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
+  public void executeCommand(
+      CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
     var code = serverCommandManager.execute(request.getCommand());
 
     responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());
@@ -42,19 +43,24 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
   }
 
   @Override
-  public void tabCompleteCommand(CommandCompletionRequest request, StreamObserver<CommandCompletionResponse> responseObserver) {
+  public void tabCompleteCommand(
+      CommandCompletionRequest request,
+      StreamObserver<CommandCompletionResponse> responseObserver) {
     var suggestions = serverCommandManager.getCompletionSuggestions(request.getCommand());
 
-    responseObserver.onNext(CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());
+    responseObserver.onNext(
+        CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());
     responseObserver.onCompleted();
   }
 
   @Override
-  public void getCommandHistory(CommandHistoryRequest request, StreamObserver<CommandHistoryResponse> responseObserver) {
+  public void getCommandHistory(
+      CommandHistoryRequest request, StreamObserver<CommandHistoryResponse> responseObserver) {
     var history = serverCommandManager.getCommandHistory();
     var builder = CommandHistoryResponse.newBuilder();
     for (var entry : history) {
-      builder.addEntriesBuilder()
+      builder
+          .addEntriesBuilder()
           .setTimestamp(entry.getKey().getEpochSecond())
           .setCommand(entry.getValue())
           .build();

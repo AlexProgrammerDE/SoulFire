@@ -33,12 +33,22 @@ public class AboutPopup extends JDialog {
     content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
     content.add(SwingTextUtils.createHtmlPane("<b>SoulFire</b>"));
-    content.add(SwingTextUtils.createHtmlPane("Version: <b><code>" + BuildData.VERSION + "</code></b>"));
-    content.add(SwingTextUtils.createHtmlPane("Author: <b><a href='https://github.com/AlexProgrammerDE'>AlexProgrammerDE</a></b>"));
-    content.add(SwingTextUtils.createHtmlPane(
-        "GitHub: <b><a href='https://github.com/AlexProgrammerDE/SoulFire'>github.com/AlexProgrammerDE/SoulFire</a></b>"));
-    content.add(SwingTextUtils.createHtmlPane("Commit: <b><code>" + BuildData.COMMIT.substring(0, 7) + "</code></b> "
-        + "(<b><a href='https://github.com/AlexProgrammerDE/SoulFire/commit/" + BuildData.COMMIT + "'>Click to show</a></b>)"));
+    content.add(
+        SwingTextUtils.createHtmlPane("Version: <b><code>" + BuildData.VERSION + "</code></b>"));
+    content.add(
+        SwingTextUtils.createHtmlPane(
+            "Author: <b><a href='https://github.com/AlexProgrammerDE'>AlexProgrammerDE</a></b>"));
+    content.add(
+        SwingTextUtils.createHtmlPane(
+            "GitHub: <b><a href='https://github.com/AlexProgrammerDE/SoulFire'>github.com/AlexProgrammerDE/SoulFire</a></b>"));
+    content.add(
+        SwingTextUtils.createHtmlPane(
+            "Commit: <b><code>"
+                + BuildData.COMMIT.substring(0, 7)
+                + "</code></b> "
+                + "(<b><a href='https://github.com/AlexProgrammerDE/SoulFire/commit/"
+                + BuildData.COMMIT
+                + "'>Click to show</a></b>)"));
     content.setBorder(new EmptyBorder(10, 10, 10, 10));
 
     add(content);

@@ -42,19 +42,20 @@ public record SettingsHolder(
     Object2BooleanMap<PropertyKey> booleanProperties,
     Object2ObjectMap<PropertyKey, String> stringProperties,
     List<MinecraftAccount> accounts,
-    List<SWProxy> proxies
-) {
-  public static final SettingsHolder EMPTY = new SettingsHolder(
-      Object2ObjectMaps.emptyMap(),
-      Object2BooleanMaps.emptyMap(),
-      Object2ObjectMaps.emptyMap(),
-      List.of(),
-      List.of()
-  );
+    List<SWProxy> proxies) {
+  public static final SettingsHolder EMPTY =
+      new SettingsHolder(
+          Object2ObjectMaps.emptyMap(),
+          Object2BooleanMaps.emptyMap(),
+          Object2ObjectMaps.emptyMap(),
+          List.of(),
+          List.of());
 
-  public static SettingsHolder createSettingsHolder(ProfileDataStructure settingsSerialized, Multimap<PropertyKey, Consumer<JsonElement>> listeners,
-                                                    Consumer<List<MinecraftAccount>> accountRegistryCallback,
-                                                    Consumer<List<SWProxy>> proxyRegistryCallback) {
+  public static SettingsHolder createSettingsHolder(
+      ProfileDataStructure settingsSerialized,
+      Multimap<PropertyKey, Consumer<JsonElement>> listeners,
+      Consumer<List<MinecraftAccount>> accountRegistryCallback,
+      Consumer<List<SWProxy>> proxyRegistryCallback) {
     var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
     var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
     var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();
@@ -103,16 +104,19 @@ public record SettingsHolder(
         booleanProperties,
         stringProperties,
         settingsSerialized.accounts(),
-        settingsSerialized.proxies()
-    );
+        settingsSerialized.proxies());
   }
 
   public int get(IntProperty property) {
-    return numberProperties.getOrDefault(property.propertyKey(), property.defaultValue()).intValue();
+    return numberProperties
+        .getOrDefault(property.propertyKey(), property.defaultValue())
+        .intValue();
   }
 
   public double get(DoubleProperty property) {
-    return numberProperties.getOrDefault(property.propertyKey(), property.defaultValue()).doubleValue();
+    return numberProperties
+        .getOrDefault(property.propertyKey(), property.defaultValue())
+        .doubleValue();
   }
 
   public boolean get(BooleanProperty property) {
@@ -124,7 +128,9 @@ public record SettingsHolder(
   }
 
   public <T> T get(ComboProperty property, Function<String, T> converter) {
-    return converter.apply(stringProperties.getOrDefault(property.propertyKey(), property.options()[property.defaultValue()].id()));
+    return converter.apply(
+        stringProperties.getOrDefault(
+            property.propertyKey(), property.options()[property.defaultValue()].id()));
   }
 
   public <T extends Enum<T>> T get(ComboProperty property, Class<T> clazz) {

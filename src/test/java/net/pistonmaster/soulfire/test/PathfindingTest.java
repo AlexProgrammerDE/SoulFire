@@ -48,16 +48,13 @@ public class PathfindingTest {
     accessor.setBlockAt(1, 0, 0, BlockType.STONE);
     accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        new PosGoal(2, 1, 0)
-    );
+    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(2, 1, 0));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of())
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(List.of()));
 
     var route = routeFinder.findRoute(initialState, false);
 
@@ -71,20 +68,20 @@ public class PathfindingTest {
     accessor.setBlockAt(1, 0, 0, BlockType.STONE);
     accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        // This is impossible to reach
-        new PosGoal(3, 1, 0)
-    );
+    var routeFinder =
+        new RouteFinder(
+            DEFAULT_GRAPH,
+            // This is impossible to reach
+            new PosGoal(3, 1, 0));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of())
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(List.of()));
 
-    assertThrowsExactly(NoRouteFoundException.class,
-        () -> routeFinder.findRoute(initialState, false));
+    assertThrowsExactly(
+        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
   }
 
   @Test
@@ -94,16 +91,13 @@ public class PathfindingTest {
     accessor.setBlockAt(1, 0, 1, BlockType.STONE);
     accessor.setBlockAt(2, 0, 2, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        new PosGoal(2, 1, 2)
-    );
+    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(2, 1, 2));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of())
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(List.of()));
 
     var route = routeFinder.findRoute(initialState, false);
 
@@ -117,20 +111,17 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
     accessor.setBlockAt(1, height, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        new PosGoal(1, height + 1, 0)
-    );
+    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(1, height + 1, 0));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of())
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(List.of()));
 
     if (height > 1) {
-      assertThrowsExactly(NoRouteFoundException.class,
-          () -> routeFinder.findRoute(initialState, false));
+      assertThrowsExactly(
+          NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
     } else {
       var route = routeFinder.findRoute(initialState, false);
       assertEquals(1, route.size());
@@ -144,20 +135,17 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
     accessor.setBlockAt(1, height, 1, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        new PosGoal(1, height + 1, 1)
-    );
+    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(1, height + 1, 1));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of())
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(List.of()));
 
     if (height > 1) {
-      assertThrowsExactly(NoRouteFoundException.class,
-          () -> routeFinder.findRoute(initialState, false));
+      assertThrowsExactly(
+          NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
     } else {
       var route = routeFinder.findRoute(initialState, false);
       assertEquals(1, route.size());
@@ -171,20 +159,17 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
     accessor.setBlockAt(1, -height, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        new PosGoal(1, -height + 1, 0)
-    );
+    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(1, -height + 1, 0));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of())
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(List.of()));
 
     if (height > 3) {
-      assertThrowsExactly(NoRouteFoundException.class,
-          () -> routeFinder.findRoute(initialState, false));
+      assertThrowsExactly(
+          NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
     } else {
       var route = routeFinder.findRoute(initialState, false);
       assertEquals(1, route.size());
@@ -198,20 +183,17 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
     accessor.setBlockAt(1, -height, 1, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        new PosGoal(1, -height + 1, 1)
-    );
+    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(1, -height + 1, 1));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of())
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(List.of()));
 
     if (height > 3) {
-      assertThrowsExactly(NoRouteFoundException.class,
-          () -> routeFinder.findRoute(initialState, false));
+      assertThrowsExactly(
+          NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
     } else {
       var route = routeFinder.findRoute(initialState, false);
       assertEquals(1, route.size());
@@ -225,21 +207,18 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
     accessor.setBlockAt(gapLength + 1, 0, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        new PosGoal(gapLength + 1, 1, 0)
-    );
+    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(gapLength + 1, 1, 0));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of())
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(List.of()));
 
     // TODO: Allow longer jumps
     if (gapLength > 1) {
-      assertThrowsExactly(NoRouteFoundException.class,
-          () -> routeFinder.findRoute(initialState, false));
+      assertThrowsExactly(
+          NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
     } else {
       var route = routeFinder.findRoute(initialState, false);
       assertEquals(1, route.size());
@@ -251,18 +230,13 @@ public class PathfindingTest {
     var accessor = new TestBlockAccessor();
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        new PosGoal(0, 2, 0)
-    );
+    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(0, 2, 0));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of(
-            SFItemStack.forTypeSingle(ItemType.STONE)
-        ))
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.STONE))));
 
     var route = routeFinder.findRoute(initialState, false);
     assertEquals(1, route.size());
@@ -274,22 +248,18 @@ public class PathfindingTest {
     var accessor = new TestBlockAccessor();
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        new PosGoal(0, 21, 0)
-    );
+    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(0, 21, 0));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of(
-            SFItemStack.forTypeSingle(ItemType.STONE).withAmount(amount)
-        ))
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(
+                List.of(SFItemStack.forTypeSingle(ItemType.STONE).withAmount(amount))));
 
     if (amount < 20) {
-      assertThrowsExactly(NoRouteFoundException.class,
-          () -> routeFinder.findRoute(initialState, false));
+      assertThrowsExactly(
+          NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
     } else {
       var route = routeFinder.findRoute(initialState, false);
       assertEquals(20, route.size());
@@ -302,18 +272,13 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
     accessor.setBlockAt(0, -1, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        new PosGoal(0, 0, 0)
-    );
+    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(0, 0, 0));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of(
-            SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
-        ))
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))));
 
     var route = routeFinder.findRoute(initialState, false);
     assertEquals(1, route.size());
@@ -329,18 +294,13 @@ public class PathfindingTest {
     accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
     // TODO: Fix stacking up
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        new PosGoal(2, 1, 0)
-    );
+    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(2, 1, 0));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of(
-            SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
-        ))
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))));
 
     var route = routeFinder.findRoute(initialState, false);
     assertEquals(3, route.size());
@@ -356,22 +316,17 @@ public class PathfindingTest {
       accessor.setBlockAt(1, 0, 0, BlockType.LAVA);
     }
 
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        new PosGoal(0, 0, 0)
-    );
+    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(0, 0, 0));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of(
-            SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
-        ))
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))));
 
     if (unsafe) {
-      assertThrowsExactly(NoRouteFoundException.class,
-          () -> routeFinder.findRoute(initialState, false));
+      assertThrowsExactly(
+          NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
     } else {
       var route = routeFinder.findRoute(initialState, false);
       assertEquals(1, route.size());
@@ -390,22 +345,17 @@ public class PathfindingTest {
 
     accessor.setBlockAt(0, -level, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(
-        DEFAULT_GRAPH,
-        new PosGoal(0, 0, 0)
-    );
+    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(0, 0, 0));
 
-    var initialState = new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
-        new ProjectedInventory(List.of(
-            SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)
-        ))
-    );
+    var initialState =
+        new BotEntityState(
+            new SFVec3i(0, 1, 0),
+            new ProjectedLevelState(accessor),
+            new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))));
 
     if (level > 1) {
-      assertThrowsExactly(NoRouteFoundException.class,
-          () -> routeFinder.findRoute(initialState, false));
+      assertThrowsExactly(
+          NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
     } else {
       var route = routeFinder.findRoute(initialState, false);
       assertEquals(1, route.size());

@@ -22,10 +22,16 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 
 public class ToolSpeedType {
   private static final Set<ItemType> SWORDS =
-      Set.of(ItemType.WOODEN_SWORD, ItemType.STONE_SWORD, ItemType.IRON_SWORD, ItemType.GOLDEN_SWORD, ItemType.DIAMOND_SWORD,
+      Set.of(
+          ItemType.WOODEN_SWORD,
+          ItemType.STONE_SWORD,
+          ItemType.IRON_SWORD,
+          ItemType.GOLDEN_SWORD,
+          ItemType.DIAMOND_SWORD,
           ItemType.NETHERITE_SWORD);
 
-  public static float getBlockToolSpeed(TagsState tagsState, ItemType itemType, BlockType blockType) {
+  public static float getBlockToolSpeed(
+      TagsState tagsState, ItemType itemType, BlockType blockType) {
     if (SWORDS.contains(itemType)) {
       if (blockType == BlockType.COBWEB) {
         return 15;
@@ -49,7 +55,8 @@ public class ToolSpeedType {
     }
   }
 
-  private static float getEnumToolSpeed(TagsState tagsState, ItemType itemType, BlockType blockType) {
+  private static float getEnumToolSpeed(
+      TagsState tagsState, ItemType itemType, BlockType blockType) {
     for (var toolSpeedType : TierType.values()) {
       if (!toolSpeedType.tools().contains(itemType)) {
         continue;
@@ -67,11 +74,14 @@ public class ToolSpeedType {
     return 1;
   }
 
-  public static boolean isRightToolFor(TagsState tagsState, ItemType itemType, BlockType blockType) {
+  public static boolean isRightToolFor(
+      TagsState tagsState, ItemType itemType, BlockType blockType) {
     if (SWORDS.contains(itemType)) {
       return blockType == BlockType.COBWEB;
     } else if (itemType == ItemType.SHEARS) {
-      return blockType == BlockType.COBWEB || blockType == BlockType.REDSTONE_WIRE || blockType == BlockType.TRIPWIRE;
+      return blockType == BlockType.COBWEB
+          || blockType == BlockType.REDSTONE_WIRE
+          || blockType == BlockType.TRIPWIRE;
     } else {
       var tier = TierType.getTier(itemType);
       if (tier.isEmpty()) {
@@ -87,8 +97,9 @@ public class ToolSpeedType {
         return false;
       }
 
-      return MineableType.getFromTool(itemType).filter(type ->
-          tagsState.isBlockInTag(blockType, type.tagName())).isPresent();
+      return MineableType.getFromTool(itemType)
+          .filter(type -> tagsState.isBlockInTag(blockType, type.tagName()))
+          .isPresent();
     }
   }
 }

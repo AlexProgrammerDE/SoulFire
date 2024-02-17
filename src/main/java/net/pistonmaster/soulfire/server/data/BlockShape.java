@@ -17,7 +17,8 @@
  */
 package net.pistonmaster.soulfire.server.data;
 
-public record BlockShape(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+public record BlockShape(
+    double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
   public boolean isFullBlock() {
     return minX == 0 && minY == 0 && minZ == 0 && maxX == 1 && maxY == 1 && maxZ == 1;
   }

@@ -33,14 +33,11 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   private final QueueWithMaxSize<String> logs = new QueueWithMaxSize<>(300); // Keep max 300 logs
 
   public LogServiceImpl() {
-    SoulFireAPI.registerListener(SystemLogEvent.class, event ->
-        logs.add(event.message()));
+    SoulFireAPI.registerListener(SystemLogEvent.class, event -> logs.add(event.message()));
   }
 
   private static void publishLine(String line, StreamObserver<LogResponse> responseObserver) {
-    var response = LogResponse.newBuilder()
-        .setMessage(line)
-        .build();
+    var response = LogResponse.newBuilder().setMessage(line).build();
 
     responseObserver.onNext(response);
   }
@@ -57,8 +54,8 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     }
   }
 
-  private record LogEventListener(
-      StreamObserver<LogResponse> responseObserver) implements Consumer<SystemLogEvent> {
+  private record LogEventListener(StreamObserver<LogResponse> responseObserver)
+      implements Consumer<SystemLogEvent> {
     @Override
     public void accept(SystemLogEvent event) {
       publishLine(event.message(), responseObserver);

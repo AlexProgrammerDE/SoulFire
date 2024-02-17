@@ -34,22 +34,21 @@ import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.util.ItemTypeHelper;
 
 /**
- * An immutable representation of a player inventory.
- * This takes an inventory and projects changes onto it.
- * This way we calculate the way we can do actions after a block was broken/placed.
+ * An immutable representation of a player inventory. This takes an inventory and projects changes
+ * onto it. This way we calculate the way we can do actions after a block was broken/placed.
  */
 @RequiredArgsConstructor
 public class ProjectedInventory {
   private final int usableBlockItems;
-  @Getter
-  private final SFItemStack[] usableToolsAndNull;
+  @Getter private final SFItemStack[] usableToolsAndNull;
   private final Map<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
 
   public ProjectedInventory(PlayerInventoryContainer playerInventory) {
-    this(Arrays.stream(playerInventory.storage())
-        .map(ContainerSlot::item)
-        .filter(item -> item != null && item.getAmount() > 0)
-        .toList());
+    this(
+        Arrays.stream(playerInventory.storage())
+            .map(ContainerSlot::item)
+            .filter(item -> item != null && item.getAmount() > 0)
+            .toList());
   }
 
   public ProjectedInventory(List<SFItemStack> items) {
@@ -87,7 +86,7 @@ public class ProjectedInventory {
   }
 
   public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockState blockState) {
-    return sharedMiningCosts.computeIfAbsent(blockState.blockType(), type ->
-        Costs.calculateBlockBreakCost(tagsState, this, type));
+    return sharedMiningCosts.computeIfAbsent(
+        blockState.blockType(), type -> Costs.calculateBlockBreakCost(tagsState, this, type));
   }
 }

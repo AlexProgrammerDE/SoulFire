@@ -21,8 +21,14 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.util.UUID;
 
-public record BedrockData(String mojangJwt, String identityJwt, ECPublicKey publicKey, ECPrivateKey privateKey,
-                          UUID deviceId, String playFabId) implements AccountData {
+public record BedrockData(
+    String mojangJwt,
+    String identityJwt,
+    ECPublicKey publicKey,
+    ECPrivateKey privateKey,
+    UUID deviceId,
+    String playFabId)
+    implements AccountData {
   @Override
   public UUID profileId() {
     return UUID.randomUUID(); // We are using a bedrock account, the uuid doesn't matter.

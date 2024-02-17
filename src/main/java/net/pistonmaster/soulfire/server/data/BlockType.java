@@ -27,12 +27,21 @@ import lombok.With;
 
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
-public record BlockType(int id, String name, float destroyTime, float explosionResistance,
-                        boolean air, boolean fallingBlock, boolean replaceable,
-                        boolean requiresCorrectToolForDrops, boolean fluidSource,
-                        OffsetData offsetData, BlockStates statesData) {
+public record BlockType(
+    int id,
+    String name,
+    float destroyTime,
+    float explosionResistance,
+    boolean air,
+    boolean fallingBlock,
+    boolean replaceable,
+    boolean requiresCorrectToolForDrops,
+    boolean fluidSource,
+    OffsetData offsetData,
+    BlockStates statesData) {
   public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
-  public static final Object2ReferenceMap<String, BlockType> FROM_NAME = new Object2ReferenceOpenHashMap<>();
+  public static final Object2ReferenceMap<String, BlockType> FROM_NAME =
+      new Object2ReferenceOpenHashMap<>();
 
   public static final BlockType AIR = register("air");
   public static final BlockType STONE = register("stone");
@@ -336,9 +345,12 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
   public static final BlockType INFESTED_STONE = register("infested_stone");
   public static final BlockType INFESTED_COBBLESTONE = register("infested_cobblestone");
   public static final BlockType INFESTED_STONE_BRICKS = register("infested_stone_bricks");
-  public static final BlockType INFESTED_MOSSY_STONE_BRICKS = register("infested_mossy_stone_bricks");
-  public static final BlockType INFESTED_CRACKED_STONE_BRICKS = register("infested_cracked_stone_bricks");
-  public static final BlockType INFESTED_CHISELED_STONE_BRICKS = register("infested_chiseled_stone_bricks");
+  public static final BlockType INFESTED_MOSSY_STONE_BRICKS =
+      register("infested_mossy_stone_bricks");
+  public static final BlockType INFESTED_CRACKED_STONE_BRICKS =
+      register("infested_cracked_stone_bricks");
+  public static final BlockType INFESTED_CHISELED_STONE_BRICKS =
+      register("infested_chiseled_stone_bricks");
   public static final BlockType BROWN_MUSHROOM_BLOCK = register("brown_mushroom_block");
   public static final BlockType RED_MUSHROOM_BLOCK = register("red_mushroom_block");
   public static final BlockType MUSHROOM_STEM = register("mushroom_stem");
@@ -446,8 +458,10 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
   public static final BlockType CHIPPED_ANVIL = register("chipped_anvil");
   public static final BlockType DAMAGED_ANVIL = register("damaged_anvil");
   public static final BlockType TRAPPED_CHEST = register("trapped_chest");
-  public static final BlockType LIGHT_WEIGHTED_PRESSURE_PLATE = register("light_weighted_pressure_plate");
-  public static final BlockType HEAVY_WEIGHTED_PRESSURE_PLATE = register("heavy_weighted_pressure_plate");
+  public static final BlockType LIGHT_WEIGHTED_PRESSURE_PLATE =
+      register("light_weighted_pressure_plate");
+  public static final BlockType HEAVY_WEIGHTED_PRESSURE_PLATE =
+      register("heavy_weighted_pressure_plate");
   public static final BlockType COMPARATOR = register("comparator");
   public static final BlockType DAYLIGHT_DETECTOR = register("daylight_detector");
   public static final BlockType REDSTONE_BLOCK = register("redstone_block");
@@ -478,12 +492,14 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
   public static final BlockType WHITE_STAINED_GLASS_PANE = register("white_stained_glass_pane");
   public static final BlockType ORANGE_STAINED_GLASS_PANE = register("orange_stained_glass_pane");
   public static final BlockType MAGENTA_STAINED_GLASS_PANE = register("magenta_stained_glass_pane");
-  public static final BlockType LIGHT_BLUE_STAINED_GLASS_PANE = register("light_blue_stained_glass_pane");
+  public static final BlockType LIGHT_BLUE_STAINED_GLASS_PANE =
+      register("light_blue_stained_glass_pane");
   public static final BlockType YELLOW_STAINED_GLASS_PANE = register("yellow_stained_glass_pane");
   public static final BlockType LIME_STAINED_GLASS_PANE = register("lime_stained_glass_pane");
   public static final BlockType PINK_STAINED_GLASS_PANE = register("pink_stained_glass_pane");
   public static final BlockType GRAY_STAINED_GLASS_PANE = register("gray_stained_glass_pane");
-  public static final BlockType LIGHT_GRAY_STAINED_GLASS_PANE = register("light_gray_stained_glass_pane");
+  public static final BlockType LIGHT_GRAY_STAINED_GLASS_PANE =
+      register("light_gray_stained_glass_pane");
   public static final BlockType CYAN_STAINED_GLASS_PANE = register("cyan_stained_glass_pane");
   public static final BlockType PURPLE_STAINED_GLASS_PANE = register("purple_stained_glass_pane");
   public static final BlockType BLUE_STAINED_GLASS_PANE = register("blue_stained_glass_pane");
@@ -667,12 +683,14 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
   public static final BlockType WHITE_GLAZED_TERRACOTTA = register("white_glazed_terracotta");
   public static final BlockType ORANGE_GLAZED_TERRACOTTA = register("orange_glazed_terracotta");
   public static final BlockType MAGENTA_GLAZED_TERRACOTTA = register("magenta_glazed_terracotta");
-  public static final BlockType LIGHT_BLUE_GLAZED_TERRACOTTA = register("light_blue_glazed_terracotta");
+  public static final BlockType LIGHT_BLUE_GLAZED_TERRACOTTA =
+      register("light_blue_glazed_terracotta");
   public static final BlockType YELLOW_GLAZED_TERRACOTTA = register("yellow_glazed_terracotta");
   public static final BlockType LIME_GLAZED_TERRACOTTA = register("lime_glazed_terracotta");
   public static final BlockType PINK_GLAZED_TERRACOTTA = register("pink_glazed_terracotta");
   public static final BlockType GRAY_GLAZED_TERRACOTTA = register("gray_glazed_terracotta");
-  public static final BlockType LIGHT_GRAY_GLAZED_TERRACOTTA = register("light_gray_glazed_terracotta");
+  public static final BlockType LIGHT_GRAY_GLAZED_TERRACOTTA =
+      register("light_gray_glazed_terracotta");
   public static final BlockType CYAN_GLAZED_TERRACOTTA = register("cyan_glazed_terracotta");
   public static final BlockType PURPLE_GLAZED_TERRACOTTA = register("purple_glazed_terracotta");
   public static final BlockType BLUE_GLAZED_TERRACOTTA = register("blue_glazed_terracotta");
@@ -767,7 +785,8 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
   public static final BlockType CAVE_AIR = register("cave_air");
   public static final BlockType BUBBLE_COLUMN = register("bubble_column");
   public static final BlockType POLISHED_GRANITE_STAIRS = register("polished_granite_stairs");
-  public static final BlockType SMOOTH_RED_SANDSTONE_STAIRS = register("smooth_red_sandstone_stairs");
+  public static final BlockType SMOOTH_RED_SANDSTONE_STAIRS =
+      register("smooth_red_sandstone_stairs");
   public static final BlockType MOSSY_STONE_BRICK_STAIRS = register("mossy_stone_brick_stairs");
   public static final BlockType POLISHED_DIORITE_STAIRS = register("polished_diorite_stairs");
   public static final BlockType MOSSY_COBBLESTONE_STAIRS = register("mossy_cobblestone_stairs");
@@ -889,15 +908,21 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
   public static final BlockType BLACKSTONE_SLAB = register("blackstone_slab");
   public static final BlockType POLISHED_BLACKSTONE = register("polished_blackstone");
   public static final BlockType POLISHED_BLACKSTONE_BRICKS = register("polished_blackstone_bricks");
-  public static final BlockType CRACKED_POLISHED_BLACKSTONE_BRICKS = register("cracked_polished_blackstone_bricks");
-  public static final BlockType CHISELED_POLISHED_BLACKSTONE = register("chiseled_polished_blackstone");
-  public static final BlockType POLISHED_BLACKSTONE_BRICK_SLAB = register("polished_blackstone_brick_slab");
-  public static final BlockType POLISHED_BLACKSTONE_BRICK_STAIRS = register("polished_blackstone_brick_stairs");
-  public static final BlockType POLISHED_BLACKSTONE_BRICK_WALL = register("polished_blackstone_brick_wall");
+  public static final BlockType CRACKED_POLISHED_BLACKSTONE_BRICKS =
+      register("cracked_polished_blackstone_bricks");
+  public static final BlockType CHISELED_POLISHED_BLACKSTONE =
+      register("chiseled_polished_blackstone");
+  public static final BlockType POLISHED_BLACKSTONE_BRICK_SLAB =
+      register("polished_blackstone_brick_slab");
+  public static final BlockType POLISHED_BLACKSTONE_BRICK_STAIRS =
+      register("polished_blackstone_brick_stairs");
+  public static final BlockType POLISHED_BLACKSTONE_BRICK_WALL =
+      register("polished_blackstone_brick_wall");
   public static final BlockType GILDED_BLACKSTONE = register("gilded_blackstone");
   public static final BlockType POLISHED_BLACKSTONE_STAIRS = register("polished_blackstone_stairs");
   public static final BlockType POLISHED_BLACKSTONE_SLAB = register("polished_blackstone_slab");
-  public static final BlockType POLISHED_BLACKSTONE_PRESSURE_PLATE = register("polished_blackstone_pressure_plate");
+  public static final BlockType POLISHED_BLACKSTONE_PRESSURE_PLATE =
+      register("polished_blackstone_pressure_plate");
   public static final BlockType POLISHED_BLACKSTONE_BUTTON = register("polished_blackstone_button");
   public static final BlockType POLISHED_BLACKSTONE_WALL = register("polished_blackstone_wall");
   public static final BlockType CHISELED_NETHER_BRICKS = register("chiseled_nether_bricks");
@@ -980,12 +1005,16 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
   public static final BlockType WEATHERED_CHISELED_COPPER = register("weathered_chiseled_copper");
   public static final BlockType EXPOSED_CHISELED_COPPER = register("exposed_chiseled_copper");
   public static final BlockType CHISELED_COPPER = register("chiseled_copper");
-  public static final BlockType WAXED_OXIDIZED_CHISELED_COPPER = register("waxed_oxidized_chiseled_copper");
-  public static final BlockType WAXED_WEATHERED_CHISELED_COPPER = register("waxed_weathered_chiseled_copper");
-  public static final BlockType WAXED_EXPOSED_CHISELED_COPPER = register("waxed_exposed_chiseled_copper");
+  public static final BlockType WAXED_OXIDIZED_CHISELED_COPPER =
+      register("waxed_oxidized_chiseled_copper");
+  public static final BlockType WAXED_WEATHERED_CHISELED_COPPER =
+      register("waxed_weathered_chiseled_copper");
+  public static final BlockType WAXED_EXPOSED_CHISELED_COPPER =
+      register("waxed_exposed_chiseled_copper");
   public static final BlockType WAXED_CHISELED_COPPER = register("waxed_chiseled_copper");
   public static final BlockType OXIDIZED_CUT_COPPER_STAIRS = register("oxidized_cut_copper_stairs");
-  public static final BlockType WEATHERED_CUT_COPPER_STAIRS = register("weathered_cut_copper_stairs");
+  public static final BlockType WEATHERED_CUT_COPPER_STAIRS =
+      register("weathered_cut_copper_stairs");
   public static final BlockType EXPOSED_CUT_COPPER_STAIRS = register("exposed_cut_copper_stairs");
   public static final BlockType CUT_COPPER_STAIRS = register("cut_copper_stairs");
   public static final BlockType OXIDIZED_CUT_COPPER_SLAB = register("oxidized_cut_copper_slab");
@@ -1000,13 +1029,19 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
   public static final BlockType WAXED_WEATHERED_CUT_COPPER = register("waxed_weathered_cut_copper");
   public static final BlockType WAXED_EXPOSED_CUT_COPPER = register("waxed_exposed_cut_copper");
   public static final BlockType WAXED_CUT_COPPER = register("waxed_cut_copper");
-  public static final BlockType WAXED_OXIDIZED_CUT_COPPER_STAIRS = register("waxed_oxidized_cut_copper_stairs");
-  public static final BlockType WAXED_WEATHERED_CUT_COPPER_STAIRS = register("waxed_weathered_cut_copper_stairs");
-  public static final BlockType WAXED_EXPOSED_CUT_COPPER_STAIRS = register("waxed_exposed_cut_copper_stairs");
+  public static final BlockType WAXED_OXIDIZED_CUT_COPPER_STAIRS =
+      register("waxed_oxidized_cut_copper_stairs");
+  public static final BlockType WAXED_WEATHERED_CUT_COPPER_STAIRS =
+      register("waxed_weathered_cut_copper_stairs");
+  public static final BlockType WAXED_EXPOSED_CUT_COPPER_STAIRS =
+      register("waxed_exposed_cut_copper_stairs");
   public static final BlockType WAXED_CUT_COPPER_STAIRS = register("waxed_cut_copper_stairs");
-  public static final BlockType WAXED_OXIDIZED_CUT_COPPER_SLAB = register("waxed_oxidized_cut_copper_slab");
-  public static final BlockType WAXED_WEATHERED_CUT_COPPER_SLAB = register("waxed_weathered_cut_copper_slab");
-  public static final BlockType WAXED_EXPOSED_CUT_COPPER_SLAB = register("waxed_exposed_cut_copper_slab");
+  public static final BlockType WAXED_OXIDIZED_CUT_COPPER_SLAB =
+      register("waxed_oxidized_cut_copper_slab");
+  public static final BlockType WAXED_WEATHERED_CUT_COPPER_SLAB =
+      register("waxed_weathered_cut_copper_slab");
+  public static final BlockType WAXED_EXPOSED_CUT_COPPER_SLAB =
+      register("waxed_exposed_cut_copper_slab");
   public static final BlockType WAXED_CUT_COPPER_SLAB = register("waxed_cut_copper_slab");
   public static final BlockType COPPER_DOOR = register("copper_door");
   public static final BlockType EXPOSED_COPPER_DOOR = register("exposed_copper_door");
@@ -1015,30 +1050,37 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
   public static final BlockType WAXED_COPPER_DOOR = register("waxed_copper_door");
   public static final BlockType WAXED_EXPOSED_COPPER_DOOR = register("waxed_exposed_copper_door");
   public static final BlockType WAXED_OXIDIZED_COPPER_DOOR = register("waxed_oxidized_copper_door");
-  public static final BlockType WAXED_WEATHERED_COPPER_DOOR = register("waxed_weathered_copper_door");
+  public static final BlockType WAXED_WEATHERED_COPPER_DOOR =
+      register("waxed_weathered_copper_door");
   public static final BlockType COPPER_TRAPDOOR = register("copper_trapdoor");
   public static final BlockType EXPOSED_COPPER_TRAPDOOR = register("exposed_copper_trapdoor");
   public static final BlockType OXIDIZED_COPPER_TRAPDOOR = register("oxidized_copper_trapdoor");
   public static final BlockType WEATHERED_COPPER_TRAPDOOR = register("weathered_copper_trapdoor");
   public static final BlockType WAXED_COPPER_TRAPDOOR = register("waxed_copper_trapdoor");
-  public static final BlockType WAXED_EXPOSED_COPPER_TRAPDOOR = register("waxed_exposed_copper_trapdoor");
-  public static final BlockType WAXED_OXIDIZED_COPPER_TRAPDOOR = register("waxed_oxidized_copper_trapdoor");
-  public static final BlockType WAXED_WEATHERED_COPPER_TRAPDOOR = register("waxed_weathered_copper_trapdoor");
+  public static final BlockType WAXED_EXPOSED_COPPER_TRAPDOOR =
+      register("waxed_exposed_copper_trapdoor");
+  public static final BlockType WAXED_OXIDIZED_COPPER_TRAPDOOR =
+      register("waxed_oxidized_copper_trapdoor");
+  public static final BlockType WAXED_WEATHERED_COPPER_TRAPDOOR =
+      register("waxed_weathered_copper_trapdoor");
   public static final BlockType COPPER_GRATE = register("copper_grate");
   public static final BlockType EXPOSED_COPPER_GRATE = register("exposed_copper_grate");
   public static final BlockType WEATHERED_COPPER_GRATE = register("weathered_copper_grate");
   public static final BlockType OXIDIZED_COPPER_GRATE = register("oxidized_copper_grate");
   public static final BlockType WAXED_COPPER_GRATE = register("waxed_copper_grate");
   public static final BlockType WAXED_EXPOSED_COPPER_GRATE = register("waxed_exposed_copper_grate");
-  public static final BlockType WAXED_WEATHERED_COPPER_GRATE = register("waxed_weathered_copper_grate");
-  public static final BlockType WAXED_OXIDIZED_COPPER_GRATE = register("waxed_oxidized_copper_grate");
+  public static final BlockType WAXED_WEATHERED_COPPER_GRATE =
+      register("waxed_weathered_copper_grate");
+  public static final BlockType WAXED_OXIDIZED_COPPER_GRATE =
+      register("waxed_oxidized_copper_grate");
   public static final BlockType COPPER_BULB = register("copper_bulb");
   public static final BlockType EXPOSED_COPPER_BULB = register("exposed_copper_bulb");
   public static final BlockType WEATHERED_COPPER_BULB = register("weathered_copper_bulb");
   public static final BlockType OXIDIZED_COPPER_BULB = register("oxidized_copper_bulb");
   public static final BlockType WAXED_COPPER_BULB = register("waxed_copper_bulb");
   public static final BlockType WAXED_EXPOSED_COPPER_BULB = register("waxed_exposed_copper_bulb");
-  public static final BlockType WAXED_WEATHERED_COPPER_BULB = register("waxed_weathered_copper_bulb");
+  public static final BlockType WAXED_WEATHERED_COPPER_BULB =
+      register("waxed_weathered_copper_bulb");
   public static final BlockType WAXED_OXIDIZED_COPPER_BULB = register("waxed_oxidized_copper_bulb");
   public static final BlockType LIGHTNING_ROD = register("lightning_rod");
   public static final BlockType POINTED_DRIPSTONE = register("pointed_dripstone");
@@ -1083,7 +1125,8 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
   public static final BlockType RAW_COPPER_BLOCK = register("raw_copper_block");
   public static final BlockType RAW_GOLD_BLOCK = register("raw_gold_block");
   public static final BlockType POTTED_AZALEA_BUSH = register("potted_azalea_bush");
-  public static final BlockType POTTED_FLOWERING_AZALEA_BUSH = register("potted_flowering_azalea_bush");
+  public static final BlockType POTTED_FLOWERING_AZALEA_BUSH =
+      register("potted_flowering_azalea_bush");
   public static final BlockType OCHRE_FROGLIGHT = register("ochre_froglight");
   public static final BlockType VERDANT_FROGLIGHT = register("verdant_froglight");
   public static final BlockType PEARLESCENT_FROGLIGHT = register("pearlescent_froglight");
@@ -1095,10 +1138,12 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
 
   public static BlockType register(String name) {
     var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class);
-    blockType = blockType.withStatesData(BlockStates.fromJsonArray(
-        blockType,
-        GsonDataHelper.fromJson("/minecraft/blocks.json", name, JsonObject.class)
-            .getAsJsonArray("states")));
+    blockType =
+        blockType.withStatesData(
+            BlockStates.fromJsonArray(
+                blockType,
+                GsonDataHelper.fromJson("/minecraft/blocks.json", name, JsonObject.class)
+                    .getAsJsonArray("states")));
 
     FROM_ID.put(blockType.id(), blockType);
     FROM_NAME.put(blockType.name(), blockType);
@@ -1129,7 +1174,8 @@ public record BlockType(int id, String name, float destroyTime, float explosionR
     return id;
   }
 
-  public record OffsetData(float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType) {
+  public record OffsetData(
+      float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType) {
     public enum OffsetType {
       XZ,
       XYZ

@@ -32,7 +32,8 @@ import net.pistonmaster.soulfire.server.util.NoopLock;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public class ChunkHolder implements BlockAccessor {
-  private static final BlockState VOID_AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.VOID_AIR);
+  private static final BlockState VOID_AIR_BLOCK_STATE =
+      BlockState.forDefaultBlockType(BlockType.VOID_AIR);
   private final Long2ObjectMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
   private final Lock readLock;
   private final Lock writeLock;
@@ -71,7 +72,8 @@ public class ChunkHolder implements BlockAccessor {
   }
 
   public ChunkData getChunk(Vector3i block) {
-    return getChunk(SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
+    return getChunk(
+        SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
   }
 
   private ChunkData getChunkFromSection(long sectionIndex) {
@@ -93,7 +95,8 @@ public class ChunkHolder implements BlockAccessor {
   }
 
   public boolean isChunkLoaded(Vector3i block) {
-    return isChunkLoaded(SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
+    return isChunkLoaded(
+        SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
   }
 
   public void removeChunk(int x, int z) {
@@ -108,8 +111,8 @@ public class ChunkHolder implements BlockAccessor {
   public ChunkData getOrCreateChunk(int x, int z) {
     writeLock.lock();
     try {
-      return chunks.computeIfAbsent(ChunkKey.calculateKey(x, z), (key) ->
-          new ChunkData(minSection, sectionsCount, false));
+      return chunks.computeIfAbsent(
+          ChunkKey.calculateKey(x, z), (key) -> new ChunkData(minSection, sectionsCount, false));
     } finally {
       writeLock.unlock();
     }

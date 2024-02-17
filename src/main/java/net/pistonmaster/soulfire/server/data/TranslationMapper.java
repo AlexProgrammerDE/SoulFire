@@ -37,10 +37,11 @@ public class TranslationMapper implements Function<TranslatableComponent, String
 
   static {
     JsonObject translations;
-    try (var stream = TranslationMapper.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
+    try (var stream =
+        TranslationMapper.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
       Objects.requireNonNull(stream, "en_us.json not found");
-      translations = SoulFireServer.GENERAL_GSON
-          .fromJson(new InputStreamReader(stream), JsonObject.class);
+      translations =
+          SoulFireServer.GENERAL_GSON.fromJson(new InputStreamReader(stream), JsonObject.class);
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
@@ -64,10 +65,11 @@ public class TranslationMapper implements Function<TranslatableComponent, String
       return component.key();
     }
 
-    var args = component.arguments().stream()
-        .map(TranslationArgumentLike::asComponent)
-        .map(SoulFireServer.PLAIN_MESSAGE_SERIALIZER::serialize)
-        .toArray(String[]::new);
+    var args =
+        component.arguments().stream()
+            .map(TranslationArgumentLike::asComponent)
+            .map(SoulFireServer.PLAIN_MESSAGE_SERIALIZER::serialize)
+            .toArray(String[]::new);
     return String.format(translation, (Object[]) args);
   }
 }

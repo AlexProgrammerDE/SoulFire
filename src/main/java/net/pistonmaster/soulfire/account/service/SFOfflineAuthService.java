@@ -21,7 +21,8 @@ import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.proxy.SWProxy;
 
-public final class SFOfflineAuthService implements MCAuthService<SFOfflineAuthService.OfflineAuthData> {
+public final class SFOfflineAuthService
+    implements MCAuthService<SFOfflineAuthService.OfflineAuthData> {
   public static MinecraftAccount createAccount(String username) {
     return new MinecraftAccount(AuthType.OFFLINE, username, new OfflineJavaData(username), true);
   }
@@ -36,6 +37,5 @@ public final class SFOfflineAuthService implements MCAuthService<SFOfflineAuthSe
     return new OfflineAuthData(data);
   }
 
-  public record OfflineAuthData(String username) {
-  }
+  public record OfflineAuthData(String username) {}
 }

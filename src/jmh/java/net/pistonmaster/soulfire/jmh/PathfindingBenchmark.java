@@ -49,9 +49,10 @@ public class PathfindingBenchmark {
   @Setup
   public void setup() {
     var gson = new Gson();
-    var byteArrayInputStream = new ByteArrayInputStream(ResourceHelper.getResourceBytes("/world_data.json.zip"));
+    var byteArrayInputStream =
+        new ByteArrayInputStream(ResourceHelper.getResourceBytes("/world_data.json.zip"));
     try (var gzipInputStream = new GZIPInputStream(byteArrayInputStream);
-         var reader = new InputStreamReader(gzipInputStream)) {
+        var reader = new InputStreamReader(gzipInputStream)) {
       log.info("Reading world data...");
       var worldData = gson.fromJson(reader, JsonObject.class);
       var definitions = worldData.getAsJsonArray("definitions");
@@ -70,8 +71,7 @@ public class PathfindingBenchmark {
         for (var y = 0; y < xArray.length; y++) {
           var yArray = xArray[y];
           for (var z = 0; z < yArray.length; z++) {
-            accessor.setBlockAt(x, y, z,
-                BlockType.getByName(blockDefinitions[yArray[z]]));
+            accessor.setBlockAt(x, y, z, BlockType.getByName(blockDefinitions[yArray[z]]));
           }
         }
       }
@@ -87,16 +87,13 @@ public class PathfindingBenchmark {
         }
       }
 
-      routeFinder = new RouteFinder(
-          new MinecraftGraph(new TagsState()),
-          new PosGoal(100, 80, 100)
-      );
+      routeFinder = new RouteFinder(new MinecraftGraph(new TagsState()), new PosGoal(100, 80, 100));
 
-      initialState = new BotEntityState(
-          new SFVec3i(0, safeY, 0),
-          new ProjectedLevelState(accessor),
-          new ProjectedInventory(new PlayerInventoryContainer(null))
-      );
+      initialState =
+          new BotEntityState(
+              new SFVec3i(0, safeY, 0),
+              new ProjectedLevelState(accessor),
+              new ProjectedInventory(new PlayerInventoryContainer(null)));
 
       log.info("Done loading! Testing...");
     } catch (Exception e) {

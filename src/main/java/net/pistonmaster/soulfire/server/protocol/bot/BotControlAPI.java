@@ -50,17 +50,14 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 /**
- * This class is used to control the bot.
- * The goal is to reduce friction for doing simple things.
+ * This class is used to control the bot. The goal is to reduce friction for doing simple things.
  */
 @Slf4j
 @RequiredArgsConstructor
 public class BotControlAPI {
   private final SessionDataManager dataManager;
   private final SecureRandom secureRandom = new SecureRandom();
-  @Getter
-  @Setter
-  private int attackCooldownTicks = 0;
+  @Getter @Setter private int attackCooldownTicks = 0;
 
   public void tick() {
     if (attackCooldownTicks > 0) {
@@ -88,10 +85,10 @@ public class BotControlAPI {
     dataManager.controlState().sprinting(newSprint);
 
     // Let the server know we are sprinting
-    dataManager.sendPacket(new ServerboundPlayerCommandPacket(
-        dataManager.clientEntity().entityId(),
-        newSprint ? PlayerState.START_SPRINTING : PlayerState.STOP_SPRINTING
-    ));
+    dataManager.sendPacket(
+        new ServerboundPlayerCommandPacket(
+            dataManager.clientEntity().entityId(),
+            newSprint ? PlayerState.START_SPRINTING : PlayerState.STOP_SPRINTING));
 
     return newSprint;
   }
@@ -101,10 +98,10 @@ public class BotControlAPI {
     dataManager.controlState().sneaking(newSneak);
 
     // Let the server know we are sneaking
-    dataManager.sendPacket(new ServerboundPlayerCommandPacket(
-        dataManager.clientEntity().entityId(),
-        newSneak ? PlayerState.START_SNEAKING : PlayerState.STOP_SNEAKING
-    ));
+    dataManager.sendPacket(
+        new ServerboundPlayerCommandPacket(
+            dataManager.clientEntity().entityId(),
+            newSneak ? PlayerState.START_SNEAKING : PlayerState.STOP_SNEAKING));
 
     return newSneak;
   }
@@ -113,26 +110,16 @@ public class BotControlAPI {
     var now = Instant.now();
     if (message.startsWith("/")) {
       var command = message.substring(1);
-      // We only sign chat at the moment because commands require the entire command tree to be handled
+      // We only sign chat at the moment because commands require the entire command tree to be
+      // handled
       // Command signing is signing every string parameter in the command because of reporting /msg
-      dataManager.sendPacket(new ServerboundChatCommandPacket(
-          command,
-          now.toEpochMilli(),
-          0L,
-          Collections.emptyList(),
-          0,
-          new BitSet()
-      ));
+      dataManager.sendPacket(
+          new ServerboundChatCommandPacket(
+              command, now.toEpochMilli(), 0L, Collections.emptyList(), 0, new BitSet()));
     } else {
       var salt = secureRandom.nextLong();
-      dataManager.sendPacket(new ServerboundChatPacket(
-          message,
-          now.toEpochMilli(),
-          salt,
-          null,
-          0,
-          new BitSet()
-      ));
+      dataManager.sendPacket(
+          new ServerboundChatPacket(message, now.toEpochMilli(), salt, null, 0, new BitSet()));
     }
   }
 
@@ -158,10 +145,7 @@ public class BotControlAPI {
   }
 
   public void sendPluginMessage(String channel, byte[] data) {
-    dataManager.sendPacket(new ServerboundCustomPayloadPacket(
-        channel,
-        data
-    ));
+    dataManager.sendPacket(new ServerboundCustomPayloadPacket(channel, data));
   }
 
   public Vector3d getEntityVisiblePoint(Entity entity) {
@@ -175,11 +159,11 @@ public class BotControlAPI {
           if (x == 0 && y == 1 && z == 0) {
             continue;
           }
-          points.add(Vector3d.from(
-              entity.x() + halfWidth * x,
-              entity.y() + halfHeight * y,
-              entity.z() + halfWidth * z
-          ));
+          points.add(
+              Vector3d.from(
+                  entity.x() + halfWidth * x,
+                  entity.y() + halfHeight * y,
+                  entity.z() + halfWidth * z));
         }
       }
     }
@@ -209,7 +193,9 @@ public class BotControlAPI {
       return;
     }
 
-    var packet = new ServerboundInteractPacket(entity.entityId(), InteractAction.ATTACK, dataManager.controlState().sneaking());
+    var packet =
+        new ServerboundInteractPacket(
+            entity.entityId(), InteractAction.ATTACK, dataManager.controlState().sneaking());
     dataManager.sendPacket(packet);
     if (swingArm) {
       swingArm();
@@ -218,7 +204,12 @@ public class BotControlAPI {
     attackCooldownTicks = (int) getHitItemCooldownTicks();
   }
 
-  public Entity getClosestEntity(double range, String whitelistedUser, boolean ignoreBots, boolean onlyInteractable, boolean mustBeSeen) {
+  public Entity getClosestEntity(
+      double range,
+      String whitelistedUser,
+      boolean ignoreBots,
+      boolean onlyInteractable,
+      boolean mustBeSeen) {
     if (dataManager.clientEntity() == null) {
       return null;
     }
@@ -235,7 +226,11 @@ public class BotControlAPI {
         continue;
       }
 
-      var distance = Math.sqrt(Math.pow(entity.x() - x, 2) + Math.pow(entity.y() - y, 2) + Math.pow(entity.z() - z, 2));
+      var distance =
+          Math.sqrt(
+              Math.pow(entity.x() - x, 2)
+                  + Math.pow(entity.y() - y, 2)
+                  + Math.pow(entity.z() - z, 2));
       if (distance > range) {
         continue;
       }
@@ -244,7 +239,9 @@ public class BotControlAPI {
         continue;
       }
 
-      if (whitelistedUser != null && !whitelistedUser.isEmpty() && entity.entityType() == EntityType.PLAYER) {
+      if (whitelistedUser != null
+          && !whitelistedUser.isEmpty()
+          && entity.entityType() == EntityType.PLAYER) {
         var connectedUsers = dataManager.playerListState();
         var playerListEntry = connectedUsers.entries().get(entity.uuid());
         if (playerListEntry != null && playerListEntry.getProfile() != null) {
@@ -254,13 +251,16 @@ public class BotControlAPI {
         }
       }
 
-      if (ignoreBots && dataManager.connection().attackManager().botConnections().stream().anyMatch(b -> {
-        if (b.sessionDataManager().clientEntity() == null) {
-          return false;
-        }
+      if (ignoreBots
+          && dataManager.connection().attackManager().botConnections().stream()
+              .anyMatch(
+                  b -> {
+                    if (b.sessionDataManager().clientEntity() == null) {
+                      return false;
+                    }
 
-        return b.sessionDataManager().clientEntity().uuid().equals(entity.uuid());
-      })) {
+                    return b.sessionDataManager().clientEntity().uuid().equals(entity.uuid());
+                  })) {
         continue;
       }
 
@@ -310,6 +310,9 @@ public class BotControlAPI {
   public float getHitItemCooldownTicks() {
     dataManager.inventoryManager().applyItemAttributes();
 
-    return (float) (1.0 / dataManager.clientEntity().getAttributeValue(AttributeType.GENERIC_ATTACK_SPEED) * 20.0);
+    return (float)
+        (1.0
+            / dataManager.clientEntity().getAttributeValue(AttributeType.GENERIC_ATTACK_SPEED)
+            * 20.0);
   }
 }

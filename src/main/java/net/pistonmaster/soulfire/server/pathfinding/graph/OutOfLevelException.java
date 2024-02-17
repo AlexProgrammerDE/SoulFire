@@ -20,12 +20,11 @@ package net.pistonmaster.soulfire.server.pathfinding.graph;
 import java.io.Serial;
 
 /**
- * Exception thrown when a node is out of the render distance.
- * The RouteFinder is supposed to catch this exception and insert a path recalculation action and return the best path.
+ * Exception thrown when a node is out of the render distance. The RouteFinder is supposed to catch
+ * this exception and insert a path recalculation action and return the best path.
  */
 public class OutOfLevelException extends RuntimeException {
-  @Serial
-  private static final long serialVersionUID = 1L;
+  @Serial private static final long serialVersionUID = 1L;
 
   public OutOfLevelException() {
     super();

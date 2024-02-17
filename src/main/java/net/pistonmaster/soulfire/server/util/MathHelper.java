@@ -18,8 +18,7 @@
 package net.pistonmaster.soulfire.server.util;
 
 public class MathHelper {
-  private MathHelper() {
-  }
+  private MathHelper() {}
 
   /**
    * Returns the greatest integer less than or equal to the double argument.

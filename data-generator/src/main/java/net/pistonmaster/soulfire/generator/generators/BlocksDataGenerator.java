@@ -78,7 +78,8 @@ public class BlocksDataGenerator implements IDataGenerator {
 
       var propertiesDesc = new JsonObject();
       for (var property : state.getProperties()) {
-        propertiesDesc.addProperty(property.getName(), Util.getPropertyName(property, state.getValue(property)));
+        propertiesDesc.addProperty(
+            property.getName(), Util.getPropertyName(property, state.getValue(property)));
       }
 
       if (!propertiesDesc.isEmpty()) {

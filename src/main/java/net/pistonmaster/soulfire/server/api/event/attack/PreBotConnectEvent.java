@@ -22,10 +22,10 @@ import net.pistonmaster.soulfire.server.api.event.SoulFireAttackEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 
 /**
- * The event is called when the bot is about to connect to the server in the attack.
- * The BotConnection instance has all fields filled, but most methods are unusable as the bot is not connected.
- * This also runs async off the main thread of the attack, so you can do blocking operations for the attack here.
- * <br>
+ * The event is called when the bot is about to connect to the server in the attack. The
+ * BotConnection instance has all fields filled, but most methods are unusable as the bot is not
+ * connected. This also runs async off the main thread of the attack, so you can do blocking
+ * operations for the attack here. <br>
  * This event is recommended for when you want to add a pre-connect hook like for server list ping.
  *
  * @param connection The bot connection instance.

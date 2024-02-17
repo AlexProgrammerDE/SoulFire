@@ -71,10 +71,7 @@ public final class BlockBreakAction implements WorldAction {
       clientEntity.lookAt(
           RotationOrigin.EYES,
           VectorHelper.topMiddleOfBlock(
-              blockPosition.toVector3d(),
-              levelState.getBlockStateAt(blockPosition)
-          )
-      );
+              blockPosition.toVector3d(), levelState.getBlockStateAt(blockPosition)));
       if (previousPitch != clientEntity.pitch() || previousYaw != clientEntity.yaw()) {
         clientEntity.sendRot();
       }
@@ -100,13 +97,14 @@ public final class BlockBreakAction implements WorldAction {
           return;
         }
 
-        var cost = Costs.getRequiredMiningTicks(
-            sessionDataManager.tagsState(),
-            sessionDataManager.clientEntity().effectState(),
-            clientEntity.onGround(),
-            item,
-            optionalBlockType
-        ).ticks();
+        var cost =
+            Costs.getRequiredMiningTicks(
+                    sessionDataManager.tagsState(),
+                    sessionDataManager.clientEntity().effectState(),
+                    clientEntity.onGround(),
+                    item,
+                    optionalBlockType)
+                .ticks();
 
         if (cost < bestCost || (item == null && cost == bestCost)) {
           bestCost = cost;
@@ -190,15 +188,14 @@ public final class BlockBreakAction implements WorldAction {
         return;
       }
 
-      remainingTicks = Costs.getRequiredMiningTicks(
-          sessionDataManager.tagsState(),
-          sessionDataManager.clientEntity().effectState(),
-          clientEntity.onGround(),
-          sessionDataManager.inventoryManager().playerInventory()
-              .getHeldItem()
-              .item(),
-          optionalBlockType
-      ).ticks();
+      remainingTicks =
+          Costs.getRequiredMiningTicks(
+                  sessionDataManager.tagsState(),
+                  sessionDataManager.clientEntity().effectState(),
+                  clientEntity.onGround(),
+                  sessionDataManager.inventoryManager().playerInventory().getHeldItem().item(),
+                  optionalBlockType)
+              .ticks();
       sessionDataManager.botActionManager().sendStartBreakBlock(blockPosition.toVector3i());
     } else if (--remainingTicks == 0) {
       sessionDataManager.botActionManager().sendEndBreakBlock(blockPosition.toVector3i());

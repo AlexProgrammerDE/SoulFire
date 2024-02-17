@@ -27,10 +27,7 @@ public enum BodyPart {
 
   // Iterating over BodyPart.values() is slower than iteration over a static array
   // Reversed because we normally want to see the head block mined before the feet
-  public static final BodyPart[] BODY_PARTS_REVERSE = new BodyPart[] {
-      BodyPart.HEAD,
-      BodyPart.FEET
-  };
+  public static final BodyPart[] BODY_PARTS_REVERSE = new BodyPart[] {BodyPart.HEAD, BodyPart.FEET};
 
   public SFVec3i offset(SFVec3i position) {
     return switch (this) {

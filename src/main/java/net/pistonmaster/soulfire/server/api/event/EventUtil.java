@@ -24,7 +24,10 @@ import net.lenni0451.reflect.stream.RStream;
 import net.lenni0451.reflect.stream.field.FieldWrapper;
 
 public class EventUtil {
-  private static final FieldWrapper handlersWrapper = RStream.of(LambdaManager.class).fields().by("handlers");
+  private static final FieldWrapper handlersWrapper =
+      RStream.of(LambdaManager.class).fields().by("handlers");
+
+  private EventUtil() {}
 
   public static void runAndAssertChanged(LambdaManager manager, Runnable runnable) {
     var handlers = handlersWrapper.<Map<?, List<?>>>get(manager);
@@ -38,8 +41,5 @@ public class EventUtil {
 
   private static int countTotalHandlers(Map<?, List<?>> handlers) {
     return handlers.values().stream().mapToInt(List::size).sum();
-  }
-
-  private EventUtil() {
   }
 }

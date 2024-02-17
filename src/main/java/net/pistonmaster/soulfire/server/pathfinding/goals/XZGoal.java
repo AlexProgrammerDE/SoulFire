@@ -34,7 +34,6 @@ public record XZGoal(Vector2i goal) implements GoalScorer {
 
   @Override
   public boolean isFinished(BotEntityState entityState) {
-    return Vector2i.from(entityState.blockPosition().x, entityState.blockPosition().z)
-        .equals(goal);
+    return Vector2i.from(entityState.blockPosition().x, entityState.blockPosition().z).equals(goal);
   }
 }

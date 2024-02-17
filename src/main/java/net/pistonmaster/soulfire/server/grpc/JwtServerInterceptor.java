@@ -40,8 +40,10 @@ public class JwtServerInterceptor implements ServerInterceptor {
   }
 
   @Override
-  public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall,
-                                                               Metadata metadata, ServerCallHandler<ReqT, RespT> serverCallHandler) {
+  public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
+      ServerCall<ReqT, RespT> serverCall,
+      Metadata metadata,
+      ServerCallHandler<ReqT, RespT> serverCallHandler) {
     var value = metadata.get(RPCConstants.AUTHORIZATION_METADATA_KEY);
 
     var status = Status.OK;
@@ -61,8 +63,9 @@ public class JwtServerInterceptor implements ServerInterceptor {
       }
       if (claims != null) {
         // set client id into current context
-        var ctx = Context.current()
-            .withValue(RPCConstants.CLIENT_ID_CONTEXT_KEY, claims.getPayload().getSubject());
+        var ctx =
+            Context.current()
+                .withValue(RPCConstants.CLIENT_ID_CONTEXT_KEY, claims.getPayload().getSubject());
         return Contexts.interceptCall(ctx, serverCall, metadata, serverCallHandler);
       }
     }

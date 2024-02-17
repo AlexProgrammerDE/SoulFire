@@ -72,11 +72,10 @@ public class ModLoaderSupport implements InternalExtension {
     var settingsHolder = connection.settingsHolder();
     var hostname = handshake.getHostname();
 
-    switch (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)) {
-      case FML -> event.packet(handshake
-          .withHostname(createFMLAddress(hostname)));
-      case FML2 -> event.packet(handshake
-          .withHostname(createFML2Address(hostname)));
+    switch (settingsHolder.get(
+        ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)) {
+      case FML -> event.packet(handshake.withHostname(createFMLAddress(hostname)));
+      case FML2 -> event.packet(handshake.withHostname(createFML2Address(hostname)));
     }
   }
 
@@ -97,7 +96,8 @@ public class ModLoaderSupport implements InternalExtension {
     }
   }
 
-  private void handleFMLPluginMessage(BotConnection botConnection, ClientboundCustomPayloadPacket pluginMessage) {
+  private void handleFMLPluginMessage(
+      BotConnection botConnection, ClientboundCustomPayloadPacket pluginMessage) {
     if (!pluginMessage.getChannel().equals("fml:hs")) {
       return;
     }
@@ -105,7 +105,7 @@ public class ModLoaderSupport implements InternalExtension {
     var buffer = Unpooled.wrappedBuffer(pluginMessage.getData());
     var discriminator = buffer.readByte();
     switch (discriminator) {
-      // ServerHello
+        // ServerHello
       case 0 -> {
         var fmlProtocolVersion = buffer.readByte();
         var helper = botConnection.session().getCodecHelper();
@@ -114,22 +114,18 @@ public class ModLoaderSupport implements InternalExtension {
           log.debug("FML dimension override: {}", dimension);
         }
 
-        botConnection.botControl().registerPluginChannels(
-            "fml:hs",
-            "fml:fml",
-            "fml:mp",
-            "fml:fml",
-            "fml:forge"
-        );
+        botConnection
+            .botControl()
+            .registerPluginChannels("fml:hs", "fml:fml", "fml:mp", "fml:fml", "fml:forge");
         sendFMLClientHello(botConnection, fmlProtocolVersion);
         sendFMLModList(botConnection, List.of());
       }
-      // ModList
+        // ModList
       case 2 -> {
         // WAITINGSERVERDATA
         sendFMLHandshakeAck(botConnection, (byte) 2);
       }
-      // RegistryData
+        // RegistryData
       case 3 -> {
         var hasMore = buffer.readBoolean();
         if (!hasMore) {
@@ -137,23 +133,23 @@ public class ModLoaderSupport implements InternalExtension {
           sendFMLHandshakeAck(botConnection, (byte) 3);
         }
       }
-      // HandshakeAck
+        // HandshakeAck
       case -1 -> {
         var phase = buffer.readByte();
         switch (phase) {
-          // WAITINGCACK
+            // WAITINGCACK
           case 2 -> {
             // PENDINGCOMPLETE
             sendFMLHandshakeAck(botConnection, (byte) 4);
           }
-          // COMPLETE
+            // COMPLETE
           case 3 -> {
             // COMPLETE
             sendFMLHandshakeAck(botConnection, (byte) 5);
           }
         }
       }
-      // HandshakeReset
+        // HandshakeReset
       case -2 -> {
         log.debug("FML handshake reset");
       }
@@ -191,20 +187,19 @@ public class ModLoaderSupport implements InternalExtension {
 
   private void handleFML2PluginMessage(ClientboundCustomQueryPacket loginPluginMessage) {
     var buffer = Unpooled.wrappedBuffer(loginPluginMessage.getData());
-
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ModLoaderSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("mod-loader");
-    public static final ComboProperty FORGE_MODE = BUILDER.ofEnum(
-        "mod-loader-mode",
-        "Mod Loader mode",
-        new String[] {"--mod-loader-mode"},
-        "What mod loader to use",
-        ModLoaderMode.values(),
-        ModLoaderMode.NONE
-    );
+    public static final ComboProperty FORGE_MODE =
+        BUILDER.ofEnum(
+            "mod-loader-mode",
+            "Mod Loader mode",
+            new String[] {"--mod-loader-mode"},
+            "What mod loader to use",
+            ModLoaderMode.values(),
+            ModLoaderMode.NONE);
 
     @RequiredArgsConstructor
     enum ModLoaderMode {
@@ -221,6 +216,5 @@ public class ModLoaderSupport implements InternalExtension {
     }
   }
 
-  private record Mod(String modId, String version) {
-  }
+  private record Mod(String modId, String version) {}
 }

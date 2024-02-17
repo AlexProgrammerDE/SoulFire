@@ -21,8 +21,8 @@ import java.util.List;
 import net.pistonmaster.soulfire.util.SFContextClassLoader;
 
 /**
- * This class only changes the classLoader for the rest of the program.
- * This is so we can merge plugin and server classes.
+ * This class only changes the classLoader for the rest of the program. This is so we can merge
+ * plugin and server classes.
  */
 public class SoulFireLauncher {
   private static final SFContextClassLoader SW_CONTEXT_CLASS_LOADER = new SFContextClassLoader();
@@ -31,7 +31,8 @@ public class SoulFireLauncher {
     Thread.currentThread().setContextClassLoader(SW_CONTEXT_CLASS_LOADER);
 
     try {
-      SW_CONTEXT_CLASS_LOADER.loadClass("net.pistonmaster.soulfire.SoulFireBootstrap")
+      SW_CONTEXT_CLASS_LOADER
+          .loadClass("net.pistonmaster.soulfire.SoulFireBootstrap")
           .getDeclaredMethod("bootstrap", String[].class, List.class)
           .invoke(null, args, SW_CONTEXT_CLASS_LOADER.childClassLoaders());
     } catch (ReflectiveOperationException e) {

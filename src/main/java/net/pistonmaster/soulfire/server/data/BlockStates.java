@@ -33,13 +33,7 @@ public record BlockStates(BlockState defaultState, List<BlockState> possibleStat
 
       var properties = new BlockStateProperties(stateObject.getAsJsonObject("properties"));
 
-      var blockState = new BlockState(
-          stateId,
-          defaultStateValue,
-          properties,
-          blockType,
-          i
-      );
+      var blockState = new BlockState(stateId, defaultStateValue, properties, blockType, i);
 
       if (defaultStateValue) {
         defaultState = blockState;
@@ -49,9 +43,6 @@ public record BlockStates(BlockState defaultState, List<BlockState> possibleStat
       i++;
     }
 
-    return new BlockStates(
-        defaultState,
-        possibleStates
-    );
+    return new BlockStates(defaultState, possibleStates);
   }
 }

@@ -49,12 +49,7 @@ public class ChunkData {
   }
 
   public int getBlock(int x, int y, int z) {
-    return getSection(getSectionIndexByBlockY(y))
-        .getBlock(
-            x & 0xF,
-            y & 0xF,
-            z & 0xF
-        );
+    return getSection(getSectionIndexByBlockY(y)).getBlock(x & 0xF, y & 0xF, z & 0xF);
   }
 
   public ChunkSection getSection(int sectionIndex) {
@@ -84,12 +79,12 @@ public class ChunkData {
     var y = block.getY();
     var sectionIndex = getSectionIndexByBlockY(y);
     var targetSection = getSection(sectionIndex);
-    var clone = new ChunkSection(
-        targetSection.getBlockCount(),
-        // Clone chunk data palette only
-        new DataPalette(targetSection.getChunkData()),
-        targetSection.getBiomeData()
-    );
+    var clone =
+        new ChunkSection(
+            targetSection.getBlockCount(),
+            // Clone chunk data palette only
+            new DataPalette(targetSection.getChunkData()),
+            targetSection.getBiomeData());
     clone.setBlock(block.getX() & 0xF, y & 0xF, block.getZ() & 0xF, state);
 
     setSection(sectionIndex, clone);

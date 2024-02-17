@@ -22,12 +22,15 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record ItemType(int id, String name, int stackSize,
-                       List<String> enchantCategories,
-                       DepletionData depletionData,
-                       FoodProperties foodProperties,
-                       EquipmentSlot attributeSlot,
-                       List<Attribute> attributes) {
+public record ItemType(
+    int id,
+    String name,
+    int stackSize,
+    List<String> enchantCategories,
+    DepletionData depletionData,
+    FoodProperties foodProperties,
+    EquipmentSlot attributeSlot,
+    List<Attribute> attributes) {
   public static final Int2ReferenceMap<ItemType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
   public static final ItemType AIR = register("air");
@@ -135,7 +138,8 @@ public record ItemType(int id, String name, int stackSize,
   public static final ItemType OXIDIZED_CUT_COPPER = register("oxidized_cut_copper");
   public static final ItemType CUT_COPPER_STAIRS = register("cut_copper_stairs");
   public static final ItemType EXPOSED_CUT_COPPER_STAIRS = register("exposed_cut_copper_stairs");
-  public static final ItemType WEATHERED_CUT_COPPER_STAIRS = register("weathered_cut_copper_stairs");
+  public static final ItemType WEATHERED_CUT_COPPER_STAIRS =
+      register("weathered_cut_copper_stairs");
   public static final ItemType OXIDIZED_CUT_COPPER_STAIRS = register("oxidized_cut_copper_stairs");
   public static final ItemType CUT_COPPER_SLAB = register("cut_copper_slab");
   public static final ItemType EXPOSED_CUT_COPPER_SLAB = register("exposed_cut_copper_slab");
@@ -146,21 +150,30 @@ public record ItemType(int id, String name, int stackSize,
   public static final ItemType WAXED_WEATHERED_COPPER = register("waxed_weathered_copper");
   public static final ItemType WAXED_OXIDIZED_COPPER = register("waxed_oxidized_copper");
   public static final ItemType WAXED_CHISELED_COPPER = register("waxed_chiseled_copper");
-  public static final ItemType WAXED_EXPOSED_CHISELED_COPPER = register("waxed_exposed_chiseled_copper");
-  public static final ItemType WAXED_WEATHERED_CHISELED_COPPER = register("waxed_weathered_chiseled_copper");
-  public static final ItemType WAXED_OXIDIZED_CHISELED_COPPER = register("waxed_oxidized_chiseled_copper");
+  public static final ItemType WAXED_EXPOSED_CHISELED_COPPER =
+      register("waxed_exposed_chiseled_copper");
+  public static final ItemType WAXED_WEATHERED_CHISELED_COPPER =
+      register("waxed_weathered_chiseled_copper");
+  public static final ItemType WAXED_OXIDIZED_CHISELED_COPPER =
+      register("waxed_oxidized_chiseled_copper");
   public static final ItemType WAXED_CUT_COPPER = register("waxed_cut_copper");
   public static final ItemType WAXED_EXPOSED_CUT_COPPER = register("waxed_exposed_cut_copper");
   public static final ItemType WAXED_WEATHERED_CUT_COPPER = register("waxed_weathered_cut_copper");
   public static final ItemType WAXED_OXIDIZED_CUT_COPPER = register("waxed_oxidized_cut_copper");
   public static final ItemType WAXED_CUT_COPPER_STAIRS = register("waxed_cut_copper_stairs");
-  public static final ItemType WAXED_EXPOSED_CUT_COPPER_STAIRS = register("waxed_exposed_cut_copper_stairs");
-  public static final ItemType WAXED_WEATHERED_CUT_COPPER_STAIRS = register("waxed_weathered_cut_copper_stairs");
-  public static final ItemType WAXED_OXIDIZED_CUT_COPPER_STAIRS = register("waxed_oxidized_cut_copper_stairs");
+  public static final ItemType WAXED_EXPOSED_CUT_COPPER_STAIRS =
+      register("waxed_exposed_cut_copper_stairs");
+  public static final ItemType WAXED_WEATHERED_CUT_COPPER_STAIRS =
+      register("waxed_weathered_cut_copper_stairs");
+  public static final ItemType WAXED_OXIDIZED_CUT_COPPER_STAIRS =
+      register("waxed_oxidized_cut_copper_stairs");
   public static final ItemType WAXED_CUT_COPPER_SLAB = register("waxed_cut_copper_slab");
-  public static final ItemType WAXED_EXPOSED_CUT_COPPER_SLAB = register("waxed_exposed_cut_copper_slab");
-  public static final ItemType WAXED_WEATHERED_CUT_COPPER_SLAB = register("waxed_weathered_cut_copper_slab");
-  public static final ItemType WAXED_OXIDIZED_CUT_COPPER_SLAB = register("waxed_oxidized_cut_copper_slab");
+  public static final ItemType WAXED_EXPOSED_CUT_COPPER_SLAB =
+      register("waxed_exposed_cut_copper_slab");
+  public static final ItemType WAXED_WEATHERED_CUT_COPPER_SLAB =
+      register("waxed_weathered_cut_copper_slab");
+  public static final ItemType WAXED_OXIDIZED_CUT_COPPER_SLAB =
+      register("waxed_oxidized_cut_copper_slab");
   public static final ItemType OAK_LOG = register("oak_log");
   public static final ItemType SPRUCE_LOG = register("spruce_log");
   public static final ItemType BIRCH_LOG = register("birch_log");
@@ -365,9 +378,12 @@ public record ItemType(int id, String name, int stackSize,
   public static final ItemType INFESTED_STONE = register("infested_stone");
   public static final ItemType INFESTED_COBBLESTONE = register("infested_cobblestone");
   public static final ItemType INFESTED_STONE_BRICKS = register("infested_stone_bricks");
-  public static final ItemType INFESTED_MOSSY_STONE_BRICKS = register("infested_mossy_stone_bricks");
-  public static final ItemType INFESTED_CRACKED_STONE_BRICKS = register("infested_cracked_stone_bricks");
-  public static final ItemType INFESTED_CHISELED_STONE_BRICKS = register("infested_chiseled_stone_bricks");
+  public static final ItemType INFESTED_MOSSY_STONE_BRICKS =
+      register("infested_mossy_stone_bricks");
+  public static final ItemType INFESTED_CRACKED_STONE_BRICKS =
+      register("infested_cracked_stone_bricks");
+  public static final ItemType INFESTED_CHISELED_STONE_BRICKS =
+      register("infested_chiseled_stone_bricks");
   public static final ItemType INFESTED_DEEPSLATE = register("infested_deepslate");
   public static final ItemType STONE_BRICKS = register("stone_bricks");
   public static final ItemType MOSSY_STONE_BRICKS = register("mossy_stone_bricks");
@@ -443,7 +459,8 @@ public record ItemType(int id, String name, int stackSize,
   public static final ItemType DIORITE_WALL = register("diorite_wall");
   public static final ItemType BLACKSTONE_WALL = register("blackstone_wall");
   public static final ItemType POLISHED_BLACKSTONE_WALL = register("polished_blackstone_wall");
-  public static final ItemType POLISHED_BLACKSTONE_BRICK_WALL = register("polished_blackstone_brick_wall");
+  public static final ItemType POLISHED_BLACKSTONE_BRICK_WALL =
+      register("polished_blackstone_brick_wall");
   public static final ItemType COBBLED_DEEPSLATE_WALL = register("cobbled_deepslate_wall");
   public static final ItemType POLISHED_DEEPSLATE_WALL = register("polished_deepslate_wall");
   public static final ItemType DEEPSLATE_BRICK_WALL = register("deepslate_brick_wall");
@@ -519,12 +536,14 @@ public record ItemType(int id, String name, int stackSize,
   public static final ItemType WHITE_STAINED_GLASS_PANE = register("white_stained_glass_pane");
   public static final ItemType ORANGE_STAINED_GLASS_PANE = register("orange_stained_glass_pane");
   public static final ItemType MAGENTA_STAINED_GLASS_PANE = register("magenta_stained_glass_pane");
-  public static final ItemType LIGHT_BLUE_STAINED_GLASS_PANE = register("light_blue_stained_glass_pane");
+  public static final ItemType LIGHT_BLUE_STAINED_GLASS_PANE =
+      register("light_blue_stained_glass_pane");
   public static final ItemType YELLOW_STAINED_GLASS_PANE = register("yellow_stained_glass_pane");
   public static final ItemType LIME_STAINED_GLASS_PANE = register("lime_stained_glass_pane");
   public static final ItemType PINK_STAINED_GLASS_PANE = register("pink_stained_glass_pane");
   public static final ItemType GRAY_STAINED_GLASS_PANE = register("gray_stained_glass_pane");
-  public static final ItemType LIGHT_GRAY_STAINED_GLASS_PANE = register("light_gray_stained_glass_pane");
+  public static final ItemType LIGHT_GRAY_STAINED_GLASS_PANE =
+      register("light_gray_stained_glass_pane");
   public static final ItemType CYAN_STAINED_GLASS_PANE = register("cyan_stained_glass_pane");
   public static final ItemType PURPLE_STAINED_GLASS_PANE = register("purple_stained_glass_pane");
   public static final ItemType BLUE_STAINED_GLASS_PANE = register("blue_stained_glass_pane");
@@ -571,12 +590,14 @@ public record ItemType(int id, String name, int stackSize,
   public static final ItemType WHITE_GLAZED_TERRACOTTA = register("white_glazed_terracotta");
   public static final ItemType ORANGE_GLAZED_TERRACOTTA = register("orange_glazed_terracotta");
   public static final ItemType MAGENTA_GLAZED_TERRACOTTA = register("magenta_glazed_terracotta");
-  public static final ItemType LIGHT_BLUE_GLAZED_TERRACOTTA = register("light_blue_glazed_terracotta");
+  public static final ItemType LIGHT_BLUE_GLAZED_TERRACOTTA =
+      register("light_blue_glazed_terracotta");
   public static final ItemType YELLOW_GLAZED_TERRACOTTA = register("yellow_glazed_terracotta");
   public static final ItemType LIME_GLAZED_TERRACOTTA = register("lime_glazed_terracotta");
   public static final ItemType PINK_GLAZED_TERRACOTTA = register("pink_glazed_terracotta");
   public static final ItemType GRAY_GLAZED_TERRACOTTA = register("gray_glazed_terracotta");
-  public static final ItemType LIGHT_GRAY_GLAZED_TERRACOTTA = register("light_gray_glazed_terracotta");
+  public static final ItemType LIGHT_GRAY_GLAZED_TERRACOTTA =
+      register("light_gray_glazed_terracotta");
   public static final ItemType CYAN_GLAZED_TERRACOTTA = register("cyan_glazed_terracotta");
   public static final ItemType PURPLE_GLAZED_TERRACOTTA = register("purple_glazed_terracotta");
   public static final ItemType BLUE_GLAZED_TERRACOTTA = register("blue_glazed_terracotta");
@@ -651,7 +672,8 @@ public record ItemType(int id, String name, int stackSize,
   public static final ItemType BLUE_ICE = register("blue_ice");
   public static final ItemType CONDUIT = register("conduit");
   public static final ItemType POLISHED_GRANITE_STAIRS = register("polished_granite_stairs");
-  public static final ItemType SMOOTH_RED_SANDSTONE_STAIRS = register("smooth_red_sandstone_stairs");
+  public static final ItemType SMOOTH_RED_SANDSTONE_STAIRS =
+      register("smooth_red_sandstone_stairs");
   public static final ItemType MOSSY_STONE_BRICK_STAIRS = register("mossy_stone_brick_stairs");
   public static final ItemType POLISHED_DIORITE_STAIRS = register("polished_diorite_stairs");
   public static final ItemType MOSSY_COBBLESTONE_STAIRS = register("mossy_cobblestone_stairs");
@@ -725,9 +747,12 @@ public record ItemType(int id, String name, int stackSize,
   public static final ItemType CRIMSON_BUTTON = register("crimson_button");
   public static final ItemType WARPED_BUTTON = register("warped_button");
   public static final ItemType STONE_PRESSURE_PLATE = register("stone_pressure_plate");
-  public static final ItemType POLISHED_BLACKSTONE_PRESSURE_PLATE = register("polished_blackstone_pressure_plate");
-  public static final ItemType LIGHT_WEIGHTED_PRESSURE_PLATE = register("light_weighted_pressure_plate");
-  public static final ItemType HEAVY_WEIGHTED_PRESSURE_PLATE = register("heavy_weighted_pressure_plate");
+  public static final ItemType POLISHED_BLACKSTONE_PRESSURE_PLATE =
+      register("polished_blackstone_pressure_plate");
+  public static final ItemType LIGHT_WEIGHTED_PRESSURE_PLATE =
+      register("light_weighted_pressure_plate");
+  public static final ItemType HEAVY_WEIGHTED_PRESSURE_PLATE =
+      register("heavy_weighted_pressure_plate");
   public static final ItemType OAK_PRESSURE_PLATE = register("oak_pressure_plate");
   public static final ItemType SPRUCE_PRESSURE_PLATE = register("spruce_pressure_plate");
   public static final ItemType BIRCH_PRESSURE_PLATE = register("birch_pressure_plate");
@@ -757,7 +782,8 @@ public record ItemType(int id, String name, int stackSize,
   public static final ItemType OXIDIZED_COPPER_DOOR = register("oxidized_copper_door");
   public static final ItemType WAXED_COPPER_DOOR = register("waxed_copper_door");
   public static final ItemType WAXED_EXPOSED_COPPER_DOOR = register("waxed_exposed_copper_door");
-  public static final ItemType WAXED_WEATHERED_COPPER_DOOR = register("waxed_weathered_copper_door");
+  public static final ItemType WAXED_WEATHERED_COPPER_DOOR =
+      register("waxed_weathered_copper_door");
   public static final ItemType WAXED_OXIDIZED_COPPER_DOOR = register("waxed_oxidized_copper_door");
   public static final ItemType IRON_TRAPDOOR = register("iron_trapdoor");
   public static final ItemType OAK_TRAPDOOR = register("oak_trapdoor");
@@ -776,9 +802,12 @@ public record ItemType(int id, String name, int stackSize,
   public static final ItemType WEATHERED_COPPER_TRAPDOOR = register("weathered_copper_trapdoor");
   public static final ItemType OXIDIZED_COPPER_TRAPDOOR = register("oxidized_copper_trapdoor");
   public static final ItemType WAXED_COPPER_TRAPDOOR = register("waxed_copper_trapdoor");
-  public static final ItemType WAXED_EXPOSED_COPPER_TRAPDOOR = register("waxed_exposed_copper_trapdoor");
-  public static final ItemType WAXED_WEATHERED_COPPER_TRAPDOOR = register("waxed_weathered_copper_trapdoor");
-  public static final ItemType WAXED_OXIDIZED_COPPER_TRAPDOOR = register("waxed_oxidized_copper_trapdoor");
+  public static final ItemType WAXED_EXPOSED_COPPER_TRAPDOOR =
+      register("waxed_exposed_copper_trapdoor");
+  public static final ItemType WAXED_WEATHERED_COPPER_TRAPDOOR =
+      register("waxed_weathered_copper_trapdoor");
+  public static final ItemType WAXED_OXIDIZED_COPPER_TRAPDOOR =
+      register("waxed_oxidized_copper_trapdoor");
   public static final ItemType OAK_FENCE_GATE = register("oak_fence_gate");
   public static final ItemType SPRUCE_FENCE_GATE = register("spruce_fence_gate");
   public static final ItemType BIRCH_FENCE_GATE = register("birch_fence_gate");
@@ -1253,11 +1282,15 @@ public record ItemType(int id, String name, int stackSize,
   public static final ItemType POLISHED_BLACKSTONE = register("polished_blackstone");
   public static final ItemType POLISHED_BLACKSTONE_SLAB = register("polished_blackstone_slab");
   public static final ItemType POLISHED_BLACKSTONE_STAIRS = register("polished_blackstone_stairs");
-  public static final ItemType CHISELED_POLISHED_BLACKSTONE = register("chiseled_polished_blackstone");
+  public static final ItemType CHISELED_POLISHED_BLACKSTONE =
+      register("chiseled_polished_blackstone");
   public static final ItemType POLISHED_BLACKSTONE_BRICKS = register("polished_blackstone_bricks");
-  public static final ItemType POLISHED_BLACKSTONE_BRICK_SLAB = register("polished_blackstone_brick_slab");
-  public static final ItemType POLISHED_BLACKSTONE_BRICK_STAIRS = register("polished_blackstone_brick_stairs");
-  public static final ItemType CRACKED_POLISHED_BLACKSTONE_BRICKS = register("cracked_polished_blackstone_bricks");
+  public static final ItemType POLISHED_BLACKSTONE_BRICK_SLAB =
+      register("polished_blackstone_brick_slab");
+  public static final ItemType POLISHED_BLACKSTONE_BRICK_STAIRS =
+      register("polished_blackstone_brick_stairs");
+  public static final ItemType CRACKED_POLISHED_BLACKSTONE_BRICKS =
+      register("cracked_polished_blackstone_bricks");
   public static final ItemType RESPAWN_ANCHOR = register("respawn_anchor");
   public static final ItemType CANDLE = register("candle");
   public static final ItemType WHITE_CANDLE = register("white_candle");
@@ -1287,23 +1320,40 @@ public record ItemType(int id, String name, int stackSize,
   public static final ItemType FROGSPAWN = register("frogspawn");
   public static final ItemType ECHO_SHARD = register("echo_shard");
   public static final ItemType BRUSH = register("brush");
-  public static final ItemType NETHERITE_UPGRADE_SMITHING_TEMPLATE = register("netherite_upgrade_smithing_template");
-  public static final ItemType SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE = register("sentry_armor_trim_smithing_template");
-  public static final ItemType DUNE_ARMOR_TRIM_SMITHING_TEMPLATE = register("dune_armor_trim_smithing_template");
-  public static final ItemType COAST_ARMOR_TRIM_SMITHING_TEMPLATE = register("coast_armor_trim_smithing_template");
-  public static final ItemType WILD_ARMOR_TRIM_SMITHING_TEMPLATE = register("wild_armor_trim_smithing_template");
-  public static final ItemType WARD_ARMOR_TRIM_SMITHING_TEMPLATE = register("ward_armor_trim_smithing_template");
-  public static final ItemType EYE_ARMOR_TRIM_SMITHING_TEMPLATE = register("eye_armor_trim_smithing_template");
-  public static final ItemType VEX_ARMOR_TRIM_SMITHING_TEMPLATE = register("vex_armor_trim_smithing_template");
-  public static final ItemType TIDE_ARMOR_TRIM_SMITHING_TEMPLATE = register("tide_armor_trim_smithing_template");
-  public static final ItemType SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE = register("snout_armor_trim_smithing_template");
-  public static final ItemType RIB_ARMOR_TRIM_SMITHING_TEMPLATE = register("rib_armor_trim_smithing_template");
-  public static final ItemType SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE = register("spire_armor_trim_smithing_template");
-  public static final ItemType WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE = register("wayfinder_armor_trim_smithing_template");
-  public static final ItemType SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE = register("shaper_armor_trim_smithing_template");
-  public static final ItemType SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE = register("silence_armor_trim_smithing_template");
-  public static final ItemType RAISER_ARMOR_TRIM_SMITHING_TEMPLATE = register("raiser_armor_trim_smithing_template");
-  public static final ItemType HOST_ARMOR_TRIM_SMITHING_TEMPLATE = register("host_armor_trim_smithing_template");
+  public static final ItemType NETHERITE_UPGRADE_SMITHING_TEMPLATE =
+      register("netherite_upgrade_smithing_template");
+  public static final ItemType SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("sentry_armor_trim_smithing_template");
+  public static final ItemType DUNE_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("dune_armor_trim_smithing_template");
+  public static final ItemType COAST_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("coast_armor_trim_smithing_template");
+  public static final ItemType WILD_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("wild_armor_trim_smithing_template");
+  public static final ItemType WARD_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("ward_armor_trim_smithing_template");
+  public static final ItemType EYE_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("eye_armor_trim_smithing_template");
+  public static final ItemType VEX_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("vex_armor_trim_smithing_template");
+  public static final ItemType TIDE_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("tide_armor_trim_smithing_template");
+  public static final ItemType SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("snout_armor_trim_smithing_template");
+  public static final ItemType RIB_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("rib_armor_trim_smithing_template");
+  public static final ItemType SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("spire_armor_trim_smithing_template");
+  public static final ItemType WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("wayfinder_armor_trim_smithing_template");
+  public static final ItemType SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("shaper_armor_trim_smithing_template");
+  public static final ItemType SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("silence_armor_trim_smithing_template");
+  public static final ItemType RAISER_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("raiser_armor_trim_smithing_template");
+  public static final ItemType HOST_ARMOR_TRIM_SMITHING_TEMPLATE =
+      register("host_armor_trim_smithing_template");
   public static final ItemType ANGLER_POTTERY_SHERD = register("angler_pottery_sherd");
   public static final ItemType ARCHER_POTTERY_SHERD = register("archer_pottery_sherd");
   public static final ItemType ARMS_UP_POTTERY_SHERD = register("arms_up_pottery_sherd");
@@ -1330,15 +1380,18 @@ public record ItemType(int id, String name, int stackSize,
   public static final ItemType OXIDIZED_COPPER_GRATE = register("oxidized_copper_grate");
   public static final ItemType WAXED_COPPER_GRATE = register("waxed_copper_grate");
   public static final ItemType WAXED_EXPOSED_COPPER_GRATE = register("waxed_exposed_copper_grate");
-  public static final ItemType WAXED_WEATHERED_COPPER_GRATE = register("waxed_weathered_copper_grate");
-  public static final ItemType WAXED_OXIDIZED_COPPER_GRATE = register("waxed_oxidized_copper_grate");
+  public static final ItemType WAXED_WEATHERED_COPPER_GRATE =
+      register("waxed_weathered_copper_grate");
+  public static final ItemType WAXED_OXIDIZED_COPPER_GRATE =
+      register("waxed_oxidized_copper_grate");
   public static final ItemType COPPER_BULB = register("copper_bulb");
   public static final ItemType EXPOSED_COPPER_BULB = register("exposed_copper_bulb");
   public static final ItemType WEATHERED_COPPER_BULB = register("weathered_copper_bulb");
   public static final ItemType OXIDIZED_COPPER_BULB = register("oxidized_copper_bulb");
   public static final ItemType WAXED_COPPER_BULB = register("waxed_copper_bulb");
   public static final ItemType WAXED_EXPOSED_COPPER_BULB = register("waxed_exposed_copper_bulb");
-  public static final ItemType WAXED_WEATHERED_COPPER_BULB = register("waxed_weathered_copper_bulb");
+  public static final ItemType WAXED_WEATHERED_COPPER_BULB =
+      register("waxed_weathered_copper_bulb");
   public static final ItemType WAXED_OXIDIZED_COPPER_BULB = register("waxed_oxidized_copper_bulb");
   public static final ItemType TRIAL_SPAWNER = register("trial_spawner");
   public static final ItemType TRIAL_KEY = register("trial_key");
@@ -1369,11 +1422,13 @@ public record ItemType(int id, String name, int stackSize,
     return id;
   }
 
-  public record DepletionData(List<String> repairWith, int maxDamage) {
-  }
+  public record DepletionData(List<String> repairWith, int maxDamage) {}
 
-  public record FoodProperties(int nutrition, float saturationModifier,
-                               boolean fastFood, boolean isMeat,
-                               boolean canAlwaysEat, boolean possiblyHarmful) {
-  }
+  public record FoodProperties(
+      int nutrition,
+      float saturationModifier,
+      boolean fastFood,
+      boolean isMeat,
+      boolean canAlwaysEat,
+      boolean possiblyHarmful) {}
 }

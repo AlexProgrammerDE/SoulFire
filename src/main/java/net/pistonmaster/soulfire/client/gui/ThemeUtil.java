@@ -35,17 +35,15 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ThemeUtil {
-  private ThemeUtil() {
-  }
+  private ThemeUtil() {}
 
   public static String getThemeClassName() {
     return GUIClientProps.getString("theme", FlatDarculaLaf.class.getName());
   }
 
   /**
-   * Apply the current theme that is set in the settings.
-   * This will also save the theme to the settings.
-   * You need to invoke SwingUtilities.updateComponentTreeUI(frame); after this method.
+   * Apply the current theme that is set in the settings. This will also save the theme to the
+   * settings. You need to invoke SwingUtilities.updateComponentTreeUI(frame); after this method.
    */
   public static void setLookAndFeel() {
     var themeSettings = getThemeClassName();
@@ -54,15 +52,19 @@ public class ThemeUtil {
     }
 
     try {
-      var theme = Class.forName(themeSettings)
-          .asSubclass(BasicLookAndFeel.class).getDeclaredConstructor().newInstance();
+      var theme =
+          Class.forName(themeSettings)
+              .asSubclass(BasicLookAndFeel.class)
+              .getDeclaredConstructor()
+              .newInstance();
 
       FlatAnimatedLafChange.showSnapshot();
 
       UIManager.setLookAndFeel(theme);
 
       var font = UIManager.getFont("defaultFont");
-      var newFont = FontUtils.getCompositeFont(FlatInterFont.FAMILY, font.getStyle(), font.getSize());
+      var newFont =
+          FontUtils.getCompositeFont(FlatInterFont.FAMILY, font.getStyle(), font.getSize());
       UIManager.put("defaultFont", newFont);
 
       FlatLaf.updateUI();

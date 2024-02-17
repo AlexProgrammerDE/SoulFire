@@ -24,12 +24,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class NoopLock implements Lock {
   @Override
-  public void lock() {
-  }
+  public void lock() {}
 
   @Override
-  public void lockInterruptibly() {
-  }
+  public void lockInterruptibly() {}
 
   @Override
   public boolean tryLock() {
@@ -42,8 +40,7 @@ public class NoopLock implements Lock {
   }
 
   @Override
-  public void unlock() {
-  }
+  public void unlock() {}
 
   @NotNull
   @Override

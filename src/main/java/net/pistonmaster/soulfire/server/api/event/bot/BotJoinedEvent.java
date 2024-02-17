@@ -21,10 +21,9 @@ import net.pistonmaster.soulfire.server.api.event.SoulFireBotEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 
 /**
- * Called when the bot finished joining the server.
- * This event is called after the server confirms the spawn location and the "World Loading" screen is gone.
+ * Called when the bot finished joining the server. This event is called after the server confirms
+ * the spawn location and the "World Loading" screen is gone.
  *
  * @param connection The bot connection instance.
  */
-public record BotJoinedEvent(BotConnection connection) implements SoulFireBotEvent {
-}
+public record BotJoinedEvent(BotConnection connection) implements SoulFireBotEvent {}

@@ -21,5 +21,5 @@ import java.util.List;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.execution.WorldAction;
 
-public record GraphInstructions(BotEntityState targetState, double actionCost, List<WorldAction> actions) {
-}
+public record GraphInstructions(
+    BotEntityState targetState, double actionCost, List<WorldAction> actions) {}

@@ -20,7 +20,12 @@ package net.pistonmaster.soulfire.server.pathfinding.execution;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 
 public sealed interface WorldAction
-    permits BlockBreakAction, BlockPlaceAction, GapJumpAction, JumpAndPlaceBelowAction, MovementAction, RecalculatePathAction {
+    permits BlockBreakAction,
+        BlockPlaceAction,
+        GapJumpAction,
+        JumpAndPlaceBelowAction,
+        MovementAction,
+        RecalculatePathAction {
   boolean isCompleted(BotConnection connection);
 
   void tick(BotConnection connection);

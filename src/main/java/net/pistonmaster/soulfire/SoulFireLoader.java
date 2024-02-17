@@ -23,8 +23,7 @@ import net.pistonmaster.soulfire.client.gui.GUIManager;
 import net.pistonmaster.soulfire.server.SoulFireServer;
 
 public class SoulFireLoader {
-  private SoulFireLoader() {
-  }
+  private SoulFireLoader() {}
 
   public static void runHeadless(String host, int port, String[] args) {
     var soulFire = new SoulFireServer(host, port);

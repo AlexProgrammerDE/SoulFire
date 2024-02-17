@@ -21,6 +21,5 @@ package net.pistonmaster.soulfire.data;
 public class EntityTypeTags {
   // VALUES REPLACE
 
-  private EntityTypeTags() {
-  }
+  private EntityTypeTags() {}
 }

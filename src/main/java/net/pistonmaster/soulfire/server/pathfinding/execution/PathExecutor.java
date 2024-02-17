@@ -39,8 +39,11 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
   private int movementNumber;
   private boolean cancelled = false;
 
-  public PathExecutor(BotConnection connection, List<WorldAction> worldActions, Boolean2ObjectFunction<List<WorldAction>> findPath,
-                      ExecutorService executorService) {
+  public PathExecutor(
+      BotConnection connection,
+      List<WorldAction> worldActions,
+      Boolean2ObjectFunction<List<WorldAction>> findPath,
+      ExecutorService executorService) {
     this.worldActions = new ArrayBlockingQueue<>(worldActions.size());
     this.worldActions.addAll(worldActions);
     this.connection = connection;
@@ -83,7 +86,9 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
     if (worldAction.isCompleted(connection)) {
       worldActions.remove();
-      connection.logger().info("Reached goal {}/{} in {} ticks!", movementNumber, totalMovements, ticks);
+      connection
+          .logger()
+          .info("Reached goal {}/{} in {} ticks!", movementNumber, totalMovements, ticks);
       movementNumber++;
       ticks = 0;
 
@@ -112,13 +117,15 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
   }
 
   public void register() {
-    EventUtil.runAndAssertChanged(connection.eventBus(), () ->
-        connection.eventBus().registerConsumer(this, BotPreTickEvent.class));
+    EventUtil.runAndAssertChanged(
+        connection.eventBus(),
+        () -> connection.eventBus().registerConsumer(this, BotPreTickEvent.class));
   }
 
   public void unregister() {
-    EventUtil.runAndAssertChanged(connection.eventBus(), () ->
-        connection.eventBus().unregisterConsumer(this, BotPreTickEvent.class));
+    EventUtil.runAndAssertChanged(
+        connection.eventBus(),
+        () -> connection.eventBus().unregisterConsumer(this, BotPreTickEvent.class));
   }
 
   public void cancel() {
@@ -129,34 +136,35 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     this.unregister();
     connection.sessionDataManager().controlState().resetAll();
 
-    executorService.submit(() -> {
-      try {
-        if (cancelled) {
-          return;
-        }
+    executorService.submit(
+        () -> {
+          try {
+            if (cancelled) {
+              return;
+            }
 
-        connection.logger().info("Waiting for one second for bot to finish falling...");
-        TimeUtil.waitTime(1, TimeUnit.SECONDS);
-        if (cancelled) {
-          return;
-        }
+            connection.logger().info("Waiting for one second for bot to finish falling...");
+            TimeUtil.waitTime(1, TimeUnit.SECONDS);
+            if (cancelled) {
+              return;
+            }
 
-        var newActions = findPath.get(false);
-        if (cancelled) {
-          return;
-        }
+            var newActions = findPath.get(false);
+            if (cancelled) {
+              return;
+            }
 
-        if (newActions.isEmpty()) {
-          connection.logger().info("We're already at the goal!");
-          return;
-        }
+            if (newActions.isEmpty()) {
+              connection.logger().info("We're already at the goal!");
+              return;
+            }
 
-        connection.logger().info("Found new path with {} actions!", newActions.size());
-        var newExecutor = new PathExecutor(connection, newActions, findPath, executorService);
-        newExecutor.register();
-      } catch (Throwable t) {
-        connection.logger().error("Failed to recalculate path!", t);
-      }
-    });
+            connection.logger().info("Found new path with {} actions!", newActions.size());
+            var newExecutor = new PathExecutor(connection, newActions, findPath, executorService);
+            newExecutor.register();
+          } catch (Throwable t) {
+            connection.logger().error("Failed to recalculate path!", t);
+          }
+        });
   }
 }

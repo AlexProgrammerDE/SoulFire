@@ -18,40 +18,33 @@
 package net.pistonmaster.soulfire.server.util;
 
 /**
- * Taken from <a href="https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/util/Timer.java">LabyStudio/java-minecraft</a>.
+ * Taken from <a
+ * href="https://github.com/LabyStudio/java-minecraft/blob/master/src/main/java/de/labystudio/game/util/Timer.java">LabyStudio/java-minecraft</a>.
  */
 public class TickTimer {
   private static final long NS_PER_SECOND = 1000000000L;
   private static final long MAX_NS_PER_UPDATE = 1000000000L;
   private static final int MAX_TICKS_PER_UPDATE = 100;
-  /**
-   * Scale the tick speed.
-   */
+
+  /** Scale the tick speed. */
   public final float timeScale = 1.0F;
-  /**
-   * Amount of ticks per second.
-   */
+
+  /** Amount of ticks per second. */
   private final float ticksPerSecond;
-  /**
-   * Framerate of the advanceTime update.
-   */
+
+  /** Framerate of the advanceTime update. */
   public float fps = 0.0F;
-  /**
-   * Passed time since last game update.
-   */
+
+  /** Passed time since last game update. */
   public float passedTime = 0.0F;
-  /**
-   * The amount of ticks for the current game update.
-   * It's the passed time as an integer.
-   */
+
+  /** The amount of ticks for the current game update. It's the passed time as an integer. */
   public int ticks;
-  /**
-   * The overflow of the current tick, caused by casting the passed time to an integer.
-   */
+
+  /** The overflow of the current tick, caused by casting the passed time to an integer. */
   public float partialTicks;
-  /**
-   * Last time updated in nano seconds.
-   */
+
+  /** Last time updated in nano seconds. */
   private long lastTime = System.nanoTime();
 
   /**
@@ -64,8 +57,8 @@ public class TickTimer {
   }
 
   /**
-   * This function calculates the amount of ticks required to reach the ticksPerSecond.
-   * Call this function in the main render loop of the game.
+   * This function calculates the amount of ticks required to reach the ticksPerSecond. Call this
+   * function in the main render loop of the game.
    */
   public void advanceTime() {
     var now = System.nanoTime();

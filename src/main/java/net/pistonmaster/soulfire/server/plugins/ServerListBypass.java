@@ -47,8 +47,11 @@ public class ServerListBypass implements InternalExtension {
     }
 
     factory.prepareConnectionInternal(ProtocolState.STATUS).connect().join();
-    TimeUtil.waitTime(RandomUtil.getRandomInt(settingsHolder.get(ServerListBypassSettings.DELAY.min()),
-        settingsHolder.get(ServerListBypassSettings.DELAY.max())), TimeUnit.SECONDS);
+    TimeUtil.waitTime(
+        RandomUtil.getRandomInt(
+            settingsHolder.get(ServerListBypassSettings.DELAY.min()),
+            settingsHolder.get(ServerListBypassSettings.DELAY.max())),
+        TimeUnit.SECONDS);
   }
 
   @EventHandler
@@ -59,39 +62,39 @@ public class ServerListBypass implements InternalExtension {
   @Override
   public void onLoad() {
     SoulFireAPI.registerListeners(ServerListBypass.class);
-    PluginHelper.registerAttackEventConsumer(PreBotConnectEvent.class, ServerListBypass::onPreConnect);
+    PluginHelper.registerAttackEventConsumer(
+        PreBotConnectEvent.class, ServerListBypass::onPreConnect);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class ServerListBypassSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("server-list-bypass");
-    public static final BooleanProperty ENABLED = BUILDER.ofBoolean("enabled",
-        "Enable Server List Bypass",
-        new String[] {"--server-list-bypass"},
-        "Whether to ping the server list before connecting. (Bypasses anti-bots like EpicGuard)",
-        false
-    );
-    public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
-        BUILDER.ofInt(
-            "min-delay",
-            "Min delay (seconds)",
-            new String[] {"--server-list-bypass-min-delay"},
-            "Minimum delay between joining the server",
-            1,
-            0,
-            Integer.MAX_VALUE,
-            1
-        ),
-        BUILDER.ofInt(
-            "max-delay",
-            "Max delay (seconds)",
-            new String[] {"--server-list-bypass-max-delay"},
-            "Maximum delay between joining the server",
-            3,
-            0,
-            Integer.MAX_VALUE,
-            1
-        )
-    );
+    public static final BooleanProperty ENABLED =
+        BUILDER.ofBoolean(
+            "enabled",
+            "Enable Server List Bypass",
+            new String[] {"--server-list-bypass"},
+            "Whether to ping the server list before connecting. (Bypasses anti-bots like EpicGuard)",
+            false);
+    public static final MinMaxPropertyLink DELAY =
+        new MinMaxPropertyLink(
+            BUILDER.ofInt(
+                "min-delay",
+                "Min delay (seconds)",
+                new String[] {"--server-list-bypass-min-delay"},
+                "Minimum delay between joining the server",
+                1,
+                0,
+                Integer.MAX_VALUE,
+                1),
+            BUILDER.ofInt(
+                "max-delay",
+                "Max delay (seconds)",
+                new String[] {"--server-list-bypass-max-delay"},
+                "Maximum delay between joining the server",
+                3,
+                0,
+                Integer.MAX_VALUE,
+                1));
   }
 }

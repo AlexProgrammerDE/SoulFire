@@ -49,14 +49,15 @@ public class WorldExporterGenerator implements IDataGenerator {
   public byte[] generateDataJson() {
     var byteOutputStream = new ByteArrayOutputStream();
     try (var gzipOutputStream = new GZIPOutputStream(byteOutputStream);
-         var outputStreamWriter = new OutputStreamWriter(gzipOutputStream);
-         var jsonWriter = new JsonWriter(outputStreamWriter)) {
+        var outputStreamWriter = new OutputStreamWriter(gzipOutputStream);
+        var jsonWriter = new JsonWriter(outputStreamWriter)) {
       var level = Objects.requireNonNull(Main.SERVER.getLevel(Level.OVERWORLD));
       var jsonObject = new JsonObject();
       var minBuildHeight = level.getMinBuildHeight();
       var definitionArray = new String[BuiltInRegistries.BLOCK.size()];
       for (var blockState : BuiltInRegistries.BLOCK) {
-        definitionArray[BuiltInRegistries.BLOCK.getId(blockState)] = BuiltInRegistries.BLOCK.getKey(blockState).getPath();
+        definitionArray[BuiltInRegistries.BLOCK.getId(blockState)] =
+            BuiltInRegistries.BLOCK.getKey(blockState).getPath();
       }
       jsonObject.add("definitions", GSON.toJsonTree(definitionArray));
 

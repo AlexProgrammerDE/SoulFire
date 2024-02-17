@@ -25,12 +25,14 @@ import lombok.With;
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
 public record AttributeType(String name, double min, double max, double defaultValue) {
-  public static final Object2ReferenceMap<String, AttributeType> FROM_NAME = new Object2ReferenceOpenHashMap<>();
+  public static final Object2ReferenceMap<String, AttributeType> FROM_NAME =
+      new Object2ReferenceOpenHashMap<>();
 
   // VALUES REPLACE
 
   public static AttributeType register(String name) {
-    var attributeType = GsonDataHelper.fromJson("/minecraft/attributes.json", name, AttributeType.class);
+    var attributeType =
+        GsonDataHelper.fromJson("/minecraft/attributes.json", name, AttributeType.class);
 
     FROM_NAME.put(attributeType.name(), attributeType);
     return attributeType;

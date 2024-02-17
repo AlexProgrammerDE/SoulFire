@@ -21,12 +21,12 @@ import java.util.Set;
 import org.pf4j.ExtensionPoint;
 
 /**
- * This interface is used to load mixins from third-party plugins.
- * Use the direct class name for a single transformer <i>(e.g. <b>package.Transformer</b>)</i><br>
- * Use the package ending with '*'
- * for all transformers in the packet (not sub packages) <i>(e.g. <b>package.*</b>)</i><br>
- * Use the package ending with '**'
- * for all transformers in the package and sub packages <i>(e.g. <b>package.**</b>)</i><br>
+ * This interface is used to load mixins from third-party plugins. Use the direct class name for a
+ * single transformer <i>(e.g. <b>package.Transformer</b>)</i><br>
+ * Use the package ending with '*' for all transformers in the packet (not sub packages) <i>(e.g.
+ * <b>package.*</b>)</i><br>
+ * Use the package ending with '**' for all transformers in the package and sub packages <i>(e.g.
+ * <b>package.**</b>)</i><br>
  */
 public interface MixinExtension extends ExtensionPoint {
   /**

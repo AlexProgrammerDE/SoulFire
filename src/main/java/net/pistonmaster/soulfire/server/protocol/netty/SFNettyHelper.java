@@ -42,7 +42,8 @@ import java.util.concurrent.ThreadFactory;
 import net.pistonmaster.soulfire.proxy.SWProxy;
 
 public class SFNettyHelper {
-  public static final boolean SUPPORTS_TPC_FAST_OPEN_CONNECT = IOUring.isTcpFastOpenClientSideAvailable();
+  public static final boolean SUPPORTS_TPC_FAST_OPEN_CONNECT =
+      IOUring.isTcpFastOpenClientSideAvailable();
   public static final Class<? extends Channel> CHANNEL_CLASS;
   public static final Class<? extends DatagramChannel> DATAGRAM_CHANNEL_CLASS;
 
@@ -69,17 +70,17 @@ public class SFNettyHelper {
     }
   }
 
-  private SFNettyHelper() {
-  }
+  private SFNettyHelper() {}
 
   public static EventLoopGroup createEventLoopGroup(int threads, String name) {
     ThreadFactory threadFactory = r -> new Thread(r, "SoulFire-" + name);
-    EventLoopGroup group = switch (TransportHelper.determineTransportMethod()) {
-      case IO_URING -> new IOUringEventLoopGroup(threads, threadFactory);
-      case EPOLL -> new EpollEventLoopGroup(threads, threadFactory);
-      case KQUEUE -> new KQueueEventLoopGroup(threads, threadFactory);
-      case NIO -> new NioEventLoopGroup(threads, threadFactory);
-    };
+    EventLoopGroup group =
+        switch (TransportHelper.determineTransportMethod()) {
+          case IO_URING -> new IOUringEventLoopGroup(threads, threadFactory);
+          case EPOLL -> new EpollEventLoopGroup(threads, threadFactory);
+          case KQUEUE -> new KQueueEventLoopGroup(threads, threadFactory);
+          case NIO -> new NioEventLoopGroup(threads, threadFactory);
+        };
 
     Runtime.getRuntime().addShutdownHook(new Thread(group::shutdownGracefully));
 
@@ -91,13 +92,16 @@ public class SFNettyHelper {
     switch (proxy.type()) {
       case HTTP -> {
         if (proxy.username() != null && proxy.password() != null) {
-          pipeline.addFirst("proxy", new HttpProxyHandler(address, proxy.username(), proxy.password()));
+          pipeline.addFirst(
+              "proxy", new HttpProxyHandler(address, proxy.username(), proxy.password()));
         } else {
           pipeline.addFirst("proxy", new HttpProxyHandler(address));
         }
       }
       case SOCKS4 -> pipeline.addFirst("proxy", new Socks4ProxyHandler(address, proxy.username()));
-      case SOCKS5 -> pipeline.addFirst("proxy", new Socks5ProxyHandler(address, proxy.username(), proxy.password()));
+      case SOCKS5 ->
+          pipeline.addFirst(
+              "proxy", new Socks5ProxyHandler(address, proxy.username(), proxy.password()));
       default -> throw new UnsupportedOperationException("Unsupported proxy type: " + proxy.type());
     }
   }

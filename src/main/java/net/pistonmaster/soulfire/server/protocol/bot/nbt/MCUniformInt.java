@@ -17,5 +17,4 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.nbt;
 
-public record MCUniformInt(int value) implements UniformOrInt {
-}
+public record MCUniformInt(int value) implements UniformOrInt {}

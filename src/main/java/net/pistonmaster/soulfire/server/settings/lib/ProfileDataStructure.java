@@ -46,14 +46,14 @@ import net.pistonmaster.soulfire.proxy.SWProxy;
 public record ProfileDataStructure(
     Map<String, Map<String, JsonElement>> settings,
     List<MinecraftAccount> accounts,
-    List<SWProxy> proxies
-) {
-  private static final Gson PROFILE_GSON = new GsonBuilder()
-      .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
-      .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
-      .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
-      .setPrettyPrinting()
-      .create();
+    List<SWProxy> proxies) {
+  private static final Gson PROFILE_GSON =
+      new GsonBuilder()
+          .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
+          .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
+          .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
+          .setPrettyPrinting()
+          .create();
 
   public static ProfileDataStructure deserialize(String json) {
     return PROFILE_GSON.fromJson(json, ProfileDataStructure.class);
@@ -87,9 +87,11 @@ public record ProfileDataStructure(
     }
   }
 
-  private abstract static class AbstractKeyAdapter<T> implements JsonSerializer<Key>, JsonDeserializer<T> {
+  private abstract static class AbstractKeyAdapter<T>
+      implements JsonSerializer<Key>, JsonDeserializer<T> {
     @Override
-    public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+    public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+        throws JsonParseException {
       return createKey(Base64.getDecoder().decode(json.getAsString()));
     }
 
@@ -101,16 +103,21 @@ public record ProfileDataStructure(
     protected abstract T createKey(byte[] bytes) throws JsonParseException;
   }
 
-  private static class MinecraftAccountAdapter implements JsonDeserializer<MinecraftAccount>, JsonSerializer<MinecraftAccount> {
+  private static class MinecraftAccountAdapter
+      implements JsonDeserializer<MinecraftAccount>, JsonSerializer<MinecraftAccount> {
     @Override
-    public MinecraftAccount deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-      var authType = context.<AuthType>deserialize(json.getAsJsonObject().get("authType"), AuthType.class);
+    public MinecraftAccount deserialize(
+        JsonElement json, Type typeOfT, JsonDeserializationContext context)
+        throws JsonParseException {
+      var authType =
+          context.<AuthType>deserialize(json.getAsJsonObject().get("authType"), AuthType.class);
 
       return createGson(authType).fromJson(json, MinecraftAccount.class);
     }
 
     @Override
-    public JsonElement serialize(MinecraftAccount src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(
+        MinecraftAccount src, Type typeOfSrc, JsonSerializationContext context) {
       return createGson(src.authType()).toJsonTree(src, MinecraftAccount.class);
     }
 
@@ -120,14 +127,18 @@ public record ProfileDataStructure(
           .create();
     }
 
-    private record AccountDataAdapter(AuthType authType) implements JsonDeserializer<AccountData>, JsonSerializer<AccountData> {
+    private record AccountDataAdapter(AuthType authType)
+        implements JsonDeserializer<AccountData>, JsonSerializer<AccountData> {
       @Override
-      public AccountData deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+      public AccountData deserialize(
+          JsonElement json, Type typeOfT, JsonDeserializationContext context)
+          throws JsonParseException {
         return PROFILE_GSON.fromJson(json, authType.accountDataClass());
       }
 
       @Override
-      public JsonElement serialize(AccountData src, Type typeOfSrc, JsonSerializationContext context) {
+      public JsonElement serialize(
+          AccountData src, Type typeOfSrc, JsonSerializationContext context) {
         return PROFILE_GSON.toJsonTree(src, authType.accountDataClass());
       }
     }
