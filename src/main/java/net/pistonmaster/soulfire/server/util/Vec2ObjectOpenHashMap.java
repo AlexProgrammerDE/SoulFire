@@ -256,42 +256,6 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
 
   @Override
   @SuppressWarnings("unchecked")
-  public boolean containsKey(final Object k) {
-    K curr;
-    final var key = this.key;
-    int pos;
-    // The starting point.
-    if (((curr = key[pos = (HashCommon.mix(hashVec((K) k))) & mask]) == null)) {
-      return false;
-    }
-    if ((equalsVec((K) (k), (curr)))) {
-      return true;
-    }
-    // There's always an unused entry.
-    while (true) {
-      if (((curr = key[pos = (pos + 1) & mask]) == null)) {
-        return false;
-      }
-      if ((equalsVec((K) (k), (curr)))) {
-        return true;
-      }
-    }
-  }
-
-  @Override
-  public boolean containsValue(final Object v) {
-    final var value = this.value;
-    final var key = this.key;
-    for (var i = elements; i-- != 0; ) {
-      if (!((key[i]) == null) && java.util.Objects.equals(value[i], v)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
   public V getOrDefault(final Object k, final V defaultValue) {
     K curr;
     final var key = this.key;
@@ -312,62 +276,6 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
         return value[pos];
       }
     }
-  }
-
-  @Override
-  public V putIfAbsent(final K k, final V v) {
-    final var pos = find(k);
-    if (pos >= 0) {
-      return value[pos];
-    }
-    insert(-pos - 1, k, v);
-    return defRetValue;
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public boolean remove(final Object k, final Object v) {
-    K curr;
-    final var key = this.key;
-    int pos;
-    // The starting point.
-    if (((curr = key[pos = (HashCommon.mix(hashVec((K) k))) & mask]) == null)) {
-      return false;
-    }
-    if ((equalsVec((K) (k), (curr))) && java.util.Objects.equals(v, value[pos])) {
-      removeEntry(pos);
-      return true;
-    }
-    while (true) {
-      if (((curr = key[pos = (pos + 1) & mask]) == null)) {
-        return false;
-      }
-      if ((equalsVec((K) (k), (curr))) && java.util.Objects.equals(v, value[pos])) {
-        removeEntry(pos);
-        return true;
-      }
-    }
-  }
-
-  @Override
-  public boolean replace(final K k, final V oldValue, final V v) {
-    final var pos = find(k);
-    if (pos < 0 || !java.util.Objects.equals(oldValue, value[pos])) {
-      return false;
-    }
-    value[pos] = v;
-    return true;
-  }
-
-  @Override
-  public V replace(final K k, final V v) {
-    final var pos = find(k);
-    if (pos < 0) {
-      return defRetValue;
-    }
-    final var oldValue = value[pos];
-    value[pos] = v;
-    return oldValue;
   }
 
   @Override

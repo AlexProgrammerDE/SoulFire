@@ -113,7 +113,6 @@ public class ViaClientSession extends TcpSession {
 
     try {
       var version = meta.protocolVersion();
-      var isLegacy = SFVersionConstants.isLegacy(version);
       var isBedrock = SFVersionConstants.isBedrock(version);
       var bootstrap = new Bootstrap();
 
@@ -188,7 +187,7 @@ public class ViaClientSession extends TcpSession {
 
           var protocolPipeline = new ProtocolPipelineImpl(userConnection);
 
-          if (isLegacy) {
+          if (SFVersionConstants.isLegacy(version)) {
             protocolPipeline.add(PreNettyBaseProtocol.INSTANCE);
             pipeline.addLast("vl-prenetty", new PreNettyLengthCodec(userConnection));
           } else if (isBedrock) {

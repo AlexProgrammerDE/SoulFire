@@ -112,11 +112,11 @@ public class GUIManager {
       // Force open this module
       Modules.openModule(xToolkit.getClass());
 
-      var CLASS_NAME_VARIABLE = MethodHandles
+      var classNameVariable = MethodHandles
           .privateLookupIn(xToolkit.getClass(), MethodHandles.lookup())
           .findStaticVarHandle(xToolkit.getClass(), "awtAppClassName", String.class);
 
-      CLASS_NAME_VARIABLE.set("SoulFire");
+      classNameVariable.set("SoulFire");
     } catch (Exception e) {
       log.error("Failed to set app title!", e);
     }

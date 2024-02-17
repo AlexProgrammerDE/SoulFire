@@ -48,7 +48,7 @@ import net.miginfocom.swing.MigLayout;
 import net.pistonmaster.soulfire.client.gui.GUIClientProps;
 
 /**
- * Taken from <a href="https://github.com/JFormDesigner/FlatLaf/blob/0d2f37e1daf43fd103de0f888a4ed01358cdcbd1/flatlaf-demo/src/main/java/com/formdev/flatlaf/demo/HintManager.java">Flatlaf Demo</a>
+ * Taken from <a href="https://github.com/JFormDesigner/FlatLaf/blob/0d2f37e1daf43fd103de0f888a4ed01358cdcbd1/flatlaf-demo/src/main/java/com/formdev/flatlaf/demo/HintManager.java">Flatlaf Demo</a>.
  *
  * @author Karl Tauber
  */

@@ -87,7 +87,7 @@ public record ProfileDataStructure(
     }
   }
 
-  private static abstract class AbstractKeyAdapter<T> implements JsonSerializer<Key>, JsonDeserializer<T> {
+  private abstract static class AbstractKeyAdapter<T> implements JsonSerializer<Key>, JsonDeserializer<T> {
     @Override
     public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
       return createKey(Base64.getDecoder().decode(json.getAsString()));

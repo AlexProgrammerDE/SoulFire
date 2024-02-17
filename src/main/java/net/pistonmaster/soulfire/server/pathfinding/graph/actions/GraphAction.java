@@ -23,7 +23,7 @@ import net.pistonmaster.soulfire.server.pathfinding.graph.GraphInstructions;
 /**
  * A calculated action that the bot can take on a graph world representation.
  */
-public sealed abstract class GraphAction permits SimpleMovement, ParkourMovement, UpMovement, DownMovement {
+public abstract sealed class GraphAction permits SimpleMovement, ParkourMovement, UpMovement, DownMovement {
   public final Object actionLock = new Object();
   private int subscriptionCounter;
 

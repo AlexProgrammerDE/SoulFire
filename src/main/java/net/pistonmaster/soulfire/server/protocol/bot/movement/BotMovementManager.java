@@ -39,7 +39,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Java port of prismarine-physics
+ * Java port of prismarine-physics.
  */
 public class BotMovementManager {
   private static final List<BlockType> WATER_TYPES = List.of(BlockType.WATER);

@@ -89,7 +89,6 @@ public final class DownMovement extends GraphAction implements Cloneable {
   @Override
   public GraphInstructions getInstructions(BotEntityState previousEntityState) {
     var inventory = previousEntityState.inventory();
-    var levelState = previousEntityState.levelState();
     var cost = 0D;
 
     cost += switch (closestBlockToFallOn) {
@@ -103,6 +102,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     if (blockBreakCosts.willDrop()) {
       inventory = inventory.withOneMoreBlock();
     }
+    var levelState = previousEntityState.levelState();
 
     levelState = levelState.withChangeToAir(blockBreakCosts.block());
 

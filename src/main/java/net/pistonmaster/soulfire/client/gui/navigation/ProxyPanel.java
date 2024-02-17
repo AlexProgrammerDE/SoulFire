@@ -43,7 +43,6 @@ public class ProxyPanel extends NavigationItem {
   @Inject
   public ProxyPanel(GUIManager guiManager, GUIFrame parent, CardsContainer cardsContainer) {
     setLayout(new GridBagLayout());
-    var insets = new Insets(10, 0, 0, 0);
 
     var proxySettingsPanel = new JPanel();
     proxySettingsPanel.setLayout(new GridBagLayout());
@@ -59,6 +58,8 @@ public class ProxyPanel extends NavigationItem {
     addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.HTTP));
     addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS4));
     addProxyPanel.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS5));
+
+    var insets = new Insets(10, 0, 0, 0);
 
     GBC.create(this).grid(0, 1).insets(insets).fill(GBC.HORIZONTAL).weightx(1).add(addProxyPanel);
 

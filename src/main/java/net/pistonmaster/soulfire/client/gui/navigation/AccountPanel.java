@@ -43,7 +43,6 @@ public class AccountPanel extends NavigationItem {
   @Inject
   public AccountPanel(GUIManager guiManager, GUIFrame parent, CardsContainer cardsContainer) {
     setLayout(new GridBagLayout());
-    var insets = new Insets(10, 0, 0, 0);
 
     var accountSettingsPanel = new JPanel();
     accountSettingsPanel.setLayout(new GridBagLayout());
@@ -61,6 +60,8 @@ public class AccountPanel extends NavigationItem {
     addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_BEDROCK));
     addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.THE_ALTENING));
     addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.EASYMC));
+
+    var insets = new Insets(10, 0, 0, 0);
 
     GBC.create(this).grid(0, 1).insets(insets).fill(GBC.HORIZONTAL).weightx(1).add(addAccountPanel);
 

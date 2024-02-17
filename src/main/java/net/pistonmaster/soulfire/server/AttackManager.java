@@ -114,13 +114,6 @@ public class AttackManager {
       throw new IllegalStateException("Attack is already running");
     }
 
-    var accounts = settingsHolder.accounts().stream()
-        .filter(MinecraftAccount::enabled)
-        .collect(Collectors.toCollection(ArrayList::new));
-    var proxies = settingsHolder.proxies().stream()
-        .filter(SWProxy::enabled)
-        .collect(Collectors.toCollection(ArrayList::new));
-
     SoulFireServer.setupLoggingAndVia(settingsHolder);
 
     this.attackState = AttackState.RUNNING;
@@ -130,6 +123,10 @@ public class AttackManager {
 
     var botAmount = settingsHolder.get(BotSettings.AMOUNT); // How many bots to connect
     var botsPerProxy = settingsHolder.get(ProxySettings.BOTS_PER_PROXY); // How many bots per proxy are allowed
+
+    var proxies = settingsHolder.proxies().stream()
+        .filter(SWProxy::enabled)
+        .collect(Collectors.toCollection(ArrayList::new));
     var availableProxiesCount = proxies.size(); // How many proxies are available?
     var maxBots = botsPerProxy > 0 ? botsPerProxy * availableProxiesCount : botAmount; // How many bots can be used at max
 
@@ -139,6 +136,10 @@ public class AttackManager {
       logger.warn("Continuing with {} bots.", maxBots);
       botAmount = maxBots;
     }
+
+    var accounts = settingsHolder.accounts().stream()
+        .filter(MinecraftAccount::enabled)
+        .collect(Collectors.toCollection(ArrayList::new));
 
     var availableAccounts = accounts.size();
 

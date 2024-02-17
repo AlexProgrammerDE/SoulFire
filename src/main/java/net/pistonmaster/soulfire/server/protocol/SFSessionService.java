@@ -41,12 +41,12 @@ public class SFSessionService {
   @SuppressWarnings("HttpUrlsUsage")
   private static final URI THE_ALTENING_JOIN_URI = URI.create("http://sessionserver.thealtening.com/session/minecraft/join");
   private static final URI EASYMC_JOIN_URI = URI.create("https://sessionserver.easymc.io/session/minecraft/join");
-  private final URI JOIN_ENDPOINT;
+  private final URI joinEndpoint;
   private final SWProxy proxyData;
   private final Gson gson = new Gson();
 
   public SFSessionService(AuthType authType, SWProxy proxyData) {
-    this.JOIN_ENDPOINT = switch (authType) {
+    this.joinEndpoint = switch (authType) {
       case MICROSOFT_JAVA -> MOJANG_JOIN_URI;
       case THE_ALTENING -> THE_ALTENING_JOIN_URI;
       case EASYMC -> EASYMC_JOIN_URI;
@@ -75,7 +75,7 @@ public class SFSessionService {
           serverId
       );
 
-      var httpPost = new HttpPost(JOIN_ENDPOINT);
+      var httpPost = new HttpPost(joinEndpoint);
       httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
       httpClient.execute(httpPost);
     } catch (Exception e) {

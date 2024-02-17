@@ -110,7 +110,6 @@ public class BotActionManager {
     }
 
     var eyePosition = clientEntity.getEyePosition();
-    var insideBlock = !levelState.getCollisionBoxes(new AABB(eyePosition, eyePosition)).isEmpty();
 
     var againstPlacePosition = getMiddleBlockFace(againstBlock, againstFace);
 
@@ -127,6 +126,7 @@ public class BotActionManager {
     }
 
     var rayCastPosition = rayCast.get().sub(againstBlock.toFloat());
+    var insideBlock = !levelState.getCollisionBoxes(new AABB(eyePosition, eyePosition)).isEmpty();
 
     dataManager.sendPacket(new ServerboundUseItemOnPacket(
         againstBlock,

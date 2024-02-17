@@ -29,8 +29,6 @@ public class NavigationWrapper {
   }
 
   public static JPanel createBackWrapper(CardsContainer container, String target, NavigationItem item) {
-    var panel = new JPanel(new BorderLayout());
-
     var topBar = new JPanel(new BorderLayout());
 
     var back = new JButton("Back");
@@ -39,6 +37,8 @@ public class NavigationWrapper {
     topBar.add(back, BorderLayout.PAGE_END);
     topBar.setSize(new Dimension(topBar.getWidth(), 20));
     topBar.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+
+    var panel = new JPanel(new BorderLayout());
 
     panel.add(topBar, BorderLayout.NORTH);
 

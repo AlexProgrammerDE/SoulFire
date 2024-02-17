@@ -157,9 +157,9 @@ public class AABB {
   }
 
   public boolean intersects(AABB other) {
-    return this.minX < other.maxX && this.maxX > other.minX &&
-        this.minY < other.maxY && this.maxY > other.minY &&
-        this.minZ < other.maxZ && this.maxZ > other.minZ;
+    return this.minX < other.maxX && this.maxX > other.minX
+        && this.minY < other.maxY && this.maxY > other.minY
+        && this.minZ < other.maxZ && this.maxZ > other.minZ;
   }
 
   public Optional<Vector3d> getIntersection(Vector3d origin, Vector3d direction) {
