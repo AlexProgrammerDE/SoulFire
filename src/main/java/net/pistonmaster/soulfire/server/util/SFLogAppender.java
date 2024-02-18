@@ -29,16 +29,16 @@ public class SFLogAppender extends AbstractAppender {
   private final AbstractStringLayout.Serializer formatter =
       new PatternLayout.SerializerBuilder()
           .setAlwaysWriteExceptions(true)
-          .setDisableAnsi(true)
-          .setNoConsoleNoAnsi(true)
-          .setDefaultPattern("[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx")
+          .setDisableAnsi(false)
+          .setNoConsoleNoAnsi(false)
+          .setDefaultPattern("%highlight{[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}")
           .build();
   private final AbstractStringLayout.Serializer builtInFormatter =
       new PatternLayout.SerializerBuilder()
           .setAlwaysWriteExceptions(true)
-          .setDisableAnsi(true)
-          .setNoConsoleNoAnsi(true)
-          .setDefaultPattern("[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx")
+          .setDisableAnsi(false)
+          .setNoConsoleNoAnsi(false)
+          .setDefaultPattern("%highlight{[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}")
           .build();
 
   public SFLogAppender() {

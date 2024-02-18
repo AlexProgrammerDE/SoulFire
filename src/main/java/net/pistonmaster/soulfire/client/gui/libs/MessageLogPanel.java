@@ -17,7 +17,10 @@
  */
 package net.pistonmaster.soulfire.client.gui.libs;
 
+import com.formdev.flatlaf.fonts.jetbrains_mono.FlatJetBrainsMonoFont;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +34,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.text.AbstractDocument;
@@ -40,8 +43,26 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.DocumentFilter;
 import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import pk.ansi4j.core.DefaultFunctionFinder;
+import pk.ansi4j.core.DefaultParserFactory;
+import pk.ansi4j.core.DefaultTextHandler;
+import pk.ansi4j.core.api.Environment;
+import pk.ansi4j.core.api.Fragment;
+import pk.ansi4j.core.api.FragmentType;
+import pk.ansi4j.core.api.FunctionFragment;
+import pk.ansi4j.core.api.ParserFactory;
+import pk.ansi4j.core.api.TextFragment;
+import pk.ansi4j.core.api.iso6429.C0ControlFunction;
+import pk.ansi4j.core.api.iso6429.ControlSequenceFunction;
+import pk.ansi4j.core.iso6429.C0ControlFunctionHandler;
+import pk.ansi4j.core.iso6429.C1ControlFunctionHandler;
+import pk.ansi4j.core.iso6429.ControlSequenceHandler;
+import pk.ansi4j.core.iso6429.ControlStringHandler;
+import pk.ansi4j.core.iso6429.IndependentControlFunctionHandler;
 
 /**
  * Modified version of: <a
@@ -53,25 +74,37 @@ public class MessageLogPanel extends JPanel {
   private final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();
   private final NoopDocumentFilter noopDocumentFilter = new NoopDocumentFilter();
   private final List<String> toInsert = Collections.synchronizedList(new ArrayList<>());
-  private final JTextArea textComponent;
-  private final AbstractDocument document;
+  private final JTextPane textComponent;
+  private final StyledDocument document;
+  private final ParserFactory factory =
+      new DefaultParserFactory.Builder()
+          .environment(Environment._7_BIT)
+          .textHandler(new DefaultTextHandler())
+          .functionFinder(new DefaultFunctionFinder())
+          .functionHandlers(
+              new C0ControlFunctionHandler(),
+              new C1ControlFunctionHandler(),
+              new ControlSequenceHandler(),
+              new IndependentControlFunctionHandler(),
+              new ControlStringHandler())
+          .build();
   private boolean clearText;
 
   public MessageLogPanel(int numLines) {
     setLayout(new BorderLayout());
 
-    this.textComponent = new JTextArea();
+    this.textComponent = new JTextPane();
 
-    textComponent.setLineWrap(true);
-    textComponent.setWrapStyleWord(true);
-
-    textComponent.setFont(new JLabel().getFont());
+    textComponent.setFont(
+        new Font(FlatJetBrainsMonoFont.FAMILY, Font.PLAIN, new JLabel().getFont().getSize()));
     textComponent.setEditable(true);
+    textComponent.setBackground(Color.decode("#090300"));
+
     var caret = (DefaultCaret) textComponent.getCaret();
     caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-    document = (AbstractDocument) textComponent.getDocument();
+    document = textComponent.getStyledDocument();
     document.addDocumentListener(new LimitLinesDocumentListener(numLines, true));
-    document.setDocumentFilter(noopDocumentFilter);
+    ((AbstractDocument) document).setDocumentFilter(noopDocumentFilter);
 
     updatePopup();
 
@@ -112,8 +145,34 @@ public class MessageLogPanel extends JPanel {
               clearText = false;
             } else {
               try {
-                var offset = document.getLength();
-                document.insertString(offset, String.join("", toInsert), defaultAttributes);
+                var parser = factory.createParser(String.join("", toInsert));
+
+                Fragment fragment;
+                while ((fragment = parser.parse()) != null) {
+                  if (fragment.getType() == FragmentType.TEXT) {
+                    var textFragment = (TextFragment) fragment;
+                    document.insertString(
+                        document.getLength(), textFragment.getText(), defaultAttributes);
+                  } else if (fragment.getType() == FragmentType.FUNCTION) {
+                    var functionFragment = (FunctionFragment) fragment;
+                    if (functionFragment.getFunction()
+                        == ControlSequenceFunction.SGR_SELECT_GRAPHIC_RENDITION) {
+                      StyleConstants.setForeground(defaultAttributes, switch ((int) functionFragment.getArguments().getFirst().getValue()) {
+                        case 30 -> Color.decode("#090300");
+                        case 31 -> Color.decode("#FF0000");
+                        case 32 -> Color.decode("#00FF00");
+                        case 33 -> Color.decode("#FFFF00");
+                        case 34 -> Color.decode("#0000FF");
+                        case 35 -> Color.decode("#FF00FF");
+                        case 36 -> Color.decode("#00FFFF");
+                        case 37 -> Color.decode("#FFFFFF");
+                        default -> Color.decode("#FFFFFF");
+                      });
+                    } else if (functionFragment.getFunction() == C0ControlFunction.LF_LINE_FEED) {
+                      document.insertString(document.getLength(), "\n", defaultAttributes);
+                    }
+                  }
+                }
               } catch (BadLocationException e) {
                 log.debug("Failed to insert text!", e);
               }
