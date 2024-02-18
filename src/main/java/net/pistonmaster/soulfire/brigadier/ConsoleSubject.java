@@ -17,12 +17,14 @@
  */
 package net.pistonmaster.soulfire.brigadier;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConsoleSubject {
-  public static final ConsoleSubject INSTANCE = new ConsoleSubject();
   private static final Logger log = LoggerFactory.getLogger("Console");
+  public Map<String, Object> extraData = new Object2ObjectOpenHashMap<>();
 
   public void sendMessage(String message) {
     log.info(message);

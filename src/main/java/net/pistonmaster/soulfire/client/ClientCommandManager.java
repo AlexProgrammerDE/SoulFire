@@ -87,7 +87,7 @@ public class ClientCommandManager {
     try {
       if (isClientCommand(command)) {
         log.debug("Executing command {} on client", command);
-        return dispatcher.execute(command, ConsoleSubject.INSTANCE);
+        return dispatcher.execute(command, new ConsoleSubject());
       } else {
         log.debug("Executing command {} on server", command);
         return rpcClient

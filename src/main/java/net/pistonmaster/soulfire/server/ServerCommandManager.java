@@ -55,7 +55,6 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.brigadier.CommandHelpWrapper;
 import net.pistonmaster.soulfire.brigadier.ConsoleSubject;
@@ -654,13 +653,28 @@ public class ServerCommandManager {
     dispatcher.register(
         literal("bot")
             .then(
-                argument("bot_name", StringArgumentType.string()).redirect(dispatcher.getRoot())));
+                argument("bot_name", StringArgumentType.string())
+                    .redirect(
+                        dispatcher.getRoot(),
+                        c -> {
+                          c.getSource()
+                              .extraData
+                              .put("bot_name", StringArgumentType.getString(c, "bot_name"));
+                          return c.getSource();
+                        })));
 
     dispatcher.register(
         literal("attack")
             .then(
                 argument("attack_id", IntegerArgumentType.integer(0))
-                    .redirect(dispatcher.getRoot())));
+                    .redirect(
+                        dispatcher.getRoot(),
+                        c -> {
+                          c.getSource()
+                              .extraData
+                              .put("attack_id", IntegerArgumentType.getInteger(c, "attack_id"));
+                          return c.getSource();
+                        })));
   }
 
   private int forEveryAttack(
@@ -672,8 +686,8 @@ public class ServerCommandManager {
 
     var resultCode = Command.SINGLE_SUCCESS;
     for (var attackManager : soulFireServer.attacks().values()) {
-      if (hasArgument(context, "attack_id")
-          && attackManager.id() != IntegerArgumentType.getInteger(context, "attack_id")) {
+      if (context.getSource().extraData.containsKey("attack_id")
+          && context.getSource().extraData.get("attack_id").equals(attackManager.id())) {
         continue;
       }
 
@@ -708,11 +722,11 @@ public class ServerCommandManager {
         attackManager -> {
           var resultCode = Command.SINGLE_SUCCESS;
           for (var bot : attackManager.botConnections()) {
-            if (hasArgument(context, "bot_name")
+            if (context.getSource().extraData.containsKey("bot_name")
                 && !bot.meta()
                     .minecraftAccount()
                     .username()
-                    .equals(StringArgumentType.getString(context, "bot_name"))) {
+                    .equals(context.getSource().extraData.get("bot_name"))) {
               continue;
             }
 
@@ -778,7 +792,7 @@ public class ServerCommandManager {
     command = command.strip();
 
     try {
-      var result = dispatcher.execute(command, ConsoleSubject.INSTANCE);
+      var result = dispatcher.execute(command, new ConsoleSubject());
       commandHistory.add(Map.entry(Instant.now(), command));
 
       // Only save successful commands
@@ -845,7 +859,7 @@ public class ServerCommandManager {
 
   public List<String> getCompletionSuggestions(String command) {
     return dispatcher
-        .getCompletionSuggestions(dispatcher.parse(command, ConsoleSubject.INSTANCE))
+        .getCompletionSuggestions(dispatcher.parse(command, new ConsoleSubject()))
         .join()
         .getList()
         .stream()
@@ -905,15 +919,6 @@ public class ServerCommandManager {
             restricted);
       }
     }
-  }
-
-  @SneakyThrows
-  private static boolean hasArgument(CommandContext<?> context, String name) {
-    var argumentsField = CommandContext.class.getDeclaredField("arguments");
-    argumentsField.setAccessible(true);
-    var arguments = (Map<?, ?>) argumentsField.get(context);
-
-    return arguments.containsKey(name);
   }
 
   private record HelpData(String command, String help) {}
