@@ -528,7 +528,7 @@ public class ServerCommandManager {
                                     });
                               } catch (IOException e) {
                                 log.error("Failed to read book.cap", e);
-                                return 1;
+                                return Command.SINGLE_SUCCESS;
                               }
                             })))
             .then(
