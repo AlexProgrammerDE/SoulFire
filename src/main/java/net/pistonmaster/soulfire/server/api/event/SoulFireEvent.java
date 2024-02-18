@@ -17,5 +17,5 @@
  */
 package net.pistonmaster.soulfire.server.api.event;
 
-public sealed interface SoulFireEvent permits SoulFireGlobalEvent, SoulFireAttackEvent, SoulFireBotEvent {
-}
+public sealed interface SoulFireEvent
+    permits SoulFireGlobalEvent, SoulFireAttackEvent, SoulFireBotEvent {}

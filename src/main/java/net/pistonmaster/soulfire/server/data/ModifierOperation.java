@@ -18,7 +18,7 @@
 package net.pistonmaster.soulfire.server.data;
 
 public enum ModifierOperation {
-    ADDITION,
-    MULTIPLY_BASE,
-    MULTIPLY_TOTAL
+  ADDITION,
+  MULTIPLY_BASE,
+  MULTIPLY_TOTAL
 }

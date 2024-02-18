@@ -19,6 +19,7 @@ package net.pistonmaster.soulfire.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
+import java.util.UUID;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.data.AttributeType;
@@ -31,134 +32,134 @@ import net.pistonmaster.soulfire.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-import java.util.UUID;
-
 @Slf4j
 @Data
 public abstract class Entity {
-    private final EntityMetadataState metadataState = new EntityMetadataState();
-    private final EntityAttributeState attributeState = new EntityAttributeState();
-    private final EntityEffectState effectState = new EntityEffectState();
-    private final int entityId;
-    private final UUID uuid;
-    private final EntityType entityType;
-    protected double x;
-    protected double y;
-    protected double z;
-    protected float yaw;
-    protected float headYaw;
-    protected float pitch;
-    protected double motionX;
-    protected double motionY;
-    protected double motionZ;
-    protected boolean onGround;
+  private final EntityMetadataState metadataState = new EntityMetadataState();
+  private final EntityAttributeState attributeState = new EntityAttributeState();
+  private final EntityEffectState effectState = new EntityEffectState();
+  private final int entityId;
+  private final UUID uuid;
+  private final EntityType entityType;
+  protected double x;
+  protected double y;
+  protected double z;
+  protected float yaw;
+  protected float headYaw;
+  protected float pitch;
+  protected double motionX;
+  protected double motionY;
+  protected double motionZ;
+  protected boolean onGround;
 
-    public void setPosition(double x, double y, double z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
+  public void setPosition(double x, double y, double z) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+  }
 
-    public void addPosition(double deltaX, double deltaY, double deltaZ) {
-        this.x += deltaX;
-        this.y += deltaY;
-        this.z += deltaZ;
-    }
+  public void addPosition(double deltaX, double deltaY, double deltaZ) {
+    this.x += deltaX;
+    this.y += deltaY;
+    this.z += deltaZ;
+  }
 
-    public void setRotation(float yaw, float pitch) {
-        this.yaw = yaw;
-        this.pitch = pitch;
-    }
+  public void setRotation(float yaw, float pitch) {
+    this.yaw = yaw;
+    this.pitch = pitch;
+  }
 
-    public void setHeadRotation(float headYaw) {
-        this.headYaw = headYaw;
-    }
+  public void setHeadRotation(float headYaw) {
+    this.headYaw = headYaw;
+  }
 
-    public void setMotion(double motionX, double motionY, double motionZ) {
-        this.motionX = motionX;
-        this.motionY = motionY;
-        this.motionZ = motionZ;
-    }
+  public void setMotion(double motionX, double motionY, double motionZ) {
+    this.motionX = motionX;
+    this.motionY = motionY;
+    this.motionZ = motionZ;
+  }
 
-    public void tick() {
-        effectState.tick();
-    }
+  public void tick() {
+    effectState.tick();
+  }
 
-    public void handleEntityEvent(EntityEvent event) {
-        log.debug("Unhandled entity event for entity {}: {}", entityId, event.name());
-    }
+  public void handleEntityEvent(EntityEvent event) {
+    log.debug("Unhandled entity event for entity {}: {}", entityId, event.name());
+  }
 
-    public void lookAt(RotationOrigin origin, RotationOrigin entityOrigin, Entity entity) {
-        lookAt(origin, entityOrigin == RotationOrigin.EYES ? entity.getEyePosition() : entity.pos());
-    }
+  public void lookAt(RotationOrigin origin, RotationOrigin entityOrigin, Entity entity) {
+    lookAt(origin, entityOrigin == RotationOrigin.EYES ? entity.getEyePosition() : entity.pos());
+  }
 
-    /**
-     * Updates the rotation to look at a given block or location.
-     *
-     * @param origin   The rotation origin, either EYES or FEET.
-     * @param position The block or location to look at.
-     */
-    public void lookAt(RotationOrigin origin, Vector3d position) {
-        var eyes = origin == RotationOrigin.EYES;
+  /**
+   * Updates the rotation to look at a given block or location.
+   *
+   * @param origin The rotation origin, either EYES or FEET.
+   * @param position The block or location to look at.
+   */
+  public void lookAt(RotationOrigin origin, Vector3d position) {
+    var eyes = origin == RotationOrigin.EYES;
 
-        var dx = position.getX() - x;
-        var dy = position.getY() - (eyes ? y + getEyeHeight() : y);
-        var dz = position.getZ() - z;
+    var dx = position.getX() - x;
+    var dy = position.getY() - (eyes ? y + getEyeHeight() : y);
+    var dz = position.getZ() - z;
 
-        var sqr = Math.sqrt(dx * dx + dz * dz);
+    var sqr = Math.sqrt(dx * dx + dz * dz);
 
-        this.pitch = MathHelper.wrapDegrees((float) (-(Math.atan2(dy, sqr) * 180.0F / (float) Math.PI)));
-        this.yaw = MathHelper.wrapDegrees((float) (Math.atan2(dz, dx) * 180.0F / (float) Math.PI) - 90.0F);
-    }
+    this.pitch =
+        MathHelper.wrapDegrees((float) (-(Math.atan2(dy, sqr) * 180.0F / (float) Math.PI)));
+    this.yaw =
+        MathHelper.wrapDegrees((float) (Math.atan2(dz, dx) * 180.0F / (float) Math.PI) - 90.0F);
+  }
 
-    public double getEyeHeight() {
-        return 1.62F;
-    }
+  public double getEyeHeight() {
+    return 1.62F;
+  }
 
-    public Vector3d getEyePosition() {
-        return Vector3d.from(x, y + getEyeHeight(), z);
-    }
+  public Vector3d getEyePosition() {
+    return Vector3d.from(x, y + getEyeHeight(), z);
+  }
 
-    public Vector3d getRotationVector() {
-        var yawRadians = (float) Math.toRadians(yaw);
-        var pitchRadians = (float) Math.toRadians(pitch);
-        var x = -Math.sin(yawRadians) * Math.cos(pitchRadians);
-        var y = -Math.sin(pitchRadians);
-        var z = Math.cos(yawRadians) * Math.cos(pitchRadians);
-        return Vector3d.from(x, y, z);
-    }
+  public Vector3d getRotationVector() {
+    var yawRadians = (float) Math.toRadians(yaw);
+    var pitchRadians = (float) Math.toRadians(pitch);
+    var x = -Math.sin(yawRadians) * Math.cos(pitchRadians);
+    var y = -Math.sin(pitchRadians);
+    var z = Math.cos(yawRadians) * Math.cos(pitchRadians);
+    return Vector3d.from(x, y, z);
+  }
 
-    public Vector3i blockPos() {
-        return Vector3i.from(x, y, z);
-    }
+  public Vector3i blockPos() {
+    return Vector3i.from(x, y, z);
+  }
 
-    public Vector3d pos() {
-        return Vector3d.from(x, y, z);
-    }
+  public Vector3d pos() {
+    return Vector3d.from(x, y, z);
+  }
 
-    public float width() {
-        return entityType.width();
-    }
+  public float width() {
+    return entityType.width();
+  }
 
-    public float height() {
-        return entityType.height();
-    }
+  public float height() {
+    return entityType.height();
+  }
 
-    public AABB boundingBox() {
-        return boundingBox(x, y, z);
-    }
+  public AABB boundingBox() {
+    return boundingBox(x, y, z);
+  }
 
-    public AABB boundingBox(Vector3d pos) {
-        return boundingBox(pos.getX(), pos.getY(), pos.getZ());
-    }
+  public AABB boundingBox(Vector3d pos) {
+    return boundingBox(pos.getX(), pos.getY(), pos.getZ());
+  }
 
-    public AABB boundingBox(double x, double y, double z) {
-        var w = width() / 2F;
-        var h = height();
-        return new AABB(x - w, y, z - w, x + w, y + h, z + w);
-    }
+  public AABB boundingBox(double x, double y, double z) {
+    var w = width() / 2F;
+    var h = height();
+    return new AABB(x - w, y, z - w, x + w, y + h, z + w);
+  }
 
-    public double getAttributeValue(AttributeType type) {
-        return attributeState.getOrCreateAttribute(type).calculateValue();
-    }
+  public double getAttributeValue(AttributeType type) {
+    return attributeState.getOrCreateAttribute(type).calculateValue();
+  }
 }

@@ -20,23 +20,23 @@ package net.pistonmaster.soulfire.server.pathfinding.execution;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 
 public final class RecalculatePathAction implements WorldAction {
-    @Override
-    public boolean isCompleted(BotConnection connection) {
-        throw new UnsupportedOperationException("Should be handled separately!");
-    }
+  @Override
+  public boolean isCompleted(BotConnection connection) {
+    throw new UnsupportedOperationException("Should be handled separately!");
+  }
 
-    @Override
-    public void tick(BotConnection connection) {
-        throw new UnsupportedOperationException("Should be handled separately!");
-    }
+  @Override
+  public void tick(BotConnection connection) {
+    throw new UnsupportedOperationException("Should be handled separately!");
+  }
 
-    @Override
-    public int getAllowedTicks() {
-        throw new UnsupportedOperationException("Should be handled separately!");
-    }
+  @Override
+  public int getAllowedTicks() {
+    throw new UnsupportedOperationException("Should be handled separately!");
+  }
 
-    @Override
-    public String toString() {
-        return "RecalculatePathAction";
-    }
+  @Override
+  public String toString() {
+    return "RecalculatePathAction";
+  }
 }

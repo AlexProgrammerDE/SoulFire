@@ -24,11 +24,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EventExceptionHandler implements IExceptionHandler {
-    public static final EventExceptionHandler INSTANCE = new EventExceptionHandler();
-    private static final Logger log = LoggerFactory.getLogger("SoulFire");
+  public static final EventExceptionHandler INSTANCE = new EventExceptionHandler();
+  private static final Logger log = LoggerFactory.getLogger("SoulFire");
 
-    @Override
-    public void handle(@NotNull AHandler handler, @NotNull Object event, @NotNull Throwable t) {
-        log.error("Exception while handling event " + event.getClass().getName() + " in handler " + handler.getClass().getName(), t);
-    }
+  @Override
+  public void handle(@NotNull AHandler handler, @NotNull Object event, @NotNull Throwable t) {
+    log.error(
+        "Exception while handling event "
+            + event.getClass().getName()
+            + " in handler "
+            + handler.getClass().getName(),
+        t);
+  }
 }

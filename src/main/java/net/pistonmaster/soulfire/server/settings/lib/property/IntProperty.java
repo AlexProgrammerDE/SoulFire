@@ -19,15 +19,15 @@ package net.pistonmaster.soulfire.server.settings.lib.property;
 
 import javax.annotation.Nullable;
 
-public record IntProperty(String namespace,
-                          String key,
-                          String uiName,
-                          String[] cliFlags,
-                          String description,
-                          int defaultValue,
-                          int minValue,
-                          int maxValue,
-                          int stepValue,
-                          @Nullable String format
-) implements SingleProperty {
-}
+public record IntProperty(
+    String namespace,
+    String key,
+    String uiName,
+    String[] cliFlags,
+    String description,
+    int defaultValue,
+    int minValue,
+    int maxValue,
+    int stepValue,
+    @Nullable String format)
+    implements SingleProperty {}

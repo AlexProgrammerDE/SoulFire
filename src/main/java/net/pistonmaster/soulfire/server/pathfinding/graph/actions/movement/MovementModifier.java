@@ -22,25 +22,25 @@ import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 
 @RequiredArgsConstructor
 public enum MovementModifier {
-    NORMAL,
-    FALL_1,
-    FALL_2,
-    FALL_3,
-    JUMP;
+  NORMAL,
+  FALL_1,
+  FALL_2,
+  FALL_3,
+  JUMP;
 
-    public static final MovementModifier[] VALUES = values();
+  public static final MovementModifier[] VALUES = values();
 
-    public SFVec3i offset(SFVec3i vector) {
-        return switch (this) {
-            case NORMAL -> vector;
-            case FALL_1 -> vector.add(0, -1, 0);
-            case FALL_2 -> vector.add(0, -2, 0);
-            case FALL_3 -> vector.add(0, -3, 0);
-            case JUMP -> vector.add(0, 1, 0);
-        };
-    }
+  public SFVec3i offset(SFVec3i vector) {
+    return switch (this) {
+      case NORMAL -> vector;
+      case FALL_1 -> vector.add(0, -1, 0);
+      case FALL_2 -> vector.add(0, -2, 0);
+      case FALL_3 -> vector.add(0, -3, 0);
+      case JUMP -> vector.add(0, 1, 0);
+    };
+  }
 
-    public SFVec3i offsetIfJump(SFVec3i vector) {
-        return this == MovementModifier.JUMP ? vector.add(0, 1, 0) : vector;
-    }
+  public SFVec3i offsetIfJump(SFVec3i vector) {
+    return this == MovementModifier.JUMP ? vector.add(0, 1, 0) : vector;
+  }
 }

@@ -18,34 +18,32 @@
 package net.pistonmaster.soulfire.server.viaversion.platform;
 
 import com.viaversion.viabackwards.api.ViaBackwardsPlatform;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.server.viaversion.JLoggerToSLF4J;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.logging.Logger;
-
 @RequiredArgsConstructor
 public class SFViaBackwards implements ViaBackwardsPlatform {
-    private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaBackwards"));
-    private final Path dataFolder;
+  private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaBackwards"));
+  private final Path dataFolder;
 
-    @Override
-    public Logger getLogger() {
-        return logger;
-    }
+  @Override
+  public Logger getLogger() {
+    return logger;
+  }
 
-    public void init() {
-        init(dataFolder.resolve("config.yml").toFile());
-    }
+  public void init() {
+    init(dataFolder.resolve("config.yml").toFile());
+  }
 
-    @Override
-    public void disable() {
-    }
+  @Override
+  public void disable() {}
 
-    @Override
-    public File getDataFolder() {
-        return dataFolder.toFile();
-    }
+  @Override
+  public File getDataFolder() {
+    return dataFolder.toFile();
+  }
 }

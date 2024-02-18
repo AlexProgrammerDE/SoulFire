@@ -20,5 +20,4 @@ package net.pistonmaster.soulfire.server.api.event.bot;
 import net.pistonmaster.soulfire.server.api.event.SoulFireBotEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 
-public record BotDisconnectedEvent(BotConnection connection) implements SoulFireBotEvent {
-}
+public record BotDisconnectedEvent(BotConnection connection) implements SoulFireBotEvent {}

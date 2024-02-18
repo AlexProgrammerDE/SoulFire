@@ -18,14 +18,13 @@
 package net.pistonmaster.soulfire.server.protocol.bot.utils;
 
 public class SectionUtils {
-    private SectionUtils() {
-    }
+  private SectionUtils() {}
 
-    public static int blockToSection(int block) {
-        return block >> 4;
-    }
+  public static int blockToSection(int block) {
+    return block >> 4;
+  }
 
-    public static int sectionToBlock(int section) {
-        return section << 4;
-    }
+  public static int sectionToBlock(int section) {
+    return section << 4;
+  }
 }

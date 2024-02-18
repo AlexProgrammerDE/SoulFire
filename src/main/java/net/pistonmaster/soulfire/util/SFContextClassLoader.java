@@ -17,8 +17,6 @@
  */
 package net.pistonmaster.soulfire.util;
 
-import lombok.Getter;
-
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
@@ -29,129 +27,136 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import lombok.Getter;
 
 public class SFContextClassLoader extends ClassLoader {
-    @Getter
-    private final List<ClassLoader> childClassLoaders = new ArrayList<>();
-    private final Method findLoadedClassMethod;
-    private final ClassLoader platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
+  @Getter private final List<ClassLoader> childClassLoaders = new ArrayList<>();
+  private final Method findLoadedClassMethod;
+  private final ClassLoader platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
 
-    public SFContextClassLoader() {
-        super(createLibClassLoader());
-        try {
-            findLoadedClassMethod = ClassLoader.class.getDeclaredMethod("loadClass", String.class, boolean.class);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
+  public SFContextClassLoader() {
+    super(createLibClassLoader());
+    try {
+      findLoadedClassMethod =
+          ClassLoader.class.getDeclaredMethod("loadClass", String.class, boolean.class);
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    private static URLClassLoader createLibClassLoader() {
-        var urls = new ArrayList<URL>();
-        try {
-            var tempDir = Files.createTempDirectory("soulfire-lib-");
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> deleteDirRecursively(tempDir)));
+  private static URLClassLoader createLibClassLoader() {
+    var urls = new ArrayList<URL>();
+    try {
+      var tempDir = Files.createTempDirectory("soulfire-lib-");
+      Runtime.getRuntime().addShutdownHook(new Thread(() -> deleteDirRecursively(tempDir)));
 
-            for (var entry : FileSystemUtil.getFilesInDirectory("/META-INF/lib").entrySet()) {
-                var fileName = entry.getKey().getFileName().toString();
+      for (var entry : FileSystemUtil.getFilesInDirectory("/META-INF/lib").entrySet()) {
+        var fileName = entry.getKey().getFileName().toString();
 
-                var tempFile = tempDir.resolve(fileName);
-                Files.write(tempFile, entry.getValue());
-                urls.add(tempFile.toUri().toURL());
-            }
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        return new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getSystemClassLoader());
+        var tempFile = tempDir.resolve(fileName);
+        Files.write(tempFile, entry.getValue());
+        urls.add(tempFile.toUri().toURL());
+      }
+    } catch (IOException | URISyntaxException e) {
+      throw new RuntimeException(e);
     }
+    return new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getSystemClassLoader());
+  }
 
-    private static void deleteDirRecursively(Path dir) {
-        try (var stream = Files.walk(dir)) {
-            stream.sorted(Comparator.reverseOrder())
-                    .forEach(file -> {
-                        try {
-                            Files.delete(file);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        synchronized (getClassLoadingLock(name)) {
-            // First, check if the class has already been loaded
-            var c = findLoadedClass(name);
-            if (c == null) {
+  private static void deleteDirRecursively(Path dir) {
+    try (var stream = Files.walk(dir)) {
+      stream
+          .sorted(Comparator.reverseOrder())
+          .forEach(
+              file -> {
                 try {
-                    return loadClassFromClassLoader(platformClassLoader, name, resolve);
-                } catch (ClassNotFoundException ignored) {
+                  Files.delete(file);
+                } catch (IOException e) {
+                  throw new RuntimeException(e);
                 }
-
-                var classData = loadClassData(this.getParent(), name);
-                if (classData == null) {
-                    // Check if child class loaders can load the class
-                    for (var childClassLoader : childClassLoaders) {
-                        try {
-                            var pluginClass = loadClassFromClassLoader(childClassLoader, name, resolve);
-                            if (pluginClass != null) {
-                                return pluginClass;
-                            }
-                        } catch (ClassNotFoundException ignored) {
-                        }
-                    }
-
-                    throw new ClassNotFoundException(name);
-                }
-
-                c = defineClass(name, classData, 0, classData.length);
-            }
-
-            if (resolve) {
-                resolveClass(c);
-            }
-
-            return c;
-        }
+              });
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    private Class<?> loadClassFromClassLoader(ClassLoader classLoader, String name, boolean resolve) throws ClassNotFoundException {
+  @Override
+  protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+    synchronized (getClassLoadingLock(name)) {
+      // First, check if the class has already been loaded
+      var c = findLoadedClass(name);
+      if (c == null) {
         try {
-            return (Class<?>) getMethodsClass()
-                    .getDeclaredMethod("invoke", Object.class, Method.class, Object[].class)
-                    .invoke(null, classLoader, findLoadedClassMethod, new Object[]{name, resolve});
-        } catch (ReflectiveOperationException e) {
-            if (e.getCause() != null
-                    && e.getCause().getCause() != null
-                    && e.getCause().getCause() instanceof ClassNotFoundException cnfe) {
-                throw cnfe;
-            } else {
-                throw new RuntimeException(e);
+          return loadClassFromClassLoader(platformClassLoader, name, resolve);
+        } catch (ClassNotFoundException ignored) {
+          // Ignore
+        }
+
+        var classData = loadClassData(this.getParent(), name);
+        if (classData == null) {
+          // Check if child class loaders can load the class
+          for (var childClassLoader : childClassLoaders) {
+            try {
+              var pluginClass = loadClassFromClassLoader(childClassLoader, name, resolve);
+              if (pluginClass != null) {
+                return pluginClass;
+              }
+            } catch (ClassNotFoundException ignored) {
+              // Ignore
             }
+          }
+
+          throw new ClassNotFoundException(name);
         }
+
+        c = defineClass(name, classData, 0, classData.length);
+      }
+
+      if (resolve) {
+        resolveClass(c);
+      }
+
+      return c;
     }
+  }
 
-    private Class<?> getMethodsClass() throws ClassNotFoundException {
-        try {
-            return getParent().loadClass("net.lenni0451.reflect.Methods");
-        } catch (ClassNotFoundException e) {
-            return getClass().getClassLoader().loadClass("net.lenni0451.reflect.Methods");
-        }
+  private Class<?> loadClassFromClassLoader(ClassLoader classLoader, String name, boolean resolve)
+      throws ClassNotFoundException {
+    try {
+      return (Class<?>)
+          getMethodsClass()
+              .getDeclaredMethod("invoke", Object.class, Method.class, Object[].class)
+              .invoke(null, classLoader, findLoadedClassMethod, new Object[] {name, resolve});
+    } catch (ReflectiveOperationException e) {
+      if (e.getCause() != null
+          && e.getCause().getCause() != null
+          && e.getCause().getCause() instanceof ClassNotFoundException cnfe) {
+        throw cnfe;
+      } else {
+        throw new RuntimeException(e);
+      }
     }
+  }
 
-    private byte[] loadClassData(ClassLoader classLoader, String className) {
-        var classPath = className.replace('.', '/') + ".class";
-
-        try (var inputStream = classLoader.getResourceAsStream(classPath)) {
-            if (inputStream == null) {
-                return null;
-            }
-
-            return inputStream.readAllBytes();
-        } catch (IOException ignored) {
-            return null;
-        }
+  private Class<?> getMethodsClass() throws ClassNotFoundException {
+    try {
+      return getParent().loadClass("net.lenni0451.reflect.Methods");
+    } catch (ClassNotFoundException e) {
+      return getClass().getClassLoader().loadClass("net.lenni0451.reflect.Methods");
     }
+  }
+
+  private byte[] loadClassData(ClassLoader classLoader, String className) {
+    var classPath = className.replace('.', '/') + ".class";
+
+    try (var inputStream = classLoader.getResourceAsStream(classPath)) {
+      if (inputStream == null) {
+        return null;
+      }
+
+      return inputStream.readAllBytes();
+    } catch (IOException ignored) {
+      return null;
+    }
+  }
 }

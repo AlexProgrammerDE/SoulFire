@@ -18,64 +18,63 @@
 package net.pistonmaster.soulfire.server.util;
 
 public class MathHelper {
-    private MathHelper() {
+  private MathHelper() {}
+
+  /**
+   * Returns the greatest integer less than or equal to the double argument.
+   *
+   * @param value A double
+   * @return The greatest integer less than or equal to the double argument
+   */
+  public static int floorDouble(double value) {
+    var i = (int) value;
+    return value < (double) i ? i - 1 : i;
+  }
+
+  public static short shortClamp(short value, short min, short max) {
+    return value < min ? min : (value > max ? max : value);
+  }
+
+  public static double doubleClamp(double value, double min, double max) {
+    if (value < min) {
+      return min;
+    } else {
+      return Math.min(value, max);
+    }
+  }
+
+  public static double lengthSquared(double x, double y, double z) {
+    return x * x + y * y + z * z;
+  }
+
+  public static double square(double x) {
+    return x * x;
+  }
+
+  public static int square(int x) {
+    return x * x;
+  }
+
+  public static long getSeed(int i, int j, int k) {
+    var l = (i * 3129871L) ^ (long) k * 116129781L ^ (long) j;
+    l = l * l * 42317861L + l * 11L;
+    return l >> 16;
+  }
+
+  public static float wrapDegrees(float value) {
+    var mod = value % 360.0F;
+    if (mod >= 180.0F) {
+      mod -= 360.0F;
     }
 
-    /**
-     * Returns the greatest integer less than or equal to the double argument
-     *
-     * @param value A double
-     * @return The greatest integer less than or equal to the double argument
-     */
-    public static int floorDouble(double value) {
-        var i = (int) value;
-        return value < (double) i ? i - 1 : i;
+    if (mod < -180.0F) {
+      mod += 360.0F;
     }
 
-    public static short shortClamp(short value, short min, short max) {
-        return value < min ? min : (value > max ? max : value);
-    }
+    return mod;
+  }
 
-    public static double doubleClamp(double value, double min, double max) {
-        if (value < min) {
-            return min;
-        } else {
-            return Math.min(value, max);
-        }
-    }
-
-    public static double lengthSquared(double x, double y, double z) {
-        return x * x + y * y + z * z;
-    }
-
-    public static double square(double x) {
-        return x * x;
-    }
-
-    public static long getSeed(int i, int j, int k) {
-        var l = (i * 3129871L) ^ (long) k * 116129781L ^ (long) j;
-        l = l * l * 42317861L + l * 11L;
-        return l >> 16;
-    }
-
-    public static float wrapDegrees(float value) {
-        var mod = value % 360.0F;
-        if (mod >= 180.0F) {
-            mod -= 360.0F;
-        }
-
-        if (mod < -180.0F) {
-            mod += 360.0F;
-        }
-
-        return mod;
-    }
-
-    public static boolean isOutsideTolerance(double a, double b, double tolerance) {
-        return Math.abs(a - b) > tolerance;
-    }
-
-    public static int square(int x) {
-        return x * x;
-    }
+  public static boolean isOutsideTolerance(double a, double b, double tolerance) {
+    return Math.abs(a - b) > tolerance;
+  }
 }

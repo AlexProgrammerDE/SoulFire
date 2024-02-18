@@ -17,30 +17,32 @@
  */
 package net.pistonmaster.soulfire.client.gui.navigation;
 
+import java.awt.GridBagLayout;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.client.gui.GUIManager;
 import net.pistonmaster.soulfire.client.gui.LogPanel;
 import net.pistonmaster.soulfire.util.BuiltinSettingsConstants;
 
-import javax.inject.Inject;
-import java.awt.*;
-
 @Slf4j
 public class DeveloperPanel extends NavigationItem {
-    @Inject
-    public DeveloperPanel(GUIManager guiManager, LogPanel logPanel, CardsContainer cardsContainer) {
-        setLayout(new GridBagLayout());
+  @Inject
+  public DeveloperPanel(GUIManager guiManager, LogPanel logPanel, CardsContainer cardsContainer) {
+    setLayout(new GridBagLayout());
 
-        GeneratedPanel.addComponents(this, cardsContainer.getByNamespace(BuiltinSettingsConstants.DEV_SETTINGS_ID), guiManager.settingsManager());
-    }
+    GeneratedPanel.addComponents(
+        this,
+        cardsContainer.getByNamespace(BuiltinSettingsConstants.DEV_SETTINGS_ID),
+        guiManager.settingsManager());
+  }
 
-    @Override
-    public String getNavigationName() {
-        return "Developer Tools";
-    }
+  @Override
+  public String getNavigationName() {
+    return "Developer Tools";
+  }
 
-    @Override
-    public String getNavigationId() {
-        return "dev-menu";
-    }
+  @Override
+  public String getNavigationId() {
+    return "dev-menu";
+  }
 }

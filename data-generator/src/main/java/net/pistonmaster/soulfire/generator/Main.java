@@ -23,9 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Main implements ModInitializer {
-    public static final Logger LOGGER = LoggerFactory.getLogger("soulfire-data-generator");
-    public static MinecraftServer SERVER;
+  public static final Logger LOGGER = LoggerFactory.getLogger("soulfire-data-generator");
+  public static MinecraftServer SERVER;
 
-    public void onInitialize() {
-    }
+  public void onInitialize() {}
 }

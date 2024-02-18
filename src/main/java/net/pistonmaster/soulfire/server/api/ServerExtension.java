@@ -21,13 +21,11 @@ import net.pistonmaster.soulfire.server.SoulFireServer;
 import org.pf4j.ExtensionPoint;
 
 /**
- * This interface loads only when the JVM is running as a SoulFire server.
- * Therefore, you can also use this to load server-only classes.
+ * This interface loads only when the JVM is running as a SoulFire server. Therefore, you can also
+ * use this to load server-only classes.
  */
 public interface ServerExtension extends ExtensionPoint {
-    default void onLoad() {
-    }
+  default void onLoad() {}
 
-    default void onEnable(SoulFireServer soulFireServer) {
-    }
+  default void onEnable(SoulFireServer soulFireServer) {}
 }

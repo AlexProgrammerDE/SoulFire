@@ -17,38 +17,40 @@
  */
 package net.pistonmaster.soulfire.server.api;
 
-import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.soulfire.server.util.RandomUtil;
-
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.soulfire.server.util.RandomUtil;
 
 @Slf4j
 public class ExecutorHelper {
-    private ExecutorHelper() {
-    }
+  private ExecutorHelper() {}
 
-    public static void executeRandomDelaySeconds(ScheduledExecutorService executorService, Runnable runnable,
-                                                 int minDelay, int maxDelay) {
-        var delay = new AtomicInteger();
-        var counter = new AtomicInteger();
-        executorService.scheduleWithFixedDelay(() -> {
-            if (counter.get() == 0) {
-                delay.set(RandomUtil.getRandomInt(minDelay, maxDelay));
+  public static void executeRandomDelaySeconds(
+      ScheduledExecutorService executorService, Runnable runnable, int minDelay, int maxDelay) {
+    var delay = new AtomicInteger();
+    var counter = new AtomicInteger();
+    executorService.scheduleWithFixedDelay(
+        () -> {
+          if (counter.get() == 0) {
+            delay.set(RandomUtil.getRandomInt(minDelay, maxDelay));
+          }
+
+          if (counter.get() == delay.get()) {
+            try {
+              runnable.run();
+            } catch (Throwable t) {
+              log.error("Error while executing task!", t);
             }
 
-            if (counter.get() == delay.get()) {
-                try {
-                    runnable.run();
-                } catch (Throwable t) {
-                    log.error("Error while executing task!", t);
-                }
-
-                counter.set(0);
-            } else {
-                counter.getAndIncrement();
-            }
-        }, 0, 1, TimeUnit.SECONDS);
-    }
+            counter.set(0);
+          } else {
+            counter.getAndIncrement();
+          }
+        },
+        0,
+        1,
+        TimeUnit.SECONDS);
+  }
 }

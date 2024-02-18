@@ -17,9 +17,6 @@
  */
 package net.pistonmaster.soulfire.client.gui;
 
-import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.soulfire.util.SFPathConstants;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,49 +26,53 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Properties;
+import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.soulfire.util.SFPathConstants;
 
 @Slf4j
 public class GUIClientProps {
-    private static final Path SETTINGS_PATH = SFPathConstants.DATA_FOLDER.resolve("gui-data.properties");
-    private static final Properties SETTINGS = new Properties();
+  private static final Path SETTINGS_PATH =
+      SFPathConstants.DATA_FOLDER.resolve("gui-data.properties");
+  private static final Properties SETTINGS = new Properties();
 
-    private GUIClientProps() {
+  private GUIClientProps() {}
+
+  public static void loadSettings() {
+    if (!Files.exists(SETTINGS_PATH)) {
+      return;
     }
 
-    public static void loadSettings() {
-        if (!Files.exists(SETTINGS_PATH)) {
-            return;
-        }
-
-        try (var is = Files.newInputStream(SETTINGS_PATH)) {
-            SETTINGS.load(new InputStreamReader(is, StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            log.error("Failed to load settings!", e);
-        }
+    try (var is = Files.newInputStream(SETTINGS_PATH)) {
+      SETTINGS.load(new InputStreamReader(is, StandardCharsets.UTF_8));
+    } catch (IOException e) {
+      log.error("Failed to load settings!", e);
     }
+  }
 
-    public static void saveSettings() {
-        try (var os = Files.newOutputStream(SETTINGS_PATH, StandardOpenOption.CREATE)) {
-            SETTINGS.store(new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8)), "SoulFire GUI Settings");
-        } catch (IOException e) {
-            log.error("Failed to save settings!", e);
-        }
+  public static void saveSettings() {
+    try (var os = Files.newOutputStream(SETTINGS_PATH, StandardOpenOption.CREATE)) {
+      SETTINGS.store(
+          new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8)),
+          "SoulFire GUI Settings");
+    } catch (IOException e) {
+      log.error("Failed to save settings!", e);
     }
+  }
 
-    public static boolean getBoolean(String key, boolean def) {
-        return Boolean.parseBoolean(getString(key, String.valueOf(def)));
-    }
+  public static boolean getBoolean(String key, boolean def) {
+    return Boolean.parseBoolean(getString(key, String.valueOf(def)));
+  }
 
-    public static void setBoolean(String key, boolean value) {
-        setString(key, String.valueOf(value));
-    }
+  public static void setBoolean(String key, boolean value) {
+    setString(key, String.valueOf(value));
+  }
 
-    public static String getString(String key, String def) {
-        return SETTINGS.getProperty(key, def);
-    }
+  public static String getString(String key, String def) {
+    return SETTINGS.getProperty(key, def);
+  }
 
-    public static void setString(String key, String value) {
-        SETTINGS.setProperty(key, value);
-        saveSettings();
-    }
+  public static void setString(String key, String value) {
+    SETTINGS.setProperty(key, value);
+    saveSettings();
+  }
 }

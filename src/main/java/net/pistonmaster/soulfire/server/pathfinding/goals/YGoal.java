@@ -21,13 +21,13 @@ import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
 
 public record YGoal(int y) implements GoalScorer {
-    @Override
-    public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-        return Math.abs(entityState.blockPosition().y - y);
-    }
+  @Override
+  public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
+    return Math.abs(entityState.blockPosition().y - y);
+  }
 
-    @Override
-    public boolean isFinished(BotEntityState entityState) {
-        return entityState.blockPosition().y == y;
-    }
+  @Override
+  public boolean isFinished(BotEntityState entityState) {
+    return entityState.blockPosition().y == y;
+  }
 }

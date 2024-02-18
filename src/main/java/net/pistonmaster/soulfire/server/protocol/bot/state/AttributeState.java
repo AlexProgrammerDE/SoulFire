@@ -18,6 +18,8 @@
 package net.pistonmaster.soulfire.server.protocol.bot.state;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.Map;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,38 +28,36 @@ import net.pistonmaster.soulfire.server.data.AttributeType;
 import net.pistonmaster.soulfire.server.data.ModifierOperation;
 import net.pistonmaster.soulfire.server.util.MathHelper;
 
-import java.util.Map;
-import java.util.UUID;
-
 @Setter
 @Getter
 @AllArgsConstructor
 public class AttributeState {
-    private final AttributeType type;
-    private final Map<UUID, Attribute.Modifier> modifiers = new Object2ObjectOpenHashMap<>();
-    private double baseValue;
+  private final AttributeType type;
+  private final Map<UUID, Attribute.Modifier> modifiers = new Object2ObjectOpenHashMap<>();
+  private double baseValue;
 
-    public double calculateValue() {
-        var value = baseValue;
+  public double calculateValue() {
+    var value = baseValue;
 
-        for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.ADDITION)) {
-            value += attributeModifier.amount();
-        }
-
-        var finalValue = value;
-
-        for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.MULTIPLY_BASE)) {
-            finalValue += value * attributeModifier.amount();
-        }
-
-        for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.MULTIPLY_TOTAL)) {
-            finalValue *= 1.0 + attributeModifier.amount();
-        }
-
-        return MathHelper.doubleClamp(finalValue, type.min(), type.max());
+    for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.ADDITION)) {
+      value += attributeModifier.amount();
     }
 
-    private Iterable<Attribute.Modifier> getModifiersOrEmpty(ModifierOperation operation) {
-        return modifiers.values().stream().filter(modifier -> modifier.operation() == operation)::iterator;
+    var finalValue = value;
+
+    for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.MULTIPLY_BASE)) {
+      finalValue += value * attributeModifier.amount();
     }
+
+    for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.MULTIPLY_TOTAL)) {
+      finalValue *= 1.0 + attributeModifier.amount();
+    }
+
+    return MathHelper.doubleClamp(finalValue, type.min(), type.max());
+  }
+
+  private Iterable<Attribute.Modifier> getModifiersOrEmpty(ModifierOperation operation) {
+    return modifiers.values().stream().filter(modifier -> modifier.operation() == operation)
+        ::iterator;
+  }
 }

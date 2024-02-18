@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.generator.mixin;
 
+import java.nio.file.Path;
 import net.minecraft.DetectedVersion;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
@@ -27,20 +28,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.nio.file.Path;
-
 @Mixin(DedicatedServer.class)
 public class ReadyMixin {
-    @Inject(method = "initServer()Z", at = @At("TAIL"))
-    private void init(CallbackInfoReturnable<Boolean> cir) {
-        Main.SERVER = (MinecraftServer) (Object) this;
+  @Inject(method = "initServer()Z", at = @At("TAIL"))
+  private void init(CallbackInfoReturnable<Boolean> cir) {
+    Main.SERVER = (MinecraftServer) (Object) this;
 
-        Main.LOGGER.info("Starting data generation!");
-        var versionName = DetectedVersion.BUILT_IN.getName();
-        var dataDumpDirectory = Path.of(System.getProperty("user.dir")).resolve("minecraft-data").resolve(versionName);
-        var success = DataGenerators.runDataGenerators(dataDumpDirectory);
-        Main.LOGGER.info("Done data generation! Success: {}", success);
+    Main.LOGGER.info("Starting data generation!");
+    var versionName = DetectedVersion.BUILT_IN.getName();
+    var dataDumpDirectory =
+        Path.of(System.getProperty("user.dir")).resolve("minecraft-data").resolve(versionName);
+    var success = DataGenerators.runDataGenerators(dataDumpDirectory);
+    Main.LOGGER.info("Done data generation! Success: {}", success);
 
-        Runtime.getRuntime().halt(success ? 0 : 1);
-    }
+    Runtime.getRuntime().halt(success ? 0 : 1);
+  }
 }

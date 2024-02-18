@@ -17,6 +17,11 @@
  */
 package net.pistonmaster.soulfire.server.pathfinding.graph;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.server.data.BlockState;
@@ -28,67 +33,60 @@ import net.pistonmaster.soulfire.server.protocol.bot.container.SFItemStack;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.server.util.ItemTypeHelper;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
- * An immutable representation of a player inventory.
- * This takes an inventory and projects changes onto it.
- * This way we calculate the way we can do actions after a block was broken/placed.
+ * An immutable representation of a player inventory. This takes an inventory and projects changes
+ * onto it. This way we calculate the way we can do actions after a block was broken/placed.
  */
 @RequiredArgsConstructor
 public class ProjectedInventory {
-    private final int usableBlockItems;
-    @Getter
-    private final SFItemStack[] usableToolsAndNull;
-    private final Map<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
+  private final int usableBlockItems;
+  @Getter private final SFItemStack[] usableToolsAndNull;
+  private final Map<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
 
-    public ProjectedInventory(PlayerInventoryContainer playerInventory) {
-        this(Arrays.stream(playerInventory.storage())
-                .map(ContainerSlot::item)
-                .filter(item -> item != null && item.getAmount() > 0)
-                .toList());
+  public ProjectedInventory(PlayerInventoryContainer playerInventory) {
+    this(
+        Arrays.stream(playerInventory.storage())
+            .map(ContainerSlot::item)
+            .filter(item -> item != null && item.getAmount() > 0)
+            .toList());
+  }
+
+  public ProjectedInventory(List<SFItemStack> items) {
+    var blockItems = 0;
+    var usableToolsAndNull = new HashSet<SFItemStack>();
+
+    // Empty slot
+    usableToolsAndNull.add(null);
+
+    for (var item : items) {
+      if (ItemTypeHelper.isSafeFullBlockItem(item.type())) {
+        blockItems += item.getAmount();
+      } else if (ItemTypeHelper.isTool(item.type())) {
+        usableToolsAndNull.add(item);
+      }
     }
 
-    public ProjectedInventory(List<SFItemStack> items) {
-        var blockItems = 0;
-        var usableToolsAndNull = new HashSet<SFItemStack>();
+    this.usableBlockItems = blockItems;
 
-        // Empty slot
-        usableToolsAndNull.add(null);
+    this.usableToolsAndNull = usableToolsAndNull.toArray(new SFItemStack[0]);
 
-        for (var item : items) {
-            if (ItemTypeHelper.isSafeFullBlockItem(item.type())) {
-                blockItems += item.getAmount();
-            } else if (ItemTypeHelper.isTool(item.type())) {
-                usableToolsAndNull.add(item);
-            }
-        }
+    this.sharedMiningCosts = new ConcurrentHashMap<>();
+  }
 
-        this.usableBlockItems = blockItems;
+  public boolean hasNoBlocks() {
+    return usableBlockItems <= 0;
+  }
 
-        this.usableToolsAndNull = usableToolsAndNull.toArray(new SFItemStack[0]);
+  public ProjectedInventory withOneLessBlock() {
+    return new ProjectedInventory(usableBlockItems - 1, usableToolsAndNull, sharedMiningCosts);
+  }
 
-        this.sharedMiningCosts = new ConcurrentHashMap<>();
-    }
+  public ProjectedInventory withOneMoreBlock() {
+    return new ProjectedInventory(usableBlockItems + 1, usableToolsAndNull, sharedMiningCosts);
+  }
 
-    public boolean hasNoBlocks() {
-        return usableBlockItems <= 0;
-    }
-
-    public ProjectedInventory withOneLessBlock() {
-        return new ProjectedInventory(usableBlockItems - 1, usableToolsAndNull, sharedMiningCosts);
-    }
-
-    public ProjectedInventory withOneMoreBlock() {
-        return new ProjectedInventory(usableBlockItems + 1, usableToolsAndNull, sharedMiningCosts);
-    }
-
-    public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockState blockState) {
-        return sharedMiningCosts.computeIfAbsent(blockState.blockType(), type ->
-                Costs.calculateBlockBreakCost(tagsState, this, type));
-    }
+  public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockState blockState) {
+    return sharedMiningCosts.computeIfAbsent(
+        blockState.blockType(), type -> Costs.calculateBlockBreakCost(tagsState, this, type));
+  }
 }

@@ -18,15 +18,14 @@
 package net.pistonmaster.soulfire.server.viaversion.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
+import java.util.Objects;
 import net.pistonmaster.soulfire.server.viaversion.StorableSession;
 import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.providers.OldAuthProvider;
 
-import java.util.Objects;
-
 public class SFViaOldAuthProvider extends OldAuthProvider {
-    @Override
-    public void sendAuthRequest(UserConnection user, String serverId) {
-        var session = Objects.requireNonNull(user.get(StorableSession.class)).session();
-        session.meta().joinServerId(serverId, session);
-    }
+  @Override
+  public void sendAuthRequest(UserConnection user, String serverId) {
+    var session = Objects.requireNonNull(user.get(StorableSession.class)).session();
+    session.meta().joinServerId(serverId, session);
+  }
 }

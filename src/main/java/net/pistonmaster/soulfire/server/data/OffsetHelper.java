@@ -22,29 +22,46 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public class OffsetHelper {
-    public static Vector3d getOffsetForBlock(BlockType blockType, Vector3i block) {
-        var offsetData = blockType.offsetData();
-        if (offsetData == null) {
-            return Vector3d.ZERO;
-        }
-
-        var maxHorizontalOffset = offsetData.maxHorizontalOffset();
-        var maxVerticalOffset = offsetData.maxVerticalOffset();
-
-        return switch (offsetData.offsetType()) {
-            case XYZ -> {
-                var seed = MathHelper.getSeed(block.getX(), 0, block.getZ());
-                var yOffset = ((double) ((float) (seed >> 4 & 15L) / 15.0F) - 1.0) * (double) maxVerticalOffset;
-                var xOffset = MathHelper.doubleClamp(((double) ((float) (seed & 15L) / 15.0F) - 0.5) * 0.5, -maxHorizontalOffset, maxHorizontalOffset);
-                var zOffset = MathHelper.doubleClamp(((double) ((float) (seed >> 8 & 15L) / 15.0F) - 0.5) * 0.5, -maxHorizontalOffset, maxHorizontalOffset);
-                yield Vector3d.from(xOffset, yOffset, zOffset);
-            }
-            case XZ -> {
-                var seed = MathHelper.getSeed(block.getX(), 0, block.getZ());
-                var xOffset = MathHelper.doubleClamp(((double) ((float) (seed & 15L) / 15.0F) - 0.5) * 0.5, -maxHorizontalOffset, maxHorizontalOffset);
-                var zOffset = MathHelper.doubleClamp(((double) ((float) (seed >> 8 & 15L) / 15.0F) - 0.5) * 0.5, -maxHorizontalOffset, maxHorizontalOffset);
-                yield Vector3d.from(xOffset, 0.0, zOffset);
-            }
-        };
+  public static Vector3d getOffsetForBlock(BlockType blockType, Vector3i block) {
+    var offsetData = blockType.offsetData();
+    if (offsetData == null) {
+      return Vector3d.ZERO;
     }
+
+    var maxHorizontalOffset = offsetData.maxHorizontalOffset();
+    var maxVerticalOffset = offsetData.maxVerticalOffset();
+
+    return switch (offsetData.offsetType()) {
+      case XYZ -> {
+        var seed = MathHelper.getSeed(block.getX(), 0, block.getZ());
+        var yOffset =
+            ((double) ((float) (seed >> 4 & 15L) / 15.0F) - 1.0) * (double) maxVerticalOffset;
+        var xOffset =
+            MathHelper.doubleClamp(
+                ((double) ((float) (seed & 15L) / 15.0F) - 0.5) * 0.5,
+                -maxHorizontalOffset,
+                maxHorizontalOffset);
+        var zOffset =
+            MathHelper.doubleClamp(
+                ((double) ((float) (seed >> 8 & 15L) / 15.0F) - 0.5) * 0.5,
+                -maxHorizontalOffset,
+                maxHorizontalOffset);
+        yield Vector3d.from(xOffset, yOffset, zOffset);
+      }
+      case XZ -> {
+        var seed = MathHelper.getSeed(block.getX(), 0, block.getZ());
+        var xOffset =
+            MathHelper.doubleClamp(
+                ((double) ((float) (seed & 15L) / 15.0F) - 0.5) * 0.5,
+                -maxHorizontalOffset,
+                maxHorizontalOffset);
+        var zOffset =
+            MathHelper.doubleClamp(
+                ((double) ((float) (seed >> 8 & 15L) / 15.0F) - 0.5) * 0.5,
+                -maxHorizontalOffset,
+                maxHorizontalOffset);
+        yield Vector3d.from(xOffset, 0.0, zOffset);
+      }
+    };
+  }
 }

@@ -19,58 +19,55 @@ package net.pistonmaster.soulfire.server.protocol.bot.container;
 
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
-import lombok.Getter;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import lombok.Getter;
 
 public class Container {
-    @Getter
-    private final @Nonnull ContainerSlot[] slots;
-    @Getter
-    private final int id;
-    private Int2IntMap properties;
+  @Getter private final @Nonnull ContainerSlot[] slots;
+  @Getter private final int id;
+  private Int2IntMap properties;
 
-    public Container(int slots, int id) {
-        this.slots = new ContainerSlot[slots];
-        for (var i = 0; i < slots; i++) {
-            this.slots[i] = new ContainerSlot(i, null);
-        }
-        this.id = id;
+  public Container(int slots, int id) {
+    this.slots = new ContainerSlot[slots];
+    for (var i = 0; i < slots; i++) {
+      this.slots[i] = new ContainerSlot(i, null);
+    }
+    this.id = id;
+  }
+
+  public void setSlot(int slot, @Nullable SFItemStack item) {
+    slots[slot].setItem(item);
+  }
+
+  public @Nonnull ContainerSlot getSlot(int slot) {
+    return slots[slot];
+  }
+
+  public ContainerSlot[] getSlots(int start, int end) {
+    var items = new ContainerSlot[end - start + 1];
+
+    if (end + 1 - start >= 0) {
+      System.arraycopy(slots, start, items, 0, end + 1 - start);
     }
 
-    public void setSlot(int slot, @Nullable SFItemStack item) {
-        slots[slot].setItem(item);
+    return items;
+  }
+
+  public void setProperty(int property, int value) {
+    // Lazy init to save a little memory
+    if (properties == null) {
+      properties = new Int2IntOpenHashMap();
     }
 
-    public @Nonnull ContainerSlot getSlot(int slot) {
-        return slots[slot];
+    properties.put(property, value);
+  }
+
+  public int getProperty(int property) {
+    if (properties == null) {
+      return 0;
     }
 
-    public ContainerSlot[] getSlots(int start, int end) {
-        var items = new ContainerSlot[end - start + 1];
-
-        if (end + 1 - start >= 0) {
-            System.arraycopy(slots, start, items, 0, end + 1 - start);
-        }
-
-        return items;
-    }
-
-    public void setProperty(int property, int value) {
-        // Lazy init to save a little memory
-        if (properties == null) {
-            properties = new Int2IntOpenHashMap();
-        }
-
-        properties.put(property, value);
-    }
-
-    public int getProperty(int property) {
-        if (properties == null) {
-            return 0;
-        }
-
-        return properties.getOrDefault(property, 0);
-    }
+    return properties.getOrDefault(property, 0);
+  }
 }

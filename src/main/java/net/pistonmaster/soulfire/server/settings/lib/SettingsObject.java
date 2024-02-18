@@ -17,8 +17,5 @@
  */
 package net.pistonmaster.soulfire.server.settings.lib;
 
-/**
- * Represents a settings object. A settings object has to be json serializable.
- */
-public interface SettingsObject {
-}
+/** Represents a settings object. A settings object has to be json serializable. */
+public interface SettingsObject {}

@@ -21,8 +21,8 @@ import com.viaversion.viaversion.api.connection.StorableObject;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
 
 public record StorableSession(ViaClientSession session) implements StorableObject {
-    @Override
-    public boolean clearOnServerSwitch() {
-        return false;
-    }
+  @Override
+  public boolean clearOnServerSwitch() {
+    return false;
+  }
 }

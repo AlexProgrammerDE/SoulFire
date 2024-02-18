@@ -32,64 +32,66 @@ import net.pistonmaster.soulfire.server.api.event.bot.SFPacketSentEvent;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
 
 public class SFSessionListener extends SessionAdapter {
-    private final SessionDataManager bus;
-    private final BotConnection botConnection;
-    private final LambdaManager busInvoker;
+  private final SessionDataManager bus;
+  private final BotConnection botConnection;
+  private final LambdaManager busInvoker;
 
-    public SFSessionListener(SessionDataManager bus, BotConnection botConnection) {
-        this.bus = bus;
-        this.botConnection = botConnection;
-        this.busInvoker = LambdaManager.basic(new ASMGenerator());
-        busInvoker.register(bus);
+  public SFSessionListener(SessionDataManager bus, BotConnection botConnection) {
+    this.bus = bus;
+    this.botConnection = botConnection;
+    this.busInvoker = LambdaManager.basic(new ASMGenerator());
+    busInvoker.register(bus);
+  }
+
+  @Override
+  public void packetReceived(Session session, Packet packet) {
+    var event = new SFPacketReceiveEvent(botConnection, (MinecraftPacket) packet);
+    botConnection.eventBus().call(event);
+    if (event.isCancelled()) {
+      return;
     }
 
-    @Override
-    public void packetReceived(Session session, Packet packet) {
-        var event = new SFPacketReceiveEvent(botConnection, (MinecraftPacket) packet);
-        botConnection.eventBus().call(event);
-        if (event.isCancelled()) {
-            return;
-        }
+    botConnection.logger().trace("Received packet: {}", packet.getClass().getSimpleName());
 
-        botConnection.logger().trace("Received packet: {}", packet.getClass().getSimpleName());
+    try {
+      busInvoker.call(event.packet());
+    } catch (Throwable t) {
+      botConnection.logger().error("Error while handling packet!", t);
+    }
+  }
 
-        try {
-            busInvoker.call(event.packet());
-        } catch (Throwable t) {
-            botConnection.logger().error("Error while handling packet!", t);
-        }
+  @Override
+  public void packetSending(PacketSendingEvent event) {
+    var event1 = new SFPacketSendingEvent(botConnection, event.getPacket());
+    botConnection.eventBus().call(event1);
+    event.setPacket(event1.packet());
+    event.setCancelled(event1.isCancelled());
+
+    if (event1.isCancelled()) {
+      return;
     }
 
-    @Override
-    public void packetSending(PacketSendingEvent event) {
-        var event1 = new SFPacketSendingEvent(botConnection, event.getPacket());
-        botConnection.eventBus().call(event1);
-        event.setPacket(event1.packet());
-        event.setCancelled(event1.isCancelled());
+    botConnection
+        .logger()
+        .trace("Sending packet: {}", event.getPacket().getClass().getSimpleName());
+  }
 
-        if (event1.isCancelled()) {
-            return;
-        }
+  @Override
+  public void packetSent(Session session, Packet packet) {
+    var event = new SFPacketSentEvent(botConnection, (MinecraftPacket) packet);
+    botConnection.eventBus().call(event);
 
-        botConnection.logger().trace("Sending packet: {}", event.getPacket().getClass().getSimpleName());
+    botConnection.logger().trace("Sent packet: {}", packet.getClass().getSimpleName());
+  }
+
+  @Override
+  public void disconnected(DisconnectedEvent event) {
+    try {
+      bus.onDisconnectEvent(event);
+    } catch (Throwable t) {
+      botConnection.logger().error("Error while handling disconnect event!", t);
     }
 
-    @Override
-    public void packetSent(Session session, Packet packet) {
-        var event = new SFPacketSentEvent(botConnection, (MinecraftPacket) packet);
-        botConnection.eventBus().call(event);
-
-        botConnection.logger().trace("Sent packet: {}", packet.getClass().getSimpleName());
-    }
-
-    @Override
-    public void disconnected(DisconnectedEvent event) {
-        try {
-            bus.onDisconnectEvent(event);
-        } catch (Throwable t) {
-            botConnection.logger().error("Error while handling disconnect event!", t);
-        }
-
-        botConnection.eventBus().call(new BotDisconnectedEvent(botConnection));
-    }
+    botConnection.eventBus().call(new BotDisconnectedEvent(botConnection));
+  }
 }

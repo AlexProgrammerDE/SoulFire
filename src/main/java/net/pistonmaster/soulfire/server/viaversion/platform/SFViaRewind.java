@@ -18,24 +18,23 @@
 package net.pistonmaster.soulfire.server.viaversion.platform;
 
 import com.viaversion.viarewind.api.ViaRewindPlatform;
+import java.nio.file.Path;
+import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.server.viaversion.JLoggerToSLF4J;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
-import java.util.logging.Logger;
-
 @RequiredArgsConstructor
 public class SFViaRewind implements ViaRewindPlatform {
-    private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaRewind"));
-    private final Path dataFolder;
+  private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaRewind"));
+  private final Path dataFolder;
 
-    public void init() {
-        init(dataFolder.resolve("config.yml").toFile());
-    }
+  public void init() {
+    init(dataFolder.resolve("config.yml").toFile());
+  }
 
-    @Override
-    public Logger getLogger() {
-        return logger;
-    }
+  @Override
+  public Logger getLogger() {
+    return logger;
+  }
 }

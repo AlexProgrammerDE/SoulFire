@@ -19,9 +19,7 @@ package net.pistonmaster.soulfire.server.api.event;
 
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 
-/**
- * Represents a bot event of a SoulFire bot in an attack.
- */
+/** Represents a bot event of a SoulFire bot in an attack. */
 public non-sealed interface SoulFireBotEvent extends SoulFireEvent {
-    BotConnection connection();
+  BotConnection connection();
 }

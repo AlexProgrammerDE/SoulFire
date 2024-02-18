@@ -17,8 +17,15 @@
  */
 package net.pistonmaster.soulfire.client.grpc;
 
-import io.grpc.*;
+import io.grpc.CallCredentials;
+import io.grpc.Context;
+import io.grpc.Grpc;
+import io.grpc.InsecureChannelCredentials;
+import io.grpc.ManagedChannel;
 import io.grpc.stub.AbstractStub;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.builddata.BuildData;
@@ -27,60 +34,65 @@ import net.pistonmaster.soulfire.grpc.generated.CommandServiceGrpc;
 import net.pistonmaster.soulfire.grpc.generated.ConfigServiceGrpc;
 import net.pistonmaster.soulfire.grpc.generated.LogsServiceGrpc;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 @Slf4j
 @Getter
 public class RPCClient {
-    private final List<Context.CancellableContext> contexts = new ArrayList<>();
-    private final ManagedChannel channel;
-    private final LogsServiceGrpc.LogsServiceBlockingStub logStubBlocking;
-    private final CommandServiceGrpc.CommandServiceStub commandStub;
-    private final CommandServiceGrpc.CommandServiceBlockingStub commandStubBlocking;
-    private final AttackServiceGrpc.AttackServiceStub attackStub;
-    private final ConfigServiceGrpc.ConfigServiceBlockingStub configStubBlocking;
+  private final List<Context.CancellableContext> contexts = new ArrayList<>();
+  private final ManagedChannel channel;
+  private final LogsServiceGrpc.LogsServiceBlockingStub logStubBlocking;
+  private final CommandServiceGrpc.CommandServiceStub commandStub;
+  private final CommandServiceGrpc.CommandServiceBlockingStub commandStubBlocking;
+  private final AttackServiceGrpc.AttackServiceStub attackStub;
+  private final ConfigServiceGrpc.ConfigServiceBlockingStub configStubBlocking;
 
-    public RPCClient(String host, int port, String jwt) {
-        this(new JwtCredential(jwt), Grpc.newChannelBuilderForAddress(host, port, InsecureChannelCredentials.create())
-                .userAgent("SoulFireJavaClient/" + BuildData.VERSION).build());
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            log.info("*** shutting down gRPC client since JVM is shutting down");
-            try {
-                shutdown();
-            } catch (Throwable e) {
-                log.error("Interrupted while shutting down gRPC client", e);
-                return;
-            }
-            log.info("*** client shut down");
-        }));
+  public RPCClient(String host, int port, String jwt) {
+    this(
+        new JwtCredential(jwt),
+        Grpc.newChannelBuilderForAddress(host, port, InsecureChannelCredentials.create())
+            .userAgent("SoulFireJavaClient/" + BuildData.VERSION)
+            .build());
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread(
+                () -> {
+                  log.info("*** shutting down gRPC client since JVM is shutting down");
+                  try {
+                    shutdown();
+                  } catch (Throwable e) {
+                    log.error("Interrupted while shutting down gRPC client", e);
+                    return;
+                  }
+                  log.info("*** client shut down");
+                }));
+  }
+
+  public RPCClient(CallCredentials callCredentials, ManagedChannel managedChannel) {
+    channel = managedChannel;
+    logStubBlocking = prepareChannel(LogsServiceGrpc.newBlockingStub(channel), callCredentials);
+    commandStub = prepareChannel(CommandServiceGrpc.newStub(channel), callCredentials);
+    commandStubBlocking =
+        prepareChannel(CommandServiceGrpc.newBlockingStub(channel), callCredentials);
+    attackStub = prepareChannel(AttackServiceGrpc.newStub(channel), callCredentials);
+    configStubBlocking =
+        prepareChannel(ConfigServiceGrpc.newBlockingStub(channel), callCredentials);
+  }
+
+  private <T extends AbstractStub<T>> T prepareChannel(T channel, CallCredentials callCredentials) {
+    return channel
+        .withCallCredentials(callCredentials)
+        .withCompression("gzip")
+        .withMaxInboundMessageSize(Integer.MAX_VALUE)
+        .withMaxOutboundMessageSize(Integer.MAX_VALUE);
+  }
+
+  public void shutdown() throws InterruptedException {
+    for (var context : contexts) {
+      context.cancel(new RuntimeException("Shutting down"));
     }
 
-    public RPCClient(CallCredentials callCredentials, ManagedChannel managedChannel) {
-        channel = managedChannel;
-        logStubBlocking = prepareChannel(LogsServiceGrpc.newBlockingStub(channel), callCredentials);
-        commandStub = prepareChannel(CommandServiceGrpc.newStub(channel), callCredentials);
-        commandStubBlocking = prepareChannel(CommandServiceGrpc.newBlockingStub(channel), callCredentials);
-        attackStub = prepareChannel(AttackServiceGrpc.newStub(channel), callCredentials);
-        configStubBlocking = prepareChannel(ConfigServiceGrpc.newBlockingStub(channel), callCredentials);
+    if (!channel.shutdown().awaitTermination(3, TimeUnit.SECONDS)
+        && !channel.shutdownNow().awaitTermination(3, TimeUnit.SECONDS)) {
+      throw new RuntimeException("Unable to shutdown gRPC client");
     }
-
-    private <T extends AbstractStub<T>> T prepareChannel(T channel, CallCredentials callCredentials) {
-        return channel.withCallCredentials(callCredentials)
-                .withCompression("gzip")
-                .withMaxInboundMessageSize(Integer.MAX_VALUE)
-                .withMaxOutboundMessageSize(Integer.MAX_VALUE);
-    }
-
-    public void shutdown() throws InterruptedException {
-        for (var context : contexts) {
-            context.cancel(new RuntimeException("Shutting down"));
-        }
-
-        if (!channel.shutdown().awaitTermination(3, TimeUnit.SECONDS)
-                && !channel.shutdownNow().awaitTermination(3, TimeUnit.SECONDS)) {
-            throw new RuntimeException("Unable to shutdown gRPC client");
-        }
-    }
+  }
 }

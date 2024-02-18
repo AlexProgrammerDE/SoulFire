@@ -17,31 +17,30 @@
  */
 package net.pistonmaster.soulfire.server.viaversion.platform;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.server.viaversion.JLoggerToSLF4J;
 import net.raphimc.vialegacy.platform.ViaLegacyPlatform;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.logging.Logger;
-
 @RequiredArgsConstructor
 public class SFViaLegacy implements ViaLegacyPlatform {
-    private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaLegacy"));
-    private final Path dataFolder;
+  private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaLegacy"));
+  private final Path dataFolder;
 
-    public void init() {
-        init(dataFolder.resolve("config.yml").toFile());
-    }
+  public void init() {
+    init(dataFolder.resolve("config.yml").toFile());
+  }
 
-    @Override
-    public Logger getLogger() {
-        return logger;
-    }
+  @Override
+  public Logger getLogger() {
+    return logger;
+  }
 
-    @Override
-    public File getDataFolder() {
-        return dataFolder.toFile();
-    }
+  @Override
+  public File getDataFolder() {
+    return dataFolder.toFile();
+  }
 }

@@ -30,6 +30,13 @@ import com.viaversion.viaversion.configuration.AbstractViaConfig;
 import com.viaversion.viaversion.libs.gson.JsonObject;
 import com.viaversion.viaversion.util.VersionInfo;
 import io.netty.buffer.ByteBuf;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.builddata.BuildData;
@@ -39,199 +46,213 @@ import net.pistonmaster.soulfire.server.viaversion.SFViaTask;
 import net.raphimc.vialoader.commands.UserCommandSender;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
-
 @RequiredArgsConstructor
 public class SFViaPlatform implements ViaPlatform<UserConnection> {
-    private final Path dataFolder;
-    private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaVersion"));
-    private final ViaAPI<UserConnection> api = new ViaAPIBase<>() {
+  private final Path dataFolder;
+  private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaVersion"));
+  private final ViaAPI<UserConnection> api =
+      new ViaAPIBase<>() {
         @Override
         public ProtocolVersion getPlayerProtocolVersion(final UserConnection player) {
-            return player.getProtocolInfo().protocolVersion();
+          return player.getProtocolInfo().protocolVersion();
         }
 
         @Override
         public void sendRawPacket(final UserConnection player, final ByteBuf packet) {
-            player.scheduleSendRawPacket(packet);
+          player.scheduleSendRawPacket(packet);
         }
-    };
-    @Getter
-    private final ViaInjector injector = new SFViaInjector();
-    private ViaVersionConfig config;
+      };
+  @Getter private final ViaInjector injector = new SFViaInjector();
+  private ViaVersionConfig config;
 
-    public void init() {
-        config = new AbstractViaConfig(dataFolder.resolve("config.yml").toFile()) {
-            private final List<String> UNSUPPORTED = List.of(
-                    "checkforupdates", "bungee-ping-interval", "bungee-ping-save", "bungee-servers",
-                    "velocity-ping-interval", "velocity-ping-save", "velocity-servers",
-                    "block-protocols", "block-disconnect-msg", "reload-disconnect-msg", "max-pps",
-                    "max-pps-kick-msg", "tracking-period", "tracking-warning-pps", "tracking-max-warnings", "tracking-max-kick-msg",
-                    "blockconnection-method", "quick-move-action-fix", "item-cache", "change-1_9-hitbox", "change-1_14-hitbox",
-                    "use-new-deathmessages", "nms-player-ticking"
-            );
+  public void init() {
+    config =
+        new AbstractViaConfig(dataFolder.resolve("config.yml").toFile()) {
+          private static final List<String> UNSUPPORTED =
+              List.of(
+                  "checkforupdates",
+                  "bungee-ping-interval",
+                  "bungee-ping-save",
+                  "bungee-servers",
+                  "velocity-ping-interval",
+                  "velocity-ping-save",
+                  "velocity-servers",
+                  "block-protocols",
+                  "block-disconnect-msg",
+                  "reload-disconnect-msg",
+                  "max-pps",
+                  "max-pps-kick-msg",
+                  "tracking-period",
+                  "tracking-warning-pps",
+                  "tracking-max-warnings",
+                  "tracking-max-kick-msg",
+                  "blockconnection-method",
+                  "quick-move-action-fix",
+                  "item-cache",
+                  "change-1_9-hitbox",
+                  "change-1_14-hitbox",
+                  "use-new-deathmessages",
+                  "nms-player-ticking");
 
-            {
-                this.reload();
-            }
+          {
+            this.reload();
+          }
 
-            @Override
-            protected void handleConfig(Map<String, Object> config) {
-            }
+          @Override
+          protected void handleConfig(Map<String, Object> config) {}
 
-            @Override
-            public List<String> getUnsupportedOptions() {
-                return UNSUPPORTED;
-            }
+          @Override
+          public List<String> getUnsupportedOptions() {
+            return UNSUPPORTED;
+          }
 
-            @Override
-            public boolean isCheckForUpdates() {
-                return false;
-            }
+          @Override
+          public boolean isCheckForUpdates() {
+            return false;
+          }
 
-            @Override
-            public String getBlockConnectionMethod() {
-                return "packet";
-            }
+          @Override
+          public String getBlockConnectionMethod() {
+            return "packet";
+          }
 
-            @Override
-            public boolean is1_12QuickMoveActionFix() {
-                return false;
-            }
+          @Override
+          public boolean is1_12QuickMoveActionFix() {
+            return false;
+          }
 
-            @Override
-            public boolean isItemCache() {
-                return false;
-            }
+          @Override
+          public boolean isItemCache() {
+            return false;
+          }
 
-            @Override
-            public boolean is1_9HitboxFix() {
-                return false;
-            }
+          @Override
+          public boolean is1_9HitboxFix() {
+            return false;
+          }
 
-            @Override
-            public boolean is1_14HitboxFix() {
-                return false;
-            }
+          @Override
+          public boolean is1_14HitboxFix() {
+            return false;
+          }
 
-            @Override
-            public boolean isShowNewDeathMessages() {
-                return false;
-            }
+          @Override
+          public boolean isShowNewDeathMessages() {
+            return false;
+          }
 
-            @Override
-            public boolean isNMSPlayerTicking() {
-                return false;
-            }
+          @Override
+          public boolean isNMSPlayerTicking() {
+            return false;
+          }
         };
-    }
+  }
 
-    @Override
-    public Logger getLogger() {
-        return logger;
-    }
+  @Override
+  public Logger getLogger() {
+    return logger;
+  }
 
-    @Override
-    public String getPlatformName() {
-        return "SoulFire";
-    }
+  @Override
+  public String getPlatformName() {
+    return "SoulFire";
+  }
 
-    @Override
-    public String getPlatformVersion() {
-        return BuildData.VERSION;
-    }
+  @Override
+  public String getPlatformVersion() {
+    return BuildData.VERSION;
+  }
 
-    @Override
-    public boolean isProxy() {
-        return true;
-    }
+  @Override
+  public boolean isProxy() {
+    return true;
+  }
 
-    @Override
-    public String getPluginVersion() {
-        return VersionInfo.VERSION;
-    }
+  @Override
+  public String getPluginVersion() {
+    return VersionInfo.VERSION;
+  }
 
-    @Override
-    public SFViaTask runAsync(Runnable runnable) {
-        return new SFViaTask(Via.getManager().getScheduler().execute(runnable));
-    }
+  @Override
+  public SFViaTask runAsync(Runnable runnable) {
+    return new SFViaTask(Via.getManager().getScheduler().execute(runnable));
+  }
 
-    @Override
-    public SFViaTask runRepeatingAsync(Runnable runnable, long period) {
-        return new SFViaTask(Via.getManager().getScheduler().scheduleRepeating(runnable, 0, period * 50, TimeUnit.MILLISECONDS));
-    }
+  @Override
+  public SFViaTask runRepeatingAsync(Runnable runnable, long period) {
+    return new SFViaTask(
+        Via.getManager()
+            .getScheduler()
+            .scheduleRepeating(runnable, 0, period * 50, TimeUnit.MILLISECONDS));
+  }
 
-    @Override
-    public SFViaTask runSync(Runnable runnable) {
-        return this.runAsync(runnable);
-    }
+  @Override
+  public SFViaTask runSync(Runnable runnable) {
+    return this.runAsync(runnable);
+  }
 
-    @Override
-    public SFViaTask runSync(Runnable runnable, long delay) {
-        return new SFViaTask(Via.getManager().getScheduler().schedule(runnable, delay * 50, TimeUnit.MILLISECONDS));
-    }
+  @Override
+  public SFViaTask runSync(Runnable runnable, long delay) {
+    return new SFViaTask(
+        Via.getManager().getScheduler().schedule(runnable, delay * 50, TimeUnit.MILLISECONDS));
+  }
 
-    @Override
-    public SFViaTask runRepeatingSync(Runnable runnable, long period) {
-        return this.runRepeatingAsync(runnable, period);
-    }
+  @Override
+  public SFViaTask runRepeatingSync(Runnable runnable, long period) {
+    return this.runRepeatingAsync(runnable, period);
+  }
 
-    @Override
-    public ViaCommandSender[] getOnlinePlayers() {
-        return Via.getManager().getConnectionManager().getConnectedClients().values().stream().map(UserCommandSender::new).toArray(ViaCommandSender[]::new);
-    }
+  @Override
+  public ViaCommandSender[] getOnlinePlayers() {
+    return Via.getManager().getConnectionManager().getConnectedClients().values().stream()
+        .map(UserCommandSender::new)
+        .toArray(ViaCommandSender[]::new);
+  }
 
-    @Override
-    public void sendMessage(UUID uuid, String message) {
-        if (uuid == null) {
-            this.getLogger().info(message);
-        } else {
-            this.getLogger().info("[" + uuid + "] " + message);
-        }
+  @Override
+  public void sendMessage(UUID uuid, String message) {
+    if (uuid == null) {
+      this.getLogger().info(message);
+    } else {
+      this.getLogger().info("[" + uuid + "] " + message);
     }
+  }
 
-    @Override
-    public boolean kickPlayer(UUID uuid, String message) {
-        return false;
-    }
+  @Override
+  public boolean kickPlayer(UUID uuid, String message) {
+    return false;
+  }
 
-    @Override
-    public boolean isPluginEnabled() {
-        return true;
-    }
+  @Override
+  public boolean isPluginEnabled() {
+    return true;
+  }
 
-    @Override
-    public ViaAPI<UserConnection> getApi() {
-        return api;
-    }
+  @Override
+  public ViaAPI<UserConnection> getApi() {
+    return api;
+  }
 
-    @Override
-    public ViaVersionConfig getConf() {
-        return config;
-    }
+  @Override
+  public ViaVersionConfig getConf() {
+    return config;
+  }
 
-    @Override
-    public File getDataFolder() {
-        return dataFolder.toFile();
-    }
+  @Override
+  public File getDataFolder() {
+    return dataFolder.toFile();
+  }
 
-    @Override
-    public void onReload() {
-    }
+  @Override
+  public void onReload() {}
 
-    @Override
-    public JsonObject getDump() {
-        return injector.getDump();
-    }
+  @Override
+  public JsonObject getDump() {
+    return injector.getDump();
+  }
 
-    @Override
-    public boolean hasPlugin(String name) {
-        return false;
-    }
+  @Override
+  public boolean hasPlugin(String name) {
+    return false;
+  }
 }

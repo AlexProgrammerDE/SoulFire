@@ -23,22 +23,21 @@ import net.pistonmaster.soulfire.client.gui.GUIManager;
 import net.pistonmaster.soulfire.server.SoulFireServer;
 
 public class SoulFireLoader {
-    private SoulFireLoader() {
-    }
+  private SoulFireLoader() {}
 
-    public static void runHeadless(String host, int port, String[] args) {
-        var soulFire = new SoulFireServer(host, port);
+  public static void runHeadless(String host, int port, String[] args) {
+    var soulFire = new SoulFireServer(host, port);
 
-        var rpcClient = new RPCClient(host, port, soulFire.generateLocalCliJWT());
-        var cliManager = new CLIManager(rpcClient);
-        cliManager.initCLI(args);
-    }
+    var rpcClient = new RPCClient(host, port, soulFire.generateLocalCliJWT());
+    var cliManager = new CLIManager(rpcClient);
+    cliManager.initCLI(args);
+  }
 
-    public static void runGUI(String host, int port) {
-        var soulFire = new SoulFireServer(host, port);
+  public static void runGUI(String host, int port) {
+    var soulFire = new SoulFireServer(host, port);
 
-        var rpcClient = new RPCClient(host, port, soulFire.generateAdminJWT());
-        var guiManager = new GUIManager(rpcClient);
-        guiManager.initGUI();
-    }
+    var rpcClient = new RPCClient(host, port, soulFire.generateAdminJWT());
+    var guiManager = new GUIManager(rpcClient);
+    guiManager.initGUI();
+  }
 }

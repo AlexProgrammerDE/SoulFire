@@ -19,6 +19,7 @@ package net.pistonmaster.soulfire.server.protocol;
 
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import java.io.IOException;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
@@ -28,34 +29,36 @@ import net.pistonmaster.soulfire.server.protocol.bot.BotControlAPI;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
 
-import java.io.IOException;
-
 @Getter
 public class BotConnectionMeta {
-    private final MinecraftAccount minecraftAccount;
-    private final ProtocolState targetState;
-    private final ProtocolVersion protocolVersion;
-    private final SFSessionService sessionService;
-    @Setter
-    private SessionDataManager sessionDataManager;
-    @Setter
-    private BotControlAPI botControlAPI;
+  private final MinecraftAccount minecraftAccount;
+  private final ProtocolState targetState;
+  private final ProtocolVersion protocolVersion;
+  private final SFSessionService sessionService;
+  @Setter private SessionDataManager sessionDataManager;
+  @Setter private BotControlAPI botControlAPI;
 
-    public BotConnectionMeta(MinecraftAccount minecraftAccount, ProtocolState targetState,
-                             ProtocolVersion protocolVersion, SWProxy proxyData) {
-        this.minecraftAccount = minecraftAccount;
-        this.targetState = targetState;
-        this.protocolVersion = protocolVersion;
-        this.sessionService = minecraftAccount.isPremiumJava() ? new SFSessionService(minecraftAccount.authType(), proxyData) : null;
-    }
+  public BotConnectionMeta(
+      MinecraftAccount minecraftAccount,
+      ProtocolState targetState,
+      ProtocolVersion protocolVersion,
+      SWProxy proxyData) {
+    this.minecraftAccount = minecraftAccount;
+    this.targetState = targetState;
+    this.protocolVersion = protocolVersion;
+    this.sessionService =
+        minecraftAccount.isPremiumJava()
+            ? new SFSessionService(minecraftAccount.authType(), proxyData)
+            : null;
+  }
 
-    public void joinServerId(String serverId, ViaClientSession session) {
-        try {
-            var javaData = (OnlineJavaData) minecraftAccount.accountData();
-            sessionService.joinServer(javaData.profileId(), javaData.authToken(), serverId);
-            session.logger().debug("Successfully sent mojang join request!");
-        } catch (IOException e) {
-            session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
-        }
+  public void joinServerId(String serverId, ViaClientSession session) {
+    try {
+      var javaData = (OnlineJavaData) minecraftAccount.accountData();
+      sessionService.joinServer(javaData.profileId(), javaData.authToken(), serverId);
+      session.logger().debug("Successfully sent mojang join request!");
+    } catch (IOException e) {
+      session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
     }
+  }
 }

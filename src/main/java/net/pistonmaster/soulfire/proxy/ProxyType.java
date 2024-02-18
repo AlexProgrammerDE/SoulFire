@@ -23,9 +23,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ProxyType {
-    HTTP(false),
-    SOCKS4(false),
-    SOCKS5(true);
+  HTTP(false),
+  SOCKS4(false),
+  SOCKS5(true);
 
-    private final boolean udpSupport;
+  private final boolean udpSupport;
 }

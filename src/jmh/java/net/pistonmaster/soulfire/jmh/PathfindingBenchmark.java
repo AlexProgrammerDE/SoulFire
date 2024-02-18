@@ -19,6 +19,9 @@ package net.pistonmaster.soulfire.jmh;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.util.zip.GZIPInputStream;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.data.BlockType;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
@@ -37,76 +40,69 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.util.zip.GZIPInputStream;
-
 @Slf4j
 @State(Scope.Benchmark)
 public class PathfindingBenchmark {
-    private RouteFinder routeFinder;
-    private BotEntityState initialState;
+  private RouteFinder routeFinder;
+  private BotEntityState initialState;
 
-    @Setup
-    public void setup() {
-        var gson = new Gson();
-        var byteArrayInputStream = new ByteArrayInputStream(ResourceHelper.getResourceBytes("/world_data.json.zip"));
-        try (var gzipInputStream = new GZIPInputStream(byteArrayInputStream);
-             var reader = new InputStreamReader(gzipInputStream)) {
-            log.info("Reading world data...");
-            var worldData = gson.fromJson(reader, JsonObject.class);
-            var definitions = worldData.getAsJsonArray("definitions");
-            var blockDefinitions = new String[definitions.size()];
-            for (var i = 0; i < definitions.size(); i++) {
-                blockDefinitions[i] = definitions.get(i).getAsString();
-            }
+  @Setup
+  public void setup() {
+    var gson = new Gson();
+    var byteArrayInputStream =
+        new ByteArrayInputStream(ResourceHelper.getResourceBytes("/world_data.json.zip"));
+    try (var gzipInputStream = new GZIPInputStream(byteArrayInputStream);
+        var reader = new InputStreamReader(gzipInputStream)) {
+      log.info("Reading world data...");
+      var worldData = gson.fromJson(reader, JsonObject.class);
+      var definitions = worldData.getAsJsonArray("definitions");
+      var blockDefinitions = new String[definitions.size()];
+      for (var i = 0; i < definitions.size(); i++) {
+        blockDefinitions[i] = definitions.get(i).getAsString();
+      }
 
-            var data = gson.fromJson(worldData.getAsJsonArray("data"), int[][][].class);
+      var data = gson.fromJson(worldData.getAsJsonArray("data"), int[][][].class);
 
-            log.info("Parsing world data...");
+      log.info("Parsing world data...");
 
-            var accessor = new TestBlockAccessor();
-            for (var x = 0; x < data.length; x++) {
-                var xArray = data[x];
-                for (var y = 0; y < xArray.length; y++) {
-                    var yArray = xArray[y];
-                    for (var z = 0; z < yArray.length; z++) {
-                        accessor.setBlockAt(x, y, z,
-                                BlockType.getByName(blockDefinitions[yArray[z]]));
-                    }
-                }
-            }
-
-            log.info("Calculating world data...");
-
-            // Find the first safe block at 0 0
-            var safeY = 0;
-            for (var y = 0; y < 255; y++) {
-                if (accessor.getBlockStateAt(0, y, 0).blockType() == BlockType.AIR) {
-                    safeY = y;
-                    break;
-                }
-            }
-
-            routeFinder = new RouteFinder(
-                    new MinecraftGraph(new TagsState()),
-                    new PosGoal(100, 80, 100)
-            );
-
-            initialState = new BotEntityState(
-                    new SFVec3i(0, safeY, 0),
-                    new ProjectedLevelState(accessor),
-                    new ProjectedInventory(new PlayerInventoryContainer(null))
-            );
-
-            log.info("Done loading! Testing...");
-        } catch (Exception e) {
-            log.error("Failed to load world data!", e);
+      var accessor = new TestBlockAccessor();
+      for (var x = 0; x < data.length; x++) {
+        var xArray = data[x];
+        for (var y = 0; y < xArray.length; y++) {
+          var yArray = xArray[y];
+          for (var z = 0; z < yArray.length; z++) {
+            accessor.setBlockAt(x, y, z, BlockType.getByName(blockDefinitions[yArray[z]]));
+          }
         }
-    }
+      }
 
-    @Benchmark
-    public void calculatePath() {
-        routeFinder.findRoute(initialState, true);
+      log.info("Calculating world data...");
+
+      // Find the first safe block at 0 0
+      var safeY = 0;
+      for (var y = 0; y < 255; y++) {
+        if (accessor.getBlockStateAt(0, y, 0).blockType() == BlockType.AIR) {
+          safeY = y;
+          break;
+        }
+      }
+
+      routeFinder = new RouteFinder(new MinecraftGraph(new TagsState()), new PosGoal(100, 80, 100));
+
+      initialState =
+          new BotEntityState(
+              new SFVec3i(0, safeY, 0),
+              new ProjectedLevelState(accessor),
+              new ProjectedInventory(new PlayerInventoryContainer(null)));
+
+      log.info("Done loading! Testing...");
+    } catch (Exception e) {
+      log.error("Failed to load world data!", e);
     }
+  }
+
+  @Benchmark
+  public void calculatePath() {
+    routeFinder.findRoute(initialState, true);
+  }
 }

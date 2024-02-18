@@ -19,5 +19,4 @@ package net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement;
 
 import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 
-public record MovementMiningCost(SFVec3i block, double miningCost, boolean willDrop) {
-}
+public record MovementMiningCost(SFVec3i block, double miningCost, boolean willDrop) {}

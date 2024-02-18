@@ -17,42 +17,47 @@
  */
 package net.pistonmaster.soulfire.server.plugins;
 
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.event.attack.BotConnectionInitEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.util.TickTimer;
 import org.slf4j.MDC;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 public class BotTicker implements InternalExtension {
-    public static void onConnectionInit(BotConnectionInitEvent event) {
-        var connection = event.connection();
-        startTicker(connection,
-                connection.executorManager().newScheduledExecutorService(connection, "Tick"),
-                new TickTimer(20));
-    }
+  public static void onConnectionInit(BotConnectionInitEvent event) {
+    var connection = event.connection();
+    startTicker(
+        connection,
+        connection.executorManager().newScheduledExecutorService(connection, "Tick"),
+        new TickTimer(20));
+  }
 
-    private static void startTicker(BotConnection connection, ScheduledExecutorService executor,
-                                    TickTimer tickTimer) {
-        executor.scheduleWithFixedDelay(() -> {
-            tickTimer.advanceTime();
+  private static void startTicker(
+      BotConnection connection, ScheduledExecutorService executor, TickTimer tickTimer) {
+    executor.scheduleWithFixedDelay(
+        () -> {
+          tickTimer.advanceTime();
 
-            MDC.put("connectionId", connection.connectionId().toString());
-            MDC.put("botName", connection.meta().minecraftAccount().username());
-            MDC.put("botUuid", connection.meta().minecraftAccount().uniqueId().toString());
-            try {
-                connection.tick(tickTimer.ticks, tickTimer.partialTicks);
-            } catch (Throwable t) {
-                connection.logger().error("Exception ticking bot", t);
-            }
-            MDC.clear();
-        }, 0, 50, TimeUnit.MILLISECONDS); // 20 TPS
-    }
+          MDC.put("connectionId", connection.connectionId().toString());
+          MDC.put("botName", connection.meta().minecraftAccount().username());
+          MDC.put("botUuid", connection.meta().minecraftAccount().uniqueId().toString());
+          try {
+            connection.tick(tickTimer.ticks, tickTimer.partialTicks);
+          } catch (Throwable t) {
+            connection.logger().error("Exception ticking bot", t);
+          }
+          MDC.clear();
+        },
+        0,
+        50,
+        TimeUnit.MILLISECONDS); // 20 TPS
+  }
 
-    @Override
-    public void onLoad() {
-        PluginHelper.registerAttackEventConsumer(BotConnectionInitEvent.class, BotTicker::onConnectionInit);
-    }
+  @Override
+  public void onLoad() {
+    PluginHelper.registerAttackEventConsumer(
+        BotConnectionInitEvent.class, BotTicker::onConnectionInit);
+  }
 }

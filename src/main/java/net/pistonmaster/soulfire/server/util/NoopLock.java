@@ -17,38 +17,34 @@
  */
 package net.pistonmaster.soulfire.server.util;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import org.jetbrains.annotations.NotNull;
 
 public class NoopLock implements Lock {
-    @Override
-    public void lock() {
-    }
+  @Override
+  public void lock() {}
 
-    @Override
-    public void lockInterruptibly() {
-    }
+  @Override
+  public void lockInterruptibly() {}
 
-    @Override
-    public boolean tryLock() {
-        return true;
-    }
+  @Override
+  public boolean tryLock() {
+    return true;
+  }
 
-    @Override
-    public boolean tryLock(long time, @NotNull TimeUnit unit) {
-        return true;
-    }
+  @Override
+  public boolean tryLock(long time, @NotNull TimeUnit unit) {
+    return true;
+  }
 
-    @Override
-    public void unlock() {
-    }
+  @Override
+  public void unlock() {}
 
-    @NotNull
-    @Override
-    public Condition newCondition() {
-        throw new UnsupportedOperationException();
-    }
+  @NotNull
+  @Override
+  public Condition newCondition() {
+    throw new UnsupportedOperationException();
+  }
 }

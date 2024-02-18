@@ -26,52 +26,52 @@ import net.pistonmaster.soulfire.generator.util.MCHelper;
 
 public class EntitiesDataGenerator implements IDataGenerator {
 
-    public static JsonObject generateEntity(EntityType<?> entityType) {
-        var entityDesc = new JsonObject();
+  public static JsonObject generateEntity(EntityType<?> entityType) {
+    var entityDesc = new JsonObject();
 
-        entityDesc.addProperty("id", BuiltInRegistries.ENTITY_TYPE.getId(entityType));
-        entityDesc.addProperty("name", BuiltInRegistries.ENTITY_TYPE.getKey(entityType).getPath());
+    entityDesc.addProperty("id", BuiltInRegistries.ENTITY_TYPE.getId(entityType));
+    entityDesc.addProperty("name", BuiltInRegistries.ENTITY_TYPE.getKey(entityType).getPath());
 
-        var dimensions = entityType.getDimensions();
+    var dimensions = entityType.getDimensions();
 
-        entityDesc.addProperty("width", dimensions.width);
-        entityDesc.addProperty("height", dimensions.height);
+    entityDesc.addProperty("width", dimensions.width);
+    entityDesc.addProperty("height", dimensions.height);
 
-        var category = entityType.getCategory();
-        entityDesc.addProperty("category", category.getName());
-        if (category.isFriendly()) {
-            entityDesc.addProperty("friendly", true);
-        }
-
-        if (entityType.canSummon()) {
-            entityDesc.addProperty("summonable", true);
-        }
-
-        var defaultEntity = createEntity(entityType);
-        if (defaultEntity.isAttackable()) {
-            entityDesc.addProperty("attackable", true);
-        }
-
-        return entityDesc;
+    var category = entityType.getCategory();
+    entityDesc.addProperty("category", category.getName());
+    if (category.isFriendly()) {
+      entityDesc.addProperty("friendly", true);
     }
 
-    private static <T extends Entity> T createEntity(EntityType<T> entityType) {
-        if (entityType == EntityType.PLAYER) {
-            return entityType.tryCast(MCHelper.getGameTestHelper().makeMockPlayer());
-        }
-
-        return entityType.create(MCHelper.getLevel());
+    if (entityType.canSummon()) {
+      entityDesc.addProperty("summonable", true);
     }
 
-    @Override
-    public String getDataName() {
-        return "entities.json";
+    var defaultEntity = createEntity(entityType);
+    if (defaultEntity.isAttackable()) {
+      entityDesc.addProperty("attackable", true);
     }
 
-    @Override
-    public JsonArray generateDataJson() {
-        var resultArray = new JsonArray();
-        BuiltInRegistries.ENTITY_TYPE.forEach(entity -> resultArray.add(generateEntity(entity)));
-        return resultArray;
+    return entityDesc;
+  }
+
+  private static <T extends Entity> T createEntity(EntityType<T> entityType) {
+    if (entityType == EntityType.PLAYER) {
+      return entityType.tryCast(MCHelper.getGameTestHelper().makeMockPlayer());
     }
+
+    return entityType.create(MCHelper.getLevel());
+  }
+
+  @Override
+  public String getDataName() {
+    return "entities.json";
+  }
+
+  @Override
+  public JsonArray generateDataJson() {
+    var resultArray = new JsonArray();
+    BuiltInRegistries.ENTITY_TYPE.forEach(entity -> resultArray.add(generateEntity(entity)));
+    return resultArray;
+  }
 }

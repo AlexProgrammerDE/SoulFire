@@ -22,31 +22,31 @@ import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 
 @RequiredArgsConstructor
 public enum MovementDirection {
-    NORTH,
-    SOUTH,
-    EAST,
-    WEST,
-    NORTH_EAST,
-    NORTH_WEST,
-    SOUTH_EAST,
-    SOUTH_WEST;
+  NORTH,
+  SOUTH,
+  EAST,
+  WEST,
+  NORTH_EAST,
+  NORTH_WEST,
+  SOUTH_EAST,
+  SOUTH_WEST;
 
-    public static final MovementDirection[] VALUES = values();
+  public static final MovementDirection[] VALUES = values();
 
-    public SFVec3i offset(SFVec3i vector) {
-        return switch (this) {
-            case NORTH -> vector.add(0, 0, -1);
-            case SOUTH -> vector.add(0, 0, 1);
-            case EAST -> vector.add(1, 0, 0);
-            case WEST -> vector.add(-1, 0, 0);
-            case NORTH_EAST -> vector.add(1, 0, -1);
-            case NORTH_WEST -> vector.add(-1, 0, -1);
-            case SOUTH_EAST -> vector.add(1, 0, 1);
-            case SOUTH_WEST -> vector.add(-1, 0, 1);
-        };
-    }
+  public SFVec3i offset(SFVec3i vector) {
+    return switch (this) {
+      case NORTH -> vector.add(0, 0, -1);
+      case SOUTH -> vector.add(0, 0, 1);
+      case EAST -> vector.add(1, 0, 0);
+      case WEST -> vector.add(-1, 0, 0);
+      case NORTH_EAST -> vector.add(1, 0, -1);
+      case NORTH_WEST -> vector.add(-1, 0, -1);
+      case SOUTH_EAST -> vector.add(1, 0, 1);
+      case SOUTH_WEST -> vector.add(-1, 0, 1);
+    };
+  }
 
-    public boolean isDiagonal() {
-        return this == NORTH_EAST || this == NORTH_WEST || this == SOUTH_EAST || this == SOUTH_WEST;
-    }
+  public boolean isDiagonal() {
+    return this == NORTH_EAST || this == NORTH_WEST || this == SOUTH_EAST || this == SOUTH_WEST;
+  }
 }

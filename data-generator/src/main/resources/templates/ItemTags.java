@@ -19,5 +19,7 @@ package net.pistonmaster.soulfire.data;
 
 @SuppressWarnings("unused")
 public class ItemTags {
-    // VALUES REPLACE
+  // VALUES REPLACE
+
+  private ItemTags() {}
 }

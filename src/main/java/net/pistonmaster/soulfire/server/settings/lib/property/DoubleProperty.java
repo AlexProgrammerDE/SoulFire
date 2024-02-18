@@ -19,15 +19,15 @@ package net.pistonmaster.soulfire.server.settings.lib.property;
 
 import javax.annotation.Nullable;
 
-public record DoubleProperty(String namespace,
-                             String key,
-                             String uiName,
-                             String[] cliFlags,
-                             String description,
-                             double defaultValue,
-                             double minValue,
-                             double maxValue,
-                             double stepValue,
-                             @Nullable String format
-) implements SingleProperty {
-}
+public record DoubleProperty(
+    String namespace,
+    String key,
+    String uiName,
+    String[] cliFlags,
+    String description,
+    double defaultValue,
+    double minValue,
+    double maxValue,
+    double stepValue,
+    @Nullable String format)
+    implements SingleProperty {}

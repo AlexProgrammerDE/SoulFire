@@ -27,82 +27,83 @@ import net.pistonmaster.soulfire.generator.mixin.BlockAccessor;
 import net.pistonmaster.soulfire.generator.util.BlockSettingsAccessor;
 
 public class BlocksDataGenerator implements IDataGenerator {
-    public static JsonObject generateBlock(Block block) {
-        var blockDesc = new JsonObject();
+  public static JsonObject generateBlock(Block block) {
+    var blockDesc = new JsonObject();
 
-        var defaultState = block.defaultBlockState();
+    blockDesc.addProperty("id", BuiltInRegistries.BLOCK.getId(block));
+    blockDesc.addProperty("name", BuiltInRegistries.BLOCK.getKey(block).getPath());
 
-        blockDesc.addProperty("id", BuiltInRegistries.BLOCK.getId(block));
-        blockDesc.addProperty("name", BuiltInRegistries.BLOCK.getKey(block).getPath());
+    blockDesc.addProperty("destroyTime", block.defaultDestroyTime());
+    blockDesc.addProperty("explosionResistance", block.getExplosionResistance());
 
-        blockDesc.addProperty("destroyTime", block.defaultDestroyTime());
-        blockDesc.addProperty("explosionResistance", block.getExplosionResistance());
-        if (defaultState.isAir()) {
-            blockDesc.addProperty("air", true);
-        }
-        if (block instanceof FallingBlock) {
-            blockDesc.addProperty("fallingBlock", true);
-        }
-        if (defaultState.canBeReplaced()) {
-            blockDesc.addProperty("replaceable", true);
-        }
-        if (defaultState.requiresCorrectToolForDrops()) {
-            blockDesc.addProperty("requiresCorrectToolForDrops", true);
-        }
-        if (defaultState.getFluidState().isSource()) {
-            blockDesc.addProperty("fluidSource", true);
-        }
-
-        if (defaultState.hasOffsetFunction()) {
-            var offsetData = new JsonObject();
-
-            offsetData.addProperty("maxHorizontalOffset", block.getMaxHorizontalOffset());
-            offsetData.addProperty("maxVerticalOffset", block.getMaxVerticalOffset());
-
-            var blockSettings = ((BlockAccessor) block).properties();
-            var offsetType = ((BlockSettingsAccessor) blockSettings).soulfire$getOffsetType();
-            offsetData.addProperty("offsetType", offsetType.name());
-
-            blockDesc.add("offsetData", offsetData);
-        }
-
-        var statesArray = new JsonArray();
-        for (var state : block.getStateDefinition().getPossibleStates()) {
-            var stateDesc = new JsonObject();
-
-            stateDesc.addProperty("id", Block.getId(state));
-
-            if (state == defaultState) {
-                stateDesc.addProperty("default", true);
-            }
-
-            var propertiesDesc = new JsonObject();
-            for (var property : state.getProperties()) {
-                propertiesDesc.addProperty(property.getName(), Util.getPropertyName(property, state.getValue(property)));
-            }
-
-            if (!propertiesDesc.isEmpty()) {
-                stateDesc.add("properties", propertiesDesc);
-            }
-
-            statesArray.add(stateDesc);
-        }
-
-        blockDesc.add("states", statesArray);
-
-        return blockDesc;
+    var defaultState = block.defaultBlockState();
+    if (defaultState.isAir()) {
+      blockDesc.addProperty("air", true);
+    }
+    if (block instanceof FallingBlock) {
+      blockDesc.addProperty("fallingBlock", true);
+    }
+    if (defaultState.canBeReplaced()) {
+      blockDesc.addProperty("replaceable", true);
+    }
+    if (defaultState.requiresCorrectToolForDrops()) {
+      blockDesc.addProperty("requiresCorrectToolForDrops", true);
+    }
+    if (defaultState.getFluidState().isSource()) {
+      blockDesc.addProperty("fluidSource", true);
     }
 
-    @Override
-    public String getDataName() {
-        return "blocks.json";
+    if (defaultState.hasOffsetFunction()) {
+      var offsetData = new JsonObject();
+
+      offsetData.addProperty("maxHorizontalOffset", block.getMaxHorizontalOffset());
+      offsetData.addProperty("maxVerticalOffset", block.getMaxVerticalOffset());
+
+      var blockSettings = ((BlockAccessor) block).properties();
+      var offsetType = ((BlockSettingsAccessor) blockSettings).soulfiregetOffsetType();
+      offsetData.addProperty("offsetType", offsetType.name());
+
+      blockDesc.add("offsetData", offsetData);
     }
 
-    @Override
-    public JsonArray generateDataJson() {
-        var resultBlocksArray = new JsonArray();
+    var statesArray = new JsonArray();
+    for (var state : block.getStateDefinition().getPossibleStates()) {
+      var stateDesc = new JsonObject();
 
-        BuiltInRegistries.BLOCK.forEach(block -> resultBlocksArray.add(generateBlock(block)));
-        return resultBlocksArray;
+      stateDesc.addProperty("id", Block.getId(state));
+
+      if (state == defaultState) {
+        stateDesc.addProperty("default", true);
+      }
+
+      var propertiesDesc = new JsonObject();
+      for (var property : state.getProperties()) {
+        propertiesDesc.addProperty(
+            property.getName(), Util.getPropertyName(property, state.getValue(property)));
+      }
+
+      if (!propertiesDesc.isEmpty()) {
+        stateDesc.add("properties", propertiesDesc);
+      }
+
+      statesArray.add(stateDesc);
     }
+
+    blockDesc.add("states", statesArray);
+
+    return blockDesc;
+  }
+
+  @Override
+  public String getDataName() {
+    return "blocks.json";
+  }
+
+  @Override
+  public JsonArray generateDataJson() {
+    var resultBlocksArray = new JsonArray();
+
+    BuiltInRegistries.BLOCK.forEach(block -> resultBlocksArray.add(generateBlock(block)));
+    return resultBlocksArray;
+  }
 }

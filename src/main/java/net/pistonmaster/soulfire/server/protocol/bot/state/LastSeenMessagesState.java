@@ -17,5 +17,4 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.state;
 
-public class LastSeenMessagesState {
-}
+public class LastSeenMessagesState {}

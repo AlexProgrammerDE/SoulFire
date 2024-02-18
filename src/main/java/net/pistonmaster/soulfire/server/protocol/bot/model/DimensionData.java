@@ -17,5 +17,5 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.model;
 
-public record DimensionData(String dimensionType, String worldName, long hashedSeed, boolean debug, boolean flat) {
-}
+public record DimensionData(
+    String dimensionType, String worldName, long hashedSeed, boolean debug, boolean flat) {}

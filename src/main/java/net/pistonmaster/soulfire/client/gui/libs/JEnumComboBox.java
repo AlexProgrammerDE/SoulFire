@@ -17,15 +17,15 @@
  */
 package net.pistonmaster.soulfire.client.gui.libs;
 
-import javax.swing.*;
+import javax.swing.JComboBox;
 
 public class JEnumComboBox<E extends Enum<E>> extends JComboBox<E> {
-    public JEnumComboBox(Class<E> enumClass) {
-        super(enumClass.getEnumConstants());
-    }
+  public JEnumComboBox(Class<E> enumClass) {
+    super(enumClass.getEnumConstants());
+  }
 
-    @Deprecated
-    public Object getSelectedItem() {
-        return super.getSelectedItem();
-    }
+  @Deprecated
+  public Object getSelectedItem() {
+    return super.getSelectedItem();
+  }
 }

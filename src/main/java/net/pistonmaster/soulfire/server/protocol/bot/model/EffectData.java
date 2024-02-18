@@ -19,5 +19,5 @@ package net.pistonmaster.soulfire.server.protocol.bot.model;
 
 import com.github.steveice10.mc.protocol.data.game.entity.Effect;
 
-public record EffectData(Effect effect, int amplifier, int duration, boolean ambient, boolean showParticles) {
-}
+public record EffectData(
+    Effect effect, int amplifier, int duration, boolean ambient, boolean showParticles) {}

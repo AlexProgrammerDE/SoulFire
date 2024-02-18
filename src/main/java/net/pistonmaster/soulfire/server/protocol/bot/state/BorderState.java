@@ -25,25 +25,25 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 public class BorderState {
-    private double centerX;
-    private double centerZ;
-    private double oldSize;
-    private double newSize;
-    private long lerpTime;
-    private int newAbsoluteMaxSize;
-    private int warningBlocks;
-    private int warningTime;
+  private double centerX;
+  private double centerZ;
+  private double oldSize;
+  private double newSize;
+  private long lerpTime;
+  private int newAbsoluteMaxSize;
+  private int warningBlocks;
+  private int warningTime;
 
-    public void tick() {
-        if (lerpTime > 0) {
-            var d = (double) (System.currentTimeMillis() - lerpTime) / 1000.0D;
+  public void tick() {
+    if (lerpTime > 0) {
+      var d = (double) (System.currentTimeMillis() - lerpTime) / 1000.0D;
 
-            if (d < 0.0D || d > 1.0D) {
-                lerpTime = 0;
-                oldSize = newSize;
-            } else {
-                oldSize = oldSize + (newSize - oldSize) * d;
-            }
-        }
+      if (d < 0.0D || d > 1.0D) {
+        lerpTime = 0;
+        oldSize = newSize;
+      } else {
+        oldSize = oldSize + (newSize - oldSize) * d;
+      }
     }
+  }
 }

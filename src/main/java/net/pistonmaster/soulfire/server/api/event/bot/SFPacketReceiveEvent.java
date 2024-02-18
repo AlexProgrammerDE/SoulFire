@@ -26,19 +26,17 @@ import net.pistonmaster.soulfire.server.api.event.SoulFireBotEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 
 /**
- * This event is called when a packet is received from the connected server.
- * This event is called before the packet is processed by the default bot listener.
- * Setter is used to change the packet by a plugin to change the behaviour of the bot.
+ * This event is called when a packet is received from the connected server. This event is called
+ * before the packet is processed by the default bot listener. Setter is used to change the packet
+ * by a plugin to change the behaviour of the bot.
  */
 @AllArgsConstructor
 public class SFPacketReceiveEvent extends AbstractCancellable implements SoulFireBotEvent {
-    private final BotConnection connection;
-    @Getter
-    @Setter
-    private MinecraftPacket packet;
+  private final BotConnection connection;
+  @Getter @Setter private MinecraftPacket packet;
 
-    @Override
-    public BotConnection connection() {
-        return connection;
-    }
+  @Override
+  public BotConnection connection() {
+    return connection;
+  }
 }

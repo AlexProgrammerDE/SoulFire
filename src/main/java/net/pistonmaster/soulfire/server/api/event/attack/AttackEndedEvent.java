@@ -20,5 +20,4 @@ package net.pistonmaster.soulfire.server.api.event.attack;
 import net.pistonmaster.soulfire.server.AttackManager;
 import net.pistonmaster.soulfire.server.api.event.SoulFireAttackEvent;
 
-public record AttackEndedEvent(AttackManager attackManager) implements SoulFireAttackEvent {
-}
+public record AttackEndedEvent(AttackManager attackManager) implements SoulFireAttackEvent {}

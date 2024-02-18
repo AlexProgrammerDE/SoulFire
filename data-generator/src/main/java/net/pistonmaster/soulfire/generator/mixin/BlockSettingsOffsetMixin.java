@@ -27,16 +27,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BlockBehaviour.Properties.class)
 public class BlockSettingsOffsetMixin implements BlockSettingsAccessor {
-    @Unique
-    private BlockBehaviour.OffsetType offsetType;
+  @Unique private BlockBehaviour.OffsetType offsetType;
 
-    @Inject(method = "offsetType(Lnet/minecraft/world/level/block/state/BlockBehaviour$OffsetType;)Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;", at = @At("HEAD"))
-    public void init(BlockBehaviour.OffsetType offsetType, CallbackInfoReturnable<BlockBehaviour.Properties> cir) {
-        this.offsetType = offsetType;
-    }
+  @Inject(
+      method =
+          "offsetType(Lnet/minecraft/world/level/block/state/BlockBehaviour$OffsetType;)Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;",
+      at = @At("HEAD"))
+  public void init(
+      BlockBehaviour.OffsetType offsetType, CallbackInfoReturnable<BlockBehaviour.Properties> cir) {
+    this.offsetType = offsetType;
+  }
 
-    @Override
-    public BlockBehaviour.OffsetType soulfire$getOffsetType() {
-        return offsetType;
-    }
+  @Override
+  public BlockBehaviour.OffsetType soulfiregetOffsetType() {
+    return offsetType;
+  }
 }

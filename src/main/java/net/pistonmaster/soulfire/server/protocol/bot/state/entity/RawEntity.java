@@ -18,24 +18,23 @@
 package net.pistonmaster.soulfire.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.ObjectData;
+import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.server.data.EntityType;
 
-import java.util.UUID;
-
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
 public class RawEntity extends Entity {
-    private final ObjectData data;
-    private float yaw;
-    private float headYaw;
-    private float pitch;
+  private final ObjectData data;
+  private float yaw;
+  private float headYaw;
+  private float pitch;
 
-    public RawEntity(int entityId, UUID uuid, EntityType type, ObjectData data) {
-        super(entityId, uuid, type);
-        this.data = data;
-    }
+  public RawEntity(int entityId, UUID uuid, EntityType type, ObjectData data) {
+    super(entityId, uuid, type);
+    this.data = data;
+  }
 }

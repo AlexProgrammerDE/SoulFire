@@ -17,10 +17,11 @@
  */
 package net.pistonmaster.soulfire.server.settings.lib.property;
 
-public sealed interface SingleProperty extends Property permits BooleanProperty, ComboProperty, IntProperty, DoubleProperty, StringProperty {
-    String uiName();
+public sealed interface SingleProperty extends Property
+    permits BooleanProperty, ComboProperty, IntProperty, DoubleProperty, StringProperty {
+  String uiName();
 
-    String[] cliFlags();
+  String[] cliFlags();
 
-    String description();
+  String description();
 }

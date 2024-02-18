@@ -22,16 +22,16 @@ import net.pistonmaster.soulfire.server.api.event.SoulFireAttackEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 
 /**
- * The event is called the moment after a bot connection object was created.
- * The BotConnection instance has all fields filled, but most methods are unusable as the bot is not connected yet.
+ * The event is called the moment after a bot connection object was created. The BotConnection
+ * instance has all fields filled, but most methods are unusable as the bot is not connected yet.
  * <br>
  * This event is recommended for when you want to add a plugin listener to the bot connection.
  *
  * @param connection The bot connection instance.
  */
 public record BotConnectionInitEvent(BotConnection connection) implements SoulFireAttackEvent {
-    @Override
-    public AttackManager attackManager() {
-        return connection.attackManager();
-    }
+  @Override
+  public AttackManager attackManager() {
+    return connection.attackManager();
+  }
 }

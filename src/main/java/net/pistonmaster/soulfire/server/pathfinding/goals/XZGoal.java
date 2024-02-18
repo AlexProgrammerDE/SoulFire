@@ -22,19 +22,18 @@ import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
 import org.cloudburstmc.math.vector.Vector2i;
 
 public record XZGoal(Vector2i goal) implements GoalScorer {
-    public XZGoal(int x, int z) {
-        this(Vector2i.from(x, z));
-    }
+  public XZGoal(int x, int z) {
+    this(Vector2i.from(x, z));
+  }
 
-    @Override
-    public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-        return Vector2i.from(entityState.blockPosition().x, entityState.blockPosition().z)
-                .distance(goal);
-    }
+  @Override
+  public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
+    return Vector2i.from(entityState.blockPosition().x, entityState.blockPosition().z)
+        .distance(goal);
+  }
 
-    @Override
-    public boolean isFinished(BotEntityState entityState) {
-        return Vector2i.from(entityState.blockPosition().x, entityState.blockPosition().z)
-                .equals(goal);
-    }
+  @Override
+  public boolean isFinished(BotEntityState entityState) {
+    return Vector2i.from(entityState.blockPosition().x, entityState.blockPosition().z).equals(goal);
+  }
 }

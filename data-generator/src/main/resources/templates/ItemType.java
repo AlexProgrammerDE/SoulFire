@@ -19,47 +19,55 @@ package net.pistonmaster.soulfire.data;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
-
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record ItemType(int id, String name, int stackSize,
-                       List<String> enchantCategories,
-                       DepletionData depletionData,
-                       FoodProperties foodProperties,
-                       EquipmentSlot attributeSlot,
-                       List<Attribute> attributes) {
-    public static final Int2ReferenceMap<ItemType> FROM_ID = new Int2ReferenceOpenHashMap<>();
+public record ItemType(
+    int id,
+    String name,
+    int stackSize,
+    List<String> enchantCategories,
+    DepletionData depletionData,
+    FoodProperties foodProperties,
+    EquipmentSlot attributeSlot,
+    List<Attribute> attributes) {
+  public static final Int2ReferenceMap<ItemType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
-    // VALUES REPLACE
+  // VALUES REPLACE
 
-    public static ItemType register(String name) {
-        var itemType = GsonDataHelper.fromJson("/minecraft/items.json", name, ItemType.class);
-        FROM_ID.put(itemType.id(), itemType);
-        return itemType;
+  public static ItemType register(String name) {
+    var itemType = GsonDataHelper.fromJson("/minecraft/items.json", name, ItemType.class);
+    FROM_ID.put(itemType.id(), itemType);
+    return itemType;
+  }
+
+  public static ItemType getById(int id) {
+    return FROM_ID.get(id);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
-
-    public static ItemType getById(int id) {
-        return FROM_ID.get(id);
+    if (!(o instanceof ItemType itemType)) {
+      return false;
     }
+    return id == itemType.id;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ItemType itemType)) return false;
-        return id == itemType.id;
-    }
+  @Override
+  public int hashCode() {
+    return id;
+  }
 
-    @Override
-    public int hashCode() {
-        return id;
-    }
+  public record DepletionData(List<String> repairWith, int maxDamage) {}
 
-    public record DepletionData(List<String> repairWith, int maxDamage) {
-    }
-
-    public record FoodProperties(int nutrition, float saturationModifier,
-                                 boolean fastFood, boolean isMeat,
-                                 boolean canAlwaysEat, boolean possiblyHarmful) {
-    }
+  public record FoodProperties(
+      int nutrition,
+      float saturationModifier,
+      boolean fastFood,
+      boolean isMeat,
+      boolean canAlwaysEat,
+      boolean possiblyHarmful) {}
 }

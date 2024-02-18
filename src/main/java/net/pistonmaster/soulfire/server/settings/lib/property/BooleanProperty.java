@@ -17,11 +17,11 @@
  */
 package net.pistonmaster.soulfire.server.settings.lib.property;
 
-public record BooleanProperty(String namespace,
-                              String key,
-                              String uiName,
-                              String[] cliFlags,
-                              String description,
-                              boolean defaultValue
-) implements SingleProperty {
-}
+public record BooleanProperty(
+    String namespace,
+    String key,
+    String uiName,
+    String[] cliFlags,
+    String description,
+    boolean defaultValue)
+    implements SingleProperty {}

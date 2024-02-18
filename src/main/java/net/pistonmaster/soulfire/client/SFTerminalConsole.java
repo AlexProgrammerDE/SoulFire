@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.client;
 
+import java.util.concurrent.ExecutorService;
 import lombok.RequiredArgsConstructor;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
 import net.pistonmaster.soulfire.util.ShutdownManager;
@@ -29,57 +30,58 @@ import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.impl.history.DefaultHistory;
 
-import java.util.concurrent.ExecutorService;
-
 @RequiredArgsConstructor
 public class SFTerminalConsole extends SimpleTerminalConsole {
-    private static final Logger logger = LogManager.getLogger("SoulFire");
-    private final ShutdownManager shutdownManager;
-    private final ClientCommandManager clientCommandManager;
+  private static final Logger logger = LogManager.getLogger("SoulFire");
+  private final ShutdownManager shutdownManager;
+  private final ClientCommandManager clientCommandManager;
 
-    /**
-     * Sets up {@code System.out} and {@code System.err} to redirect to log4j.
-     */
-    public static void setupStreams() {
-        System.setOut(IoBuilder.forLogger(logger).setLevel(Level.INFO).buildPrintStream());
-        System.setErr(IoBuilder.forLogger(logger).setLevel(Level.ERROR).buildPrintStream());
+  /** Sets up {@code System.out} and {@code System.err} to redirect to log4j. */
+  public static void setupStreams() {
+    System.setOut(IoBuilder.forLogger(logger).setLevel(Level.INFO).buildPrintStream());
+    System.setErr(IoBuilder.forLogger(logger).setLevel(Level.ERROR).buildPrintStream());
+  }
+
+  public static void setupTerminalConsole(
+      ExecutorService threadPool,
+      ShutdownManager shutdownManager,
+      ClientCommandManager clientCommandManager) {
+    SFTerminalConsole.setupStreams();
+    threadPool.execute(new SFTerminalConsole(shutdownManager, clientCommandManager)::start);
+  }
+
+  @Override
+  protected boolean isRunning() {
+    return !shutdownManager.shutdown();
+  }
+
+  @Override
+  protected void runCommand(String command) {
+    clientCommandManager.execute(command);
+  }
+
+  @Override
+  protected void shutdown() {
+    shutdownManager.shutdownSoftware(true);
+  }
+
+  @Override
+  protected LineReader buildReader(LineReaderBuilder builder) {
+    var history = new DefaultHistory();
+    for (var command : clientCommandManager.getCommandHistory()) {
+      history.add(command.getKey(), command.getValue());
     }
 
-    public static void setupTerminalConsole(ExecutorService threadPool, ShutdownManager shutdownManager, ClientCommandManager clientCommandManager) {
-        SFTerminalConsole.setupStreams();
-        threadPool.execute(new SFTerminalConsole(shutdownManager, clientCommandManager)::start);
-    }
-
-    @Override
-    protected boolean isRunning() {
-        return !shutdownManager.shutdown();
-    }
-
-    @Override
-    protected void runCommand(String command) {
-        clientCommandManager.execute(command);
-    }
-
-    @Override
-    protected void shutdown() {
-        shutdownManager.shutdownSoftware(true);
-    }
-
-    @Override
-    protected LineReader buildReader(LineReaderBuilder builder) {
-        var history = new DefaultHistory();
-        for (var command : clientCommandManager.getCommandHistory()) {
-            history.add(command.getKey(), command.getValue());
-        }
-
-        return super.buildReader(builder
-                .appName("SoulFire")
-                .completer((reader, parsedLine, list) -> {
-                    for (var suggestion : clientCommandManager.getCompletionSuggestions(parsedLine.line())) {
-                        list.add(new Candidate(suggestion));
-                    }
+    return super.buildReader(
+        builder
+            .appName("SoulFire")
+            .completer(
+                (reader, parsedLine, list) -> {
+                  for (var suggestion :
+                      clientCommandManager.getCompletionSuggestions(parsedLine.line())) {
+                    list.add(new Candidate(suggestion));
+                  }
                 })
-                .history(history)
-        );
-    }
+            .history(history));
+  }
 }

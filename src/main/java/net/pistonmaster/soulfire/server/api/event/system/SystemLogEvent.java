@@ -19,5 +19,4 @@ package net.pistonmaster.soulfire.server.api.event.system;
 
 import net.pistonmaster.soulfire.server.api.event.SoulFireGlobalEvent;
 
-public record SystemLogEvent(String message) implements SoulFireGlobalEvent {
-}
+public record SystemLogEvent(String message) implements SoulFireGlobalEvent {}

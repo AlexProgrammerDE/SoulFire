@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.account.service;
 
+import java.io.IOException;
 import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.HttpHelper;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
@@ -25,39 +26,44 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
 
-import java.io.IOException;
+public final class SFJavaMicrosoftAuthService
+    implements MCAuthService<SFJavaMicrosoftAuthService.JavaMicrosoftAuthData> {
+  @Override
+  public MinecraftAccount login(JavaMicrosoftAuthData data, SWProxy proxyData) throws IOException {
+    try {
+      var fullJavaSession =
+          MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(
+              HttpHelper.createLenniMCAuthHttpClient(proxyData),
+              new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
+      var mcProfile = fullJavaSession.getMcProfile();
+      var mcToken = mcProfile.getMcToken();
+      return new MinecraftAccount(
+          AuthType.MICROSOFT_JAVA,
+          mcProfile.getName(),
+          new OnlineJavaData(
+              mcProfile.getId(), mcToken.getAccessToken(), mcToken.getExpireTimeMs()),
+          true);
+    } catch (Exception e) {
+      throw new IOException(e);
+    }
+  }
 
-public final class SFJavaMicrosoftAuthService implements MCAuthService<SFJavaMicrosoftAuthService.JavaMicrosoftAuthData> {
-    @Override
-    public MinecraftAccount login(JavaMicrosoftAuthData data, SWProxy proxyData) throws IOException {
-        try {
-            var fullJavaSession = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(HttpHelper.createLenniMCAuthHttpClient(proxyData),
-                    new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
-            var mcProfile = fullJavaSession.getMcProfile();
-            var mcToken = mcProfile.getMcToken();
-            return new MinecraftAccount(AuthType.MICROSOFT_JAVA, mcProfile.getName(), new OnlineJavaData(mcProfile.getId(), mcToken.getAccessToken(), mcToken.getExpireTimeMs()), true);
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+  @Override
+  public JavaMicrosoftAuthData createData(String data) {
+    var split = data.split(":");
+
+    if (split.length != 2) {
+      throw new IllegalArgumentException("Invalid data!");
     }
 
-    @Override
-    public JavaMicrosoftAuthData createData(String data) {
-        var split = data.split(":");
-
-        if (split.length != 2) {
-            throw new IllegalArgumentException("Invalid data!");
-        }
-
-        var email = split[0].trim();
-        var password = split[1].trim();
-        if (!EmailValidator.getInstance().isValid(email)) {
-            throw new IllegalArgumentException("Invalid email!");
-        }
-
-        return new JavaMicrosoftAuthData(email, password);
+    var email = split[0].trim();
+    var password = split[1].trim();
+    if (!EmailValidator.getInstance().isValid(email)) {
+      throw new IllegalArgumentException("Invalid email!");
     }
 
-    public record JavaMicrosoftAuthData(String email, String password) {
-    }
+    return new JavaMicrosoftAuthData(email, password);
+  }
+
+  public record JavaMicrosoftAuthData(String email, String password) {}
 }

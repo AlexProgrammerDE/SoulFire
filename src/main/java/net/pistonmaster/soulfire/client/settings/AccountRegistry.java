@@ -17,77 +17,77 @@
  */
 package net.pistonmaster.soulfire.client.settings;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 @Slf4j
 @RequiredArgsConstructor
 public class AccountRegistry {
-    private final List<MinecraftAccount> accounts = new ArrayList<>();
-    private final List<Runnable> loadHooks = new ArrayList<>();
+  private final List<MinecraftAccount> accounts = new ArrayList<>();
+  private final List<Runnable> loadHooks = new ArrayList<>();
 
-    public void loadFromString(String data, AuthType authType) {
-        var newAccounts = data.lines()
-                .map(String::strip)
-                .filter(line -> !line.isBlank())
-                .distinct()
-                .map(account -> fromStringSingle(account, authType))
-                .toList();
+  public void loadFromString(String data, AuthType authType) {
+    var newAccounts =
+        data.lines()
+            .map(String::strip)
+            .filter(line -> !line.isBlank())
+            .distinct()
+            .map(account -> fromStringSingle(account, authType))
+            .toList();
 
-        if (newAccounts.isEmpty()) {
-            log.warn("No accounts found in the provided data!");
-            return;
-        }
-
-        this.accounts.addAll(newAccounts);
-        callLoadHooks();
-
-        log.info("Loaded {} accounts!", newAccounts.size());
+    if (newAccounts.isEmpty()) {
+      log.warn("No accounts found in the provided data!");
+      return;
     }
 
-    private MinecraftAccount fromStringSingle(String data, AuthType authType) {
-        data = data.trim();
+    this.accounts.addAll(newAccounts);
+    callLoadHooks();
 
-        if (data.isBlank()) {
-            throw new IllegalArgumentException("Account cannot be empty!");
-        }
+    log.info("Loaded {} accounts!", newAccounts.size());
+  }
 
-        try {
-            return authType.authService().createDataAndLogin(data, null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+  private MinecraftAccount fromStringSingle(String data, AuthType authType) {
+    data = data.trim();
+
+    if (data.isBlank()) {
+      throw new IllegalArgumentException("Account cannot be empty!");
     }
 
-    public List<MinecraftAccount> getAccounts() {
-        return Collections.unmodifiableList(accounts);
+    try {
+      return authType.authService().createDataAndLogin(data, null);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    public void setAccounts(List<MinecraftAccount> accounts) {
-        this.accounts.clear();
-        this.accounts.addAll(accounts);
-    }
+  public List<MinecraftAccount> getAccounts() {
+    return Collections.unmodifiableList(accounts);
+  }
 
-    public void callLoadHooks() {
-        loadHooks.forEach(Runnable::run);
-    }
+  public void setAccounts(List<MinecraftAccount> accounts) {
+    this.accounts.clear();
+    this.accounts.addAll(accounts);
+  }
 
-    public void addLoadHook(Runnable hook) {
-        loadHooks.add(hook);
-    }
+  public void callLoadHooks() {
+    loadHooks.forEach(Runnable::run);
+  }
 
-    public MinecraftAccount getAccount(String username, AuthType authType) {
-        return accounts.stream()
-                .filter(account -> account.authType() == authType)
-                .filter(account -> account.username().equals(username))
-                .findFirst()
-                .orElse(null);
-    }
+  public void addLoadHook(Runnable hook) {
+    loadHooks.add(hook);
+  }
+
+  public MinecraftAccount getAccount(String username, AuthType authType) {
+    return accounts.stream()
+        .filter(account -> account.authType() == authType)
+        .filter(account -> account.username().equals(username))
+        .findFirst()
+        .orElse(null);
+  }
 }

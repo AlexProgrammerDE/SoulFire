@@ -30,83 +30,83 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
 public class AutoRegister implements InternalExtension {
-    public static void onChat(ChatMessageReceiveEvent event) {
-        var connection = event.connection();
-        var settingsHolder = connection.settingsHolder();
-        if (!settingsHolder.get(AutoRegisterSettings.ENABLED)) {
-            return;
+  public static void onChat(ChatMessageReceiveEvent event) {
+    var connection = event.connection();
+    var settingsHolder = connection.settingsHolder();
+    if (!settingsHolder.get(AutoRegisterSettings.ENABLED)) {
+      return;
+    }
+
+    var plainMessage = event.parseToText();
+    var password = settingsHolder.get(AutoRegisterSettings.PASSWORD_FORMAT);
+
+    // TODO: Add more password options
+    if (plainMessage.contains("/register")) {
+      var registerCommand = settingsHolder.get(AutoRegisterSettings.REGISTER_COMMAND);
+      connection.botControl().sendMessage(registerCommand.replace("%password%", password));
+    } else if (plainMessage.contains("/login")) {
+      var loginCommand = settingsHolder.get(AutoRegisterSettings.LOGIN_COMMAND);
+      connection.botControl().sendMessage(loginCommand.replace("%password%", password));
+    } else if (plainMessage.contains("/captcha")) {
+      var captchaCommand = settingsHolder.get(AutoRegisterSettings.CAPTCHA_COMMAND);
+      var split = plainMessage.split(" ");
+
+      for (var i = 0; i < split.length; i++) {
+        if (split[i].equals("/captcha")) {
+          connection.botControl().sendMessage(captchaCommand.replace("%captcha%", split[i + 1]));
         }
-
-        var plainMessage = event.parseToText();
-        var password = settingsHolder.get(AutoRegisterSettings.PASSWORD_FORMAT);
-
-        // TODO: Add more password options
-        if (plainMessage.contains("/register")) {
-            var registerCommand = settingsHolder.get(AutoRegisterSettings.REGISTER_COMMAND);
-            connection.botControl().sendMessage(registerCommand.replace("%password%", password));
-        } else if (plainMessage.contains("/login")) {
-            var loginCommand = settingsHolder.get(AutoRegisterSettings.LOGIN_COMMAND);
-            connection.botControl().sendMessage(loginCommand.replace("%password%", password));
-        } else if (plainMessage.contains("/captcha")) {
-            var captchaCommand = settingsHolder.get(AutoRegisterSettings.CAPTCHA_COMMAND);
-            var split = plainMessage.split(" ");
-
-            for (var i = 0; i < split.length; i++) {
-                if (split[i].equals("/captcha")) {
-                    connection.botControl().sendMessage(captchaCommand.replace("%captcha%", split[i + 1]));
-                }
-            }
-        }
+      }
     }
+  }
 
-    @EventHandler
-    public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
-        event.settingsRegistry().addClass(AutoRegisterSettings.class, "Auto Register");
-    }
+  @EventHandler
+  public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(AutoRegisterSettings.class, "Auto Register");
+  }
 
-    @Override
-    public void onLoad() {
-        SoulFireAPI.registerListeners(AutoRegister.class);
-        PluginHelper.registerBotEventConsumer(ChatMessageReceiveEvent.class, AutoRegister::onChat);
-    }
+  @Override
+  public void onLoad() {
+    SoulFireAPI.registerListeners(AutoRegister.class);
+    PluginHelper.registerBotEventConsumer(ChatMessageReceiveEvent.class, AutoRegister::onChat);
+  }
 
-    @NoArgsConstructor(access = AccessLevel.NONE)
-    private static class AutoRegisterSettings implements SettingsObject {
-        private static final Property.Builder BUILDER = Property.builder("auto-register");
-        public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
-                "enabled",
-                "Enable Auto Register",
-                new String[]{"--auto-register"},
-                "Make bots run the /register and /login command after joining",
-                false
-        );
-        public static final StringProperty REGISTER_COMMAND = BUILDER.ofString(
-                "register-command",
-                "Register Command",
-                new String[]{"--register-command"},
-                "Command to be executed to register",
-                "/register %password% %password%"
-        );
-        public static final StringProperty LOGIN_COMMAND = BUILDER.ofString(
-                "login-command",
-                "Login Command",
-                new String[]{"--login-command"},
-                "Command to be executed to log in",
-                "/login %password%"
-        );
-        public static final StringProperty CAPTCHA_COMMAND = BUILDER.ofString(
-                "captcha-command",
-                "Captcha Command",
-                new String[]{"--captcha-command"},
-                "Command to be executed to confirm a captcha",
-                "/captcha %captcha%"
-        );
-        public static final StringProperty PASSWORD_FORMAT = BUILDER.ofString(
-                "password-format",
-                "Password Format",
-                new String[]{"--password-format"},
-                "The password for registering",
-                "SoulFire"
-        );
-    }
+  @NoArgsConstructor(access = AccessLevel.NONE)
+  private static class AutoRegisterSettings implements SettingsObject {
+    private static final Property.Builder BUILDER = Property.builder("auto-register");
+    public static final BooleanProperty ENABLED =
+        BUILDER.ofBoolean(
+            "enabled",
+            "Enable Auto Register",
+            new String[] {"--auto-register"},
+            "Make bots run the /register and /login command after joining",
+            false);
+    public static final StringProperty REGISTER_COMMAND =
+        BUILDER.ofString(
+            "register-command",
+            "Register Command",
+            new String[] {"--register-command"},
+            "Command to be executed to register",
+            "/register %password% %password%");
+    public static final StringProperty LOGIN_COMMAND =
+        BUILDER.ofString(
+            "login-command",
+            "Login Command",
+            new String[] {"--login-command"},
+            "Command to be executed to log in",
+            "/login %password%");
+    public static final StringProperty CAPTCHA_COMMAND =
+        BUILDER.ofString(
+            "captcha-command",
+            "Captcha Command",
+            new String[] {"--captcha-command"},
+            "Command to be executed to confirm a captcha",
+            "/captcha %captcha%");
+    public static final StringProperty PASSWORD_FORMAT =
+        BUILDER.ofString(
+            "password-format",
+            "Password Format",
+            new String[] {"--password-format"},
+            "The password for registering",
+            "SoulFire");
+  }
 }

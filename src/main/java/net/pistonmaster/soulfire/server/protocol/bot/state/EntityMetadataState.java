@@ -24,9 +24,9 @@ import lombok.Data;
 
 @Data
 public class EntityMetadataState {
-    private final Int2ObjectMap<EntityMetadata<?, ?>> metadataStore = new Int2ObjectOpenHashMap<>();
+  private final Int2ObjectMap<EntityMetadata<?, ?>> metadataStore = new Int2ObjectOpenHashMap<>();
 
-    public void setMetadata(EntityMetadata<?, ?> metadata) {
-        this.metadataStore.put(metadata.getId(), metadata);
-    }
+  public void setMetadata(EntityMetadata<?, ?> metadata) {
+    this.metadataStore.put(metadata.getId(), metadata);
+  }
 }

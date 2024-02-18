@@ -17,39 +17,38 @@
  */
 package net.pistonmaster.soulfire.server.data;
 
+import java.util.Optional;
 import net.pistonmaster.soulfire.server.util.BlockTypeHelper;
 
-import java.util.Optional;
-
 public class BlockItems {
-    public static final BlockType[] VALUES = new BlockType[ItemType.FROM_ID.size()];
-    public static final ItemType[] VALUES_REVERSE = new ItemType[BlockType.FROM_ID.size()];
+  public static final BlockType[] VALUES = new BlockType[ItemType.FROM_ID.size()];
+  public static final ItemType[] VALUES_REVERSE = new ItemType[BlockType.FROM_ID.size()];
 
-    static {
-        for (var itemType : ItemType.FROM_ID.values()) {
-            for (var blockType : BlockType.FROM_ID.values()) {
-                var blockShapeTypes = BlockState.forDefaultBlockType(blockType).blockShapeGroup();
+  static {
+    for (var itemType : ItemType.FROM_ID.values()) {
+      for (var blockType : BlockType.FROM_ID.values()) {
+        var blockShapeTypes = BlockState.forDefaultBlockType(blockType).blockShapeGroup();
 
-                // Let's not use bedrock as a building block
-                if (BlockTypeHelper.isDiggable(blockType)
-                        && itemType.name().equals(blockType.name())
-                        && blockShapeTypes.isFullBlock()) {
-                    VALUES[itemType.id()] = blockType;
-                    VALUES_REVERSE[blockType.id()] = itemType;
-                }
-            }
+        // Let's not use bedrock as a building block
+        if (BlockTypeHelper.isDiggable(blockType)
+            && itemType.name().equals(blockType.name())
+            && blockShapeTypes.isFullBlock()) {
+          VALUES[itemType.id()] = blockType;
+          VALUES_REVERSE[blockType.id()] = itemType;
         }
+      }
     }
+  }
 
-    public static Optional<BlockType> getBlockType(ItemType itemType) {
-        return Optional.ofNullable(VALUES[itemType.id()]);
-    }
+  public static Optional<BlockType> getBlockType(ItemType itemType) {
+    return Optional.ofNullable(VALUES[itemType.id()]);
+  }
 
-    public static Optional<ItemType> getItemType(BlockType blockType) {
-        return Optional.ofNullable(VALUES_REVERSE[blockType.id()]);
-    }
+  public static Optional<ItemType> getItemType(BlockType blockType) {
+    return Optional.ofNullable(VALUES_REVERSE[blockType.id()]);
+  }
 
-    public static boolean hasItemType(BlockType blockType) {
-        return VALUES_REVERSE[blockType.id()] != null;
-    }
+  public static boolean hasItemType(BlockType blockType) {
+    return VALUES_REVERSE[blockType.id()] != null;
+  }
 }

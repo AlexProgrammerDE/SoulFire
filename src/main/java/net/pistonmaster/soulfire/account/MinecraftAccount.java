@@ -17,29 +17,32 @@
  */
 package net.pistonmaster.soulfire.account;
 
+import java.util.UUID;
 import lombok.NonNull;
 import net.pistonmaster.soulfire.account.service.AccountData;
 import net.pistonmaster.soulfire.account.service.BedrockData;
 import net.pistonmaster.soulfire.account.service.OnlineJavaData;
 
-import java.util.UUID;
+public record MinecraftAccount(
+    @NonNull AuthType authType,
+    @NonNull String username,
+    @NonNull AccountData accountData,
+    boolean enabled) {
+  @Override
+  public String toString() {
+    return String.format(
+        "MinecraftAccount(authType=%s, username=%s, enabled=%s)", authType, username, enabled);
+  }
 
-public record MinecraftAccount(@NonNull AuthType authType, @NonNull String username, @NonNull AccountData accountData,
-                               boolean enabled) {
-    @Override
-    public String toString() {
-        return String.format("MinecraftAccount(authType=%s, username=%s, enabled=%s)", authType, username, enabled);
-    }
+  public boolean isPremiumJava() {
+    return accountData instanceof OnlineJavaData;
+  }
 
-    public boolean isPremiumJava() {
-        return accountData instanceof OnlineJavaData;
-    }
+  public boolean isPremiumBedrock() {
+    return accountData instanceof BedrockData;
+  }
 
-    public boolean isPremiumBedrock() {
-        return accountData instanceof BedrockData;
-    }
-
-    public UUID uniqueId() {
-        return accountData.profileId();
-    }
+  public UUID uniqueId() {
+    return accountData.profileId();
+  }
 }

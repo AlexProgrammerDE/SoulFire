@@ -22,14 +22,13 @@ import net.pistonmaster.soulfire.server.data.BlockState;
 import org.cloudburstmc.math.vector.Vector3d;
 
 public class VectorHelper {
-    private VectorHelper() {
-    }
+  private VectorHelper() {}
 
-    public static Vector3d topMiddleOfBlock(Vector3d vector, BlockState blockState) {
-        return topMiddleOfBlock(vector, blockState.blockShapeGroup());
-    }
+  public static Vector3d topMiddleOfBlock(Vector3d vector, BlockState blockState) {
+    return topMiddleOfBlock(vector, blockState.blockShapeGroup());
+  }
 
-    public static Vector3d topMiddleOfBlock(Vector3d vector, BlockShapeGroup blockShapeGroup) {
-        return vector.floor().add(0.5, blockShapeGroup.highestY(), 0.5);
-    }
+  public static Vector3d topMiddleOfBlock(Vector3d vector, BlockShapeGroup blockShapeGroup) {
+    return vector.floor().add(0.5, blockShapeGroup.highestY(), 0.5);
+  }
 }

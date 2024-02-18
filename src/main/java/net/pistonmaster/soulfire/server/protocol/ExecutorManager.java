@@ -17,9 +17,6 @@
  */
 package net.pistonmaster.soulfire.server.protocol;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,77 +24,83 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
 public class ExecutorManager {
-    public static final ThreadLocal<BotConnection> BOT_CONNECTION_THREAD_LOCAL = new ThreadLocal<>();
-    private final List<ExecutorService> executors = Collections.synchronizedList(new ArrayList<>());
-    private final String threadPrefix;
-    private boolean shutdown = false;
+  public static final ThreadLocal<BotConnection> BOT_CONNECTION_THREAD_LOCAL = new ThreadLocal<>();
+  private final List<ExecutorService> executors = Collections.synchronizedList(new ArrayList<>());
+  private final String threadPrefix;
+  private boolean shutdown = false;
 
-    public ScheduledExecutorService newScheduledExecutorService(BotConnection botConnection, String threadName) {
-        if (shutdown) {
-            throw new IllegalStateException("Cannot create new executor after shutdown!");
-        }
-
-        var executor = Executors.newSingleThreadScheduledExecutor(getThreadFactory(botConnection, threadName));
-
-        executors.add(executor);
-
-        return executor;
+  public ScheduledExecutorService newScheduledExecutorService(
+      BotConnection botConnection, String threadName) {
+    if (shutdown) {
+      throw new IllegalStateException("Cannot create new executor after shutdown!");
     }
 
-    public ExecutorService newExecutorService(BotConnection botConnection, String threadName) {
-        if (shutdown) {
-            throw new IllegalStateException("Cannot create new executor after shutdown!");
-        }
+    var executor =
+        Executors.newSingleThreadScheduledExecutor(getThreadFactory(botConnection, threadName));
 
-        var executor = Executors.newSingleThreadExecutor(getThreadFactory(botConnection, threadName));
+    executors.add(executor);
 
-        executors.add(executor);
+    return executor;
+  }
 
-        return executor;
+  public ExecutorService newExecutorService(BotConnection botConnection, String threadName) {
+    if (shutdown) {
+      throw new IllegalStateException("Cannot create new executor after shutdown!");
     }
 
-    public ExecutorService newCachedExecutorService(BotConnection botConnection, String threadName) {
-        if (shutdown) {
-            throw new IllegalStateException("Cannot create new executor after shutdown!");
-        }
+    var executor = Executors.newSingleThreadExecutor(getThreadFactory(botConnection, threadName));
 
-        var executor = Executors.newCachedThreadPool(getThreadFactory(botConnection, threadName));
+    executors.add(executor);
 
-        executors.add(executor);
+    return executor;
+  }
 
-        return executor;
+  public ExecutorService newCachedExecutorService(BotConnection botConnection, String threadName) {
+    if (shutdown) {
+      throw new IllegalStateException("Cannot create new executor after shutdown!");
     }
 
-    private ThreadFactory getThreadFactory(BotConnection botConnection, String threadName) {
-        return runnable -> {
-            var thread = new Thread(() -> {
+    var executor = Executors.newCachedThreadPool(getThreadFactory(botConnection, threadName));
+
+    executors.add(executor);
+
+    return executor;
+  }
+
+  private ThreadFactory getThreadFactory(BotConnection botConnection, String threadName) {
+    return runnable -> {
+      var thread =
+          new Thread(
+              () -> {
                 BOT_CONNECTION_THREAD_LOCAL.set(botConnection);
                 runnable.run();
                 BOT_CONNECTION_THREAD_LOCAL.remove();
-            });
-            var usedThreadName = threadName;
-            if (runnable instanceof NamedRunnable named) {
-                usedThreadName = named.name();
-            }
-            thread.setName(threadPrefix + "-" + usedThreadName);
+              });
+      var usedThreadName = threadName;
+      if (runnable instanceof NamedRunnable named) {
+        usedThreadName = named.name();
+      }
+      thread.setName(threadPrefix + "-" + usedThreadName);
 
-            return thread;
-        };
-    }
+      return thread;
+    };
+  }
 
-    public void shutdownAll() {
-        shutdown = true;
-        executors.forEach(ExecutorService::shutdownNow);
-    }
+  public void shutdownAll() {
+    shutdown = true;
+    executors.forEach(ExecutorService::shutdownNow);
+  }
 
-    private record NamedRunnable(Runnable runnable, String name) implements Runnable {
-        @Override
-        public void run() {
-            runnable.run();
-        }
+  private record NamedRunnable(Runnable runnable, String name) implements Runnable {
+    @Override
+    public void run() {
+      runnable.run();
     }
+  }
 }

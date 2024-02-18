@@ -23,22 +23,22 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 
 public class BrigadierHelper {
-    private BrigadierHelper() {
-    }
+  private BrigadierHelper() {}
 
-    public static LiteralArgumentBuilder<ConsoleSubject> literal(String name) {
-        return LiteralArgumentBuilder.literal(name);
-    }
+  public static LiteralArgumentBuilder<ConsoleSubject> literal(String name) {
+    return LiteralArgumentBuilder.literal(name);
+  }
 
-    public static <T> RequiredArgumentBuilder<ConsoleSubject, T> argument(String name, ArgumentType<T> type) {
-        return RequiredArgumentBuilder.argument(name, type);
-    }
+  public static <T> RequiredArgumentBuilder<ConsoleSubject, T> argument(
+      String name, ArgumentType<T> type) {
+    return RequiredArgumentBuilder.argument(name, type);
+  }
 
-    public static Command<ConsoleSubject> help(String help, Command<ConsoleSubject> command) {
-        return new CommandHelpWrapper(command, help, false);
-    }
+  public static Command<ConsoleSubject> help(String help, Command<ConsoleSubject> command) {
+    return new CommandHelpWrapper(command, help, false);
+  }
 
-    public static Command<ConsoleSubject> privateCommand(Command<ConsoleSubject> command) {
-        return new CommandHelpWrapper(command, null, true);
-    }
+  public static Command<ConsoleSubject> privateCommand(Command<ConsoleSubject> command) {
+    return new CommandHelpWrapper(command, null, true);
+  }
 }

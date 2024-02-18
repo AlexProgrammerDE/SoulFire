@@ -22,46 +22,46 @@ import java.util.Locale;
 import java.util.function.Function;
 
 public record ComboProperty(
-        String namespace,
-        String key,
-        String uiName,
-        String[] cliFlags,
-        String description,
-        ComboOption[] options,
-        int defaultValue
-) implements SingleProperty {
-    public ComboProperty {
-        if (options.length == 0) {
-            throw new IllegalArgumentException("Options must not be empty!");
-        }
-
-        if (defaultValue < 0 || defaultValue >= options.length) {
-            throw new IllegalArgumentException("Default value must be in range of options!");
-        }
+    String namespace,
+    String key,
+    String uiName,
+    String[] cliFlags,
+    String description,
+    ComboOption[] options,
+    int defaultValue)
+    implements SingleProperty {
+  public ComboProperty {
+    if (options.length == 0) {
+      throw new IllegalArgumentException("Options must not be empty!");
     }
 
-    public static <T extends Enum<T>> String capitalizeEnum(T enumValue) {
-        return String.join(" ", Arrays.stream(enumValue.name().split("_"))
-                .map(ComboProperty::capitalizeString)
-                .toArray(String[]::new));
+    if (defaultValue < 0 || defaultValue >= options.length) {
+      throw new IllegalArgumentException("Default value must be in range of options!");
     }
+  }
 
-    public static String capitalizeString(String str) {
-        return str.substring(0, 1).toUpperCase(Locale.ROOT) + str.substring(1).toLowerCase(Locale.ROOT);
+  public static <T extends Enum<T>> String capitalizeEnum(T enumValue) {
+    return String.join(
+        " ",
+        Arrays.stream(enumValue.name().split("_"))
+            .map(ComboProperty::capitalizeString)
+            .toArray(String[]::new));
+  }
+
+  public static String capitalizeString(String str) {
+    return str.substring(0, 1).toUpperCase(Locale.ROOT) + str.substring(1).toLowerCase(Locale.ROOT);
+  }
+
+  public record ComboOption(String id, String displayName) {
+    public static <T extends Enum<T>> ComboOption[] fromEnum(
+        T[] values, Function<T, String> mapper) {
+      var options = new ComboOption[values.length];
+
+      for (var i = 0; i < values.length; i++) {
+        options[i] = new ComboOption(values[i].name(), mapper.apply(values[i]));
+      }
+
+      return options;
     }
-
-    public record ComboOption(
-            String id,
-            String displayName
-    ) {
-        public static <T extends Enum<T>> ComboOption[] fromEnum(T[] values, Function<T, String> mapper) {
-            var options = new ComboOption[values.length];
-
-            for (var i = 0; i < values.length; i++) {
-                options[i] = new ComboOption(values[i].name(), mapper.apply(values[i]));
-            }
-
-            return options;
-        }
-    }
+  }
 }

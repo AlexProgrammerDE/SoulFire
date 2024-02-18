@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.server.pathfinding.graph.actions;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
@@ -29,105 +30,105 @@ import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.Block
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement.MovementMiningCost;
 
-import java.util.List;
-
 public final class DownMovement extends GraphAction implements Cloneable {
-    private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
-    private final SFVec3i targetToMineBlock;
-    @Getter
-    @Setter
-    private MovementMiningCost blockBreakCosts;
-    @Getter
-    @Setter
-    private int closestBlockToFallOn = Integer.MIN_VALUE;
+  private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
+  private final SFVec3i targetToMineBlock;
+  @Getter @Setter private MovementMiningCost blockBreakCosts;
+  @Getter @Setter private int closestBlockToFallOn = Integer.MIN_VALUE;
 
-    public DownMovement() {
-        this.targetToMineBlock = FEET_POSITION_RELATIVE_BLOCK.sub(0, 1, 0);
-    }
+  public DownMovement() {
+    this.targetToMineBlock = FEET_POSITION_RELATIVE_BLOCK.sub(0, 1, 0);
+  }
 
-    public SFVec3i blockToBreak() {
-        return targetToMineBlock;
-    }
+  public SFVec3i blockToBreak() {
+    return targetToMineBlock;
+  }
 
-    public List<SFVec3i> listSafetyCheckBlocks() {
-        var requiredFreeBlocks = new ObjectArrayList<SFVec3i>();
+  public List<SFVec3i> listSafetyCheckBlocks() {
+    var requiredFreeBlocks = new ObjectArrayList<SFVec3i>();
 
-        // Falls one block
-        requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0));
+    // Falls one block
+    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0));
 
-        // Falls two blocks
-        requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 3, 0));
+    // Falls two blocks
+    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 3, 0));
 
-        // Falls three blocks
-        requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 4, 0));
+    // Falls three blocks
+    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 4, 0));
 
-        return requiredFreeBlocks;
-    }
+    return requiredFreeBlocks;
+  }
 
-    public BlockSafetyData[][] listCheckSafeMineBlocks() {
-        var results = new BlockSafetyData[1][];
+  public BlockSafetyData[][] listCheckSafeMineBlocks() {
+    var results = new BlockSafetyData[1][];
 
-        var firstDirection = BlockDirection.NORTH;
-        var oppositeDirection = firstDirection.opposite();
-        var leftDirectionSide = firstDirection.leftSide();
-        var rightDirectionSide = firstDirection.rightSide();
+    var firstDirection = BlockDirection.NORTH;
+    var oppositeDirection = firstDirection.opposite();
+    var leftDirectionSide = firstDirection.leftSide();
+    var rightDirectionSide = firstDirection.rightSide();
 
-        results[0] = new BlockSafetyData[]{
-                new BlockSafetyData(firstDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
-                new BlockSafetyData(oppositeDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
-                new BlockSafetyData(leftDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
-                new BlockSafetyData(rightDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS)
+    results[0] =
+        new BlockSafetyData[] {
+          new BlockSafetyData(
+              firstDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
+          new BlockSafetyData(
+              oppositeDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
+          new BlockSafetyData(
+              leftDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
+          new BlockSafetyData(
+              rightDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS)
         };
 
-        return results;
-    }
+    return results;
+  }
 
-    @Override
-    public boolean impossibleToComplete() {
-        return closestBlockToFallOn == Integer.MIN_VALUE;
-    }
+  @Override
+  public boolean impossibleToComplete() {
+    return closestBlockToFallOn == Integer.MIN_VALUE;
+  }
 
-    @Override
-    public GraphInstructions getInstructions(BotEntityState previousEntityState) {
-        var inventory = previousEntityState.inventory();
-        var levelState = previousEntityState.levelState();
-        var cost = 0D;
+  @Override
+  public GraphInstructions getInstructions(BotEntityState previousEntityState) {
+    var inventory = previousEntityState.inventory();
+    var cost = 0D;
 
-        cost += switch (closestBlockToFallOn) {
-            case -2 -> Costs.FALL_1;
-            case -3 -> Costs.FALL_2;
-            case -4 -> Costs.FALL_3;
-            default -> throw new IllegalStateException("Unexpected value: " + closestBlockToFallOn);
+    cost +=
+        switch (closestBlockToFallOn) {
+          case -2 -> Costs.FALL_1;
+          case -3 -> Costs.FALL_2;
+          case -4 -> Costs.FALL_3;
+          default -> throw new IllegalStateException("Unexpected value: " + closestBlockToFallOn);
         };
 
-        cost += blockBreakCosts.miningCost();
-        if (blockBreakCosts.willDrop()) {
-            inventory = inventory.withOneMoreBlock();
-        }
-
-        levelState = levelState.withChangeToAir(blockBreakCosts.block());
-
-        var absoluteMinedBlock = previousEntityState.blockPosition().add(targetToMineBlock);
-        var absoluteTargetFeetBlock = previousEntityState.blockPosition().add(0, closestBlockToFallOn + 1, 0);
-
-        return new GraphInstructions(new BotEntityState(
-                absoluteTargetFeetBlock,
-                levelState,
-                inventory
-        ), cost, List.of(new BlockBreakAction(absoluteMinedBlock)));
+    cost += blockBreakCosts.miningCost();
+    if (blockBreakCosts.willDrop()) {
+      inventory = inventory.withOneMoreBlock();
     }
+    var levelState = previousEntityState.levelState();
 
-    @Override
-    public DownMovement copy(BotEntityState previousEntityState) {
-        return this.clone();
-    }
+    levelState = levelState.withChangeToAir(blockBreakCosts.block());
 
-    @Override
-    public DownMovement clone() {
-        try {
-            return (DownMovement) super.clone();
-        } catch (CloneNotSupportedException cantHappen) {
-            throw new InternalError();
-        }
+    var absoluteMinedBlock = previousEntityState.blockPosition().add(targetToMineBlock);
+    var absoluteTargetFeetBlock =
+        previousEntityState.blockPosition().add(0, closestBlockToFallOn + 1, 0);
+
+    return new GraphInstructions(
+        new BotEntityState(absoluteTargetFeetBlock, levelState, inventory),
+        cost,
+        List.of(new BlockBreakAction(absoluteMinedBlock)));
+  }
+
+  @Override
+  public DownMovement copy(BotEntityState previousEntityState) {
+    return this.clone();
+  }
+
+  @Override
+  public DownMovement clone() {
+    try {
+      return (DownMovement) super.clone();
+    } catch (CloneNotSupportedException cantHappen) {
+      throw new InternalError();
     }
+  }
 }

@@ -20,18 +20,17 @@ package net.pistonmaster.soulfire.server.util;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomUtil {
-    private RandomUtil() {
+  private RandomUtil() {}
+
+  public static int getRandomInt(int min, int max) {
+    if (min > max) {
+      throw new IllegalArgumentException("max must be greater than min");
     }
 
-    public static int getRandomInt(int min, int max) {
-        if (min > max) {
-            throw new IllegalArgumentException("max must be greater than min");
-        }
-
-        if (min == max) {
-            return min;
-        }
-
-        return ThreadLocalRandom.current().nextInt(min, max);
+    if (min == max) {
+      return min;
     }
+
+    return ThreadLocalRandom.current().nextInt(min, max);
+  }
 }

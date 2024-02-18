@@ -18,6 +18,13 @@
 package net.pistonmaster.soulfire.client.gui.navigation;
 
 import ch.jalu.injector.Injector;
+import java.awt.CardLayout;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.client.gui.GUIManager;
@@ -25,74 +32,73 @@ import net.pistonmaster.soulfire.grpc.generated.ClientDataRequest;
 import net.pistonmaster.soulfire.grpc.generated.ClientPluginSettingsPage;
 import net.pistonmaster.soulfire.util.BuiltinSettingsConstants;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.swing.*;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CardsContainer extends JPanel {
-    @Getter
-    private final List<NavigationItem> panels = new ArrayList<>();
-    private final Injector injector;
-    private final GUIManager guiManager;
-    @Getter
-    private final List<ClientPluginSettingsPage> pluginPages = new ArrayList<>();
-    private final CardLayout cardLayout = new CardLayout();
+  @Getter private final List<NavigationItem> panels = new ArrayList<>();
+  private final Injector injector;
+  private final GUIManager guiManager;
+  @Getter private final List<ClientPluginSettingsPage> pluginPages = new ArrayList<>();
+  private final CardLayout cardLayout = new CardLayout();
 
-    @PostConstruct
-    public void postConstruct() {
-        injector.register(CardsContainer.class, this);
+  @PostConstruct
+  public void postConstruct() {
+    injector.register(CardsContainer.class, this);
 
-        setLayout(cardLayout);
-        setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));
+    setLayout(cardLayout);
+    setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));
 
-        pluginPages.addAll(guiManager.rpcClient().configStubBlocking()
-                .getUIClientData(ClientDataRequest.getDefaultInstance())
-                .getPluginSettingsList());
+    pluginPages.addAll(
+        guiManager
+            .rpcClient()
+            .configStubBlocking()
+            .getUIClientData(ClientDataRequest.getDefaultInstance())
+            .getPluginSettingsList());
 
-        // Add bot settings
-        panels.add(new GeneratedPanel(guiManager.settingsManager(), getByNamespace(BuiltinSettingsConstants.BOT_SETTINGS_ID)));
-        panels.add(injector.getSingleton(PluginListPanel.class));
-        panels.add(injector.getSingleton(AccountPanel.class));
-        panels.add(injector.getSingleton(ProxyPanel.class));
-        panels.add(injector.getSingleton(DeveloperPanel.class));
+    // Add bot settings
+    panels.add(
+        new GeneratedPanel(
+            guiManager.settingsManager(),
+            getByNamespace(BuiltinSettingsConstants.BOT_SETTINGS_ID)));
+    panels.add(injector.getSingleton(PluginListPanel.class));
+    panels.add(injector.getSingleton(AccountPanel.class));
+    panels.add(injector.getSingleton(ProxyPanel.class));
+    panels.add(injector.getSingleton(DeveloperPanel.class));
 
-        add(injector.getSingleton(NavigationPanel.class), NavigationPanel.NAVIGATION_ID);
+    add(injector.getSingleton(NavigationPanel.class), NavigationPanel.NAVIGATION_ID);
 
-        // Add the main page cards
-        for (var item : panels) {
-            add(NavigationWrapper.createBackWrapper(this, NavigationPanel.NAVIGATION_ID, item),
-                    item.getNavigationId()
-            );
-        }
-
-        // Add the plugin page cards
-        for (var item : pluginPages) {
-            if (item.getHidden()) {
-                continue;
-            }
-
-            add(NavigationWrapper.createBackWrapper(this, PluginListPanel.NAVIGATION_ID,
-                            new GeneratedPanel(guiManager.settingsManager(), item)),
-                    item.getNamespace()
-            );
-        }
+    // Add the main page cards
+    for (var item : panels) {
+      add(
+          NavigationWrapper.createBackWrapper(this, NavigationPanel.NAVIGATION_ID, item),
+          item.getNavigationId());
     }
 
-    public ClientPluginSettingsPage getByNamespace(String namespace) {
-        for (var page : pluginPages) {
-            if (page.getNamespace().equals(namespace)) {
-                return page;
-            }
-        }
+    // Add the plugin page cards
+    for (var item : pluginPages) {
+      if (item.getHidden()) {
+        continue;
+      }
 
-        throw new IllegalArgumentException("No page found with namespace " + namespace);
+      add(
+          NavigationWrapper.createBackWrapper(
+              this,
+              PluginListPanel.NAVIGATION_ID,
+              new GeneratedPanel(guiManager.settingsManager(), item)),
+          item.getNamespace());
+    }
+  }
+
+  public ClientPluginSettingsPage getByNamespace(String namespace) {
+    for (var page : pluginPages) {
+      if (page.getNamespace().equals(namespace)) {
+        return page;
+      }
     }
 
-    public void show(String id) {
-        cardLayout.show(this, id);
-    }
+    throw new IllegalArgumentException("No page found with namespace " + namespace);
+  }
+
+  public void show(String id) {
+    cardLayout.show(this, id);
+  }
 }

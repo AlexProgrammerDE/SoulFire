@@ -17,75 +17,75 @@
  */
 package net.pistonmaster.soulfire.client.settings;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.proxy.ProxyType;
 import net.pistonmaster.soulfire.proxy.SWProxy;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 @Slf4j
 @RequiredArgsConstructor
 public class ProxyRegistry {
-    private final List<SWProxy> proxies = new ArrayList<>();
-    private final List<Runnable> loadHooks = new ArrayList<>();
+  private final List<SWProxy> proxies = new ArrayList<>();
+  private final List<Runnable> loadHooks = new ArrayList<>();
 
-    private static <T> T getIndexOrNull(T[] array, int index) {
-        if (index < array.length) {
-            return array[index];
-        } else {
-            return null;
-        }
+  private static <T> T getIndexOrNull(T[] array, int index) {
+    if (index < array.length) {
+      return array[index];
+    } else {
+      return null;
+    }
+  }
+
+  public void loadFromString(String data, ProxyType proxyType) {
+    var newProxies =
+        data.lines()
+            .map(String::strip)
+            .filter(line -> !line.isBlank())
+            .distinct()
+            .map(line -> fromStringSingle(line, proxyType))
+            .toList();
+
+    if (newProxies.isEmpty()) {
+      log.warn("No proxies found in the provided data!");
+      return;
     }
 
-    public void loadFromString(String data, ProxyType proxyType) {
-        var newProxies = data.lines()
-                .map(String::strip)
-                .filter(line -> !line.isBlank())
-                .distinct()
-                .map(line -> fromStringSingle(line, proxyType))
-                .toList();
+    this.proxies.addAll(newProxies);
+    callLoadHooks();
 
-        if (newProxies.isEmpty()) {
-            log.warn("No proxies found in the provided data!");
-            return;
-        }
+    log.info("Loaded {} proxies!", newProxies.size());
+  }
 
-        this.proxies.addAll(newProxies);
-        callLoadHooks();
+  private SWProxy fromStringSingle(String data, ProxyType proxyType) {
+    data = data.trim();
 
-        log.info("Loaded {} proxies!", newProxies.size());
-    }
+    var split = data.split(":");
 
-    private SWProxy fromStringSingle(String data, ProxyType proxyType) {
-        data = data.trim();
+    var host = split[0];
+    var port = Integer.parseInt(split[1]);
+    var username = getIndexOrNull(split, 2);
+    var password = getIndexOrNull(split, 3);
 
-        var split = data.split(":");
+    return new SWProxy(proxyType, host, port, username, password, true);
+  }
 
-        var host = split[0];
-        var port = Integer.parseInt(split[1]);
-        var username = getIndexOrNull(split, 2);
-        var password = getIndexOrNull(split, 3);
+  public List<SWProxy> getProxies() {
+    return Collections.unmodifiableList(proxies);
+  }
 
-        return new SWProxy(proxyType, host, port, username, password, true);
-    }
+  public void setProxies(List<SWProxy> proxies) {
+    this.proxies.clear();
+    this.proxies.addAll(proxies);
+  }
 
-    public List<SWProxy> getProxies() {
-        return Collections.unmodifiableList(proxies);
-    }
+  public void callLoadHooks() {
+    loadHooks.forEach(Runnable::run);
+  }
 
-    public void setProxies(List<SWProxy> proxies) {
-        this.proxies.clear();
-        this.proxies.addAll(proxies);
-    }
-
-    public void callLoadHooks() {
-        loadHooks.forEach(Runnable::run);
-    }
-
-    public void addLoadHook(Runnable runnable) {
-        loadHooks.add(runnable);
-    }
+  public void addLoadHook(Runnable runnable) {
+    loadHooks.add(runnable);
+  }
 }

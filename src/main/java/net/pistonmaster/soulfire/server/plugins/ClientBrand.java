@@ -34,53 +34,54 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
 public class ClientBrand implements InternalExtension {
-    public static void onPacket(SFPacketSentEvent event) {
-        if (event.packet() instanceof ServerboundLoginAcknowledgedPacket) {
-            var connection = event.connection();
-            var settingsHolder = connection.settingsHolder();
+  public static void onPacket(SFPacketSentEvent event) {
+    if (event.packet() instanceof ServerboundLoginAcknowledgedPacket) {
+      var connection = event.connection();
+      var settingsHolder = connection.settingsHolder();
 
-            if (!settingsHolder.get(ClientBrandSettings.ENABLED)) {
-                return;
-            }
+      if (!settingsHolder.get(ClientBrandSettings.ENABLED)) {
+        return;
+      }
 
-            var buf = Unpooled.buffer();
-            connection.session().getCodecHelper()
-                    .writeString(buf, settingsHolder.get(ClientBrandSettings.CLIENT_BRAND));
+      var buf = Unpooled.buffer();
+      connection
+          .session()
+          .getCodecHelper()
+          .writeString(buf, settingsHolder.get(ClientBrandSettings.CLIENT_BRAND));
 
-            connection.session().send(new ServerboundCustomPayloadPacket(
-                    "minecraft:brand",
-                    ByteBufUtil.getBytes(buf)
-            ));
-        }
+      connection
+          .session()
+          .send(new ServerboundCustomPayloadPacket("minecraft:brand", ByteBufUtil.getBytes(buf)));
     }
+  }
 
-    @EventHandler
-    public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
-        event.settingsRegistry().addClass(ClientBrandSettings.class, "Client Brand");
-    }
+  @EventHandler
+  public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(ClientBrandSettings.class, "Client Brand");
+  }
 
-    @Override
-    public void onLoad() {
-        SoulFireAPI.registerListeners(ClientBrand.class);
-        PluginHelper.registerBotEventConsumer(SFPacketSentEvent.class, ClientBrand::onPacket);
-    }
+  @Override
+  public void onLoad() {
+    SoulFireAPI.registerListeners(ClientBrand.class);
+    PluginHelper.registerBotEventConsumer(SFPacketSentEvent.class, ClientBrand::onPacket);
+  }
 
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    private static class ClientBrandSettings implements SettingsObject {
-        private static final Property.Builder BUILDER = Property.builder("client-brand");
-        public static final BooleanProperty ENABLED = BUILDER.ofBoolean(
-                "enabled",
-                "Send client brand",
-                new String[]{"--send-client-brand"},
-                "Send client brand to the server",
-                true
-        );
-        public static final StringProperty CLIENT_BRAND = BUILDER.ofString(
-                "client-brand",
-                "Client brand",
-                new String[]{"--client-brand"},
-                "The client brand to send to the server",
-                "vanilla"
-        );
-    }
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  private static class ClientBrandSettings implements SettingsObject {
+    private static final Property.Builder BUILDER = Property.builder("client-brand");
+    public static final BooleanProperty ENABLED =
+        BUILDER.ofBoolean(
+            "enabled",
+            "Send client brand",
+            new String[] {"--send-client-brand"},
+            "Send client brand to the server",
+            true);
+    public static final StringProperty CLIENT_BRAND =
+        BUILDER.ofString(
+            "client-brand",
+            "Client brand",
+            new String[] {"--client-brand"},
+            "The client brand to send to the server",
+            "vanilla");
+  }
 }

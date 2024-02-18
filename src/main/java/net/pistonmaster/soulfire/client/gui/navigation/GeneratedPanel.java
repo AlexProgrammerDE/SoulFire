@@ -18,6 +18,19 @@
 package net.pistonmaster.soulfire.client.gui.navigation;
 
 import com.google.gson.JsonPrimitive;
+import java.awt.Component;
+import java.awt.GridBagLayout;
+import java.util.Objects;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import net.lenni0451.commons.swing.GBC;
 import net.pistonmaster.soulfire.client.gui.libs.JMinMaxHelper;
 import net.pistonmaster.soulfire.client.gui.libs.SwingTextUtils;
@@ -28,151 +41,210 @@ import net.pistonmaster.soulfire.grpc.generated.DoubleSetting;
 import net.pistonmaster.soulfire.grpc.generated.IntSetting;
 import net.pistonmaster.soulfire.server.settings.lib.property.PropertyKey;
 
-import javax.swing.*;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
-import java.awt.*;
-import java.util.Objects;
-
 public class GeneratedPanel extends NavigationItem {
-    private final ClientPluginSettingsPage settingsPage;
+  private final ClientPluginSettingsPage settingsPage;
 
-    public GeneratedPanel(SettingsManager settingsManager, ClientPluginSettingsPage settingsPage) {
-        this.settingsPage = settingsPage;
+  public GeneratedPanel(SettingsManager settingsManager, ClientPluginSettingsPage settingsPage) {
+    this.settingsPage = settingsPage;
 
-        setLayout(new GridBagLayout());
+    setLayout(new GridBagLayout());
 
-        addComponents(this, settingsPage, settingsManager);
+    addComponents(this, settingsPage, settingsManager);
+  }
+
+  private static JSpinner createIntObject(
+      PropertyKey propertyKey, SettingsManager settingsManager, IntSetting intSetting) {
+    var spinner =
+        new JSpinner(
+            new SpinnerNumberModel(
+                intSetting.getDef(),
+                intSetting.getMin(),
+                intSetting.getMax(),
+                intSetting.getStep()));
+    if (intSetting.hasFormat()) {
+      spinner.setEditor(new JSpinner.NumberEditor(spinner, intSetting.getFormat()));
     }
 
-    private static JSpinner createIntObject(PropertyKey propertyKey, SettingsManager settingsManager, IntSetting intSetting) {
-        var spinner = new JSpinner(new SpinnerNumberModel(intSetting.getDef(), intSetting.getMin(), intSetting.getMax(), intSetting.getStep()));
-        if (intSetting.hasFormat()) {
-            spinner.setEditor(new JSpinner.NumberEditor(spinner, intSetting.getFormat()));
-        }
+    settingsManager.registerListener(propertyKey, s -> spinner.setValue(s.getAsInt()));
+    settingsManager.registerProvider(
+        propertyKey, () -> new JsonPrimitive((int) spinner.getValue()));
 
-        settingsManager.registerListener(propertyKey, s -> spinner.setValue(s.getAsInt()));
-        settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive((int) spinner.getValue()));
+    return spinner;
+  }
 
-        return spinner;
+  private static JSpinner createDoubleObject(
+      PropertyKey propertyKey, SettingsManager settingsManager, DoubleSetting doubleSetting) {
+    var spinner =
+        new JSpinner(
+            new SpinnerNumberModel(
+                doubleSetting.getDef(),
+                doubleSetting.getMin(),
+                doubleSetting.getMax(),
+                doubleSetting.getStep()));
+    if (doubleSetting.hasFormat()) {
+      spinner.setEditor(new JSpinner.NumberEditor(spinner, doubleSetting.getFormat()));
     }
 
-    private static JSpinner createDoubleObject(PropertyKey propertyKey, SettingsManager settingsManager, DoubleSetting doubleSetting) {
-        var spinner = new JSpinner(new SpinnerNumberModel(doubleSetting.getDef(), doubleSetting.getMin(), doubleSetting.getMax(), doubleSetting.getStep()));
-        if (doubleSetting.hasFormat()) {
-            spinner.setEditor(new JSpinner.NumberEditor(spinner, doubleSetting.getFormat()));
-        }
+    settingsManager.registerListener(propertyKey, s -> spinner.setValue(s.getAsDouble()));
+    settingsManager.registerProvider(
+        propertyKey, () -> new JsonPrimitive((double) spinner.getValue()));
 
-        settingsManager.registerListener(propertyKey, s -> spinner.setValue(s.getAsDouble()));
-        settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive((double) spinner.getValue()));
+    return spinner;
+  }
 
-        return spinner;
-    }
+  public static void addComponents(
+      JPanel panel, ClientPluginSettingsPage settingsPage, SettingsManager settingsManager) {
+    var row = 0;
+    for (var settingEntry : settingsPage.getEntriesList()) {
+      switch (settingEntry.getValueCase()) {
+        case SINGLE -> {
+          var singleEntry = settingEntry.getSingle();
+          var propertyKey = new PropertyKey(settingsPage.getNamespace(), singleEntry.getKey());
 
-    public static void addComponents(JPanel panel, ClientPluginSettingsPage settingsPage, SettingsManager settingsManager) {
-        var row = 0;
-        for (var settingEntry : settingsPage.getEntriesList()) {
-            switch (settingEntry.getValueCase()) {
-                case SINGLE -> {
-                    var singleEntry = settingEntry.getSingle();
-                    var propertyKey = new PropertyKey(settingsPage.getNamespace(), singleEntry.getKey());
+          GBC.create(panel)
+              .grid(0, row)
+              .anchor(GBC.LINE_START)
+              .add(
+                  new JLabel(singleEntry.getUiName()),
+                  label -> label.setToolTipText(singleEntry.getDescription()));
+          var settingType = singleEntry.getType();
+          Component component =
+              switch (settingType.getValueCase()) {
+                case STRING -> {
+                  var stringEntry = settingType.getString();
+                  var textField =
+                      stringEntry.getSecret()
+                          ? new JPasswordField(stringEntry.getDef())
+                          : new JTextField(stringEntry.getDef());
+                  settingsManager.registerListener(
+                      propertyKey, s -> textField.setText(s.getAsString()));
+                  settingsManager.registerProvider(
+                      propertyKey, () -> new JsonPrimitive(textField.getText()));
 
-                    GBC.create(panel).grid(0, row).anchor(GBC.LINE_START).add(new JLabel(singleEntry.getUiName()), label -> label.setToolTipText(singleEntry.getDescription()));
-                    var settingType = singleEntry.getType();
-                    Component component = switch (settingType.getValueCase()) {
-                        case STRING -> {
-                            var stringEntry = settingType.getString();
-                            var textField = stringEntry.getSecret() ? new JPasswordField(stringEntry.getDef())
-                                    : new JTextField(stringEntry.getDef());
-                            settingsManager.registerListener(propertyKey, s -> textField.setText(s.getAsString()));
-                            settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(textField.getText()));
+                  SwingTextUtils.addUndoRedo(textField);
 
-                            SwingTextUtils.addUndoRedo(textField);
-
-                            yield textField;
-                        }
-                        case INT -> {
-                            var intEntry = settingType.getInt();
-                            yield createIntObject(propertyKey, settingsManager, intEntry);
-                        }
-                        case DOUBLE -> {
-                            var doubleEntry = settingType.getDouble();
-                            yield createDoubleObject(propertyKey, settingsManager, doubleEntry);
-                        }
-                        case BOOL -> {
-                            var boolEntry = settingType.getBool();
-                            var checkBox = new JCheckBox();
-                            checkBox.setSelected(boolEntry.getDef());
-                            settingsManager.registerListener(propertyKey, s -> checkBox.setSelected(s.getAsBoolean()));
-                            settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(checkBox.isSelected()));
-
-                            yield checkBox;
-                        }
-                        case COMBO -> {
-                            var comboEntry = settingType.getCombo();
-                            var options = comboEntry.getOptionsList();
-                            @SuppressWarnings("Convert2Diamond")
-                            var comboBox = new JComboBox<ComboOption>(options.toArray(new ComboOption[0]));
-                            comboBox.setRenderer(new ComboRenderer());
-                            comboBox.setSelectedItem(options.get(comboEntry.getDef()));
-                            settingsManager.registerListener(propertyKey,
-                                    s -> comboBox.setSelectedItem(options.stream()
-                                            .filter(o -> o.getId().equals(s.getAsString()))
-                                            .findFirst()
-                                            .orElseThrow()
-                                    ));
-                            settingsManager.registerProvider(propertyKey,
-                                    () -> new JsonPrimitive(((ComboOption) Objects.requireNonNull(comboBox.getSelectedItem())).getId()));
-
-                            yield comboBox;
-                        }
-                        case VALUE_NOT_SET -> throw new IllegalStateException("Unexpected value: " + settingType.getValueCase());
-                    };
-                    GBC.create(panel).grid(1, row++).insets(0, 10, 0, 0).fill(GBC.HORIZONTAL).weightx(1).add(component);
+                  yield textField;
                 }
-                case MINMAXPAIR -> {
-                    var minMaxEntry = settingEntry.getMinMaxPair();
-
-                    var minPropertyKey = new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMin().getKey());
-                    var min = minMaxEntry.getMin();
-                    GBC.create(panel).grid(0, row).anchor(GBC.LINE_START).add(new JLabel(min.getUiName()), label -> label.setToolTipText(min.getDescription()));
-                    var minSpinner = createIntObject(minPropertyKey, settingsManager, min.getIntSetting());
-                    GBC.create(panel).grid(1, row++).insets(0, 10, 0, 0).fill(GBC.HORIZONTAL).weightx(1).add(minSpinner);
-
-                    var maxPropertyKey = new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMax().getKey());
-                    var max = minMaxEntry.getMax();
-                    GBC.create(panel).grid(0, row).anchor(GBC.LINE_START).add(new JLabel(max.getUiName()), label -> label.setToolTipText(max.getDescription()));
-                    var maxSpinner = createIntObject(maxPropertyKey, settingsManager, max.getIntSetting());
-                    GBC.create(panel).grid(1, row++).insets(0, 10, 0, 0).fill(GBC.HORIZONTAL).weightx(1).add(maxSpinner);
-
-                    JMinMaxHelper.applyLink(minSpinner, maxSpinner);
+                case INT -> {
+                  var intEntry = settingType.getInt();
+                  yield createIntObject(propertyKey, settingsManager, intEntry);
                 }
-                case VALUE_NOT_SET -> throw new IllegalStateException("Unexpected value: " + settingEntry.getValueCase());
-            }
+                case DOUBLE -> {
+                  var doubleEntry = settingType.getDouble();
+                  yield createDoubleObject(propertyKey, settingsManager, doubleEntry);
+                }
+                case BOOL -> {
+                  var boolEntry = settingType.getBool();
+                  var checkBox = new JCheckBox();
+                  checkBox.setSelected(boolEntry.getDef());
+                  settingsManager.registerListener(
+                      propertyKey, s -> checkBox.setSelected(s.getAsBoolean()));
+                  settingsManager.registerProvider(
+                      propertyKey, () -> new JsonPrimitive(checkBox.isSelected()));
+
+                  yield checkBox;
+                }
+                case COMBO -> {
+                  var comboEntry = settingType.getCombo();
+                  var options = comboEntry.getOptionsList();
+                  @SuppressWarnings("Convert2Diamond")
+                  var comboBox = new JComboBox<ComboOption>(options.toArray(new ComboOption[0]));
+                  comboBox.setRenderer(new ComboRenderer());
+                  comboBox.setSelectedItem(options.get(comboEntry.getDef()));
+                  settingsManager.registerListener(
+                      propertyKey,
+                      s ->
+                          comboBox.setSelectedItem(
+                              options.stream()
+                                  .filter(o -> o.getId().equals(s.getAsString()))
+                                  .findFirst()
+                                  .orElseThrow()));
+                  settingsManager.registerProvider(
+                      propertyKey,
+                      () ->
+                          new JsonPrimitive(
+                              ((ComboOption) Objects.requireNonNull(comboBox.getSelectedItem()))
+                                  .getId()));
+
+                  yield comboBox;
+                }
+                case VALUE_NOT_SET ->
+                    throw new IllegalStateException(
+                        "Unexpected value: " + settingType.getValueCase());
+              };
+          GBC.create(panel)
+              .grid(1, row++)
+              .insets(0, 10, 0, 0)
+              .fill(GBC.HORIZONTAL)
+              .weightx(1)
+              .add(component);
         }
+        case MINMAXPAIR -> {
+          var minMaxEntry = settingEntry.getMinMaxPair();
 
-        GBC.fillVerticalSpace(panel);
-    }
+          var minPropertyKey =
+              new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMin().getKey());
+          var min = minMaxEntry.getMin();
+          GBC.create(panel)
+              .grid(0, row)
+              .anchor(GBC.LINE_START)
+              .add(
+                  new JLabel(min.getUiName()), label -> label.setToolTipText(min.getDescription()));
+          var minSpinner = createIntObject(minPropertyKey, settingsManager, min.getIntSetting());
+          GBC.create(panel)
+              .grid(1, row++)
+              .insets(0, 10, 0, 0)
+              .fill(GBC.HORIZONTAL)
+              .weightx(1)
+              .add(minSpinner);
 
-    @Override
-    public String getNavigationName() {
-        return settingsPage.getPageName();
-    }
+          var maxPropertyKey =
+              new PropertyKey(settingsPage.getNamespace(), minMaxEntry.getMax().getKey());
+          var max = minMaxEntry.getMax();
+          GBC.create(panel)
+              .grid(0, row)
+              .anchor(GBC.LINE_START)
+              .add(
+                  new JLabel(max.getUiName()), label -> label.setToolTipText(max.getDescription()));
+          var maxSpinner = createIntObject(maxPropertyKey, settingsManager, max.getIntSetting());
+          GBC.create(panel)
+              .grid(1, row++)
+              .insets(0, 10, 0, 0)
+              .fill(GBC.HORIZONTAL)
+              .weightx(1)
+              .add(maxSpinner);
 
-    @Override
-    public String getNavigationId() {
-        return settingsPage.getNamespace();
-    }
-
-    private static class ComboRenderer extends BasicComboBoxRenderer {
-        @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-            if (value instanceof ComboOption option) {
-                setText(option.getDisplayName());
-            }
-
-            return this;
+          JMinMaxHelper.applyLink(minSpinner, maxSpinner);
         }
+        case VALUE_NOT_SET ->
+            throw new IllegalStateException("Unexpected value: " + settingEntry.getValueCase());
+      }
     }
+
+    GBC.fillVerticalSpace(panel);
+  }
+
+  @Override
+  public String getNavigationName() {
+    return settingsPage.getPageName();
+  }
+
+  @Override
+  public String getNavigationId() {
+    return settingsPage.getNamespace();
+  }
+
+  private static class ComboRenderer extends BasicComboBoxRenderer {
+    @Override
+    public Component getListCellRendererComponent(
+        JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+      super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+      if (value instanceof ComboOption option) {
+        setText(option.getDisplayName());
+      }
+
+      return this;
+    }
+  }
 }

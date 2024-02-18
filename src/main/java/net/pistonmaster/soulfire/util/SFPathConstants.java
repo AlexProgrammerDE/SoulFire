@@ -17,18 +17,20 @@
  */
 package net.pistonmaster.soulfire.util;
 
+import java.nio.file.Path;
 import net.harawata.appdirs.AppDirsFactory;
 
-import java.nio.file.Path;
-
 public class SFPathConstants {
-    public static final Path WORKING_DIRECTORY = Path.of(System.getProperty("user.dir"));
-    public static final Path DATA_FOLDER = getApplicationDataFolder();
-    public static final Path PLUGINS_FOLDER = DATA_FOLDER.resolve("plugins");
-    public static final Path CONFIG_FOLDER = DATA_FOLDER.resolve("config");
-    public static final Path PROFILES_FOLDER = DATA_FOLDER.resolve("profiles");
+  public static final Path WORKING_DIRECTORY = Path.of(System.getProperty("user.dir"));
+  public static final Path DATA_FOLDER = getApplicationDataFolder();
+  public static final Path PLUGINS_FOLDER = DATA_FOLDER.resolve("plugins");
+  public static final Path CONFIG_FOLDER = DATA_FOLDER.resolve("config");
+  public static final Path PROFILES_FOLDER = DATA_FOLDER.resolve("profiles");
+  public static final Path MAPS_FOLDER = DATA_FOLDER.resolve("maps");
 
-    private static Path getApplicationDataFolder() {
-        return Path.of(AppDirsFactory.getInstance().getUserDataDir("SoulFire", null, null));
-    }
+  private SFPathConstants() {}
+
+  private static Path getApplicationDataFolder() {
+    return Path.of(AppDirsFactory.getInstance().getUserDataDir("SoulFire", null, null));
+  }
 }

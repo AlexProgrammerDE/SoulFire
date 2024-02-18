@@ -17,37 +17,36 @@
  */
 package net.pistonmaster.soulfire.server.viaversion.platform;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.server.viaversion.JLoggerToSLF4J;
 import net.raphimc.viabedrock.ViaBedrockConfig;
 import net.raphimc.viabedrock.platform.ViaBedrockPlatform;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.logging.Logger;
-
 @RequiredArgsConstructor
 public class SFViaBedrock implements ViaBedrockPlatform {
-    private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaBedrock"));
-    private final Path dataFolder;
+  private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaBedrock"));
+  private final Path dataFolder;
 
-    public void init() {
-        var configFile = dataFolder.resolve("config.yml").toFile();
-        var config = new ViaBedrockConfig(configFile);
-        config.reload();
-        config.set("translate-resource-packs", false);
-        config.save();
-        init(configFile);
-    }
+  public void init() {
+    var configFile = dataFolder.resolve("config.yml").toFile();
+    var config = new ViaBedrockConfig(configFile);
+    config.reload();
+    config.set("translate-resource-packs", false);
+    config.save();
+    init(configFile);
+  }
 
-    @Override
-    public Logger getLogger() {
-        return logger;
-    }
+  @Override
+  public Logger getLogger() {
+    return logger;
+  }
 
-    @Override
-    public File getDataFolder() {
-        return dataFolder.toFile();
-    }
+  @Override
+  public File getDataFolder() {
+    return dataFolder.toFile();
+  }
 }

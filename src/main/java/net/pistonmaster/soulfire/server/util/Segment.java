@@ -17,83 +17,84 @@
  */
 package net.pistonmaster.soulfire.server.util;
 
+import java.util.List;
 import net.pistonmaster.soulfire.server.protocol.bot.movement.AABB;
 import org.cloudburstmc.math.vector.Vector3d;
 
-import java.util.List;
-
 public record Segment(Vector3d startPoint, Vector3d endPoint) {
-    public boolean intersects(List<AABB> boxes) {
-        for (var box : boxes) {
-            if (isInside(box)) { // if both points are inside the box, we can skip this box
-                continue;
-            }
+  public boolean intersects(List<AABB> boxes) {
+    for (var box : boxes) {
+      if (isInside(box)) { // if both points are inside the box, we can skip this box
+        continue;
+      }
 
-            if (intersectsBox(box)) {
-                return true;
-            }
-        }
-        return false;
+      if (intersectsBox(box)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public boolean isInside(AABB box) {
+    var originInside =
+        startPoint.getX() >= box.minX
+            && startPoint.getX() <= box.maxX
+            && startPoint.getY() >= box.minY
+            && startPoint.getY() <= box.maxY
+            && startPoint.getZ() >= box.minZ
+            && startPoint.getZ() <= box.maxZ;
+
+    var directionInside =
+        endPoint.getX() >= box.minX
+            && endPoint.getX() <= box.maxX
+            && endPoint.getY() >= box.minY
+            && endPoint.getY() <= box.maxY
+            && endPoint.getZ() >= box.minZ
+            && endPoint.getZ() <= box.maxZ;
+
+    return originInside && directionInside;
+  }
+
+  private boolean intersectsBox(AABB box) {
+    var tmin = (box.minX - startPoint.getX()) / (endPoint.getX() - startPoint.getX());
+    var tmax = (box.maxX - startPoint.getX()) / (endPoint.getX() - startPoint.getX());
+
+    if (tmin > tmax) {
+      var temp = tmin;
+      tmin = tmax;
+      tmax = temp;
     }
 
-    public boolean isInside(AABB box) {
-        var originInside = startPoint.getX() >= box.minX &&
-                startPoint.getX() <= box.maxX &&
-                startPoint.getY() >= box.minY &&
-                startPoint.getY() <= box.maxY &&
-                startPoint.getZ() >= box.minZ &&
-                startPoint.getZ() <= box.maxZ;
+    var tymin = (box.minY - startPoint.getY()) / (endPoint.getY() - startPoint.getY());
+    var tymax = (box.maxY - startPoint.getY()) / (endPoint.getY() - startPoint.getY());
 
-        var directionInside = endPoint.getX() >= box.minX &&
-                endPoint.getX() <= box.maxX &&
-                endPoint.getY() >= box.minY &&
-                endPoint.getY() <= box.maxY &&
-                endPoint.getZ() >= box.minZ &&
-                endPoint.getZ() <= box.maxZ;
-
-        return originInside && directionInside;
+    if (tymin > tymax) {
+      var temp = tymin;
+      tymin = tymax;
+      tymax = temp;
     }
 
-    private boolean intersectsBox(AABB box) {
-        var tmin = (box.minX - startPoint.getX()) / (endPoint.getX() - startPoint.getX());
-        var tmax = (box.maxX - startPoint.getX()) / (endPoint.getX() - startPoint.getX());
-
-        if (tmin > tmax) {
-            var temp = tmin;
-            tmin = tmax;
-            tmax = temp;
-        }
-
-        var tymin = (box.minY - startPoint.getY()) / (endPoint.getY() - startPoint.getY());
-        var tymax = (box.maxY - startPoint.getY()) / (endPoint.getY() - startPoint.getY());
-
-        if (tymin > tymax) {
-            var temp = tymin;
-            tymin = tymax;
-            tymax = temp;
-        }
-
-        if ((tmin > tymax) || (tymin > tmax)) {
-            return false;
-        }
-
-        if (tymin > tmin) {
-            tmin = tymin;
-        }
-
-        if (tymax < tmax) {
-            tmax = tymax;
-        }
-
-        var tzmin = (box.minZ - startPoint.getZ()) / (endPoint.getZ() - startPoint.getZ());
-        var tzmax = (box.maxZ - startPoint.getZ()) / (endPoint.getZ() - startPoint.getZ());
-
-        if (tzmin > tzmax) {
-            var temp = tzmin;
-            tzmin = tzmax;
-            tzmax = temp;
-        }
-
-        return (!(tmin > tzmax)) && (!(tzmin > tmax));
+    if ((tmin > tymax) || (tymin > tmax)) {
+      return false;
     }
+
+    if (tymin > tmin) {
+      tmin = tymin;
+    }
+
+    if (tymax < tmax) {
+      tmax = tymax;
+    }
+
+    var tzmin = (box.minZ - startPoint.getZ()) / (endPoint.getZ() - startPoint.getZ());
+    var tzmax = (box.maxZ - startPoint.getZ()) / (endPoint.getZ() - startPoint.getZ());
+
+    if (tzmin > tzmax) {
+      var temp = tzmin;
+      tzmin = tzmax;
+      tzmax = temp;
+    }
+
+    return (!(tmin > tzmax)) && (!(tzmin > tmax));
+  }
 }

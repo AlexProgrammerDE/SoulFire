@@ -20,25 +20,23 @@ package net.pistonmaster.soulfire.server.pathfinding.goals;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.graph.MinecraftGraph;
 
-/**
- * A goal represents something that the user wants the bot to achieve.
- */
+/** A goal represents something that the user wants the bot to achieve. */
 public interface GoalScorer {
-    /**
-     * Calculates the estimated score for a given block position to the goal.
-     * Usually this means the distance from achieving the goal.
-     *
-     * @param graph       the graph to calculate the score for
-     * @param entityState the entity state to calculate the score for
-     * @return the score for the given world state
-     */
-    double computeScore(MinecraftGraph graph, BotEntityState entityState);
+  /**
+   * Calculates the estimated score for a given block position to the goal. Usually this means the
+   * distance from achieving the goal.
+   *
+   * @param graph the graph to calculate the score for
+   * @param entityState the entity state to calculate the score for
+   * @return the score for the given world state
+   */
+  double computeScore(MinecraftGraph graph, BotEntityState entityState);
 
-    /**
-     * Checks if the given world state indicates that the goal is reached.
-     *
-     * @param entityState the current entity state
-     * @return true if the goal is reached, false otherwise
-     */
-    boolean isFinished(BotEntityState entityState);
+  /**
+   * Checks if the given world state indicates that the goal is reached.
+   *
+   * @param entityState the current entity state
+   * @return true if the goal is reached, false otherwise
+   */
+  boolean isFinished(BotEntityState entityState);
 }

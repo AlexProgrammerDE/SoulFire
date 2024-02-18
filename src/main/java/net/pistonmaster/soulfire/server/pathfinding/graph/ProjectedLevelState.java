@@ -26,71 +26,66 @@ import net.pistonmaster.soulfire.server.protocol.bot.block.BlockAccessor;
 import net.pistonmaster.soulfire.server.util.Vec2ObjectOpenHashMap;
 
 /**
- * An immutable representation of the world state.
- * This takes a world state and projects changes onto it.
- * This way we calculate the way we can do actions after a block was broken/placed.
+ * An immutable representation of the world state. This takes a world state and projects changes
+ * onto it. This way we calculate the way we can do actions after a block was broken/placed.
  */
 @RequiredArgsConstructor
 public class ProjectedLevelState {
-    private static final BlockState AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.AIR);
+  private static final BlockState AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.AIR);
 
-    private final BlockAccessor accessor;
-    private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blockChanges;
+  private final BlockAccessor accessor;
+  private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blockChanges;
 
-    public ProjectedLevelState(BlockAccessor accessor) {
-        this(
-                accessor,
-                new Vec2ObjectOpenHashMap<>()
-        );
-    }
+  public ProjectedLevelState(BlockAccessor accessor) {
+    this(accessor, new Vec2ObjectOpenHashMap<>());
+  }
 
-    public ProjectedLevelState withChangeToSolidBlock(SFVec3i position) {
-        var blockChanges = this.blockChanges.clone();
-        blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
+  public ProjectedLevelState withChangeToSolidBlock(SFVec3i position) {
+    var blockChanges = this.blockChanges.clone();
+    blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
 
-        return new ProjectedLevelState(accessor, blockChanges);
-    }
+    return new ProjectedLevelState(accessor, blockChanges);
+  }
 
-    public ProjectedLevelState withChangeToAir(SFVec3i position) {
-        var blockChanges = this.blockChanges.clone();
+  public ProjectedLevelState withChangeToAir(SFVec3i position) {
+    var blockChanges = this.blockChanges.clone();
+    blockChanges.put(position, AIR_BLOCK_STATE);
+
+    return new ProjectedLevelState(accessor, blockChanges);
+  }
+
+  public ProjectedLevelState withChanges(SFVec3i[] air, SFVec3i solid) {
+    var blockChanges = this.blockChanges.clone();
+    blockChanges.ensureCapacity(
+        blockChanges.size() + (air != null ? air.length : 0) + (solid != null ? 1 : 0));
+
+    if (air != null) {
+      for (var position : air) {
+        if (position == null) {
+          continue;
+        }
+
         blockChanges.put(position, AIR_BLOCK_STATE);
-
-        return new ProjectedLevelState(accessor, blockChanges);
+      }
     }
 
-    public ProjectedLevelState withChanges(SFVec3i[] air, SFVec3i solid) {
-        var blockChanges = this.blockChanges.clone();
-        blockChanges.ensureCapacity(blockChanges.size()
-                + (air != null ? air.length : 0)
-                + (solid != null ? 1 : 0));
-
-        if (air != null) {
-            for (var position : air) {
-                if (position == null) {
-                    continue;
-                }
-
-                blockChanges.put(position, AIR_BLOCK_STATE);
-            }
-        }
-
-        if (solid != null) {
-            blockChanges.put(solid, Costs.SOLID_PLACED_BLOCK_STATE);
-        }
-
-        return new ProjectedLevelState(accessor, blockChanges);
+    if (solid != null) {
+      blockChanges.put(solid, Costs.SOLID_PLACED_BLOCK_STATE);
     }
 
-    public BlockState getBlockStateAt(SFVec3i position) {
-        var blockChange = blockChanges.get(position);
-        if (blockChange != null) {
-            return blockChange;
-        }
+    return new ProjectedLevelState(accessor, blockChanges);
+  }
 
-        return accessor.getBlockStateAt(position.x, position.y, position.z);
+  public BlockState getBlockStateAt(SFVec3i position) {
+    var blockChange = blockChanges.get(position);
+    if (blockChange != null) {
+      return blockChange;
     }
 
-    public boolean isChanged(SFVec3i position) {
-        return blockChanges.containsKey(position);
-    }
+    return accessor.getBlockStateAt(position.x, position.y, position.z);
+  }
+
+  public boolean isChanged(SFVec3i position) {
+    return blockChanges.containsKey(position);
+  }
 }

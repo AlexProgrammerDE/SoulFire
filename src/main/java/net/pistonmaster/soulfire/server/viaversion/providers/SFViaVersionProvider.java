@@ -20,14 +20,15 @@ package net.pistonmaster.soulfire.server.viaversion.providers;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
+import java.util.Objects;
 import net.pistonmaster.soulfire.server.viaversion.StorableSession;
 
-import java.util.Objects;
-
 public class SFViaVersionProvider implements VersionProvider {
-    @Override
-    public ProtocolVersion getClosestServerProtocol(UserConnection connection) {
-        return Objects.requireNonNull(connection.get(StorableSession.class), "Session provider is null")
-                .session().meta().protocolVersion();
-    }
+  @Override
+  public ProtocolVersion getClosestServerProtocol(UserConnection connection) {
+    return Objects.requireNonNull(connection.get(StorableSession.class), "Session provider is null")
+        .session()
+        .meta()
+        .protocolVersion();
+  }
 }

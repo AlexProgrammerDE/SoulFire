@@ -17,26 +17,31 @@
  */
 package net.pistonmaster.soulfire.client.gui.libs;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import javax.swing.JTextArea;
+import javax.swing.UIManager;
 
 public class HintTextArea extends JTextArea {
-    private final String hint;
+  private final String hint;
 
-    public HintTextArea(String hint, int rows, int columns) {
-        super(rows, columns);
-        this.hint = hint;
+  public HintTextArea(String hint, int rows, int columns) {
+    super(rows, columns);
+    this.hint = hint;
+  }
+
+  @Override
+  public void paint(Graphics g) {
+    super.paint(g);
+    if (getText().isEmpty()) {
+      ((Graphics2D) g)
+          .setRenderingHint(
+              RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+      g.setColor(UIManager.getColor("TextField.placeholderForeground"));
+
+      var ins = getInsets();
+      g.drawString(hint, ins.left, ins.top + g.getFontMetrics().getAscent());
     }
-
-    @Override
-    public void paint(Graphics g) {
-        super.paint(g);
-        if (getText().isEmpty()) {
-            ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            g.setColor(UIManager.getColor("TextField.placeholderForeground"));
-
-            var ins = getInsets();
-            g.drawString(hint, ins.left, ins.top + g.getFontMetrics().getAscent());
-        }
-    }
+  }
 }

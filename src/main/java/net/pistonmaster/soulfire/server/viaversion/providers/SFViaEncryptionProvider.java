@@ -18,21 +18,20 @@
 package net.pistonmaster.soulfire.server.viaversion.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
+import java.util.Objects;
+import javax.crypto.SecretKey;
 import net.pistonmaster.soulfire.server.protocol.SFProtocolConstants;
 import net.pistonmaster.soulfire.server.viaversion.StorableSession;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
 
-import javax.crypto.SecretKey;
-import java.util.Objects;
-
 public class SFViaEncryptionProvider extends EncryptionProvider {
-    @Override
-    public void enableDecryption(UserConnection user) {
-        var session = Objects.requireNonNull(user.get(StorableSession.class)).session();
-        SecretKey key = session.getFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY);
-        Objects.requireNonNull(key, "Key is null!");
-        session.setFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY, null);
+  @Override
+  public void enableDecryption(UserConnection user) {
+    var session = Objects.requireNonNull(user.get(StorableSession.class)).session();
+    SecretKey key = session.getFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY);
+    Objects.requireNonNull(key, "Key is null!");
+    session.setFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY, null);
 
-        session.enableJavaEncryption(key);
-    }
+    session.enableJavaEncryption(key);
+  }
 }

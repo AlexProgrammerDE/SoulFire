@@ -17,27 +17,29 @@
  */
 package net.pistonmaster.soulfire.server.api.event;
 
+import java.util.List;
+import java.util.Map;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.reflect.stream.RStream;
 import net.lenni0451.reflect.stream.field.FieldWrapper;
 
-import java.util.List;
-import java.util.Map;
-
 public class EventUtil {
-    private static final FieldWrapper handlersWrapper = RStream.of(LambdaManager.class).fields().by("handlers");
+  private static final FieldWrapper handlersWrapper =
+      RStream.of(LambdaManager.class).fields().by("handlers");
 
-    public static void runAndAssertChanged(LambdaManager manager, Runnable runnable) {
-        var handlers = handlersWrapper.<Map<?, List<?>>>get(manager);
-        var initialHandlers = countTotalHandlers(handlers);
-        runnable.run();
-        var finalHandlers = countTotalHandlers(handlers);
-        if (initialHandlers == finalHandlers) {
-            throw new IllegalStateException("No handlers changed!");
-        }
-    }
+  private EventUtil() {}
 
-    private static int countTotalHandlers(Map<?, List<?>> handlers) {
-        return handlers.values().stream().mapToInt(List::size).sum();
+  public static void runAndAssertChanged(LambdaManager manager, Runnable runnable) {
+    var handlers = handlersWrapper.<Map<?, List<?>>>get(manager);
+    var initialHandlers = countTotalHandlers(handlers);
+    runnable.run();
+    var finalHandlers = countTotalHandlers(handlers);
+    if (initialHandlers == finalHandlers) {
+      throw new IllegalStateException("No handlers changed!");
     }
+  }
+
+  private static int countTotalHandlers(Map<?, List<?>> handlers) {
+    return handlers.values().stream().mapToInt(List::size).sum();
+  }
 }

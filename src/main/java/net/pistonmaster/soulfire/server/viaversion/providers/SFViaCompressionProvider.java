@@ -19,13 +19,14 @@ package net.pistonmaster.soulfire.server.viaversion.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.CompressionProvider;
+import java.util.Objects;
 import net.pistonmaster.soulfire.server.viaversion.StorableSession;
 
-import java.util.Objects;
-
 public class SFViaCompressionProvider extends CompressionProvider {
-    @Override
-    public void handlePlayCompression(UserConnection user, int threshold) {
-        Objects.requireNonNull(user.get(StorableSession.class)).session().setCompressionThreshold(threshold);
-    }
+  @Override
+  public void handlePlayCompression(UserConnection user, int threshold) {
+    Objects.requireNonNull(user.get(StorableSession.class))
+        .session()
+        .setCompressionThreshold(threshold);
+  }
 }

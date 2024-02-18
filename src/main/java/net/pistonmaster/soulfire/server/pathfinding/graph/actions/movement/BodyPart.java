@@ -22,20 +22,17 @@ import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 
 @RequiredArgsConstructor
 public enum BodyPart {
-    FEET,
-    HEAD;
+  FEET,
+  HEAD;
 
-    // Iterating over BodyPart.values() is slower than iteration over a static array
-    // Reversed because we normally want to see the head block mined before the feet
-    public static final BodyPart[] BODY_PARTS_REVERSE = new BodyPart[]{
-            BodyPart.HEAD,
-            BodyPart.FEET
+  // Iterating over BodyPart.values() is slower than iteration over a static array
+  // Reversed because we normally want to see the head block mined before the feet
+  public static final BodyPart[] BODY_PARTS_REVERSE = new BodyPart[] {BodyPart.HEAD, BodyPart.FEET};
+
+  public SFVec3i offset(SFVec3i position) {
+    return switch (this) {
+      case FEET -> position;
+      case HEAD -> position.add(0, 1, 0);
     };
-
-    public SFVec3i offset(SFVec3i position) {
-        return switch (this) {
-            case FEET -> position;
-            case HEAD -> position.add(0, 1, 0);
-        };
-    }
+  }
 }

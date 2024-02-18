@@ -21,77 +21,76 @@ import lombok.Getter;
 
 @Getter
 public class PlayerInventoryContainer extends Container {
-    private final InventoryManager inventoryManager;
-    private final ContainerSlot[] mainInventory = getSlots(9, 35);
-    private final ContainerSlot[] hotbar = getSlots(36, 44);
-    /**
-     * Retrieves the storage slots of the container.
-     * This includes the main inventory and the hotbar.
-     */
-    private final ContainerSlot[] storage = getSlots(9, 44);
-    @Getter
-    private final ContainerSlot[] armor = getSlots(5, 8);
-    @Getter
-    private final ContainerSlot[] craftingGrid = getSlots(1, 4);
+  private final InventoryManager inventoryManager;
+  private final ContainerSlot[] mainInventory = getSlots(9, 35);
+  private final ContainerSlot[] hotbar = getSlots(36, 44);
 
-    public PlayerInventoryContainer(InventoryManager inventoryManager) {
-        super(46, 0);
-        this.inventoryManager = inventoryManager;
-    }
+  /**
+   * Retrieves the storage slots of the container. This includes the main inventory and the hotbar.
+   */
+  private final ContainerSlot[] storage = getSlots(9, 44);
 
-    public ContainerSlot getHeldItem() {
-        return hotbarSlot(inventoryManager.heldItemSlot());
-    }
+  @Getter private final ContainerSlot[] armor = getSlots(5, 8);
+  @Getter private final ContainerSlot[] craftingGrid = getSlots(1, 4);
 
-    public ContainerSlot hotbarSlot(int slot) {
-        return getSlot(36 + slot);
-    }
+  public PlayerInventoryContainer(InventoryManager inventoryManager) {
+    super(46, 0);
+    this.inventoryManager = inventoryManager;
+  }
 
-    public ContainerSlot getOffhand() {
-        return getSlot(45);
-    }
+  public ContainerSlot getHeldItem() {
+    return hotbarSlot(inventoryManager.heldItemSlot());
+  }
 
-    public ContainerSlot getHelmet() {
-        return getSlot(5);
-    }
+  public ContainerSlot hotbarSlot(int slot) {
+    return getSlot(36 + slot);
+  }
 
-    public ContainerSlot getChestplate() {
-        return getSlot(6);
-    }
+  public ContainerSlot getOffhand() {
+    return getSlot(45);
+  }
 
-    public ContainerSlot getLeggings() {
-        return getSlot(7);
-    }
+  public ContainerSlot getHelmet() {
+    return getSlot(5);
+  }
 
-    public ContainerSlot getBoots() {
-        return getSlot(8);
-    }
+  public ContainerSlot getChestplate() {
+    return getSlot(6);
+  }
 
-    public ContainerSlot getCraftingResult() {
-        return getSlot(0);
-    }
+  public ContainerSlot getLeggings() {
+    return getSlot(7);
+  }
 
-    public boolean isHotbar(ContainerSlot slot) {
-        return isHotbar(slot.slot());
-    }
+  public ContainerSlot getBoots() {
+    return getSlot(8);
+  }
 
-    public boolean isHotbar(int slot) {
-        return slot >= 36 && slot <= 44;
-    }
+  public ContainerSlot getCraftingResult() {
+    return getSlot(0);
+  }
 
-    public int toHotbarIndex(ContainerSlot slot) {
-        return toHotbarIndex(slot.slot());
-    }
+  public boolean isHotbar(ContainerSlot slot) {
+    return isHotbar(slot.slot());
+  }
 
-    public int toHotbarIndex(int slot) {
-        return slot - 36;
-    }
+  public boolean isHotbar(int slot) {
+    return slot >= 36 && slot <= 44;
+  }
 
-    public boolean isMainInventory(ContainerSlot slot) {
-        return isMainInventory(slot.slot());
-    }
+  public int toHotbarIndex(ContainerSlot slot) {
+    return toHotbarIndex(slot.slot());
+  }
 
-    public boolean isMainInventory(int slot) {
-        return slot >= 9 && slot <= 35;
-    }
+  public int toHotbarIndex(int slot) {
+    return slot - 36;
+  }
+
+  public boolean isMainInventory(ContainerSlot slot) {
+    return isMainInventory(slot.slot());
+  }
+
+  public boolean isMainInventory(int slot) {
+    return slot >= 9 && slot <= 35;
+  }
 }

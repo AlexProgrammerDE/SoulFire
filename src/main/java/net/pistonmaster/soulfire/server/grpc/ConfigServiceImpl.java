@@ -18,6 +18,9 @@
 package net.pistonmaster.soulfire.server.grpc;
 
 import io.grpc.stub.StreamObserver;
+import java.util.ArrayList;
+import java.util.Collection;
+import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.SoulFireBootstrap;
 import net.pistonmaster.soulfire.grpc.generated.ClientDataRequest;
@@ -27,45 +30,40 @@ import net.pistonmaster.soulfire.grpc.generated.UIClientDataResponse;
 import net.pistonmaster.soulfire.server.SoulFireServer;
 import net.pistonmaster.soulfire.util.RPCConstants;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collection;
-
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
-    private final SoulFireServer soulFireServer;
+  private final SoulFireServer soulFireServer;
 
-    private static Collection<ClientPlugin> getExtensions() {
-        var plugins = new ArrayList<ClientPlugin>();
-        for (var pluginWrapper : SoulFireBootstrap.PLUGIN_MANAGER.getPlugins()) {
-            var id = pluginWrapper.getPluginId();
-            var description = pluginWrapper.getDescriptor().getPluginDescription();
-            var version = pluginWrapper.getDescriptor().getVersion();
-            var provider = pluginWrapper.getDescriptor().getProvider();
+  private static Collection<ClientPlugin> getExtensions() {
+    var plugins = new ArrayList<ClientPlugin>();
+    for (var pluginWrapper : SoulFireBootstrap.PLUGIN_MANAGER.getPlugins()) {
+      var id = pluginWrapper.getPluginId();
+      var description = pluginWrapper.getDescriptor().getPluginDescription();
+      var version = pluginWrapper.getDescriptor().getVersion();
+      var provider = pluginWrapper.getDescriptor().getProvider();
 
-            plugins.add(
-                    ClientPlugin.newBuilder()
-                            .setId(id)
-                            .setDescription(description)
-                            .setVersion(version)
-                            .setProvider(provider)
-                            .build()
-            );
-        }
-
-        return plugins;
+      plugins.add(
+          ClientPlugin.newBuilder()
+              .setId(id)
+              .setDescription(description)
+              .setVersion(version)
+              .setProvider(provider)
+              .build());
     }
 
-    @Override
-    public void getUIClientData(ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
-        var username = RPCConstants.CLIENT_ID_CONTEXT_KEY.get();
-        responseObserver.onNext(
-                UIClientDataResponse.newBuilder()
-                        .setUsername(username)
-                        .addAllPlugins(getExtensions())
-                        .addAllPluginSettings(soulFireServer.settingsRegistry().exportSettingsMeta())
-                        .build()
-        );
-        responseObserver.onCompleted();
-    }
+    return plugins;
+  }
+
+  @Override
+  public void getUIClientData(
+      ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
+    var username = RPCConstants.CLIENT_ID_CONTEXT_KEY.get();
+    responseObserver.onNext(
+        UIClientDataResponse.newBuilder()
+            .setUsername(username)
+            .addAllPlugins(getExtensions())
+            .addAllPluginSettings(soulFireServer.settingsRegistry().exportSettingsMeta())
+            .build());
+    responseObserver.onCompleted();
+  }
 }

@@ -21,12 +21,31 @@ import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLightLaf;
-import com.formdev.flatlaf.intellijthemes.*;
+import com.formdev.flatlaf.intellijthemes.FlatArcDarkOrangeIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatCyanLightIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatDarkPurpleIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme;
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDarkerIJTheme;
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicIJTheme;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.formdev.flatlaf.util.SystemInfo;
+import java.awt.Desktop;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.SwingUtilities;
+import javax.swing.plaf.basic.BasicLookAndFeel;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.client.gui.libs.JFXFileHelper;
 import net.pistonmaster.soulfire.client.gui.popups.AboutPopup;
@@ -34,23 +53,14 @@ import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.gui.WindowCloseEvent;
 import net.pistonmaster.soulfire.util.SFPathConstants;
 
-import javax.inject.Inject;
-import javax.swing.*;
-import javax.swing.plaf.basic.BasicLookAndFeel;
-import java.awt.*;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 @Slf4j
 public class SFMenuBar extends JMenuBar {
-    private static final List<Class<? extends BasicLookAndFeel>> THEMES;
+  private static final List<Class<? extends BasicLookAndFeel>> THEMES;
 
-    static {
-        var tempThemes = new ArrayList<>(List.of(
+  static {
+    var tempThemes =
+        new ArrayList<>(
+            List.of(
                 FlatDarculaLaf.class,
                 FlatIntelliJLaf.class,
                 FlatDarkLaf.class,
@@ -64,148 +74,161 @@ public class SFMenuBar extends JMenuBar {
                 FlatDarkPurpleIJTheme.class,
                 FlatMaterialDarkerIJTheme.class,
                 FlatMaterialOceanicIJTheme.class,
-                FlatCarbonIJTheme.class
-        ));
-        THEMES = List.copyOf(tempThemes);
+                FlatCarbonIJTheme.class));
+    THEMES = List.copyOf(tempThemes);
+  }
+
+  private final GUIManager guiManager;
+  private final GUIFrame guiFrame;
+
+  @Inject
+  public SFMenuBar(GUIManager guiManager, LogPanel logPanel, GUIFrame guiFrame) {
+    this.guiManager = guiManager;
+    this.guiFrame = guiFrame;
+
+    var fileMenu = new JMenu("File");
+    var loadProfile = new JMenuItem("Load Profile");
+    loadProfile.addActionListener(
+        e ->
+            JFXFileHelper.showOpenDialog(
+                    SFPathConstants.PROFILES_FOLDER, Map.of("SoulFire profile", "json"))
+                .ifPresent(
+                    file -> {
+                      try {
+                        guiManager.settingsManager().loadProfile(file);
+                        log.info("Loaded profile!");
+                      } catch (IOException ex) {
+                        log.warn("Failed to load profile!", ex);
+                      }
+                    }));
+
+    fileMenu.add(loadProfile);
+    var saveProfile = new JMenuItem("Save Profile");
+    saveProfile.addActionListener(
+        e ->
+            JFXFileHelper.showSaveDialog(
+                    SFPathConstants.PROFILES_FOLDER,
+                    Map.of("SoulFire profile", "json"),
+                    "profile.json")
+                .ifPresent(
+                    file -> {
+                      // Add .json if not present
+                      var path = file.toString();
+                      if (!path.endsWith(".json")) {
+                        path += ".json";
+                      }
+
+                      try {
+                        guiManager.settingsManager().saveProfile(Path.of(path));
+                        log.info("Saved profile!");
+                      } catch (IOException ex) {
+                        log.warn("Failed to save profile!", ex);
+                      }
+                    }));
+
+    fileMenu.add(saveProfile);
+
+    if (!SystemInfo.isMacOS) {
+      fileMenu.addSeparator();
+
+      var exit = new JMenuItem("Exit");
+      exit.addActionListener(e -> guiManager.shutdown());
+      fileMenu.add(exit);
     }
 
-    private final GUIManager guiManager;
-    private final GUIFrame guiFrame;
+    add(fileMenu);
 
-    @Inject
-    public SFMenuBar(GUIManager guiManager, LogPanel logPanel, GUIFrame guiFrame) {
-        this.guiManager = guiManager;
-        this.guiFrame = guiFrame;
+    var viewMenu = new JMenu("View");
+    var themeSelector = new JMenu("Theme");
+    var updateCallbacks = new ArrayList<Runnable>();
+    for (var theme : THEMES) {
+      var themeItem = new JRadioButtonMenuItem(theme.getSimpleName());
+      updateCallbacks.add(
+          () -> {
+            themeItem.setSelected(theme.getName().equals(ThemeUtil.getThemeClassName()));
+          });
+      themeItem.addActionListener(
+          e -> {
+            GUIClientProps.setString("theme", theme.getName());
+            SwingUtilities.invokeLater(ThemeUtil::setLookAndFeel);
+            updateCallbacks.forEach(Runnable::run);
+          });
+      themeSelector.add(themeItem);
+    }
+    updateCallbacks.forEach(Runnable::run);
+    viewMenu.add(themeSelector);
 
-        var fileMenu = new JMenu("File");
-        var loadProfile = new JMenuItem("Load Profile");
-        loadProfile.addActionListener(e -> JFXFileHelper.showOpenDialog(SFPathConstants.PROFILES_FOLDER, Map.of(
-                "SoulFire profile", "json"
-        )).ifPresent(file -> {
-            try {
-                guiManager.settingsManager().loadProfile(file);
-                log.info("Loaded profile!");
-            } catch (IOException ex) {
-                log.warn("Failed to load profile!", ex);
-            }
-        }));
+    /*
+    viewMenu.addSeparator();
 
-        fileMenu.add(loadProfile);
-        var saveProfile = new JMenuItem("Save Profile");
-        saveProfile.addActionListener(e -> JFXFileHelper.showSaveDialog(SFPathConstants.PROFILES_FOLDER, Map.of(
-                "SoulFire profile", "json"
-        ), "profile.json").ifPresent(file -> {
-            // Add .json if not present
-            var path = file.toString();
-            if (!path.endsWith(".json")) {
-                path += ".json";
-            }
+    var windowMenu = new JMenu("Window");
+    var trafficGraph = new JMenuItem("Traffic Monitor");
+    trafficGraph.addActionListener(e -> {
+        System.out.println("TODO: Open traffic graph");
+    });
+    windowMenu.add(trafficGraph);
+    viewMenu.add(windowMenu);
+     */
+    add(viewMenu);
 
-            try {
-                guiManager.settingsManager().saveProfile(Path.of(path));
-                log.info("Saved profile!");
-            } catch (IOException ex) {
-                log.warn("Failed to save profile!", ex);
-            }
-        }));
+    var helpMenu = new JMenu("Help");
+    var openHome = new JMenuItem("Show home");
+    openHome.addActionListener(e -> openHome());
+    helpMenu.add(openHome);
 
-        fileMenu.add(saveProfile);
+    helpMenu.addSeparator();
 
-        if (!SystemInfo.isMacOS) {
-            fileMenu.addSeparator();
+    var saveLogs = new JMenuItem("Save logs");
+    saveLogs.addActionListener(
+        listener ->
+            JFXFileHelper.showSaveDialog(
+                    SFPathConstants.DATA_FOLDER, Map.of("Log Files", "log"), "log.txt")
+                .ifPresent(
+                    file -> {
+                      try {
+                        Files.writeString(file, logPanel.messageLogPanel().getLogs());
+                        log.info("Saved log to: {}", file);
+                      } catch (IOException e) {
+                        log.error("Failed to save log!", e);
+                      }
+                    }));
+    helpMenu.add(saveLogs);
 
-            var exit = new JMenuItem("Exit");
-            exit.addActionListener(e -> guiManager.shutdown());
-            fileMenu.add(exit);
-        }
+    if (!SystemInfo.isMacOS) {
+      helpMenu.addSeparator();
 
-        add(fileMenu);
-
-        var viewMenu = new JMenu("View");
-        var themeSelector = new JMenu("Theme");
-        var updateCallbacks = new ArrayList<Runnable>();
-        for (var theme : THEMES) {
-            var themeItem = new JRadioButtonMenuItem(theme.getSimpleName());
-            updateCallbacks.add(() -> {
-                themeItem.setSelected(theme.getName().equals(ThemeUtil.getThemeClassName()));
-            });
-            themeItem.addActionListener(e -> {
-                GUIClientProps.setString("theme", theme.getName());
-                SwingUtilities.invokeLater(ThemeUtil::setLookAndFeel);
-                updateCallbacks.forEach(Runnable::run);
-            });
-            themeSelector.add(themeItem);
-        }
-        updateCallbacks.forEach(Runnable::run);
-        viewMenu.add(themeSelector);
-
-        /*
-        viewMenu.addSeparator();
-
-        var windowMenu = new JMenu("Window");
-        var trafficGraph = new JMenuItem("Traffic Monitor");
-        trafficGraph.addActionListener(e -> {
-            System.out.println("TODO: Open traffic graph");
-        });
-        windowMenu.add(trafficGraph);
-        viewMenu.add(windowMenu);
-         */
-        add(viewMenu);
-
-        var helpMenu = new JMenu("Help");
-        var openHome = new JMenuItem("Show home");
-        openHome.addActionListener(e -> openHome());
-        helpMenu.add(openHome);
-
-        helpMenu.addSeparator();
-
-        var saveLogs = new JMenuItem("Save logs");
-        saveLogs.addActionListener(listener -> JFXFileHelper.showSaveDialog(SFPathConstants.DATA_FOLDER, Map.of(
-                "Log Files", "log"
-        ), "log.txt").ifPresent(file -> {
-            try {
-                Files.writeString(file, logPanel.messageLogPanel().getLogs());
-                log.info("Saved log to: {}", file);
-            } catch (IOException e) {
-                log.error("Failed to save log!", e);
-            }
-        }));
-        helpMenu.add(saveLogs);
-
-        if (!SystemInfo.isMacOS) {
-            helpMenu.addSeparator();
-
-            var about = new JMenuItem("About");
-            about.addActionListener(e -> showAboutDialog());
-            helpMenu.add(about);
-        }
-
-        add(helpMenu);
-
-        var desktop = Desktop.getDesktop();
-        if (desktop.isSupported(Desktop.Action.APP_ABOUT)) {
-            desktop.setAboutHandler(e -> showAboutDialog());
-        }
-
-        if (desktop.isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
-            desktop.setQuitHandler((e, response) -> {
-                var event = new WindowCloseEvent();
-                SoulFireAPI.postEvent(event);
-                var canQuit = !event.isCancelled();
-                if (canQuit) {
-                    response.performQuit();
-                } else {
-                    response.cancelQuit();
-                }
-            });
-        }
+      var about = new JMenuItem("About");
+      about.addActionListener(e -> showAboutDialog());
+      helpMenu.add(about);
     }
 
-    private void showAboutDialog() {
-        new AboutPopup(guiFrame);
+    add(helpMenu);
+
+    var desktop = Desktop.getDesktop();
+    if (desktop.isSupported(Desktop.Action.APP_ABOUT)) {
+      desktop.setAboutHandler(e -> showAboutDialog());
     }
 
-    private void openHome() {
-        guiManager.browse(SFPathConstants.DATA_FOLDER.toUri());
+    if (desktop.isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
+      desktop.setQuitHandler(
+          (e, response) -> {
+            var event = new WindowCloseEvent();
+            SoulFireAPI.postEvent(event);
+            var canQuit = !event.isCancelled();
+            if (canQuit) {
+              response.performQuit();
+            } else {
+              response.cancelQuit();
+            }
+          });
     }
+  }
+
+  private void showAboutDialog() {
+    new AboutPopup(guiFrame);
+  }
+
+  private void openHome() {
+    guiManager.browse(SFPathConstants.DATA_FOLDER.toUri());
+  }
 }

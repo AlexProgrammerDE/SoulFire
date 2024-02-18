@@ -20,20 +20,20 @@ package net.pistonmaster.soulfire.server.pathfinding.graph.actions.movement;
 import net.pistonmaster.soulfire.server.pathfinding.SFVec3i;
 
 public enum ParkourDirection {
-    NORTH,
-    SOUTH,
-    EAST,
-    WEST;
+  NORTH,
+  SOUTH,
+  EAST,
+  WEST;
 
-    public static final ParkourDirection[] VALUES = values();
+  public static final ParkourDirection[] VALUES = values();
 
-    @SuppressWarnings("DuplicatedCode")
-    public SFVec3i offset(SFVec3i vector) {
-        return switch (this) {
-            case NORTH -> vector.add(0, 0, -1);
-            case SOUTH -> vector.add(0, 0, 1);
-            case EAST -> vector.add(1, 0, 0);
-            case WEST -> vector.add(-1, 0, 0);
-        };
-    }
+  @SuppressWarnings("DuplicatedCode")
+  public SFVec3i offset(SFVec3i vector) {
+    return switch (this) {
+      case NORTH -> vector.add(0, 0, -1);
+      case SOUTH -> vector.add(0, 0, 1);
+      case EAST -> vector.add(1, 0, 0);
+      case WEST -> vector.add(-1, 0, 0);
+    };
+  }
 }

@@ -23,81 +23,84 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 /**
- * A simple 3D integer vector.
- * This class is used instead of Vector3i because this uses direct field access instead of getters.
- * Even though the JIT compiler could optimize this, it's still faster to use this class.
+ * A simple 3D integer vector. This class is used instead of Vector3i because this uses direct field
+ * access instead of getters. Even though the JIT compiler could optimize this, it's still faster to
+ * use this class.
  */
 @RequiredArgsConstructor
 public class SFVec3i {
-    public static final SFVec3i ZERO = new SFVec3i(0, 0, 0);
+  public static final SFVec3i ZERO = new SFVec3i(0, 0, 0);
 
-    public final int x;
-    public final int y;
-    public final int z;
-    private int hashCode;
-    private boolean hashCodeSet;
+  public final int x;
+  public final int y;
+  public final int z;
+  private int hashCode;
+  private boolean hashCodeSet;
 
-    public static SFVec3i fromDouble(Vector3d vec) {
-        return fromInt(vec.toInt());
+  public static SFVec3i fromDouble(Vector3d vec) {
+    return fromInt(vec.toInt());
+  }
+
+  public static SFVec3i fromInt(Vector3i vec) {
+    return from(vec.getX(), vec.getY(), vec.getZ());
+  }
+
+  public static SFVec3i from(int x, int y, int z) {
+    return new SFVec3i(x, y, z);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof SFVec3i other)) {
+      return false;
     }
 
-    public static SFVec3i fromInt(Vector3i vec) {
-        return from(vec.getX(), vec.getY(), vec.getZ());
+    return this.x == other.x && this.y == other.y && this.z == other.z;
+  }
+
+  @Override
+  public int hashCode() {
+    if (!hashCodeSet) {
+      hashCode = (x * 211 + y) * 97 + z;
+      hashCodeSet = true;
     }
 
-    public static SFVec3i from(int x, int y, int z) {
-        return new SFVec3i(x, y, z);
-    }
+    return hashCode;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof SFVec3i other)) {
-            return false;
-        }
+  public SFVec3i add(int x, int y, int z) {
+    return new SFVec3i(this.x + x, this.y + y, this.z + z);
+  }
 
-        return this.x == other.x && this.y == other.y && this.z == other.z;
-    }
+  public SFVec3i add(SFVec3i other) {
+    return add(other.x, other.y, other.z);
+  }
 
-    @Override
-    public int hashCode() {
-        if (!hashCodeSet) {
-            hashCode = (x * 211 + y) * 97 + z;
-            hashCodeSet = true;
-        }
+  public SFVec3i sub(int x, int y, int z) {
+    return new SFVec3i(this.x - x, this.y - y, this.z - z);
+  }
 
-        return hashCode;
-    }
+  public Vector3i toVector3i() {
+    return Vector3i.from(x, y, z);
+  }
 
-    public SFVec3i add(int x, int y, int z) {
-        return new SFVec3i(this.x + x, this.y + y, this.z + z);
-    }
+  public Vector3d toVector3d() {
+    return Vector3d.from(x, y, z);
+  }
 
-    public SFVec3i add(SFVec3i other) {
-        return add(other.x, other.y, other.z);
-    }
+  @Override
+  public String toString() {
+    return "SWVec3i(" + x + ", " + y + ", " + z + ")";
+  }
 
-    public SFVec3i sub(int x, int y, int z) {
-        return new SFVec3i(this.x - x, this.y - y, this.z - z);
-    }
+  public String formatXYZ() {
+    return "[" + x + ", " + y + ", " + z + "]";
+  }
 
-    public Vector3i toVector3i() {
-        return Vector3i.from(x, y, z);
-    }
-
-    public Vector3d toVector3d() {
-        return Vector3d.from(x, y, z);
-    }
-
-    @Override
-    public String toString() {
-        return "SWVec3i(" + x + ", " + y + ", " + z + ")";
-    }
-
-    public String formatXYZ() {
-        return "[" + x + ", " + y + ", " + z + "]";
-    }
-
-    public double distance(SFVec3i goal) {
-        return Math.sqrt(MathHelper.square(goal.x - x) + MathHelper.square(goal.y - y) + MathHelper.square(goal.z - z));
-    }
+  public double distance(SFVec3i goal) {
+    return Math.sqrt(
+        MathHelper.square(goal.x - x)
+            + MathHelper.square(goal.y - y)
+            + MathHelper.square(goal.z - z));
+  }
 }

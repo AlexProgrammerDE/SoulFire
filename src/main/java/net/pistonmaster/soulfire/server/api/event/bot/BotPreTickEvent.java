@@ -25,5 +25,4 @@ import net.pistonmaster.soulfire.server.protocol.BotConnection;
  *
  * @param connection The bot connection instance.
  */
-public record BotPreTickEvent(BotConnection connection) implements SoulFireBotEvent {
-}
+public record BotPreTickEvent(BotConnection connection) implements SoulFireBotEvent {}

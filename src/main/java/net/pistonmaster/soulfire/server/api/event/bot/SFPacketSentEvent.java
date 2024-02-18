@@ -21,5 +21,5 @@ import com.github.steveice10.mc.protocol.codec.MinecraftPacket;
 import net.pistonmaster.soulfire.server.api.event.SoulFireBotEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 
-public record SFPacketSentEvent(BotConnection connection, MinecraftPacket packet) implements SoulFireBotEvent {
-}
+public record SFPacketSentEvent(BotConnection connection, MinecraftPacket packet)
+    implements SoulFireBotEvent {}

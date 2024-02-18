@@ -21,14 +21,14 @@ import com.viaversion.viaversion.api.platform.PlatformTask;
 import com.viaversion.viaversion.api.scheduler.Task;
 
 public record SFViaTask(Task task) implements PlatformTask<Task> {
-    @Deprecated
-    @Override
-    public Task getObject() {
-        return this.task;
-    }
+  @Deprecated
+  @Override
+  public Task getObject() {
+    return this.task;
+  }
 
-    @Override
-    public void cancel() {
-        this.task.cancel();
-    }
+  @Override
+  public void cancel() {
+    this.task.cancel();
+  }
 }

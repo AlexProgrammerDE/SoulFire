@@ -18,6 +18,15 @@
 package net.pistonmaster.soulfire.server.protocol;
 
 import com.google.gson.Gson;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.util.UUID;
+import javax.crypto.SecretKey;
 import lombok.AllArgsConstructor;
 import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.HttpHelper;
@@ -27,68 +36,63 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 
-import javax.crypto.SecretKey;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.util.UUID;
-
 public class SFSessionService {
-    private static final URI MOJANG_JOIN_URI = URI.create("https://sessionserver.mojang.com/session/minecraft/join");
-    @SuppressWarnings("HttpUrlsUsage")
-    private static final URI THE_ALTENING_JOIN_URI = URI.create("http://sessionserver.thealtening.com/session/minecraft/join");
-    private static final URI EASYMC_JOIN_URI = URI.create("https://sessionserver.easymc.io/session/minecraft/join");
-    private final URI JOIN_ENDPOINT;
-    private final SWProxy proxyData;
-    private final Gson gson = new Gson();
+  private static final URI MOJANG_JOIN_URI =
+      URI.create("https://sessionserver.mojang.com/session/minecraft/join");
 
-    public SFSessionService(AuthType authType, SWProxy proxyData) {
-        this.JOIN_ENDPOINT = switch (authType) {
-            case MICROSOFT_JAVA -> MOJANG_JOIN_URI;
-            case THE_ALTENING -> THE_ALTENING_JOIN_URI;
-            case EASYMC -> EASYMC_JOIN_URI;
-            default -> throw new IllegalStateException("Unexpected value: " + authType);
+  @SuppressWarnings("HttpUrlsUsage")
+  private static final URI THE_ALTENING_JOIN_URI =
+      URI.create("http://sessionserver.thealtening.com/session/minecraft/join");
+
+  private static final URI EASYMC_JOIN_URI =
+      URI.create("https://sessionserver.easymc.io/session/minecraft/join");
+  private final URI joinEndpoint;
+  private final SWProxy proxyData;
+  private final Gson gson = new Gson();
+
+  public SFSessionService(AuthType authType, SWProxy proxyData) {
+    this.joinEndpoint =
+        switch (authType) {
+          case MICROSOFT_JAVA -> MOJANG_JOIN_URI;
+          case THE_ALTENING -> THE_ALTENING_JOIN_URI;
+          case EASYMC -> EASYMC_JOIN_URI;
+          default -> throw new IllegalStateException("Unexpected value: " + authType);
         };
-        this.proxyData = proxyData;
-    }
+    this.proxyData = proxyData;
+  }
 
-    public static String getServerId(String base, PublicKey publicKey, SecretKey secretKey) {
-        try {
-            var digest = MessageDigest.getInstance("SHA-1");
-            digest.update(base.getBytes(StandardCharsets.ISO_8859_1));
-            digest.update(secretKey.getEncoded());
-            digest.update(publicKey.getEncoded());
-            return new BigInteger(digest.digest()).toString(16);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Server ID hash algorithm unavailable.", e);
-        }
+  public static String getServerId(String base, PublicKey publicKey, SecretKey secretKey) {
+    try {
+      var digest = MessageDigest.getInstance("SHA-1");
+      digest.update(base.getBytes(StandardCharsets.ISO_8859_1));
+      digest.update(secretKey.getEncoded());
+      digest.update(publicKey.getEncoded());
+      return new BigInteger(digest.digest()).toString(16);
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("Server ID hash algorithm unavailable.", e);
     }
+  }
 
-    public void joinServer(UUID profileId, String authenticationToken, String serverId) throws IOException {
-        try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-            var request = new SFSessionService.JoinServerRequest(
-                    authenticationToken,
-                    UUIDHelper.convertToNoDashes(profileId),
-                    serverId
-            );
+  public void joinServer(UUID profileId, String authenticationToken, String serverId)
+      throws IOException {
+    try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
+      var request =
+          new SFSessionService.JoinServerRequest(
+              authenticationToken, UUIDHelper.convertToNoDashes(profileId), serverId);
 
-            var httpPost = new HttpPost(JOIN_ENDPOINT);
-            httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
-            httpClient.execute(httpPost);
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+      var httpPost = new HttpPost(joinEndpoint);
+      httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
+      httpClient.execute(httpPost);
+    } catch (Exception e) {
+      throw new IOException(e);
     }
+  }
 
-    @SuppressWarnings("unused") // Used by GSON
-    @AllArgsConstructor
-    private static class JoinServerRequest {
-        private String accessToken;
-        private String selectedProfile;
-        private String serverId;
-    }
+  @SuppressWarnings("unused") // Used by GSON
+  @AllArgsConstructor
+  private static class JoinServerRequest {
+    private String accessToken;
+    private String selectedProfile;
+    private String serverId;
+  }
 }

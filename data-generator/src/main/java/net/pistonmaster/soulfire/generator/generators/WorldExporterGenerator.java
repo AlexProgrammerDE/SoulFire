@@ -21,6 +21,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.Objects;
+import java.util.zip.GZIPOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,65 +33,60 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.pistonmaster.soulfire.generator.Main;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.Objects;
-import java.util.zip.GZIPOutputStream;
-
 @Slf4j
 public class WorldExporterGenerator implements IDataGenerator {
-    private static final int CHUNK_X = 8;
-    private static final int CHUNK_Z = 8;
-    private static final int CHUNK_SIZE = 16;
-    private static final Gson GSON = new Gson();
+  private static final int CHUNK_X = 8;
+  private static final int CHUNK_Z = 8;
+  private static final int CHUNK_SIZE = 16;
+  private static final Gson GSON = new Gson();
 
-    @Override
-    public String getDataName() {
-        return "world_data.json.zip";
-    }
+  @Override
+  public String getDataName() {
+    return "world_data.json.zip";
+  }
 
-    @Override
-    public byte[] generateDataJson() {
-        var byteOutputStream = new ByteArrayOutputStream();
-        try (var gzipOutputStream = new GZIPOutputStream(byteOutputStream);
-             var outputStreamWriter = new OutputStreamWriter(gzipOutputStream);
-             var jsonWriter = new JsonWriter(outputStreamWriter)) {
-            var level = Objects.requireNonNull(Main.SERVER.getLevel(Level.OVERWORLD));
-            var jsonObject = new JsonObject();
-            var minBuildHeight = level.getMinBuildHeight();
-            var definitionArray = new String[BuiltInRegistries.BLOCK.size()];
-            for (var blockState : BuiltInRegistries.BLOCK) {
-                definitionArray[BuiltInRegistries.BLOCK.getId(blockState)] = BuiltInRegistries.BLOCK.getKey(blockState).getPath();
-            }
-            jsonObject.add("definitions", GSON.toJsonTree(definitionArray));
+  @Override
+  public byte[] generateDataJson() {
+    var byteOutputStream = new ByteArrayOutputStream();
+    try (var gzipOutputStream = new GZIPOutputStream(byteOutputStream);
+        var outputStreamWriter = new OutputStreamWriter(gzipOutputStream);
+        var jsonWriter = new JsonWriter(outputStreamWriter)) {
+      var level = Objects.requireNonNull(Main.SERVER.getLevel(Level.OVERWORLD));
+      var jsonObject = new JsonObject();
+      var minBuildHeight = level.getMinBuildHeight();
+      var definitionArray = new String[BuiltInRegistries.BLOCK.size()];
+      for (var blockState : BuiltInRegistries.BLOCK) {
+        definitionArray[BuiltInRegistries.BLOCK.getId(blockState)] =
+            BuiltInRegistries.BLOCK.getKey(blockState).getPath();
+      }
+      jsonObject.add("definitions", GSON.toJsonTree(definitionArray));
 
-            var data = new int[CHUNK_X * CHUNK_SIZE][level.getHeight()][CHUNK_Z * CHUNK_SIZE];
-            for (var x = 0; x < CHUNK_X * CHUNK_SIZE; x++) {
-                for (var y = 0; y < level.getHeight(); y++) {
-                    for (var z = 0; z < CHUNK_Z * CHUNK_SIZE; z++) {
-                        var pos = new BlockPos(x, y + minBuildHeight, z);
-                        var blockState = level.getBlockState(pos);
+      var data = new int[CHUNK_X * CHUNK_SIZE][level.getHeight()][CHUNK_Z * CHUNK_SIZE];
+      for (var x = 0; x < CHUNK_X * CHUNK_SIZE; x++) {
+        for (var y = 0; y < level.getHeight(); y++) {
+          for (var z = 0; z < CHUNK_Z * CHUNK_SIZE; z++) {
+            var pos = new BlockPos(x, y + minBuildHeight, z);
+            var blockState = level.getBlockState(pos);
 
-                        if (!blockState.isCollisionShapeFullBlock(level, pos)) {
-                            data[x][y][z] = BuiltInRegistries.BLOCK.getId(Blocks.AIR);
-                            continue;
-                        }
-
-                        data[x][y][z] = BuiltInRegistries.BLOCK.getId(blockState.getBlock());
-                    }
-                }
+            if (!blockState.isCollisionShapeFullBlock(level, pos)) {
+              data[x][y][z] = BuiltInRegistries.BLOCK.getId(Blocks.AIR);
+              continue;
             }
 
-            jsonObject.add("data", GSON.toJsonTree(data));
-
-            Streams.write(jsonObject, jsonWriter);
-
-            jsonWriter.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            data[x][y][z] = BuiltInRegistries.BLOCK.getId(blockState.getBlock());
+          }
         }
+      }
 
-        return byteOutputStream.toByteArray();
+      jsonObject.add("data", GSON.toJsonTree(data));
+
+      Streams.write(jsonObject, jsonWriter);
+
+      jsonWriter.flush();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+
+    return byteOutputStream.toByteArray();
+  }
 }

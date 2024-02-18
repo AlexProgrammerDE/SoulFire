@@ -17,29 +17,36 @@
  */
 package net.pistonmaster.soulfire.generator.generators;
 
+import java.util.Locale;
+import java.util.Objects;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.pistonmaster.soulfire.generator.util.GeneratorConstants;
 import net.pistonmaster.soulfire.generator.util.ResourceHelper;
 
-import java.util.Locale;
-import java.util.Objects;
-
 public class AttributesJavaGenerator implements IDataGenerator {
-    @Override
-    public String getDataName() {
-        return "AttributeType.java";
-    }
+  @Override
+  public String getDataName() {
+    return "AttributeType.java";
+  }
 
-    @Override
-    public String generateDataJson() {
-        var base = ResourceHelper.getResource("/templates/AttributeType.java");
-        return base.replace(GeneratorConstants.VALUES_REPLACE, String.join("\n    ",
-                BuiltInRegistries.ATTRIBUTE
-                        .stream().map(s -> {
-                            var name = Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(s)).getPath();
-                            return "public static final AttributeType "
-                                    + name.toUpperCase(Locale.ROOT).replace(".", "_") + " = register(\"" + name + "\");";
-                        })
-                        .toArray(String[]::new)));
-    }
+  @Override
+  public String generateDataJson() {
+    var base = ResourceHelper.getResource("/templates/AttributeType.java");
+    return base.replace(
+        GeneratorConstants.VALUES_REPLACE,
+        String.join(
+            "\n  ",
+            BuiltInRegistries.ATTRIBUTE.stream()
+                .map(
+                    s -> {
+                      var name =
+                          Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(s)).getPath();
+                      return "public static final AttributeType "
+                          + name.toUpperCase(Locale.ROOT).replace(".", "_")
+                          + " = register(\""
+                          + name
+                          + "\");";
+                    })
+                .toArray(String[]::new)));
+  }
 }

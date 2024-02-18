@@ -17,36 +17,38 @@
  */
 package net.pistonmaster.soulfire.client.gui.navigation;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import javax.swing.JPanel;
+import javax.swing.Scrollable;
 
 public abstract class NavigationItem extends JPanel implements Scrollable {
-    public abstract String getNavigationName();
+  public abstract String getNavigationName();
 
-    public abstract String getNavigationId();
+  public abstract String getNavigationId();
 
-    @Override
-    public Dimension getPreferredScrollableViewportSize() {
-        return getPreferredSize();
-    }
+  @Override
+  public Dimension getPreferredScrollableViewportSize() {
+    return getPreferredSize();
+  }
 
-    @Override
-    public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
-        return 10;
-    }
+  @Override
+  public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+    return 10;
+  }
 
-    @Override
-    public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
-        return 150;
-    }
+  @Override
+  public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+    return 150;
+  }
 
-    @Override
-    public boolean getScrollableTracksViewportWidth() {
-        return true;
-    }
+  @Override
+  public boolean getScrollableTracksViewportWidth() {
+    return true;
+  }
 
-    @Override
-    public boolean getScrollableTracksViewportHeight() {
-        return false;
-    }
+  @Override
+  public boolean getScrollableTracksViewportHeight() {
+    return false;
+  }
 }

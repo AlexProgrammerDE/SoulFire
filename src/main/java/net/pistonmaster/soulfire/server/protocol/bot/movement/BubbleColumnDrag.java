@@ -17,10 +17,4 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.movement;
 
-public record BubbleColumnDrag(
-        double down,
-        double maxDown,
-        double up,
-        double maxUp
-) {
-}
+public record BubbleColumnDrag(double down, double maxDown, double up, double maxUp) {}

@@ -17,12 +17,15 @@
  */
 package net.pistonmaster.soulfire.server.settings.lib;
 
-import com.google.gson.*;
-import net.pistonmaster.soulfire.account.AuthType;
-import net.pistonmaster.soulfire.account.MinecraftAccount;
-import net.pistonmaster.soulfire.account.service.AccountData;
-import net.pistonmaster.soulfire.proxy.SWProxy;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 import java.security.GeneralSecurityException;
 import java.security.Key;
@@ -34,95 +37,110 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import net.pistonmaster.soulfire.account.AuthType;
+import net.pistonmaster.soulfire.account.MinecraftAccount;
+import net.pistonmaster.soulfire.account.service.AccountData;
+import net.pistonmaster.soulfire.proxy.SWProxy;
 
 // Intermediary class between profile strings and SettingsHolder
 public record ProfileDataStructure(
-        Map<String, Map<String, JsonElement>> settings,
-        List<MinecraftAccount> accounts,
-        List<SWProxy> proxies
-) {
-    private static final Gson PROFILE_GSON = new GsonBuilder()
-            .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
-            .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
-            .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
-            .setPrettyPrinting()
-            .create();
+    Map<String, Map<String, JsonElement>> settings,
+    List<MinecraftAccount> accounts,
+    List<SWProxy> proxies) {
+  private static final Gson PROFILE_GSON =
+      new GsonBuilder()
+          .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
+          .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
+          .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
+          .setPrettyPrinting()
+          .create();
 
-    public static ProfileDataStructure deserialize(String json) {
-        return PROFILE_GSON.fromJson(json, ProfileDataStructure.class);
+  public static ProfileDataStructure deserialize(String json) {
+    return PROFILE_GSON.fromJson(json, ProfileDataStructure.class);
+  }
+
+  public String serialize() {
+    return PROFILE_GSON.toJson(this);
+  }
+
+  private static class ECPublicKeyAdapter extends AbstractKeyAdapter<ECPublicKey> {
+    @Override
+    protected ECPublicKey createKey(byte[] bytes) throws JsonParseException {
+      try {
+        var keyFactory = KeyFactory.getInstance("EC");
+        return (ECPublicKey) keyFactory.generatePublic(new X509EncodedKeySpec(bytes));
+      } catch (GeneralSecurityException e) {
+        throw new JsonParseException(e);
+      }
+    }
+  }
+
+  private static class ECPrivateKeyAdapter extends AbstractKeyAdapter<ECPrivateKey> {
+    @Override
+    protected ECPrivateKey createKey(byte[] bytes) throws JsonParseException {
+      try {
+        var keyFactory = KeyFactory.getInstance("EC");
+        return (ECPrivateKey) keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
+      } catch (GeneralSecurityException e) {
+        throw new JsonParseException(e);
+      }
+    }
+  }
+
+  private abstract static class AbstractKeyAdapter<T>
+      implements JsonSerializer<Key>, JsonDeserializer<T> {
+    @Override
+    public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+        throws JsonParseException {
+      return createKey(Base64.getDecoder().decode(json.getAsString()));
     }
 
-    public String serialize() {
-        return PROFILE_GSON.toJson(this);
+    @Override
+    public JsonElement serialize(Key src, Type typeOfSrc, JsonSerializationContext context) {
+      return new JsonPrimitive(Base64.getEncoder().encodeToString(src.getEncoded()));
     }
 
-    private static class ECPublicKeyAdapter extends AbstractKeyAdapter<ECPublicKey> {
-        @Override
-        protected ECPublicKey createKey(byte[] bytes) throws JsonParseException {
-            try {
-                var keyFactory = KeyFactory.getInstance("EC");
-                return (ECPublicKey) keyFactory.generatePublic(new X509EncodedKeySpec(bytes));
-            } catch (GeneralSecurityException e) {
-                throw new JsonParseException(e);
-            }
-        }
+    protected abstract T createKey(byte[] bytes) throws JsonParseException;
+  }
+
+  private static class MinecraftAccountAdapter
+      implements JsonDeserializer<MinecraftAccount>, JsonSerializer<MinecraftAccount> {
+    @Override
+    public MinecraftAccount deserialize(
+        JsonElement json, Type typeOfT, JsonDeserializationContext context)
+        throws JsonParseException {
+      var authType =
+          context.<AuthType>deserialize(json.getAsJsonObject().get("authType"), AuthType.class);
+
+      return createGson(authType).fromJson(json, MinecraftAccount.class);
     }
 
-    private static class ECPrivateKeyAdapter extends AbstractKeyAdapter<ECPrivateKey> {
-        @Override
-        protected ECPrivateKey createKey(byte[] bytes) throws JsonParseException {
-            try {
-                var keyFactory = KeyFactory.getInstance("EC");
-                return (ECPrivateKey) keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
-            } catch (GeneralSecurityException e) {
-                throw new JsonParseException(e);
-            }
-        }
+    @Override
+    public JsonElement serialize(
+        MinecraftAccount src, Type typeOfSrc, JsonSerializationContext context) {
+      return createGson(src.authType()).toJsonTree(src, MinecraftAccount.class);
     }
 
-    private static abstract class AbstractKeyAdapter<T> implements JsonSerializer<Key>, JsonDeserializer<T> {
-        @Override
-        public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            return createKey(Base64.getDecoder().decode(json.getAsString()));
-        }
-
-        @Override
-        public JsonElement serialize(Key src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(Base64.getEncoder().encodeToString(src.getEncoded()));
-        }
-
-        protected abstract T createKey(byte[] bytes) throws JsonParseException;
+    private Gson createGson(AuthType authType) {
+      return new GsonBuilder()
+          .registerTypeAdapter(AccountData.class, new AccountDataAdapter(authType))
+          .create();
     }
 
-    private static class MinecraftAccountAdapter implements JsonDeserializer<MinecraftAccount>, JsonSerializer<MinecraftAccount> {
-        @Override
-        public MinecraftAccount deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            var authType = context.<AuthType>deserialize(json.getAsJsonObject().get("authType"), AuthType.class);
+    private record AccountDataAdapter(AuthType authType)
+        implements JsonDeserializer<AccountData>, JsonSerializer<AccountData> {
+      @Override
+      public AccountData deserialize(
+          JsonElement json, Type typeOfT, JsonDeserializationContext context)
+          throws JsonParseException {
+        return PROFILE_GSON.fromJson(json, authType.accountDataClass());
+      }
 
-            return createGson(authType).fromJson(json, MinecraftAccount.class);
-        }
-
-        @Override
-        public JsonElement serialize(MinecraftAccount src, Type typeOfSrc, JsonSerializationContext context) {
-            return createGson(src.authType()).toJsonTree(src, MinecraftAccount.class);
-        }
-
-        private Gson createGson(AuthType authType) {
-            return new GsonBuilder()
-                    .registerTypeAdapter(AccountData.class, new AccountDataAdapter(authType))
-                    .create();
-        }
-
-        private record AccountDataAdapter(AuthType authType) implements JsonDeserializer<AccountData>, JsonSerializer<AccountData> {
-            @Override
-            public AccountData deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                return PROFILE_GSON.fromJson(json, authType.accountDataClass());
-            }
-
-            @Override
-            public JsonElement serialize(AccountData src, Type typeOfSrc, JsonSerializationContext context) {
-                return PROFILE_GSON.toJsonTree(src, authType.accountDataClass());
-            }
-        }
+      @Override
+      public JsonElement serialize(
+          AccountData src, Type typeOfSrc, JsonSerializationContext context) {
+        return PROFILE_GSON.toJsonTree(src, authType.accountDataClass());
+      }
     }
+  }
 }

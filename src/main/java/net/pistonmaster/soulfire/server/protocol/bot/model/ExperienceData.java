@@ -17,5 +17,4 @@
  */
 package net.pistonmaster.soulfire.server.protocol.bot.model;
 
-public record ExperienceData(float experience, int level, int totalExperience) {
-}
+public record ExperienceData(float experience, int level, int totalExperience) {}

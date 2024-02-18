@@ -24,10 +24,10 @@ import net.lenni0451.lambdaevents.types.ICancellableEvent;
 @Getter
 @Setter
 public class AbstractCancellable implements ICancellableEvent {
-    private boolean cancelled;
+  private boolean cancelled;
 
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
-    }
+  @Override
+  public boolean isCancelled() {
+    return cancelled;
+  }
 }
