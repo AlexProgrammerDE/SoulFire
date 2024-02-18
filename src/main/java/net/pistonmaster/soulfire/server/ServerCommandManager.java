@@ -682,7 +682,7 @@ public class ServerCommandManager {
                 literal("chest")
                     .executes(
                         help(
-                            "Attempts to crash the server with a chest.",
+                            "Attempts to crash the server with a chest",
                             c -> {
                               log.info("Attempting to crash the server with a chest");
 
