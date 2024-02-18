@@ -103,7 +103,7 @@ public record MapColor(int id, int col) {
 
   public static int getColorFromPackedId(int packedId) {
     var i = packedId & 0xFF;
-    return COLORS[i >> 2].calculateRGBColor(Brightness.VALUES[i & 3]);
+    return fromId(i >> 2).calculateRGBColor(Brightness.VALUES[i & 3]);
   }
 
   private static MapColor fromId(int id) {

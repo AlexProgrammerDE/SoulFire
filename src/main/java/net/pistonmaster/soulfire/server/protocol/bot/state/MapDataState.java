@@ -72,13 +72,21 @@ public class MapDataState {
     colorData[x + y * 128] = color;
   }
 
-  public BufferedImage toBufferedImage(MapDataState mapData) {
-    var image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+  public BufferedImage toBufferedImage() {
+    var image =
+        new BufferedImage(128, 128, BufferedImage.TYPE_4BYTE_ABGR);
     for (var x = 0; x < 128; ++x) {
       for (var y = 0; y < 128; ++y) {
-        image.setRGB(x, y, MapColor.getColorFromPackedId(mapData.getColor(x, y)));
+        image.setRGB(x, y, convertABGRToARGB(MapColor.getColorFromPackedId(getColor(x, y))));
       }
     }
+
     return image;
+  }
+
+  private static int convertABGRToARGB(int argbColor) {
+    var r = (argbColor >> 16) & 0xFF;
+    var b = argbColor & 0xFF;
+    return (argbColor & 0xFF00FF00) | (b << 16) | r;
   }
 }

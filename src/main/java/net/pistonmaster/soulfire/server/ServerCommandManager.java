@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.ToIntFunction;
 import javax.annotation.PostConstruct;
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -176,8 +177,7 @@ public class ServerCommandManager {
                                               var z = IntegerArgumentType.getInteger(c, "z");
 
                                               return executePathfinding(new PosGoal(x, y, z));
-                                            })))))
-    );
+                                            }))))));
     dispatcher.register(
         literal("stop-path")
             .executes(
@@ -420,6 +420,47 @@ public class ServerCommandManager {
                                   FileUtils.byteCountToDisplaySize(currentWriteTraffic));
 
                               return Command.SINGLE_SUCCESS;
+                            }))));
+    dispatcher.register(
+        literal("export-map")
+            .then(
+                argument("map_id", IntegerArgumentType.integer())
+                    .executes(
+                        help(
+                            "Exports a image of a map item by map id. Can be a held item or in a item-frame.",
+                            c -> {
+                              var mapId = IntegerArgumentType.getInteger(c, "map_id");
+                              var currentTime = System.currentTimeMillis();
+
+                              return forEveryBot(
+                                  bot -> {
+                                    var mapDataState =
+                                        bot.sessionDataManager().mapDataStates().get(mapId);
+                                    if (mapDataState == null) {
+                                      c.getSource().sendMessage("Map not found!");
+                                      return Command.SINGLE_SUCCESS;
+                                    }
+
+                                    var image = mapDataState.toBufferedImage();
+                                    var fileName =
+                                        "map_"
+                                            + mapId
+                                            + "_"
+                                            + currentTime
+                                            + "_"
+                                            + bot.meta().minecraftAccount().username()
+                                            + ".png";
+                                    try {
+                                      Files.createDirectories(SFPathConstants.MAPS_FOLDER);
+                                      var file = SFPathConstants.MAPS_FOLDER.resolve(fileName);
+                                      ImageIO.write(image, "png", file.toFile());
+                                      c.getSource().sendMessage("Exported map to " + file);
+                                    } catch (IOException e) {
+                                      log.error("Failed to export map!", e);
+                                    }
+
+                                    return Command.SINGLE_SUCCESS;
+                                  });
                             }))));
 
     SoulFireAPI.postEvent(new DispatcherInitEvent(dispatcher));
