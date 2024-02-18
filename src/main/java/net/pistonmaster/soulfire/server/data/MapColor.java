@@ -93,16 +93,16 @@ public record MapColor(int id, int col) {
     if (this == EMPTY) {
       return 0;
     } else {
-      int m = brightness.modifier;
-      int r = (this.col >> 16 & 0xFF) * m / 255;
-      int g = (this.col >> 8 & 0xFF) * m / 255;
-      int b = (this.col & 0xFF) * m / 255;
+      var m = brightness.modifier;
+      var r = (this.col >> 16 & 0xFF) * m / 255;
+      var g = (this.col >> 8 & 0xFF) * m / 255;
+      var b = (this.col & 0xFF) * m / 255;
       return 0xFF000000 | b << 16 | g << 8 | r;
     }
   }
 
   public static int getColorFromPackedId(int packedId) {
-    int i = packedId & 0xFF;
+    var i = packedId & 0xFF;
     return COLORS[i >> 2].calculateRGBColor(Brightness.VALUES[i & 3]);
   }
 
@@ -128,7 +128,7 @@ public record MapColor(int id, int col) {
   }
 
   @RequiredArgsConstructor
-  public static enum Brightness {
+  public enum Brightness {
     LOW(0, 180),
     NORMAL(1, 220),
     HIGH(2, 255),

@@ -138,7 +138,29 @@ public class ServerCommandManager {
 
     // Pathfinding
     dispatcher.register(
-        literal("walkxyz")
+        literal("walk")
+            .then(
+                argument("y", IntegerArgumentType.integer())
+                    .executes(
+                        help(
+                            "Makes all connected bots walk to the y coordinates",
+                            c -> {
+                              var y = IntegerArgumentType.getInteger(c, "y");
+                              return executePathfinding(new YGoal(y));
+                            })))
+            .then(
+                argument("x", IntegerArgumentType.integer())
+                    .then(
+                        argument("z", IntegerArgumentType.integer())
+                            .executes(
+                                help(
+                                    "Makes all connected bots walk to the xz coordinates",
+                                    c -> {
+                                      var x = IntegerArgumentType.getInteger(c, "x");
+                                      var z = IntegerArgumentType.getInteger(c, "z");
+
+                                      return executePathfinding(new XZGoal(x, z));
+                                    }))))
             .then(
                 argument("x", IntegerArgumentType.integer())
                     .then(
@@ -154,33 +176,8 @@ public class ServerCommandManager {
                                               var z = IntegerArgumentType.getInteger(c, "z");
 
                                               return executePathfinding(new PosGoal(x, y, z));
-                                            }))))));
-    dispatcher.register(
-        literal("walkxz")
-            .then(
-                argument("x", IntegerArgumentType.integer())
-                    .then(
-                        argument("z", IntegerArgumentType.integer())
-                            .executes(
-                                help(
-                                    "Makes all connected bots walk to the xz coordinates",
-                                    c -> {
-                                      var x = IntegerArgumentType.getInteger(c, "x");
-                                      var z = IntegerArgumentType.getInteger(c, "z");
-
-                                      return executePathfinding(new XZGoal(x, z));
-                                    })))));
-    dispatcher.register(
-        literal("walky")
-            .then(
-                argument("y", IntegerArgumentType.integer())
-                    .executes(
-                        help(
-                            "Makes all connected bots walk to the y coordinates",
-                            c -> {
-                              var y = IntegerArgumentType.getInteger(c, "y");
-                              return executePathfinding(new YGoal(y));
-                            }))));
+                                            })))))
+    );
     dispatcher.register(
         literal("stop-path")
             .executes(
