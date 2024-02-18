@@ -1,6 +1,6 @@
 # Contributing to SoulFire
 
-Thank you for considering to contribute to SoulFire! Please read the following paragraphs about how to edit your code style
+Thank you for considering to contribute to SoulFire! Please read the following paragraphs about how to adapt your code style.
 
 ## Code style
 
@@ -18,4 +18,5 @@ That also includes types like `Map<String> map = new HashMap<>()`, those should 
 ### IntelliJ inspections
 
 If you use IntelliJ you can import the file `config/checkstyle/checkstyle.xml` under `Settings -> Editor -> Code Style`.
+(Requires the Checkstyle plugin to be installed)
 You can also import the recommended inspections at `config/intellij_inspections.xml` at `Settings -> Editor -> Inspections`.
