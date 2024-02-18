@@ -85,8 +85,8 @@ public class MapDataState {
   }
 
   private static int convertABGRToARGB(int color) {
-    var r = (color >> 16) & 0xFF;
-    var b = color & 0xFF;
-    return (color & 0xFF00FF00) | (b << 16) | r;
+    var first = (color >> 16) & 0xFF;
+    var second = color & 0xFF;
+    return (color & 0xFF00FF00) | (second << 16) | first;
   }
 }
