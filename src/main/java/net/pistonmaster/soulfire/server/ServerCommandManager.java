@@ -535,9 +535,9 @@ public class ServerCommandManager {
                 literal("calc")
                     .executes(
                         help(
-                            "Attempts to crash the server with a calculation",
+                            "Attempts to crash the server with a WorldEdit calculation",
                             c -> {
-                              log.info("Attempting to crash the server with a calculation");
+                              log.info("Attempting to crash the server with a WorldEdit calculation");
 
                               return forEveryBot(
                                   c,
@@ -552,9 +552,9 @@ public class ServerCommandManager {
                 literal("fly")
                     .executes(
                         help(
-                            "Attempts to crash the server with flying",
+                            "Attempts to crash the server with flying fast",
                             c -> {
-                              log.info("Attempting to crash the server with flying");
+                              log.info("Attempting to crash the server with flying fast");
 
                               return forEveryBot(
                                   c,
@@ -614,9 +614,9 @@ public class ServerCommandManager {
                 literal("permissionsex")
                     .executes(
                         help(
-                            "Attempts to crash the server with Permissionsex",
+                            "Attempts to crash the server with PermissionsEx",
                             c -> {
-                              log.info("Attempting to crash the server with Permissionsex");
+                              log.info("Attempting to crash the server with PermissionsEx");
 
                               return forEveryBot(
                                   c,
