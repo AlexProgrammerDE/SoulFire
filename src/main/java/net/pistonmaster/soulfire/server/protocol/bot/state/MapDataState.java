@@ -20,29 +20,30 @@ package net.pistonmaster.soulfire.server.protocol.bot.state;
 import com.github.steveice10.mc.protocol.data.game.level.map.MapData;
 import com.github.steveice10.mc.protocol.data.game.level.map.MapIcon;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundMapItemDataPacket;
+import java.awt.image.BufferedImage;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.pistonmaster.soulfire.server.data.MapColor;
 
 @Setter
 @Getter
 @ToString
 public class MapDataState {
-  private byte scale;
-  private boolean locked;
+  private final byte[] colorData = new byte[128 * 128];
+  private final byte scale;
+  private final boolean locked;
   private MapIcon[] icons;
-  private MapData mapData;
 
-  public void update(ClientboundMapItemDataPacket packet) {
+  public MapDataState(ClientboundMapItemDataPacket packet) {
     this.scale = packet.getScale();
     this.locked = packet.isLocked();
+  }
+
+  public void update(ClientboundMapItemDataPacket packet) {
     this.icons = packet.getIcons();
 
     if (packet.getData() != null) {
-      if (this.mapData == null) {
-        this.mapData = new MapData(128, 128, 0, 0, new byte[128 * 128]);
-      }
-
       this.mergeIntoMap(packet.getData());
     }
   }
@@ -53,14 +54,31 @@ public class MapDataState {
 
     var xOffset = source.getX();
     var yOffset = source.getY();
-    for (var i = 0; i < width; ++i) {
-      for (var j = 0; j < height; ++j) {
-        var colorData = source.getData()[i + j * width];
-
-        var x = xOffset + i;
-        var y = yOffset + j;
-        this.mapData.getData()[x + y * 128] = colorData;
+    for (var relativeX = 0; relativeX < width; ++relativeX) {
+      for (var relativeY = 0; relativeY < height; ++relativeY) {
+        setColor(
+            xOffset + relativeX,
+            yOffset + relativeY,
+            source.getData()[relativeX + relativeY * width]);
       }
     }
+  }
+
+  public byte getColor(int x, int y) {
+    return colorData[x + y * 128];
+  }
+
+  public void setColor(int x, int y, byte color) {
+    colorData[x + y * 128] = color;
+  }
+
+  public BufferedImage toBufferedImage(MapDataState mapData) {
+    var image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+    for (var x = 0; x < 128; ++x) {
+      for (var y = 0; y < 128; ++y) {
+        image.setRGB(x, y, MapColor.getColorFromPackedId(mapData.getColor(x, y)));
+      }
+    }
+    return image;
   }
 }

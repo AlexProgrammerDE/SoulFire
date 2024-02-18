@@ -18,15 +18,20 @@
 package net.pistonmaster.soulfire.client.gui.navigation;
 
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import javax.inject.Inject;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JToolBar;
+import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import net.lenni0451.commons.swing.GBC;
 import net.pistonmaster.soulfire.account.AuthType;
@@ -34,7 +39,6 @@ import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.client.gui.GUIFrame;
 import net.pistonmaster.soulfire.client.gui.GUIManager;
 import net.pistonmaster.soulfire.client.gui.libs.JEnumComboBox;
-import net.pistonmaster.soulfire.client.gui.libs.SwingTextUtils;
 import net.pistonmaster.soulfire.client.gui.popups.ImportTextDialog;
 import net.pistonmaster.soulfire.util.BuiltinSettingsConstants;
 import net.pistonmaster.soulfire.util.SFPathConstants;
@@ -54,21 +58,27 @@ public class AccountPanel extends NavigationItem {
 
     GBC.create(this).grid(0, 0).fill(GBC.HORIZONTAL).weightx(1).add(accountSettingsPanel);
 
-    var addAccountPanel = new JPanel();
-    addAccountPanel.setLayout(new GridLayout(0, 3, 10, 10));
+    var toolBar = new JToolBar();
+    toolBar.setFloatable(false);
+    var addButton = new JButton("+");
+    addButton.setToolTipText("Add accounts");
+    addButton.addMouseListener(new MouseAdapter() {
+      public void mousePressed(MouseEvent e) {
+        var menu = new JPopupMenu();
+        menu.add(createAccountLoadButton(guiManager, parent, AuthType.OFFLINE));
+        menu.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_JAVA));
+        menu.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_BEDROCK));
+        menu.add(createAccountLoadButton(guiManager, parent, AuthType.THE_ALTENING));
+        menu.add(createAccountLoadButton(guiManager, parent, AuthType.EASYMC));
+        menu.show(e.getComponent(), e.getX(), e.getY());
+      }
+    });
 
-    addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.OFFLINE));
-    addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_JAVA));
-    addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_BEDROCK));
-    addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.THE_ALTENING));
-    addAccountPanel.add(createAccountLoadButton(guiManager, parent, AuthType.EASYMC));
+    toolBar.add(addButton);
+    toolBar.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor")));
+    toolBar.setBackground(UIManager.getColor("Table.background"));
 
-    var insets = new Insets(10, 0, 0, 0);
-
-    GBC.create(this).grid(0, 1).insets(insets).fill(GBC.HORIZONTAL).weightx(1).add(addAccountPanel);
-
-    var accountListPanel = new JPanel();
-    accountListPanel.setLayout(new GridLayout(0, 1));
+    GBC.create(this).grid(0, 1).insets(10, 4, -5, 4).fill(GBC.HORIZONTAL).weightx(0).add(toolBar);
 
     var columnNames = new String[] {"Username", "Type", "Enabled"};
     var model =
@@ -136,12 +146,12 @@ public class AccountPanel extends NavigationItem {
 
     var scrollPane = new JScrollPane(accountList);
 
-    GBC.create(this).grid(0, 2).insets(insets).fill(GBC.BOTH).weight(1, 1).add(scrollPane);
+    GBC.create(this).grid(0, 2).fill(GBC.BOTH).weight(1, 1).add(scrollPane);
   }
 
-  private static JButton createAccountLoadButton(
+  private static JMenuItem createAccountLoadButton(
       GUIManager guiManager, GUIFrame parent, AuthType type) {
-    var button = new JButton(SwingTextUtils.htmlCenterText(String.format("Add %s accounts", type)));
+    var button = new JMenuItem(type.toString());
 
     button.addActionListener(
         e ->

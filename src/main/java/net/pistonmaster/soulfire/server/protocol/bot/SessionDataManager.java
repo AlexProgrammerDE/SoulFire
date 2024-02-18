@@ -623,7 +623,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onMapData(ClientboundMapItemDataPacket packet) {
-    mapDataStates.computeIfAbsent(packet.getMapId(), k -> new MapDataState()).update(packet);
+    mapDataStates.computeIfAbsent(packet.getMapId(), k -> new MapDataState(packet)).update(packet);
   }
 
   @EventHandler
