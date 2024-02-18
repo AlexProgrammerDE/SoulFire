@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.brigadier;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -36,6 +37,10 @@ public class BrigadierHelper {
 
   public static Command<ConsoleSubject> help(String help, Command<ConsoleSubject> command) {
     return new CommandHelpWrapper(command, help, false);
+  }
+
+  public static RedirectModifier<ConsoleSubject> helpRedirect(String help, RedirectModifier<ConsoleSubject> redirect) {
+    return new RedirectHelpWrapper(redirect, help, false);
   }
 
   public static Command<ConsoleSubject> privateCommand(Command<ConsoleSubject> command) {

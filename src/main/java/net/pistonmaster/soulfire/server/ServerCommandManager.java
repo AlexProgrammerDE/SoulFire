@@ -20,6 +20,7 @@ package net.pistonmaster.soulfire.server;
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 import static net.pistonmaster.soulfire.brigadier.BrigadierHelper.argument;
 import static net.pistonmaster.soulfire.brigadier.BrigadierHelper.help;
+import static net.pistonmaster.soulfire.brigadier.BrigadierHelper.helpRedirect;
 import static net.pistonmaster.soulfire.brigadier.BrigadierHelper.literal;
 import static net.pistonmaster.soulfire.brigadier.BrigadierHelper.privateCommand;
 
@@ -45,6 +46,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +60,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.brigadier.CommandHelpWrapper;
 import net.pistonmaster.soulfire.brigadier.ConsoleSubject;
+import net.pistonmaster.soulfire.brigadier.RedirectHelpWrapper;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.EventUtil;
 import net.pistonmaster.soulfire.server.api.event.bot.BotPreTickEvent;
@@ -102,7 +105,7 @@ public class ServerCommandManager {
                       for (var command : getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
                         c.getSource()
                             .sendMessage(
-                                String.format("%s: %s", command.command(), command.help()));
+                                String.format("%s -> %s", command.command(), command.help()));
                       }
 
                       return Command.SINGLE_SUCCESS;
@@ -537,7 +540,8 @@ public class ServerCommandManager {
                         help(
                             "Attempts to crash the server with a WorldEdit calculation",
                             c -> {
-                              log.info("Attempting to crash the server with a WorldEdit calculation");
+                              log.info(
+                                  "Attempting to crash the server with a WorldEdit calculation");
 
                               return forEveryBot(
                                   c,
@@ -678,7 +682,7 @@ public class ServerCommandManager {
                 literal("chest")
                     .executes(
                         help(
-                            "Attempts to crash the server with a chest",
+                            "Attempts to crash the server with a chest.",
                             c -> {
                               log.info("Attempting to crash the server with a chest");
 
@@ -694,28 +698,34 @@ public class ServerCommandManager {
     dispatcher.register(
         literal("bot")
             .then(
-                argument("bot_name", StringArgumentType.string())
-                    .redirect(
+                argument("bot_names", StringArgumentType.string())
+                    .forward(
                         dispatcher.getRoot(),
-                        c -> {
-                          c.getSource()
-                              .extraData
-                              .put("bot_name", StringArgumentType.getString(c, "bot_name"));
-                          return c.getSource();
-                        })));
+                        helpRedirect(
+                            "Instead of running a command for all bots, run it for a specific list of bots. Use a comma to separate the names",
+                            c -> {
+                              c.getSource()
+                                  .extraData
+                                  .put("bot_names", StringArgumentType.getString(c, "bot_names"));
+                              return Collections.singleton(c.getSource());
+                            }),
+                        false)));
 
     dispatcher.register(
         literal("attack")
             .then(
-                argument("attack_id", IntegerArgumentType.integer(0))
-                    .redirect(
+                argument("attack_ids", StringArgumentType.string())
+                    .forward(
                         dispatcher.getRoot(),
-                        c -> {
-                          c.getSource()
-                              .extraData
-                              .put("attack_id", IntegerArgumentType.getInteger(c, "attack_id"));
-                          return c.getSource();
-                        })));
+                        helpRedirect(
+                            "Instead of running a command for all attacks, run it for a specific list of attacks. Use a comma to separate the ids",
+                            c -> {
+                              c.getSource()
+                                  .extraData
+                                  .put("attack_ids", StringArgumentType.getString(c, "attack_ids"));
+                              return Collections.singleton(c.getSource());
+                            }),
+                        false)));
   }
 
   private int forEveryAttack(
@@ -727,8 +737,10 @@ public class ServerCommandManager {
 
     var resultCode = Command.SINGLE_SUCCESS;
     for (var attackManager : soulFireServer.attacks().values()) {
-      if (context.getSource().extraData.containsKey("attack_id")
-          && context.getSource().extraData.get("attack_id").equals(attackManager.id())) {
+      if (context.getSource().extraData.containsKey("attack_ids")
+          && Arrays.stream(context.getSource().extraData.get("attack_ids").split(","))
+              .mapToInt(Integer::parseInt)
+              .noneMatch(i -> i == attackManager.id())) {
         continue;
       }
 
@@ -763,11 +775,9 @@ public class ServerCommandManager {
         attackManager -> {
           var resultCode = Command.SINGLE_SUCCESS;
           for (var bot : attackManager.botConnections()) {
-            if (context.getSource().extraData.containsKey("bot_name")
-                && !bot.meta()
-                    .minecraftAccount()
-                    .username()
-                    .equals(context.getSource().extraData.get("bot_name"))) {
+            if (context.getSource().extraData.containsKey("bot_names")
+                && Arrays.stream(context.getSource().extraData.get("bot_names").split(","))
+                    .noneMatch(s -> s.equals(bot.meta().minecraftAccount().username()))) {
               continue;
             }
 
@@ -928,26 +938,26 @@ public class ServerCommandManager {
     }
 
     if (node.getCommand() != null) {
-      if (node.getCommand() instanceof CommandHelpWrapper helpWrapper) {
+      var helpWrapper = (CommandHelpWrapper) node.getCommand();
         if (!helpWrapper.privateCommand()) {
           result.add(new HelpData(prefix, helpWrapper.help()));
         }
-      } else {
-        result.add(new HelpData(prefix, "N/A"));
-      }
     }
 
     if (node.getRedirect() != null) {
-      final var redirect =
-          node.getRedirect() == dispatcher.getRoot()
-              ? "..."
-              : "-> " + node.getRedirect().getUsageText();
-      result.add(
-          new HelpData(
-              prefix.isEmpty()
-                  ? node.getUsageText() + ARGUMENT_SEPARATOR + redirect
-                  : prefix + ARGUMENT_SEPARATOR + redirect,
-              "N/A"));
+      var redirectHelpWrapper = (RedirectHelpWrapper) node.getRedirectModifier();
+      if (!redirectHelpWrapper.privateCommand()) {
+        final var redirect =
+            node.getRedirect() == dispatcher.getRoot()
+                ? "..."
+                : "-> " + node.getRedirect().getUsageText();
+        result.add(
+            new HelpData(
+                prefix.isEmpty()
+                    ? node.getUsageText() + ARGUMENT_SEPARATOR + redirect
+                    : prefix + ARGUMENT_SEPARATOR + redirect,
+                redirectHelpWrapper.help()));
+      }
     } else if (!node.getChildren().isEmpty()) {
       for (final var child : node.getChildren()) {
         getAllUsage(

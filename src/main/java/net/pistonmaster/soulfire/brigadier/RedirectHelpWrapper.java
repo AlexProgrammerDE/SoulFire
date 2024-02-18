@@ -17,16 +17,16 @@
  */
 package net.pistonmaster.soulfire.brigadier;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.mojang.brigadier.RedirectModifier;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import java.util.Collection;
 
-public class ConsoleSubject {
-  private static final Logger log = LoggerFactory.getLogger("Console");
-  public Map<String, String> extraData = new Object2ObjectOpenHashMap<>();
-
-  public void sendMessage(String message) {
-    log.info(message);
+public record RedirectHelpWrapper(
+    RedirectModifier<ConsoleSubject> command, String help, boolean privateCommand)
+    implements RedirectModifier<ConsoleSubject> {
+  @Override
+  public Collection<ConsoleSubject> apply(CommandContext<ConsoleSubject> context) throws CommandSyntaxException {
+    return command.apply(context);
   }
 }
