@@ -74,7 +74,7 @@ public class MapDataState {
 
   public BufferedImage toBufferedImage() {
     var image =
-        new BufferedImage(128, 128, BufferedImage.TYPE_4BYTE_ABGR);
+        new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
     for (var x = 0; x < 128; ++x) {
       for (var y = 0; y < 128; ++y) {
         image.setRGB(x, y, convertABGRToARGB(MapColor.getColorFromPackedId(getColor(x, y))));
