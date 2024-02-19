@@ -72,7 +72,7 @@ public class SoulFireBootstrap {
 
   @SuppressWarnings("unused")
   public static void bootstrap(String[] args, List<ClassLoader> classLoaders) {
-    injectAnsi();
+    AnsiConsole.systemInstall();
     setupLogging(SettingsHolder.EMPTY);
 
     injectExceptionHandler();
@@ -163,15 +163,6 @@ public class SoulFireBootstrap {
     for (var plugin : PLUGIN_MANAGER.getPlugins()) {
       classLoaders.add(plugin.getPluginClassLoader());
     }
-  }
-
-  /** RGB support for terminals. */
-  private static void injectAnsi() {
-    if (System.console() == null) {
-      return;
-    }
-
-    AnsiConsole.systemInstall();
   }
 
   public static void setupLogging(SettingsHolder settingsHolder) {

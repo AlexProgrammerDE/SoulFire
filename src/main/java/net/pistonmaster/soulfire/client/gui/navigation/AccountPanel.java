@@ -62,17 +62,18 @@ public class AccountPanel extends NavigationItem {
     toolBar.setFloatable(false);
     var addButton = new JButton("+");
     addButton.setToolTipText("Add accounts");
-    addButton.addMouseListener(new MouseAdapter() {
-      public void mousePressed(MouseEvent e) {
-        var menu = new JPopupMenu();
-        menu.add(createAccountLoadButton(guiManager, parent, AuthType.OFFLINE));
-        menu.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_JAVA));
-        menu.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_BEDROCK));
-        menu.add(createAccountLoadButton(guiManager, parent, AuthType.THE_ALTENING));
-        menu.add(createAccountLoadButton(guiManager, parent, AuthType.EASYMC));
-        menu.show(e.getComponent(), e.getX(), e.getY());
-      }
-    });
+    addButton.addMouseListener(
+        new MouseAdapter() {
+          public void mousePressed(MouseEvent e) {
+            var menu = new JPopupMenu();
+            menu.add(createAccountLoadButton(guiManager, parent, AuthType.OFFLINE));
+            menu.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_JAVA));
+            menu.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_BEDROCK));
+            menu.add(createAccountLoadButton(guiManager, parent, AuthType.THE_ALTENING));
+            menu.add(createAccountLoadButton(guiManager, parent, AuthType.EASYMC));
+            menu.show(e.getComponent(), e.getX(), e.getY());
+          }
+        });
 
     toolBar.add(addButton);
     toolBar.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor")));

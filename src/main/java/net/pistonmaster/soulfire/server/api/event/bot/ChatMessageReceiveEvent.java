@@ -40,10 +40,6 @@ public record ChatMessageReceiveEvent(
     return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(message);
   }
 
-  public boolean isFromPlayer() {
-    return sender != null;
-  }
-
   public record ChatMessageSender(UUID senderUUID, String senderName) {
     public static ChatMessageSender fromClientboundPlayerChatPacket(
         ClientboundPlayerChatPacket packet) {

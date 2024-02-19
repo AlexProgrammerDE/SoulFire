@@ -47,6 +47,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.soulfire.server.util.XtermPalette256;
 import pk.ansi4j.core.DefaultFunctionFinder;
 import pk.ansi4j.core.DefaultParserFactory;
 import pk.ansi4j.core.DefaultTextHandler;
@@ -157,17 +158,82 @@ public class MessageLogPanel extends JPanel {
                     var functionFragment = (FunctionFragment) fragment;
                     if (functionFragment.getFunction()
                         == ControlSequenceFunction.SGR_SELECT_GRAPHIC_RENDITION) {
-                      StyleConstants.setForeground(defaultAttributes, switch ((int) functionFragment.getArguments().getFirst().getValue()) {
-                        case 30 -> Color.decode("#090300");
-                        case 31 -> Color.decode("#FF0000");
-                        case 32 -> Color.decode("#00FF00");
-                        case 33 -> Color.decode("#FFFF00");
-                        case 34 -> Color.decode("#0000FF");
-                        case 35 -> Color.decode("#FF00FF");
-                        case 36 -> Color.decode("#00FFFF");
-                        case 37 -> Color.decode("#FFFFFF");
-                        default -> Color.decode("#FFFFFF");
-                      });
+                      var sgr = (int) functionFragment.getArguments().getFirst().getValue();
+
+                      switch (sgr) {
+                        case 0 -> {
+                          for (var attributes = defaultAttributes.getAttributeNames();
+                              attributes.hasMoreElements(); ) {
+                            var name = attributes.nextElement();
+                            defaultAttributes.removeAttribute(name);
+                          }
+                        }
+                        case 1 -> StyleConstants.setBold(defaultAttributes, true);
+                        case 3 -> StyleConstants.setItalic(defaultAttributes, true);
+                        case 4 -> StyleConstants.setUnderline(defaultAttributes, true);
+                        case 9 -> StyleConstants.setStrikeThrough(defaultAttributes, true);
+                        case 22 -> StyleConstants.setBold(defaultAttributes, false);
+                        case 23 -> StyleConstants.setItalic(defaultAttributes, false);
+                        case 24 -> StyleConstants.setUnderline(defaultAttributes, false);
+                        case 29 -> StyleConstants.setStrikeThrough(defaultAttributes, false);
+                        case 30 ->
+                            StyleConstants.setForeground(defaultAttributes, new Color(1, 1, 1));
+                        case 31 ->
+                            StyleConstants.setForeground(defaultAttributes, new Color(222, 56, 43));
+                        case 32 ->
+                            StyleConstants.setForeground(defaultAttributes, new Color(57, 181, 74));
+                        case 33 ->
+                            StyleConstants.setForeground(defaultAttributes, new Color(255, 199, 6));
+                        case 34 ->
+                            StyleConstants.setForeground(defaultAttributes, new Color(0, 111, 184));
+                        case 35 ->
+                            StyleConstants.setForeground(
+                                defaultAttributes, new Color(118, 38, 113));
+                        case 36 ->
+                            StyleConstants.setForeground(
+                                defaultAttributes, new Color(44, 181, 233));
+                        case 37, 39 ->
+                            StyleConstants.setForeground(
+                                defaultAttributes, new Color(204, 204, 204));
+                        case 38 -> {
+                          var secondArgument =
+                              (int) functionFragment.getArguments().get(1).getValue();
+                          StyleConstants.setForeground(
+                              defaultAttributes,
+                              switch (secondArgument) {
+                                case 2 -> {
+                                  var r = (int) functionFragment.getArguments().get(2).getValue();
+                                  var g = (int) functionFragment.getArguments().get(3).getValue();
+                                  var b =
+                                      (int) functionFragment.getArguments().getLast().getValue();
+                                  yield new Color(r, g, b);
+                                }
+                                case 5 -> {
+                                  var id = (int) functionFragment.getArguments().get(2).getValue();
+                                  yield XtermPalette256.getColor(id);
+                                }
+                                default -> Color.decode("#FFFFFF");
+                              });
+                        }
+                        case 90 ->
+                            StyleConstants.setForeground(
+                                defaultAttributes, new Color(128, 128, 128));
+                        case 91 ->
+                            StyleConstants.setForeground(defaultAttributes, new Color(255, 0, 0));
+                        case 92 ->
+                            StyleConstants.setForeground(defaultAttributes, new Color(0, 255, 0));
+                        case 93 ->
+                            StyleConstants.setForeground(defaultAttributes, new Color(255, 255, 0));
+                        case 94 ->
+                            StyleConstants.setForeground(defaultAttributes, new Color(0, 0, 255));
+                        case 95 ->
+                            StyleConstants.setForeground(defaultAttributes, new Color(255, 0, 255));
+                        case 96 ->
+                            StyleConstants.setForeground(defaultAttributes, new Color(0, 255, 255));
+                        case 97 ->
+                            StyleConstants.setForeground(
+                                defaultAttributes, new Color(255, 255, 255));
+                      }
                     } else if (functionFragment.getFunction() == C0ControlFunction.LF_LINE_FEED) {
                       document.insertString(document.getLength(), "\n", defaultAttributes);
                     }

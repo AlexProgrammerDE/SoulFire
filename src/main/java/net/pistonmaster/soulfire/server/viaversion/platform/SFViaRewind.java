@@ -18,7 +18,6 @@
 package net.pistonmaster.soulfire.server.viaversion.platform;
 
 import com.viaversion.viarewind.api.ViaRewindPlatform;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.util.logging.Logger;
