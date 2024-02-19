@@ -101,9 +101,7 @@ public class SoulFireServer {
           .mapper(TranslatableComponent.class, TranslationMapper.INSTANCE)
           .build();
   public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER =
-      PlainTextComponentSerializer.builder()
-          .flattener(FLATTENER)
-          .build();
+      PlainTextComponentSerializer.builder().flattener(FLATTENER).build();
 
   private final Injector injector =
       new InjectorBuilder().addDefaultHandlers("net.pistonmaster.soulfire").create();

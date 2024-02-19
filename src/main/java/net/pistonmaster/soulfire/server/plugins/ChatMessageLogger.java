@@ -56,9 +56,10 @@ public class ChatMessageLogger implements InternalExtension {
       return;
     }
 
-    var sender = Optional.ofNullable(event.sender())
-        .map(ChatMessageReceiveEvent.ChatMessageSender::senderName)
-        .orElse("Server");
+    var sender =
+        Optional.ofNullable(event.sender())
+            .map(ChatMessageReceiveEvent.ChatMessageSender::senderName)
+            .orElse("Server");
     var message = Component.text("<" + sender + "> ").append(event.message());
 
     var ansiMessage = ANSI_MESSAGE_SERIALIZER.serialize(message);

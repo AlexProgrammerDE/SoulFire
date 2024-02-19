@@ -123,9 +123,10 @@ public class ViaClientSession extends TcpSession {
           throw new IllegalStateException("Proxy must support UDP! (Only SOCKS5 is supported)");
         }
 
-        bootstrap.channelFactory(RakChannelFactory.client(SFNettyHelper.DATAGRAM_CHANNEL_CLASS));
+        bootstrap.channelFactory(
+            RakChannelFactory.client(SFNettyHelper.TRANSPORT_METHOD.datagramChannelClass()));
       } else {
-        bootstrap.channel(SFNettyHelper.CHANNEL_CLASS);
+        bootstrap.channel(SFNettyHelper.TRANSPORT_METHOD.channelClass());
       }
 
       bootstrap
@@ -143,7 +144,7 @@ public class ViaClientSession extends TcpSession {
       } else {
         bootstrap.option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true);
 
-        if (SFNettyHelper.SUPPORTS_TPC_FAST_OPEN_CONNECT) {
+        if (SFNettyHelper.TRANSPORT_METHOD.tcpFastOpenClientSideAvailable()) {
           bootstrap.option(ChannelOption.TCP_FASTOPEN_CONNECT, true);
         }
       }

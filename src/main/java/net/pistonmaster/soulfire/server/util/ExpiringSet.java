@@ -17,7 +17,6 @@
  */
 package net.pistonmaster.soulfire.server.util;
 
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.util.concurrent.TimeUnit;
