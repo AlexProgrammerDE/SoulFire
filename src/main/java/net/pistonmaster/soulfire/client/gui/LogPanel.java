@@ -20,11 +20,13 @@ package net.pistonmaster.soulfire.client.gui;
 import io.grpc.Context;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 import javax.inject.Inject;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -33,7 +35,6 @@ import javax.swing.JTextField;
 import javax.swing.undo.UndoManager;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.client.gui.libs.MessageLogPanel;
 import net.pistonmaster.soulfire.client.gui.libs.SwingTextUtils;
@@ -69,17 +70,19 @@ public class LogPanel extends JPanel {
             });
 
     var commands = new JTextField();
+    commands.setFocusTraversalKeysEnabled(false);
+
     commands.putClientProperty("JTextField.placeholderText", "Type SoulFire commands here...");
 
     putClientProperty("log-panel-command-input", commands);
 
     var undoManager = SwingTextUtils.addUndoRedo(commands);
 
-    var commandShellAction = new CommandShellAction(undoManager);
+    var commandShellAction = new CommandShellAction(undoManager, commands);
     commandShellAction.initHistory();
 
     commands.addActionListener(commandShellAction);
-    commands.addKeyListener(new CommandShellKeyAdapter(undoManager, commandShellAction, commands));
+    commands.addKeyListener(commandShellAction);
 
     setLayout(new BorderLayout());
     add(messageLogPanel, BorderLayout.CENTER);
@@ -88,12 +91,14 @@ public class LogPanel extends JPanel {
     setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 0));
   }
 
-  @Getter
   @RequiredArgsConstructor
-  private class CommandShellAction extends AbstractAction {
-    private final UndoManager undoManager;
+  private class CommandShellAction extends AbstractAction implements KeyListener {
     private final List<String> commandHistory = new ArrayList<>();
-    @Setter private int pointer = -1;
+    private final UndoManager undoManager;
+    private final JTextField commands;
+    private Queue<String> tabQueue = null;
+    private String cachedText = null;
+    private int historyPointer = -1;
 
     public void initHistory() {
       commandHistory.addAll(
@@ -104,7 +109,7 @@ public class LogPanel extends JPanel {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      pointer = -1;
+      historyPointer = -1;
 
       var command = e.getActionCommand();
       command = command.strip();
@@ -119,50 +124,77 @@ public class LogPanel extends JPanel {
       commandHistory.add(command);
       guiManager.clientCommandManager().execute(command);
     }
-  }
 
-  @RequiredArgsConstructor
-  private class CommandShellKeyAdapter extends KeyAdapter {
-    private final UndoManager undoManager;
-    private final CommandShellAction commandShellAction;
-    private final JTextField commands;
-    private String cachedText = null;
+    @Override
+    public void keyTyped(KeyEvent e) {}
 
     @Override
     public void keyPressed(KeyEvent e) {
       // Cache the written text so we can restore it later
-      if (commandShellAction.pointer() == -1) {
+      if (historyPointer == -1) {
         cachedText = commands.getText();
       }
 
-      var commandHistory = commandShellAction.commandHistory();
-      var pointer = commandShellAction.pointer();
       switch (e.getKeyCode()) {
         case KeyEvent.VK_UP -> {
-          if (pointer < commandHistory.size() - 1) {
-            commandShellAction.pointer(pointer + 1);
+          if (historyPointer < commandHistory.size() - 1) {
+            historyPointer = historyPointer + 1;
             commands.setText(getTextAtPointer());
             undoManager.discardAllEdits();
           }
         }
         case KeyEvent.VK_DOWN -> {
-          if (pointer > -1) {
-            commandShellAction.pointer(pointer - 1);
+          if (historyPointer > -1) {
+            historyPointer = historyPointer - 1;
             commands.setText(getTextAtPointer());
             undoManager.discardAllEdits();
           }
         }
         case KeyEvent.VK_ENTER -> cachedText = null;
+        case KeyEvent.VK_TAB -> {
+          e.consume();
+          var caretPos = commands.getCaretPosition();
+          var textLength = commands.getText().length();
+
+          // If caret is not at the end of the text, we don't want to autocomplete
+          if (caretPos != textLength) {
+            log.warn("Caret is not at the end of the text, not autocompleting!");
+            return;
+          }
+
+          var command = commands.getText();
+          if (tabQueue == null) {
+            tabQueue =
+                new LinkedBlockingQueue<>(
+                    guiManager.clientCommandManager().getCompletionSuggestions(command));
+          }
+
+          if (tabQueue.isEmpty()) {
+            return;
+          }
+
+          var suggestion = tabQueue.poll();
+          tabQueue.add(suggestion);
+
+          var split = command.split(" ");
+          var finalCommand = new String[split.length];
+          System.arraycopy(split, 0, finalCommand, 0, split.length - 1);
+          finalCommand[split.length - 1] = suggestion;
+
+          commands.setText(String.join(" ", finalCommand));
+        }
+        default -> tabQueue = null;
       }
     }
 
+    @Override
+    public void keyReleased(KeyEvent e) {}
+
     private String getTextAtPointer() {
-      var commandHistory = commandShellAction.commandHistory();
-      var pointer = commandShellAction.pointer();
-      if (pointer == -1) {
+      if (historyPointer == -1) {
         return cachedText;
       } else {
-        return commandHistory.get(commandHistory.size() - 1 - pointer);
+        return commandHistory.get(commandHistory.size() - 1 - historyPointer);
       }
     }
   }
