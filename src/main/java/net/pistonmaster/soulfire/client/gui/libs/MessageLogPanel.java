@@ -89,6 +89,8 @@ public class MessageLogPanel extends JPanel {
               new IndependentControlFunctionHandler(),
               new ControlStringHandler())
           .build();
+  private static final Color BACKGROUND_COLOR = Color.decode("#090300");
+  private static final Color DEFAULT_TEXT_COLOR = new Color(204, 204, 204);
   private boolean clearText;
 
   public MessageLogPanel(int numLines) {
@@ -99,7 +101,8 @@ public class MessageLogPanel extends JPanel {
     textComponent.setFont(
         new Font(FlatJetBrainsMonoFont.FAMILY, Font.PLAIN, new JLabel().getFont().getSize()));
     textComponent.setEditable(true);
-    textComponent.setBackground(Color.decode("#090300"));
+    textComponent.setBackground(BACKGROUND_COLOR);
+    StyleConstants.setForeground(defaultAttributes, DEFAULT_TEXT_COLOR);
 
     var caret = (DefaultCaret) textComponent.getCaret();
     caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
@@ -162,6 +165,7 @@ public class MessageLogPanel extends JPanel {
                             var name = attributes.nextElement();
                             defaultAttributes.removeAttribute(name);
                           }
+                          StyleConstants.setForeground(defaultAttributes, DEFAULT_TEXT_COLOR);
                         }
                         case 1 -> StyleConstants.setBold(defaultAttributes, true);
                         case 3 -> StyleConstants.setItalic(defaultAttributes, true);
@@ -188,8 +192,7 @@ public class MessageLogPanel extends JPanel {
                             StyleConstants.setForeground(
                                 defaultAttributes, new Color(44, 181, 233));
                         case 37, 39 ->
-                            StyleConstants.setForeground(
-                                defaultAttributes, new Color(204, 204, 204));
+                            StyleConstants.setForeground(defaultAttributes, DEFAULT_TEXT_COLOR);
                         case 38 -> {
                           var secondArgument =
                               (int) functionFragment.getArguments().get(1).getValue();
