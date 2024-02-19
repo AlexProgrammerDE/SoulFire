@@ -73,7 +73,8 @@ public class SFNettyHelper {
   private SFNettyHelper() {}
 
   public static EventLoopGroup createEventLoopGroup(int threads, String name) {
-    ThreadFactory threadFactory = r -> new Thread(r, "SoulFire-" + name);
+    ThreadFactory threadFactory =
+        r -> Thread.ofPlatform().name(name).daemon().priority(Thread.MAX_PRIORITY).unstarted(r);
     EventLoopGroup group =
         switch (TransportHelper.determineTransportMethod()) {
           case IO_URING -> new IOUringEventLoopGroup(threads, threadFactory);

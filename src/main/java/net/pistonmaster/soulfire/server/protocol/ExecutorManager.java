@@ -75,20 +75,20 @@ public class ExecutorManager {
 
   private ThreadFactory getThreadFactory(BotConnection botConnection, String threadName) {
     return runnable -> {
-      var thread =
-          new Thread(
+      var usedThreadName = threadName;
+      if (runnable instanceof NamedRunnable named) {
+        usedThreadName = named.name();
+      }
+
+      return Thread.ofPlatform()
+          .name(threadPrefix + "-" + usedThreadName)
+          .daemon()
+          .unstarted(
               () -> {
                 BOT_CONNECTION_THREAD_LOCAL.set(botConnection);
                 runnable.run();
                 BOT_CONNECTION_THREAD_LOCAL.remove();
               });
-      var usedThreadName = threadName;
-      if (runnable instanceof NamedRunnable named) {
-        usedThreadName = named.name();
-      }
-      thread.setName(threadPrefix + "-" + usedThreadName);
-
-      return thread;
     };
   }
 

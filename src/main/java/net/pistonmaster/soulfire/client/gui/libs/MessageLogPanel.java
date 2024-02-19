@@ -41,10 +41,10 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
+import javax.swing.text.Document;
 import javax.swing.text.DocumentFilter;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.server.util.XtermPalette256;
@@ -76,7 +76,7 @@ public class MessageLogPanel extends JPanel {
   private final NoopDocumentFilter noopDocumentFilter = new NoopDocumentFilter();
   private final List<String> toInsert = Collections.synchronizedList(new ArrayList<>());
   private final JTextPane textComponent;
-  private final StyledDocument document;
+  private final Document document;
   private final ParserFactory factory =
       new DefaultParserFactory.Builder()
           .environment(Environment._7_BIT)
@@ -103,7 +103,7 @@ public class MessageLogPanel extends JPanel {
 
     var caret = (DefaultCaret) textComponent.getCaret();
     caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-    document = textComponent.getStyledDocument();
+    document = textComponent.getDocument();
     document.addDocumentListener(new LimitLinesDocumentListener(numLines, true));
     ((AbstractDocument) document).setDocumentFilter(noopDocumentFilter);
 
@@ -122,12 +122,7 @@ public class MessageLogPanel extends JPanel {
 
     var executorService =
         Executors.newSingleThreadScheduledExecutor(
-            (r) -> {
-              var thread = new Thread(r);
-              thread.setName("MessageLogPanel");
-              thread.setDaemon(true);
-              return thread;
-            });
+            r -> Thread.ofPlatform().name("MessageLogPanel").daemon().unstarted(r));
     executorService.scheduleWithFixedDelay(
         this::updateTextComponent, 100, 100, TimeUnit.MILLISECONDS);
   }
