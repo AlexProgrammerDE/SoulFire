@@ -61,12 +61,14 @@ public class ExecutorManager {
     return executor;
   }
 
-  public ExecutorService newFixedExecutorService(int threadAmount, BotConnection botConnection, String threadName) {
+  public ExecutorService newFixedExecutorService(
+      int threadAmount, BotConnection botConnection, String threadName) {
     if (shutdown) {
       throw new IllegalStateException("Cannot create new executor after shutdown!");
     }
 
-    var executor = Executors.newFixedThreadPool(threadAmount, getThreadFactory(botConnection, threadName));
+    var executor =
+        Executors.newFixedThreadPool(threadAmount, getThreadFactory(botConnection, threadName));
 
     executors.add(executor);
 

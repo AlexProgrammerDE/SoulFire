@@ -48,7 +48,8 @@ public class ThemeUtil {
 
     return Stream.of(TerminalTheme.THEMES)
         .filter(theme -> theme.name().equals(current))
-        .findFirst().orElse(TerminalTheme.THEMES[0]);
+        .findFirst()
+        .orElse(TerminalTheme.THEMES[0]);
   }
 
   /**

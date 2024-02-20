@@ -226,7 +226,8 @@ public class AttackManager {
 
     // Used for concurrent bot connecting
     var connectService =
-        executorManager.newFixedExecutorService(settingsHolder.get(BotSettings.CONCURRENT_CONNECTS), null, "Connect");
+        executorManager.newFixedExecutorService(
+            settingsHolder.get(BotSettings.CONCURRENT_CONNECTS), null, "Connect");
 
     return CompletableFuture.runAsync(
         () -> {

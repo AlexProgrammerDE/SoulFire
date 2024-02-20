@@ -28,30 +28,6 @@ import java.awt.Color;
  * @param colors The ANSI colors of the theme
  */
 public record TerminalTheme(String name, Color backgroundColor, Color[] colors) {
-  public TerminalTheme(String name, String backgroundColor, String[] colors) {
-    this(name, Color.decode(backgroundColor), new Color[colors.length]);
-    for (var i = 0; i < colors.length; i++) {
-      this.colors[i] = Color.decode(colors[i]);
-    }
-  }
-
-  public TerminalTheme {
-    if (colors.length != 16) {
-      throw new IllegalArgumentException("Colors must be 16 long!");
-    }
-  }
-
-  public Color getANSIColor(int index) {
-    if (index < 0 || index > 15) {
-      throw new IllegalArgumentException("Index must be between 0 and 15!");
-    }
-    return colors[index];
-  }
-
-  public Color getDefaultTextColor() {
-    return colors[7];
-  }
-
   public static final TerminalTheme[] THEMES = {
     new TerminalTheme(
         "Catppuccin-Frappe",
@@ -82,4 +58,28 @@ public record TerminalTheme(String name, Color backgroundColor, Color[] colors) 
           "#585B70", "#F38BA8", "#A6E3A1", "#F9E2AF", "#89B4FA", "#F5C2E7", "#94E2D5", "#A6ADC8"
         })
   };
+
+  public TerminalTheme(String name, String backgroundColor, String[] colors) {
+    this(name, Color.decode(backgroundColor), new Color[colors.length]);
+    for (var i = 0; i < colors.length; i++) {
+      this.colors[i] = Color.decode(colors[i]);
+    }
+  }
+
+  public TerminalTheme {
+    if (colors.length != 16) {
+      throw new IllegalArgumentException("Colors must be 16 long!");
+    }
+  }
+
+  public Color getANSIColor(int index) {
+    if (index < 0 || index > 15) {
+      throw new IllegalArgumentException("Index must be between 0 and 15!");
+    }
+    return colors[index];
+  }
+
+  public Color getDefaultTextColor() {
+    return colors[7];
+  }
 }
