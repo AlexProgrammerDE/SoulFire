@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 
 public record BotConnectionFactory(
     AttackManager attackManager,
+    UUID botConnectionId,
     ResolveUtil.ResolvedAddress resolvedAddress,
     SettingsHolder settingsHolder,
     Logger logger,

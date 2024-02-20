@@ -332,7 +332,7 @@ public class ServerCommandManager {
                         forEveryAttackEnsureHasBots(
                             attackManager -> {
                               var online = new ArrayList<String>();
-                              for (var bot : attackManager.botConnections()) {
+                              for (var bot : attackManager.botConnections().values()) {
                                 if (!bot.isOnline()) {
                                   continue;
                                 }
@@ -377,7 +377,7 @@ public class ServerCommandManager {
                               log.info("Total bots: {}", attackManager.botConnections().size());
                               long readTraffic = 0;
                               long writeTraffic = 0;
-                              for (var bot : attackManager.botConnections()) {
+                              for (var bot : attackManager.botConnections().values()) {
                                 var trafficShapingHandler = bot.getTrafficHandler();
 
                                 if (trafficShapingHandler == null) {
@@ -399,7 +399,7 @@ public class ServerCommandManager {
 
                               long currentReadTraffic = 0;
                               long currentWriteTraffic = 0;
-                              for (var bot : attackManager.botConnections()) {
+                              for (var bot : attackManager.botConnections().values()) {
                                 var trafficShapingHandler = bot.getTrafficHandler();
 
                                 if (trafficShapingHandler == null) {
@@ -500,7 +500,7 @@ public class ServerCommandManager {
     return forEveryAttackEnsureHasBots(
         attackManager -> {
           var resultCode = Command.SINGLE_SUCCESS;
-          for (var bot : attackManager.botConnections()) {
+          for (var bot : attackManager.botConnections().values()) {
             log.info(
                 "--- Running command for bot {} ---", bot.meta().minecraftAccount().username());
             var result = consumer.applyAsInt(bot);

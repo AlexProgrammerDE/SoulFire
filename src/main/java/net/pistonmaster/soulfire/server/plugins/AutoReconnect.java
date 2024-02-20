@@ -17,8 +17,6 @@
  */
 package net.pistonmaster.soulfire.server.plugins;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -34,8 +32,6 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.util.RandomUtil;
 
 public class AutoReconnect implements InternalExtension {
-  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
   @EventHandler
   public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(AutoReconnectSettings.class, "Auto Reconnect");
@@ -55,31 +51,33 @@ public class AutoReconnect implements InternalExtension {
       return;
     }
 
-    scheduler.schedule(
-        () -> {
-          var eventLoopGroup = connection.session().eventLoopGroup();
-          if (eventLoopGroup.isShuttingDown()
-              || eventLoopGroup.isShutdown()
-              || eventLoopGroup.isTerminated()) {
-            return;
-          }
+    connection
+        .attackManager()
+        .executorManager()
+        .newScheduledExecutorService(connection, "Reconnect")
+        .schedule(
+            () -> {
+              var eventLoopGroup = connection.session().eventLoopGroup();
+              if (eventLoopGroup.isShuttingDown()
+                  || eventLoopGroup.isShutdown()
+                  || eventLoopGroup.isTerminated()) {
+                return;
+              }
 
-          connection.gracefulDisconnect().join();
-          var newConnection = connection.factory().prepareConnection();
+              connection.gracefulDisconnect().join();
+              var newConnection = connection.factory().prepareConnection();
 
-          connection
-              .attackManager()
-              .botConnections()
-              .replaceAll(
-                  connectionEntry ->
-                      connectionEntry == connection ? newConnection : connectionEntry);
+              connection
+                  .attackManager()
+                  .botConnections()
+                  .put(connection.connectionId(), newConnection);
 
-          newConnection.connect();
-        },
-        RandomUtil.getRandomInt(
-            settingsHolder.get(AutoReconnectSettings.DELAY.min()),
-            settingsHolder.get(AutoReconnectSettings.DELAY.max())),
-        TimeUnit.SECONDS);
+              newConnection.connect();
+            },
+            RandomUtil.getRandomInt(
+                settingsHolder.get(AutoReconnectSettings.DELAY.min()),
+                settingsHolder.get(AutoReconnectSettings.DELAY.max())),
+            TimeUnit.SECONDS);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
