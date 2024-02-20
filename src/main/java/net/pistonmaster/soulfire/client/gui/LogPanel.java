@@ -176,7 +176,7 @@ public class LogPanel extends JPanel {
           var suggestion = tabQueue.poll();
           tabQueue.add(suggestion);
 
-          var split = command.split(" ");
+          var split = command.split(" ", -1);
           var finalCommand = new String[split.length];
           System.arraycopy(split, 0, finalCommand, 0, split.length - 1);
           finalCommand[split.length - 1] = suggestion;
