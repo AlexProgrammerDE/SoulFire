@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.bundles.log4j)
     implementation(libs.jline)
     implementation(libs.jansi)
+    implementation(libs.bundles.ansi4j)
     implementation(libs.terminalconsoleappender)
     api(libs.slf4j)
     implementation(libs.disruptor)

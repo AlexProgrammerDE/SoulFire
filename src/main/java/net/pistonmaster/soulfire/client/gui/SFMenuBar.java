@@ -48,6 +48,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.client.gui.libs.JFXFileHelper;
+import net.pistonmaster.soulfire.client.gui.libs.TerminalTheme;
 import net.pistonmaster.soulfire.client.gui.popups.AboutPopup;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.gui.WindowCloseEvent;
@@ -140,10 +141,10 @@ public class SFMenuBar extends JMenuBar {
 
     var viewMenu = new JMenu("View");
     var themeSelector = new JMenu("Theme");
-    var updateCallbacks = new ArrayList<Runnable>();
+    var themeUpdateCallbacks = new ArrayList<Runnable>();
     for (var theme : THEMES) {
       var themeItem = new JRadioButtonMenuItem(theme.getSimpleName());
-      updateCallbacks.add(
+      themeUpdateCallbacks.add(
           () -> {
             themeItem.setSelected(theme.getName().equals(ThemeUtil.getThemeClassName()));
           });
@@ -151,12 +152,35 @@ public class SFMenuBar extends JMenuBar {
           e -> {
             GUIClientProps.setString("theme", theme.getName());
             SwingUtilities.invokeLater(ThemeUtil::setLookAndFeel);
-            updateCallbacks.forEach(Runnable::run);
+            themeUpdateCallbacks.forEach(Runnable::run);
+            log.info("Changed theme to: {}", theme.getName());
           });
       themeSelector.add(themeItem);
     }
-    updateCallbacks.forEach(Runnable::run);
+    themeUpdateCallbacks.forEach(Runnable::run);
     viewMenu.add(themeSelector);
+
+    var terminalSelector = new JMenu("Terminal");
+    var terminalUpdateCallbacks = new ArrayList<Runnable>();
+    for (var terminal : TerminalTheme.THEMES) {
+      var terminalItem = new JRadioButtonMenuItem(terminal.name());
+      terminalUpdateCallbacks.add(
+          () -> {
+            terminalItem.setSelected(terminal == ThemeUtil.getTerminal());
+          });
+      terminalItem.addActionListener(
+          e -> {
+            GUIClientProps.setString("terminal", terminal.name());
+            logPanel.messageLogPanel().refreshTheme();
+            terminalUpdateCallbacks.forEach(Runnable::run);
+            log.info(
+                "Changed terminal to: {} (You may need to restart for the text color to look right)",
+                terminal.name());
+          });
+      terminalSelector.add(terminalItem);
+    }
+    terminalUpdateCallbacks.forEach(Runnable::run);
+    viewMenu.add(terminalSelector);
 
     /*
     viewMenu.addSeparator();

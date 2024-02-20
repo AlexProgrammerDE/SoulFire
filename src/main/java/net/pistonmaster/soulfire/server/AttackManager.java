@@ -29,11 +29,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -53,6 +53,7 @@ import net.pistonmaster.soulfire.server.api.event.attack.AttackEndedEvent;
 import net.pistonmaster.soulfire.server.api.event.attack.AttackStartEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.protocol.BotConnectionFactory;
+import net.pistonmaster.soulfire.server.protocol.ExecutorManager;
 import net.pistonmaster.soulfire.server.protocol.netty.ResolveUtil;
 import net.pistonmaster.soulfire.server.protocol.netty.SFNettyHelper;
 import net.pistonmaster.soulfire.server.settings.AccountSettings;
@@ -82,7 +83,8 @@ public class AttackManager {
                   throw new IllegalStateException("This event handler only accepts attack events");
                 }
               });
-  private final List<BotConnection> botConnections = new CopyOnWriteArrayList<>();
+  private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
+  private final ExecutorManager executorManager = new ExecutorManager("SoulFire-Attack-" + id);
   private final SoulFireServer soulFireServer;
   @Setter private AttackState attackState = AttackState.STOPPED;
 
@@ -198,6 +200,7 @@ public class AttackManager {
       factories.add(
           new BotConnectionFactory(
               this,
+              UUID.randomUUID(),
               targetAddress.orElseThrow(
                   () -> new IllegalStateException("Could not resolve address")),
               settingsHolder,
@@ -223,7 +226,8 @@ public class AttackManager {
 
     // Used for concurrent bot connecting
     var connectService =
-        Executors.newFixedThreadPool(settingsHolder.get(BotSettings.CONCURRENT_CONNECTS));
+        executorManager.newFixedExecutorService(
+            settingsHolder.get(BotSettings.CONCURRENT_CONNECTS), null, "Connect");
 
     return CompletableFuture.runAsync(
         () -> {
@@ -244,7 +248,7 @@ public class AttackManager {
 
                   logger.debug("Connecting bot {}", factory.minecraftAccount().username());
                   var botConnection = factory.prepareConnection();
-                  botConnections.add(botConnection);
+                  botConnections.put(botConnection.connectionId(), botConnection);
 
                   try {
                     botConnection.connect().get();
@@ -274,14 +278,17 @@ public class AttackManager {
   }
 
   private void stopInternal() {
+    logger.info("Shutting down attack executor");
+    executorManager.shutdownAll();
+
     logger.info("Disconnecting bots");
     do {
       var eventLoopGroups = new HashSet<EventLoopGroup>();
       var disconnectFuture = new ArrayList<CompletableFuture<?>>();
-      for (var botConnection : List.copyOf(botConnections)) {
-        disconnectFuture.add(botConnection.gracefulDisconnect());
-        eventLoopGroups.add(botConnection.session().eventLoopGroup());
-        botConnections.remove(botConnection);
+      for (var entry : Map.copyOf(botConnections).entrySet()) {
+        disconnectFuture.add(entry.getValue().gracefulDisconnect());
+        eventLoopGroups.add(entry.getValue().session().eventLoopGroup());
+        botConnections.remove(entry.getKey());
       }
 
       logger.info("Waiting for all bots to fully disconnect");

@@ -17,11 +17,16 @@
  */
 package net.pistonmaster.soulfire.server.plugins;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
+import net.kyori.ansi.ColorLevel;
 import net.lenni0451.lambdaevents.EventHandler;
+import net.pistonmaster.soulfire.server.SoulFireServer;
 import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.bot.ChatMessageReceiveEvent;
@@ -29,41 +34,48 @@ import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInit
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.pistonmaster.soulfire.server.util.ExpiringSet;
+import org.fusesource.jansi.AnsiConsole;
 
+@Slf4j
 public class ChatMessageLogger implements InternalExtension {
-  private static final Logger logger = LoggerFactory.getLogger(ChatMessageLogger.class);
-  private static final Set<Long> chatMessages = new LinkedHashSet<>(50); // in case of huge lag
+  private static final ANSIComponentSerializer ANSI_MESSAGE_SERIALIZER =
+      ANSIComponentSerializer.builder()
+          .flattener(SoulFireServer.FLATTENER)
+          .colorLevel(
+              switch (AnsiConsole.out().getColors()) {
+                case Colors16 -> ColorLevel.INDEXED_16;
+                case Colors256 -> ColorLevel.INDEXED_256;
+                case TrueColor -> ColorLevel.TRUE_COLOR;
+              })
+          .build();
+  private static final ExpiringSet<String> CHAT_MESSAGES = new ExpiringSet<>(5, TimeUnit.SECONDS);
 
   public static void onMessage(ChatMessageReceiveEvent event) {
-    if (event.connection().settingsHolder().get(ChatMessageSettings.ENABLED)) {
-      var content = new StringBuilder();
-      // if it's a player message, add username
-      if (event.isFromPlayer()) {
-        content.append("<").append(event.sender().senderName()).append("> ");
-      } else {
-        content.append("<Server> ");
-      }
-
-      content.append(event.parseToText());
-
-      // usage of synchronized method so that the chatMessages set is not modified while being
-      // iterated
-      logChatMessage(content.toString(), event.timestamp());
-    }
-  }
-
-  private static synchronized void logChatMessage(String message, Long timestamp) {
-    if (chatMessages.contains(timestamp)) {
+    if (!event.connection().settingsHolder().get(ChatMessageSettings.ENABLED)) {
       return;
     }
-    if (chatMessages.size() == 5) {
-      chatMessages.remove(chatMessages.iterator().next());
+
+    var sender =
+        Optional.ofNullable(event.sender())
+            .map(ChatMessageReceiveEvent.ChatMessageSender::senderName)
+            .orElse("Server");
+    var message = Component.text("<" + sender + "> ").append(event.message());
+
+    var ansiMessage = ANSI_MESSAGE_SERIALIZER.serialize(message);
+
+    // usage of synchronized method so that the chatMessages set is not modified while being
+    // iterated
+    logChatMessage(ansiMessage);
+  }
+
+  private static synchronized void logChatMessage(String message) {
+    if (CHAT_MESSAGES.contains(message)) {
+      return;
     }
 
-    chatMessages.add(timestamp);
-    logger.info(message);
+    CHAT_MESSAGES.add(message);
+    log.info(message);
   }
 
   @EventHandler

@@ -96,13 +96,12 @@ import org.apache.logging.log4j.LogManager;
 @Getter
 public class SoulFireServer {
   public static final Gson GENERAL_GSON = new Gson();
-  public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER =
-      PlainTextComponentSerializer.builder()
-          .flattener(
-              ComponentFlattener.basic().toBuilder()
-                  .mapper(TranslatableComponent.class, TranslationMapper.INSTANCE)
-                  .build())
+  public static final ComponentFlattener FLATTENER =
+      ComponentFlattener.basic().toBuilder()
+          .mapper(TranslatableComponent.class, TranslationMapper.INSTANCE)
           .build();
+  public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER =
+      PlainTextComponentSerializer.builder().flattener(FLATTENER).build();
 
   private final Injector injector =
       new InjectorBuilder().addDefaultHandlers("net.pistonmaster.soulfire").create();

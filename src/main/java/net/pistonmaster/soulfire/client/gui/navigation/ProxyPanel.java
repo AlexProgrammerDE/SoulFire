@@ -62,15 +62,16 @@ public class ProxyPanel extends NavigationItem {
     toolBar.setFloatable(false);
     var addButton = new JButton("+");
     addButton.setToolTipText("Add proxies");
-    addButton.addMouseListener(new MouseAdapter() {
-      public void mousePressed(MouseEvent e) {
-        var menu = new JPopupMenu();
-        menu.add(createProxyLoadButton(guiManager, parent, ProxyType.HTTP));
-        menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS4));
-        menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS5));
-        menu.show(e.getComponent(), e.getX(), e.getY());
-      }
-    });
+    addButton.addMouseListener(
+        new MouseAdapter() {
+          public void mousePressed(MouseEvent e) {
+            var menu = new JPopupMenu();
+            menu.add(createProxyLoadButton(guiManager, parent, ProxyType.HTTP));
+            menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS4));
+            menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS5));
+            menu.show(e.getComponent(), e.getX(), e.getY());
+          }
+        });
 
     toolBar.add(addButton);
     toolBar.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor")));

@@ -21,13 +21,12 @@ import java.awt.GridBagLayout;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.client.gui.GUIManager;
-import net.pistonmaster.soulfire.client.gui.LogPanel;
 import net.pistonmaster.soulfire.util.BuiltinSettingsConstants;
 
 @Slf4j
 public class DeveloperPanel extends NavigationItem {
   @Inject
-  public DeveloperPanel(GUIManager guiManager, LogPanel logPanel, CardsContainer cardsContainer) {
+  public DeveloperPanel(GUIManager guiManager, CardsContainer cardsContainer) {
     setLayout(new GridBagLayout());
 
     GeneratedPanel.addComponents(

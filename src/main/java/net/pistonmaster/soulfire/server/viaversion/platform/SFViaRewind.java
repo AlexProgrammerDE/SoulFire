@@ -18,6 +18,7 @@
 package net.pistonmaster.soulfire.server.viaversion.platform;
 
 import com.viaversion.viarewind.api.ViaRewindPlatform;
+import java.io.File;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
@@ -36,5 +37,10 @@ public class SFViaRewind implements ViaRewindPlatform {
   @Override
   public Logger getLogger() {
     return logger;
+  }
+
+  @Override
+  public File getDataFolder() {
+    return dataFolder.toFile();
   }
 }

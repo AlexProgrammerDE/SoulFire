@@ -61,6 +61,20 @@ public class ExecutorManager {
     return executor;
   }
 
+  public ExecutorService newFixedExecutorService(
+      int threadAmount, BotConnection botConnection, String threadName) {
+    if (shutdown) {
+      throw new IllegalStateException("Cannot create new executor after shutdown!");
+    }
+
+    var executor =
+        Executors.newFixedThreadPool(threadAmount, getThreadFactory(botConnection, threadName));
+
+    executors.add(executor);
+
+    return executor;
+  }
+
   public ExecutorService newCachedExecutorService(BotConnection botConnection, String threadName) {
     if (shutdown) {
       throw new IllegalStateException("Cannot create new executor after shutdown!");
@@ -75,20 +89,20 @@ public class ExecutorManager {
 
   private ThreadFactory getThreadFactory(BotConnection botConnection, String threadName) {
     return runnable -> {
-      var thread =
-          new Thread(
+      var usedThreadName = threadName;
+      if (runnable instanceof NamedRunnable named) {
+        usedThreadName = named.name();
+      }
+
+      return Thread.ofPlatform()
+          .name(threadPrefix + "-" + usedThreadName)
+          .daemon()
+          .unstarted(
               () -> {
                 BOT_CONNECTION_THREAD_LOCAL.set(botConnection);
                 runnable.run();
                 BOT_CONNECTION_THREAD_LOCAL.remove();
               });
-      var usedThreadName = threadName;
-      if (runnable instanceof NamedRunnable named) {
-        usedThreadName = named.name();
-      }
-      thread.setName(threadPrefix + "-" + usedThreadName);
-
-      return thread;
     };
   }
 

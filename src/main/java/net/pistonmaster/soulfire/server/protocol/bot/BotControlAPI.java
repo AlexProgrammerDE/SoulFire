@@ -252,7 +252,7 @@ public class BotControlAPI {
       }
 
       if (ignoreBots
-          && dataManager.connection().attackManager().botConnections().stream()
+          && dataManager.connection().attackManager().botConnections().values().stream()
               .anyMatch(
                   b -> {
                     if (b.sessionDataManager().clientEntity() == null) {

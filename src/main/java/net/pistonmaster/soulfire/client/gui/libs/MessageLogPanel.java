@@ -17,7 +17,10 @@
  */
 package net.pistonmaster.soulfire.client.gui.libs;
 
+import com.formdev.flatlaf.fonts.jetbrains_mono.FlatJetBrainsMonoFont;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,17 +34,37 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
+import javax.swing.text.Document;
 import javax.swing.text.DocumentFilter;
 import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.soulfire.client.gui.ThemeUtil;
+import net.pistonmaster.soulfire.server.util.XtermPalette256;
+import pk.ansi4j.core.DefaultFunctionFinder;
+import pk.ansi4j.core.DefaultParserFactory;
+import pk.ansi4j.core.DefaultTextHandler;
+import pk.ansi4j.core.api.Environment;
+import pk.ansi4j.core.api.Fragment;
+import pk.ansi4j.core.api.FragmentType;
+import pk.ansi4j.core.api.FunctionFragment;
+import pk.ansi4j.core.api.ParserFactory;
+import pk.ansi4j.core.api.TextFragment;
+import pk.ansi4j.core.api.iso6429.C0ControlFunction;
+import pk.ansi4j.core.api.iso6429.ControlSequenceFunction;
+import pk.ansi4j.core.iso6429.C0ControlFunctionHandler;
+import pk.ansi4j.core.iso6429.C1ControlFunctionHandler;
+import pk.ansi4j.core.iso6429.ControlSequenceHandler;
+import pk.ansi4j.core.iso6429.ControlStringHandler;
+import pk.ansi4j.core.iso6429.IndependentControlFunctionHandler;
 
 /**
  * Modified version of: <a
@@ -53,25 +76,39 @@ public class MessageLogPanel extends JPanel {
   private final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();
   private final NoopDocumentFilter noopDocumentFilter = new NoopDocumentFilter();
   private final List<String> toInsert = Collections.synchronizedList(new ArrayList<>());
-  private final JTextArea textComponent;
-  private final AbstractDocument document;
+  private final JTextPane textComponent;
+  private final Document document;
+  private final ParserFactory factory =
+      new DefaultParserFactory.Builder()
+          .environment(Environment._7_BIT)
+          .textHandler(new DefaultTextHandler())
+          .functionFinder(new DefaultFunctionFinder())
+          .functionHandlers(
+              new C0ControlFunctionHandler(),
+              new C1ControlFunctionHandler(),
+              new ControlSequenceHandler(),
+              new IndependentControlFunctionHandler(),
+              new ControlStringHandler())
+          .build();
+  private TerminalTheme theme = ThemeUtil.getTerminal();
   private boolean clearText;
 
   public MessageLogPanel(int numLines) {
     setLayout(new BorderLayout());
 
-    this.textComponent = new JTextArea();
+    this.textComponent = new JTextPane();
 
-    textComponent.setLineWrap(true);
-    textComponent.setWrapStyleWord(true);
-
-    textComponent.setFont(new JLabel().getFont());
+    textComponent.setFont(
+        new Font(FlatJetBrainsMonoFont.FAMILY, Font.PLAIN, new JLabel().getFont().getSize()));
     textComponent.setEditable(true);
+    textComponent.setBackground(theme.backgroundColor());
+    StyleConstants.setForeground(defaultAttributes, theme.getDefaultTextColor());
+
     var caret = (DefaultCaret) textComponent.getCaret();
     caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-    document = (AbstractDocument) textComponent.getDocument();
+    document = textComponent.getDocument();
     document.addDocumentListener(new LimitLinesDocumentListener(numLines, true));
-    document.setDocumentFilter(noopDocumentFilter);
+    ((AbstractDocument) document).setDocumentFilter(noopDocumentFilter);
 
     updatePopup();
 
@@ -88,12 +125,7 @@ public class MessageLogPanel extends JPanel {
 
     var executorService =
         Executors.newSingleThreadScheduledExecutor(
-            (r) -> {
-              var thread = new Thread(r);
-              thread.setName("MessageLogPanel");
-              thread.setDaemon(true);
-              return thread;
-            });
+            r -> Thread.ofPlatform().name("MessageLogPanel").daemon().unstarted(r));
     executorService.scheduleWithFixedDelay(
         this::updateTextComponent, 100, 100, TimeUnit.MILLISECONDS);
   }
@@ -112,8 +144,96 @@ public class MessageLogPanel extends JPanel {
               clearText = false;
             } else {
               try {
-                var offset = document.getLength();
-                document.insertString(offset, String.join("", toInsert), defaultAttributes);
+                var parser = factory.createParser(String.join("", toInsert));
+
+                Fragment fragment;
+                while ((fragment = parser.parse()) != null) {
+                  if (fragment.getType() == FragmentType.TEXT) {
+                    var textFragment = (TextFragment) fragment;
+                    document.insertString(
+                        document.getLength(), textFragment.getText(), defaultAttributes);
+                  } else if (fragment.getType() == FragmentType.FUNCTION) {
+                    var functionFragment = (FunctionFragment) fragment;
+                    if (functionFragment.getFunction()
+                        == ControlSequenceFunction.SGR_SELECT_GRAPHIC_RENDITION) {
+                      var sgr = (int) functionFragment.getArguments().getFirst().getValue();
+
+                      switch (sgr) {
+                        case 0 -> {
+                          for (var attributes = defaultAttributes.getAttributeNames();
+                              attributes.hasMoreElements(); ) {
+                            var name = attributes.nextElement();
+                            defaultAttributes.removeAttribute(name);
+                          }
+                          StyleConstants.setForeground(
+                              defaultAttributes, theme.getDefaultTextColor());
+                        }
+                        case 1 -> StyleConstants.setBold(defaultAttributes, true);
+                        case 3 -> StyleConstants.setItalic(defaultAttributes, true);
+                        case 4 -> StyleConstants.setUnderline(defaultAttributes, true);
+                        case 9 -> StyleConstants.setStrikeThrough(defaultAttributes, true);
+                        case 22 -> StyleConstants.setBold(defaultAttributes, false);
+                        case 23 -> StyleConstants.setItalic(defaultAttributes, false);
+                        case 24 -> StyleConstants.setUnderline(defaultAttributes, false);
+                        case 29 -> StyleConstants.setStrikeThrough(defaultAttributes, false);
+                        case 30 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(0));
+                        case 31 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(1));
+                        case 32 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(2));
+                        case 33 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(3));
+                        case 34 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(4));
+                        case 35 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(5));
+                        case 36 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(6));
+                        case 37, 39 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(7));
+                        case 38 -> {
+                          var secondArgument =
+                              (int) functionFragment.getArguments().get(1).getValue();
+                          StyleConstants.setForeground(
+                              defaultAttributes,
+                              switch (secondArgument) {
+                                case 2 -> {
+                                  var r = (int) functionFragment.getArguments().get(2).getValue();
+                                  var g = (int) functionFragment.getArguments().get(3).getValue();
+                                  var b =
+                                      (int) functionFragment.getArguments().getLast().getValue();
+                                  yield new Color(r, g, b);
+                                }
+                                case 5 -> {
+                                  var id = (int) functionFragment.getArguments().get(2).getValue();
+                                  yield XtermPalette256.getColor(id);
+                                }
+                                default -> Color.decode("#FFFFFF");
+                              });
+                        }
+                        case 90 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(8));
+                        case 91 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(9));
+                        case 92 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(10));
+                        case 93 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(11));
+                        case 94 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(12));
+                        case 95 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(13));
+                        case 96 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(14));
+                        case 97 ->
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(15));
+                      }
+                    } else if (functionFragment.getFunction() == C0ControlFunction.LF_LINE_FEED) {
+                      document.insertString(document.getLength(), "\n", defaultAttributes);
+                    }
+                  }
+                }
               } catch (BadLocationException e) {
                 log.debug("Failed to insert text!", e);
               }
@@ -175,6 +295,12 @@ public class MessageLogPanel extends JPanel {
 
   public String getLogs() {
     return textComponent.getText();
+  }
+
+  public void refreshTheme() {
+    theme = ThemeUtil.getTerminal();
+    textComponent.setBackground(theme.backgroundColor());
+    StyleConstants.setForeground(defaultAttributes, theme.getDefaultTextColor());
   }
 
   @Setter

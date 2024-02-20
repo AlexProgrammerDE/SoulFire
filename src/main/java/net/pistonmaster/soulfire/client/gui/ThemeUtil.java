@@ -23,8 +23,9 @@ import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.fonts.inter.FlatInterFont;
-import com.formdev.flatlaf.util.FontUtils;
+import com.formdev.flatlaf.fonts.jetbrains_mono.FlatJetBrainsMonoFont;
 import com.formdev.flatlaf.util.SystemInfo;
+import java.util.stream.Stream;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.ToolTipManager;
@@ -32,6 +33,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.soulfire.client.gui.libs.TerminalTheme;
 
 @Slf4j
 public class ThemeUtil {
@@ -39,6 +41,15 @@ public class ThemeUtil {
 
   public static String getThemeClassName() {
     return GUIClientProps.getString("theme", FlatDarculaLaf.class.getName());
+  }
+
+  public static TerminalTheme getTerminal() {
+    var current = GUIClientProps.getString("terminal", TerminalTheme.THEMES[0].name());
+
+    return Stream.of(TerminalTheme.THEMES)
+        .filter(theme -> theme.name().equals(current))
+        .findFirst()
+        .orElse(TerminalTheme.THEMES[0]);
   }
 
   /**
@@ -62,11 +73,6 @@ public class ThemeUtil {
 
       UIManager.setLookAndFeel(theme);
 
-      var font = UIManager.getFont("defaultFont");
-      var newFont =
-          FontUtils.getCompositeFont(FlatInterFont.FAMILY, font.getStyle(), font.getSize());
-      UIManager.put("defaultFont", newFont);
-
       FlatLaf.updateUI();
 
       FlatAnimatedLafChange.hideSnapshotWithAnimation();
@@ -76,12 +82,19 @@ public class ThemeUtil {
   }
 
   public static void initFlatLaf() {
+    FlatInterFont.install();
+    FlatLaf.setPreferredFontFamily(FlatInterFont.FAMILY);
+    FlatLaf.setPreferredLightFontFamily(FlatInterFont.FAMILY_LIGHT);
+    FlatLaf.setPreferredSemiboldFontFamily(FlatInterFont.FAMILY_SEMIBOLD);
+
+    FlatJetBrainsMonoFont.install();
+    FlatLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
+
     FlatInspector.install("ctrl shift I");
     FlatUIDefaultsInspector.install("ctrl shift O");
     ToolTipManager.sharedInstance().setInitialDelay(100);
     ToolTipManager.sharedInstance().setDismissDelay(10_000);
     UIManager.put("PasswordField.showRevealButton", true);
-    FlatInterFont.install();
 
     if (SystemInfo.isMacOS) {
       // Use top screen menu bar on macOS

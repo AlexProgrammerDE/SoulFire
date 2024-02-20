@@ -40,6 +40,12 @@ public class MapDataState {
     this.locked = packet.isLocked();
   }
 
+  private static int convertABGRToARGB(int color) {
+    var first = (color >> 16) & 0xFF;
+    var second = color & 0xFF;
+    return (color & 0xFF00FF00) | (second << 16) | first;
+  }
+
   public void update(ClientboundMapItemDataPacket packet) {
     this.icons = packet.getIcons();
 
@@ -73,8 +79,7 @@ public class MapDataState {
   }
 
   public BufferedImage toBufferedImage() {
-    var image =
-        new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+    var image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
     for (var x = 0; x < 128; ++x) {
       for (var y = 0; y < 128; ++y) {
         image.setRGB(x, y, convertABGRToARGB(MapColor.getColorFromPackedId(getColor(x, y))));
@@ -82,11 +87,5 @@ public class MapDataState {
     }
 
     return image;
-  }
-
-  private static int convertABGRToARGB(int color) {
-    var first = (color >> 16) & 0xFF;
-    var second = color & 0xFF;
-    return (color & 0xFF00FF00) | (second << 16) | first;
   }
 }

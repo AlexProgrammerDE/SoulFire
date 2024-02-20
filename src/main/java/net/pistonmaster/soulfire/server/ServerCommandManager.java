@@ -374,7 +374,7 @@ public class ServerCommandManager {
                             c,
                             attackManager -> {
                               var online = new ArrayList<String>();
-                              for (var bot : attackManager.botConnections()) {
+                              for (var bot : attackManager.botConnections().values()) {
                                 if (!bot.isOnline()) {
                                   continue;
                                 }
@@ -421,7 +421,7 @@ public class ServerCommandManager {
                               log.info("Total bots: {}", attackManager.botConnections().size());
                               long readTraffic = 0;
                               long writeTraffic = 0;
-                              for (var bot : attackManager.botConnections()) {
+                              for (var bot : attackManager.botConnections().values()) {
                                 var trafficShapingHandler = bot.getTrafficHandler();
 
                                 if (trafficShapingHandler == null) {
@@ -443,7 +443,7 @@ public class ServerCommandManager {
 
                               long currentReadTraffic = 0;
                               long currentWriteTraffic = 0;
-                              for (var bot : attackManager.botConnections()) {
+                              for (var bot : attackManager.botConnections().values()) {
                                 var trafficShapingHandler = bot.getTrafficHandler();
 
                                 if (trafficShapingHandler == null) {
@@ -774,13 +774,12 @@ public class ServerCommandManager {
         context,
         attackManager -> {
           var resultCode = Command.SINGLE_SUCCESS;
-          for (var bot : attackManager.botConnections()) {
+          for (var bot : attackManager.botConnections().values()) {
             if (context.getSource().extraData.containsKey("bot_names")
                 && Arrays.stream(context.getSource().extraData.get("bot_names").split(","))
                     .noneMatch(s -> s.equals(bot.meta().minecraftAccount().username()))) {
               continue;
             }
-
             log.info(
                 "--- Running command for bot {} ---", bot.meta().minecraftAccount().username());
             var result = consumer.applyAsInt(bot);
