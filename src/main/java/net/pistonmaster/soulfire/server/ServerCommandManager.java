@@ -368,7 +368,7 @@ public class ServerCommandManager {
         literal("online")
             .executes(
                 help(
-                    "Shows connected bots from all attacks",
+                    "Shows connected bots in attacks",
                     c ->
                         forEveryAttackEnsureHasBots(
                             c,
@@ -699,6 +699,18 @@ public class ServerCommandManager {
         literal("bot")
             .then(
                 argument("bot_names", StringArgumentType.string())
+                    .suggests(
+                        (c, b) -> {
+                          forEveryBot(
+                              c,
+                              bot -> {
+                                b.suggest(bot.meta().minecraftAccount().username());
+
+                                return Command.SINGLE_SUCCESS;
+                              });
+
+                          return b.buildFuture();
+                        })
                     .forward(
                         dispatcher.getRoot(),
                         helpRedirect(
@@ -715,6 +727,18 @@ public class ServerCommandManager {
         literal("attack")
             .then(
                 argument("attack_ids", StringArgumentType.string())
+                    .suggests(
+                        (c, b) -> {
+                          forEveryAttack(
+                              c,
+                              attackManager -> {
+                                b.suggest(attackManager.id());
+
+                                return Command.SINGLE_SUCCESS;
+                              });
+
+                          return b.buildFuture();
+                        })
                     .forward(
                         dispatcher.getRoot(),
                         helpRedirect(
@@ -938,9 +962,9 @@ public class ServerCommandManager {
 
     if (node.getCommand() != null) {
       var helpWrapper = (CommandHelpWrapper) node.getCommand();
-        if (!helpWrapper.privateCommand()) {
-          result.add(new HelpData(prefix, helpWrapper.help()));
-        }
+      if (!helpWrapper.privateCommand()) {
+        result.add(new HelpData(prefix, helpWrapper.help()));
+      }
     }
 
     if (node.getRedirect() != null) {
