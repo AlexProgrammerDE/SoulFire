@@ -26,7 +26,11 @@ public class ConsoleSubject {
   private static final Logger log = LoggerFactory.getLogger("Console");
   public Map<String, String> extraData = new Object2ObjectOpenHashMap<>();
 
-  public void sendMessage(String message) {
+  public void sendInfo(String message) {
     log.info(message);
+  }
+
+  public void sendWarn(String message) {
+    log.warn(message);
   }
 }

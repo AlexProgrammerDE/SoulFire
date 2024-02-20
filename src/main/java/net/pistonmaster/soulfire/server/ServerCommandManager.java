@@ -101,11 +101,10 @@ public class ServerCommandManager {
                 help(
                     "Prints a list of all available commands",
                     c -> {
-                      c.getSource().sendMessage("Available commands:");
+                      c.getSource().sendInfo("Available commands:");
                       for (var command : getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
                         c.getSource()
-                            .sendMessage(
-                                String.format("%s -> %s", command.command(), command.help()));
+                            .sendInfo(String.format("%s -> %s", command.command(), command.help()));
                       }
 
                       return Command.SINGLE_SUCCESS;
@@ -117,7 +116,7 @@ public class ServerCommandManager {
                     c -> {
                       for (var command : getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
                         c.getSource()
-                            .sendMessage(
+                            .sendInfo(
                                 String.format("| `%s` | %s |", command.command(), command.help()));
                       }
 
@@ -214,7 +213,7 @@ public class ServerCommandManager {
                               bot.sessionDataManager().controlState().resetAll();
 
                               c.getSource()
-                                  .sendMessage(
+                                  .sendInfo(
                                       "Stopped pathfinding for "
                                           + bot.meta().minecraftAccount().username());
                               return Command.SINGLE_SUCCESS;
@@ -383,7 +382,7 @@ public class ServerCommandManager {
                               }
 
                               c.getSource()
-                                  .sendMessage(
+                                  .sendInfo(
                                       online.size() + " bots online: " + String.join(", ", online));
                               return Command.SINGLE_SUCCESS;
                             }))));
@@ -482,7 +481,7 @@ public class ServerCommandManager {
                                     var mapDataState =
                                         bot.sessionDataManager().mapDataStates().get(mapId);
                                     if (mapDataState == null) {
-                                      c.getSource().sendMessage("Map not found!");
+                                      c.getSource().sendInfo("Map not found!");
                                       return Command.SINGLE_SUCCESS;
                                     }
 
@@ -499,7 +498,7 @@ public class ServerCommandManager {
                                       Files.createDirectories(SFPathConstants.MAPS_FOLDER);
                                       var file = SFPathConstants.MAPS_FOLDER.resolve(fileName);
                                       ImageIO.write(image, "png", file.toFile());
-                                      c.getSource().sendMessage("Exported map to " + file);
+                                      c.getSource().sendInfo("Exported map to " + file);
                                     } catch (IOException e) {
                                       log.error("Failed to export map!", e);
                                     }
@@ -707,7 +706,8 @@ public class ServerCommandManager {
                                 b.suggest(bot.meta().minecraftAccount().username());
 
                                 return Command.SINGLE_SUCCESS;
-                              });
+                              },
+                              false);
 
                           return b.buildFuture();
                         })
@@ -735,7 +735,8 @@ public class ServerCommandManager {
                                 b.suggest(attackManager.id());
 
                                 return Command.SINGLE_SUCCESS;
-                              });
+                              },
+                              false);
 
                           return b.buildFuture();
                         })
@@ -754,8 +755,18 @@ public class ServerCommandManager {
 
   private int forEveryAttack(
       CommandContext<ConsoleSubject> context, ToIntFunction<AttackManager> consumer) {
+    return forEveryAttack(context, consumer, true);
+  }
+
+  private int forEveryAttack(
+      CommandContext<ConsoleSubject> context,
+      ToIntFunction<AttackManager> consumer,
+      boolean printMessages) {
     if (soulFireServer.attacks().isEmpty()) {
-      log.warn("No attacks found!");
+      if (printMessages) {
+        context.getSource().sendWarn("No attacks found!");
+      }
+
       return 2;
     }
 
@@ -768,7 +779,12 @@ public class ServerCommandManager {
         continue;
       }
 
-      log.info("--- Running command for attack {} ---", attackManager.id());
+      if (printMessages) {
+        context
+            .getSource()
+            .sendInfo("--- Running command for attack " + attackManager.id() + " ---");
+      }
+
       var result = consumer.applyAsInt(attackManager);
       if (result != Command.SINGLE_SUCCESS) {
         resultCode = result;
@@ -780,20 +796,37 @@ public class ServerCommandManager {
 
   private int forEveryAttackEnsureHasBots(
       CommandContext<ConsoleSubject> context, ToIntFunction<AttackManager> consumer) {
+    return forEveryAttackEnsureHasBots(context, consumer, true);
+  }
+
+  private int forEveryAttackEnsureHasBots(
+      CommandContext<ConsoleSubject> context,
+      ToIntFunction<AttackManager> consumer,
+      boolean printMessages) {
     return forEveryAttack(
         context,
         attackManager -> {
           if (attackManager.botConnections().isEmpty()) {
-            log.warn("No bots connected!");
+            if (printMessages) {
+              context.getSource().sendWarn("No bots found in attack " + attackManager.id() + "!");
+            }
             return 3;
           }
 
           return consumer.applyAsInt(attackManager);
-        });
+        },
+        printMessages);
   }
 
   private int forEveryBot(
       CommandContext<ConsoleSubject> context, ToIntFunction<BotConnection> consumer) {
+    return forEveryBot(context, consumer, true);
+  }
+
+  private int forEveryBot(
+      CommandContext<ConsoleSubject> context,
+      ToIntFunction<BotConnection> consumer,
+      boolean printMessages) {
     return forEveryAttackEnsureHasBots(
         context,
         attackManager -> {
@@ -804,8 +837,16 @@ public class ServerCommandManager {
                     .noneMatch(s -> s.equals(bot.meta().minecraftAccount().username()))) {
               continue;
             }
-            log.info(
-                "--- Running command for bot {} ---", bot.meta().minecraftAccount().username());
+
+            if (printMessages) {
+              context
+                  .getSource()
+                  .sendInfo(
+                      "--- Running command for bot "
+                          + bot.meta().minecraftAccount().username()
+                          + " ---");
+            }
+
             var result = consumer.applyAsInt(bot);
             if (result != Command.SINGLE_SUCCESS) {
               resultCode = result;
@@ -813,7 +854,8 @@ public class ServerCommandManager {
           }
 
           return resultCode;
-        });
+        },
+        printMessages);
   }
 
   private int executePathfinding(CommandContext<ConsoleSubject> context, GoalScorer goalScorer) {
