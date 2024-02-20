@@ -47,6 +47,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.soulfire.client.gui.ThemeUtil;
 import net.pistonmaster.soulfire.server.util.XtermPalette256;
 import pk.ansi4j.core.DefaultFunctionFinder;
 import pk.ansi4j.core.DefaultParserFactory;
@@ -89,8 +90,7 @@ public class MessageLogPanel extends JPanel {
               new IndependentControlFunctionHandler(),
               new ControlStringHandler())
           .build();
-  private static final Color BACKGROUND_COLOR = Color.decode("#090300");
-  private static final Color DEFAULT_TEXT_COLOR = new Color(204, 204, 204);
+  private TerminalTheme theme = ThemeUtil.getTerminal();
   private boolean clearText;
 
   public MessageLogPanel(int numLines) {
@@ -101,8 +101,8 @@ public class MessageLogPanel extends JPanel {
     textComponent.setFont(
         new Font(FlatJetBrainsMonoFont.FAMILY, Font.PLAIN, new JLabel().getFont().getSize()));
     textComponent.setEditable(true);
-    textComponent.setBackground(BACKGROUND_COLOR);
-    StyleConstants.setForeground(defaultAttributes, DEFAULT_TEXT_COLOR);
+    textComponent.setBackground(theme.backgroundColor());
+    StyleConstants.setForeground(defaultAttributes, theme.getDefaultTextColor());
 
     var caret = (DefaultCaret) textComponent.getCaret();
     caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
@@ -165,7 +165,8 @@ public class MessageLogPanel extends JPanel {
                             var name = attributes.nextElement();
                             defaultAttributes.removeAttribute(name);
                           }
-                          StyleConstants.setForeground(defaultAttributes, DEFAULT_TEXT_COLOR);
+                          StyleConstants.setForeground(
+                              defaultAttributes, theme.getDefaultTextColor());
                         }
                         case 1 -> StyleConstants.setBold(defaultAttributes, true);
                         case 3 -> StyleConstants.setItalic(defaultAttributes, true);
@@ -176,23 +177,21 @@ public class MessageLogPanel extends JPanel {
                         case 24 -> StyleConstants.setUnderline(defaultAttributes, false);
                         case 29 -> StyleConstants.setStrikeThrough(defaultAttributes, false);
                         case 30 ->
-                            StyleConstants.setForeground(defaultAttributes, new Color(1, 1, 1));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(0));
                         case 31 ->
-                            StyleConstants.setForeground(defaultAttributes, new Color(222, 56, 43));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(1));
                         case 32 ->
-                            StyleConstants.setForeground(defaultAttributes, new Color(57, 181, 74));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(2));
                         case 33 ->
-                            StyleConstants.setForeground(defaultAttributes, new Color(255, 199, 6));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(3));
                         case 34 ->
-                            StyleConstants.setForeground(defaultAttributes, new Color(0, 111, 184));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(4));
                         case 35 ->
-                            StyleConstants.setForeground(
-                                defaultAttributes, new Color(118, 38, 113));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(5));
                         case 36 ->
-                            StyleConstants.setForeground(
-                                defaultAttributes, new Color(44, 181, 233));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(6));
                         case 37, 39 ->
-                            StyleConstants.setForeground(defaultAttributes, DEFAULT_TEXT_COLOR);
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(7));
                         case 38 -> {
                           var secondArgument =
                               (int) functionFragment.getArguments().get(1).getValue();
@@ -214,23 +213,21 @@ public class MessageLogPanel extends JPanel {
                               });
                         }
                         case 90 ->
-                            StyleConstants.setForeground(
-                                defaultAttributes, new Color(128, 128, 128));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(8));
                         case 91 ->
-                            StyleConstants.setForeground(defaultAttributes, new Color(255, 0, 0));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(9));
                         case 92 ->
-                            StyleConstants.setForeground(defaultAttributes, new Color(0, 255, 0));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(10));
                         case 93 ->
-                            StyleConstants.setForeground(defaultAttributes, new Color(255, 255, 0));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(11));
                         case 94 ->
-                            StyleConstants.setForeground(defaultAttributes, new Color(0, 0, 255));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(12));
                         case 95 ->
-                            StyleConstants.setForeground(defaultAttributes, new Color(255, 0, 255));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(13));
                         case 96 ->
-                            StyleConstants.setForeground(defaultAttributes, new Color(0, 255, 255));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(14));
                         case 97 ->
-                            StyleConstants.setForeground(
-                                defaultAttributes, new Color(255, 255, 255));
+                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(15));
                       }
                     } else if (functionFragment.getFunction() == C0ControlFunction.LF_LINE_FEED) {
                       document.insertString(document.getLength(), "\n", defaultAttributes);
@@ -298,6 +295,12 @@ public class MessageLogPanel extends JPanel {
 
   public String getLogs() {
     return textComponent.getText();
+  }
+
+  public void refreshTheme() {
+    theme = ThemeUtil.getTerminal();
+    textComponent.setBackground(theme.backgroundColor());
+    StyleConstants.setForeground(defaultAttributes, theme.getDefaultTextColor());
   }
 
   @Setter
