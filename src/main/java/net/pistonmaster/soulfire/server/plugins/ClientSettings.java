@@ -40,7 +40,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ClientSettings implements InternalExtension {
+public class ClientSettings implements InternalPlugin {
   public static void onPacket(SFPacketSentEvent event) {
     if (event.packet() instanceof ServerboundLoginAcknowledgedPacket) {
       var connection = event.connection();

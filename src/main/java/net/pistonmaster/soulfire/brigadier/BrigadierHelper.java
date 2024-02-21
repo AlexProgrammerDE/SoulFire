@@ -39,7 +39,8 @@ public class BrigadierHelper {
     return new CommandHelpWrapper(command, help, false);
   }
 
-  public static RedirectModifier<ConsoleSubject> helpRedirect(String help, RedirectModifier<ConsoleSubject> redirect) {
+  public static RedirectModifier<ConsoleSubject> helpRedirect(
+      String help, RedirectModifier<ConsoleSubject> redirect) {
     return new RedirectHelpWrapper(redirect, help, false);
   }
 

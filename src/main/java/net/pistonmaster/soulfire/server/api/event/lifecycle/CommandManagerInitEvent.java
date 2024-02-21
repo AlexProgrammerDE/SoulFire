@@ -15,15 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.soulfire.server.plugins;
+package net.pistonmaster.soulfire.server.api.event.lifecycle;
 
-import java.util.Set;
-import net.pistonmaster.soulfire.server.api.MixinExtension;
-import net.pistonmaster.soulfire.server.api.ServerExtension;
+import net.pistonmaster.soulfire.server.ServerCommandManager;
+import net.pistonmaster.soulfire.server.api.event.SoulFireGlobalEvent;
 
-public interface InternalExtension extends ServerExtension, MixinExtension {
-  @Override
-  default Set<String> getMixinPaths() {
-    return Set.of();
-  }
-}
+/**
+ * Add yourself to the command manager to add custom commands. At this stage, all built-in commands
+ * are already registered.
+ *
+ * @param commandManager The command manager.
+ */
+public record CommandManagerInitEvent(ServerCommandManager commandManager)
+    implements SoulFireGlobalEvent {}

@@ -54,7 +54,7 @@ import net.pistonmaster.soulfire.server.util.VelocityConstants;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ForwardingBypass implements InternalExtension {
+public class ForwardingBypass implements InternalPlugin {
   private static final char LEGACY_FORWARDING_SEPARATOR = '\0';
 
   private static int findForwardingVersion(int requested, BotConnection player) {

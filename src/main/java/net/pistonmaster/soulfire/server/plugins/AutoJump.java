@@ -30,7 +30,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.MinMaxPropertyLink;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 
-public class AutoJump implements InternalExtension {
+public class AutoJump implements InternalPlugin {
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsHolder = connection.settingsHolder();

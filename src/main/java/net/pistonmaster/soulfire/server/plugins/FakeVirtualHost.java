@@ -31,7 +31,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.IntProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
-public class FakeVirtualHost implements InternalExtension {
+public class FakeVirtualHost implements InternalPlugin {
   public static void onPacket(SFPacketSendingEvent event) {
     if (event.packet() instanceof ClientIntentionPacket intentionPacket) {
       var settingsHolder = event.connection().settingsHolder();

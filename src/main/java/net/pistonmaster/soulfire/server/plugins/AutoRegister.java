@@ -29,7 +29,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
-public class AutoRegister implements InternalExtension {
+public class AutoRegister implements InternalPlugin {
   public static void onChat(ChatMessageReceiveEvent event) {
     var connection = event.connection();
     var settingsHolder = connection.settingsHolder();

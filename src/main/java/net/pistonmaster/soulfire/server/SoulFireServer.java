@@ -51,7 +51,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.pistonmaster.soulfire.SoulFireBootstrap;
 import net.pistonmaster.soulfire.builddata.BuildData;
 import net.pistonmaster.soulfire.server.api.AttackState;
-import net.pistonmaster.soulfire.server.api.ServerExtension;
+import net.pistonmaster.soulfire.server.api.ServerPlugin;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.attack.AttackInitEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
@@ -68,6 +68,7 @@ import net.pistonmaster.soulfire.server.plugins.BotTicker;
 import net.pistonmaster.soulfire.server.plugins.ChatMessageLogger;
 import net.pistonmaster.soulfire.server.plugins.ClientBrand;
 import net.pistonmaster.soulfire.server.plugins.ClientSettings;
+import net.pistonmaster.soulfire.server.plugins.CrashExploits;
 import net.pistonmaster.soulfire.server.plugins.FakeVirtualHost;
 import net.pistonmaster.soulfire.server.plugins.ForwardingBypass;
 import net.pistonmaster.soulfire.server.plugins.KillAura;
@@ -247,14 +248,15 @@ public class SoulFireServer {
             new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
             new ModLoaderSupport(), // Needs to be before ForwardingBypass to not break it
             new ForwardingBypass(),
-            new KillAura());
+            new KillAura(),
+            new CrashExploits());
 
     plugins.forEach(SoulFireAPI::registerServerExtension);
   }
 
   private static void registerServerExtensions() {
     SoulFireBootstrap.PLUGIN_MANAGER
-        .getExtensions(ServerExtension.class)
+        .getExtensions(ServerPlugin.class)
         .forEach(SoulFireAPI::registerServerExtension);
   }
 

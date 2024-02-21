@@ -33,7 +33,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
-public class ClientBrand implements InternalExtension {
+public class ClientBrand implements InternalPlugin {
   public static void onPacket(SFPacketSentEvent event) {
     if (event.packet() instanceof ServerboundLoginAcknowledgedPacket) {
       var connection = event.connection();

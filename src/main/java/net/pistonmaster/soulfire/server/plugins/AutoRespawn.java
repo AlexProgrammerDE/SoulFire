@@ -35,7 +35,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.MinMaxPropertyLink
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.util.RandomUtil;
 
-public class AutoRespawn implements InternalExtension {
+public class AutoRespawn implements InternalPlugin {
   public static void onPacket(SFPacketReceiveEvent event) {
     if (event.packet() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
       var connection = event.connection();

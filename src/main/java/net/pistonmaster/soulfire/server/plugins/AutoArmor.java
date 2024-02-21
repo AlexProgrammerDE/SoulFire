@@ -38,7 +38,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.MinMaxPropertyLink
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.util.TimeUtil;
 
-public class AutoArmor implements InternalExtension {
+public class AutoArmor implements InternalPlugin {
   private static void putOn(
       InventoryManager inventoryManager,
       PlayerInventoryContainer inventory,

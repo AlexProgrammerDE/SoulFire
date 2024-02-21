@@ -37,7 +37,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 
 @Slf4j
-public class KillAura implements InternalExtension {
+public class KillAura implements InternalPlugin {
   @EventHandler
   public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(KillAuraSettings.class, "Kill Aura");

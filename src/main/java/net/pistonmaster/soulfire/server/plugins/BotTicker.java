@@ -25,7 +25,7 @@ import net.pistonmaster.soulfire.server.protocol.BotConnection;
 import net.pistonmaster.soulfire.server.util.TickTimer;
 import org.slf4j.MDC;
 
-public class BotTicker implements InternalExtension {
+public class BotTicker implements InternalPlugin {
   public static void onConnectionInit(BotConnectionInitEvent event) {
     var connection = event.connection();
     startTicker(

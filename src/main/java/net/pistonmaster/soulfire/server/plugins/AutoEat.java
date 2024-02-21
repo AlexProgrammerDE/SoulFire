@@ -34,7 +34,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.util.ItemTypeHelper;
 import net.pistonmaster.soulfire.server.util.TimeUtil;
 
-public class AutoEat implements InternalExtension {
+public class AutoEat implements InternalPlugin {
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsHolder = connection.settingsHolder();

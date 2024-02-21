@@ -40,7 +40,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ModLoaderSupport implements InternalExtension {
+public class ModLoaderSupport implements InternalPlugin {
   private static final char HOSTNAME_SEPARATOR = '\0';
 
   @EventHandler

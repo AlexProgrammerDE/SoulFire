@@ -26,7 +26,8 @@ public record RedirectHelpWrapper(
     RedirectModifier<ConsoleSubject> command, String help, boolean privateCommand)
     implements RedirectModifier<ConsoleSubject> {
   @Override
-  public Collection<ConsoleSubject> apply(CommandContext<ConsoleSubject> context) throws CommandSyntaxException {
+  public Collection<ConsoleSubject> apply(CommandContext<ConsoleSubject> context)
+      throws CommandSyntaxException {
     return command.apply(context);
   }
 }

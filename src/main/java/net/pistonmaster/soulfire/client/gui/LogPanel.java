@@ -177,6 +177,9 @@ public class LogPanel extends JPanel {
           tabQueue.add(suggestion);
 
           var split = command.split(" ", -1);
+
+          // Change command by inserting the suggestion as the last "word"
+          // Word may be "" to allow inserting into the end of the string
           var finalCommand = new String[split.length];
           System.arraycopy(split, 0, finalCommand, 0, split.length - 1);
           finalCommand[split.length - 1] = suggestion;
