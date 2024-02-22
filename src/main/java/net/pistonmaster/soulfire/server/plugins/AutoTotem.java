@@ -33,7 +33,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.MinMaxPropertyLink
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.util.TimeUtil;
 
-public class AutoTotem implements InternalExtension {
+public class AutoTotem implements InternalPlugin {
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsHolder = connection.settingsHolder();

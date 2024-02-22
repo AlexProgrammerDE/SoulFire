@@ -51,7 +51,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.pistonmaster.soulfire.SoulFireBootstrap;
 import net.pistonmaster.soulfire.builddata.BuildData;
 import net.pistonmaster.soulfire.server.api.AttackState;
-import net.pistonmaster.soulfire.server.api.ServerExtension;
+import net.pistonmaster.soulfire.server.api.ServerPlugin;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.attack.AttackInitEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
@@ -254,7 +254,7 @@ public class SoulFireServer {
 
   private static void registerServerExtensions() {
     SoulFireBootstrap.PLUGIN_MANAGER
-        .getExtensions(ServerExtension.class)
+        .getExtensions(ServerPlugin.class)
         .forEach(SoulFireAPI::registerServerExtension);
   }
 

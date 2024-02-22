@@ -31,7 +31,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.MinMaxPropertyLink
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.util.RandomUtil;
 
-public class AutoReconnect implements InternalExtension {
+public class AutoReconnect implements InternalPlugin {
   @EventHandler
   public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(AutoReconnectSettings.class, "Auto Reconnect");

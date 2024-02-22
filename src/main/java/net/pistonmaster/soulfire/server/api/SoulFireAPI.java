@@ -41,7 +41,7 @@ public class SoulFireAPI {
                   throw new IllegalStateException("This event handler only accepts global events");
                 }
               });
-  private static final List<ServerExtension> SERVER_EXTENSIONS = new ArrayList<>();
+  private static final List<ServerPlugin> SERVER_EXTENSIONS = new ArrayList<>();
   private static SoulFireServer soulFireServer;
 
   private SoulFireAPI() {}
@@ -86,12 +86,12 @@ public class SoulFireAPI {
     return EVENT_BUS;
   }
 
-  public static void registerServerExtension(ServerExtension serverExtension) {
-    SERVER_EXTENSIONS.add(serverExtension);
-    serverExtension.onLoad();
+  public static void registerServerExtension(ServerPlugin serverPlugin) {
+    SERVER_EXTENSIONS.add(serverPlugin);
+    serverPlugin.onLoad();
   }
 
-  public static List<ServerExtension> getServerExtensions() {
+  public static List<ServerPlugin> getServerExtensions() {
     return Collections.unmodifiableList(SERVER_EXTENSIONS);
   }
 }

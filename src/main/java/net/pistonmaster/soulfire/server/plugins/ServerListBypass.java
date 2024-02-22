@@ -33,7 +33,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.util.RandomUtil;
 import net.pistonmaster.soulfire.server.util.TimeUtil;
 
-public class ServerListBypass implements InternalExtension {
+public class ServerListBypass implements InternalPlugin {
   public static void onPreConnect(PreBotConnectEvent event) {
     var connection = event.connection();
     if (connection.meta().targetState() == ProtocolState.STATUS) {

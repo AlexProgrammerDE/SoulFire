@@ -15,17 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.soulfire.server.api.event.lifecycle;
+package net.pistonmaster.soulfire.server.plugins;
 
-import com.mojang.brigadier.CommandDispatcher;
-import net.pistonmaster.soulfire.brigadier.ConsoleSubject;
-import net.pistonmaster.soulfire.server.api.event.SoulFireGlobalEvent;
+import java.util.Set;
+import net.pistonmaster.soulfire.server.api.MixinExtension;
+import net.pistonmaster.soulfire.server.api.ServerPlugin;
 
-/**
- * Add yourself to the command dispatcher to add custom commands. At this stage, all built-in
- * commands are already registered.
- *
- * @param commandDispatcher The command dispatcher.
- */
-public record DispatcherInitEvent(CommandDispatcher<ConsoleSubject> commandDispatcher)
-    implements SoulFireGlobalEvent {}
+public interface InternalPlugin extends ServerPlugin, MixinExtension {
+  @Override
+  default Set<String> getMixinPaths() {
+    return Set.of();
+  }
+}
