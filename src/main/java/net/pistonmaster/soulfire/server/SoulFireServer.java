@@ -68,7 +68,6 @@ import net.pistonmaster.soulfire.server.plugins.BotTicker;
 import net.pistonmaster.soulfire.server.plugins.ChatMessageLogger;
 import net.pistonmaster.soulfire.server.plugins.ClientBrand;
 import net.pistonmaster.soulfire.server.plugins.ClientSettings;
-import net.pistonmaster.soulfire.server.plugins.CrashExploits;
 import net.pistonmaster.soulfire.server.plugins.FakeVirtualHost;
 import net.pistonmaster.soulfire.server.plugins.ForwardingBypass;
 import net.pistonmaster.soulfire.server.plugins.KillAura;
@@ -248,8 +247,7 @@ public class SoulFireServer {
             new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
             new ModLoaderSupport(), // Needs to be before ForwardingBypass to not break it
             new ForwardingBypass(),
-            new KillAura(),
-            new CrashExploits());
+            new KillAura());
 
     plugins.forEach(SoulFireAPI::registerServerExtension);
   }
