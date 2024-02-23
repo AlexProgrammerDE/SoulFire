@@ -56,8 +56,8 @@ jobs:
         run: |
           projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
           projectVersionStripped=${projectVersion/-SNAPSHOT/}
-          jpackage --app-version $projectVersionStripped --main-jar "SoulFire-$projectVersion.jar" "@jpackage.cfg" "@jpackage-linux.cfg" --type rpm
-          jpackage --app-version $projectVersionStripped --main-jar "SoulFire-$projectVersion.jar" "@jpackage.cfg" "@jpackage-linux.cfg" --type deb
+          jpackage --app-version $projectVersionStripped --main-jar "SoulFire-$projectVersion.jar" "@installer/jpackage.cfg" "@installer/jpackage-linux.cfg" --type rpm
+          jpackage --app-version $projectVersionStripped --main-jar "SoulFire-$projectVersion.jar" "@installer/jpackage.cfg" "@installer/jpackage-linux.cfg" --type deb
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
@@ -85,7 +85,7 @@ jobs:
         run: |
           $projectVersion = Select-String -Path gradle.properties -Pattern '^mavenVersion=' | ForEach-Object { $_.ToString().Split('=')[1] }
           $projectVersionStripped = $projectVersion -replace '-SNAPSHOT', '' 
-          jpackage --app-version $projectVersionStripped --main-jar "SoulFire-$projectVersion.jar" "@jpackage.cfg" "@jpackage-windows.cfg"
+          jpackage --app-version $projectVersionStripped --main-jar "SoulFire-$projectVersion.jar" "@installer/jpackage.cfg" "@installer/jpackage-windows.cfg"
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
@@ -109,16 +109,11 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-      - name: Prepare environment
-        run: |
-          mkdir mac-resources
-          cp src/main/resources/icons/icon.png mac-resources/SoulFire-background.png
-          cp src/main/resources/icons/icon.png mac-resources/SoulFire-background-darkAqua.png
       - name: Package with jpackage
         run: |
           projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
           projectVersionStripped=${projectVersion/-SNAPSHOT/}
-          jpackage --app-version $projectVersionStripped --main-jar "SoulFire-$projectVersion.jar" "@jpackage.cfg" "@jpackage-mac.cfg"
+          jpackage --app-version $projectVersionStripped --main-jar "SoulFire-$projectVersion.jar" "@installer/jpackage.cfg" "@installer/jpackage-mac.cfg"
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
