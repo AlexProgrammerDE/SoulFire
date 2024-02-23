@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.ToIntFunction;
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
@@ -142,6 +143,35 @@ public class ServerCommandManager {
     // Pathfinding
     dispatcher.register(
         literal("walk")
+            .then(
+                literal("radius")
+                    .then(
+                        argument("size", IntegerArgumentType.integer())
+                            .executes(
+                                help(
+                                    "Makes all connected bots walk to a random xz position within the radius",
+                                    c -> {
+                                      var radius = IntegerArgumentType.getInteger(c, "radius");
+
+                                      return forEveryBot(
+                                          c,
+                                          bot -> {
+                                            var random = ThreadLocalRandom.current();
+                                            var pos = bot.sessionDataManager().clientEntity().pos();
+                                            var x =
+                                                random.nextInt(
+                                                    pos.getFloorX() - radius,
+                                                    pos.getFloorX() + radius);
+                                            var z =
+                                                random.nextInt(
+                                                    pos.getFloorZ() - radius,
+                                                    pos.getFloorZ() + radius);
+
+                                            executePathfinding(bot, new XZGoal(x, z));
+
+                                            return Command.SINGLE_SUCCESS;
+                                          });
+                                    }))))
             .then(
                 argument("y", IntegerArgumentType.integer())
                     .executes(
@@ -677,39 +707,41 @@ public class ServerCommandManager {
     return forEveryBot(
         context,
         bot -> {
-          var logger = bot.logger();
-          var executorService = bot.executorManager().newExecutorService(bot, "PathfindingManager");
-          executorService.execute(
-              () -> {
-                var sessionDataManager = bot.sessionDataManager();
-                var clientEntity = sessionDataManager.clientEntity();
-                var routeFinder =
-                    new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState()), goalScorer);
-
-                Boolean2ObjectFunction<List<WorldAction>> findPath =
-                    requiresRepositioning -> {
-                      var start =
-                          BotEntityState.initialState(
-                              clientEntity,
-                              new ProjectedLevelState(
-                                  Objects.requireNonNull(
-                                          sessionDataManager.getCurrentLevel(), "Level is null!")
-                                      .chunks()
-                                      .immutableCopy()),
-                              new ProjectedInventory(
-                                  sessionDataManager.inventoryManager().playerInventory()));
-                      logger.info("Starting calculations at: {}", start);
-                      var actions = routeFinder.findRoute(start, requiresRepositioning);
-                      logger.info("Calculated path with {} actions: {}", actions.size(), actions);
-                      return actions;
-                    };
-
-                var pathExecutor =
-                    new PathExecutor(bot, findPath.get(true), findPath, executorService);
-                pathExecutor.register();
-              });
-
+          executePathfinding(bot, goalScorer);
           return Command.SINGLE_SUCCESS;
+        });
+  }
+
+  public void executePathfinding(BotConnection bot, GoalScorer goalScorer) {
+    var logger = bot.logger();
+    var executorService = bot.executorManager().newExecutorService(bot, "PathfindingManager");
+    executorService.execute(
+        () -> {
+          var sessionDataManager = bot.sessionDataManager();
+          var clientEntity = sessionDataManager.clientEntity();
+          var routeFinder =
+              new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState()), goalScorer);
+
+          Boolean2ObjectFunction<List<WorldAction>> findPath =
+              requiresRepositioning -> {
+                var start =
+                    BotEntityState.initialState(
+                        clientEntity,
+                        new ProjectedLevelState(
+                            Objects.requireNonNull(
+                                    sessionDataManager.getCurrentLevel(), "Level is null!")
+                                .chunks()
+                                .immutableCopy()),
+                        new ProjectedInventory(
+                            sessionDataManager.inventoryManager().playerInventory()));
+                logger.info("Starting calculations at: {}", start);
+                var actions = routeFinder.findRoute(start, requiresRepositioning);
+                logger.info("Calculated path with {} actions: {}", actions.size(), actions);
+                return actions;
+              };
+
+          var pathExecutor = new PathExecutor(bot, findPath.get(true), findPath, executorService);
+          pathExecutor.register();
         });
   }
 
