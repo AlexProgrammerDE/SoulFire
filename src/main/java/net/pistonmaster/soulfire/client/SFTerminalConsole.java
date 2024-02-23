@@ -47,6 +47,12 @@ public class SFTerminalConsole extends SimpleTerminalConsole {
       ShutdownManager shutdownManager,
       ClientCommandManager clientCommandManager) {
     SFTerminalConsole.setupStreams();
+
+    if (System.console() == null) {
+      logger.debug("No console available, not starting a terminal console.");
+      return;
+    }
+
     threadPool.execute(new SFTerminalConsole(shutdownManager, clientCommandManager)::start);
   }
 
