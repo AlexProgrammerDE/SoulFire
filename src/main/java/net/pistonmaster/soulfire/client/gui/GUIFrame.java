@@ -19,7 +19,6 @@ package net.pistonmaster.soulfire.client.gui;
 
 import ch.jalu.injector.Injector;
 import com.formdev.flatlaf.extras.FlatSVGUtils;
-import com.formdev.flatlaf.util.SystemInfo;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -113,16 +112,6 @@ public class GUIFrame extends JFrame {
   }
 
   public void initComponents(Injector injector) {
-    if (SystemInfo.isMacOS && SystemInfo.isMacFullWindowContentSupported) {
-      var rootPane = getRootPane();
-      // expand window content into window title bar and make title bar transparent
-      rootPane.putClientProperty("apple.awt.fullWindowContent", true);
-      rootPane.putClientProperty("apple.awt.transparentTitleBar", true);
-
-      // Hide window title because we want to avoid dark-mode name issues
-      rootPane.putClientProperty("apple.awt.windowTitleVisible", false);
-    }
-
     setResizable(true);
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
