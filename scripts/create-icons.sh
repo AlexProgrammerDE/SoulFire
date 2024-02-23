@@ -30,7 +30,7 @@ rm output_*.png
 
 # pkg background
 convert src/main/resources/icons/icon.png \
--background transparent -density 1000 -resize 123x123^ -gravity center -extent 143x222 \
+-background transparent -density 1000 -resize 103x123 -gravity center -extent 143x222 \
 installer/mac/SoulFire-background.png
 
 cp installer/mac/SoulFire-background.png \
