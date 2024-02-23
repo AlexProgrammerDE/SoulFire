@@ -109,6 +109,11 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+      - name: Prepare environment
+        run: |
+          mkdir mac-resources
+          cp src/main/resources/icon.png mac-resources/SoulFire-background.png
+          cp src/main/resources/icon.png mac-resources/SoulFire-background-darkAqua.png
       - name: Package with jpackage
         run: |
           projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
