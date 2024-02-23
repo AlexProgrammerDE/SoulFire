@@ -146,7 +146,7 @@ public class ServerCommandManager {
             .then(
                 literal("radius")
                     .then(
-                        argument("size", IntegerArgumentType.integer())
+                        argument("radius", IntegerArgumentType.integer())
                             .executes(
                                 help(
                                     "Makes all connected bots walk to a random xz position within the radius",
