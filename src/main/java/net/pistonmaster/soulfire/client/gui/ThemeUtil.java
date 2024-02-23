@@ -82,20 +82,7 @@ public class ThemeUtil {
   }
 
   public static void initFlatLaf() {
-    FlatInterFont.install();
-    FlatLaf.setPreferredFontFamily(FlatInterFont.FAMILY);
-    FlatLaf.setPreferredLightFontFamily(FlatInterFont.FAMILY_LIGHT);
-    FlatLaf.setPreferredSemiboldFontFamily(FlatInterFont.FAMILY_SEMIBOLD);
-
-    FlatJetBrainsMonoFont.install();
-    FlatLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
-
-    FlatInspector.install("ctrl shift I");
-    FlatUIDefaultsInspector.install("ctrl shift O");
-    ToolTipManager.sharedInstance().setInitialDelay(100);
-    ToolTipManager.sharedInstance().setDismissDelay(10_000);
-    UIManager.put("PasswordField.showRevealButton", true);
-
+    // Needs to be before the other stuff to work properly
     if (SystemInfo.isMacOS) {
       // Use top screen menu bar on macOS
       System.setProperty("apple.laf.useScreenMenuBar", "true");
@@ -110,5 +97,19 @@ public class ThemeUtil {
       JFrame.setDefaultLookAndFeelDecorated(true);
       JDialog.setDefaultLookAndFeelDecorated(true);
     }
+
+    FlatInterFont.install();
+    FlatLaf.setPreferredFontFamily(FlatInterFont.FAMILY);
+    FlatLaf.setPreferredLightFontFamily(FlatInterFont.FAMILY_LIGHT);
+    FlatLaf.setPreferredSemiboldFontFamily(FlatInterFont.FAMILY_SEMIBOLD);
+
+    FlatJetBrainsMonoFont.install();
+    FlatLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
+
+    FlatInspector.install("ctrl shift I");
+    FlatUIDefaultsInspector.install("ctrl shift O");
+    ToolTipManager.sharedInstance().setInitialDelay(100);
+    ToolTipManager.sharedInstance().setDismissDelay(10_000);
+    UIManager.put("PasswordField.showRevealButton", true);
   }
 }
