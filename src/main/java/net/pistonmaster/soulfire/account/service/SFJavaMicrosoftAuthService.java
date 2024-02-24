@@ -19,9 +19,9 @@ package net.pistonmaster.soulfire.account.service;
 
 import java.io.IOException;
 import net.pistonmaster.soulfire.account.AuthType;
-import net.pistonmaster.soulfire.account.HttpHelper;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.proxy.SFProxy;
+import net.pistonmaster.soulfire.util.HttpHelper;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;

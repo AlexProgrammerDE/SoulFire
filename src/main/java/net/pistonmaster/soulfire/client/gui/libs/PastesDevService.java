@@ -19,8 +19,8 @@ package net.pistonmaster.soulfire.client.gui.libs;
 
 import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.soulfire.account.HttpHelper;
 import net.pistonmaster.soulfire.util.GsonInstance;
+import net.pistonmaster.soulfire.util.HttpHelper;
 import reactor.core.publisher.Flux;
 import reactor.netty.ByteBufFlux;
 

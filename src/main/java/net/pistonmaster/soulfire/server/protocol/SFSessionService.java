@@ -27,10 +27,10 @@ import java.util.UUID;
 import javax.crypto.SecretKey;
 import lombok.AllArgsConstructor;
 import net.pistonmaster.soulfire.account.AuthType;
-import net.pistonmaster.soulfire.account.HttpHelper;
 import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.pistonmaster.soulfire.server.util.UUIDHelper;
 import net.pistonmaster.soulfire.util.GsonInstance;
+import net.pistonmaster.soulfire.util.HttpHelper;
 import reactor.core.publisher.Flux;
 import reactor.netty.ByteBufFlux;
 

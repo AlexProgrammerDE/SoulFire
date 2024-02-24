@@ -22,7 +22,6 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
-import net.pistonmaster.soulfire.account.HttpHelper;
 import net.pistonmaster.soulfire.builddata.BuildData;
 import net.pistonmaster.soulfire.server.util.VersionComparator;
 import reactor.core.publisher.Mono;
