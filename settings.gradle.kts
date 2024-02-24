@@ -42,6 +42,9 @@ dependencyResolutionManagement {
         maven("https://jitpack.io/") {
             name = "JitPack Repository"
         }
+        maven("https://repo.spring.io/milestone") {
+            name = "Spring Milestone Repository"
+        }
         mavenCentral()
     }
     versionCatalogs {

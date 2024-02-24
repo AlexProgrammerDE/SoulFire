@@ -19,18 +19,19 @@ package net.pistonmaster.soulfire.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URI;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import javax.net.ssl.HttpsURLConnection;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.builddata.BuildData;
 import net.pistonmaster.soulfire.server.util.VersionComparator;
+import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 
 @Slf4j
 public class SFUpdateChecker {
+  private static final URI UPDATE_URL = URI.create("https://api.github.com/repos/AlexProgrammerDE/SoulFire/releases/latest");
   private static SFUpdateChecker instance;
   private final String updateVersion;
 
@@ -56,34 +57,33 @@ public class SFUpdateChecker {
     }
 
     try {
-      var url =
-          URI.create("https://api.github.com/repos/AlexProgrammerDE/SoulFire/releases/latest")
-              .toURL();
-      var connection = (HttpsURLConnection) url.openConnection();
-      connection.setRequestMethod("GET");
-      connection.setRequestProperty("User-Agent", "SoulFire");
-      connection.setConnectTimeout(5000);
-      connection.setReadTimeout(5000);
+      return HttpClient.create()
+          .responseTimeout(Duration.ofSeconds(5))
+          .headers(h -> h.add("User-Agent", "SoulFire"))
+          .get()
+          .uri(UPDATE_URL)
+          .responseSingle((res, content) -> {
+            if (res.status().code() != 200) {
+              log.warn("Failed to check for updates: {}", res.status().code());
+              return Mono.empty();
+            }
 
-      if (connection.getResponseCode() != 200) {
-        log.warn("Failed to check for updates: {}", connection.getResponseCode());
-        return null;
-      }
+            return content.asString().mapNotNull(s -> {
+              var responseObject = new Gson().fromJson(s, JsonObject.class);
 
-      JsonObject response;
-      try (var stream = connection.getInputStream()) {
-        response = new Gson().fromJson(new InputStreamReader(stream), JsonObject.class);
-      }
-
-      var latestVersion = response.get("tag_name").getAsString();
-      if (VersionComparator.isNewer(BuildData.VERSION, latestVersion)) {
-        return latestVersion;
-      }
-    } catch (IOException e) {
+              var latestVersion = responseObject.get("tag_name").getAsString();
+              if (VersionComparator.isNewer(BuildData.VERSION, latestVersion)) {
+                return latestVersion;
+              } else {
+                return null;
+              }
+            });
+          })
+          .block();
+    } catch (Exception e) {
       log.warn("Failed to check for updates", e);
+      return null;
     }
-
-    return null;
   }
 
   public Optional<String> getUpdateVersion() {

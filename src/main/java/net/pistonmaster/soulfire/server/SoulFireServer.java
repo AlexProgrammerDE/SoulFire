@@ -205,6 +205,8 @@ public class SoulFireServer {
           "SoulFire is outdated! Current version: {}, latest version: {}",
           BuildData.VERSION,
           newVersion.get());
+    } else {
+      log.info("SoulFire is up to date!");
     }
 
     registerInternalServerExtensions();
