@@ -17,17 +17,33 @@
  */
 package net.pistonmaster.soulfire.account;
 
+import io.netty.handler.codec.http.HttpMethod;
+import java.io.IOException;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import lombok.SneakyThrows;
 import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.HttpResponse;
+import net.lenni0451.commons.httpclient.executor.RequestExecutor;
+import net.lenni0451.commons.httpclient.requests.HttpContentRequest;
+import net.lenni0451.commons.httpclient.requests.HttpRequest;
 import net.pistonmaster.soulfire.builddata.BuildData;
 import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.raphimc.minecraftauth.MinecraftAuth;
+import org.jetbrains.annotations.NotNull;
+import reactor.core.publisher.Flux;
+import reactor.netty.ByteBufFlux;
 import reactor.netty.transport.ProxyProvider;
 
 public class HttpHelper {
   private HttpHelper() {}
 
-  public static reactor.netty.http.client.HttpClient createReactorClient(SFProxy proxyData, boolean withBody) {
+  public static reactor.netty.http.client.HttpClient createReactorClient(
+      SFProxy proxyData, boolean withBody) {
     var base =
         reactor.netty.http.client.HttpClient.create()
             .responseTimeout(Duration.ofSeconds(5))
@@ -69,6 +85,70 @@ public class HttpHelper {
   }
 
   public static HttpClient createLenniMCAuthHttpClient(SFProxy proxyData) {
-    return MinecraftAuth.createHttpClient();
+    return MinecraftAuth.createHttpClient()
+        .setExecutor(client -> new ReactorLenniExecutor(proxyData, client));
+  }
+
+  private static class ReactorLenniExecutor extends RequestExecutor {
+    private final SFProxy proxyData;
+
+    public ReactorLenniExecutor(SFProxy proxyData, HttpClient httpClient) {
+      super(httpClient);
+      this.proxyData = proxyData;
+    }
+
+    @NotNull
+    @Override
+    @SneakyThrows
+    public HttpResponse execute(@NotNull HttpRequest httpRequest) {
+      try {
+        var base =
+            createReactorClient(proxyData, false)
+                .followRedirect(
+                    switch (httpRequest.getFollowRedirects()) {
+                      case NOT_SET, FOLLOW -> true;
+                      case IGNORE -> false;
+                    })
+                .responseTimeout(Duration.ofMillis(client.getReadTimeout()))
+                .headers(
+                    h -> {
+                      h.clear();
+                      httpRequest.getHeaders().forEach(h::add);
+                    })
+                .request(HttpMethod.valueOf(httpRequest.getMethod().toUpperCase(Locale.ROOT)))
+                .uri(httpRequest.getURL().toURI());
+
+        reactor.netty.http.client.HttpClient.ResponseReceiver<?> receiver;
+        if (httpRequest instanceof HttpContentRequest contentRequest) {
+          receiver =
+              base.send(
+                  ByteBufFlux.fromString(
+                      Flux.just(Objects.requireNonNull(contentRequest.getContent()).getAsString())));
+        } else {
+          receiver = base;
+        }
+
+        return receiver
+            .responseSingle(
+                (res, content) ->
+                    content
+                        .asByteArray()
+                        .map(
+                            bytes ->
+                                new HttpResponse(
+                                    httpRequest.getURL(),
+                                    res.status().code(),
+                                    bytes,
+                                    res.responseHeaders().entries().stream()
+                                        .collect(
+                                            Collectors.toMap(
+                                                Map.Entry::getKey,
+                                                e -> Collections.singletonList(e.getValue()))))))
+            .blockOptional()
+            .orElseThrow();
+      } catch (Exception e) {
+        throw new IOException(e);
+      }
+    }
   }
 }
