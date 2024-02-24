@@ -17,7 +17,6 @@
  */
 package net.pistonmaster.soulfire.client.settings;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -61,7 +60,7 @@ public class AccountRegistry {
 
     try {
       return authType.authService().createDataAndLogin(data, null);
-    } catch (IOException e) {
+    } catch (Exception e) {
       log.error("Failed to load account from string", e);
       throw new RuntimeException(e);
     }

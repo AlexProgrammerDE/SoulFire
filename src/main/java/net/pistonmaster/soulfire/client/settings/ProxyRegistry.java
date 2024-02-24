@@ -64,12 +64,21 @@ public class ProxyRegistry {
 
     var split = data.split(":");
 
-    var host = split[0];
-    var port = Integer.parseInt(split[1]);
-    var username = getIndexOrNull(split, 2);
-    var password = getIndexOrNull(split, 3);
+    if (split.length < 2) {
+      throw new IllegalArgumentException("Proxy must have at least a host and a port!");
+    }
 
-    return new SFProxy(proxyType, host, port, username, password, true);
+    try {
+      var host = split[0];
+      var port = Integer.parseInt(split[1]);
+      var username = getIndexOrNull(split, 2);
+      var password = getIndexOrNull(split, 3);
+
+      return new SFProxy(proxyType, host, port, username, password, true);
+    } catch (Exception e) {
+      log.error("Failed to load proxy from string.", e);
+      throw new RuntimeException(e);
+    }
   }
 
   public List<SFProxy> getProxies() {
