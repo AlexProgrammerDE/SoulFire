@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.HttpResponse;
@@ -104,8 +103,7 @@ public class HttpHelper {
 
     @NotNull
     @Override
-    @SneakyThrows
-    public HttpResponse execute(@NotNull HttpRequest httpRequest) {
+    public HttpResponse execute(@NotNull HttpRequest httpRequest) throws IOException {
       var cookieManager = getCookieManager(httpRequest);
       try {
         log.debug("Executing request: {}", httpRequest.getURL());
