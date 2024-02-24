@@ -62,6 +62,7 @@ public class AccountRegistry {
     try {
       return authType.authService().createDataAndLogin(data, null);
     } catch (IOException e) {
+      log.error("Failed to load account from string", e);
       throw new RuntimeException(e);
     }
   }
