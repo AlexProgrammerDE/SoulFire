@@ -20,18 +20,18 @@ package net.pistonmaster.soulfire.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.net.URI;
-import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
+import net.pistonmaster.soulfire.account.HttpHelper;
 import net.pistonmaster.soulfire.builddata.BuildData;
 import net.pistonmaster.soulfire.server.util.VersionComparator;
 import reactor.core.publisher.Mono;
-import reactor.netty.http.client.HttpClient;
 
 @Slf4j
 public class SFUpdateChecker {
-  private static final URI UPDATE_URL = URI.create("https://api.github.com/repos/AlexProgrammerDE/SoulFire/releases/latest");
+  private static final URI UPDATE_URL =
+      URI.create("https://api.github.com/repos/AlexProgrammerDE/SoulFire/releases/latest");
   private static SFUpdateChecker instance;
   private final String updateVersion;
 
@@ -57,28 +57,31 @@ public class SFUpdateChecker {
     }
 
     try {
-      return HttpClient.create()
-          .responseTimeout(Duration.ofSeconds(5))
+      return HttpHelper.createReactorClient(null)
           .headers(h -> h.add("User-Agent", "SoulFire"))
           .get()
           .uri(UPDATE_URL)
-          .responseSingle((res, content) -> {
-            if (res.status().code() != 200) {
-              log.warn("Failed to check for updates: {}", res.status().code());
-              return Mono.empty();
-            }
+          .responseSingle(
+              (res, content) -> {
+                if (res.status().code() != 200) {
+                  log.warn("Failed to check for updates: {}", res.status().code());
+                  return Mono.empty();
+                }
 
-            return content.asString().mapNotNull(s -> {
-              var responseObject = new Gson().fromJson(s, JsonObject.class);
+                return content
+                    .asString()
+                    .mapNotNull(
+                        s -> {
+                          var responseObject = new Gson().fromJson(s, JsonObject.class);
 
-              var latestVersion = responseObject.get("tag_name").getAsString();
-              if (VersionComparator.isNewer(BuildData.VERSION, latestVersion)) {
-                return latestVersion;
-              } else {
-                return null;
-              }
-            });
-          })
+                          var latestVersion = responseObject.get("tag_name").getAsString();
+                          if (VersionComparator.isNewer(BuildData.VERSION, latestVersion)) {
+                            return latestVersion;
+                          } else {
+                            return null;
+                          }
+                        });
+              })
           .block();
     } catch (Exception e) {
       log.warn("Failed to check for updates", e);

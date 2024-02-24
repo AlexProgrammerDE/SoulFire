@@ -255,7 +255,7 @@ public class MessageLogPanel extends JPanel {
 
       var uploadItem = new JMenuItem("Upload to pastes.dev");
       uploadItem.addActionListener(
-          e -> {
+          event -> {
             try {
               var url =
                   "https://pastes.dev/" + PastesDevService.upload(textComponent.getSelectedText());
@@ -265,8 +265,8 @@ public class MessageLogPanel extends JPanel {
                       "Uploaded to: <a href='" + url + "'>" + url + "</a>"),
                   "Success",
                   JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception ex) {
-              log.error("Failed to upload!", ex);
+            } catch (Exception e) {
+              log.error("Failed to upload!", e);
               JOptionPane.showMessageDialog(
                   this, "Failed to upload!", "Error", JOptionPane.ERROR_MESSAGE);
             }

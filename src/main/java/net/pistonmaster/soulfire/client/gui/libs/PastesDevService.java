@@ -18,19 +18,19 @@
 package net.pistonmaster.soulfire.client.gui.libs;
 
 import com.google.gson.Gson;
-import java.io.IOException;
 import java.util.ArrayList;
+import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.account.HttpHelper;
 import net.pistonmaster.soulfire.builddata.BuildData;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.util.EntityUtils;
+import reactor.core.publisher.Flux;
+import reactor.netty.ByteBufFlux;
 
+@Slf4j
 public class PastesDevService {
   private static final Gson gson = new Gson();
 
@@ -42,26 +42,36 @@ public class PastesDevService {
     headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en"));
     headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "SoulFire/" + BuildData.VERSION));
 
-    return HttpHelper.createHttpClient(headers, null);
+    return HttpHelper.createApacheHttpClient(headers, null);
   }
 
-  public static String upload(String text) throws IOException {
-    try (var httpClient = createHttpClient()) {
-      var httpPost = new HttpPost("https://api.pastes.dev/post");
-      httpPost.setEntity(new StringEntity(text, ContentType.APPLICATION_JSON));
-      try (var response = httpClient.execute(httpPost)) {
-        if (response.getStatusLine().getStatusCode() != 201) {
-          throw new IOException(
-              "Failed to upload paste: " + response.getStatusLine().getStatusCode());
-        }
+  public static String upload(String text) {
+    return HttpHelper.createReactorClient(null)
+        .headers(
+            h -> {
+              h.add("Accept", "application/json");
+              h.add("Content-Type", "application/json");
+              h.add("User-Agent", "SoulFire/" + BuildData.VERSION);
+            })
+        .post()
+        .uri("https://api.pastes.dev/post")
+        .send(ByteBufFlux.fromString(Flux.just(text)))
+        .responseSingle(
+            (res, content) -> {
+              if (res.status().code() != 201) {
+                log.warn("Failed to upload: {}", res.status().code());
+                throw new RuntimeException("Failed to upload");
+              }
 
-        var responseText = EntityUtils.toString(response.getEntity());
-
-        return gson.fromJson(responseText, BytebinResponse.class).key();
-      }
-    } catch (Exception e) {
-      throw new IOException(e);
-    }
+              return content
+                  .asString()
+                  .map(
+                      responseText -> {
+                        var response = gson.fromJson(responseText, BytebinResponse.class);
+                        return response.key();
+                      });
+            })
+        .block();
   }
 
   private record BytebinResponse(String key) {}

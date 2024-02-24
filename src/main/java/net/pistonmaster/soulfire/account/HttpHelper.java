@@ -17,6 +17,7 @@
  */
 package net.pistonmaster.soulfire.account;
 
+import java.time.Duration;
 import java.util.List;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.pistonmaster.soulfire.proxy.SFProxy;
@@ -37,18 +38,25 @@ public class HttpHelper {
   private HttpHelper() {}
 
   public static CloseableHttpClient createMCAuthHttpClient(SFProxy proxyData) {
-    return createHttpClient(
+    return createApacheHttpClient(
         List.of(
             new BasicHeader("Accept", ContentType.APPLICATION_JSON.getMimeType()),
             new BasicHeader("Accept-Language", "en-US,en")),
         proxyData);
   }
 
+  public static reactor.netty.http.client.HttpClient createReactorClient(SFProxy proxyData) {
+    return reactor.netty.http.client.HttpClient.create()
+        .responseTimeout(Duration.ofSeconds(5))
+        .headers(h -> h.add("Accept-Language", "en-US,en"));
+  }
+
   public static HttpClient createLenniMCAuthHttpClient(SFProxy proxyData) {
     return MinecraftAuth.createHttpClient();
   }
 
-  public static CloseableHttpClient createHttpClient(List<Header> headers, SFProxy proxyData) {
+  public static CloseableHttpClient createApacheHttpClient(
+      List<Header> headers, SFProxy proxyData) {
     var httpBuilder = HttpClientBuilder.create().setDefaultHeaders(headers);
 
     var timeout = 5;
