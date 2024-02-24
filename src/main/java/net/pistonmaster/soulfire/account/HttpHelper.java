@@ -19,7 +19,7 @@ package net.pistonmaster.soulfire.account;
 
 import java.util.List;
 import net.lenni0451.commons.httpclient.HttpClient;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -36,7 +36,7 @@ import org.apache.http.message.BasicHeader;
 public class HttpHelper {
   private HttpHelper() {}
 
-  public static CloseableHttpClient createMCAuthHttpClient(SWProxy proxyData) {
+  public static CloseableHttpClient createMCAuthHttpClient(SFProxy proxyData) {
     return createHttpClient(
         List.of(
             new BasicHeader("Accept", ContentType.APPLICATION_JSON.getMimeType()),
@@ -44,11 +44,11 @@ public class HttpHelper {
         proxyData);
   }
 
-  public static HttpClient createLenniMCAuthHttpClient(SWProxy proxyData) {
+  public static HttpClient createLenniMCAuthHttpClient(SFProxy proxyData) {
     return MinecraftAuth.createHttpClient();
   }
 
-  public static CloseableHttpClient createHttpClient(List<Header> headers, SWProxy proxyData) {
+  public static CloseableHttpClient createHttpClient(List<Header> headers, SFProxy proxyData) {
     var httpBuilder = HttpClientBuilder.create().setDefaultHeaders(headers);
 
     var timeout = 5;

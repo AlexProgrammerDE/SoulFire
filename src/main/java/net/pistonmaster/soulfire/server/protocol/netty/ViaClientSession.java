@@ -53,7 +53,7 @@ import javax.crypto.SecretKey;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.pistonmaster.soulfire.account.service.BedrockData;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.pistonmaster.soulfire.server.protocol.BotConnectionMeta;
 import net.pistonmaster.soulfire.server.protocol.SFProtocolConstants;
 import net.pistonmaster.soulfire.server.viaversion.FrameCodec;
@@ -81,7 +81,7 @@ public class ViaClientSession extends TcpSession {
   private final InetSocketAddress targetAddress;
   private final String bindAddress;
   private final int bindPort;
-  private final SWProxy proxy;
+  private final SFProxy proxy;
   private final PacketCodecHelper codecHelper;
   @Getter private final EventLoopGroup eventLoopGroup;
   @Getter private final BotConnectionMeta meta;
@@ -92,7 +92,7 @@ public class ViaClientSession extends TcpSession {
       InetSocketAddress targetAddress,
       Logger logger,
       PacketProtocol protocol,
-      SWProxy proxy,
+      SFProxy proxy,
       EventLoopGroup eventLoopGroup,
       BotConnectionMeta meta) {
     super(null, -1, protocol);

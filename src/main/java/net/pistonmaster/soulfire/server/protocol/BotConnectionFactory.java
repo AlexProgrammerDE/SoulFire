@@ -25,7 +25,7 @@ import java.util.UUID;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.pistonmaster.soulfire.server.AttackManager;
 import net.pistonmaster.soulfire.server.api.event.EventExceptionHandler;
 import net.pistonmaster.soulfire.server.api.event.SoulFireBotEvent;
@@ -47,7 +47,7 @@ public record BotConnectionFactory(
     MinecraftProtocol protocol,
     MinecraftAccount minecraftAccount,
     ProtocolVersion protocolVersion,
-    SWProxy proxyData,
+    SFProxy proxyData,
     EventLoopGroup eventLoopGroup) {
   public BotConnection prepareConnection() {
     return prepareConnectionInternal(ProtocolState.LOGIN);

@@ -110,7 +110,7 @@ public class SFBaseListener extends SessionAdapter {
         session.send(
             new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
 
-        if (!isLegacy) { // Legacy encryption is handled in SWViaEncryptionProvider
+        if (!isLegacy) { // Legacy encryption is handled in SFViaEncryptionProvider
           viaSession.enableJavaEncryption(key);
         } else {
           botConnection.logger().debug("Storing legacy secret key.");

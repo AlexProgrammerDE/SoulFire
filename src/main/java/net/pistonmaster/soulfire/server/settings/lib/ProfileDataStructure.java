@@ -40,13 +40,13 @@ import java.util.Map;
 import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.account.service.AccountData;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 
 // Intermediary class between profile strings and SettingsHolder
 public record ProfileDataStructure(
     Map<String, Map<String, JsonElement>> settings,
     List<MinecraftAccount> accounts,
-    List<SWProxy> proxies) {
+    List<SFProxy> proxies) {
   private static final Gson PROFILE_GSON =
       new GsonBuilder()
           .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())

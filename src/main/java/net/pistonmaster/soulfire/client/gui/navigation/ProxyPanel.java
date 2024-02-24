@@ -39,7 +39,7 @@ import net.pistonmaster.soulfire.client.gui.GUIManager;
 import net.pistonmaster.soulfire.client.gui.libs.JEnumComboBox;
 import net.pistonmaster.soulfire.client.gui.popups.ImportTextDialog;
 import net.pistonmaster.soulfire.proxy.ProxyType;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.pistonmaster.soulfire.util.BuiltinSettingsConstants;
 import net.pistonmaster.soulfire.util.SFPathConstants;
 
@@ -135,7 +135,7 @@ public class ProxyPanel extends NavigationItem {
     proxyList.addPropertyChangeListener(
         evt -> {
           if ("tableCellEditor".equals(evt.getPropertyName()) && !proxyList.isEditing()) {
-            var proxies = new ArrayList<SWProxy>();
+            var proxies = new ArrayList<SFProxy>();
 
             for (var i = 0; i < proxyList.getRowCount(); i++) {
               var row = new Object[proxyList.getColumnCount()];
@@ -150,7 +150,7 @@ public class ProxyPanel extends NavigationItem {
               var type = (ProxyType) row[4];
               var enabled = (boolean) row[5];
 
-              proxies.add(new SWProxy(type, host, port, username, password, enabled));
+              proxies.add(new SFProxy(type, host, port, username, password, enabled));
             }
 
             proxyRegistry.setProxies(proxies);

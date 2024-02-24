@@ -25,16 +25,16 @@ import net.pistonmaster.soulfire.util.SFContextClassLoader;
  * plugin and server classes.
  */
 public class SoulFireLauncher {
-  private static final SFContextClassLoader SW_CONTEXT_CLASS_LOADER = new SFContextClassLoader();
+  private static final SFContextClassLoader SF_CONTEXT_CLASS_LOADER = new SFContextClassLoader();
 
   public static void main(String[] args) {
-    Thread.currentThread().setContextClassLoader(SW_CONTEXT_CLASS_LOADER);
+    Thread.currentThread().setContextClassLoader(SF_CONTEXT_CLASS_LOADER);
 
     try {
-      SW_CONTEXT_CLASS_LOADER
+      SF_CONTEXT_CLASS_LOADER
           .loadClass("net.pistonmaster.soulfire.SoulFireBootstrap")
           .getDeclaredMethod("bootstrap", String[].class, List.class)
-          .invoke(null, args, SW_CONTEXT_CLASS_LOADER.childClassLoaders());
+          .invoke(null, args, SF_CONTEXT_CLASS_LOADER.childClassLoaders());
     } catch (ReflectiveOperationException e) {
       throw new RuntimeException(e);
     }

@@ -24,7 +24,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.account.service.OnlineJavaData;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.pistonmaster.soulfire.server.protocol.bot.BotControlAPI;
 import net.pistonmaster.soulfire.server.protocol.bot.SessionDataManager;
 import net.pistonmaster.soulfire.server.protocol.netty.ViaClientSession;
@@ -42,7 +42,7 @@ public class BotConnectionMeta {
       MinecraftAccount minecraftAccount,
       ProtocolState targetState,
       ProtocolVersion protocolVersion,
-      SWProxy proxyData) {
+      SFProxy proxyData) {
     this.minecraftAccount = minecraftAccount;
     this.targetState = targetState;
     this.protocolVersion = protocolVersion;

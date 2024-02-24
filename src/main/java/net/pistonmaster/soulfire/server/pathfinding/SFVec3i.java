@@ -90,7 +90,7 @@ public class SFVec3i {
 
   @Override
   public String toString() {
-    return "SWVec3i(" + x + ", " + y + ", " + z + ")";
+    return "SFVec3i(" + x + ", " + y + ", " + z + ")";
   }
 
   public String formatXYZ() {

@@ -30,7 +30,7 @@ import javax.crypto.SecretKey;
 import lombok.AllArgsConstructor;
 import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.HttpHelper;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.pistonmaster.soulfire.server.util.UUIDHelper;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -47,10 +47,10 @@ public class SFSessionService {
   private static final URI EASYMC_JOIN_URI =
       URI.create("https://sessionserver.easymc.io/session/minecraft/join");
   private final URI joinEndpoint;
-  private final SWProxy proxyData;
+  private final SFProxy proxyData;
   private final Gson gson = new Gson();
 
-  public SFSessionService(AuthType authType, SWProxy proxyData) {
+  public SFSessionService(AuthType authType, SFProxy proxyData) {
     this.joinEndpoint =
         switch (authType) {
           case MICROSOFT_JAVA -> MOJANG_JOIN_URI;

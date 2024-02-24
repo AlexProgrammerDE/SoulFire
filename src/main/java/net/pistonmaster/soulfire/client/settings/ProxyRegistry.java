@@ -23,12 +23,12 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.proxy.ProxyType;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 
 @Slf4j
 @RequiredArgsConstructor
 public class ProxyRegistry {
-  private final List<SWProxy> proxies = new ArrayList<>();
+  private final List<SFProxy> proxies = new ArrayList<>();
   private final List<Runnable> loadHooks = new ArrayList<>();
 
   private static <T> T getIndexOrNull(T[] array, int index) {
@@ -59,7 +59,7 @@ public class ProxyRegistry {
     log.info("Loaded {} proxies!", newProxies.size());
   }
 
-  private SWProxy fromStringSingle(String data, ProxyType proxyType) {
+  private SFProxy fromStringSingle(String data, ProxyType proxyType) {
     data = data.trim();
 
     var split = data.split(":");
@@ -69,14 +69,14 @@ public class ProxyRegistry {
     var username = getIndexOrNull(split, 2);
     var password = getIndexOrNull(split, 3);
 
-    return new SWProxy(proxyType, host, port, username, password, true);
+    return new SFProxy(proxyType, host, port, username, password, true);
   }
 
-  public List<SWProxy> getProxies() {
+  public List<SFProxy> getProxies() {
     return Collections.unmodifiableList(proxies);
   }
 
-  public void setProxies(List<SWProxy> proxies) {
+  public void setProxies(List<SFProxy> proxies) {
     this.proxies.clear();
     this.proxies.addAll(proxies);
   }

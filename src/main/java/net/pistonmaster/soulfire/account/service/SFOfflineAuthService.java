@@ -19,7 +19,7 @@ package net.pistonmaster.soulfire.account.service;
 
 import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 
 public final class SFOfflineAuthService
     implements MCAuthService<SFOfflineAuthService.OfflineAuthData> {
@@ -28,7 +28,7 @@ public final class SFOfflineAuthService
   }
 
   @Override
-  public MinecraftAccount login(OfflineAuthData data, SWProxy proxyData) {
+  public MinecraftAccount login(OfflineAuthData data, SFProxy proxyData) {
     return createAccount(data.username());
   }
 

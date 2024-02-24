@@ -42,7 +42,7 @@ import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.BiFunction;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 
 public class SFNettyHelper {
   public static final TransportMethod TRANSPORT_METHOD =
@@ -84,7 +84,7 @@ public class SFNettyHelper {
     return group;
   }
 
-  public static void addProxy(ChannelPipeline pipeline, SWProxy proxy) {
+  public static void addProxy(ChannelPipeline pipeline, SFProxy proxy) {
     var address = proxy.getInetSocketAddress();
     switch (proxy.type()) {
       case HTTP -> {

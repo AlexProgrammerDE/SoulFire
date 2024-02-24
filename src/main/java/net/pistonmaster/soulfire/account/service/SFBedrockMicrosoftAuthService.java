@@ -21,7 +21,7 @@ import java.io.IOException;
 import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.HttpHelper;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -29,7 +29,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 public final class SFBedrockMicrosoftAuthService
     implements MCAuthService<SFBedrockMicrosoftAuthService.BedrockMicrosoftAuthData> {
   @Override
-  public MinecraftAccount login(BedrockMicrosoftAuthData data, SWProxy proxyData)
+  public MinecraftAccount login(BedrockMicrosoftAuthData data, SFProxy proxyData)
       throws IOException {
     try {
       var fullBedrockSession =

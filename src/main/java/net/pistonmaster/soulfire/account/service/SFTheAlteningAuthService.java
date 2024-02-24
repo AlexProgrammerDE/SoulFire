@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.HttpHelper;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.pistonmaster.soulfire.server.util.UUIDHelper;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -44,7 +44,7 @@ public final class SFTheAlteningAuthService
   private final Gson gson = new Gson();
 
   @Override
-  public MinecraftAccount login(TheAlteningAuthData data, SWProxy proxyData) throws IOException {
+  public MinecraftAccount login(TheAlteningAuthData data, SFProxy proxyData) throws IOException {
     try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
       var request =
           new AuthenticationRequest(data.altToken, PASSWORD, UUID.randomUUID().toString());

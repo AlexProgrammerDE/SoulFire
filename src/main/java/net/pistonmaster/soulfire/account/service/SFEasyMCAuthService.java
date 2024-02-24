@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.HttpHelper;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -40,7 +40,7 @@ public final class SFEasyMCAuthService
   private final Gson gson = new Gson();
 
   @Override
-  public MinecraftAccount login(EasyMCAuthData data, SWProxy proxyData) throws IOException {
+  public MinecraftAccount login(EasyMCAuthData data, SFProxy proxyData) throws IOException {
     try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
       var request = new AuthenticationRequest(data.altToken);
       var httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);

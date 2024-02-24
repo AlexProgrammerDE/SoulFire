@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.pistonmaster.soulfire.server.settings.lib.property.BooleanProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.ComboProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.DoubleProperty;
@@ -42,7 +42,7 @@ public record SettingsHolder(
     Object2BooleanMap<PropertyKey> booleanProperties,
     Object2ObjectMap<PropertyKey, String> stringProperties,
     List<MinecraftAccount> accounts,
-    List<SWProxy> proxies) {
+    List<SFProxy> proxies) {
   public static final SettingsHolder EMPTY =
       new SettingsHolder(
           Object2ObjectMaps.emptyMap(),
@@ -55,7 +55,7 @@ public record SettingsHolder(
       ProfileDataStructure settingsSerialized,
       Multimap<PropertyKey, Consumer<JsonElement>> listeners,
       Consumer<List<MinecraftAccount>> accountRegistryCallback,
-      Consumer<List<SWProxy>> proxyRegistryCallback) {
+      Consumer<List<SFProxy>> proxyRegistryCallback) {
     var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
     var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
     var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();

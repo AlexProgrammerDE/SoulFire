@@ -45,7 +45,7 @@ import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.account.service.SFOfflineAuthService;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.pistonmaster.soulfire.server.api.AttackState;
 import net.pistonmaster.soulfire.server.api.event.EventExceptionHandler;
 import net.pistonmaster.soulfire.server.api.event.SoulFireAttackEvent;
@@ -98,8 +98,8 @@ public class AttackManager {
     return accounts.removeFirst();
   }
 
-  private static Optional<SWProxy> getProxy(
-      int accountsPerProxy, Object2IntMap<SWProxy> proxyUseMap) {
+  private static Optional<SFProxy> getProxy(
+      int accountsPerProxy, Object2IntMap<SFProxy> proxyUseMap) {
     if (proxyUseMap.isEmpty()) {
       return Optional.empty(); // No proxies available
     }
@@ -135,7 +135,7 @@ public class AttackManager {
 
     var proxies =
         settingsHolder.proxies().stream()
-            .filter(SWProxy::enabled)
+            .filter(SFProxy::enabled)
             .collect(Collectors.toCollection(ArrayList::new));
     var availableProxiesCount = proxies.size(); // How many proxies are available?
     var maxBots =
@@ -172,7 +172,7 @@ public class AttackManager {
       Collections.shuffle(accounts);
     }
 
-    var proxyUseMap = new Object2IntOpenHashMap<SWProxy>();
+    var proxyUseMap = new Object2IntOpenHashMap<SFProxy>();
     for (var proxy : proxies) {
       proxyUseMap.put(proxy, 0);
     }

@@ -52,4 +52,4 @@ https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.20/asset
 
 ### Update code
 
-Replace the latest version in SWConstants.
+Replace the latest version in SFConstants.

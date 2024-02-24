@@ -19,7 +19,7 @@ package net.pistonmaster.soulfire.account.service;
 
 import java.io.IOException;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
-import net.pistonmaster.soulfire.proxy.SWProxy;
+import net.pistonmaster.soulfire.proxy.SFProxy;
 
 public sealed interface MCAuthService<T>
     permits SFBedrockMicrosoftAuthService,
@@ -27,11 +27,11 @@ public sealed interface MCAuthService<T>
         SFJavaMicrosoftAuthService,
         SFOfflineAuthService,
         SFTheAlteningAuthService {
-  MinecraftAccount login(T data, SWProxy proxyData) throws IOException;
+  MinecraftAccount login(T data, SFProxy proxyData) throws IOException;
 
   T createData(String data);
 
-  default MinecraftAccount createDataAndLogin(String data, SWProxy proxyData) throws IOException {
+  default MinecraftAccount createDataAndLogin(String data, SFProxy proxyData) throws IOException {
     return login(createData(data), proxyData);
   }
 }
