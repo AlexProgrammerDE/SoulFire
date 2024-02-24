@@ -38,7 +38,6 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.pistonmaster.soulfire.server.SoulFireServer;
 import net.pistonmaster.soulfire.server.api.PluginHelper;
 import net.pistonmaster.soulfire.server.api.SoulFireAPI;
 import net.pistonmaster.soulfire.server.api.event.bot.SFPacketReceiveEvent;
@@ -51,6 +50,7 @@ import net.pistonmaster.soulfire.server.settings.lib.property.Property;
 import net.pistonmaster.soulfire.server.settings.lib.property.StringProperty;
 import net.pistonmaster.soulfire.server.util.UUIDHelper;
 import net.pistonmaster.soulfire.server.util.VelocityConstants;
+import net.pistonmaster.soulfire.util.GsonInstance;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -241,7 +241,7 @@ public class ForwardingBypass implements InternalPlugin {
             .append(LEGACY_FORWARDING_SEPARATOR)
             .append(UUIDHelper.convertToNoDashes(botUniqueId))
             .append(LEGACY_FORWARDING_SEPARATOR);
-    SoulFireServer.GENERAL_GSON.toJson(propertiesTransform.apply(List.of()), data);
+    GsonInstance.GSON.toJson(propertiesTransform.apply(List.of()), data);
     return data.toString();
   }
 

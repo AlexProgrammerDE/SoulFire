@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.TranslationArgumentLike;
 import net.pistonmaster.soulfire.server.SoulFireServer;
+import net.pistonmaster.soulfire.util.GsonInstance;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -40,8 +41,7 @@ public class TranslationMapper implements Function<TranslatableComponent, String
     try (var stream =
         TranslationMapper.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
       Objects.requireNonNull(stream, "en_us.json not found");
-      translations =
-          SoulFireServer.GENERAL_GSON.fromJson(new InputStreamReader(stream), JsonObject.class);
+      translations = GsonInstance.GSON.fromJson(new InputStreamReader(stream), JsonObject.class);
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }

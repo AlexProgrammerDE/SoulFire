@@ -19,7 +19,6 @@ package net.pistonmaster.soulfire.server.protocol;
 
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import java.io.IOException;
 import lombok.Getter;
 import lombok.Setter;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
@@ -57,7 +56,7 @@ public class BotConnectionMeta {
       var javaData = (OnlineJavaData) minecraftAccount.accountData();
       sessionService.joinServer(javaData.profileId(), javaData.authToken(), serverId);
       session.logger().debug("Successfully sent mojang join request!");
-    } catch (IOException e) {
+    } catch (Exception e) {
       session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
     }
   }

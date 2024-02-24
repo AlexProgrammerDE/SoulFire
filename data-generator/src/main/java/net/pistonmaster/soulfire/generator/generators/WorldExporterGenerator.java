@@ -17,7 +17,6 @@
  */
 package net.pistonmaster.soulfire.generator.generators;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
@@ -32,13 +31,13 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.pistonmaster.soulfire.generator.Main;
+import net.pistonmaster.soulfire.generator.util.GsonInstance;
 
 @Slf4j
 public class WorldExporterGenerator implements IDataGenerator {
   private static final int CHUNK_X = 8;
   private static final int CHUNK_Z = 8;
   private static final int CHUNK_SIZE = 16;
-  private static final Gson GSON = new Gson();
 
   @Override
   public String getDataName() {
@@ -59,7 +58,7 @@ public class WorldExporterGenerator implements IDataGenerator {
         definitionArray[BuiltInRegistries.BLOCK.getId(blockState)] =
             BuiltInRegistries.BLOCK.getKey(blockState).getPath();
       }
-      jsonObject.add("definitions", GSON.toJsonTree(definitionArray));
+      jsonObject.add("definitions", GsonInstance.GSON.toJsonTree(definitionArray));
 
       var data = new int[CHUNK_X * CHUNK_SIZE][level.getHeight()][CHUNK_Z * CHUNK_SIZE];
       for (var x = 0; x < CHUNK_X * CHUNK_SIZE; x++) {
@@ -78,7 +77,7 @@ public class WorldExporterGenerator implements IDataGenerator {
         }
       }
 
-      jsonObject.add("data", GSON.toJsonTree(data));
+      jsonObject.add("data", GsonInstance.GSON.toJsonTree(data));
 
       Streams.write(jsonObject, jsonWriter);
 

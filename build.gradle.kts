@@ -105,7 +105,6 @@ dependencies {
 
     api(libs.commons.validator)
     api(libs.commons.io)
-    api(libs.httpclient)
 
     api(libs.guava)
     api(libs.gson)

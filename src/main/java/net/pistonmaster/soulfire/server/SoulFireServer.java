@@ -19,7 +19,6 @@ package net.pistonmaster.soulfire.server;
 
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
-import com.google.gson.Gson;
 import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
@@ -95,7 +94,6 @@ import org.apache.logging.log4j.LogManager;
 @Slf4j
 @Getter
 public class SoulFireServer {
-  public static final Gson GENERAL_GSON = new Gson();
   public static final ComponentFlattener FLATTENER =
       ComponentFlattener.basic().toBuilder()
           .mapper(TranslatableComponent.class, TranslationMapper.INSTANCE)

@@ -17,7 +17,6 @@
  */
 package net.pistonmaster.soulfire.jmh;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -34,6 +33,7 @@ import net.pistonmaster.soulfire.server.pathfinding.graph.ProjectedLevelState;
 import net.pistonmaster.soulfire.server.protocol.bot.container.PlayerInventoryContainer;
 import net.pistonmaster.soulfire.server.protocol.bot.state.TagsState;
 import net.pistonmaster.soulfire.test.utils.TestBlockAccessor;
+import net.pistonmaster.soulfire.util.GsonInstance;
 import net.pistonmaster.soulfire.util.ResourceHelper;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
@@ -48,20 +48,19 @@ public class PathfindingBenchmark {
 
   @Setup
   public void setup() {
-    var gson = new Gson();
     var byteArrayInputStream =
         new ByteArrayInputStream(ResourceHelper.getResourceBytes("/world_data.json.zip"));
     try (var gzipInputStream = new GZIPInputStream(byteArrayInputStream);
         var reader = new InputStreamReader(gzipInputStream)) {
       log.info("Reading world data...");
-      var worldData = gson.fromJson(reader, JsonObject.class);
+      var worldData = GsonInstance.GSON.fromJson(reader, JsonObject.class);
       var definitions = worldData.getAsJsonArray("definitions");
       var blockDefinitions = new String[definitions.size()];
       for (var i = 0; i < definitions.size(); i++) {
         blockDefinitions[i] = definitions.get(i).getAsString();
       }
 
-      var data = gson.fromJson(worldData.getAsJsonArray("data"), int[][][].class);
+      var data = GsonInstance.GSON.fromJson(worldData.getAsJsonArray("data"), int[][][].class);
 
       log.info("Parsing world data...");
 

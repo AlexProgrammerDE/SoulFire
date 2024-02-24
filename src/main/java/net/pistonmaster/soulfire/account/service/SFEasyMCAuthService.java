@@ -17,7 +17,6 @@
  */
 package net.pistonmaster.soulfire.account.service;
 
-import com.google.gson.Gson;
 import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
@@ -27,46 +26,50 @@ import net.pistonmaster.soulfire.account.AuthType;
 import net.pistonmaster.soulfire.account.HttpHelper;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.proxy.SFProxy;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.util.EntityUtils;
+import net.pistonmaster.soulfire.util.GsonInstance;
+import reactor.core.publisher.Flux;
+import reactor.netty.ByteBufFlux;
 
 @Slf4j
 public final class SFEasyMCAuthService
     implements MCAuthService<SFEasyMCAuthService.EasyMCAuthData> {
   private static final URI AUTHENTICATE_ENDPOINT =
       URI.create("https://api.easymc.io/v1/token/redeem");
-  private final Gson gson = new Gson();
 
   @Override
   public MinecraftAccount login(EasyMCAuthData data, SFProxy proxyData) throws IOException {
-    try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-      var request = new AuthenticationRequest(data.altToken);
-      var httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
-      httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
-      var response =
-          gson.fromJson(
-              EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
-              TokenRedeemResponse.class);
+    var request = new AuthenticationRequest(data.altToken);
+    return HttpHelper.createReactorClient(null, true)
+        .post()
+        .uri(AUTHENTICATE_ENDPOINT)
+        .send(ByteBufFlux.fromString(Flux.just(GsonInstance.GSON.toJson(request))))
+        .responseSingle(
+            (res, content) ->
+                content
+                    .asString()
+                    .map(
+                        responseText -> {
+                          var response = GsonInstance.GSON.fromJson(responseText, TokenRedeemResponse.class);
 
-      if (response.error() != null) {
-        log.error("EasyMC has returned a error: {}", response.error());
-        throw new IOException(response.error());
-      }
+                          if (response.error() != null) {
+                            log.error("EasyMC has returned a error: {}", response.error());
+                            throw new RuntimeException(response.error());
+                          }
 
-      if (response.message() != null) {
-        log.info("EasyMC has a message for you (This is not a error): {}", response.message());
-      }
+                          if (response.message() != null) {
+                            log.info(
+                                "EasyMC has a message for you (This is not a error): {}",
+                                response.message());
+                          }
 
-      return new MinecraftAccount(
-          AuthType.EASYMC,
-          response.mcName(),
-          new OnlineJavaData(UUID.fromString(response.uuid()), response.session(), -1),
-          true);
-    } catch (Exception e) {
-      throw new IOException(e);
-    }
+                          return new MinecraftAccount(
+                              AuthType.EASYMC,
+                              response.mcName(),
+                              new OnlineJavaData(
+                                  UUID.fromString(response.uuid()), response.session(), -1),
+                              true);
+                        }))
+        .block();
   }
 
   @Override

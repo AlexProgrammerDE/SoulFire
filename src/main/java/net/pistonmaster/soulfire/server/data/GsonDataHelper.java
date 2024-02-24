@@ -17,15 +17,14 @@
  */
 package net.pistonmaster.soulfire.server.data;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import java.util.HashMap;
 import java.util.Map;
+import net.pistonmaster.soulfire.util.GsonInstance;
 import net.pistonmaster.soulfire.util.ResourceHelper;
 
 public class GsonDataHelper {
   private static final Map<String, JsonArray> LOADED_DATA = new HashMap<>();
-  private static final Gson GSON = new Gson();
 
   public static <T> T fromJson(String dataFile, String dataKey, Class<T> clazz) {
     var array =
@@ -34,7 +33,7 @@ public class GsonDataHelper {
             file -> {
               var data = new JsonArray();
               try {
-                data = GSON.fromJson(ResourceHelper.getResource(file), JsonArray.class);
+                data = GsonInstance.GSON.fromJson(ResourceHelper.getResource(file), JsonArray.class);
               } catch (Exception e) {
                 e.printStackTrace();
               }
@@ -42,7 +41,7 @@ public class GsonDataHelper {
             });
     for (var element : array) {
       if (element.getAsJsonObject().get("name").getAsString().equals(dataKey)) {
-        return GSON.fromJson(element, clazz);
+        return GsonInstance.GSON.fromJson(element, clazz);
       }
     }
 

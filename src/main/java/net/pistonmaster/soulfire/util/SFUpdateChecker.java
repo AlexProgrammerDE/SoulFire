@@ -17,7 +17,6 @@
  */
 package net.pistonmaster.soulfire.util;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.net.URI;
 import java.util.Optional;
@@ -57,8 +56,7 @@ public class SFUpdateChecker {
     }
 
     try {
-      return HttpHelper.createReactorClient(null)
-          .headers(h -> h.add("User-Agent", "SoulFire"))
+      return HttpHelper.createReactorClient(null, false)
           .get()
           .uri(UPDATE_URL)
           .responseSingle(
@@ -72,7 +70,7 @@ public class SFUpdateChecker {
                     .asString()
                     .mapNotNull(
                         s -> {
-                          var responseObject = new Gson().fromJson(s, JsonObject.class);
+                          var responseObject = GsonInstance.GSON.fromJson(s, JsonObject.class);
 
                           var latestVersion = responseObject.get("tag_name").getAsString();
                           if (VersionComparator.isNewer(BuildData.VERSION, latestVersion)) {

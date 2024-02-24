@@ -18,74 +18,57 @@
 package net.pistonmaster.soulfire.account;
 
 import java.time.Duration;
-import java.util.List;
 import net.lenni0451.commons.httpclient.HttpClient;
+import net.pistonmaster.soulfire.builddata.BuildData;
 import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.raphimc.minecraftauth.MinecraftAuth;
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicHeader;
+import reactor.netty.transport.ProxyProvider;
 
 public class HttpHelper {
   private HttpHelper() {}
 
-  public static CloseableHttpClient createMCAuthHttpClient(SFProxy proxyData) {
-    return createApacheHttpClient(
-        List.of(
-            new BasicHeader("Accept", ContentType.APPLICATION_JSON.getMimeType()),
-            new BasicHeader("Accept-Language", "en-US,en")),
-        proxyData);
-  }
+  public static reactor.netty.http.client.HttpClient createReactorClient(SFProxy proxyData, boolean withBody) {
+    var base =
+        reactor.netty.http.client.HttpClient.create()
+            .responseTimeout(Duration.ofSeconds(5))
+            .headers(
+                h -> {
+                  h.add("Accept", "application/json");
+                  if (withBody) {
+                    h.add("Content-Type", "application/json");
+                  }
 
-  public static reactor.netty.http.client.HttpClient createReactorClient(SFProxy proxyData) {
-    return reactor.netty.http.client.HttpClient.create()
-        .responseTimeout(Duration.ofSeconds(5))
-        .headers(h -> h.add("Accept-Language", "en-US,en"));
+                  h.add("Accept-Language", "en-US,en");
+                  h.add("User-Agent", "SoulFire/" + BuildData.VERSION);
+                });
+
+    return proxyData == null
+        ? base
+        : base.proxy(
+            p -> {
+              var spec =
+                  p.type(
+                          switch (proxyData.type()) {
+                            case HTTP -> ProxyProvider.Proxy.HTTP;
+                            case SOCKS4 -> ProxyProvider.Proxy.SOCKS4;
+                            case SOCKS5 -> ProxyProvider.Proxy.SOCKS5;
+                          })
+                      .host(proxyData.host())
+                      .port(proxyData.port())
+                      .nonProxyHosts("localhost")
+                      .connectTimeoutMillis(20_000);
+
+              if (proxyData.username() != null) {
+                spec.username(proxyData.username());
+              }
+
+              if (proxyData.password() != null) {
+                spec.password(s -> proxyData.password());
+              }
+            });
   }
 
   public static HttpClient createLenniMCAuthHttpClient(SFProxy proxyData) {
     return MinecraftAuth.createHttpClient();
-  }
-
-  public static CloseableHttpClient createApacheHttpClient(
-      List<Header> headers, SFProxy proxyData) {
-    var httpBuilder = HttpClientBuilder.create().setDefaultHeaders(headers);
-
-    var timeout = 5;
-    var requestBuilder =
-        RequestConfig.custom()
-            .setConnectTimeout(timeout * 1000)
-            .setConnectionRequestTimeout(timeout * 1000)
-            .setSocketTimeout(timeout * 1000);
-
-    if (proxyData != null) {
-      var proxy = new HttpHost(proxyData.host(), proxyData.port());
-
-      if (proxyData.username() != null && proxyData.password() != null) {
-        var credentials =
-            new UsernamePasswordCredentials(proxyData.username(), proxyData.password());
-
-        var authScope = new AuthScope(proxy);
-
-        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(authScope, credentials);
-
-        httpBuilder.setDefaultCredentialsProvider(credentialsProvider);
-      }
-
-      requestBuilder.setProxy(proxy);
-    }
-
-    httpBuilder.setDefaultRequestConfig(requestBuilder.build());
-
-    return httpBuilder.build();
   }
 }

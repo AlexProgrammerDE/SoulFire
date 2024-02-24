@@ -17,7 +17,6 @@
  */
 package net.pistonmaster.soulfire.account.service;
 
-import com.google.gson.Gson;
 import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
@@ -28,10 +27,9 @@ import net.pistonmaster.soulfire.account.HttpHelper;
 import net.pistonmaster.soulfire.account.MinecraftAccount;
 import net.pistonmaster.soulfire.proxy.SFProxy;
 import net.pistonmaster.soulfire.server.util.UUIDHelper;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.util.EntityUtils;
+import net.pistonmaster.soulfire.util.GsonInstance;
+import reactor.core.publisher.Flux;
+import reactor.netty.ByteBufFlux;
 
 public final class SFTheAlteningAuthService
     implements MCAuthService<SFTheAlteningAuthService.TheAlteningAuthData> {
@@ -41,31 +39,36 @@ public final class SFTheAlteningAuthService
 
   private static final String PASSWORD =
       "SoulFireIsCool"; // Password doesn't matter for The Altening
-  private final Gson gson = new Gson();
 
   @Override
   public MinecraftAccount login(TheAlteningAuthData data, SFProxy proxyData) throws IOException {
-    try (var httpClient = HttpHelper.createMCAuthHttpClient(proxyData)) {
-      var request =
-          new AuthenticationRequest(data.altToken, PASSWORD, UUID.randomUUID().toString());
-      var httpPost = new HttpPost(AUTHENTICATE_ENDPOINT);
-      httpPost.setEntity(new StringEntity(gson.toJson(request), ContentType.APPLICATION_JSON));
-      var response =
-          gson.fromJson(
-              EntityUtils.toString(httpClient.execute(httpPost).getEntity()),
-              AuthenticateRefreshResponse.class);
+    var request =
+        new AuthenticationRequest(data.altToken, PASSWORD, UUID.randomUUID().toString());
+    return HttpHelper.createReactorClient(null, true)
+        .post()
+        .uri(AUTHENTICATE_ENDPOINT)
+        .send(ByteBufFlux.fromString(Flux.just(GsonInstance.GSON.toJson(request))))
+        .responseSingle(
+            (res, content) ->
+                content
+                    .asString()
+                    .map(
+                        responseText -> {
+                          var response =
+                              GsonInstance.GSON.fromJson(
+                                  responseText,
+                                  AuthenticateRefreshResponse.class);
 
-      return new MinecraftAccount(
-          AuthType.THE_ALTENING,
-          response.selectedProfile().name(),
-          new OnlineJavaData(
-              UUIDHelper.convertToDashed(response.selectedProfile().id()),
-              response.accessToken(),
-              -1),
-          true);
-    } catch (Exception e) {
-      throw new IOException(e);
-    }
+                          return new MinecraftAccount(
+                              AuthType.THE_ALTENING,
+                              response.selectedProfile().name(),
+                              new OnlineJavaData(
+                                  UUIDHelper.convertToDashed(response.selectedProfile().id()),
+                                  response.accessToken(),
+                                  -1),
+                              true);
+                        }))
+        .block();
   }
 
   @Override

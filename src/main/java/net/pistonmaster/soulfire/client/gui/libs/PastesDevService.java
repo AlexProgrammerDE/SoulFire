@@ -17,44 +17,23 @@
  */
 package net.pistonmaster.soulfire.client.gui.libs;
 
-import com.google.gson.Gson;
-import java.util.ArrayList;
+import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 import net.pistonmaster.soulfire.account.HttpHelper;
-import net.pistonmaster.soulfire.builddata.BuildData;
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
-import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicHeader;
+import net.pistonmaster.soulfire.util.GsonInstance;
 import reactor.core.publisher.Flux;
 import reactor.netty.ByteBufFlux;
 
 @Slf4j
 public class PastesDevService {
-  private static final Gson gson = new Gson();
+  private static final URI PASTES_DEV_URI = URI.create("https://api.pastes.dev/post");
 
   private PastesDevService() {}
 
-  private static CloseableHttpClient createHttpClient() {
-    var headers = new ArrayList<Header>();
-    headers.add(new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType()));
-    headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en"));
-    headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "SoulFire/" + BuildData.VERSION));
-
-    return HttpHelper.createApacheHttpClient(headers, null);
-  }
-
   public static String upload(String text) {
-    return HttpHelper.createReactorClient(null)
-        .headers(
-            h -> {
-              h.add("Accept", "application/json");
-              h.add("Content-Type", "application/json");
-              h.add("User-Agent", "SoulFire/" + BuildData.VERSION);
-            })
+    return HttpHelper.createReactorClient(null, true)
         .post()
-        .uri("https://api.pastes.dev/post")
+        .uri(PASTES_DEV_URI)
         .send(ByteBufFlux.fromString(Flux.just(text)))
         .responseSingle(
             (res, content) -> {
@@ -67,7 +46,8 @@ public class PastesDevService {
                   .asString()
                   .map(
                       responseText -> {
-                        var response = gson.fromJson(responseText, BytebinResponse.class);
+                        var response =
+                            GsonInstance.GSON.fromJson(responseText, BytebinResponse.class);
                         return response.key();
                       });
             })
