@@ -18,10 +18,12 @@
 package net.pistonmaster.soulfire.server.plugins;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
+import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
 import com.github.steveice10.mc.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
 import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundCustomQueryAnswerPacket;
 import com.google.common.collect.ImmutableList;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.nio.charset.StandardCharsets;
@@ -44,6 +46,7 @@ import net.pistonmaster.soulfire.server.api.event.bot.SFPacketReceiveEvent;
 import net.pistonmaster.soulfire.server.api.event.bot.SFPacketSendingEvent;
 import net.pistonmaster.soulfire.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import net.pistonmaster.soulfire.server.protocol.BotConnection;
+import net.pistonmaster.soulfire.server.protocol.IdentifiedKey;
 import net.pistonmaster.soulfire.server.settings.lib.SettingsObject;
 import net.pistonmaster.soulfire.server.settings.lib.property.ComboProperty;
 import net.pistonmaster.soulfire.server.settings.lib.property.Property;
@@ -57,32 +60,39 @@ import net.pistonmaster.soulfire.util.GsonInstance;
 public class ForwardingBypass implements InternalPlugin {
   private static final char LEGACY_FORWARDING_SEPARATOR = '\0';
 
+  public static void writePlayerKey(
+      ByteBuf buf, MinecraftCodecHelper codecHelper, IdentifiedKey playerKey) {
+    buf.writeLong(playerKey.expiryTemporal().toEpochMilli());
+    codecHelper.writeByteArray(buf, playerKey.getSignedPublicKey().getEncoded());
+    codecHelper.writeByteArray(buf, playerKey.getSignature());
+  }
+
   private static int findForwardingVersion(int requested, BotConnection player) {
-    // TODO: Fix this
-    /*
     // Ensure we are in range
     requested = Math.min(requested, VelocityConstants.MODERN_FORWARDING_MAX_VERSION);
     if (requested > VelocityConstants.MODERN_FORWARDING_DEFAULT) {
-        if (player.getProtocolVersion().compareTo(ProtocolVersion.MINECRAFT_1_19_3) >= 0) {
-            return requested >= VelocityConstants.MODERN_LAZY_SESSION
-                    ? VelocityConstants.MODERN_LAZY_SESSION
-                    : VelocityConstants.MODERN_FORWARDING_DEFAULT;
-        }
-        if (player.getIdentifiedKey() != null) {
-            // No enhanced switch on java 11
-            return switch (player.getIdentifiedKey().getKeyRevision()) {
-                case GENERIC_V1 -> VelocityConstants.MODERN_FORWARDING_WITH_KEY;
-                // Since V2 is not backwards compatible we have to throw the key if v2 and requested is v1
-                case LINKED_V2 -> requested >= VelocityConstants.MODERN_FORWARDING_WITH_KEY_V2
-                        ? VelocityConstants.MODERN_FORWARDING_WITH_KEY_V2
-                        : VelocityConstants.MODERN_FORWARDING_DEFAULT;
-                default -> VelocityConstants.MODERN_FORWARDING_DEFAULT;
-            };
-        } else {
-            return VelocityConstants.MODERN_FORWARDING_DEFAULT;
-        }
+      if (player.meta().protocolVersion().newerThanOrEqualTo(ProtocolVersion.v1_19_3)) {
+        //noinspection NonStrictComparisonCanBeEquality
+        return requested >= VelocityConstants.MODERN_LAZY_SESSION
+            ? VelocityConstants.MODERN_LAZY_SESSION
+            : VelocityConstants.MODERN_FORWARDING_DEFAULT;
+      }
+      if (player.getIdentifiedKey() != null) {
+        // No enhanced switch on java 11
+        return switch (player.getIdentifiedKey().getKeyRevision()) {
+          case GENERIC_V1 -> VelocityConstants.MODERN_FORWARDING_WITH_KEY;
+          case LINKED_V2 ->
+              // Since V2 is not backwards compatible, we have to throw the key if v2 and requested
+              // is v1
+              requested >= VelocityConstants.MODERN_FORWARDING_WITH_KEY_V2
+                  ? VelocityConstants.MODERN_FORWARDING_WITH_KEY_V2
+                  : VelocityConstants.MODERN_FORWARDING_DEFAULT;
+        };
+      } else {
+        return VelocityConstants.MODERN_FORWARDING_DEFAULT;
+      }
     }
-    */
+
     return VelocityConstants.MODERN_FORWARDING_DEFAULT;
   }
 
@@ -98,31 +108,28 @@ public class ForwardingBypass implements InternalPlugin {
       codecHelper.writeUUID(forwarded, player.meta().minecraftAccount().uniqueId());
       codecHelper.writeString(forwarded, player.meta().minecraftAccount().username());
 
-      // TODO: Fix this
-      /*
       // This serves as additional redundancy. The key normally is stored in the
       // login start to the server, but some setups require this.
       if (actualVersion >= VelocityConstants.MODERN_FORWARDING_WITH_KEY
-              && actualVersion < VelocityConstants.MODERN_LAZY_SESSION) {
-          IdentifiedKey key = player.getIdentifiedKey();
-          assert key != null;
-          codecHelper.writePlayerKey(forwarded, key);
+          && actualVersion < VelocityConstants.MODERN_LAZY_SESSION) {
+        var key = player.getIdentifiedKey();
+        assert key != null;
+        writePlayerKey(forwarded, codecHelper, key);
 
-          // Provide the signer UUID since the UUID may differ from the
-          // assigned UUID. Doing that breaks the signatures anyway but the server
-          // should be able to verify the key independently.
-          if (actualVersion >= VelocityConstants.MODERN_FORWARDING_WITH_KEY_V2) {
-              if (key.getSignatureHolder() != null) {
-                  forwarded.writeBoolean(true);
-                  ProtocolUtils.writeUuid(forwarded, key.getSignatureHolder());
-              } else {
-                  // Should only not be provided if the player was connected
-                  // as offline-mode and the signer UUID was not backfilled
-                  forwarded.writeBoolean(false);
-              }
+        // Provide the signer UUID since the UUID may differ from the
+        // assigned UUID. Doing that breaks the signatures anyway but the server
+        // should be able to verify the key independently.
+        if (actualVersion >= VelocityConstants.MODERN_FORWARDING_WITH_KEY_V2) {
+          if (key.getSignatureHolder() != null) {
+            forwarded.writeBoolean(true);
+            codecHelper.writeUUID(forwarded, key.getSignatureHolder());
+          } else {
+            // Should only not be provided if the player was connected
+            // as offline-mode and the signer UUID was not backfilled
+            forwarded.writeBoolean(false);
           }
+        }
       }
-      */
 
       var key = new SecretKeySpec(hmacSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
       var mac = Mac.getInstance("HmacSHA256");

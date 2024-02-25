@@ -110,4 +110,8 @@ public record BotConnection(
           TimeUtil.waitTime(100, TimeUnit.MILLISECONDS);
         });
   }
+
+  public IdentifiedKey getIdentifiedKey() {
+    throw new UnsupportedOperationException("Not implemented yet!");
+  }
 }
