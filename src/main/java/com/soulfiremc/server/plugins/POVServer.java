@@ -22,6 +22,11 @@ import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.ServerLoginHandler;
 import com.github.steveice10.mc.protocol.codec.MinecraftCodec;
+import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
+import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeModifier;
+import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
+import com.github.steveice10.mc.protocol.data.game.entity.attribute.ModifierOperation;
+import com.github.steveice10.mc.protocol.data.game.entity.metadata.EntityMetadata;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerSpawnInfo;
 import com.github.steveice10.mc.protocol.data.game.entity.type.EntityType;
@@ -32,6 +37,8 @@ import com.github.steveice10.mc.protocol.data.status.VersionInfo;
 import com.github.steveice10.mc.protocol.data.status.handler.ServerInfoBuilder;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateMobEffectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
@@ -400,20 +407,6 @@ public class POVServer implements InternalPlugin {
                                 sessionDataManager.defaultSpawnData().angle()));
                       }
 
-                      for (var effect :
-                          sessionDataManager.clientEntity().effectState().effects().entrySet()) {
-                        session.send(
-                            new ClientboundUpdateMobEffectPacket(
-                                sessionDataManager.clientEntity().entityId(),
-                                effect.getKey(),
-                                effect.getValue().amplifier(),
-                                effect.getValue().duration(),
-                                effect.getValue().ambient(),
-                                effect.getValue().showParticles(),
-                                effect.getValue().showIcon(),
-                                effect.getValue().factorData()));
-                      }
-
                       for (var entity : sessionDataManager.entityTrackerState().getEntities()) {
                         if (entity instanceof RawEntity rawEntity) {
                           session.send(
@@ -440,6 +433,56 @@ public class POVServer implements InternalPlugin {
                                   experienceOrbEntity.z(),
                                   experienceOrbEntity.expValue()));
                         }
+
+                        for (var effect : entity.effectState().effects().entrySet()) {
+                          session.send(
+                              new ClientboundUpdateMobEffectPacket(
+                                  entity.entityId(),
+                                  effect.getKey(),
+                                  effect.getValue().amplifier(),
+                                  effect.getValue().duration(),
+                                  effect.getValue().ambient(),
+                                  effect.getValue().showParticles(),
+                                  effect.getValue().showIcon(),
+                                  effect.getValue().factorData()));
+                        }
+
+                        session.send(
+                            new ClientboundSetEntityDataPacket(
+                                entity.entityId(),
+                                entity
+                                    .metadataState()
+                                    .metadataStore()
+                                    .values()
+                                    .toArray(new EntityMetadata<?, ?>[0])));
+
+                        session.send(
+                            new ClientboundUpdateAttributesPacket(
+                                entity.entityId(),
+                                entity.attributeState().attributeStore().values().stream()
+                                    .map(
+                                        attributeState ->
+                                            new Attribute(
+                                                new AttributeType.Custom(
+                                                    "minecraft:" + attributeState.type().name()),
+                                                attributeState.baseValue(),
+                                                attributeState.modifiers().values().stream()
+                                                    .map(
+                                                        modifier ->
+                                                            new AttributeModifier(
+                                                                modifier.uuid(),
+                                                                modifier.amount(),
+                                                                switch (modifier.operation()) {
+                                                                  case ADDITION ->
+                                                                      ModifierOperation.ADD;
+                                                                  case MULTIPLY_BASE ->
+                                                                      ModifierOperation
+                                                                          .ADD_MULTIPLIED;
+                                                                  case MULTIPLY_TOTAL ->
+                                                                      ModifierOperation.MULTIPLY;
+                                                                }))
+                                                    .toList()))
+                                    .toList()));
                       }
 
                       session.send(
