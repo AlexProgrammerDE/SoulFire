@@ -161,7 +161,7 @@ tasks {
         outputs.upToDateWhen { false }
     }
     withType<Checkstyle> {
-        exclude("**/net/pistonmaster/soulfire/data**")
+        exclude("**/com/soulfiremc/data**")
     }
     jar {
         archiveClassifier = "unshaded"

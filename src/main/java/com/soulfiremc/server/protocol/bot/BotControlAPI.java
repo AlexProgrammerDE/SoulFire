@@ -27,6 +27,11 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerCommandPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundSwingPacket;
+import com.soulfiremc.server.data.AttributeType;
+import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.protocol.bot.movement.AABB;
+import com.soulfiremc.server.protocol.bot.state.entity.Entity;
+import com.soulfiremc.server.util.Segment;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.nio.charset.StandardCharsets;
@@ -41,11 +46,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.server.data.AttributeType;
-import com.soulfiremc.server.data.EntityType;
-import com.soulfiremc.server.protocol.bot.movement.AABB;
-import com.soulfiremc.server.protocol.bot.state.entity.Entity;
-import com.soulfiremc.server.util.Segment;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
