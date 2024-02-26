@@ -965,7 +965,9 @@ public final class SessionDataManager {
             packet.getAmplifier(),
             packet.getDuration(),
             packet.isAmbient(),
-            packet.isShowParticles());
+            packet.isShowParticles(),
+            packet.isShowIcon(),
+            packet.getFactorData());
   }
 
   @EventHandler

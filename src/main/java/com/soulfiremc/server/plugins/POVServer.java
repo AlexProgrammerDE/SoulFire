@@ -24,6 +24,7 @@ import com.github.steveice10.mc.protocol.ServerLoginHandler;
 import com.github.steveice10.mc.protocol.codec.MinecraftCodec;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerSpawnInfo;
+import com.github.steveice10.mc.protocol.data.game.entity.type.EntityType;
 import com.github.steveice10.mc.protocol.data.game.level.notify.GameEvent;
 import com.github.steveice10.mc.protocol.data.status.PlayerInfo;
 import com.github.steveice10.mc.protocol.data.status.ServerStatusInfo;
@@ -31,9 +32,12 @@ import com.github.steveice10.mc.protocol.data.status.VersionInfo;
 import com.github.steveice10.mc.protocol.data.status.handler.ServerInfoBuilder;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateMobEffectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetDefaultSpawnPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
@@ -56,6 +60,8 @@ import com.soulfiremc.server.api.event.attack.AttackInitEvent;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
+import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.property.BooleanProperty;
 import com.soulfiremc.server.settings.lib.property.IntProperty;
@@ -394,14 +400,56 @@ public class POVServer implements InternalPlugin {
                                 sessionDataManager.defaultSpawnData().angle()));
                       }
 
-                      session.send(new ClientboundPlayerPositionPacket(
-                            sessionDataManager.clientEntity().x(),
-                            sessionDataManager.clientEntity().y(),
-                            sessionDataManager.clientEntity().z(),
-                            sessionDataManager.clientEntity().yaw(),
-                            sessionDataManager.clientEntity().pitch(),
-                            Integer.MIN_VALUE
-                      ));
+                      for (var effect :
+                          sessionDataManager.clientEntity().effectState().effects().entrySet()) {
+                        session.send(
+                            new ClientboundUpdateMobEffectPacket(
+                                sessionDataManager.clientEntity().entityId(),
+                                effect.getKey(),
+                                effect.getValue().amplifier(),
+                                effect.getValue().duration(),
+                                effect.getValue().ambient(),
+                                effect.getValue().showParticles(),
+                                effect.getValue().showIcon(),
+                                effect.getValue().factorData()));
+                      }
+
+                      for (var entity : sessionDataManager.entityTrackerState().getEntities()) {
+                        if (entity instanceof RawEntity rawEntity) {
+                          session.send(
+                              new ClientboundAddEntityPacket(
+                                  entity.entityId(),
+                                  entity.uuid(),
+                                  EntityType.from(entity.entityType().id()),
+                                  rawEntity.data(),
+                                  rawEntity.x(),
+                                  rawEntity.y(),
+                                  rawEntity.z(),
+                                  rawEntity.yaw(),
+                                  rawEntity.headYaw(),
+                                  rawEntity.pitch(),
+                                  rawEntity.motionX(),
+                                  rawEntity.motionY(),
+                                  rawEntity.motionZ()));
+                        } else if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
+                          session.send(
+                              new ClientboundAddExperienceOrbPacket(
+                                  entity.entityId(),
+                                  experienceOrbEntity.x(),
+                                  experienceOrbEntity.y(),
+                                  experienceOrbEntity.z(),
+                                  experienceOrbEntity.expValue()));
+                        }
+                      }
+
+                      session.send(
+                          new ClientboundPlayerPositionPacket(
+                              sessionDataManager.clientEntity().x(),
+                              sessionDataManager.clientEntity().y(),
+                              sessionDataManager.clientEntity().z(),
+                              sessionDataManager.clientEntity().yaw(),
+                              sessionDataManager.clientEntity().pitch(),
+                              Integer.MIN_VALUE));
 
                       session.send(
                           new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
