@@ -22,6 +22,7 @@ import com.formdev.flatlaf.ui.FlatDropShadowBorder;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.UIScale;
+import com.soulfiremc.client.gui.GUIClientProps;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -45,7 +46,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import net.miginfocom.swing.MigLayout;
-import com.soulfiremc.client.gui.GUIClientProps;
 
 /**
  * Taken from <a

@@ -22,12 +22,12 @@ import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
 import com.github.steveice10.opennbt.tag.builtin.ListTag;
 import com.github.steveice10.opennbt.tag.builtin.ShortTag;
 import com.github.steveice10.opennbt.tag.builtin.StringTag;
+import com.soulfiremc.server.data.ItemType;
 import it.unimi.dsi.fastutil.objects.Object2ShortArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ShortMap;
 import it.unimi.dsi.fastutil.objects.Object2ShortMaps;
 import java.util.Objects;
 import lombok.Getter;
-import com.soulfiremc.server.data.ItemType;
 
 @Getter
 public class SFItemStack extends ItemStack {

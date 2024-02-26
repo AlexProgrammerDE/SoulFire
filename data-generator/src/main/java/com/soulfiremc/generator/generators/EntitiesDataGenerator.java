@@ -19,10 +19,10 @@ package com.soulfiremc.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.soulfiremc.generator.util.MCHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import com.soulfiremc.generator.util.MCHelper;
 
 public class EntitiesDataGenerator implements IDataGenerator {
 

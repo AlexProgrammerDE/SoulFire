@@ -18,10 +18,10 @@
 package com.soulfiremc.server.data;
 
 import com.google.gson.JsonArray;
-import java.util.HashMap;
-import java.util.Map;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ResourceHelper;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GsonDataHelper {
   private static final Map<String, JsonArray> LOADED_DATA = new HashMap<>();
@@ -33,7 +33,8 @@ public class GsonDataHelper {
             file -> {
               var data = new JsonArray();
               try {
-                data = GsonInstance.GSON.fromJson(ResourceHelper.getResource(file), JsonArray.class);
+                data =
+                    GsonInstance.GSON.fromJson(ResourceHelper.getResource(file), JsonArray.class);
               } catch (Exception e) {
                 e.printStackTrace();
               }

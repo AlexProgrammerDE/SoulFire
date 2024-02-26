@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.server.plugins;
 
-import java.util.Set;
 import com.soulfiremc.server.api.MixinExtension;
 import com.soulfiremc.server.api.ServerPlugin;
+import java.util.Set;
 
 public interface InternalPlugin extends ServerPlugin, MixinExtension {
   @Override

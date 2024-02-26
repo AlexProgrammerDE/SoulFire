@@ -21,12 +21,6 @@ import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.gson.JsonPrimitive;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import com.soulfiremc.client.ClientCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.SettingsManager;
@@ -36,6 +30,12 @@ import com.soulfiremc.grpc.generated.DoubleSetting;
 import com.soulfiremc.grpc.generated.IntSetting;
 import com.soulfiremc.server.settings.lib.property.PropertyKey;
 import com.soulfiremc.util.ShutdownManager;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 
 @Slf4j

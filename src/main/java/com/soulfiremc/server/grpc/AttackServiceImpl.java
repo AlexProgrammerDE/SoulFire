@@ -17,9 +17,6 @@
  */
 package com.soulfiremc.server.grpc;
 
-import io.grpc.stub.StreamObserver;
-import javax.inject.Inject;
-import lombok.RequiredArgsConstructor;
 import com.soulfiremc.grpc.generated.AttackServiceGrpc;
 import com.soulfiremc.grpc.generated.AttackStartRequest;
 import com.soulfiremc.grpc.generated.AttackStartResponse;
@@ -30,6 +27,9 @@ import com.soulfiremc.grpc.generated.AttackStopResponse;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.settings.lib.ProfileDataStructure;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
+import io.grpc.stub.StreamObserver;
+import javax.inject.Inject;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {

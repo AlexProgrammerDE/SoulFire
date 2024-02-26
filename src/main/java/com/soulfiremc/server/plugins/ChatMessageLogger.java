@@ -17,15 +17,6 @@
  */
 package com.soulfiremc.server.plugins;
 
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
-import net.kyori.ansi.ColorLevel;
-import net.lenni0451.lambdaevents.EventHandler;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
@@ -35,6 +26,15 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.property.BooleanProperty;
 import com.soulfiremc.server.settings.lib.property.Property;
 import com.soulfiremc.server.util.ExpiringSet;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
+import net.kyori.ansi.ColorLevel;
+import net.lenni0451.lambdaevents.EventHandler;
 import org.fusesource.jansi.AnsiConsole;
 
 @Slf4j

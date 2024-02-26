@@ -23,6 +23,14 @@ import static com.soulfiremc.brigadier.BrigadierHelper.literal;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.soulfiremc.brigadier.ConsoleSubject;
+import com.soulfiremc.client.grpc.RPCClient;
+import com.soulfiremc.client.settings.SettingsManager;
+import com.soulfiremc.grpc.generated.AttackStartRequest;
+import com.soulfiremc.grpc.generated.AttackStartResponse;
+import com.soulfiremc.grpc.generated.CommandCompletionRequest;
+import com.soulfiremc.grpc.generated.CommandHistoryRequest;
+import com.soulfiremc.grpc.generated.CommandRequest;
 import io.grpc.stub.StreamObserver;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -33,14 +41,6 @@ import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.brigadier.ConsoleSubject;
-import com.soulfiremc.client.grpc.RPCClient;
-import com.soulfiremc.client.settings.SettingsManager;
-import com.soulfiremc.grpc.generated.AttackStartRequest;
-import com.soulfiremc.grpc.generated.AttackStartResponse;
-import com.soulfiremc.grpc.generated.CommandCompletionRequest;
-import com.soulfiremc.grpc.generated.CommandHistoryRequest;
-import com.soulfiremc.grpc.generated.CommandRequest;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

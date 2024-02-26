@@ -17,6 +17,10 @@
  */
 package com.soulfiremc.server.pathfinding.execution;
 
+import com.soulfiremc.server.api.event.EventUtil;
+import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
+import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.util.TimeUtil;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import java.util.List;
 import java.util.Queue;
@@ -24,10 +28,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import com.soulfiremc.server.api.event.EventUtil;
-import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
-import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.util.TimeUtil;
 
 public class PathExecutor implements Consumer<BotPreTickEvent> {
   private final Queue<WorldAction> worldActions;

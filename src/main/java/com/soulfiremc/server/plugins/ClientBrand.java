@@ -19,11 +19,6 @@ package com.soulfiremc.server.plugins;
 
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
 import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import net.lenni0451.lambdaevents.EventHandler;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.SFPacketSentEvent;
@@ -32,6 +27,11 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.property.BooleanProperty;
 import com.soulfiremc.server.settings.lib.property.Property;
 import com.soulfiremc.server.settings.lib.property.StringProperty;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import net.lenni0451.lambdaevents.EventHandler;
 
 public class ClientBrand implements InternalPlugin {
   public static void onPacket(SFPacketSentEvent event) {

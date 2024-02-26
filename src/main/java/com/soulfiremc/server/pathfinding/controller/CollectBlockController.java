@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.server.pathfinding.controller;
 
-import lombok.RequiredArgsConstructor;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.protocol.BotConnection;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class CollectBlockController {

@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.viaversion;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
+import com.viaversion.viaversion.api.connection.StorableObject;
 
 public record StorableSession(ViaClientSession session) implements StorableObject {
   @Override

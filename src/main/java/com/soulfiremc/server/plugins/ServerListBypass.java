@@ -18,10 +18,6 @@
 package com.soulfiremc.server.plugins;
 
 import com.github.steveice10.mc.protocol.data.ProtocolState;
-import java.util.concurrent.TimeUnit;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import net.lenni0451.lambdaevents.EventHandler;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.PreBotConnectEvent;
@@ -32,6 +28,10 @@ import com.soulfiremc.server.settings.lib.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.lib.property.Property;
 import com.soulfiremc.server.util.RandomUtil;
 import com.soulfiremc.server.util.TimeUtil;
+import java.util.concurrent.TimeUnit;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import net.lenni0451.lambdaevents.EventHandler;
 
 public class ServerListBypass implements InternalPlugin {
   public static void onPreConnect(PreBotConnectEvent event) {

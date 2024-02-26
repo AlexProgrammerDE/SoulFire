@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.generator.generators;
 
+import com.soulfiremc.generator.util.GeneratorConstants;
+import com.soulfiremc.generator.util.ResourceHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -25,8 +27,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
-import com.soulfiremc.generator.util.GeneratorConstants;
-import com.soulfiremc.generator.util.ResourceHelper;
 
 @Slf4j
 public class TagsDataGenerator {

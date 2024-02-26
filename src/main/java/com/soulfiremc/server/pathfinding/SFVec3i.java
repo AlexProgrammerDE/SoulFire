@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.pathfinding;
 
-import lombok.RequiredArgsConstructor;
 import com.soulfiremc.server.util.MathHelper;
+import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 

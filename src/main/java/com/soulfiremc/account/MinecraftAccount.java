@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.account;
 
-import java.util.UUID;
-import lombok.NonNull;
 import com.soulfiremc.account.service.AccountData;
 import com.soulfiremc.account.service.BedrockData;
 import com.soulfiremc.account.service.OnlineJavaData;
+import java.util.UUID;
+import lombok.NonNull;
 
 public record MinecraftAccount(
     @NonNull AuthType authType,

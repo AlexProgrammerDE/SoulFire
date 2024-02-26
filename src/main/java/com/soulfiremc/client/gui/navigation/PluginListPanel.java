@@ -17,12 +17,12 @@
  */
 package com.soulfiremc.client.gui.navigation;
 
+import com.soulfiremc.client.gui.libs.SwingTextUtils;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import javax.inject.Inject;
 import javax.swing.JButton;
 import lombok.Getter;
-import com.soulfiremc.client.gui.libs.SwingTextUtils;
 
 @Getter
 public class PluginListPanel extends NavigationItem {

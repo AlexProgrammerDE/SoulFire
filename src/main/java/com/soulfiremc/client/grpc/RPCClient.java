@@ -17,6 +17,11 @@
  */
 package com.soulfiremc.client.grpc;
 
+import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.grpc.generated.AttackServiceGrpc;
+import com.soulfiremc.grpc.generated.CommandServiceGrpc;
+import com.soulfiremc.grpc.generated.ConfigServiceGrpc;
+import com.soulfiremc.grpc.generated.LogsServiceGrpc;
 import io.grpc.CallCredentials;
 import io.grpc.Context;
 import io.grpc.Grpc;
@@ -28,11 +33,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.grpc.generated.AttackServiceGrpc;
-import com.soulfiremc.grpc.generated.CommandServiceGrpc;
-import com.soulfiremc.grpc.generated.ConfigServiceGrpc;
-import com.soulfiremc.grpc.generated.LogsServiceGrpc;
 
 @Slf4j
 @Getter

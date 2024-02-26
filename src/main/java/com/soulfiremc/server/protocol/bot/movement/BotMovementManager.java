@@ -17,11 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot.movement;
 
-import it.unimi.dsi.fastutil.Pair;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiConsumer;
-import lombok.Getter;
 import com.soulfiremc.server.data.Attribute;
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.BlockState;
@@ -34,6 +29,11 @@ import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.util.MathHelper;
+import it.unimi.dsi.fastutil.Pair;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
+import lombok.Getter;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;

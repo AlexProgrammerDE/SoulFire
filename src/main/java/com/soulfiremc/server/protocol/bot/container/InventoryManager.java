@@ -23,6 +23,9 @@ import com.github.steveice10.mc.protocol.data.game.inventory.ContainerActionType
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.inventory.ServerboundContainerClickPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.inventory.ServerboundContainerClosePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundSetCarriedItemPacket;
+import com.soulfiremc.server.data.EquipmentSlot;
+import com.soulfiremc.server.data.ItemType;
+import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -32,9 +35,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import com.soulfiremc.server.data.EquipmentSlot;
-import com.soulfiremc.server.data.ItemType;
-import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import org.jetbrains.annotations.Nullable;
 
 @Data

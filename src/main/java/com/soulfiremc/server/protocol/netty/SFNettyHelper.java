@@ -18,6 +18,7 @@
 package com.soulfiremc.server.protocol.netty;
 
 import com.github.steveice10.packetlib.helper.TransportHelper;
+import com.soulfiremc.proxy.SFProxy;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
@@ -42,7 +43,6 @@ import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.BiFunction;
-import com.soulfiremc.proxy.SFProxy;
 
 public class SFNettyHelper {
   public static final TransportMethod TRANSPORT_METHOD =

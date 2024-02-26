@@ -17,6 +17,9 @@
  */
 package com.soulfiremc.client.gui;
 
+import com.soulfiremc.client.gui.libs.MessageLogPanel;
+import com.soulfiremc.client.gui.libs.SwingTextUtils;
+import com.soulfiremc.grpc.generated.LogRequest;
 import io.grpc.Context;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -36,9 +39,6 @@ import javax.swing.undo.UndoManager;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.client.gui.libs.MessageLogPanel;
-import com.soulfiremc.client.gui.libs.SwingTextUtils;
-import com.soulfiremc.grpc.generated.LogRequest;
 
 @Slf4j
 @Getter

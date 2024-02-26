@@ -18,11 +18,11 @@
 package com.soulfiremc.client.gui.navigation;
 
 import ch.jalu.injector.Injector;
+import com.soulfiremc.client.gui.libs.SwingTextUtils;
 import java.awt.GridLayout;
 import javax.inject.Inject;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import com.soulfiremc.client.gui.libs.SwingTextUtils;
 
 public class NavigationPanel extends JPanel {
   public static final String NAVIGATION_ID = "navigation-menu";

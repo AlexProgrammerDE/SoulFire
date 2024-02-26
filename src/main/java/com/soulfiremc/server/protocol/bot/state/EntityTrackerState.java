@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
+import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Collection;
 import lombok.Data;
-import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
 @Data

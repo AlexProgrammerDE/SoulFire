@@ -17,6 +17,11 @@
  */
 package com.soulfiremc.server.protocol;
 
+import com.soulfiremc.account.AuthType;
+import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.server.util.UUIDHelper;
+import com.soulfiremc.util.GsonInstance;
+import com.soulfiremc.util.HttpHelper;
 import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -26,11 +31,6 @@ import java.security.PublicKey;
 import java.util.UUID;
 import javax.crypto.SecretKey;
 import lombok.AllArgsConstructor;
-import com.soulfiremc.account.AuthType;
-import com.soulfiremc.proxy.SFProxy;
-import com.soulfiremc.server.util.UUIDHelper;
-import com.soulfiremc.util.GsonInstance;
-import com.soulfiremc.util.HttpHelper;
 import reactor.core.publisher.Flux;
 import reactor.netty.ByteBufFlux;
 

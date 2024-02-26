@@ -17,17 +17,17 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.soulfiremc.grpc.generated.LogRequest;
+import com.soulfiremc.grpc.generated.LogResponse;
+import com.soulfiremc.grpc.generated.LogsServiceGrpc;
+import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.event.system.SystemLogEvent;
 import io.grpc.stub.StreamObserver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Consumer;
-import com.soulfiremc.grpc.generated.LogRequest;
-import com.soulfiremc.grpc.generated.LogResponse;
-import com.soulfiremc.grpc.generated.LogsServiceGrpc;
-import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.system.SystemLogEvent;
 
 public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   private final QueueWithMaxSize<String> logs = new QueueWithMaxSize<>(300); // Keep max 300 logs

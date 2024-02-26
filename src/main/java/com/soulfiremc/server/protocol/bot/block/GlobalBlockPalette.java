@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.server.protocol.bot.block;
 
+import com.soulfiremc.server.data.BlockState;
+import com.soulfiremc.server.data.BlockType;
+import com.soulfiremc.server.protocol.bot.state.ChunkData;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.ToString;
-import com.soulfiremc.server.data.BlockState;
-import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.protocol.bot.state.ChunkData;
 
 @ToString
 public class GlobalBlockPalette {

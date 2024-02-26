@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.server.data;
 
+import com.soulfiremc.server.protocol.bot.movement.AABB;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import com.soulfiremc.server.protocol.bot.movement.AABB;
 import org.cloudburstmc.math.vector.Vector3i;
 
 @SuppressWarnings("unused")

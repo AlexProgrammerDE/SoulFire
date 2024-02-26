@@ -19,11 +19,6 @@ package com.soulfiremc.server.protocol;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import io.netty.channel.EventLoopGroup;
-import java.util.UUID;
-import net.lenni0451.lambdaevents.LambdaManager;
-import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.server.AttackManager;
@@ -36,6 +31,11 @@ import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import io.netty.channel.EventLoopGroup;
+import java.util.UUID;
+import net.lenni0451.lambdaevents.LambdaManager;
+import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import org.slf4j.Logger;
 
 public record BotConnectionFactory(

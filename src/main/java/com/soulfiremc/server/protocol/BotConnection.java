@@ -18,11 +18,6 @@
 package com.soulfiremc.server.protocol;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
-import io.netty.handler.traffic.GlobalTrafficShapingHandler;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import net.lenni0451.lambdaevents.LambdaManager;
 import com.soulfiremc.server.AttackManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.event.attack.PreBotConnectEvent;
@@ -35,6 +30,11 @@ import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.util.TimeUtil;
+import io.netty.handler.traffic.GlobalTrafficShapingHandler;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import net.lenni0451.lambdaevents.LambdaManager;
 import org.slf4j.Logger;
 
 public record BotConnection(

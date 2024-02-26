@@ -18,12 +18,6 @@
 package com.soulfiremc.server.plugins;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import java.util.concurrent.ThreadLocalRandom;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import net.lenni0451.lambdaevents.EventHandler;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotPreEntityTickEvent;
@@ -35,6 +29,12 @@ import com.soulfiremc.server.settings.lib.property.DoubleProperty;
 import com.soulfiremc.server.settings.lib.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.lib.property.Property;
 import com.soulfiremc.server.settings.lib.property.StringProperty;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import java.util.concurrent.ThreadLocalRandom;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.lenni0451.lambdaevents.EventHandler;
 
 @Slf4j
 public class KillAura implements InternalPlugin {

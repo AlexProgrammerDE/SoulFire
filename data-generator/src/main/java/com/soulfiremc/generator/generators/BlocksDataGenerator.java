@@ -19,12 +19,12 @@ package com.soulfiremc.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.soulfiremc.generator.mixin.BlockAccessor;
+import com.soulfiremc.generator.util.BlockSettingsAccessor;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FallingBlock;
-import com.soulfiremc.generator.mixin.BlockAccessor;
-import com.soulfiremc.generator.util.BlockSettingsAccessor;
 
 public class BlocksDataGenerator implements IDataGenerator {
   public static JsonObject generateBlock(Block block) {

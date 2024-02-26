@@ -19,6 +19,10 @@ package com.soulfiremc.client.gui;
 
 import ch.jalu.injector.Injector;
 import com.formdev.flatlaf.extras.FlatSVGUtils;
+import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.client.gui.libs.HintManager;
+import com.soulfiremc.client.gui.navigation.CardsContainer;
+import com.soulfiremc.client.gui.navigation.ControlPanel;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -31,10 +35,6 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.client.gui.libs.HintManager;
-import com.soulfiremc.client.gui.navigation.CardsContainer;
-import com.soulfiremc.client.gui.navigation.ControlPanel;
 
 public class GUIFrame extends JFrame {
   public static final String MAIN_MENU = "MainMenu";

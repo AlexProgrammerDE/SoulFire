@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.server.pathfinding.graph;
 
-import lombok.RequiredArgsConstructor;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
+import lombok.RequiredArgsConstructor;
 
 /**
  * An immutable representation of the world state. This takes a world state and projects changes

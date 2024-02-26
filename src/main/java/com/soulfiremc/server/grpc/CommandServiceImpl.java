@@ -17,9 +17,6 @@
  */
 package com.soulfiremc.server.grpc;
 
-import io.grpc.stub.StreamObserver;
-import javax.inject.Inject;
-import lombok.RequiredArgsConstructor;
 import com.soulfiremc.grpc.generated.CommandCompletionRequest;
 import com.soulfiremc.grpc.generated.CommandCompletionResponse;
 import com.soulfiremc.grpc.generated.CommandHistoryRequest;
@@ -28,6 +25,9 @@ import com.soulfiremc.grpc.generated.CommandRequest;
 import com.soulfiremc.grpc.generated.CommandResponse;
 import com.soulfiremc.grpc.generated.CommandServiceGrpc;
 import com.soulfiremc.server.ServerCommandManager;
+import io.grpc.stub.StreamObserver;
+import javax.inject.Inject;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBase {

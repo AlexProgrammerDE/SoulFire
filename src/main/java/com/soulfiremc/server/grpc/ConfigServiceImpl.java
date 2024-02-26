@@ -17,11 +17,6 @@
  */
 package com.soulfiremc.server.grpc;
 
-import io.grpc.stub.StreamObserver;
-import java.util.ArrayList;
-import java.util.Collection;
-import javax.inject.Inject;
-import lombok.RequiredArgsConstructor;
 import com.soulfiremc.SoulFireBootstrap;
 import com.soulfiremc.grpc.generated.ClientDataRequest;
 import com.soulfiremc.grpc.generated.ClientPlugin;
@@ -29,6 +24,11 @@ import com.soulfiremc.grpc.generated.ConfigServiceGrpc;
 import com.soulfiremc.grpc.generated.UIClientDataResponse;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.util.RPCConstants;
+import io.grpc.stub.StreamObserver;
+import java.util.ArrayList;
+import java.util.Collection;
+import javax.inject.Inject;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {

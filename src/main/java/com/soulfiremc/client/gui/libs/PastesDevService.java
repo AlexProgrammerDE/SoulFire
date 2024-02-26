@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.client.gui.libs;
 
-import java.net.URI;
-import lombok.extern.slf4j.Slf4j;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.HttpHelper;
+import java.net.URI;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.netty.ByteBufFlux;
 

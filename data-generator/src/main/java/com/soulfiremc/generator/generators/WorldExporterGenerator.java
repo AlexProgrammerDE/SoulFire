@@ -20,6 +20,8 @@ package com.soulfiremc.generator.generators;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
+import com.soulfiremc.generator.Main;
+import com.soulfiremc.generator.util.GsonInstance;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -30,8 +32,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import com.soulfiremc.generator.Main;
-import com.soulfiremc.generator.util.GsonInstance;
 
 @Slf4j
 public class WorldExporterGenerator implements IDataGenerator {

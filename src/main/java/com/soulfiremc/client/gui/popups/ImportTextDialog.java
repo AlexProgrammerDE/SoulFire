@@ -17,6 +17,10 @@
  */
 package com.soulfiremc.client.gui.popups;
 
+import com.soulfiremc.client.gui.GUIFrame;
+import com.soulfiremc.client.gui.GUIManager;
+import com.soulfiremc.client.gui.libs.HintTextArea;
+import com.soulfiremc.client.gui.libs.JFXFileHelper;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
@@ -41,10 +45,6 @@ import javax.swing.UIManager;
 import javax.swing.border.MatteBorder;
 import javax.swing.border.TitledBorder;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.client.gui.GUIFrame;
-import com.soulfiremc.client.gui.GUIManager;
-import com.soulfiremc.client.gui.libs.HintTextArea;
-import com.soulfiremc.client.gui.libs.JFXFileHelper;
 
 @Slf4j
 public class ImportTextDialog extends JDialog {

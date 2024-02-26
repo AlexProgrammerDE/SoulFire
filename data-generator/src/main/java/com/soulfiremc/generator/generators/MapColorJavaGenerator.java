@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.generator.generators;
 
-import lombok.SneakyThrows;
-import net.minecraft.world.level.material.MapColor;
 import com.soulfiremc.generator.util.GeneratorConstants;
 import com.soulfiremc.generator.util.ResourceHelper;
+import lombok.SneakyThrows;
+import net.minecraft.world.level.material.MapColor;
 
 public class MapColorJavaGenerator implements IDataGenerator {
   @Override

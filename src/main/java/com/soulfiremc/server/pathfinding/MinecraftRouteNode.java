@@ -17,12 +17,12 @@
  */
 package com.soulfiremc.server.pathfinding;
 
+import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import com.soulfiremc.server.pathfinding.execution.WorldAction;
 
 @Getter
 @Setter

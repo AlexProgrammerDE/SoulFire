@@ -17,6 +17,11 @@
  */
 package com.soulfiremc.client.cli;
 
+import com.soulfiremc.account.AuthType;
+import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.client.SFTerminalConsole;
+import com.soulfiremc.proxy.ProxyType;
+import com.soulfiremc.server.viaversion.SFVersionConstants;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,11 +31,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.account.AuthType;
-import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.client.SFTerminalConsole;
-import com.soulfiremc.proxy.ProxyType;
-import com.soulfiremc.server.viaversion.SFVersionConstants;
 import net.raphimc.vialoader.util.ProtocolVersionList;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;

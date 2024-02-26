@@ -18,12 +18,12 @@
 package com.soulfiremc.util;
 
 import com.google.gson.JsonObject;
+import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.server.util.VersionComparator;
 import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.server.util.VersionComparator;
 import reactor.core.publisher.Mono;
 
 @Slf4j

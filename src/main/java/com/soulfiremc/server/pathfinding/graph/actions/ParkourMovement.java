@@ -17,14 +17,14 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import java.util.List;
 import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.GapJumpAction;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ParkourDirection;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.List;
 
 public final class ParkourMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;

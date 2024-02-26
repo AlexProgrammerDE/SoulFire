@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.account;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import com.soulfiremc.account.service.AccountData;
 import com.soulfiremc.account.service.BedrockData;
 import com.soulfiremc.account.service.MCAuthService;
@@ -29,6 +27,8 @@ import com.soulfiremc.account.service.SFEasyMCAuthService;
 import com.soulfiremc.account.service.SFJavaMicrosoftAuthService;
 import com.soulfiremc.account.service.SFOfflineAuthService;
 import com.soulfiremc.account.service.SFTheAlteningAuthService;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor

@@ -23,6 +23,20 @@ import com.github.steveice10.mc.protocol.packet.handshake.serverbound.ClientInte
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
 import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundCustomQueryAnswerPacket;
 import com.google.common.collect.ImmutableList;
+import com.soulfiremc.server.api.PluginHelper;
+import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
+import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
+import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.IdentifiedKey;
+import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.property.ComboProperty;
+import com.soulfiremc.server.settings.lib.property.Property;
+import com.soulfiremc.server.settings.lib.property.StringProperty;
+import com.soulfiremc.server.util.UUIDHelper;
+import com.soulfiremc.server.util.VelocityConstants;
+import com.soulfiremc.util.GsonInstance;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -40,20 +54,6 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
-import com.soulfiremc.server.api.PluginHelper;
-import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
-import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
-import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
-import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.protocol.IdentifiedKey;
-import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.lib.property.ComboProperty;
-import com.soulfiremc.server.settings.lib.property.Property;
-import com.soulfiremc.server.settings.lib.property.StringProperty;
-import com.soulfiremc.server.util.UUIDHelper;
-import com.soulfiremc.server.util.VelocityConstants;
-import com.soulfiremc.util.GsonInstance;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

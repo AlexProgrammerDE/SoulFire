@@ -18,9 +18,9 @@
 package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
+import com.soulfiremc.server.pathfinding.SFVec3i;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import com.soulfiremc.server.pathfinding.SFVec3i;
 
 @Getter
 @RequiredArgsConstructor

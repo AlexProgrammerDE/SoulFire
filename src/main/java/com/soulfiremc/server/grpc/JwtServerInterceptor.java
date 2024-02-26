@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.soulfiremc.util.RPCConstants;
 import io.grpc.Context;
 import io.grpc.Contexts;
 import io.grpc.Metadata;
@@ -30,7 +31,6 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import javax.crypto.SecretKey;
-import com.soulfiremc.util.RPCConstants;
 
 public class JwtServerInterceptor implements ServerInterceptor {
   private final JwtParser parser;

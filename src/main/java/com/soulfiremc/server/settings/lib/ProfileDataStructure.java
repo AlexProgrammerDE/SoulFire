@@ -26,6 +26,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.soulfiremc.account.AuthType;
+import com.soulfiremc.account.MinecraftAccount;
+import com.soulfiremc.account.service.AccountData;
+import com.soulfiremc.proxy.SFProxy;
 import java.lang.reflect.Type;
 import java.security.GeneralSecurityException;
 import java.security.Key;
@@ -37,10 +41,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import com.soulfiremc.account.AuthType;
-import com.soulfiremc.account.MinecraftAccount;
-import com.soulfiremc.account.service.AccountData;
-import com.soulfiremc.proxy.SFProxy;
 
 // Intermediary class between profile strings and SettingsHolder
 public record ProfileDataStructure(

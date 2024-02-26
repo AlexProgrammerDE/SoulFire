@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.data;
 
-import java.util.Optional;
 import com.soulfiremc.server.util.BlockTypeHelper;
+import java.util.Optional;
 
 public class BlockItems {
   public static final BlockType[] VALUES = new BlockType[ItemType.FROM_ID.size()];

@@ -20,14 +20,6 @@ package com.soulfiremc.server.plugins;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 import com.github.steveice10.mc.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
-import io.netty.buffer.Unpooled;
-import java.util.List;
-import javax.inject.Inject;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import net.lenni0451.lambdaevents.EventHandler;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
@@ -37,6 +29,14 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.property.ComboProperty;
 import com.soulfiremc.server.settings.lib.property.Property;
+import io.netty.buffer.Unpooled;
+import java.util.List;
+import javax.inject.Inject;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.lenni0451.lambdaevents.EventHandler;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

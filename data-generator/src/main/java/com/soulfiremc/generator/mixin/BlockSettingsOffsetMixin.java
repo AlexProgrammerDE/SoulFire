@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.generator.mixin;
 
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import com.soulfiremc.generator.util.BlockSettingsAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;

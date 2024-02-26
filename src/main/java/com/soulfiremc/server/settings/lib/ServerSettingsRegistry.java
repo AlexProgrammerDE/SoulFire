@@ -17,12 +17,6 @@
  */
 package com.soulfiremc.server.settings.lib;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import com.soulfiremc.grpc.generated.BoolSetting;
 import com.soulfiremc.grpc.generated.ClientPluginSettingEntry;
 import com.soulfiremc.grpc.generated.ClientPluginSettingEntryMinMaxPair;
@@ -43,6 +37,12 @@ import com.soulfiremc.server.settings.lib.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.lib.property.Property;
 import com.soulfiremc.server.settings.lib.property.SingleProperty;
 import com.soulfiremc.server.settings.lib.property.StringProperty;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ServerSettingsRegistry {
   private final Map<String, NamespaceRegistry> namespaceMap = new LinkedHashMap<>();

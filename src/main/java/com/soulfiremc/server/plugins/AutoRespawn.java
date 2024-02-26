@@ -20,10 +20,6 @@ package com.soulfiremc.server.plugins;
 import com.github.steveice10.mc.protocol.data.game.ClientCommand;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
-import java.util.concurrent.TimeUnit;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import net.lenni0451.lambdaevents.EventHandler;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
@@ -34,6 +30,10 @@ import com.soulfiremc.server.settings.lib.property.BooleanProperty;
 import com.soulfiremc.server.settings.lib.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.lib.property.Property;
 import com.soulfiremc.server.util.RandomUtil;
+import java.util.concurrent.TimeUnit;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import net.lenni0451.lambdaevents.EventHandler;
 
 public class AutoRespawn implements InternalPlugin {
   public static void onPacket(SFPacketReceiveEvent event) {

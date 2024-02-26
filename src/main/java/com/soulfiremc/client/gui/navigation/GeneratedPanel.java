@@ -18,6 +18,14 @@
 package com.soulfiremc.client.gui.navigation;
 
 import com.google.gson.JsonPrimitive;
+import com.soulfiremc.client.gui.libs.JMinMaxHelper;
+import com.soulfiremc.client.gui.libs.SwingTextUtils;
+import com.soulfiremc.client.settings.SettingsManager;
+import com.soulfiremc.grpc.generated.ClientPluginSettingsPage;
+import com.soulfiremc.grpc.generated.ComboOption;
+import com.soulfiremc.grpc.generated.DoubleSetting;
+import com.soulfiremc.grpc.generated.IntSetting;
+import com.soulfiremc.server.settings.lib.property.PropertyKey;
 import java.awt.Component;
 import java.awt.GridBagLayout;
 import java.util.Objects;
@@ -32,14 +40,6 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import net.lenni0451.commons.swing.GBC;
-import com.soulfiremc.client.gui.libs.JMinMaxHelper;
-import com.soulfiremc.client.gui.libs.SwingTextUtils;
-import com.soulfiremc.client.settings.SettingsManager;
-import com.soulfiremc.grpc.generated.ClientPluginSettingsPage;
-import com.soulfiremc.grpc.generated.ComboOption;
-import com.soulfiremc.grpc.generated.DoubleSetting;
-import com.soulfiremc.grpc.generated.IntSetting;
-import com.soulfiremc.server.settings.lib.property.PropertyKey;
 
 public class GeneratedPanel extends NavigationItem {
   private final ClientPluginSettingsPage settingsPage;

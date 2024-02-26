@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.server.viaversion.providers;
 
+import com.soulfiremc.server.viaversion.StorableSession;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.CompressionProvider;
 import java.util.Objects;
-import com.soulfiremc.server.viaversion.StorableSession;
 
 public class SFViaCompressionProvider extends CompressionProvider {
   @Override

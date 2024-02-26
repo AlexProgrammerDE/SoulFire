@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
-import lombok.RequiredArgsConstructor;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum BodyPart {

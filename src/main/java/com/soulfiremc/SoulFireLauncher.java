@@ -17,8 +17,8 @@
  */
 package com.soulfiremc;
 
-import java.util.List;
 import com.soulfiremc.util.SFContextClassLoader;
+import java.util.List;
 
 /**
  * This class only changes the classLoader for the rest of the program. This is so we can merge

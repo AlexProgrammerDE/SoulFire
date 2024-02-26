@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.account.service;
 
-import java.io.IOException;
 import com.soulfiremc.account.AuthType;
 import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.util.HttpHelper;
+import java.io.IOException;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;

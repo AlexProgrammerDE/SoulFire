@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.server.protocol.bot.state.entity;
 
+import com.soulfiremc.server.data.EntityType;
 import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import com.soulfiremc.server.data.EntityType;
 
 @Getter
 @EqualsAndHashCode(callSuper = true)

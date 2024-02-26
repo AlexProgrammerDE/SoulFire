@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.client.gui;
 
+import com.soulfiremc.util.SFPathConstants;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,7 +28,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.util.SFPathConstants;
 
 @Slf4j
 public class GUIClientProps {

@@ -18,13 +18,6 @@
 package com.soulfiremc.server.pathfinding;
 
 import com.google.common.base.Stopwatch;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectCollection;
-import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Consumer;
-import lombok.extern.slf4j.Slf4j;
 import com.soulfiremc.server.pathfinding.execution.MovementAction;
 import com.soulfiremc.server.pathfinding.execution.RecalculatePathAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
@@ -33,6 +26,13 @@ import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectCollection;
+import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {

@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.data;
 
-import java.util.Set;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
+import java.util.Set;
 
 public class ToolSpeedType {
   private static final Set<ItemType> SWORDS =

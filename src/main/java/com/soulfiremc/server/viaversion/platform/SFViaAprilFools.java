@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.viaversion.platform;
 
+import com.soulfiremc.server.viaversion.JLoggerToSLF4J;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
-import com.soulfiremc.server.viaversion.JLoggerToSLF4J;
 import net.raphimc.viaaprilfools.platform.ViaAprilFoolsPlatform;
 import org.slf4j.LoggerFactory;
 

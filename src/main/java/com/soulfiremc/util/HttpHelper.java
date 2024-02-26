@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.util;
 
+import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.proxy.SFProxy;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import java.io.IOException;
@@ -33,8 +35,6 @@ import net.lenni0451.commons.httpclient.requests.HttpContentRequest;
 import net.lenni0451.commons.httpclient.requests.HttpRequest;
 import net.lenni0451.commons.httpclient.utils.HttpRequestUtils;
 import net.lenni0451.commons.httpclient.utils.URLWrapper;
-import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.proxy.SFProxy;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
@@ -91,6 +91,13 @@ public class HttpHelper {
   public static HttpClient createLenniMCAuthHttpClient(SFProxy proxyData) {
     return MinecraftAuth.createHttpClient()
         .setExecutor(client -> new ReactorLenniExecutor(proxyData, client));
+  }
+
+  private static Map<String, List<String>> getAsMap(HttpHeaders headers) {
+    return headers.entries().stream()
+        .collect(
+            Collectors.groupingBy(
+                Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
   }
 
   private static class ReactorLenniExecutor extends RequestExecutor {
@@ -160,12 +167,5 @@ public class HttpHelper {
         throw new IOException(e);
       }
     }
-  }
-
-  private static Map<String, List<String>> getAsMap(HttpHeaders headers) {
-    return headers.entries().stream()
-        .collect(
-            Collectors.groupingBy(
-                Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
   }
 }

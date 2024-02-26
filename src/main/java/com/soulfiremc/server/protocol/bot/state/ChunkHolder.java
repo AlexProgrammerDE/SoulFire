@@ -17,11 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
@@ -29,6 +24,11 @@ import com.soulfiremc.server.protocol.bot.block.GlobalBlockPalette;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.utils.SectionUtils;
 import com.soulfiremc.server.util.NoopLock;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public class ChunkHolder implements BlockAccessor {

@@ -18,6 +18,8 @@
 package com.soulfiremc.server.protocol.netty;
 
 import com.google.common.net.HostAndPort;
+import com.soulfiremc.server.settings.BotSettings;
+import com.soulfiremc.server.settings.lib.SettingsHolder;
 import io.netty.channel.EventLoopGroup;
 import java.net.IDN;
 import java.net.InetAddress;
@@ -28,8 +30,6 @@ import java.util.Optional;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.server.settings.BotSettings;
-import com.soulfiremc.server.settings.lib.SettingsHolder;
 
 @Slf4j
 public class ResolveUtil {

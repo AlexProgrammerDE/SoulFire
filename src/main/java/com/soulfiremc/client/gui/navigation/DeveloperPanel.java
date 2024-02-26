@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.client.gui.navigation;
 
+import com.soulfiremc.client.gui.GUIManager;
+import com.soulfiremc.util.BuiltinSettingsConstants;
 import java.awt.GridBagLayout;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.client.gui.GUIManager;
-import com.soulfiremc.util.BuiltinSettingsConstants;
 
 @Slf4j
 public class DeveloperPanel extends NavigationItem {

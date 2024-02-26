@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.api;
 
+import com.soulfiremc.server.util.RandomUtil;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.server.util.RandomUtil;
 
 @Slf4j
 public class ExecutorHelper {

@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.client;
 
+import com.soulfiremc.util.ShutdownManager;
 import java.util.concurrent.ExecutorService;
 import lombok.RequiredArgsConstructor;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
-import com.soulfiremc.util.ShutdownManager;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

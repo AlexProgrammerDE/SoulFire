@@ -18,12 +18,12 @@
 package com.soulfiremc.server.pathfinding.execution;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.VectorHelper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor

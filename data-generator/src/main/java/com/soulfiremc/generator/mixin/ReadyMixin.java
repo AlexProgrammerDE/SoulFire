@@ -17,12 +17,12 @@
  */
 package com.soulfiremc.generator.mixin;
 
+import com.soulfiremc.generator.Main;
+import com.soulfiremc.generator.generators.DataGenerators;
 import java.nio.file.Path;
 import net.minecraft.DetectedVersion;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
-import com.soulfiremc.generator.Main;
-import com.soulfiremc.generator.generators.DataGenerators;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

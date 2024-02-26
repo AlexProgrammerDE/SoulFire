@@ -19,6 +19,7 @@ package com.soulfiremc.server.protocol;
 
 
 import com.google.common.collect.ImmutableSet;
+import com.soulfiremc.server.util.EncryptionUtils;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -29,7 +30,6 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import com.soulfiremc.server.util.EncryptionUtils;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

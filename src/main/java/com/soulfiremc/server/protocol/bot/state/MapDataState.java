@@ -20,11 +20,11 @@ package com.soulfiremc.server.protocol.bot.state;
 import com.github.steveice10.mc.protocol.data.game.level.map.MapData;
 import com.github.steveice10.mc.protocol.data.game.level.map.MapIcon;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundMapItemDataPacket;
+import com.soulfiremc.server.data.MapColor;
 import java.awt.image.BufferedImage;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import com.soulfiremc.server.data.MapColor;
 
 @Setter
 @Getter

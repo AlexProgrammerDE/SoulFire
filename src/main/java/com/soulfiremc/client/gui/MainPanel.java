@@ -18,6 +18,7 @@
 package com.soulfiremc.client.gui;
 
 import ch.jalu.injector.Injector;
+import com.soulfiremc.client.gui.navigation.CardsContainer;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import javax.annotation.PostConstruct;
@@ -26,7 +27,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import lombok.RequiredArgsConstructor;
-import com.soulfiremc.client.gui.navigation.CardsContainer;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MainPanel extends JPanel {

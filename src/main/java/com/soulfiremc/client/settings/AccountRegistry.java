@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.client.settings;
 
+import com.soulfiremc.account.AuthType;
+import com.soulfiremc.account.MinecraftAccount;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.account.AuthType;
-import com.soulfiremc.account.MinecraftAccount;
 
 @Slf4j
 @RequiredArgsConstructor

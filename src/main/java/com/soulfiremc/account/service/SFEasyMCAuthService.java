@@ -17,16 +17,16 @@
  */
 package com.soulfiremc.account.service;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.UUID;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import com.soulfiremc.account.AuthType;
 import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.HttpHelper;
+import java.io.IOException;
+import java.net.URI;
+import java.util.UUID;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.netty.ByteBufFlux;
 

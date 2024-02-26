@@ -18,12 +18,12 @@
 package com.soulfiremc.server.api.event.bot;
 
 import com.github.steveice10.mc.protocol.codec.MinecraftPacket;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 import com.soulfiremc.server.api.event.AbstractCancellable;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.protocol.BotConnection;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * This event is called when a packet is sent to the connected server. Setter is used to change the

@@ -17,14 +17,14 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
+import com.soulfiremc.server.data.Attribute;
+import com.soulfiremc.server.data.AttributeType;
+import com.soulfiremc.server.data.ItemType;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Data;
-import com.soulfiremc.server.data.Attribute;
-import com.soulfiremc.server.data.AttributeType;
-import com.soulfiremc.server.data.ItemType;
 
 @Data
 public class EntityAttributeState {

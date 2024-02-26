@@ -17,14 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding.graph;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectList;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.util.TriState;
 import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
@@ -46,6 +38,14 @@ import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.ObjectReference;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.util.TriState;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {

@@ -17,14 +17,14 @@
  */
 package com.soulfiremc.server.api;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
 import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.SoulFireAttackEvent;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.api.event.attack.AttackInitEvent;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /** This class contains helper methods for plugins to use to make their life easier. */
 public class PluginHelper {

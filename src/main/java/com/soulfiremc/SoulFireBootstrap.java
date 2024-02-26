@@ -17,6 +17,13 @@
  */
 package com.soulfiremc;
 
+import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.client.gui.GUIManager;
+import com.soulfiremc.server.api.MixinExtension;
+import com.soulfiremc.server.settings.DevSettings;
+import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.util.CustomClassProvider;
+import com.soulfiremc.util.SFPathConstants;
 import io.netty.util.ResourceLeakDetector;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
@@ -30,13 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.reflect.Agents;
-import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.client.gui.GUIManager;
-import com.soulfiremc.server.api.MixinExtension;
-import com.soulfiremc.server.settings.DevSettings;
-import com.soulfiremc.server.settings.lib.SettingsHolder;
-import com.soulfiremc.server.util.CustomClassProvider;
-import com.soulfiremc.util.SFPathConstants;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.fusesource.jansi.AnsiConsole;

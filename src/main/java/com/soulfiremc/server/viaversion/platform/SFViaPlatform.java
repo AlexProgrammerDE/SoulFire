@@ -17,6 +17,10 @@
  */
 package com.soulfiremc.server.viaversion.platform;
 
+import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.server.viaversion.JLoggerToSLF4J;
+import com.soulfiremc.server.viaversion.SFViaInjector;
+import com.soulfiremc.server.viaversion.SFViaTask;
 import com.viaversion.viaversion.ViaAPIBase;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.ViaAPI;
@@ -39,10 +43,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.server.viaversion.JLoggerToSLF4J;
-import com.soulfiremc.server.viaversion.SFViaInjector;
-import com.soulfiremc.server.viaversion.SFViaTask;
 import net.raphimc.vialoader.commands.UserCommandSender;
 import org.slf4j.LoggerFactory;
 

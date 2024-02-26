@@ -17,16 +17,16 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
+import com.soulfiremc.server.data.Attribute;
+import com.soulfiremc.server.data.AttributeType;
+import com.soulfiremc.server.data.ModifierOperation;
+import com.soulfiremc.server.util.MathHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import com.soulfiremc.server.data.Attribute;
-import com.soulfiremc.server.data.AttributeType;
-import com.soulfiremc.server.data.ModifierOperation;
-import com.soulfiremc.server.util.MathHelper;
 
 @Setter
 @Getter

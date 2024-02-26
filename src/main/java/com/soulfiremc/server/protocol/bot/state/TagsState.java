@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
+import com.soulfiremc.server.data.BlockType;
+import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.data.ItemType;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.data.EntityType;
-import com.soulfiremc.server.data.ItemType;
 
 public class TagsState {
   private final Map<String, Set<BlockType>> blockTags = new Object2ObjectOpenHashMap<>();

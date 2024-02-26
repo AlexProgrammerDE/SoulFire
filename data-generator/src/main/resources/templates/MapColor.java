@@ -24,6 +24,16 @@ public record MapColor(int id, int col) {
   // VALUES REPLACE
   private static final MapColor EMPTY = COLORS[0];
 
+  public static int getColorFromPackedId(int packedId) {
+    var i = packedId & 0xFF;
+    return COLORS[i >> 2].calculateRGBColor(Brightness.VALUES[i & 3]);
+  }
+
+  private static MapColor fromId(int id) {
+    var mapColor = COLORS[id];
+    return mapColor == null ? EMPTY : mapColor;
+  }
+
   public int calculateRGBColor(Brightness brightness) {
     if (this == EMPTY) {
       return 0;
@@ -34,16 +44,6 @@ public record MapColor(int id, int col) {
       var b = (this.col & 0xFF) * m / 255;
       return 0xFF000000 | b << 16 | g << 8 | r;
     }
-  }
-
-  public static int getColorFromPackedId(int packedId) {
-    var i = packedId & 0xFF;
-    return COLORS[i >> 2].calculateRGBColor(Brightness.VALUES[i & 3]);
-  }
-
-  private static MapColor fromId(int id) {
-    var mapColor = COLORS[id];
-    return mapColor == null ? EMPTY : mapColor;
   }
 
   @Override

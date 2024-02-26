@@ -20,7 +20,6 @@ package com.soulfiremc.test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.util.List;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.pathfinding.BotEntityState;
@@ -34,6 +33,7 @@ import com.soulfiremc.server.pathfinding.graph.ProjectedLevelState;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.test.utils.TestBlockAccessor;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

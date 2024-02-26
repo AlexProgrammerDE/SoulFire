@@ -19,6 +19,12 @@ package com.soulfiremc.client.gui;
 
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
+import com.soulfiremc.client.ClientCommandManager;
+import com.soulfiremc.client.SFTerminalConsole;
+import com.soulfiremc.client.grpc.RPCClient;
+import com.soulfiremc.client.settings.SettingsManager;
+import com.soulfiremc.util.SFPathConstants;
+import com.soulfiremc.util.ShutdownManager;
 import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
@@ -32,12 +38,6 @@ import javax.swing.SwingUtilities;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.reflect.Modules;
-import com.soulfiremc.client.ClientCommandManager;
-import com.soulfiremc.client.SFTerminalConsole;
-import com.soulfiremc.client.grpc.RPCClient;
-import com.soulfiremc.client.settings.SettingsManager;
-import com.soulfiremc.util.SFPathConstants;
-import com.soulfiremc.util.ShutdownManager;
 
 @Slf4j
 @Getter

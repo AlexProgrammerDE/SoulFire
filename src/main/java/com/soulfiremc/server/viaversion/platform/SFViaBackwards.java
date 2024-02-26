@@ -17,12 +17,12 @@
  */
 package com.soulfiremc.server.viaversion.platform;
 
+import com.soulfiremc.server.viaversion.JLoggerToSLF4J;
 import com.viaversion.viabackwards.api.ViaBackwardsPlatform;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
-import com.soulfiremc.server.viaversion.JLoggerToSLF4J;
 import org.slf4j.LoggerFactory;
 
 @RequiredArgsConstructor

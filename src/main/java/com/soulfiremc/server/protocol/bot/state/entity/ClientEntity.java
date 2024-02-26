@@ -22,11 +22,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import java.util.UUID;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.bot.movement.BotMovementManager;
@@ -34,6 +29,11 @@ import com.soulfiremc.server.protocol.bot.movement.ControlState;
 import com.soulfiremc.server.protocol.bot.movement.PhysicsData;
 import com.soulfiremc.server.protocol.bot.movement.PlayerMovementState;
 import com.soulfiremc.server.util.MathHelper;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import java.util.UUID;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /** Represents the bot itself as an entity. */
 @Getter

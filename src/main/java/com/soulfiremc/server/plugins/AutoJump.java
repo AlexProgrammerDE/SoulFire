@@ -17,9 +17,6 @@
  */
 package com.soulfiremc.server.plugins;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import net.lenni0451.lambdaevents.EventHandler;
 import com.soulfiremc.server.api.ExecutorHelper;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
@@ -29,6 +26,9 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.property.BooleanProperty;
 import com.soulfiremc.server.settings.lib.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.lib.property.Property;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import net.lenni0451.lambdaevents.EventHandler;
 
 public class AutoJump implements InternalPlugin {
   public static void onJoined(BotJoinedEvent event) {

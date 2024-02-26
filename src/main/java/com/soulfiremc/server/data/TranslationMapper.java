@@ -18,6 +18,8 @@
 package com.soulfiremc.server.data;
 
 import com.google.gson.JsonObject;
+import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.util.GsonInstance;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -28,8 +30,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.TranslationArgumentLike;
-import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.util.GsonInstance;
 
 @Slf4j
 @RequiredArgsConstructor

@@ -20,6 +20,9 @@ package com.soulfiremc.client.settings;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.JsonElement;
+import com.soulfiremc.server.settings.lib.ProfileDataStructure;
+import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.settings.lib.property.PropertyKey;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,9 +33,6 @@ import java.util.function.Consumer;
 import javax.inject.Provider;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.server.settings.lib.ProfileDataStructure;
-import com.soulfiremc.server.settings.lib.SettingsHolder;
-import com.soulfiremc.server.settings.lib.property.PropertyKey;
 
 @Slf4j
 public class SettingsManager {

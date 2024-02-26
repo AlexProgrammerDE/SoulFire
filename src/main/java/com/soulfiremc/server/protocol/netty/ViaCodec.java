@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.protocol.netty;
 
+import com.soulfiremc.server.viaversion.StorableSession;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.packet.State;
@@ -33,7 +34,6 @@ import io.netty.handler.codec.MessageToMessageCodec;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import com.soulfiremc.server.viaversion.StorableSession;
 
 @RequiredArgsConstructor
 public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {

@@ -17,6 +17,14 @@
  */
 package com.soulfiremc.client.gui.navigation;
 
+import com.soulfiremc.account.AuthType;
+import com.soulfiremc.account.MinecraftAccount;
+import com.soulfiremc.client.gui.GUIFrame;
+import com.soulfiremc.client.gui.GUIManager;
+import com.soulfiremc.client.gui.libs.JEnumComboBox;
+import com.soulfiremc.client.gui.popups.ImportTextDialog;
+import com.soulfiremc.util.BuiltinSettingsConstants;
+import com.soulfiremc.util.SFPathConstants;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -34,14 +42,6 @@ import javax.swing.JToolBar;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import net.lenni0451.commons.swing.GBC;
-import com.soulfiremc.account.AuthType;
-import com.soulfiremc.account.MinecraftAccount;
-import com.soulfiremc.client.gui.GUIFrame;
-import com.soulfiremc.client.gui.GUIManager;
-import com.soulfiremc.client.gui.libs.JEnumComboBox;
-import com.soulfiremc.client.gui.popups.ImportTextDialog;
-import com.soulfiremc.util.BuiltinSettingsConstants;
-import com.soulfiremc.util.SFPathConstants;
 
 public class AccountPanel extends NavigationItem {
   @Inject

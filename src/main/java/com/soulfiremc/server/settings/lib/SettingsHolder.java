@@ -19,6 +19,14 @@ package com.soulfiremc.server.settings.lib;
 
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
+import com.soulfiremc.account.MinecraftAccount;
+import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.server.settings.lib.property.BooleanProperty;
+import com.soulfiremc.server.settings.lib.property.ComboProperty;
+import com.soulfiremc.server.settings.lib.property.DoubleProperty;
+import com.soulfiremc.server.settings.lib.property.IntProperty;
+import com.soulfiremc.server.settings.lib.property.PropertyKey;
+import com.soulfiremc.server.settings.lib.property.StringProperty;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMaps;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
@@ -28,14 +36,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import com.soulfiremc.account.MinecraftAccount;
-import com.soulfiremc.proxy.SFProxy;
-import com.soulfiremc.server.settings.lib.property.BooleanProperty;
-import com.soulfiremc.server.settings.lib.property.ComboProperty;
-import com.soulfiremc.server.settings.lib.property.DoubleProperty;
-import com.soulfiremc.server.settings.lib.property.IntProperty;
-import com.soulfiremc.server.settings.lib.property.PropertyKey;
-import com.soulfiremc.server.settings.lib.property.StringProperty;
 
 public record SettingsHolder(
     Object2ObjectMap<PropertyKey, Number> numberProperties,

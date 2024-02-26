@@ -22,12 +22,6 @@ import com.github.steveice10.mc.protocol.data.game.setting.ChatVisibility;
 import com.github.steveice10.mc.protocol.data.game.setting.SkinPart;
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundClientInformationPacket;
 import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
-import java.util.ArrayList;
-import javax.inject.Inject;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import net.lenni0451.lambdaevents.EventHandler;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.SFPacketSentEvent;
@@ -38,6 +32,12 @@ import com.soulfiremc.server.settings.lib.property.ComboProperty;
 import com.soulfiremc.server.settings.lib.property.IntProperty;
 import com.soulfiremc.server.settings.lib.property.Property;
 import com.soulfiremc.server.settings.lib.property.StringProperty;
+import java.util.ArrayList;
+import javax.inject.Inject;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import net.lenni0451.lambdaevents.EventHandler;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientSettings implements InternalPlugin {

@@ -18,6 +18,8 @@
 package com.soulfiremc.client.gui.libs;
 
 import com.formdev.flatlaf.fonts.jetbrains_mono.FlatJetBrainsMonoFont;
+import com.soulfiremc.client.gui.ThemeUtil;
+import com.soulfiremc.server.util.XtermPalette256;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -47,8 +49,6 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.client.gui.ThemeUtil;
-import com.soulfiremc.server.util.XtermPalette256;
 import pk.ansi4j.core.DefaultFunctionFinder;
 import pk.ansi4j.core.DefaultParserFactory;
 import pk.ansi4j.core.DefaultTextHandler;

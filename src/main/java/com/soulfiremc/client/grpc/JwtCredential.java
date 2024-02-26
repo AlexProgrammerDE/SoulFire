@@ -17,12 +17,12 @@
  */
 package com.soulfiremc.client.grpc;
 
+import com.soulfiremc.util.RPCConstants;
 import io.grpc.CallCredentials;
 import io.grpc.Metadata;
 import io.grpc.Status;
 import java.util.concurrent.Executor;
 import lombok.RequiredArgsConstructor;
-import com.soulfiremc.util.RPCConstants;
 
 @RequiredArgsConstructor
 public class JwtCredential extends CallCredentials {

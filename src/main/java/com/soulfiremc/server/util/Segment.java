@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.util;
 
-import java.util.List;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
+import java.util.List;
 import org.cloudburstmc.math.vector.Vector3d;
 
 public record Segment(Vector3d startPoint, Vector3d endPoint) {

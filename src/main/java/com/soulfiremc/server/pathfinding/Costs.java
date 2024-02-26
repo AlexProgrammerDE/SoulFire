@@ -18,7 +18,6 @@
 package com.soulfiremc.server.pathfinding;
 
 import com.github.steveice10.mc.protocol.data.game.entity.Effect;
-import java.util.OptionalInt;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.ItemType;
@@ -28,6 +27,7 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.util.MathHelper;
+import java.util.OptionalInt;
 import org.jetbrains.annotations.Nullable;
 
 public class Costs {

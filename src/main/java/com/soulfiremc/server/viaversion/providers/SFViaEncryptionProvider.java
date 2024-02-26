@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.viaversion.providers;
 
+import com.soulfiremc.server.protocol.SFProtocolConstants;
+import com.soulfiremc.server.viaversion.StorableSession;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import java.util.Objects;
 import javax.crypto.SecretKey;
-import com.soulfiremc.server.protocol.SFProtocolConstants;
-import com.soulfiremc.server.viaversion.StorableSession;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
 
 public class SFViaEncryptionProvider extends EncryptionProvider {

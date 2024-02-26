@@ -18,10 +18,6 @@
 package com.soulfiremc.jmh;
 
 import com.google.gson.JsonObject;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.util.zip.GZIPInputStream;
-import lombok.extern.slf4j.Slf4j;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.RouteFinder;
@@ -35,6 +31,10 @@ import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.test.utils.TestBlockAccessor;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ResourceHelper;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.util.zip.GZIPInputStream;
+import lombok.extern.slf4j.Slf4j;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;

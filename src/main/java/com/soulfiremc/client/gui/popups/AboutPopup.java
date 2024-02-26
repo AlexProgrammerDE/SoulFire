@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.client.gui.popups;
 
+import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.client.gui.libs.SwingTextUtils;
 import javax.swing.BoxLayout;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.client.gui.libs.SwingTextUtils;
 
 public class AboutPopup extends JDialog {
   public AboutPopup(JFrame parent) {
@@ -43,7 +43,11 @@ public class AboutPopup extends JDialog {
             "GitHub: <b><a href='https://github.com/AlexProgrammerDE/SoulFire'>github.com/AlexProgrammerDE/SoulFire</a></b>"));
     content.add(
         SwingTextUtils.createHtmlPane(
-            "Website: <b><a href='" + BuildData.URL + "'>" + BuildData.URL.replace("https://", "") + "</a></b>"));
+            "Website: <b><a href='"
+                + BuildData.URL
+                + "'>"
+                + BuildData.URL.replace("https://", "")
+                + "</a></b>"));
     content.add(
         SwingTextUtils.createHtmlPane(
             "Commit: <b><code>"

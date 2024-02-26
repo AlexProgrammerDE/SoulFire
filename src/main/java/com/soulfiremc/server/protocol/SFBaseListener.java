@@ -45,6 +45,8 @@ import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.event.session.ConnectedEvent;
 import com.github.steveice10.packetlib.event.session.SessionAdapter;
 import com.github.steveice10.packetlib.packet.Packet;
+import com.soulfiremc.server.protocol.netty.ViaClientSession;
+import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
@@ -52,8 +54,6 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import com.soulfiremc.server.protocol.netty.ViaClientSession;
-import com.soulfiremc.server.viaversion.SFVersionConstants;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 
 @RequiredArgsConstructor

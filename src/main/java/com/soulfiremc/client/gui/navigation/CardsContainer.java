@@ -18,6 +18,10 @@
 package com.soulfiremc.client.gui.navigation;
 
 import ch.jalu.injector.Injector;
+import com.soulfiremc.client.gui.GUIManager;
+import com.soulfiremc.grpc.generated.ClientDataRequest;
+import com.soulfiremc.grpc.generated.ClientPluginSettingsPage;
+import com.soulfiremc.util.BuiltinSettingsConstants;
 import java.awt.CardLayout;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +31,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import com.soulfiremc.client.gui.GUIManager;
-import com.soulfiremc.grpc.generated.ClientDataRequest;
-import com.soulfiremc.grpc.generated.ClientPluginSettingsPage;
-import com.soulfiremc.util.BuiltinSettingsConstants;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CardsContainer extends JPanel {

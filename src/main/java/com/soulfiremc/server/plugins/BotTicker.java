@@ -17,12 +17,12 @@
  */
 package com.soulfiremc.server.plugins;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.TickTimer;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.MDC;
 
 public class BotTicker implements InternalPlugin {

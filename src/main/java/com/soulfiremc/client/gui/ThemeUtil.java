@@ -25,6 +25,7 @@ import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.fonts.inter.FlatInterFont;
 import com.formdev.flatlaf.fonts.jetbrains_mono.FlatJetBrainsMonoFont;
 import com.formdev.flatlaf.util.SystemInfo;
+import com.soulfiremc.client.gui.libs.TerminalTheme;
 import java.util.stream.Stream;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -33,7 +34,6 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.client.gui.libs.TerminalTheme;
 
 @Slf4j
 public class ThemeUtil {

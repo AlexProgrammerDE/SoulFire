@@ -17,6 +17,10 @@
  */
 package com.soulfiremc.server.api;
 
+import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.api.event.EventExceptionHandler;
+import com.soulfiremc.server.api.event.EventUtil;
+import com.soulfiremc.server.api.event.SoulFireGlobalEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,10 +28,6 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
-import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.api.event.EventExceptionHandler;
-import com.soulfiremc.server.api.event.EventUtil;
-import com.soulfiremc.server.api.event.SoulFireGlobalEvent;
 
 public class SoulFireAPI {
   private static final LambdaManager EVENT_BUS =

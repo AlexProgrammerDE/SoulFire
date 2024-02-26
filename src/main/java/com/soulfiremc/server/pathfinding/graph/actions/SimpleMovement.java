@@ -18,11 +18,6 @@
 package com.soulfiremc.server.pathfinding.graph.actions;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
@@ -39,6 +34,11 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCo
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementModifier;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public final class SimpleMovement extends GraphAction implements Cloneable {

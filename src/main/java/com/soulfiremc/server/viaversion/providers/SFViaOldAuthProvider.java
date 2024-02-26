@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.server.viaversion.providers;
 
+import com.soulfiremc.server.viaversion.StorableSession;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import java.util.Objects;
-import com.soulfiremc.server.viaversion.StorableSession;
 import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.providers.OldAuthProvider;
 
 public class SFViaOldAuthProvider extends OldAuthProvider {

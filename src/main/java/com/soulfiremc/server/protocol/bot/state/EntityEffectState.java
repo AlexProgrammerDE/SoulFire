@@ -18,6 +18,7 @@
 package com.soulfiremc.server.protocol.bot.state;
 
 import com.github.steveice10.mc.protocol.data.game.entity.Effect;
+import com.soulfiremc.server.protocol.bot.model.EffectData;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +26,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import com.soulfiremc.server.protocol.bot.model.EffectData;
 
 @Data
 public class EntityEffectState {

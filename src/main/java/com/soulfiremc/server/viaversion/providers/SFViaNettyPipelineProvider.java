@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.viaversion.providers;
 
+import com.soulfiremc.server.protocol.netty.ViaClientSession;
+import com.soulfiremc.server.viaversion.StorableSession;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import java.util.Objects;
 import javax.crypto.SecretKey;
-import com.soulfiremc.server.protocol.netty.ViaClientSession;
-import com.soulfiremc.server.viaversion.StorableSession;
 import net.raphimc.viabedrock.api.io.compression.ProtocolCompression;
 import net.raphimc.viabedrock.netty.AesEncryptionCodec;
 import net.raphimc.viabedrock.netty.CompressionCodec;

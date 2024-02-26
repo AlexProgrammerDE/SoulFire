@@ -68,9 +68,10 @@ public class EncryptionUtils {
     try {
       var bytes =
           ByteStreams.toByteArray(
-              Objects.requireNonNull(EncryptionUtils.class
-                  .getClassLoader()
-                  .getResourceAsStream("yggdrasil_session_pubkey.der")));
+              Objects.requireNonNull(
+                  EncryptionUtils.class
+                      .getClassLoader()
+                      .getResourceAsStream("yggdrasil_session_pubkey.der")));
       YGGDRASIL_SESSION_KEY = parseRsaPublicKey(bytes);
     } catch (IOException | NullPointerException err) {
       throw new RuntimeException(err);

@@ -18,11 +18,11 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.ObjectData;
+import com.soulfiremc.server.data.EntityType;
 import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import com.soulfiremc.server.data.EntityType;
 
 @Getter
 @Setter

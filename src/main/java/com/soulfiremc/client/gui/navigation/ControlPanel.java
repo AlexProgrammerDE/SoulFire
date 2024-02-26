@@ -17,13 +17,6 @@
  */
 package com.soulfiremc.client.gui.navigation;
 
-import io.grpc.stub.StreamObserver;
-import java.awt.GridLayout;
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.inject.Inject;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import lombok.extern.slf4j.Slf4j;
 import com.soulfiremc.client.gui.GUIManager;
 import com.soulfiremc.grpc.generated.AttackStartRequest;
 import com.soulfiremc.grpc.generated.AttackStartResponse;
@@ -31,6 +24,13 @@ import com.soulfiremc.grpc.generated.AttackStateToggleRequest;
 import com.soulfiremc.grpc.generated.AttackStateToggleResponse;
 import com.soulfiremc.grpc.generated.AttackStopRequest;
 import com.soulfiremc.grpc.generated.AttackStopResponse;
+import io.grpc.stub.StreamObserver;
+import java.awt.GridLayout;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.inject.Inject;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ControlPanel extends JPanel {

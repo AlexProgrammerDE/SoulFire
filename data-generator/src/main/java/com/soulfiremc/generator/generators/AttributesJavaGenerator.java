@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.generator.generators;
 
+import com.soulfiremc.generator.util.GeneratorConstants;
+import com.soulfiremc.generator.util.ResourceHelper;
 import java.util.Locale;
 import java.util.Objects;
 import net.minecraft.core.registries.BuiltInRegistries;
-import com.soulfiremc.generator.util.GeneratorConstants;
-import com.soulfiremc.generator.util.ResourceHelper;
 
 public class AttributesJavaGenerator implements IDataGenerator {
   @Override

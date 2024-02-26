@@ -19,9 +19,6 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
-import java.util.UUID;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
@@ -29,6 +26,9 @@ import com.soulfiremc.server.protocol.bot.state.EntityAttributeState;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.EntityMetadataState;
 import com.soulfiremc.server.util.MathHelper;
+import java.util.UUID;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 

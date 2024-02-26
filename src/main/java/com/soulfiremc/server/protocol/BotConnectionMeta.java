@@ -18,15 +18,15 @@
 package com.soulfiremc.server.protocol;
 
 import com.github.steveice10.mc.protocol.data.ProtocolState;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import lombok.Getter;
-import lombok.Setter;
 import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.account.service.OnlineJavaData;
 import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.server.protocol.bot.BotControlAPI;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class BotConnectionMeta {

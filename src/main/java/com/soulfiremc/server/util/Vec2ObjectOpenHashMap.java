@@ -20,6 +20,7 @@ package com.soulfiremc.server.util;
 import static it.unimi.dsi.fastutil.HashCommon.arraySize;
 import static it.unimi.dsi.fastutil.HashCommon.maxFill;
 
+import com.soulfiremc.server.pathfinding.SFVec3i;
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.HashCommon;
 import it.unimi.dsi.fastutil.objects.AbstractObject2ObjectMap;
@@ -37,7 +38,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
-import com.soulfiremc.server.pathfinding.SFVec3i;
 import org.jetbrains.annotations.NotNull;
 
 // Fork of Object2ObjectCustomOpenHashMap

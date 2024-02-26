@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.util;
 
+import com.soulfiremc.SoulFireBootstrap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.soulfiremc.SoulFireBootstrap;
 
 @Slf4j
 @RequiredArgsConstructor

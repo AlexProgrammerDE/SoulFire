@@ -17,17 +17,17 @@
  */
 package com.soulfiremc.server.viaversion;
 
-import com.viaversion.viaversion.api.Via;
-import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
-import com.viaversion.viaversion.api.protocol.version.VersionProvider;
-import com.viaversion.viaversion.protocols.protocol1_13to1_12_2.Protocol1_13To1_12_2;
-import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.CompressionProvider;
 import com.soulfiremc.server.viaversion.providers.SFViaCompressionProvider;
 import com.soulfiremc.server.viaversion.providers.SFViaEncryptionProvider;
 import com.soulfiremc.server.viaversion.providers.SFViaGameProfileFetcher;
 import com.soulfiremc.server.viaversion.providers.SFViaNettyPipelineProvider;
 import com.soulfiremc.server.viaversion.providers.SFViaOldAuthProvider;
 import com.soulfiremc.server.viaversion.providers.SFViaVersionProvider;
+import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
+import com.viaversion.viaversion.api.protocol.version.VersionProvider;
+import com.viaversion.viaversion.protocols.protocol1_13to1_12_2.Protocol1_13To1_12_2;
+import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.CompressionProvider;
 import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.providers.OldAuthProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
