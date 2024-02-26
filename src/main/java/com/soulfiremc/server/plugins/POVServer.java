@@ -43,7 +43,6 @@ import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.event.server.ServerAdapter;
 import com.github.steveice10.packetlib.event.server.ServerClosedEvent;
 import com.github.steveice10.packetlib.event.server.SessionAddedEvent;
-import com.github.steveice10.packetlib.event.server.SessionRemovedEvent;
 import com.github.steveice10.packetlib.event.session.ConnectedEvent;
 import com.github.steveice10.packetlib.event.session.DisconnectingEvent;
 import com.github.steveice10.packetlib.event.session.PacketErrorEvent;
@@ -56,12 +55,14 @@ import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.attack.AttackInitEvent;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.property.BooleanProperty;
 import com.soulfiremc.server.settings.lib.property.IntProperty;
 import com.soulfiremc.server.settings.lib.property.Property;
 import com.soulfiremc.util.PortHelper;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.function.Consumer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -195,7 +196,7 @@ public class POVServer implements InternalPlugin {
                             false,
                             false,
                             null,
-                            100)));
+                            0)));
 
                 session.send(
                     new ClientboundPlayerAbilitiesPacket(false, false, true, false, 0f, 0f));
@@ -238,26 +239,79 @@ public class POVServer implements InternalPlugin {
 
               session.addListener(
                   new SessionAdapter() {
+                    private BotConnection botConnection;
+                    private boolean enableForwarding;
+
                     @Override
                     public void packetReceived(Session session, Packet packet) {
-                      if (packet instanceof ServerboundChatPacket chatPacket) {
-                        GameProfile profile =
-                            event.getSession().getFlag(MinecraftConstants.PROFILE_KEY);
+                      if (botConnection == null) {
+                        if (packet instanceof ServerboundChatPacket chatPacket) {
+                          GameProfile profile =
+                              event.getSession().getFlag(MinecraftConstants.PROFILE_KEY);
 
-                        log.info("{}: {}", profile.getName(), chatPacket.getMessage());
-                      } else if (packet instanceof ServerboundAcceptTeleportationPacket) {
-                        // if we keep the health on 0, the client will spam us respawn request packets :/
-                        session.send(new ClientboundSetHealthPacket(1, 0, 0));
+                          log.info("{}: {}", profile.getName(), chatPacket.getMessage());
+
+                          var first =
+                              attackManager.botConnections().values().stream()
+                                  .filter(
+                                      c ->
+                                          c.meta()
+                                              .minecraftAccount()
+                                              .username()
+                                              .equals(chatPacket.getMessage()))
+                                  .findFirst();
+                          if (first.isPresent()) {
+                            botConnection = first.get();
+                            session.send(
+                                new ClientboundSystemChatPacket(
+                                    Component.text("Connected to bot ")
+                                        .color(NamedTextColor.GREEN)
+                                        .append(
+                                            Component.text(
+                                                    botConnection
+                                                        .meta()
+                                                        .minecraftAccount()
+                                                        .username())
+                                                .color(NamedTextColor.AQUA)
+                                                .decorate(TextDecoration.UNDERLINED))
+                                        .append(Component.text("!"))
+                                        .color(NamedTextColor.GREEN),
+                                    false));
+                            syncBotAndUser();
+                            var povSession = session;
+                            botConnection
+                                .session()
+                                .addListener(
+                                    new SessionAdapter() {
+                                      @Override
+                                      public void packetReceived(Session session, Packet packet) {
+                                        if (enableForwarding) {
+                                          povSession.send(packet);
+                                        }
+                                      }
+                                    });
+                          } else {
+                            session.send(
+                                new ClientboundSystemChatPacket(
+                                    Component.text("Bot not found!").color(NamedTextColor.RED),
+                                    false));
+                          }
+                        } else if (packet instanceof ServerboundAcceptTeleportationPacket) {
+                          // if we keep the health on 0, the client will spam us respawn request
+                          // packets :/
+                          session.send(new ClientboundSetHealthPacket(1, 0, 0));
+                        }
+                      } else if (enableForwarding) {
+                        botConnection.session().send(packet);
                       }
                     }
 
                     @Override
                     public void connected(ConnectedEvent event) {
-                      var session = event.getSession();
-                      try {
-                        GameProfile profile =
-                            session.getFlag(MinecraftConstants.PROFILE_KEY);
-                        log.info("Connected: {}", profile.getName());
+                      if (botConnection == null) {
+                        var session = event.getSession();
+                        GameProfile profile = session.getFlag(MinecraftConstants.PROFILE_KEY);
+                        log.info("Account connected: {}", profile.getName());
 
                         Component msg =
                             Component.text("Hello, ")
@@ -272,8 +326,6 @@ public class POVServer implements InternalPlugin {
                                         .color(NamedTextColor.GREEN));
 
                         session.send(new ClientboundSystemChatPacket(msg, false));
-                      } catch (Exception e) {
-                        log.error("Error sending welcome message", e);
                       }
                     }
 
@@ -286,12 +338,77 @@ public class POVServer implements InternalPlugin {
                     public void disconnecting(DisconnectingEvent event) {
                       log.info("Disconnecting: {}", event.getReason(), event.getCause());
                     }
-                  });
-            }
 
-            @Override
-            public void sessionRemoved(SessionRemovedEvent event) {
-              log.info("Session removed.");
+                    private void syncBotAndUser() {
+                      Objects.requireNonNull(botConnection);
+                      var sessionDataManager = botConnection.sessionDataManager();
+                      session.send(
+                          new ClientboundLoginPacket(
+                              sessionDataManager.clientEntity().entityId(),
+                              sessionDataManager.loginData().hardcore(),
+                              sessionDataManager.loginData().worldNames(),
+                              sessionDataManager.loginData().maxPlayers(),
+                              sessionDataManager.serverViewDistance(),
+                              sessionDataManager.serverSimulationDistance(),
+                              sessionDataManager.clientEntity().showReducedDebug(),
+                              sessionDataManager.enableRespawnScreen(),
+                              sessionDataManager.doLimitedCrafting(),
+                              new PlayerSpawnInfo(
+                                  sessionDataManager.currentDimension().dimensionType(),
+                                  sessionDataManager.currentDimension().worldName(),
+                                  sessionDataManager.currentDimension().hashedSeed(),
+                                  sessionDataManager.gameMode(),
+                                  sessionDataManager.previousGameMode(),
+                                  sessionDataManager.currentDimension().debug(),
+                                  sessionDataManager.currentDimension().flat(),
+                                  null,
+                                  0)));
+
+                      if (sessionDataManager.abilitiesData() != null) {
+                        session.send(
+                            new ClientboundPlayerAbilitiesPacket(
+                                sessionDataManager.abilitiesData().invulnerable(),
+                                sessionDataManager.abilitiesData().flying(),
+                                sessionDataManager.abilitiesData().allowFlying(),
+                                sessionDataManager.abilitiesData().creativeModeBreak(),
+                                sessionDataManager.abilitiesData().flySpeed(),
+                                sessionDataManager.abilitiesData().walkSpeed()));
+                      }
+
+                      session.send(
+                          new ClientboundSetHealthPacket(
+                              sessionDataManager.healthData().health(),
+                              sessionDataManager.healthData().food(),
+                              sessionDataManager.healthData().saturation()));
+
+                      session.send(
+                          new ClientboundSetHealthPacket(
+                              sessionDataManager.healthData().health(),
+                              sessionDataManager.healthData().food(),
+                              sessionDataManager.healthData().saturation()));
+
+                      if (sessionDataManager.defaultSpawnData() != null) {
+                        session.send(
+                            new ClientboundSetDefaultSpawnPositionPacket(
+                                sessionDataManager.defaultSpawnData().position(),
+                                sessionDataManager.defaultSpawnData().angle()));
+                      }
+
+                      session.send(new ClientboundPlayerPositionPacket(
+                            sessionDataManager.clientEntity().x(),
+                            sessionDataManager.clientEntity().y(),
+                            sessionDataManager.clientEntity().z(),
+                            sessionDataManager.clientEntity().yaw(),
+                            sessionDataManager.clientEntity().pitch(),
+                            Integer.MIN_VALUE
+                      ));
+
+                      session.send(
+                          new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
+
+                      enableForwarding = true;
+                    }
+                  });
             }
           });
 
