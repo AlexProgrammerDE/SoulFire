@@ -23,11 +23,11 @@ import com.soulfiremc.server.api.MixinExtension;
 import com.soulfiremc.server.settings.DevSettings;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.util.CustomClassProvider;
+import com.soulfiremc.util.PortHelper;
 import com.soulfiremc.util.SFPathConstants;
 import io.netty.util.ResourceLeakDetector;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -124,7 +124,7 @@ public class SoulFireBootstrap {
 
   private static void postMixinMain(boolean runServer, String[] args) {
     var host = getHost();
-    var port = getAvailablePort();
+    var port = getRPCPort();
     if (runServer) {
       log.info("Starting server on {}:{}", host, port);
       SoulFireLoader.runHeadless(host, port, args);
@@ -135,6 +135,15 @@ public class SoulFireBootstrap {
 
       SoulFireLoader.runGUI(host, port);
     }
+  }
+
+  private static int getRPCPort() {
+    var portProperty = System.getProperty("sw.grpc.port");
+    if (portProperty != null) {
+      return Integer.parseInt(portProperty);
+    }
+
+    return PortHelper.getAvailablePort(38765);
   }
 
   public static void injectExceptionHandler() {
@@ -176,27 +185,5 @@ public class SoulFireBootstrap {
 
   private static String getHost() {
     return System.getProperty("sw.grpc.host", "localhost");
-  }
-
-  private static int getAvailablePort() {
-    var portProperty = System.getProperty("sw.grpc.port");
-    if (portProperty != null) {
-      return Integer.parseInt(portProperty);
-    }
-
-    var initialPort = 38765;
-
-    while (true) {
-      try {
-        var serverSocket = new ServerSocket(initialPort);
-        serverSocket.close();
-        break; // Port is available, exit the loop
-      } catch (IOException e) {
-        log.info("Port {} is already in use, trying next port...", initialPort);
-        initialPort++; // Increment the port number and try again
-      }
-    }
-
-    return initialPort;
   }
 }

@@ -86,6 +86,7 @@ public class AttackManager {
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final ExecutorManager executorManager = new ExecutorManager("SoulFire-Attack-" + id);
   private final SoulFireServer soulFireServer;
+  private final SettingsHolder settingsHolder;
   @Setter private AttackState attackState = AttackState.STOPPED;
 
   private static MinecraftAccount getAccount(
@@ -117,7 +118,7 @@ public class AttackManager {
     return Optional.of(selectedProxy.getKey());
   }
 
-  public CompletableFuture<?> start(SettingsHolder settingsHolder) {
+  public CompletableFuture<?> start() {
     if (!attackState.isStopped()) {
       throw new IllegalStateException("Attack is already running");
     }

@@ -17,4 +17,4 @@
  */
 package com.soulfiremc.server.api;
 
-public interface BotContext {}
+public interface ObjectContext {}

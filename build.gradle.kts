@@ -25,11 +25,9 @@ allprojects {
     }
 }
 
-var mainClassString = "com.soulfiremc.launcher.SoulFireJava8Launcher"
-
 application {
     applicationName = "SoulFire"
-    mainClass = mainClassString
+    mainClass = "com.soulfiremc.SoulFireLauncher"
 }
 
 dependencies {
@@ -135,7 +133,7 @@ dependencies {
 }
 
 fun Manifest.applySFAttributes() {
-    attributes["Main-Class"] = mainClassString
+    attributes["Main-Class"] = "com.soulfiremc.launcher.SoulFireJava8Launcher"
     attributes["Name"] = "SoulFire"
     attributes["Specification-Title"] = "SoulFire"
     attributes["Specification-Version"] = version.toString()

@@ -69,7 +69,8 @@ public class PluginHelper {
                 () -> event.attackManager().eventBus().registerConsumer(consumer, clazz)));
   }
 
-  public static void registerBotContextFactory(Function<BotConnection, BotContext> contextFactory) {
+  public static void registerBotContextFactory(
+      Function<BotConnection, ObjectContext> contextFactory) {
     registerAttackEventConsumer(
         BotConnectionInitEvent.class,
         event ->

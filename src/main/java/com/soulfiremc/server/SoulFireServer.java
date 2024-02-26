@@ -43,6 +43,7 @@ import com.soulfiremc.server.plugins.FakeVirtualHost;
 import com.soulfiremc.server.plugins.ForwardingBypass;
 import com.soulfiremc.server.plugins.KillAura;
 import com.soulfiremc.server.plugins.ModLoaderSupport;
+import com.soulfiremc.server.plugins.POVServer;
 import com.soulfiremc.server.plugins.ServerListBypass;
 import com.soulfiremc.server.settings.AccountSettings;
 import com.soulfiremc.server.settings.BotSettings;
@@ -247,7 +248,8 @@ public class SoulFireServer {
             new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
             new ModLoaderSupport(), // Needs to be before ForwardingBypass to not break it
             new ForwardingBypass(),
-            new KillAura());
+            new KillAura(),
+            new POVServer());
 
     plugins.forEach(SoulFireAPI::registerServerExtension);
   }
@@ -296,12 +298,12 @@ public class SoulFireServer {
   }
 
   public int startAttack(SettingsHolder settingsHolder) {
-    var attackManager = injector.newInstance(AttackManager.class);
+    var attackManager = new AttackManager(this, settingsHolder);
     SoulFireAPI.postEvent(new AttackInitEvent(attackManager));
 
     attacks.put(attackManager.id(), attackManager);
 
-    attackManager.start(settingsHolder);
+    attackManager.start();
 
     log.debug("Started attack with id {}", attackManager.id());
 
