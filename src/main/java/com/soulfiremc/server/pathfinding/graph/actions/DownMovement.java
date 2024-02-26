@@ -1,0 +1,134 @@
+/*
+ * SoulFire
+ * Copyright (C) 2024  AlexProgrammerDE
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package com.soulfiremc.server.pathfinding.graph.actions;
+
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import com.soulfiremc.server.pathfinding.BotEntityState;
+import com.soulfiremc.server.pathfinding.Costs;
+import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
+import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockDirection;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
+
+public final class DownMovement extends GraphAction implements Cloneable {
+  private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
+  private final SFVec3i targetToMineBlock;
+  @Getter @Setter private MovementMiningCost blockBreakCosts;
+  @Getter @Setter private int closestBlockToFallOn = Integer.MIN_VALUE;
+
+  public DownMovement() {
+    this.targetToMineBlock = FEET_POSITION_RELATIVE_BLOCK.sub(0, 1, 0);
+  }
+
+  public SFVec3i blockToBreak() {
+    return targetToMineBlock;
+  }
+
+  public List<SFVec3i> listSafetyCheckBlocks() {
+    var requiredFreeBlocks = new ObjectArrayList<SFVec3i>();
+
+    // Falls one block
+    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0));
+
+    // Falls two blocks
+    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 3, 0));
+
+    // Falls three blocks
+    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 4, 0));
+
+    return requiredFreeBlocks;
+  }
+
+  public BlockSafetyData[][] listCheckSafeMineBlocks() {
+    var results = new BlockSafetyData[1][];
+
+    var firstDirection = BlockDirection.NORTH;
+    var oppositeDirection = firstDirection.opposite();
+    var leftDirectionSide = firstDirection.leftSide();
+    var rightDirectionSide = firstDirection.rightSide();
+
+    results[0] =
+        new BlockSafetyData[] {
+          new BlockSafetyData(
+              firstDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
+          new BlockSafetyData(
+              oppositeDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
+          new BlockSafetyData(
+              leftDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
+          new BlockSafetyData(
+              rightDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS)
+        };
+
+    return results;
+  }
+
+  @Override
+  public boolean impossibleToComplete() {
+    return closestBlockToFallOn == Integer.MIN_VALUE;
+  }
+
+  @Override
+  public GraphInstructions getInstructions(BotEntityState previousEntityState) {
+    var inventory = previousEntityState.inventory();
+    var cost = 0D;
+
+    cost +=
+        switch (closestBlockToFallOn) {
+          case -2 -> Costs.FALL_1;
+          case -3 -> Costs.FALL_2;
+          case -4 -> Costs.FALL_3;
+          default -> throw new IllegalStateException("Unexpected value: " + closestBlockToFallOn);
+        };
+
+    cost += blockBreakCosts.miningCost();
+    if (blockBreakCosts.willDrop()) {
+      inventory = inventory.withOneMoreBlock();
+    }
+    var levelState = previousEntityState.levelState();
+
+    levelState = levelState.withChangeToAir(blockBreakCosts.block());
+
+    var absoluteMinedBlock = previousEntityState.blockPosition().add(targetToMineBlock);
+    var absoluteTargetFeetBlock =
+        previousEntityState.blockPosition().add(0, closestBlockToFallOn + 1, 0);
+
+    return new GraphInstructions(
+        new BotEntityState(absoluteTargetFeetBlock, levelState, inventory),
+        cost,
+        List.of(new BlockBreakAction(absoluteMinedBlock)));
+  }
+
+  @Override
+  public DownMovement copy(BotEntityState previousEntityState) {
+    return this.clone();
+  }
+
+  @Override
+  public DownMovement clone() {
+    try {
+      return (DownMovement) super.clone();
+    } catch (CloneNotSupportedException cantHappen) {
+      throw new InternalError();
+    }
+  }
+}

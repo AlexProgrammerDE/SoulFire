@@ -9,7 +9,7 @@ sourceSets {
             javaSources {
                 property("version", rootProject.version.toString())
                 property("description", rootProject.description)
-                property("url", "https://github.com/AlexProgrammerDE/SoulFire")
+                property("url", "https://soulfiremc.com")
                 property("commit", indraGit.commit()?.name ?: "unknown")
             }
         }

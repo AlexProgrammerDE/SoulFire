@@ -46,7 +46,7 @@ indra {
     configurePublications {
         pom {
             name = "SoulFire"
-            url = "https://github.com/AlexProgrammerDE/SoulFire"
+            url = "https://soulfiremc.com"
             organization {
                 name = "AlexProgrammerDE"
                 url = "https://pistonmaster.net"

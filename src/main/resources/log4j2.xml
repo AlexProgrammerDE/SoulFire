@@ -25,7 +25,7 @@
                         disableAnsi="false"
                         defaultPattern="%highlight{[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%n%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}">
                     <!-- SoulFire doesn't need a prefix -->
-                    <PatternMatch key="net.pistonmaster.soulfire."
+                    <PatternMatch key="com.soulfiremc."
                                   pattern="%highlight{[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%n%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}"/>
                 </LoggerNamePatternSelector>
             </PatternLayout>

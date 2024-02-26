@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.pistonmaster.soulfire.data;
+package com.soulfiremc.data;
 
 @SuppressWarnings("unused")
 public class EntityTypeTags {

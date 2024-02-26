@@ -13,7 +13,7 @@ plugins {
 val mavenVersion: String by project
 
 allprojects {
-    group = "net.pistonmaster"
+    group = "com.soulfiremc"
     version = mavenVersion
     description = "Advanced Minecraft Server-Stresser Tool."
 
@@ -25,7 +25,7 @@ allprojects {
     }
 }
 
-var mainClassString = "net.pistonmaster.soulfire.launcher.SoulFireJava8Launcher"
+var mainClassString = "com.soulfiremc.launcher.SoulFireJava8Launcher"
 
 application {
     applicationName = "SoulFire"

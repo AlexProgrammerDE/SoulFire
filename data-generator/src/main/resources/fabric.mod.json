@@ -13,7 +13,7 @@
   "environment": "server",
   "entrypoints": {
     "main": [
-      "net.pistonmaster.soulfire.generator.Main"
+      "com.soulfiremc.generator.Main"
     ]
   },
   "mixins": [

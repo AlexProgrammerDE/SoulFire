@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package com.soulfiremc.grpc.generated;
+
+message ViewerListRequest {
+}
+
+message ViewerListResponse {
+  repeated string viewers = 1;
+}
+
+message ViewerDataRequest {
+}
+
+message ViewerDataResponse {
+}
+
+service ViewerService {
+  rpc listAvailable(ViewerListRequest) returns (ViewerListResponse);
+  rpc subscribe(ViewerDataRequest) returns (stream ViewerDataResponse);
+}

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package com.soulfiremc.grpc.generated;
+
+message LogRequest {
+  uint32 previous = 1;
+}
+
+message LogResponse {
+  string message = 1;
+}
+
+service LogsService {
+  rpc subscribe(LogRequest) returns (stream LogResponse);
+}
