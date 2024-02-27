@@ -544,16 +544,49 @@ public class POVServer implements InternalPlugin {
                                 sessionDataManager.playerListState().footer()));
                       }
 
-                      var updateSet = EnumSet.noneOf(PlayerListEntryAction.class);
-                      var playerEntries = new ArrayList<PlayerListEntry>();
-                      for (var player : sessionDataManager.playerListState().entries().values()) {
-                        updateSet.add(PlayerListEntryAction.ADD_PLAYER);
-                        playerEntries.add(player);
-                      }
-
+                      var currentId =
+                          session.<GameProfile>getFlag(MinecraftConstants.PROFILE_KEY).getId();
                       session.send(
                           new ClientboundPlayerInfoUpdatePacket(
-                              updateSet, playerEntries.toArray(new PlayerListEntry[0])));
+                              EnumSet.of(
+                                  PlayerListEntryAction.ADD_PLAYER,
+                                  PlayerListEntryAction.INITIALIZE_CHAT,
+                                  PlayerListEntryAction.UPDATE_GAME_MODE,
+                                  PlayerListEntryAction.UPDATE_LISTED,
+                                  PlayerListEntryAction.UPDATE_LATENCY,
+                                  PlayerListEntryAction.UPDATE_DISPLAY_NAME),
+                              sessionDataManager.playerListState().entries().values().stream()
+                                  .map(
+                                      entry -> {
+                                        if (entry.getProfileId().equals(currentId)) {
+                                          GameProfile newGameProfile;
+                                          if (entry.getProfile() == null) {
+                                            newGameProfile = null;
+                                          } else {
+                                            newGameProfile =
+                                                new GameProfile(
+                                                    currentId, entry.getProfile().getName());
+                                            newGameProfile.setProperties(
+                                                entry.getProfile().getProperties());
+                                          }
+
+                                          return new PlayerListEntry(
+                                              currentId,
+                                              newGameProfile,
+                                              entry.isListed(),
+                                              entry.getLatency(),
+                                              entry.getGameMode(),
+                                              entry.getDisplayName(),
+                                              entry.getSessionId(),
+                                              entry.getExpiresAt(),
+                                              entry.getPublicKey(),
+                                              entry.getKeySignature());
+                                        } else {
+                                          return entry;
+                                        }
+                                      })
+                                  .toList()
+                                  .toArray(new PlayerListEntry[0])));
 
                       if (sessionDataManager.centerChunk() != null) {
                         session.send(
