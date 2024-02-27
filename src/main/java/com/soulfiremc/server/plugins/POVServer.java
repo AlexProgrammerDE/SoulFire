@@ -66,8 +66,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundChunkBatchFinishedPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundChunkBatchStartPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundLevelChunkWithLightPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheCenterPacket;
@@ -675,8 +673,6 @@ public class POVServer implements InternalPlugin {
                       session.send(
                           new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
 
-                      session.send(new ClientboundChunkBatchStartPacket());
-                      var chunkCount = 0;
                       for (var chunkEntry :
                           Objects.requireNonNull(sessionDataManager.getCurrentLevel())
                               .chunks()
@@ -720,9 +716,7 @@ public class POVServer implements InternalPlugin {
                                 new CompoundTag(""),
                                 new BlockEntityInfo[0],
                                 lightUpdateData));
-                        chunkCount++;
                       }
-                      session.send(new ClientboundChunkBatchFinishedPacket(chunkCount));
 
                       // enableForwarding = true;
                     }
