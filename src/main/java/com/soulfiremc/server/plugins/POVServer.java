@@ -49,6 +49,7 @@ import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCu
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundKeepAlivePacket;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundPingPacket;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
+import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundKeepAlivePacket;
 import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundPongPacket;
 import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundFinishConfigurationPacket;
 import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
@@ -108,6 +109,7 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.property.BooleanProperty;
 import com.soulfiremc.server.settings.lib.property.IntProperty;
 import com.soulfiremc.server.settings.lib.property.Property;
+import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.util.PortHelper;
 import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
@@ -132,6 +134,7 @@ public class POVServer implements InternalPlugin {
   private static final List<Class<?>> NOT_SYNCED =
       List.of(
           ClientboundKeepAlivePacket.class,
+          ServerboundKeepAlivePacket.class,
           ClientboundPingPacket.class,
           ServerboundPongPacket.class,
           ClientboundCustomPayloadPacket.class,
@@ -255,7 +258,7 @@ public class POVServer implements InternalPlugin {
                 for (var i = 0; i < sectionCount; i++) {
                   var chunk = DataPalette.createForChunk();
                   chunk.set(0, 0, 0, 0);
-                  var biome = DataPalette.createForBiome(6);
+                  var biome = DataPalette.createForBiome();
                   biome.set(0, 0, 0, 0);
                   SessionDataManager.writeChunkSection(
                       buf,
@@ -381,6 +384,7 @@ public class POVServer implements InternalPlugin {
                                   });
                         }
                       } else if (!NOT_SYNCED.contains(packet.getClass()) && enableForwarding) {
+                        System.out.println(packet);
                         // MC Client -> Server of the bot
                         botConnection.session().send(packet);
                       }
@@ -669,7 +673,7 @@ public class POVServer implements InternalPlugin {
                           session.send(
                               new ClientboundContainerSetContentPacket(
                                   container.id(),
-                                  ++stateIndex,
+                                  stateIndex++,
                                   Arrays.stream(
                                           sessionDataManager
                                               .inventoryManager()
@@ -791,7 +795,10 @@ public class POVServer implements InternalPlugin {
                                     .toList()));
                       }
 
-                      // enableForwarding = true;
+                      // Give the client a few moments to process the packets
+                      TimeUtil.waitTime(2, TimeUnit.SECONDS);
+
+                      enableForwarding = true;
                     }
                   });
             }

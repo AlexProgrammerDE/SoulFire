@@ -117,7 +117,6 @@ import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.ModifierOperation;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.protocol.bot.block.GlobalBlockPalette;
 import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
@@ -726,7 +725,7 @@ public final class SessionDataManager {
       try {
         for (var i = 0; chunkData.getSectionCount() > i; i++) {
           var section = chunkData.getSection(i);
-          var biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, biomesEntryBitsSize);
+          var biomePalette = codec.readDataPalette(buf, PaletteType.BIOME);
           chunkData.setSection(
               i, new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette));
         }
@@ -1125,8 +1124,8 @@ public final class SessionDataManager {
 
     var chunkPalette =
         codec.readDataPalette(
-            buf, PaletteType.CHUNK, GlobalBlockPalette.INSTANCE.blockBitsPerEntry());
-    var biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, biomesEntryBitsSize);
+            buf, PaletteType.CHUNK);
+    var biomePalette = codec.readDataPalette(buf, PaletteType.BIOME);
     return new ChunkSection(blockCount, chunkPalette, biomePalette);
   }
 
