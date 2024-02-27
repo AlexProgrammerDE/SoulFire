@@ -213,6 +213,7 @@ public final class SessionDataManager {
   private @Nullable ChunkKey centerChunk;
   private boolean isDead = false;
   private boolean joinedWorld = false;
+  private String serverBrand;
 
   public SessionDataManager(BotConnection connection) {
     this.settingsHolder = connection.settingsHolder();
@@ -386,10 +387,11 @@ public final class SessionDataManager {
           log.debug(
               "Received unregister packet for channels; {}",
               String.join(", ", readChannels(packet)));
-      case "minecraft:brand" ->
-          log.debug(
-              "Received server brand \"{}\"",
-              session.getCodecHelper().readString(Unpooled.wrappedBuffer(packet.getData())));
+      case "minecraft:brand" -> {
+        serverBrand = session.getCodecHelper().readString(Unpooled.wrappedBuffer(packet.getData()));
+        log.debug(
+            "Received server brand \"{}\"", serverBrand   );
+      }
     }
   }
 
@@ -1129,6 +1131,13 @@ public final class SessionDataManager {
             buf, PaletteType.CHUNK, GlobalBlockPalette.INSTANCE.blockBitsPerEntry());
     var biomePalette = codec.readDataPalette(buf, PaletteType.BIOME, biomesEntryBitsSize);
     return new ChunkSection(blockCount, chunkPalette, biomePalette);
+  }
+
+  public void writeChunkSection(ByteBuf buf, MinecraftCodecHelper codec, ChunkSection chunkSection) {
+    buf.writeShort(chunkSection.getBlockCount());
+
+    codec.writeDataPalette(buf, chunkSection.getChunkData());
+    codec.writeDataPalette(buf, chunkSection.getBiomeData());
   }
 
   public LevelState getCurrentLevel() {

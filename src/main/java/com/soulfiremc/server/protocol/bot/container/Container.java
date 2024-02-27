@@ -23,9 +23,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Getter;
 
+@Getter
 public class Container {
-  @Getter private final @Nonnull ContainerSlot[] slots;
-  @Getter private final int id;
+  private final @Nonnull ContainerSlot[] slots;
+  private final int id;
   private Int2IntMap properties;
 
   public Container(int slots, int id) {

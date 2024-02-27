@@ -34,7 +34,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 public class ChunkHolder implements BlockAccessor {
   private static final BlockState VOID_AIR_BLOCK_STATE =
       BlockState.forDefaultBlockType(BlockType.VOID_AIR);
-  private final Long2ObjectMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
+  private final Long2ObjectOpenHashMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
   private final Lock readLock;
   private final Lock writeLock;
   private final int minBuildHeight;
@@ -134,6 +134,10 @@ public class ChunkHolder implements BlockAccessor {
     }
 
     return GlobalBlockPalette.INSTANCE.getBlockStateForStateId(chunkData.getBlock(x, y, z));
+  }
+
+  public Long2ObjectMap<ChunkData> getChunks() {
+    return chunks.clone();
   }
 
   public boolean isOutsideBuildHeight(int y) {

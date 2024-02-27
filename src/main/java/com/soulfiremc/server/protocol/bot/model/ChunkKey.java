@@ -21,4 +21,8 @@ public record ChunkKey(int chunkX, int chunkZ) {
   public static long calculateKey(int chunkX, int chunkZ) {
     return (long) chunkX & 0xffffffffL | ((long) chunkZ & 0xffffffffL) << 32;
   }
+
+  public static ChunkKey fromKey(long key) {
+    return new ChunkKey((int) key, (int) (key >> 32));
+  }
 }

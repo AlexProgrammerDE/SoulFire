@@ -27,14 +27,19 @@ import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeMod
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.ModifierOperation;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.EntityMetadata;
+import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerSpawnInfo;
 import com.github.steveice10.mc.protocol.data.game.entity.type.EntityType;
+import com.github.steveice10.mc.protocol.data.game.level.LightUpdateData;
+import com.github.steveice10.mc.protocol.data.game.level.block.BlockEntityInfo;
 import com.github.steveice10.mc.protocol.data.game.level.notify.GameEvent;
 import com.github.steveice10.mc.protocol.data.status.PlayerInfo;
 import com.github.steveice10.mc.protocol.data.status.ServerStatusInfo;
 import com.github.steveice10.mc.protocol.data.status.VersionInfo;
 import com.github.steveice10.mc.protocol.data.status.handler.ServerInfoBuilder;
+import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
@@ -42,13 +47,21 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.Client
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateMobEffectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetCarriedItemPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetExperiencePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetDataPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundLevelChunkWithLightPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheCenterPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetDefaultSpawnPositionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
+import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
 import com.github.steveice10.packetlib.Server;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.event.server.ServerAdapter;
@@ -67,6 +80,8 @@ import com.soulfiremc.server.api.event.attack.AttackInitEvent;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
+import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -74,7 +89,11 @@ import com.soulfiremc.server.settings.lib.property.BooleanProperty;
 import com.soulfiremc.server.settings.lib.property.IntProperty;
 import com.soulfiremc.server.settings.lib.property.Property;
 import com.soulfiremc.util.PortHelper;
+import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import lombok.AccessLevel;
@@ -235,6 +254,14 @@ public class POVServer implements InternalPlugin {
 
                 // Manually call the connect event
                 session.callEvent(new ConnectedEvent(session));
+
+                var brandBuffer = Unpooled.buffer();
+                session.getCodecHelper().writeString(brandBuffer, "SoulFire POV");
+
+                var brandBytes = new byte[brandBuffer.readableBytes()];
+                brandBuffer.readBytes(brandBytes);
+
+                session.send(new ClientboundCustomPayloadPacket("minecraft:brand", brandBytes));
               });
       server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256); // default
 
@@ -377,6 +404,68 @@ public class POVServer implements InternalPlugin {
                                   null,
                                   0)));
 
+                      session.send(new ClientboundGameEventPacket(GameEvent.CHANGE_GAMEMODE, GameMode.SPECTATOR));
+
+                      if (sessionDataManager.experienceData() != null) {
+                        session.send(
+                            new ClientboundSetExperiencePacket(
+                                sessionDataManager.experienceData().experience(),
+                                sessionDataManager.experienceData().level(),
+                                sessionDataManager.experienceData().totalExperience()));
+                      }
+
+                      if (sessionDataManager.difficultyData() != null) {
+                        session.send(
+                            new ClientboundChangeDifficultyPacket(
+                                sessionDataManager.difficultyData().difficulty(),
+                                sessionDataManager.difficultyData().locked()));
+                      }
+
+                      if (sessionDataManager.borderState() != null) {
+                        session.send(
+                            new ClientboundInitializeBorderPacket(
+                                sessionDataManager.borderState().centerX(),
+                                sessionDataManager.borderState().centerZ(),
+                                sessionDataManager.borderState().oldSize(),
+                                sessionDataManager.borderState().newSize(),
+                                sessionDataManager.borderState().lerpTime(),
+                                sessionDataManager.borderState().newAbsoluteMaxSize(),
+                                sessionDataManager.borderState().warningBlocks(),
+                                sessionDataManager.borderState().warningTime()));
+                      }
+
+                      if (sessionDataManager.inventoryManager() != null) {
+                        session.send(
+                            new ClientboundSetCarriedItemPacket(
+                                sessionDataManager.inventoryManager().heldItemSlot()));
+                        var stateIndex = 0;
+                        for (var container :
+                            sessionDataManager.inventoryManager().containerData().values()) {
+                          session.send(
+                              new ClientboundContainerSetContentPacket(
+                                  container.id(),
+                                  ++stateIndex,
+                                  Arrays.stream(
+                                          sessionDataManager
+                                              .inventoryManager()
+                                              .playerInventory()
+                                              .slots())
+                                      .map(ContainerSlot::item)
+                                      .toList()
+                                      .toArray(new ItemStack[0]),
+                                  sessionDataManager.inventoryManager().cursorItem()));
+
+                          if (container.properties() != null) {
+                            for (var containerProperty : container.properties().int2IntEntrySet())
+                              session.send(
+                                  new ClientboundContainerSetDataPacket(
+                                      container.id(),
+                                      containerProperty.getIntKey(),
+                                      containerProperty.getIntValue()));
+                          }
+                        }
+                      }
+
                       if (sessionDataManager.abilitiesData() != null) {
                         session.send(
                             new ClientboundPlayerAbilitiesPacket(
@@ -415,22 +504,22 @@ public class POVServer implements InternalPlugin {
                                   entity.uuid(),
                                   EntityType.from(entity.entityType().id()),
                                   rawEntity.data(),
-                                  rawEntity.x(),
-                                  rawEntity.y(),
-                                  rawEntity.z(),
-                                  rawEntity.yaw(),
-                                  rawEntity.headYaw(),
-                                  rawEntity.pitch(),
-                                  rawEntity.motionX(),
-                                  rawEntity.motionY(),
-                                  rawEntity.motionZ()));
+                                  entity.x(),
+                                  entity.y(),
+                                  entity.z(),
+                                  entity.yaw(),
+                                  entity.headYaw(),
+                                  entity.pitch(),
+                                  entity.motionX(),
+                                  entity.motionY(),
+                                  entity.motionZ()));
                         } else if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
                           session.send(
                               new ClientboundAddExperienceOrbPacket(
                                   entity.entityId(),
-                                  experienceOrbEntity.x(),
-                                  experienceOrbEntity.y(),
-                                  experienceOrbEntity.z(),
+                                  entity.x(),
+                                  entity.y(),
+                                  entity.z(),
                                   experienceOrbEntity.expValue()));
                         }
 
@@ -494,10 +583,55 @@ public class POVServer implements InternalPlugin {
                               sessionDataManager.clientEntity().pitch(),
                               Integer.MIN_VALUE));
 
+                      if (sessionDataManager.centerChunk() != null) {
+                        session.send(
+                            new ClientboundSetChunkCacheCenterPacket(
+                                sessionDataManager.centerChunk().chunkX(),
+                                sessionDataManager.centerChunk().chunkZ()));
+                      }
+
                       session.send(
                           new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
 
-                      enableForwarding = true;
+                      for (var chunkEntry :
+                          Objects.requireNonNull(sessionDataManager.getCurrentLevel())
+                              .chunks()
+                              .getChunks()
+                              .long2ObjectEntrySet()) {
+                        var chunkKey = ChunkKey.fromKey(chunkEntry.getLongKey());
+                        var chunk = chunkEntry.getValue();
+                        var buf = Unpooled.buffer();
+
+                        for (var i = 0; i < chunk.getSectionCount(); i++) {
+                          sessionDataManager.writeChunkSection(
+                              buf,
+                              sessionDataManager.session().getCodecHelper(),
+                              chunk.getSection(i));
+                        }
+
+                        var chunkBytes = new byte[buf.readableBytes()];
+                        buf.readBytes(chunkBytes);
+
+                        var lightUpdateData =
+                            new LightUpdateData(
+                                new BitSet(),
+                                new BitSet(),
+                                new BitSet(),
+                                new BitSet(),
+                                List.of(),
+                                List.of());
+
+                        session.send(
+                            new ClientboundLevelChunkWithLightPacket(
+                                chunkKey.chunkX(),
+                                chunkKey.chunkZ(),
+                                chunkBytes,
+                                new CompoundTag(""),
+                                new BlockEntityInfo[0],
+                                lightUpdateData));
+                      }
+
+                      // enableForwarding = true;
                     }
                   });
             }
