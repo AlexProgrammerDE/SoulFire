@@ -24,6 +24,8 @@ import com.github.steveice10.mc.protocol.ServerLoginHandler;
 import com.github.steveice10.mc.protocol.codec.MinecraftCodec;
 import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
+import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
+import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
 import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
 import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
@@ -51,8 +53,10 @@ import com.github.steveice10.mc.protocol.packet.configuration.clientbound.Client
 import com.github.steveice10.mc.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerInfoUpdatePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundStartConfigurationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundTabListPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
@@ -106,6 +110,7 @@ import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -468,6 +473,13 @@ public class POVServer implements InternalPlugin {
                                   null,
                                   0)));
 
+                      if (sessionDataManager.difficultyData() != null) {
+                        session.send(
+                            new ClientboundChangeDifficultyPacket(
+                                sessionDataManager.difficultyData().difficulty(),
+                                sessionDataManager.difficultyData().locked()));
+                      }
+
                       if (sessionDataManager.abilitiesData() != null) {
                         session.send(
                             new ClientboundPlayerAbilitiesPacket(
@@ -477,13 +489,6 @@ public class POVServer implements InternalPlugin {
                                 sessionDataManager.abilitiesData().creativeModeBreak(),
                                 sessionDataManager.abilitiesData().flySpeed(),
                                 sessionDataManager.abilitiesData().walkSpeed()));
-                      }
-
-                      if (sessionDataManager.difficultyData() != null) {
-                        session.send(
-                            new ClientboundChangeDifficultyPacket(
-                                sessionDataManager.difficultyData().difficulty(),
-                                sessionDataManager.difficultyData().locked()));
                       }
 
                       if (sessionDataManager.borderState() != null) {
@@ -504,6 +509,105 @@ public class POVServer implements InternalPlugin {
                             new ClientboundSetDefaultSpawnPositionPacket(
                                 sessionDataManager.defaultSpawnData().position(),
                                 sessionDataManager.defaultSpawnData().angle()));
+                      }
+
+                      if (sessionDataManager.healthData() != null) {
+                        session.send(
+                            new ClientboundSetHealthPacket(
+                                sessionDataManager.healthData().health(),
+                                sessionDataManager.healthData().food(),
+                                sessionDataManager.healthData().saturation()));
+                      }
+
+                      if (sessionDataManager.experienceData() != null) {
+                        session.send(
+                            new ClientboundSetExperiencePacket(
+                                sessionDataManager.experienceData().experience(),
+                                sessionDataManager.experienceData().level(),
+                                sessionDataManager.experienceData().totalExperience()));
+                      }
+
+                      session.send(
+                          new ClientboundPlayerPositionPacket(
+                              sessionDataManager.clientEntity().x(),
+                              sessionDataManager.clientEntity().y(),
+                              sessionDataManager.clientEntity().z(),
+                              sessionDataManager.clientEntity().yaw(),
+                              sessionDataManager.clientEntity().pitch(),
+                              Integer.MIN_VALUE));
+
+                      if (sessionDataManager.playerListState().header() != null
+                          && sessionDataManager.playerListState().footer() != null) {
+                        session.send(
+                            new ClientboundTabListPacket(
+                                sessionDataManager.playerListState().header(),
+                                sessionDataManager.playerListState().footer()));
+                      }
+
+                      var updateSet = EnumSet.noneOf(PlayerListEntryAction.class);
+                      var playerEntries = new ArrayList<PlayerListEntry>();
+                      for (var player : sessionDataManager.playerListState().entries().values()) {
+                        updateSet.add(PlayerListEntryAction.ADD_PLAYER);
+                        playerEntries.add(player);
+                      }
+
+                      session.send(
+                          new ClientboundPlayerInfoUpdatePacket(
+                              updateSet, playerEntries.toArray(new PlayerListEntry[0])));
+
+                      if (sessionDataManager.centerChunk() != null) {
+                        session.send(
+                            new ClientboundSetChunkCacheCenterPacket(
+                                sessionDataManager.centerChunk().chunkX(),
+                                sessionDataManager.centerChunk().chunkZ()));
+                      }
+
+                      session.send(
+                          new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
+
+                      for (var chunkEntry :
+                          Objects.requireNonNull(sessionDataManager.getCurrentLevel())
+                              .chunks()
+                              .getChunks()
+                              .long2ObjectEntrySet()) {
+                        var chunkKey = ChunkKey.fromKey(chunkEntry.getLongKey());
+                        var chunk = chunkEntry.getValue();
+                        var buf = Unpooled.buffer();
+
+                        for (var i = 0; i < chunk.getSectionCount(); i++) {
+                          SessionDataManager.writeChunkSection(
+                              buf,
+                              sessionDataManager.session().getCodecHelper(),
+                              chunk.getSection(i));
+                        }
+
+                        var chunkBytes = new byte[buf.readableBytes()];
+                        buf.readBytes(chunkBytes);
+
+                        var lightMask = new BitSet();
+                        lightMask.set(0, chunk.getSectionCount() + 2);
+                        var skyUpdateList = new ArrayList<byte[]>();
+                        for (var i = 0; i < chunk.getSectionCount() + 2; i++) {
+                          skyUpdateList.add(FULL_LIGHT); // sky light
+                        }
+
+                        var lightUpdateData =
+                            new LightUpdateData(
+                                lightMask,
+                                new BitSet(),
+                                new BitSet(),
+                                lightMask,
+                                skyUpdateList,
+                                List.of());
+
+                        session.send(
+                            new ClientboundLevelChunkWithLightPacket(
+                                chunkKey.chunkX(),
+                                chunkKey.chunkZ(),
+                                chunkBytes,
+                                new CompoundTag(""),
+                                new BlockEntityInfo[0],
+                                lightUpdateData));
                       }
 
                       if (sessionDataManager.inventoryManager() != null) {
@@ -537,22 +641,6 @@ public class POVServer implements InternalPlugin {
                             }
                           }
                         }
-                      }
-
-                      if (sessionDataManager.healthData() != null) {
-                        session.send(
-                            new ClientboundSetHealthPacket(
-                                sessionDataManager.healthData().health(),
-                                sessionDataManager.healthData().food(),
-                                sessionDataManager.healthData().saturation()));
-                      }
-
-                      if (sessionDataManager.experienceData() != null) {
-                        session.send(
-                            new ClientboundSetExperiencePacket(
-                                sessionDataManager.experienceData().experience(),
-                                sessionDataManager.experienceData().level(),
-                                sessionDataManager.experienceData().totalExperience()));
                       }
 
                       for (var entity : sessionDataManager.entityTrackerState().getEntities()) {
@@ -652,70 +740,6 @@ public class POVServer implements InternalPlugin {
                                                                 }))
                                                     .toList()))
                                     .toList()));
-                      }
-
-                      session.send(
-                          new ClientboundPlayerPositionPacket(
-                              sessionDataManager.clientEntity().x(),
-                              sessionDataManager.clientEntity().y(),
-                              sessionDataManager.clientEntity().z(),
-                              sessionDataManager.clientEntity().yaw(),
-                              sessionDataManager.clientEntity().pitch(),
-                              Integer.MIN_VALUE));
-
-                      if (sessionDataManager.centerChunk() != null) {
-                        session.send(
-                            new ClientboundSetChunkCacheCenterPacket(
-                                sessionDataManager.centerChunk().chunkX(),
-                                sessionDataManager.centerChunk().chunkZ()));
-                      }
-
-                      session.send(
-                          new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
-
-                      for (var chunkEntry :
-                          Objects.requireNonNull(sessionDataManager.getCurrentLevel())
-                              .chunks()
-                              .getChunks()
-                              .long2ObjectEntrySet()) {
-                        var chunkKey = ChunkKey.fromKey(chunkEntry.getLongKey());
-                        var chunk = chunkEntry.getValue();
-                        var buf = Unpooled.buffer();
-
-                        for (var i = 0; i < chunk.getSectionCount(); i++) {
-                          SessionDataManager.writeChunkSection(
-                              buf,
-                              sessionDataManager.session().getCodecHelper(),
-                              chunk.getSection(i));
-                        }
-
-                        var chunkBytes = new byte[buf.readableBytes()];
-                        buf.readBytes(chunkBytes);
-
-                        var lightMask = new BitSet();
-                        lightMask.set(0, chunk.getSectionCount() + 2);
-                        var skyUpdateList = new ArrayList<byte[]>();
-                        for (var i = 0; i < chunk.getSectionCount() + 2; i++) {
-                          skyUpdateList.add(FULL_LIGHT); // sky light
-                        }
-
-                        var lightUpdateData =
-                            new LightUpdateData(
-                                lightMask,
-                                new BitSet(),
-                                new BitSet(),
-                                lightMask,
-                                skyUpdateList,
-                                List.of());
-
-                        session.send(
-                            new ClientboundLevelChunkWithLightPacket(
-                                chunkKey.chunkX(),
-                                chunkKey.chunkZ(),
-                                chunkBytes,
-                                new CompoundTag(""),
-                                new BlockEntityInfo[0],
-                                lightUpdateData));
                       }
 
                       // enableForwarding = true;
