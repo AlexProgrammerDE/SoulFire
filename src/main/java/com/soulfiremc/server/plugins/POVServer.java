@@ -22,6 +22,7 @@ import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.ServerLoginHandler;
 import com.github.steveice10.mc.protocol.codec.MinecraftCodec;
+import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeModifier;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
@@ -42,6 +43,7 @@ import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCu
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateMobEffectPacket;
@@ -82,6 +84,7 @@ import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
+import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -404,14 +407,15 @@ public class POVServer implements InternalPlugin {
                                   null,
                                   0)));
 
-                      session.send(new ClientboundGameEventPacket(GameEvent.CHANGE_GAMEMODE, GameMode.SPECTATOR));
-
-                      if (sessionDataManager.experienceData() != null) {
+                      if (sessionDataManager.abilitiesData() != null) {
                         session.send(
-                            new ClientboundSetExperiencePacket(
-                                sessionDataManager.experienceData().experience(),
-                                sessionDataManager.experienceData().level(),
-                                sessionDataManager.experienceData().totalExperience()));
+                            new ClientboundPlayerAbilitiesPacket(
+                                sessionDataManager.abilitiesData().invulnerable(),
+                                sessionDataManager.abilitiesData().flying(),
+                                sessionDataManager.abilitiesData().allowFlying(),
+                                sessionDataManager.abilitiesData().creativeModeBreak(),
+                                sessionDataManager.abilitiesData().flySpeed(),
+                                sessionDataManager.abilitiesData().walkSpeed()));
                       }
 
                       if (sessionDataManager.difficultyData() != null) {
@@ -432,6 +436,13 @@ public class POVServer implements InternalPlugin {
                                 sessionDataManager.borderState().newAbsoluteMaxSize(),
                                 sessionDataManager.borderState().warningBlocks(),
                                 sessionDataManager.borderState().warningTime()));
+                      }
+
+                      if (sessionDataManager.defaultSpawnData() != null) {
+                        session.send(
+                            new ClientboundSetDefaultSpawnPositionPacket(
+                                sessionDataManager.defaultSpawnData().position(),
+                                sessionDataManager.defaultSpawnData().angle()));
                       }
 
                       if (sessionDataManager.inventoryManager() != null) {
@@ -466,38 +477,45 @@ public class POVServer implements InternalPlugin {
                         }
                       }
 
-                      if (sessionDataManager.abilitiesData() != null) {
+                      if (sessionDataManager.healthData() != null) {
                         session.send(
-                            new ClientboundPlayerAbilitiesPacket(
-                                sessionDataManager.abilitiesData().invulnerable(),
-                                sessionDataManager.abilitiesData().flying(),
-                                sessionDataManager.abilitiesData().allowFlying(),
-                                sessionDataManager.abilitiesData().creativeModeBreak(),
-                                sessionDataManager.abilitiesData().flySpeed(),
-                                sessionDataManager.abilitiesData().walkSpeed()));
+                            new ClientboundSetHealthPacket(
+                                sessionDataManager.healthData().health(),
+                                sessionDataManager.healthData().food(),
+                                sessionDataManager.healthData().saturation()));
                       }
 
-                      session.send(
-                          new ClientboundSetHealthPacket(
-                              sessionDataManager.healthData().health(),
-                              sessionDataManager.healthData().food(),
-                              sessionDataManager.healthData().saturation()));
-
-                      session.send(
-                          new ClientboundSetHealthPacket(
-                              sessionDataManager.healthData().health(),
-                              sessionDataManager.healthData().food(),
-                              sessionDataManager.healthData().saturation()));
-
-                      if (sessionDataManager.defaultSpawnData() != null) {
+                      if (sessionDataManager.experienceData() != null) {
                         session.send(
-                            new ClientboundSetDefaultSpawnPositionPacket(
-                                sessionDataManager.defaultSpawnData().position(),
-                                sessionDataManager.defaultSpawnData().angle()));
+                            new ClientboundSetExperiencePacket(
+                                sessionDataManager.experienceData().experience(),
+                                sessionDataManager.experienceData().level(),
+                                sessionDataManager.experienceData().totalExperience()));
                       }
 
                       for (var entity : sessionDataManager.entityTrackerState().getEntities()) {
-                        if (entity instanceof RawEntity rawEntity) {
+                        if (entity instanceof ClientEntity clientEntity) {
+                          session.send(
+                              new ClientboundEntityEventPacket(
+                                  clientEntity.entityId(),
+                                  switch (clientEntity.opPermissionLevel()) {
+                                    case 0 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_0;
+                                    case 1 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_1;
+                                    case 2 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_2;
+                                    case 3 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_3;
+                                    case 4 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_4;
+                                    default ->
+                                        throw new IllegalStateException(
+                                            "Unexpected value: "
+                                                + clientEntity.opPermissionLevel());
+                                  }));
+                          session.send(
+                              new ClientboundEntityEventPacket(
+                                  clientEntity.entityId(),
+                                  clientEntity.showReducedDebug()
+                                      ? EntityEvent.PLAYER_ENABLE_REDUCED_DEBUG
+                                      : EntityEvent.PLAYER_DISABLE_REDUCED_DEBUG));
+                        } else if (entity instanceof RawEntity rawEntity) {
                           session.send(
                               new ClientboundAddEntityPacket(
                                   entity.entityId(),
