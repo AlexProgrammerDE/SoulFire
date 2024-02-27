@@ -89,4 +89,27 @@ public class TagsState {
   public boolean isEntityInTag(EntityType entityType, String tagName) {
     return entityTags.getOrDefault(tagName, Set.of()).contains(entityType);
   }
+
+  public Map<String, Map<String, int[]>> exportTagData() {
+    var tags = new Object2ObjectOpenHashMap<String, Map<String, int[]>>();
+    var blockMap = new Object2ObjectOpenHashMap<String, int[]>();
+    for (var block : blockTags.entrySet()) {
+        var blockArray = block.getValue().stream().mapToInt(BlockType::id).toArray();
+        blockMap.put(block.getKey(), blockArray);
+    }
+    tags.put("minecraft:block", blockMap);
+    var itemMap = new Object2ObjectOpenHashMap<String, int[]>();
+    for (var item : itemTags.entrySet()) {
+        var itemArray = item.getValue().stream().mapToInt(ItemType::id).toArray();
+        itemMap.put(item.getKey(), itemArray);
+    }
+    tags.put("minecraft:item", itemMap);
+    var entityMap = new Object2ObjectOpenHashMap<String, int[]>();
+    for (var entity : entityTags.entrySet()) {
+        var entityArray = entity.getValue().stream().mapToInt(EntityType::id).toArray();
+        entityMap.put(entity.getKey(), entityArray);
+    }
+    tags.put("minecraft:entity_type", entityMap);
+    return tags;
+  }
 }

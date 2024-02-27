@@ -389,8 +389,7 @@ public final class SessionDataManager {
               String.join(", ", readChannels(packet)));
       case "minecraft:brand" -> {
         serverBrand = session.getCodecHelper().readString(Unpooled.wrappedBuffer(packet.getData()));
-        log.debug(
-            "Received server brand \"{}\"", serverBrand   );
+        log.debug("Received server brand \"{}\"", serverBrand);
       }
     }
   }
@@ -1120,10 +1119,6 @@ public final class SessionDataManager {
   }
 
   public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {
-    if (biomesEntryBitsSize == -1) {
-      throw new IllegalStateException("Biome entry bits size is not set");
-    }
-
     int blockCount = buf.readShort();
 
     var chunkPalette =
@@ -1133,7 +1128,8 @@ public final class SessionDataManager {
     return new ChunkSection(blockCount, chunkPalette, biomePalette);
   }
 
-  public void writeChunkSection(ByteBuf buf, MinecraftCodecHelper codec, ChunkSection chunkSection) {
+  public static void writeChunkSection(
+      ByteBuf buf, MinecraftCodecHelper codec, ChunkSection chunkSection) {
     buf.writeShort(chunkSection.getBlockCount());
 
     codec.writeDataPalette(buf, chunkSection.getChunkData());

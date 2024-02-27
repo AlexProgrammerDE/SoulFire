@@ -22,6 +22,10 @@ import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.ServerLoginHandler;
 import com.github.steveice10.mc.protocol.codec.MinecraftCodec;
+import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
+import com.github.steveice10.mc.protocol.data.ProtocolState;
+import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
+import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
 import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeModifier;
@@ -40,8 +44,13 @@ import com.github.steveice10.mc.protocol.data.status.ServerStatusInfo;
 import com.github.steveice10.mc.protocol.data.status.VersionInfo;
 import com.github.steveice10.mc.protocol.data.status.handler.ServerInfoBuilder;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
+import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
+import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundFinishConfigurationPacket;
+import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundUpdateEnabledFeaturesPacket;
+import com.github.steveice10.mc.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundStartConfigurationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
@@ -56,12 +65,15 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetDataPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundChunkBatchFinishedPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundChunkBatchStartPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundLevelChunkWithLightPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheCenterPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetDefaultSpawnPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundConfigurationAcknowledgedPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
 import com.github.steveice10.packetlib.Server;
@@ -82,6 +94,7 @@ import com.soulfiremc.server.api.event.attack.AttackInitEvent;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
@@ -98,6 +111,8 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -110,6 +125,12 @@ import org.cloudburstmc.math.vector.Vector3i;
 
 @Slf4j
 public class POVServer implements InternalPlugin {
+  private static final byte[] FULL_LIGHT = new byte[2048];
+
+  static {
+    Arrays.fill(FULL_LIGHT, (byte) 0xFF);
+  }
+
   @EventHandler
   public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(POVServerSettings.class, "POV Server");
@@ -234,7 +255,7 @@ public class POVServer implements InternalPlugin {
                             0)));
 
                 session.send(
-                    new ClientboundPlayerAbilitiesPacket(false, false, true, false, 0f, 0f));
+                    new ClientboundPlayerAbilitiesPacket(false, false, true, false, 0.05f, 0.1f));
 
                 // without this the player will spawn only after waiting 30 seconds
                 // there are multiple options to fix that,
@@ -254,6 +275,42 @@ public class POVServer implements InternalPlugin {
                 // this packet is required since 1.20.3
                 session.send(
                     new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
+
+                var sectionCount = 16;
+                var buf = Unpooled.buffer();
+                for (var i = 0; i < sectionCount; i++) {
+                  var chunk = DataPalette.createForChunk();
+                  chunk.set(0, 0, 0, 0);
+                  var biome = DataPalette.createForBiome(6);
+                  biome.set(0, 0, 0, 0);
+                  SessionDataManager.writeChunkSection(
+                      buf,
+                      (MinecraftCodecHelper) session.getCodecHelper(),
+                      new ChunkSection(0, chunk, biome));
+                }
+
+                var chunkBytes = new byte[buf.readableBytes()];
+                buf.readBytes(chunkBytes);
+
+                var lightMask = new BitSet();
+                lightMask.set(0, sectionCount + 2);
+                var skyUpdateList = new ArrayList<byte[]>();
+                for (var i = 0; i < sectionCount + 2; i++) {
+                  skyUpdateList.add(FULL_LIGHT); // sky light
+                }
+
+                var lightUpdateData =
+                    new LightUpdateData(
+                        lightMask, new BitSet(), new BitSet(), lightMask, skyUpdateList, List.of());
+
+                session.send(
+                    new ClientboundLevelChunkWithLightPacket(
+                        0,
+                        0,
+                        chunkBytes,
+                        new CompoundTag(""),
+                        new BlockEntityInfo[0],
+                        lightUpdateData));
 
                 // Manually call the connect event
                 session.callEvent(new ConnectedEvent(session));
@@ -305,22 +362,6 @@ public class POVServer implements InternalPlugin {
                                   .findFirst();
                           if (first.isPresent()) {
                             botConnection = first.get();
-                            session.send(
-                                new ClientboundSystemChatPacket(
-                                    Component.text("Connected to bot ")
-                                        .color(NamedTextColor.GREEN)
-                                        .append(
-                                            Component.text(
-                                                    botConnection
-                                                        .meta()
-                                                        .minecraftAccount()
-                                                        .username())
-                                                .color(NamedTextColor.AQUA)
-                                                .decorate(TextDecoration.UNDERLINED))
-                                        .append(Component.text("!"))
-                                        .color(NamedTextColor.GREEN),
-                                    false));
-                            syncBotAndUser();
                             var povSession = session;
                             botConnection
                                 .session()
@@ -332,6 +373,27 @@ public class POVServer implements InternalPlugin {
                                           povSession.send(packet);
                                         }
                                       }
+                                    });
+                            Thread.ofPlatform()
+                                .name("SyncTask")
+                                .start(
+                                    () -> {
+                                      syncBotAndUser();
+                                      session.send(
+                                          new ClientboundSystemChatPacket(
+                                              Component.text("Connected to bot ")
+                                                  .color(NamedTextColor.GREEN)
+                                                  .append(
+                                                      Component.text(
+                                                              botConnection
+                                                                  .meta()
+                                                                  .minecraftAccount()
+                                                                  .username())
+                                                          .color(NamedTextColor.AQUA)
+                                                          .decorate(TextDecoration.UNDERLINED))
+                                                  .append(Component.text("!"))
+                                                  .color(NamedTextColor.GREEN),
+                                              false));
                                     });
                           } else {
                             session.send(
@@ -382,9 +444,43 @@ public class POVServer implements InternalPlugin {
                       log.info("Disconnecting: {}", event.getReason(), event.getCause());
                     }
 
+                    private void awaitReceived(Class<?> clazz) {
+                      var future = new CompletableFuture<Void>();
+
+                      session.addListener(
+                          new SessionAdapter() {
+                            @Override
+                            public void packetReceived(Session session, Packet packet) {
+                              if (clazz.isInstance(packet)) {
+                                future.complete(null);
+                              }
+                            }
+                          });
+
+                      future.orTimeout(5, TimeUnit.SECONDS).join();
+                    }
+
                     private void syncBotAndUser() {
                       Objects.requireNonNull(botConnection);
                       var sessionDataManager = botConnection.sessionDataManager();
+
+                      session.send(new ClientboundStartConfigurationPacket());
+                      awaitReceived(ServerboundConfigurationAcknowledgedPacket.class);
+                      ((MinecraftProtocol) session.getPacketProtocol())
+                          .setState(ProtocolState.CONFIGURATION);
+
+                      session.send(
+                          new ClientboundUpdateEnabledFeaturesPacket(
+                              new String[] {"minecraft:vanilla"}));
+                      var tagsPacket = new ClientboundUpdateTagsPacket();
+                      tagsPacket.getTags().putAll(sessionDataManager.tagsState().exportTagData());
+
+                      session.send(new ClientboundFinishConfigurationPacket());
+                      awaitReceived(ServerboundFinishConfigurationPacket.class);
+
+                      ((MinecraftProtocol) session.getPacketProtocol())
+                          .setState(ProtocolState.GAME);
+
                       session.send(
                           new ClientboundLoginPacket(
                               sessionDataManager.clientEntity().entityId(),
@@ -467,12 +563,13 @@ public class POVServer implements InternalPlugin {
                                   sessionDataManager.inventoryManager().cursorItem()));
 
                           if (container.properties() != null) {
-                            for (var containerProperty : container.properties().int2IntEntrySet())
+                            for (var containerProperty : container.properties().int2IntEntrySet()) {
                               session.send(
                                   new ClientboundContainerSetDataPacket(
                                       container.id(),
                                       containerProperty.getIntKey(),
                                       containerProperty.getIntValue()));
+                            }
                           }
                         }
                       }
@@ -611,6 +708,8 @@ public class POVServer implements InternalPlugin {
                       session.send(
                           new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
 
+                      session.send(new ClientboundChunkBatchStartPacket());
+                      var chunkCount = 0;
                       for (var chunkEntry :
                           Objects.requireNonNull(sessionDataManager.getCurrentLevel())
                               .chunks()
@@ -630,13 +729,20 @@ public class POVServer implements InternalPlugin {
                         var chunkBytes = new byte[buf.readableBytes()];
                         buf.readBytes(chunkBytes);
 
+                        var lightMask = new BitSet();
+                        lightMask.set(0, chunk.getSectionCount() + 2);
+                        var skyUpdateList = new ArrayList<byte[]>();
+                        for (var i = 0; i < chunk.getSectionCount() + 2; i++) {
+                          skyUpdateList.add(FULL_LIGHT); // sky light
+                        }
+
                         var lightUpdateData =
                             new LightUpdateData(
+                                lightMask,
                                 new BitSet(),
                                 new BitSet(),
-                                new BitSet(),
-                                new BitSet(),
-                                List.of(),
+                                lightMask,
+                                skyUpdateList,
                                 List.of());
 
                         session.send(
@@ -647,7 +753,9 @@ public class POVServer implements InternalPlugin {
                                 new CompoundTag(""),
                                 new BlockEntityInfo[0],
                                 lightUpdateData));
+                        chunkCount++;
                       }
+                      session.send(new ClientboundChunkBatchFinishedPacket(chunkCount));
 
                       // enableForwarding = true;
                     }
