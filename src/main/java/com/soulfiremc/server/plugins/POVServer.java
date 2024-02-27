@@ -77,7 +77,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.Clientb
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundConfigurationAcknowledgedPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
 import com.github.steveice10.packetlib.Server;
 import com.github.steveice10.packetlib.Session;
@@ -226,12 +225,6 @@ public class POVServer implements InternalPlugin {
                 session.send(
                     new ClientboundPlayerAbilitiesPacket(false, false, true, false, 0.05f, 0.1f));
 
-                // without this the player will spawn only after waiting 30 seconds
-                // there are multiple options to fix that,
-                // but this is the best option as we don't want to send chunk and the player is in
-                // spectator anyway
-                session.send(new ClientboundSetHealthPacket(0, 0, 0));
-
                 // this packet is also required to let our player spawn, but the location itself
                 // doesn't matter
                 session.send(new ClientboundSetDefaultSpawnPositionPacket(Vector3i.ZERO, 0));
@@ -328,51 +321,48 @@ public class POVServer implements InternalPlugin {
                                               .username()
                                               .equals(chatPacket.getMessage()))
                                   .findFirst();
-                          if (first.isPresent()) {
-                            botConnection = first.get();
-                            var povSession = session;
-                            botConnection
-                                .session()
-                                .addListener(
-                                    new SessionAdapter() {
-                                      @Override
-                                      public void packetReceived(Session session, Packet packet) {
-                                        if (enableForwarding) {
-                                          povSession.send(packet);
-                                        }
-                                      }
-                                    });
-                            Thread.ofPlatform()
-                                .name("SyncTask")
-                                .start(
-                                    () -> {
-                                      syncBotAndUser();
-                                      session.send(
-                                          new ClientboundSystemChatPacket(
-                                              Component.text("Connected to bot ")
-                                                  .color(NamedTextColor.GREEN)
-                                                  .append(
-                                                      Component.text(
-                                                              botConnection
-                                                                  .meta()
-                                                                  .minecraftAccount()
-                                                                  .username())
-                                                          .color(NamedTextColor.AQUA)
-                                                          .decorate(TextDecoration.UNDERLINED))
-                                                  .append(Component.text("!"))
-                                                  .color(NamedTextColor.GREEN),
-                                              false));
-                                    });
-                          } else {
+                          if (first.isEmpty()) {
                             session.send(
                                 new ClientboundSystemChatPacket(
                                     Component.text("Bot not found!").color(NamedTextColor.RED),
                                     false));
+                            return;
                           }
-                        } else if (packet instanceof ServerboundAcceptTeleportationPacket) {
-                          // if we keep the health on 0, the client will spam us respawn request
-                          // packets :/
-                          session.send(new ClientboundSetHealthPacket(1, 0, 0));
+
+                          botConnection = first.get();
+                          var povSession = session;
+                          botConnection
+                              .session()
+                              .addListener(
+                                  new SessionAdapter() {
+                                    @Override
+                                    public void packetReceived(Session session, Packet packet) {
+                                      if (enableForwarding) {
+                                        povSession.send(packet);
+                                      }
+                                    }
+                                  });
+                          Thread.ofPlatform()
+                              .name("SyncTask")
+                              .start(
+                                  () -> {
+                                    syncBotAndUser();
+                                    session.send(
+                                        new ClientboundSystemChatPacket(
+                                            Component.text("Connected to bot ")
+                                                .color(NamedTextColor.GREEN)
+                                                .append(
+                                                    Component.text(
+                                                            botConnection
+                                                                .meta()
+                                                                .minecraftAccount()
+                                                                .username())
+                                                        .color(NamedTextColor.AQUA)
+                                                        .decorate(TextDecoration.UNDERLINED))
+                                                .append(Component.text("!"))
+                                                .color(NamedTextColor.GREEN),
+                                            false));
+                                  });
                         }
                       } else if (enableForwarding) {
                         botConnection.session().send(packet);
@@ -491,6 +481,8 @@ public class POVServer implements InternalPlugin {
                                 sessionDataManager.abilitiesData().walkSpeed()));
                       }
 
+                      session.send(new ClientboundGameEventPacket(GameEvent.CHANGE_GAMEMODE, sessionDataManager.gameMode()));
+
                       if (sessionDataManager.borderState() != null) {
                         session.send(
                             new ClientboundInitializeBorderPacket(
@@ -558,7 +550,9 @@ public class POVServer implements InternalPlugin {
                               sessionDataManager.playerListState().entries().values().stream()
                                   .map(
                                       entry -> {
-                                        if (entry.getProfileId().equals(currentId)) {
+                                        if (entry
+                                            .getProfileId()
+                                            .equals(sessionDataManager.botProfile().getId())) {
                                           GameProfile newGameProfile;
                                           if (entry.getProfile() == null) {
                                             newGameProfile = null;
