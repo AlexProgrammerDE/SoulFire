@@ -46,6 +46,7 @@ import com.github.steveice10.mc.protocol.data.status.handler.ServerInfoBuilder;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
 import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundFinishConfigurationPacket;
+import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
 import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundUpdateEnabledFeaturesPacket;
 import com.github.steveice10.mc.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
@@ -89,9 +90,7 @@ import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.tcp.TcpServer;
 import com.soulfiremc.server.AttackManager;
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.attack.AttackInitEvent;
-import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
@@ -113,7 +112,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -148,38 +146,10 @@ public class POVServer implements InternalPlugin {
             return;
           }
 
-          EventUtil.runAndAssertChanged(
-              attackManager.eventBus(),
-              () -> {
-                var freePort =
-                    PortHelper.getAvailablePort(settingsHolder.get(POVServerSettings.PORT_START));
-                var server = new POVServerInstance(freePort, attackManager);
-                log.info(
-                    "Started POV server on 0.0.0.0:{} for attack {}", freePort, attackManager.id());
-
-                attackManager
-                    .eventBus()
-                    .registerConsumer(
-                        (Consumer<BotConnectionInitEvent>)
-                            event2 -> {
-                              var botConnection = event2.connection();
-                              /*
-                              EventUtil.runAndAssertChanged(
-                                  botConnection.eventBus(),
-                                  () -> {
-                                    botConnection.eventBus().registerConsumer((Consumer<BotConnectionInitEvent>) event2 -> {
-                                      var botConnection = event2.connection();
-                                      EventUtil.runAndAssertChanged(
-                                          botConnection.eventBus(),
-                                          () -> {
-
-                                          });
-                                    }, BotConnectionInitEvent.class);
-                                  });
-                               */
-                            },
-                        BotConnectionInitEvent.class);
-              });
+          var freePort =
+              PortHelper.getAvailablePort(settingsHolder.get(POVServerSettings.PORT_START));
+          new POVServerInstance(freePort, attackManager);
+          log.info("Started POV server on 0.0.0.0:{} for attack {}", freePort, attackManager.id());
         });
   }
 
@@ -203,10 +173,6 @@ public class POVServer implements InternalPlugin {
             1,
             65535,
             1);
-  }
-
-  private static class POVSessionState {
-    private String connectedBot;
   }
 
   private static class POVServerInstance {
@@ -335,7 +301,6 @@ public class POVServer implements InternalPlugin {
             @Override
             public void sessionAdded(SessionAddedEvent event) {
               var session = event.getSession();
-              session.setFlag("pov-state", new POVSessionState());
 
               session.addListener(
                   new SessionAdapter() {
@@ -472,6 +437,8 @@ public class POVServer implements InternalPlugin {
                       session.send(
                           new ClientboundUpdateEnabledFeaturesPacket(
                               new String[] {"minecraft:vanilla"}));
+                      session.send(
+                          new ClientboundRegistryDataPacket(MinecraftProtocol.loadNetworkCodec()));
                       var tagsPacket = new ClientboundUpdateTagsPacket();
                       tagsPacket.getTags().putAll(sessionDataManager.tagsState().exportTagData());
 
@@ -720,7 +687,7 @@ public class POVServer implements InternalPlugin {
                         var buf = Unpooled.buffer();
 
                         for (var i = 0; i < chunk.getSectionCount(); i++) {
-                          sessionDataManager.writeChunkSection(
+                          SessionDataManager.writeChunkSection(
                               buf,
                               sessionDataManager.session().getCodecHelper(),
                               chunk.getSection(i));
