@@ -46,7 +46,10 @@ import com.github.steveice10.mc.protocol.data.status.ServerStatusInfo;
 import com.github.steveice10.mc.protocol.data.status.VersionInfo;
 import com.github.steveice10.mc.protocol.data.status.handler.ServerInfoBuilder;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
+import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundKeepAlivePacket;
+import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundPingPacket;
 import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
+import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundPongPacket;
 import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundFinishConfigurationPacket;
 import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
 import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundUpdateEnabledFeaturesPacket;
@@ -126,6 +129,14 @@ import org.cloudburstmc.math.vector.Vector3i;
 
 @Slf4j
 public class POVServer implements InternalPlugin {
+  private static final List<Class<?>> NOT_SYNCED =
+      List.of(
+          ClientboundKeepAlivePacket.class,
+          ClientboundPingPacket.class,
+          ServerboundPongPacket.class,
+          ClientboundCustomPayloadPacket.class,
+          ServerboundFinishConfigurationPacket.class,
+          ServerboundConfigurationAcknowledgedPacket.class);
   private static final byte[] FULL_LIGHT = new byte[2048];
 
   static {
@@ -338,9 +349,13 @@ public class POVServer implements InternalPlugin {
                                   new SessionAdapter() {
                                     @Override
                                     public void packetReceived(Session session, Packet packet) {
-                                      if (enableForwarding) {
-                                        povSession.send(packet);
+                                      if (!enableForwarding
+                                          || NOT_SYNCED.contains(packet.getClass())) {
+                                        return;
                                       }
+
+                                      // MC Server of the bot -> MC Client
+                                      povSession.send(packet);
                                     }
                                   });
                           Thread.ofPlatform()
@@ -365,7 +380,8 @@ public class POVServer implements InternalPlugin {
                                             false));
                                   });
                         }
-                      } else if (enableForwarding) {
+                      } else if (!NOT_SYNCED.contains(packet.getClass()) && enableForwarding) {
+                        // MC Client -> Server of the bot
                         botConnection.session().send(packet);
                       }
                     }
@@ -416,7 +432,7 @@ public class POVServer implements InternalPlugin {
                             }
                           });
 
-                      future.orTimeout(5, TimeUnit.SECONDS).join();
+                      future.orTimeout(30, TimeUnit.SECONDS).join();
                     }
 
                     private void syncBotAndUser() {
