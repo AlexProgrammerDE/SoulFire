@@ -54,6 +54,7 @@ import com.github.steveice10.mc.protocol.packet.configuration.serverbound.Server
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerInfoUpdatePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundRespawnPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundStartConfigurationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundTabListPacket;
@@ -433,7 +434,7 @@ public class POVServer implements InternalPlugin {
                       session.send(
                           new ClientboundRegistryDataPacket(MinecraftProtocol.loadNetworkCodec()));
                       var tagsPacket = new ClientboundUpdateTagsPacket();
-                      tagsPacket.getTags().putAll(sessionDataManager.tagsState().exportTagData());
+                      tagsPacket.getTags().putAll(sessionDataManager.tagsState().exportTags());
 
                       session.send(new ClientboundFinishConfigurationPacket());
                       awaitReceived(ServerboundFinishConfigurationPacket.class);
@@ -441,6 +442,17 @@ public class POVServer implements InternalPlugin {
                       ((MinecraftProtocol) session.getPacketProtocol())
                           .setState(ProtocolState.GAME);
 
+                      var spawnInfo =
+                          new PlayerSpawnInfo(
+                              sessionDataManager.currentDimension().dimensionType(),
+                              sessionDataManager.currentDimension().worldName(),
+                              sessionDataManager.currentDimension().hashedSeed(),
+                              sessionDataManager.gameMode(),
+                              sessionDataManager.previousGameMode(),
+                              sessionDataManager.currentDimension().debug(),
+                              sessionDataManager.currentDimension().flat(),
+                              sessionDataManager.lastDeathPos(),
+                              sessionDataManager.portalCooldown());
                       session.send(
                           new ClientboundLoginPacket(
                               sessionDataManager.clientEntity().entityId(),
@@ -452,16 +464,8 @@ public class POVServer implements InternalPlugin {
                               sessionDataManager.clientEntity().showReducedDebug(),
                               sessionDataManager.enableRespawnScreen(),
                               sessionDataManager.doLimitedCrafting(),
-                              new PlayerSpawnInfo(
-                                  sessionDataManager.currentDimension().dimensionType(),
-                                  sessionDataManager.currentDimension().worldName(),
-                                  sessionDataManager.currentDimension().hashedSeed(),
-                                  sessionDataManager.gameMode(),
-                                  sessionDataManager.previousGameMode(),
-                                  sessionDataManager.currentDimension().debug(),
-                                  sessionDataManager.currentDimension().flat(),
-                                  null,
-                                  0)));
+                              spawnInfo));
+                      session.send(new ClientboundRespawnPacket(spawnInfo, false, false));
 
                       if (sessionDataManager.difficultyData() != null) {
                         session.send(
@@ -481,7 +485,9 @@ public class POVServer implements InternalPlugin {
                                 sessionDataManager.abilitiesData().walkSpeed()));
                       }
 
-                      session.send(new ClientboundGameEventPacket(GameEvent.CHANGE_GAMEMODE, sessionDataManager.gameMode()));
+                      session.send(
+                          new ClientboundGameEventPacket(
+                              GameEvent.CHANGE_GAMEMODE, sessionDataManager.gameMode()));
 
                       if (sessionDataManager.borderState() != null) {
                         session.send(

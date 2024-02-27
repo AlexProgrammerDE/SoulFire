@@ -20,96 +20,54 @@ package com.soulfiremc.server.protocol.bot.state;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.ItemType;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import lombok.Getter;
 
+@Getter
 public class TagsState {
-  private final Map<String, Set<BlockType>> blockTags = new Object2ObjectOpenHashMap<>();
-  private final Map<String, Set<ItemType>> itemTags = new Object2ObjectOpenHashMap<>();
-  private final Map<String, Set<EntityType>> entityTags = new Object2ObjectOpenHashMap<>();
+  private final Map<String, Map<String, IntSet>> tags = new Object2ObjectOpenHashMap<>();
 
-  public void handleTagData(Map<String, Map<String, int[]>> tags) {
-    for (var registry : tags.entrySet()) {
-      var registryKey = registry.getKey();
-
-      switch (registryKey) {
-        case "minecraft:block" -> handleBlocks(registry.getValue());
-        case "minecraft:item" -> handleItems(registry.getValue());
-        case "minecraft:entity_type" -> handleEntities(registry.getValue());
+  public void handleTagData(Map<String, Map<String, int[]>> updateTags) {
+    for (var entry : updateTags.entrySet()) {
+      var tagMap = new Object2ObjectOpenHashMap<String, IntSet>();
+      for (var tagEntry : entry.getValue().entrySet()) {
+        var set = new IntOpenHashSet(tagEntry.getValue());
+        tagMap.put(tagEntry.getKey(), set);
       }
-      // Ignore everything else, we just need these three for now
-    }
-  }
-
-  private void handleBlocks(Map<String, int[]> blocks) {
-    for (var block : blocks.entrySet()) {
-      var blockKey = block.getKey();
-      var blockSet =
-          blockTags.computeIfAbsent(blockKey, k -> new HashSet<>(block.getValue().length));
-
-      for (var i : block.getValue()) {
-        blockSet.add(BlockType.getById(i));
-      }
-    }
-  }
-
-  private void handleItems(Map<String, int[]> items) {
-    for (var item : items.entrySet()) {
-      var itemKey = item.getKey();
-      var itemSet = itemTags.computeIfAbsent(itemKey, k -> new HashSet<>(item.getValue().length));
-
-      for (var i : item.getValue()) {
-        itemSet.add(ItemType.getById(i));
-      }
-    }
-  }
-
-  private void handleEntities(Map<String, int[]> entities) {
-    for (var entity : entities.entrySet()) {
-      var entityKey = entity.getKey();
-      var entitySet =
-          entityTags.computeIfAbsent(entityKey, k -> new HashSet<>(entity.getValue().length));
-
-      for (var i : entity.getValue()) {
-        entitySet.add(EntityType.getById(i));
-      }
+      tags.put(entry.getKey(), tagMap);
     }
   }
 
   public boolean isBlockInTag(BlockType blockType, String tagName) {
-    return blockTags.getOrDefault(tagName, Set.of()).contains(blockType);
+    return tags.getOrDefault("minecraft:block", Map.of())
+        .getOrDefault(tagName, IntSet.of())
+        .contains(blockType.id());
   }
 
   public boolean isItemInTag(ItemType itemType, String tagName) {
-    return itemTags.getOrDefault(tagName, Set.of()).contains(itemType);
+    return tags.getOrDefault("minecraft:item", Map.of())
+        .getOrDefault(tagName, IntSet.of())
+        .contains(itemType.id());
   }
 
   public boolean isEntityInTag(EntityType entityType, String tagName) {
-    return entityTags.getOrDefault(tagName, Set.of()).contains(entityType);
+    return tags.getOrDefault("minecraft:entity_type", Map.of())
+        .getOrDefault(tagName, IntSet.of())
+        .contains(entityType.id());
   }
 
-  public Map<String, Map<String, int[]>> exportTagData() {
-    var tags = new Object2ObjectOpenHashMap<String, Map<String, int[]>>();
-    var blockMap = new Object2ObjectOpenHashMap<String, int[]>();
-    for (var block : blockTags.entrySet()) {
-        var blockArray = block.getValue().stream().mapToInt(BlockType::id).toArray();
-        blockMap.put(block.getKey(), blockArray);
+  public Map<String, Map<String, int[]>> exportTags() {
+    var result = new Object2ObjectOpenHashMap<String, Map<String, int[]>>();
+    for (var entry : tags.entrySet()) {
+      var tagMap = new Object2ObjectOpenHashMap<String, int[]>();
+      for (var tagEntry : entry.getValue().entrySet()) {
+        tagMap.put(tagEntry.getKey(), tagEntry.getValue().toIntArray());
+      }
+      result.put(entry.getKey(), tagMap);
     }
-    tags.put("minecraft:block", blockMap);
-    var itemMap = new Object2ObjectOpenHashMap<String, int[]>();
-    for (var item : itemTags.entrySet()) {
-        var itemArray = item.getValue().stream().mapToInt(ItemType::id).toArray();
-        itemMap.put(item.getKey(), itemArray);
-    }
-    tags.put("minecraft:item", itemMap);
-    var entityMap = new Object2ObjectOpenHashMap<String, int[]>();
-    for (var entity : entityTags.entrySet()) {
-        var entityArray = entity.getValue().stream().mapToInt(EntityType::id).toArray();
-        entityMap.put(entity.getKey(), entityArray);
-    }
-    tags.put("minecraft:entity_type", entityMap);
-    return tags;
+    return result;
   }
 }

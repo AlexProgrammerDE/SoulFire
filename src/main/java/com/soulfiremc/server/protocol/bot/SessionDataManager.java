@@ -205,6 +205,7 @@ public final class SessionDataManager {
   private int serverViewDistance = -1;
   private int serverSimulationDistance = -1;
   private @Nullable GlobalPos lastDeathPos;
+  private int portalCooldown = -1;
   private @Nullable DifficultyData difficultyData;
   private @Nullable AbilitiesData abilitiesData;
   private @Nullable DefaultSpawnData defaultSpawnData;
@@ -297,6 +298,7 @@ public final class SessionDataManager {
     gameMode = spawnInfo.getGameMode();
     previousGameMode = spawnInfo.getPreviousGamemode();
     lastDeathPos = spawnInfo.getLastDeathPos();
+    portalCooldown = spawnInfo.getPortalCooldown();
   }
 
   @EventHandler
@@ -1150,8 +1152,8 @@ public final class SessionDataManager {
       borderState.tick();
     }
 
-    // Tick item cooldowns
-    tickCoolDowns();
+    // Tick cooldowns
+    tickCooldowns();
 
     var tickHookState = TickHookContext.INSTANCE.get();
 
@@ -1165,7 +1167,11 @@ public final class SessionDataManager {
     tickHookState.callHooks(TickHookContext.HookType.POST_ENTITY_TICK);
   }
 
-  private void tickCoolDowns() {
+  private void tickCooldowns() {
+    if (portalCooldown > 0) {
+      portalCooldown--;
+    }
+
     synchronized (itemCoolDowns) {
       var iterator = itemCoolDowns.int2IntEntrySet().iterator();
       while (iterator.hasNext()) {
