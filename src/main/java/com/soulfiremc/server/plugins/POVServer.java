@@ -41,6 +41,8 @@ import com.github.steveice10.mc.protocol.data.game.entity.type.EntityType;
 import com.github.steveice10.mc.protocol.data.game.level.LightUpdateData;
 import com.github.steveice10.mc.protocol.data.game.level.block.BlockEntityInfo;
 import com.github.steveice10.mc.protocol.data.game.level.notify.GameEvent;
+import com.github.steveice10.mc.protocol.data.game.level.notify.RainStrengthValue;
+import com.github.steveice10.mc.protocol.data.game.level.notify.ThunderStrengthValue;
 import com.github.steveice10.mc.protocol.data.status.PlayerInfo;
 import com.github.steveice10.mc.protocol.data.status.ServerStatusInfo;
 import com.github.steveice10.mc.protocol.data.status.VersionInfo;
@@ -82,6 +84,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.Clientb
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundConfigurationAcknowledgedPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
@@ -363,6 +366,51 @@ public class POVServer implements InternalPlugin {
                                       // MC Server of the bot -> MC Client
                                       povSession.send(packet);
                                     }
+
+                                    @Override
+                                    public void packetSent(Session session, Packet packet) {
+                                      if (!enableForwarding
+                                          || NOT_SYNCED.contains(packet.getClass())) {
+                                        return;
+                                      }
+
+                                      var clientEntity =
+                                          botConnection.sessionDataManager().clientEntity();
+                                      // Bot -> MC Client
+                                      switch (packet) {
+                                        case ServerboundMovePlayerPosRotPacket posRot ->
+                                            povSession.send(
+                                                new ClientboundPlayerPositionPacket(
+                                                    posRot.getX(),
+                                                    posRot.getY(),
+                                                    posRot.getZ(),
+                                                    posRot.getYaw(),
+                                                    posRot.getPitch(),
+                                                    Integer.MIN_VALUE,
+                                                    List.of()));
+                                        case ServerboundMovePlayerPosPacket pos ->
+                                            povSession.send(
+                                                new ClientboundPlayerPositionPacket(
+                                                    pos.getX(),
+                                                    pos.getY(),
+                                                    pos.getZ(),
+                                                    clientEntity.yaw(),
+                                                    clientEntity.pitch(),
+                                                    Integer.MIN_VALUE,
+                                                    List.of()));
+                                        case ServerboundMovePlayerRotPacket rot ->
+                                            povSession.send(
+                                                new ClientboundPlayerPositionPacket(
+                                                    clientEntity.x(),
+                                                    clientEntity.y(),
+                                                    clientEntity.z(),
+                                                    rot.getYaw(),
+                                                    rot.getPitch(),
+                                                    Integer.MIN_VALUE,
+                                                    List.of()));
+                                        default -> {}
+                                      }
+                                    }
                                   });
                           Thread.ofPlatform()
                               .name("SyncTask")
@@ -394,10 +442,7 @@ public class POVServer implements InternalPlugin {
                             clientEntity.y(posRot.getY());
                             clientEntity.z(posRot.getZ());
                             clientEntity.yaw(posRot.getYaw());
-                            botConnection
-                                .sessionDataManager()
-                                .clientEntity()
-                                .pitch(posRot.getPitch());
+                            clientEntity.pitch(posRot.getPitch());
                           }
                           case ServerboundMovePlayerPosPacket pos -> {
                             clientEntity.x(pos.getX());
@@ -408,8 +453,13 @@ public class POVServer implements InternalPlugin {
                             clientEntity.yaw(rot.getYaw());
                             clientEntity.pitch(rot.getPitch());
                           }
-                          default -> {
+                          case ServerboundAcceptTeleportationPacket teleportationPacket -> {
+                            // This was a forced teleport, the server should not know about it
+                            if (teleportationPacket.getId() == Integer.MIN_VALUE) {
+                              return;
+                            }
                           }
+                          default -> {}
                         }
 
                         // MC Client -> Server of the bot
@@ -554,6 +604,25 @@ public class POVServer implements InternalPlugin {
                             new ClientboundSetDefaultSpawnPositionPacket(
                                 sessionDataManager.defaultSpawnData().position(),
                                 sessionDataManager.defaultSpawnData().angle()));
+                      }
+
+                      if (sessionDataManager.weatherState() != null) {
+                        session.send(
+                            new ClientboundGameEventPacket(
+                                sessionDataManager.weatherState().raining()
+                                    ? GameEvent.START_RAIN
+                                    : GameEvent.STOP_RAIN,
+                                null));
+                        session.send(
+                            new ClientboundGameEventPacket(
+                                GameEvent.RAIN_STRENGTH,
+                                new RainStrengthValue(
+                                    sessionDataManager.weatherState().rainStrength())));
+                        session.send(
+                            new ClientboundGameEventPacket(
+                                GameEvent.THUNDER_STRENGTH,
+                                new ThunderStrengthValue(
+                                    sessionDataManager.weatherState().thunderStrength())));
                       }
 
                       if (sessionDataManager.healthData() != null) {
