@@ -32,7 +32,7 @@ import java.util.zip.DataFormatException;
 import lombok.Setter;
 
 public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
-  // stolen from Krypton (GPL) and modified
+  // taken from Krypton (GPL) and modified
   // https://github.com/astei/krypton/blob/master/src/main/java/me/steinborn/krypton/mod/shared/network/compression/MinecraftCompressEncoder.java
   private static final int UNCOMPRESSED_CAP = 8 * 1024 * 1024; // 8MiB
   private final int compressionLevel = 6; // TODO: make configurable

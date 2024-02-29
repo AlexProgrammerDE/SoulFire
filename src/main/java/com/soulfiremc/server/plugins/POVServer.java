@@ -82,6 +82,9 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.Clientb
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundConfigurationAcknowledgedPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
 import com.github.steveice10.packetlib.Server;
 import com.github.steveice10.packetlib.Session;
@@ -384,7 +387,31 @@ public class POVServer implements InternalPlugin {
                                   });
                         }
                       } else if (!NOT_SYNCED.contains(packet.getClass()) && enableForwarding) {
-                        System.out.println(packet);
+                        var clientEntity = botConnection.sessionDataManager().clientEntity();
+                        switch (packet) {
+                          case ServerboundMovePlayerPosRotPacket posRot -> {
+                            clientEntity.x(posRot.getX());
+                            clientEntity.y(posRot.getY());
+                            clientEntity.z(posRot.getZ());
+                            clientEntity.yaw(posRot.getYaw());
+                            botConnection
+                                .sessionDataManager()
+                                .clientEntity()
+                                .pitch(posRot.getPitch());
+                          }
+                          case ServerboundMovePlayerPosPacket pos -> {
+                            clientEntity.x(pos.getX());
+                            clientEntity.y(pos.getY());
+                            clientEntity.z(pos.getZ());
+                          }
+                          case ServerboundMovePlayerRotPacket rot -> {
+                            clientEntity.yaw(rot.getYaw());
+                            clientEntity.pitch(rot.getPitch());
+                          }
+                          default -> {
+                          }
+                        }
+
                         // MC Client -> Server of the bot
                         botConnection.session().send(packet);
                       }
