@@ -65,6 +65,9 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSt
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundTabListPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosRotPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateMobEffectPacket;
@@ -323,6 +326,9 @@ public class POVServer implements InternalPlugin {
                   new SessionAdapter() {
                     private BotConnection botConnection;
                     private boolean enableForwarding;
+                    private double lastX;
+                    private double lastY;
+                    private double lastZ;
 
                     @Override
                     public void packetReceived(Session session, Packet packet) {
@@ -380,34 +386,29 @@ public class POVServer implements InternalPlugin {
                                       switch (packet) {
                                         case ServerboundMovePlayerPosRotPacket posRot ->
                                             povSession.send(
-                                                new ClientboundPlayerPositionPacket(
-                                                    posRot.getX(),
-                                                    posRot.getY(),
-                                                    posRot.getZ(),
+                                                new ClientboundMoveEntityPosRotPacket(
+                                                    clientEntity.entityId(),
+                                                    (posRot.getX() * 32 - lastX * 32) * 128,
+                                                    (posRot.getY() * 32 - lastY * 32) * 128,
+                                                    (posRot.getZ() * 32 - lastZ * 32) * 128,
                                                     posRot.getYaw(),
                                                     posRot.getPitch(),
-                                                    Integer.MIN_VALUE,
-                                                    List.of()));
+                                                    clientEntity.onGround()));
                                         case ServerboundMovePlayerPosPacket pos ->
                                             povSession.send(
-                                                new ClientboundPlayerPositionPacket(
-                                                    pos.getX(),
-                                                    pos.getY(),
-                                                    pos.getZ(),
-                                                    clientEntity.yaw(),
-                                                    clientEntity.pitch(),
-                                                    Integer.MIN_VALUE,
-                                                    List.of()));
+                                                new ClientboundMoveEntityPosPacket(
+                                                    clientEntity.entityId(),
+                                                    (pos.getX() * 32 - lastX * 32) * 128,
+                                                    (pos.getY() * 32 - lastY * 32) * 128,
+                                                    (pos.getZ() * 32 - lastZ * 32) * 128,
+                                                    clientEntity.onGround()));
                                         case ServerboundMovePlayerRotPacket rot ->
                                             povSession.send(
-                                                new ClientboundPlayerPositionPacket(
-                                                    clientEntity.x(),
-                                                    clientEntity.y(),
-                                                    clientEntity.z(),
+                                                new ClientboundMoveEntityRotPacket(
+                                                    clientEntity.entityId(),
                                                     rot.getYaw(),
                                                     rot.getPitch(),
-                                                    Integer.MIN_VALUE,
-                                                    List.of()));
+                                                    clientEntity.lastOnGround()));
                                         default -> {}
                                       }
                                     }
@@ -434,7 +435,25 @@ public class POVServer implements InternalPlugin {
                                             false));
                                   });
                         }
-                      } else if (!NOT_SYNCED.contains(packet.getClass()) && enableForwarding) {
+                      } else if (!NOT_SYNCED.contains(packet.getClass())) {
+                        switch (packet) {
+                          case ServerboundMovePlayerPosRotPacket posRot -> {
+                            lastX = posRot.getX();
+                            lastY = posRot.getY();
+                            lastZ = posRot.getZ();
+                          }
+                          case ServerboundMovePlayerPosPacket pos -> {
+                            lastX = pos.getX();
+                            lastY = pos.getY();
+                            lastZ = pos.getZ();
+                          }
+                          default -> {}
+                        }
+
+                        if (!enableForwarding) {
+                          return;
+                        }
+
                         var clientEntity = botConnection.sessionDataManager().clientEntity();
                         switch (packet) {
                           case ServerboundMovePlayerPosRotPacket posRot -> {
@@ -460,6 +479,12 @@ public class POVServer implements InternalPlugin {
                             }
                           }
                           default -> {}
+                        }
+
+                        // The client spams too many packets when being force-moved,
+                        // so we'll just ignore them
+                        if (clientEntity.controlState().isActivelyControlling()) {
+                          return;
                         }
 
                         // MC Client -> Server of the bot

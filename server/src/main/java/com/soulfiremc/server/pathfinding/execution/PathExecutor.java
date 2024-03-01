@@ -117,12 +117,14 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
   }
 
   public void register() {
+    connection.sessionDataManager().clientEntity().controlState().incrementActivelyControlling();
     EventUtil.runAndAssertChanged(
         connection.eventBus(),
         () -> connection.eventBus().registerConsumer(this, BotPreTickEvent.class));
   }
 
   public void unregister() {
+    connection.sessionDataManager().clientEntity().controlState().decrementActivelyControlling();
     EventUtil.runAndAssertChanged(
         connection.eventBus(),
         () -> connection.eventBus().unregisterConsumer(this, BotPreTickEvent.class));

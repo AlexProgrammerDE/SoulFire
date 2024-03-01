@@ -67,7 +67,8 @@ include(
     "data-generator",
     "build-data",
     "j8-launcher",
-    "proto"
+    "proto",
+    "server"
 )
 
 rootProject.name = "soulfire"
