@@ -174,6 +174,7 @@ public class ProxyPanel extends NavigationItem {
         });
 
     toolBar.add(addButton);
+    toolBar.add(removeButton);
     toolBar.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor")));
     toolBar.setBackground(UIManager.getColor("Table.background"));
   }
