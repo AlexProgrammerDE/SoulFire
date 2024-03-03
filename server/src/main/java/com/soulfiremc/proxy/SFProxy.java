@@ -25,8 +25,7 @@ public record SFProxy(
     @NonNull String host,
     int port,
     String username,
-    String password,
-    boolean enabled) {
+    String password) {
   public SFProxy {
     if (type == ProxyType.SOCKS4 && password != null) {
       throw new IllegalArgumentException("SOCKS4 does not support passwords!");

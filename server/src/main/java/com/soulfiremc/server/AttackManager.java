@@ -137,7 +137,8 @@ public class AttackManager {
 
     var proxies =
         settingsHolder.proxies().stream()
-            .filter(SFProxy::enabled)
+            .filter(EnabledWrapper::enabled)
+            .map(EnabledWrapper::value)
             .collect(Collectors.toCollection(ArrayList::new));
     var availableProxiesCount = proxies.size(); // How many proxies are available?
     var maxBots =

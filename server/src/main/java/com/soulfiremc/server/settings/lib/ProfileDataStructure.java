@@ -47,7 +47,7 @@ import java.util.Map;
 public record ProfileDataStructure(
     Map<String, Map<String, JsonElement>> settings,
     List<EnabledWrapper<MinecraftAccount>> accounts,
-    List<SFProxy> proxies) {
+    List<EnabledWrapper<SFProxy>> proxies) {
   private static final Gson PROFILE_GSON =
       new GsonBuilder()
           .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())

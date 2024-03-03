@@ -24,6 +24,7 @@ import com.soulfiremc.client.gui.popups.ImportTextDialog;
 import com.soulfiremc.proxy.ProxyType;
 import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.util.BuiltinSettingsConstants;
+import com.soulfiremc.util.EnabledWrapper;
 import com.soulfiremc.util.SFPathConstants;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
@@ -59,23 +60,6 @@ public class ProxyPanel extends NavigationItem {
     GBC.create(this).grid(0, 0).fill(GBC.HORIZONTAL).weightx(1).add(proxySettingsPanel);
 
     var toolBar = new JToolBar();
-    toolBar.setFloatable(false);
-    var addButton = new JButton("+");
-    addButton.setToolTipText("Add proxies");
-    addButton.addMouseListener(
-        new MouseAdapter() {
-          public void mousePressed(MouseEvent e) {
-            var menu = new JPopupMenu();
-            menu.add(createProxyLoadButton(guiManager, parent, ProxyType.HTTP));
-            menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS4));
-            menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS5));
-            menu.show(e.getComponent(), e.getX(), e.getY());
-          }
-        });
-
-    toolBar.add(addButton);
-    toolBar.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor")));
-    toolBar.setBackground(UIManager.getColor("Table.background"));
 
     GBC.create(this).grid(0, 1).insets(10, 4, -5, 4).fill(GBC.HORIZONTAL).weightx(0).add(toolBar);
 
@@ -113,11 +97,11 @@ public class ProxyPanel extends NavigationItem {
 
             dataVector[i] =
                 new Object[] {
-                  proxy.host(),
-                  proxy.port(),
-                  proxy.username(),
-                  proxy.password(),
-                  proxy.type(),
+                  proxy.value().host(),
+                  proxy.value().port(),
+                  proxy.value().username(),
+                  proxy.value().password(),
+                  proxy.value().type(),
                   proxy.enabled()
                 };
           }
@@ -132,34 +116,66 @@ public class ProxyPanel extends NavigationItem {
           model.fireTableDataChanged();
         });
 
+    Runnable reconstructFromTable =
+        () -> {
+          var proxies = new ArrayList<EnabledWrapper<SFProxy>>();
+
+          for (var i = 0; i < proxyList.getRowCount(); i++) {
+            var row = new Object[proxyList.getColumnCount()];
+            for (var j = 0; j < proxyList.getColumnCount(); j++) {
+              row[j] = proxyList.getValueAt(i, j);
+            }
+
+            var host = (String) row[0];
+            var port = (int) row[1];
+            var username = (String) row[2];
+            var password = (String) row[3];
+            var type = (ProxyType) row[4];
+            var enabled = (boolean) row[5];
+
+            proxies.add(new EnabledWrapper<>(enabled, new SFProxy(type, host, port, username, password)));
+          }
+
+          proxyRegistry.setProxies(proxies);
+        };
     proxyList.addPropertyChangeListener(
         evt -> {
           if ("tableCellEditor".equals(evt.getPropertyName()) && !proxyList.isEditing()) {
-            var proxies = new ArrayList<SFProxy>();
-
-            for (var i = 0; i < proxyList.getRowCount(); i++) {
-              var row = new Object[proxyList.getColumnCount()];
-              for (var j = 0; j < proxyList.getColumnCount(); j++) {
-                row[j] = proxyList.getValueAt(i, j);
-              }
-
-              var host = (String) row[0];
-              var port = (int) row[1];
-              var username = (String) row[2];
-              var password = (String) row[3];
-              var type = (ProxyType) row[4];
-              var enabled = (boolean) row[5];
-
-              proxies.add(new SFProxy(type, host, port, username, password, enabled));
-            }
-
-            proxyRegistry.setProxies(proxies);
+            reconstructFromTable.run();
           }
         });
 
     var scrollPane = new JScrollPane(proxyList);
 
     GBC.create(this).grid(0, 2).fill(GBC.BOTH).weight(1, 1).add(scrollPane);
+
+    toolBar.setFloatable(false);
+    var addButton = new JButton("+");
+    addButton.setToolTipText("Add proxies to the list");
+    addButton.addMouseListener(
+        new MouseAdapter() {
+          public void mousePressed(MouseEvent e) {
+            var menu = new JPopupMenu();
+            menu.add(createProxyLoadButton(guiManager, parent, ProxyType.HTTP));
+            menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS4));
+            menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS5));
+            menu.show(e.getComponent(), e.getX(), e.getY());
+          }
+        });
+    var removeButton = new JButton("-");
+    removeButton.setToolTipText("Remove selected proxies from the list");
+    removeButton.addActionListener(
+        e -> {
+          var selectedRows = proxyList.getSelectedRows();
+          for (var i = selectedRows.length - 1; i >= 0; i--) {
+            model.removeRow(selectedRows[i]);
+          }
+          reconstructFromTable.run();
+        });
+
+    toolBar.add(addButton);
+    toolBar.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor")));
+    toolBar.setBackground(UIManager.getColor("Table.background"));
   }
 
   private static JMenuItem createProxyLoadButton(

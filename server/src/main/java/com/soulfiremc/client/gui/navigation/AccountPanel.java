@@ -155,14 +155,13 @@ public class AccountPanel extends NavigationItem {
           }
         });
     var removeButton = new JButton("-");
-    removeButton.setToolTipText("Remove accounts from the list");
+    removeButton.setToolTipText("Remove selected accounts from the list");
     removeButton.addActionListener(
         e -> {
           var selectedRows = accountList.getSelectedRows();
           for (var i = selectedRows.length - 1; i >= 0; i--) {
             model.removeRow(selectedRows[i]);
           }
-
           reconstructFromTable.run();
         });
 

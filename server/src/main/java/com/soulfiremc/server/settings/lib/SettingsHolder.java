@@ -43,7 +43,7 @@ public record SettingsHolder(
     Object2BooleanMap<PropertyKey> booleanProperties,
     Object2ObjectMap<PropertyKey, String> stringProperties,
     List<EnabledWrapper<MinecraftAccount>> accounts,
-    List<SFProxy> proxies) {
+    List<EnabledWrapper<SFProxy>> proxies) {
   public static final SettingsHolder EMPTY =
       new SettingsHolder(
           Object2ObjectMaps.emptyMap(),
@@ -56,7 +56,7 @@ public record SettingsHolder(
       ProfileDataStructure settingsSerialized,
       Multimap<PropertyKey, Consumer<JsonElement>> listeners,
       Consumer<List<EnabledWrapper<MinecraftAccount>>> accountRegistryCallback,
-      Consumer<List<SFProxy>> proxyRegistryCallback) {
+      Consumer<List<EnabledWrapper<SFProxy>>> proxyRegistryCallback) {
     var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
     var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
     var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();

@@ -19,6 +19,7 @@ package com.soulfiremc.client.settings;
 
 import com.soulfiremc.proxy.ProxyType;
 import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.util.EnabledWrapper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class ProxyRegistry {
-  private final List<SFProxy> proxies = new ArrayList<>();
+  private final List<EnabledWrapper<SFProxy>> proxies = new ArrayList<>();
   private final List<Runnable> loadHooks = new ArrayList<>();
 
   private static <T> T getIndexOrNull(T[] array, int index) {
@@ -59,7 +60,7 @@ public class ProxyRegistry {
     log.info("Loaded {} proxies!", newProxies.size());
   }
 
-  private SFProxy fromStringSingle(String data, ProxyType proxyType) {
+  private EnabledWrapper<SFProxy> fromStringSingle(String data, ProxyType proxyType) {
     data = data.trim();
 
     var split = data.split(":");
@@ -74,18 +75,18 @@ public class ProxyRegistry {
       var username = getIndexOrNull(split, 2);
       var password = getIndexOrNull(split, 3);
 
-      return new SFProxy(proxyType, host, port, username, password, true);
+      return new EnabledWrapper<>(true, new SFProxy(proxyType, host, port, username, password));
     } catch (Exception e) {
       log.error("Failed to load proxy from string.", e);
       throw new RuntimeException(e);
     }
   }
 
-  public List<SFProxy> getProxies() {
+  public List<EnabledWrapper<SFProxy>> getProxies() {
     return Collections.unmodifiableList(proxies);
   }
 
-  public void setProxies(List<SFProxy> proxies) {
+  public void setProxies(List<EnabledWrapper<SFProxy>> proxies) {
     this.proxies.clear();
     this.proxies.addAll(proxies);
   }
