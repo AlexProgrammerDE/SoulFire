@@ -21,17 +21,17 @@ import com.soulfiremc.account.AuthType;
 import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.client.gui.GUIFrame;
 import com.soulfiremc.client.gui.GUIManager;
-import com.soulfiremc.client.gui.libs.JEnumComboBox;
 import com.soulfiremc.client.gui.popups.ImportTextDialog;
 import com.soulfiremc.util.BuiltinSettingsConstants;
+import com.soulfiremc.util.EnabledWrapper;
 import com.soulfiremc.util.SFPathConstants;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.UUID;
 import javax.inject.Inject;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -59,37 +59,21 @@ public class AccountPanel extends NavigationItem {
     GBC.create(this).grid(0, 0).fill(GBC.HORIZONTAL).weightx(1).add(accountSettingsPanel);
 
     var toolBar = new JToolBar();
-    toolBar.setFloatable(false);
-    var addButton = new JButton("+");
-    addButton.setToolTipText("Add accounts");
-    addButton.addMouseListener(
-        new MouseAdapter() {
-          public void mousePressed(MouseEvent e) {
-            var menu = new JPopupMenu();
-            menu.add(createAccountLoadButton(guiManager, parent, AuthType.OFFLINE));
-            menu.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_JAVA));
-            menu.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_BEDROCK));
-            menu.add(createAccountLoadButton(guiManager, parent, AuthType.THE_ALTENING));
-            menu.add(createAccountLoadButton(guiManager, parent, AuthType.EASYMC));
-            menu.show(e.getComponent(), e.getX(), e.getY());
-          }
-        });
-
-    toolBar.add(addButton);
-    toolBar.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor")));
-    toolBar.setBackground(UIManager.getColor("Table.background"));
-
     GBC.create(this).grid(0, 1).insets(10, 4, -5, 4).fill(GBC.HORIZONTAL).weightx(0).add(toolBar);
 
-    var columnNames = new String[] {"Username", "Type", "Enabled"};
+    var columnNames = new String[] {"Username", "UUID", "Type", "Enabled"};
+    var enabledColumn = 3; // Index of the enabled column
+    var columnTypes = new Class<?>[] {String.class, UUID.class, AuthType.class, Boolean.class};
     var model =
         new DefaultTableModel(columnNames, 0) {
-          final Class<?>[] columnTypes =
-              new Class<?>[] {String.class, AuthType.class, Boolean.class};
-
           @Override
           public Class<?> getColumnClass(int columnIndex) {
             return columnTypes[columnIndex];
+          }
+
+          @Override
+          public boolean isCellEditable(int row, int column) {
+            return column == enabledColumn;
           }
         };
 
@@ -107,47 +91,85 @@ public class AccountPanel extends NavigationItem {
             var account = accounts.get(i);
 
             dataVector[i] =
-                new Object[] {account.username(), account.authType(), account.enabled()};
+                new Object[] {
+                  account.value().lastKnownName(),
+                  account.value().profileId(),
+                  account.value().authType(),
+                  account.enabled()
+                };
           }
 
           model.setDataVector(dataVector, columnNames);
-
-          accountList
-              .getColumnModel()
-              .getColumn(1)
-              .setCellEditor(new DefaultCellEditor(new JEnumComboBox<>(AuthType.class)));
-
           model.fireTableDataChanged();
         });
 
+    Runnable reconstructFromTable =
+        () -> {
+          var accounts = new ArrayList<EnabledWrapper<MinecraftAccount>>();
+
+          for (var i = 0; i < accountList.getRowCount(); i++) {
+            var row = new Object[accountList.getColumnCount()];
+            for (var j = 0; j < accountList.getColumnCount(); j++) {
+              row[j] = accountList.getValueAt(i, j);
+            }
+
+            var username = (String) row[0];
+            var profileId = (UUID) row[1];
+            var authType = (AuthType) row[2];
+            var enabled = (boolean) row[3];
+
+            var account = accountRegistry.getAccount(username, authType);
+
+            accounts.add(
+                new EnabledWrapper<>(
+                    enabled,
+                    new MinecraftAccount(authType, profileId, username, account.accountData())));
+          }
+
+          accountRegistry.setAccounts(accounts);
+        };
     accountList.addPropertyChangeListener(
         evt -> {
           if ("tableCellEditor".equals(evt.getPropertyName()) && !accountList.isEditing()) {
-            var accounts = new ArrayList<MinecraftAccount>();
-
-            for (var i = 0; i < accountList.getRowCount(); i++) {
-              var row = new Object[accountList.getColumnCount()];
-              for (var j = 0; j < accountList.getColumnCount(); j++) {
-                row[j] = accountList.getValueAt(i, j);
-              }
-
-              var username = (String) row[0];
-              var authType = (AuthType) row[1];
-              var enabled = (boolean) row[2];
-
-              var account = accountRegistry.getAccount(username, authType);
-
-              accounts.add(
-                  new MinecraftAccount(authType, username, account.accountData(), enabled));
-            }
-
-            accountRegistry.setAccounts(accounts);
+            reconstructFromTable.run();
           }
         });
 
     var scrollPane = new JScrollPane(accountList);
 
     GBC.create(this).grid(0, 2).fill(GBC.BOTH).weight(1, 1).add(scrollPane);
+
+    toolBar.setFloatable(false);
+    var addButton = new JButton("+");
+    addButton.setToolTipText("Add accounts to the list");
+    addButton.addMouseListener(
+        new MouseAdapter() {
+          public void mousePressed(MouseEvent e) {
+            var menu = new JPopupMenu();
+            menu.add(createAccountLoadButton(guiManager, parent, AuthType.OFFLINE));
+            menu.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_JAVA));
+            menu.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_BEDROCK));
+            menu.add(createAccountLoadButton(guiManager, parent, AuthType.THE_ALTENING));
+            menu.add(createAccountLoadButton(guiManager, parent, AuthType.EASYMC));
+            menu.show(e.getComponent(), e.getX(), e.getY());
+          }
+        });
+    var removeButton = new JButton("-");
+    removeButton.setToolTipText("Remove accounts from the list");
+    removeButton.addActionListener(
+        e -> {
+          var selectedRows = accountList.getSelectedRows();
+          for (var i = selectedRows.length - 1; i >= 0; i--) {
+            model.removeRow(selectedRows[i]);
+          }
+
+          reconstructFromTable.run();
+        });
+
+    toolBar.add(addButton);
+    toolBar.add(removeButton);
+    toolBar.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor")));
+    toolBar.setBackground(UIManager.getColor("Table.background"));
   }
 
   private static JMenuItem createAccountLoadButton(

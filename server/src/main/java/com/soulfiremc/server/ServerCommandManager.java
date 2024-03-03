@@ -239,7 +239,7 @@ public class ServerCommandManager {
                               c.getSource()
                                   .sendInfo(
                                       "Stopped pathfinding for "
-                                          + bot.meta().minecraftAccount().username());
+                                          + bot.meta().accountName());
                               return Command.SINGLE_SUCCESS;
                             }))));
 
@@ -402,7 +402,7 @@ public class ServerCommandManager {
                                   continue;
                                 }
 
-                                online.add(bot.meta().minecraftAccount().username());
+                                online.add(bot.meta().accountName());
                               }
 
                               c.getSource()
@@ -522,7 +522,7 @@ public class ServerCommandManager {
                                             + "_"
                                             + currentTime
                                             + "_"
-                                            + bot.meta().minecraftAccount().username()
+                                            + bot.meta().accountName()
                                             + ".png";
                                     try {
                                       Files.createDirectories(SFPathConstants.MAPS_FOLDER);
@@ -547,7 +547,7 @@ public class ServerCommandManager {
                           forEveryBot(
                               c,
                               bot -> {
-                                b.suggest(bot.meta().minecraftAccount().username());
+                                b.suggest(bot.meta().accountName());
 
                                 return Command.SINGLE_SUCCESS;
                               },
@@ -679,7 +679,7 @@ public class ServerCommandManager {
           for (var bot : attackManager.botConnections().values()) {
             if (context.getSource().extraData.containsKey("bot_names")
                 && Arrays.stream(context.getSource().extraData.get("bot_names").split(","))
-                    .noneMatch(s -> s.equals(bot.meta().minecraftAccount().username()))) {
+                    .noneMatch(s -> s.equals(bot.meta().accountName()))) {
               continue;
             }
 
@@ -688,7 +688,7 @@ public class ServerCommandManager {
                   .getSource()
                   .sendInfo(
                       "--- Running command for bot "
-                          + bot.meta().minecraftAccount().username()
+                          + bot.meta().accountName()
                           + " ---");
             }
 

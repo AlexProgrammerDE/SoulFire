@@ -15,11 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.account.service;
+package com.soulfiremc.util;
 
-public record OnlineJavaData(String authToken, long tokenExpireAt)
-    implements AccountData {
-  public boolean isTokenExpired() {
-    return tokenExpireAt != -1 && System.currentTimeMillis() > tokenExpireAt;
-  }
-}
+public record EnabledWrapper<T>(boolean enabled, T value) {}

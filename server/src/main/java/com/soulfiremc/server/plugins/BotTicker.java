@@ -41,8 +41,8 @@ public class BotTicker implements InternalPlugin {
           tickTimer.advanceTime();
 
           MDC.put("connectionId", connection.connectionId().toString());
-          MDC.put("botName", connection.meta().minecraftAccount().username());
-          MDC.put("botUuid", connection.meta().minecraftAccount().uniqueId().toString());
+          MDC.put("botName", connection.meta().accountName());
+          MDC.put("botUuid", connection.meta().accountProfileId().toString());
           try {
             connection.tick(tickTimer.ticks, tickTimer.partialTicks);
           } catch (Throwable t) {

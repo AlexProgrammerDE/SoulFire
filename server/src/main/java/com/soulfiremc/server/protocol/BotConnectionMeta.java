@@ -25,12 +25,15 @@ import com.soulfiremc.server.protocol.bot.BotControlAPI;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 public class BotConnectionMeta {
   private final MinecraftAccount minecraftAccount;
+  private final UUID accountProfileId;
+  private final String accountName;
   private final ProtocolState targetState;
   private final ProtocolVersion protocolVersion;
   private final SFSessionService sessionService;
@@ -43,6 +46,8 @@ public class BotConnectionMeta {
       ProtocolVersion protocolVersion,
       SFProxy proxyData) {
     this.minecraftAccount = minecraftAccount;
+    this.accountProfileId = minecraftAccount.profileId();
+    this.accountName = minecraftAccount.lastKnownName();
     this.targetState = targetState;
     this.protocolVersion = protocolVersion;
     this.sessionService =
@@ -54,7 +59,7 @@ public class BotConnectionMeta {
   public void joinServerId(String serverId, ViaClientSession session) {
     try {
       var javaData = (OnlineJavaData) minecraftAccount.accountData();
-      sessionService.joinServer(javaData.profileId(), javaData.authToken(), serverId);
+      sessionService.joinServer(accountProfileId, javaData.authToken(), serverId);
       session.logger().debug("Successfully sent mojang join request!");
     } catch (Exception e) {
       session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);

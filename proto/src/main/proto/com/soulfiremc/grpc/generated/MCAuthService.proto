@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+
+package com.soulfiremc.grpc.generated;
+
+message AuthRequest {
+  enum Service {
+    JAVA = 0;
+    BEDROCK = 1;
+    EASY_MC = 2;
+    THE_ALTENING = 3;
+  }
+
+  Service service = 1;
+  string payload = 2;
+}
+
+message AuthResponse {
+}
+
+service MCAuthService {
+  rpc login(AuthRequest) returns (AuthResponse);
+}

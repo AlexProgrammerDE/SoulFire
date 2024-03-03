@@ -23,15 +23,25 @@ import com.soulfiremc.account.service.OnlineJavaData;
 import java.util.UUID;
 import lombok.NonNull;
 
+/**
+ * Represents an authenticated MC account.
+ * This can be a premium, offline or bedrock account.
+ * Beware that the profileId is not a valid online UUID for offline and bedrock accounts.
+ *
+ * @param authType The type of authentication
+ * @param profileId Identifier that uniquely identifies the account
+ * @param lastKnownName The last known name of the account
+ * @param accountData The data of the account (values depend on the authType)
+ */
 public record MinecraftAccount(
     @NonNull AuthType authType,
-    @NonNull String username,
-    @NonNull AccountData accountData,
-    boolean enabled) {
+    @NonNull UUID profileId,
+    @NonNull String lastKnownName,
+    @NonNull AccountData accountData) {
   @Override
   public String toString() {
     return String.format(
-        "MinecraftAccount(authType=%s, username=%s, enabled=%s)", authType, username, enabled);
+        "MinecraftAccount(authType=%s, profileId=%s, lastKnownName=%s)", authType, profileId, lastKnownName);
   }
 
   public boolean isPremiumJava() {
@@ -40,9 +50,5 @@ public record MinecraftAccount(
 
   public boolean isPremiumBedrock() {
     return accountData instanceof BedrockData;
-  }
-
-  public UUID uniqueId() {
-    return accountData.profileId();
   }
 }

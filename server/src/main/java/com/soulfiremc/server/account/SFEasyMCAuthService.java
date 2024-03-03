@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.account.service;
+package com.soulfiremc.server.account;
 
 import com.soulfiremc.account.AuthType;
 import com.soulfiremc.account.MinecraftAccount;
+import com.soulfiremc.account.service.OnlineJavaData;
 import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.HttpHelper;
@@ -64,10 +65,10 @@ public final class SFEasyMCAuthService
 
                           return new MinecraftAccount(
                               AuthType.EASYMC,
+                              UUID.fromString(response.uuid()),
                               response.mcName(),
                               new OnlineJavaData(
-                                  UUID.fromString(response.uuid()), response.session(), -1),
-                              true);
+                                  response.session(), -1));
                         }))
         .block();
   }

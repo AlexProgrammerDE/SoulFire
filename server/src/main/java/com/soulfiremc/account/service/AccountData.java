@@ -17,8 +17,5 @@
  */
 package com.soulfiremc.account.service;
 
-import java.util.UUID;
-
 public sealed interface AccountData permits BedrockData, OfflineJavaData, OnlineJavaData {
-  UUID profileId();
 }

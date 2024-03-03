@@ -27,6 +27,7 @@ import com.soulfiremc.server.settings.lib.property.DoubleProperty;
 import com.soulfiremc.server.settings.lib.property.IntProperty;
 import com.soulfiremc.server.settings.lib.property.PropertyKey;
 import com.soulfiremc.server.settings.lib.property.StringProperty;
+import com.soulfiremc.util.EnabledWrapper;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMaps;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
@@ -41,7 +42,7 @@ public record SettingsHolder(
     Object2ObjectMap<PropertyKey, Number> numberProperties,
     Object2BooleanMap<PropertyKey> booleanProperties,
     Object2ObjectMap<PropertyKey, String> stringProperties,
-    List<MinecraftAccount> accounts,
+    List<EnabledWrapper<MinecraftAccount>> accounts,
     List<SFProxy> proxies) {
   public static final SettingsHolder EMPTY =
       new SettingsHolder(
@@ -54,7 +55,7 @@ public record SettingsHolder(
   public static SettingsHolder createSettingsHolder(
       ProfileDataStructure settingsSerialized,
       Multimap<PropertyKey, Consumer<JsonElement>> listeners,
-      Consumer<List<MinecraftAccount>> accountRegistryCallback,
+      Consumer<List<EnabledWrapper<MinecraftAccount>>> accountRegistryCallback,
       Consumer<List<SFProxy>> proxyRegistryCallback) {
     var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
     var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();

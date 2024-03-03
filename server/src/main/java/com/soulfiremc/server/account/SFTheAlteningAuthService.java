@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.account.service;
+package com.soulfiremc.server.account;
 
 import com.soulfiremc.account.AuthType;
 import com.soulfiremc.account.MinecraftAccount;
+import com.soulfiremc.account.service.OnlineJavaData;
 import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.util.GsonInstance;
@@ -61,12 +62,11 @@ public final class SFTheAlteningAuthService
 
                           return new MinecraftAccount(
                               AuthType.THE_ALTENING,
+                              UUIDHelper.convertToDashed(response.selectedProfile().id()),
                               response.selectedProfile().name(),
                               new OnlineJavaData(
-                                  UUIDHelper.convertToDashed(response.selectedProfile().id()),
                                   response.accessToken(),
-                                  -1),
-                              true);
+                                  -1));
                         }))
         .block();
   }

@@ -19,8 +19,8 @@ package com.soulfiremc.server;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.soulfiremc.account.MinecraftAccount;
-import com.soulfiremc.account.service.SFOfflineAuthService;
 import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.server.account.SFOfflineAuthService;
 import com.soulfiremc.server.api.AttackState;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
 import com.soulfiremc.server.api.event.SoulFireAttackEvent;
@@ -38,6 +38,7 @@ import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.util.RandomUtil;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
+import com.soulfiremc.util.EnabledWrapper;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -155,7 +156,8 @@ public class AttackManager {
 
     var accounts =
         settingsHolder.accounts().stream()
-            .filter(MinecraftAccount::enabled)
+            .filter(EnabledWrapper::enabled)
+            .map(EnabledWrapper::value)
             .collect(Collectors.toCollection(ArrayList::new));
 
     var availableAccounts = accounts.size();
@@ -205,7 +207,7 @@ public class AttackManager {
               targetAddress.orElseThrow(
                   () -> new IllegalStateException("Could not resolve address")),
               settingsHolder,
-              LoggerFactory.getLogger(minecraftAccount.username()),
+              LoggerFactory.getLogger(minecraftAccount.lastKnownName()),
               protocol,
               minecraftAccount,
               protocolVersion,
@@ -238,7 +240,7 @@ public class AttackManager {
               break;
             }
 
-            logger.debug("Scheduling bot {}", factory.minecraftAccount().username());
+            logger.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
             connectService.execute(
                 () -> {
                   if (attackState.isStopped()) {
@@ -247,7 +249,7 @@ public class AttackManager {
 
                   TimeUtil.waitCondition(attackState::isPaused);
 
-                  logger.debug("Connecting bot {}", factory.minecraftAccount().username());
+                  logger.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
                   var botConnection = factory.prepareConnection();
                   botConnections.put(botConnection.connectionId(), botConnection);
 

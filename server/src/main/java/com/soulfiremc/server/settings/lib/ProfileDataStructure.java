@@ -30,6 +30,7 @@ import com.soulfiremc.account.AuthType;
 import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.account.service.AccountData;
 import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.util.EnabledWrapper;
 import java.lang.reflect.Type;
 import java.security.GeneralSecurityException;
 import java.security.Key;
@@ -45,7 +46,7 @@ import java.util.Map;
 // Intermediary class between profile strings and SettingsHolder
 public record ProfileDataStructure(
     Map<String, Map<String, JsonElement>> settings,
-    List<MinecraftAccount> accounts,
+    List<EnabledWrapper<MinecraftAccount>> accounts,
     List<SFProxy> proxies) {
   private static final Gson PROFILE_GSON =
       new GsonBuilder()

@@ -151,8 +151,7 @@ public class SoulFireServer {
         CompletableFuture.runAsync(
             () -> {
               // Init via
-              var viaPath = SFPathConstants.CONFIG_FOLDER.resolve("ViaVersion");
-              var platform = new SFViaPlatform(viaPath);
+              var platform = new SFViaPlatform(SFPathConstants.CONFIG_FOLDER.resolve("ViaVersion"));
 
               Via.init(
                   ViaManagerImpl.builder()

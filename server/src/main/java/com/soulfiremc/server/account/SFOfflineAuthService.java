@@ -15,16 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.account.service;
+package com.soulfiremc.server.account;
 
 import com.soulfiremc.account.AuthType;
 import com.soulfiremc.account.MinecraftAccount;
+import com.soulfiremc.account.service.OfflineJavaData;
 import com.soulfiremc.proxy.SFProxy;
 
 public final class SFOfflineAuthService
     implements MCAuthService<SFOfflineAuthService.OfflineAuthData> {
   public static MinecraftAccount createAccount(String username) {
-    return new MinecraftAccount(AuthType.OFFLINE, username, new OfflineJavaData(username), true);
+    return new MinecraftAccount(AuthType.OFFLINE, OfflineJavaData.getOfflineUUID(username),
+        username, new OfflineJavaData());
   }
 
   @Override

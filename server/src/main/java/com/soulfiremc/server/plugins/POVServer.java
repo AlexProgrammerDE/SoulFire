@@ -337,16 +337,16 @@ public class POVServer implements InternalPlugin {
                           GameProfile profile =
                               event.getSession().getFlag(MinecraftConstants.PROFILE_KEY);
 
-                          log.info("{}: {}", profile.getName(), chatPacket.getMessage());
+                          var selectedName = chatPacket.getMessage();
+                          log.info("{}: {}", profile.getName(), selectedName);
 
                           var first =
                               attackManager.botConnections().values().stream()
                                   .filter(
                                       c ->
                                           c.meta()
-                                              .minecraftAccount()
-                                              .username()
-                                              .equals(chatPacket.getMessage()))
+                                              .accountName()
+                                              .equals(selectedName))
                                   .findFirst();
                           if (first.isEmpty()) {
                             session.send(
@@ -426,8 +426,7 @@ public class POVServer implements InternalPlugin {
                                                     Component.text(
                                                             botConnection
                                                                 .meta()
-                                                                .minecraftAccount()
-                                                                .username())
+                                                                .accountName())
                                                         .color(NamedTextColor.AQUA)
                                                         .decorate(TextDecoration.UNDERLINED))
                                                 .append(Component.text("!"))

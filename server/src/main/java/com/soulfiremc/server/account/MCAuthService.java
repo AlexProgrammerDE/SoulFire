@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.account.service;
+package com.soulfiremc.server.account;
 
 import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.proxy.SFProxy;

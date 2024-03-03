@@ -20,11 +20,7 @@ package com.soulfiremc.account.service;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-public record OfflineJavaData(UUID profileId) implements AccountData {
-  public OfflineJavaData(String username) {
-    this(getOfflineUUID(username));
-  }
-
+public record OfflineJavaData() implements AccountData {
   public static UUID getOfflineUUID(String username) {
     return UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8));
   }

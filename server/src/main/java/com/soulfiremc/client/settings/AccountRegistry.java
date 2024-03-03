@@ -19,6 +19,7 @@ package com.soulfiremc.client.settings;
 
 import com.soulfiremc.account.AuthType;
 import com.soulfiremc.account.MinecraftAccount;
+import com.soulfiremc.util.EnabledWrapper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class AccountRegistry {
-  private final List<MinecraftAccount> accounts = new ArrayList<>();
+  private final List<EnabledWrapper<MinecraftAccount>> accounts = new ArrayList<>();
   private final List<Runnable> loadHooks = new ArrayList<>();
 
   public void loadFromString(String data, AuthType authType) {
@@ -38,6 +39,7 @@ public class AccountRegistry {
             .filter(line -> !line.isBlank())
             .distinct()
             .map(account -> fromStringSingle(account, authType))
+            .map(account -> new EnabledWrapper<>(true, account))
             .toList();
 
     if (newAccounts.isEmpty()) {
@@ -66,11 +68,15 @@ public class AccountRegistry {
     }
   }
 
-  public List<MinecraftAccount> getAccounts() {
+  public List<EnabledWrapper<MinecraftAccount>> getAccounts() {
     return Collections.unmodifiableList(accounts);
   }
 
-  public void setAccounts(List<MinecraftAccount> accounts) {
+  public List<MinecraftAccount> getEnabledAccounts() {
+    return accounts.stream().filter(EnabledWrapper::enabled).map(EnabledWrapper::value).toList();
+  }
+
+  public void setAccounts(List<EnabledWrapper<MinecraftAccount>> accounts) {
     this.accounts.clear();
     this.accounts.addAll(accounts);
   }
@@ -85,8 +91,9 @@ public class AccountRegistry {
 
   public MinecraftAccount getAccount(String username, AuthType authType) {
     return accounts.stream()
+        .map(EnabledWrapper::value)
         .filter(account -> account.authType() == authType)
-        .filter(account -> account.username().equals(username))
+        .filter(account -> account.lastKnownName().equals(username))
         .findFirst()
         .orElse(null);
   }

@@ -105,8 +105,8 @@ public class ForwardingBypass implements InternalPlugin {
       var codecHelper = player.session().getCodecHelper();
       codecHelper.writeVarInt(forwarded, actualVersion);
       codecHelper.writeString(forwarded, address);
-      codecHelper.writeUUID(forwarded, player.meta().minecraftAccount().uniqueId());
-      codecHelper.writeString(forwarded, player.meta().minecraftAccount().username());
+      codecHelper.writeUUID(forwarded, player.meta().accountProfileId());
+      codecHelper.writeString(forwarded, player.meta().accountName());
 
       // This serves as additional redundancy. The key normally is stored in the
       // login start to the server, but some setups require this.
@@ -168,7 +168,7 @@ public class ForwardingBypass implements InternalPlugin {
     var connection = event.connection();
     var settingsHolder = connection.settingsHolder();
     var hostname = handshake.getHostname();
-    var uuid = connection.meta().minecraftAccount().uniqueId();
+    var uuid = connection.meta().accountProfileId();
 
     switch (settingsHolder.get(
         ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)) {

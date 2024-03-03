@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.account.service;
+package com.soulfiremc.server.account;
 
 import com.soulfiremc.account.AuthType;
 import com.soulfiremc.account.MinecraftAccount;
+import com.soulfiremc.account.service.OnlineJavaData;
 import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.util.HttpHelper;
 import java.io.IOException;
@@ -26,39 +27,30 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
 
-public final class SFBedrockMicrosoftAuthService
-    implements MCAuthService<SFBedrockMicrosoftAuthService.BedrockMicrosoftAuthData> {
+public final class SFJavaMicrosoftAuthService
+    implements MCAuthService<SFJavaMicrosoftAuthService.JavaMicrosoftAuthData> {
   @Override
-  public MinecraftAccount login(BedrockMicrosoftAuthData data, SFProxy proxyData)
-      throws IOException {
+  public MinecraftAccount login(JavaMicrosoftAuthData data, SFProxy proxyData) throws IOException {
     try {
-      var fullBedrockSession =
-          MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(
+      var fullJavaSession =
+          MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(
               HttpHelper.createLenniMCAuthHttpClient(proxyData),
               new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
-
-      var mcChain = fullBedrockSession.getMcChain();
-      var xblXsts = mcChain.getXblXsts();
-      var deviceId = xblXsts.getInitialXblSession().getXblDeviceToken().getId();
-      var playFabId = fullBedrockSession.getPlayFabToken().getPlayFabId();
+      var mcProfile = fullJavaSession.getMcProfile();
+      var mcToken = mcProfile.getMcToken();
       return new MinecraftAccount(
-          AuthType.MICROSOFT_BEDROCK,
-          mcChain.getDisplayName(),
-          new BedrockData(
-              mcChain.getMojangJwt(),
-              mcChain.getIdentityJwt(),
-              mcChain.getPublicKey(),
-              mcChain.getPrivateKey(),
-              deviceId,
-              playFabId),
-          true);
+          AuthType.MICROSOFT_JAVA,
+          mcProfile.getId(),
+          mcProfile.getName(),
+          new OnlineJavaData(
+               mcToken.getAccessToken(), mcToken.getExpireTimeMs()));
     } catch (Exception e) {
       throw new IOException(e);
     }
   }
 
   @Override
-  public BedrockMicrosoftAuthData createData(String data) {
+  public JavaMicrosoftAuthData createData(String data) {
     var split = data.split(":");
 
     if (split.length != 2) {
@@ -71,8 +63,8 @@ public final class SFBedrockMicrosoftAuthService
       throw new IllegalArgumentException("Invalid email!");
     }
 
-    return new BedrockMicrosoftAuthData(email, password);
+    return new JavaMicrosoftAuthData(email, password);
   }
 
-  public record BedrockMicrosoftAuthData(String email, String password) {}
+  public record JavaMicrosoftAuthData(String email, String password) {}
 }

@@ -29,8 +29,4 @@ public record BedrockData(
     UUID deviceId,
     String playFabId)
     implements AccountData {
-  @Override
-  public UUID profileId() {
-    return UUID.randomUUID(); // We are using a bedrock account, the uuid doesn't matter.
-  }
 }
