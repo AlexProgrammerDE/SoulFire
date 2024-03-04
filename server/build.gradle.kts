@@ -10,6 +10,14 @@ plugins {
     alias(libs.plugins.license.report)
 }
 
+// Uppercase all artifacts
+tasks.withType<AbstractArchiveTask> {
+    if (archiveBaseName.isPresent && archiveBaseName.get() == "server") {
+        archiveBaseName.set("SoulFire")
+        destinationDirectory = rootProject.file("build/libs")
+    }
+}
+
 application {
     applicationName = "SoulFire"
     mainClass = "com.soulfiremc.SoulFireLauncher"
