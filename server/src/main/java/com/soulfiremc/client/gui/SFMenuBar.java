@@ -35,8 +35,6 @@ import com.formdev.flatlaf.util.SystemInfo;
 import com.soulfiremc.client.gui.libs.JFXFileHelper;
 import com.soulfiremc.client.gui.libs.TerminalTheme;
 import com.soulfiremc.client.gui.popups.AboutPopup;
-import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.gui.WindowCloseEvent;
 import com.soulfiremc.util.SFPathConstants;
 import java.awt.Desktop;
 import java.io.IOException;
@@ -235,16 +233,7 @@ public class SFMenuBar extends JMenuBar {
 
     if (desktop.isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
       desktop.setQuitHandler(
-          (e, response) -> {
-            var event = new WindowCloseEvent();
-            SoulFireAPI.postEvent(event);
-            var canQuit = !event.isCancelled();
-            if (canQuit) {
-              response.performQuit();
-            } else {
-              response.cancelQuit();
-            }
-          });
+          (e, response) -> response.performQuit());
     }
   }
 

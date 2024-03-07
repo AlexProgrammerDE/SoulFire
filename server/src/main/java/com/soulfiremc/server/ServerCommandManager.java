@@ -53,6 +53,7 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.pathfinding.graph.ProjectedLevelState;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.util.SFPathConstants;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import java.io.IOException;
@@ -74,6 +75,7 @@ import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.raphimc.vialoader.util.ProtocolVersionList;
 import org.apache.commons.io.FileUtils;
 import org.cloudburstmc.math.vector.Vector3d;
 
@@ -536,6 +538,39 @@ public class ServerCommandManager {
                                     return Command.SINGLE_SUCCESS;
                                   });
                             }))));
+    dispatcher.register(
+        literal("generate-versions")
+            .executes(
+                help(
+                    "Create a table of all supported protocol versions",
+                    c -> {
+                      var yesEmoji = "✅";
+                      var noEmoji = "❌";
+
+                      var builder = new StringBuilder("\n");
+                      ProtocolVersionList.getProtocolsNewToOld()
+                          .forEach(
+                              version -> {
+                                var nativeVersion =
+                                    SFVersionConstants.CURRENT_PROTOCOL_VERSION == version ? yesEmoji : noEmoji;
+                                var bedrockVersion = SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
+                                var javaVersion = !SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
+                                var snapshotVersion = SFVersionConstants.isAprilFools(version) ? yesEmoji : noEmoji;
+                                var legacyVersion = SFVersionConstants.isLegacy(version) ? yesEmoji : noEmoji;
+
+                                builder.append(String.format(
+                                    "| %s | %s | %s | %s | %s | %s |\n",
+                                    version.getName(),
+                                    nativeVersion,
+                                    javaVersion,
+                                    snapshotVersion,
+                                    legacyVersion,
+                                    bedrockVersion));
+                              });
+                      log.info(builder.toString());
+
+                      return Command.SINGLE_SUCCESS;
+                    })));
 
     // Context commands
     dispatcher.register(

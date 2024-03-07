@@ -21,7 +21,6 @@ import com.soulfiremc.account.AuthType;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.client.SFTerminalConsole;
 import com.soulfiremc.proxy.ProxyType;
-import com.soulfiremc.server.viaversion.SFVersionConstants;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,7 +30,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.raphimc.vialoader.util.ProtocolVersionList;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -85,12 +83,6 @@ public class SFCommandDefinition implements Callable<Integer> {
       hidden = true)
   private boolean generateFlags;
 
-  @Option(
-      names = {"--generate-versions"},
-      description = "Create a list of supported versions",
-      hidden = true)
-  private boolean generateVersions;
-
   @Override
   public Integer call() {
     if (generateFlags) {
@@ -114,31 +106,6 @@ public class SFCommandDefinition implements Callable<Integer> {
                 var description =
                     option.description() == null ? "" : String.join(", ", option.description());
                 System.out.printf("| %s | %s | %s |%n", name, defaultValue, description);
-              });
-      cliManager.shutdown();
-      return 0;
-    } else if (generateVersions) {
-      var yesEmoji = "✅";
-      var noEmoji = "❌";
-
-      ProtocolVersionList.getProtocolsNewToOld()
-          .forEach(
-              version -> {
-                var nativeVersion =
-                    SFVersionConstants.CURRENT_PROTOCOL_VERSION == version ? yesEmoji : noEmoji;
-                var bedrockVersion = SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
-                var javaVersion = !SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
-                var snapshotVersion = SFVersionConstants.isAprilFools(version) ? yesEmoji : noEmoji;
-                var legacyVersion = SFVersionConstants.isLegacy(version) ? yesEmoji : noEmoji;
-
-                System.out.printf(
-                    "| %s | %s | %s | %s | %s | %s |%n",
-                    version.getName(),
-                    nativeVersion,
-                    javaVersion,
-                    snapshotVersion,
-                    legacyVersion,
-                    bedrockVersion);
               });
       cliManager.shutdown();
       return 0;

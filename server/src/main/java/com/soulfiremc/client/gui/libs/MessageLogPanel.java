@@ -19,7 +19,7 @@ package com.soulfiremc.client.gui.libs;
 
 import com.formdev.flatlaf.fonts.jetbrains_mono.FlatJetBrainsMonoFont;
 import com.soulfiremc.client.gui.ThemeUtil;
-import com.soulfiremc.server.util.XtermPalette256;
+import com.soulfiremc.util.XtermPalette256;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
