@@ -15,13 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.settings.lib.property;
+package com.soulfiremc.settings;
 
-public sealed interface SingleProperty extends Property
-    permits BooleanProperty, ComboProperty, IntProperty, DoubleProperty, StringProperty {
-  String uiName();
-
-  String[] cliFlags();
-
-  String description();
-}
+public record PropertyKey(String namespace, String key) {}

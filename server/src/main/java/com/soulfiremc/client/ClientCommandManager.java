@@ -25,7 +25,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.soulfiremc.brigadier.ConsoleSubject;
 import com.soulfiremc.client.grpc.RPCClient;
-import com.soulfiremc.client.settings.SettingsManager;
+import com.soulfiremc.client.settings.ClientSettingsManager;
 import com.soulfiremc.grpc.generated.AttackStartRequest;
 import com.soulfiremc.grpc.generated.AttackStartResponse;
 import com.soulfiremc.grpc.generated.CommandCompletionRequest;
@@ -47,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ClientCommandManager {
   @Getter private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
   private final RPCClient rpcClient;
-  private final SettingsManager settingsManager;
+  private final ClientSettingsManager clientSettingsManager;
 
   @PostConstruct
   public void postConstruct() {
@@ -61,7 +61,7 @@ public class ClientCommandManager {
                           .attackStub()
                           .startAttack(
                               AttackStartRequest.newBuilder()
-                                  .setSettings(settingsManager.exportSettings())
+                                  .setSettings(clientSettingsManager.exportSettings())
                                   .build(),
                               new StreamObserver<>() {
                                 @Override

@@ -66,7 +66,7 @@ public class ControlPanel extends JPanel {
               .attackStub()
               .startAttack(
                   AttackStartRequest.newBuilder()
-                      .setSettings(guiManager.settingsManager().exportSettings())
+                      .setSettings(guiManager.clientSettingsManager().exportSettings())
                       .build(),
                   new StreamObserver<>() {
                     @Override

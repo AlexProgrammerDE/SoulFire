@@ -15,14 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.settings.lib.property;
+package com.soulfiremc.server.settings.property;
 
-public record StringProperty(
+import javax.annotation.Nullable;
+
+public record DoubleProperty(
     String namespace,
     String key,
     String uiName,
     String[] cliFlags,
     String description,
-    String defaultValue,
-    boolean secret)
+    double defaultValue,
+    double minValue,
+    double maxValue,
+    double stepValue,
+    @Nullable String format)
     implements SingleProperty {}

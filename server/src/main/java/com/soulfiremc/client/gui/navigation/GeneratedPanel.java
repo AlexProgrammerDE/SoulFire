@@ -20,12 +20,12 @@ package com.soulfiremc.client.gui.navigation;
 import com.google.gson.JsonPrimitive;
 import com.soulfiremc.client.gui.libs.JMinMaxHelper;
 import com.soulfiremc.client.gui.libs.SwingTextUtils;
-import com.soulfiremc.client.settings.SettingsManager;
+import com.soulfiremc.client.settings.ClientSettingsManager;
 import com.soulfiremc.grpc.generated.ClientPluginSettingsPage;
 import com.soulfiremc.grpc.generated.ComboOption;
 import com.soulfiremc.grpc.generated.DoubleSetting;
 import com.soulfiremc.grpc.generated.IntSetting;
-import com.soulfiremc.server.settings.lib.property.PropertyKey;
+import com.soulfiremc.settings.PropertyKey;
 import java.awt.Component;
 import java.awt.GridBagLayout;
 import java.util.Objects;
@@ -44,16 +44,16 @@ import net.lenni0451.commons.swing.GBC;
 public class GeneratedPanel extends NavigationItem {
   private final ClientPluginSettingsPage settingsPage;
 
-  public GeneratedPanel(SettingsManager settingsManager, ClientPluginSettingsPage settingsPage) {
+  public GeneratedPanel(ClientSettingsManager clientSettingsManager, ClientPluginSettingsPage settingsPage) {
     this.settingsPage = settingsPage;
 
     setLayout(new GridBagLayout());
 
-    addComponents(this, settingsPage, settingsManager);
+    addComponents(this, settingsPage, clientSettingsManager);
   }
 
   private static JSpinner createIntObject(
-      PropertyKey propertyKey, SettingsManager settingsManager, IntSetting intSetting) {
+      PropertyKey propertyKey, ClientSettingsManager clientSettingsManager, IntSetting intSetting) {
     var spinner =
         new JSpinner(
             new SpinnerNumberModel(
@@ -65,15 +65,15 @@ public class GeneratedPanel extends NavigationItem {
       spinner.setEditor(new JSpinner.NumberEditor(spinner, intSetting.getFormat()));
     }
 
-    settingsManager.registerListener(propertyKey, s -> spinner.setValue(s.getAsInt()));
-    settingsManager.registerProvider(
+    clientSettingsManager.registerListener(propertyKey, s -> spinner.setValue(s.getAsInt()));
+    clientSettingsManager.registerProvider(
         propertyKey, () -> new JsonPrimitive((int) spinner.getValue()));
 
     return spinner;
   }
 
   private static JSpinner createDoubleObject(
-      PropertyKey propertyKey, SettingsManager settingsManager, DoubleSetting doubleSetting) {
+      PropertyKey propertyKey, ClientSettingsManager clientSettingsManager, DoubleSetting doubleSetting) {
     var spinner =
         new JSpinner(
             new SpinnerNumberModel(
@@ -85,15 +85,15 @@ public class GeneratedPanel extends NavigationItem {
       spinner.setEditor(new JSpinner.NumberEditor(spinner, doubleSetting.getFormat()));
     }
 
-    settingsManager.registerListener(propertyKey, s -> spinner.setValue(s.getAsDouble()));
-    settingsManager.registerProvider(
+    clientSettingsManager.registerListener(propertyKey, s -> spinner.setValue(s.getAsDouble()));
+    clientSettingsManager.registerProvider(
         propertyKey, () -> new JsonPrimitive((double) spinner.getValue()));
 
     return spinner;
   }
 
   public static void addComponents(
-      JPanel panel, ClientPluginSettingsPage settingsPage, SettingsManager settingsManager) {
+      JPanel panel, ClientPluginSettingsPage settingsPage, ClientSettingsManager clientSettingsManager) {
     var row = 0;
     for (var settingEntry : settingsPage.getEntriesList()) {
       switch (settingEntry.getValueCase()) {
@@ -116,9 +116,9 @@ public class GeneratedPanel extends NavigationItem {
                       stringEntry.getSecret()
                           ? new JPasswordField(stringEntry.getDef())
                           : new JTextField(stringEntry.getDef());
-                  settingsManager.registerListener(
+                  clientSettingsManager.registerListener(
                       propertyKey, s -> textField.setText(s.getAsString()));
-                  settingsManager.registerProvider(
+                  clientSettingsManager.registerProvider(
                       propertyKey, () -> new JsonPrimitive(textField.getText()));
 
                   SwingTextUtils.addUndoRedo(textField);
@@ -127,19 +127,19 @@ public class GeneratedPanel extends NavigationItem {
                 }
                 case INT -> {
                   var intEntry = settingType.getInt();
-                  yield createIntObject(propertyKey, settingsManager, intEntry);
+                  yield createIntObject(propertyKey, clientSettingsManager, intEntry);
                 }
                 case DOUBLE -> {
                   var doubleEntry = settingType.getDouble();
-                  yield createDoubleObject(propertyKey, settingsManager, doubleEntry);
+                  yield createDoubleObject(propertyKey, clientSettingsManager, doubleEntry);
                 }
                 case BOOL -> {
                   var boolEntry = settingType.getBool();
                   var checkBox = new JCheckBox();
                   checkBox.setSelected(boolEntry.getDef());
-                  settingsManager.registerListener(
+                  clientSettingsManager.registerListener(
                       propertyKey, s -> checkBox.setSelected(s.getAsBoolean()));
-                  settingsManager.registerProvider(
+                  clientSettingsManager.registerProvider(
                       propertyKey, () -> new JsonPrimitive(checkBox.isSelected()));
 
                   yield checkBox;
@@ -151,7 +151,7 @@ public class GeneratedPanel extends NavigationItem {
                   var comboBox = new JComboBox<ComboOption>(options.toArray(new ComboOption[0]));
                   comboBox.setRenderer(new ComboRenderer());
                   comboBox.setSelectedItem(options.get(comboEntry.getDef()));
-                  settingsManager.registerListener(
+                  clientSettingsManager.registerListener(
                       propertyKey,
                       s ->
                           comboBox.setSelectedItem(
@@ -159,7 +159,7 @@ public class GeneratedPanel extends NavigationItem {
                                   .filter(o -> o.getId().equals(s.getAsString()))
                                   .findFirst()
                                   .orElseThrow()));
-                  settingsManager.registerProvider(
+                  clientSettingsManager.registerProvider(
                       propertyKey,
                       () ->
                           new JsonPrimitive(
@@ -190,7 +190,7 @@ public class GeneratedPanel extends NavigationItem {
               .anchor(GBC.LINE_START)
               .add(
                   new JLabel(min.getUiName()), label -> label.setToolTipText(min.getDescription()));
-          var minSpinner = createIntObject(minPropertyKey, settingsManager, min.getIntSetting());
+          var minSpinner = createIntObject(minPropertyKey, clientSettingsManager, min.getIntSetting());
           GBC.create(panel)
               .grid(1, row++)
               .insets(0, 10, 0, 0)
@@ -206,7 +206,7 @@ public class GeneratedPanel extends NavigationItem {
               .anchor(GBC.LINE_START)
               .add(
                   new JLabel(max.getUiName()), label -> label.setToolTipText(max.getDescription()));
-          var maxSpinner = createIntObject(maxPropertyKey, settingsManager, max.getIntSetting());
+          var maxSpinner = createIntObject(maxPropertyKey, clientSettingsManager, max.getIntSetting());
           GBC.create(panel)
               .grid(1, row++)
               .insets(0, 10, 0, 0)

@@ -23,12 +23,12 @@ import com.google.common.util.concurrent.AtomicDouble;
 import com.google.gson.JsonPrimitive;
 import com.soulfiremc.client.ClientCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
-import com.soulfiremc.client.settings.SettingsManager;
+import com.soulfiremc.client.settings.ClientSettingsManager;
 import com.soulfiremc.grpc.generated.ClientDataRequest;
 import com.soulfiremc.grpc.generated.ComboOption;
 import com.soulfiremc.grpc.generated.DoubleSetting;
 import com.soulfiremc.grpc.generated.IntSetting;
-import com.soulfiremc.server.settings.lib.property.PropertyKey;
+import com.soulfiremc.settings.PropertyKey;
 import com.soulfiremc.util.ShutdownManager;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,14 +48,14 @@ public class CLIManager {
       new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
   private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
-  private final SettingsManager settingsManager = new SettingsManager();
+  private final ClientSettingsManager clientSettingsManager = new ClientSettingsManager();
 
   public CLIManager(RPCClient rpcClient) {
     this.rpcClient = rpcClient;
     injector.register(CLIManager.class, this);
     injector.register(RPCClient.class, rpcClient);
     injector.register(ShutdownManager.class, shutdownManager);
-    injector.register(SettingsManager.class, settingsManager);
+    injector.register(ClientSettingsManager.class, clientSettingsManager);
 
     this.clientCommandManager = injector.getSingleton(ClientCommandManager.class);
   }
@@ -113,9 +113,9 @@ public class CLIManager {
                                 })
                             .build();
 
-                    settingsManager.registerListener(
+                    clientSettingsManager.registerListener(
                         propertyKey, s -> reference.set(s.getAsString()));
-                    settingsManager.registerProvider(
+                    clientSettingsManager.registerProvider(
                         propertyKey, () -> new JsonPrimitive(reference.get()));
 
                     yield optionSpec;
@@ -124,7 +124,7 @@ public class CLIManager {
                     var intEntry = settingType.getInt();
                     yield addIntSetting(
                         propertyKey,
-                        settingsManager,
+                        clientSettingsManager,
                         description,
                         singleEntry.getCliFlagsList().toArray(new String[0]),
                         intEntry);
@@ -133,7 +133,7 @@ public class CLIManager {
                     var doubleEntry = settingType.getDouble();
                     yield addDoubleSetting(
                         propertyKey,
-                        settingsManager,
+                        clientSettingsManager,
                         description,
                         singleEntry.getCliFlagsList().toArray(new String[0]),
                         doubleEntry);
@@ -157,9 +157,9 @@ public class CLIManager {
                                 })
                             .build();
 
-                    settingsManager.registerListener(
+                    clientSettingsManager.registerListener(
                         propertyKey, s -> reference.set(s.getAsBoolean()));
-                    settingsManager.registerProvider(
+                    clientSettingsManager.registerProvider(
                         propertyKey, () -> new JsonPrimitive(reference.get()));
 
                     yield optionSpec;
@@ -188,9 +188,9 @@ public class CLIManager {
                                 })
                             .build();
 
-                    settingsManager.registerListener(
+                    clientSettingsManager.registerListener(
                         propertyKey, s -> reference.set(s.getAsString()));
-                    settingsManager.registerProvider(
+                    clientSettingsManager.registerProvider(
                         propertyKey, () -> new JsonPrimitive(reference.get()));
 
                     yield optionSpec;
@@ -209,7 +209,7 @@ public class CLIManager {
             targetCommandSpec.addOption(
                 addIntSetting(
                     minPropertyKey,
-                    settingsManager,
+                    clientSettingsManager,
                     minDescription,
                     min.getCliFlagsList().toArray(new String[0]),
                     min.getIntSetting()));
@@ -220,7 +220,7 @@ public class CLIManager {
             targetCommandSpec.addOption(
                 addIntSetting(
                     maxPropertyKey,
-                    settingsManager,
+                    clientSettingsManager,
                     maxDescription,
                     max.getCliFlagsList().toArray(new String[0]),
                     max.getIntSetting()));
@@ -236,7 +236,7 @@ public class CLIManager {
 
   private CommandLine.Model.OptionSpec addIntSetting(
       PropertyKey propertyKey,
-      SettingsManager settingsManager,
+      ClientSettingsManager clientSettingsManager,
       String cliDescription,
       String[] cliNames,
       IntSetting intEntry) {
@@ -256,15 +256,15 @@ public class CLIManager {
                 })
             .build();
 
-    settingsManager.registerListener(propertyKey, s -> reference.set(s.getAsInt()));
-    settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
+    clientSettingsManager.registerListener(propertyKey, s -> reference.set(s.getAsInt()));
+    clientSettingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
 
     return optionSpec;
   }
 
   private CommandLine.Model.OptionSpec addDoubleSetting(
       PropertyKey propertyKey,
-      SettingsManager settingsManager,
+      ClientSettingsManager clientSettingsManager,
       String cliDescription,
       String[] cliNames,
       DoubleSetting doubleSetting) {
@@ -284,8 +284,8 @@ public class CLIManager {
                 })
             .build();
 
-    settingsManager.registerListener(propertyKey, s -> reference.set(s.getAsDouble()));
-    settingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
+    clientSettingsManager.registerListener(propertyKey, s -> reference.set(s.getAsDouble()));
+    clientSettingsManager.registerProvider(propertyKey, () -> new JsonPrimitive(reference.get()));
 
     return optionSpec;
   }

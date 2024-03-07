@@ -18,12 +18,12 @@
 package com.soulfiremc.server.settings;
 
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.lib.property.BooleanProperty;
-import com.soulfiremc.server.settings.lib.property.ComboProperty;
-import com.soulfiremc.server.settings.lib.property.IntProperty;
-import com.soulfiremc.server.settings.lib.property.MinMaxPropertyLink;
-import com.soulfiremc.server.settings.lib.property.Property;
-import com.soulfiremc.server.settings.lib.property.StringProperty;
+import com.soulfiremc.server.settings.property.BooleanProperty;
+import com.soulfiremc.server.settings.property.ComboProperty;
+import com.soulfiremc.server.settings.property.IntProperty;
+import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
+import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.StringProperty;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.util.BuiltinSettingsConstants;
 import lombok.AccessLevel;

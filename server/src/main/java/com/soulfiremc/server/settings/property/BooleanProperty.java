@@ -15,16 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.settings.lib.property;
+package com.soulfiremc.server.settings.property;
 
-public record MinMaxPropertyLink(IntProperty min, IntProperty max) implements Property {
-  @Override
-  public String namespace() {
-    return min.namespace();
-  }
-
-  @Override
-  public String key() {
-    throw new UnsupportedOperationException("This is a link!");
-  }
-}
+public record BooleanProperty(
+    String namespace,
+    String key,
+    String uiName,
+    String[] cliFlags,
+    String description,
+    boolean defaultValue)
+    implements SingleProperty {}

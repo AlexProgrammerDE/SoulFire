@@ -17,16 +17,15 @@
  */
 package com.soulfiremc.server.settings.lib;
 
-import com.google.common.collect.Multimap;
-import com.google.gson.JsonElement;
 import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.proxy.SFProxy;
-import com.soulfiremc.server.settings.lib.property.BooleanProperty;
-import com.soulfiremc.server.settings.lib.property.ComboProperty;
-import com.soulfiremc.server.settings.lib.property.DoubleProperty;
-import com.soulfiremc.server.settings.lib.property.IntProperty;
-import com.soulfiremc.server.settings.lib.property.PropertyKey;
-import com.soulfiremc.server.settings.lib.property.StringProperty;
+import com.soulfiremc.server.settings.property.BooleanProperty;
+import com.soulfiremc.server.settings.property.ComboProperty;
+import com.soulfiremc.server.settings.property.DoubleProperty;
+import com.soulfiremc.server.settings.property.IntProperty;
+import com.soulfiremc.server.settings.property.StringProperty;
+import com.soulfiremc.settings.ProfileDataStructure;
+import com.soulfiremc.settings.PropertyKey;
 import com.soulfiremc.util.EnabledWrapper;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMaps;
@@ -35,7 +34,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public record SettingsHolder(
@@ -52,53 +50,27 @@ public record SettingsHolder(
           List.of(),
           List.of());
 
-  public static SettingsHolder createSettingsHolder(
-      ProfileDataStructure settingsSerialized,
-      Multimap<PropertyKey, Consumer<JsonElement>> listeners,
-      Consumer<List<EnabledWrapper<MinecraftAccount>>> accountRegistryCallback,
-      Consumer<List<EnabledWrapper<SFProxy>>> proxyRegistryCallback) {
+  public static SettingsHolder createSettingsHolder(ProfileDataStructure settingsSerialized) {
     var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
     var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
     var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();
 
-    for (var entry : settingsSerialized.settings().entrySet()) {
-      var namespace = entry.getKey();
-      for (var setting : entry.getValue().entrySet()) {
-        var key = setting.getKey();
-        var settingData = setting.getValue();
-
-        var propertyKey = new PropertyKey(namespace, key);
-
-        if (listeners != null) {
-          // Notify all listeners that this setting has been loaded
-          listeners.get(propertyKey).forEach(listener -> listener.accept(settingData));
-        }
-
-        if (settingData.isJsonPrimitive()) {
-          var primitive = settingData.getAsJsonPrimitive();
-          if (primitive.isBoolean()) {
-            booleanProperties.put(propertyKey, primitive.getAsBoolean());
-          } else if (primitive.isNumber()) {
-            numberProperties.put(propertyKey, primitive.getAsNumber());
-          } else if (primitive.isString()) {
-            stringProperties.put(propertyKey, primitive.getAsString());
-          } else {
-            throw new IllegalArgumentException("Unknown primitive type: " + primitive);
-          }
+    settingsSerialized.handleProperties((propertyKey, settingData) -> {
+      if (settingData.isJsonPrimitive()) {
+        var primitive = settingData.getAsJsonPrimitive();
+        if (primitive.isBoolean()) {
+          booleanProperties.put(propertyKey, primitive.getAsBoolean());
+        } else if (primitive.isNumber()) {
+          numberProperties.put(propertyKey, primitive.getAsNumber());
+        } else if (primitive.isString()) {
+          stringProperties.put(propertyKey, primitive.getAsString());
         } else {
-          throw new IllegalArgumentException("Unknown type: " + settingData);
+          throw new IllegalArgumentException("Unknown primitive type: " + primitive);
         }
+      } else {
+        throw new IllegalArgumentException("Unknown type: " + settingData);
       }
-    }
-
-    // Apply loaded accounts & proxies
-    if (accountRegistryCallback != null) {
-      accountRegistryCallback.accept(settingsSerialized.accounts());
-    }
-
-    if (proxyRegistryCallback != null) {
-      proxyRegistryCallback.accept(settingsSerialized.proxies());
-    }
+    });
 
     return new SettingsHolder(
         numberProperties,

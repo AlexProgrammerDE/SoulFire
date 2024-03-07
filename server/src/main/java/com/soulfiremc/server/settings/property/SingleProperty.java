@@ -15,19 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.settings.lib.property;
+package com.soulfiremc.server.settings.property;
 
-import javax.annotation.Nullable;
+public sealed interface SingleProperty extends Property
+    permits BooleanProperty, ComboProperty, IntProperty, DoubleProperty, StringProperty {
+  String uiName();
 
-public record IntProperty(
-    String namespace,
-    String key,
-    String uiName,
-    String[] cliFlags,
-    String description,
-    int defaultValue,
-    int minValue,
-    int maxValue,
-    int stepValue,
-    @Nullable String format)
-    implements SingleProperty {}
+  String[] cliFlags();
+
+  String description();
+}

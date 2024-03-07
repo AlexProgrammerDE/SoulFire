@@ -20,9 +20,8 @@ package com.soulfiremc.client.settings;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.JsonElement;
-import com.soulfiremc.server.settings.lib.ProfileDataStructure;
-import com.soulfiremc.server.settings.lib.SettingsHolder;
-import com.soulfiremc.server.settings.lib.property.PropertyKey;
+import com.soulfiremc.settings.ProfileDataStructure;
+import com.soulfiremc.settings.PropertyKey;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +34,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class SettingsManager {
+public class ClientSettingsManager {
   private final Multimap<PropertyKey, Consumer<JsonElement>> listeners =
       Multimaps.newListMultimap(new LinkedHashMap<>(), ArrayList::new);
   private final Map<PropertyKey, Provider<JsonElement>> providers = new LinkedHashMap<>();
@@ -51,17 +50,19 @@ public class SettingsManager {
   }
 
   public void loadProfile(Path path) throws IOException {
-    SettingsHolder.createSettingsHolder(
-        ProfileDataStructure.deserialize(Files.readString(path)),
-        listeners,
-        accounts -> {
-          accountRegistry.setAccounts(accounts);
-          accountRegistry.callLoadHooks();
-        },
-        proxies -> {
-          proxyRegistry.setProxies(proxies);
-          proxyRegistry.callLoadHooks();
+    var profileDataStructure = ProfileDataStructure.deserialize(Files.readString(path));
+    profileDataStructure.handleProperties(
+        (propertyKey, jsonElement) -> {
+          for (var listener : listeners.get(propertyKey)) {
+            listener.accept(jsonElement);
+          }
         });
+
+    accountRegistry.setAccounts(profileDataStructure.accounts());
+    accountRegistry.callLoadHooks();
+
+    proxyRegistry.setProxies(profileDataStructure.proxies());
+    proxyRegistry.callLoadHooks();
   }
 
   public void saveProfile(Path path) throws IOException {

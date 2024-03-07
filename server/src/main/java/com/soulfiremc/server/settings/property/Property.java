@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.settings.lib.property;
+package com.soulfiremc.server.settings.property;
 
+import com.soulfiremc.settings.PropertyKey;
 import java.util.function.Function;
 
 public sealed interface Property permits SingleProperty, MinMaxPropertyLink {

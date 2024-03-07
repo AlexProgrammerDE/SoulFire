@@ -54,7 +54,7 @@ public class AccountPanel extends NavigationItem {
     GeneratedPanel.addComponents(
         accountSettingsPanel,
         cardsContainer.getByNamespace(BuiltinSettingsConstants.ACCOUNT_SETTINGS_ID),
-        guiManager.settingsManager());
+        guiManager.clientSettingsManager());
 
     GBC.create(this).grid(0, 0).fill(GBC.HORIZONTAL).weightx(1).add(accountSettingsPanel);
 
@@ -79,7 +79,7 @@ public class AccountPanel extends NavigationItem {
 
     var accountList = new JTable(model);
 
-    var accountRegistry = guiManager.settingsManager().accountRegistry();
+    var accountRegistry = guiManager.clientSettingsManager().accountRegistry();
     accountRegistry.addLoadHook(
         () -> {
           model.getDataVector().removeAllElements();
@@ -183,7 +183,7 @@ public class AccountPanel extends NavigationItem {
                 String.format("%s list file", type),
                 guiManager,
                 parent,
-                text -> guiManager.settingsManager().accountRegistry().loadFromString(text, type)));
+                text -> guiManager.clientSettingsManager().accountRegistry().loadFromString(text, type)));
 
     return button;
   }

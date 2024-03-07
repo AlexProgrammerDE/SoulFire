@@ -94,7 +94,7 @@ public class SFMenuBar extends JMenuBar {
                 .ifPresent(
                     file -> {
                       try {
-                        guiManager.settingsManager().loadProfile(file);
+                        guiManager.clientSettingsManager().loadProfile(file);
                         log.info("Loaded profile!");
                       } catch (IOException ex) {
                         log.warn("Failed to load profile!", ex);
@@ -118,7 +118,7 @@ public class SFMenuBar extends JMenuBar {
                       }
 
                       try {
-                        guiManager.settingsManager().saveProfile(Path.of(path));
+                        guiManager.clientSettingsManager().saveProfile(Path.of(path));
                         log.info("Saved profile!");
                       } catch (IOException ex) {
                         log.warn("Failed to save profile!", ex);

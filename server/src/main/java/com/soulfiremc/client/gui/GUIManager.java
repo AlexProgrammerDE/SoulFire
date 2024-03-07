@@ -22,7 +22,7 @@ import ch.jalu.injector.InjectorBuilder;
 import com.soulfiremc.client.ClientCommandManager;
 import com.soulfiremc.client.SFTerminalConsole;
 import com.soulfiremc.client.grpc.RPCClient;
-import com.soulfiremc.client.settings.SettingsManager;
+import com.soulfiremc.client.settings.ClientSettingsManager;
 import com.soulfiremc.util.SFPathConstants;
 import com.soulfiremc.util.ShutdownManager;
 import java.awt.Desktop;
@@ -48,14 +48,14 @@ public class GUIManager {
       new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
   private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
-  private final SettingsManager settingsManager = new SettingsManager();
+  private final ClientSettingsManager clientSettingsManager = new ClientSettingsManager();
 
   public GUIManager(RPCClient rpcClient) {
     this.rpcClient = rpcClient;
     injector.register(GUIManager.class, this);
     injector.register(RPCClient.class, rpcClient);
     injector.register(ShutdownManager.class, shutdownManager);
-    injector.register(SettingsManager.class, settingsManager);
+    injector.register(ClientSettingsManager.class, clientSettingsManager);
 
     this.clientCommandManager = injector.getSingleton(ClientCommandManager.class);
   }

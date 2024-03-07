@@ -118,7 +118,7 @@ public class SFCommandDefinition implements Callable<Integer> {
     if (accountFile != null && authType != null) {
       try {
         cliManager
-            .settingsManager()
+            .clientSettingsManager()
             .accountRegistry()
             .loadFromString(Files.readString(accountFile), authType);
       } catch (IOException e) {
@@ -130,7 +130,7 @@ public class SFCommandDefinition implements Callable<Integer> {
     if (proxyFile != null && proxyType != null) {
       try {
         cliManager
-            .settingsManager()
+            .clientSettingsManager()
             .proxyRegistry()
             .loadFromString(Files.readString(proxyFile), proxyType);
       } catch (IOException e) {
@@ -141,7 +141,7 @@ public class SFCommandDefinition implements Callable<Integer> {
 
     if (profileFile != null) {
       try {
-        cliManager.settingsManager().loadProfile(profileFile);
+        cliManager.clientSettingsManager().loadProfile(profileFile);
       } catch (IOException e) {
         log.error("Failed to load profile!", e);
         return 1;

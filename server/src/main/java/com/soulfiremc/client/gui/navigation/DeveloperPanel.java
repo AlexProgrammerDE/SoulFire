@@ -32,7 +32,7 @@ public class DeveloperPanel extends NavigationItem {
     GeneratedPanel.addComponents(
         this,
         cardsContainer.getByNamespace(BuiltinSettingsConstants.DEV_SETTINGS_ID),
-        guiManager.settingsManager());
+        guiManager.clientSettingsManager());
   }
 
   @Override

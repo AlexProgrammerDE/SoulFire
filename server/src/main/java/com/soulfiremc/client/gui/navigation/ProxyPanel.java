@@ -55,7 +55,7 @@ public class ProxyPanel extends NavigationItem {
     GeneratedPanel.addComponents(
         proxySettingsPanel,
         cardsContainer.getByNamespace(BuiltinSettingsConstants.PROXY_SETTINGS_ID),
-        guiManager.settingsManager());
+        guiManager.clientSettingsManager());
 
     GBC.create(this).grid(0, 0).fill(GBC.HORIZONTAL).weightx(1).add(proxySettingsPanel);
 
@@ -84,7 +84,7 @@ public class ProxyPanel extends NavigationItem {
 
     var proxyList = new JTable(model);
 
-    var proxyRegistry = guiManager.settingsManager().proxyRegistry();
+    var proxyRegistry = guiManager.clientSettingsManager().proxyRegistry();
     proxyRegistry.addLoadHook(
         () -> {
           model.getDataVector().removeAllElements();
@@ -191,7 +191,7 @@ public class ProxyPanel extends NavigationItem {
                 String.format("%s list file", type),
                 guiManager,
                 parent,
-                text -> guiManager.settingsManager().proxyRegistry().loadFromString(text, type)));
+                text -> guiManager.clientSettingsManager().proxyRegistry().loadFromString(text, type)));
 
     return button;
   }

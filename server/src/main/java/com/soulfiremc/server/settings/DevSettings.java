@@ -18,8 +18,8 @@
 package com.soulfiremc.server.settings;
 
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.lib.property.BooleanProperty;
-import com.soulfiremc.server.settings.lib.property.Property;
+import com.soulfiremc.server.settings.property.BooleanProperty;
+import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.util.BuiltinSettingsConstants;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

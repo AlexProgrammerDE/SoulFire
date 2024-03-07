@@ -57,7 +57,7 @@ public class CardsContainer extends JPanel {
     // Add bot settings
     panels.add(
         new GeneratedPanel(
-            guiManager.settingsManager(),
+            guiManager.clientSettingsManager(),
             getByNamespace(BuiltinSettingsConstants.BOT_SETTINGS_ID)));
     panels.add(injector.getSingleton(PluginListPanel.class));
     panels.add(injector.getSingleton(AccountPanel.class));
@@ -83,7 +83,7 @@ public class CardsContainer extends JPanel {
           NavigationWrapper.createBackWrapper(
               this,
               PluginListPanel.NAVIGATION_ID,
-              new GeneratedPanel(guiManager.settingsManager(), item)),
+              new GeneratedPanel(guiManager.clientSettingsManager(), item)),
           item.getNamespace());
     }
   }

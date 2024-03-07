@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.settings.lib;
+package com.soulfiremc.settings;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -42,6 +42,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 // Intermediary class between profile strings and SettingsHolder
 public record ProfileDataStructure(
@@ -62,6 +63,21 @@ public record ProfileDataStructure(
 
   public String serialize() {
     return PROFILE_GSON.toJson(this);
+  }
+
+  public void handleProperties(BiConsumer<PropertyKey, JsonElement> consumer) {
+    for (var entry : settings.entrySet()) {
+      var namespace = entry.getKey();
+      for (var setting : entry.getValue().entrySet()) {
+        var key = setting.getKey();
+        var settingData = setting.getValue();
+
+        var propertyKey = new PropertyKey(namespace, key);
+
+        // Notify all listeners that this setting has been loaded
+        consumer.accept(propertyKey, settingData);
+      }
+    }
   }
 
   private static class ECPublicKeyAdapter extends AbstractKeyAdapter<ECPublicKey> {

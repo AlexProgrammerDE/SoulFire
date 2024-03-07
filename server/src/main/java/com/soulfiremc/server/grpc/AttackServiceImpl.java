@@ -25,8 +25,8 @@ import com.soulfiremc.grpc.generated.AttackStateToggleResponse;
 import com.soulfiremc.grpc.generated.AttackStopRequest;
 import com.soulfiremc.grpc.generated.AttackStopResponse;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.settings.lib.ProfileDataStructure;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.settings.ProfileDataStructure;
 import io.grpc.stub.StreamObserver;
 import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
       AttackStartRequest request, StreamObserver<AttackStartResponse> responseObserver) {
     var settingsHolder =
         SettingsHolder.createSettingsHolder(
-            ProfileDataStructure.deserialize(request.getSettings()), null, null, null);
+            ProfileDataStructure.deserialize(request.getSettings()));
 
     var id = soulFireServer.startAttack(settingsHolder);
     responseObserver.onNext(AttackStartResponse.newBuilder().setId(id).build());
