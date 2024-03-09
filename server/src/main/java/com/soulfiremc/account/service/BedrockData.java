@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.account.service;
 
+import com.soulfiremc.grpc.generated.MinecraftAccountProto;
+import com.soulfiremc.util.KeyHelper;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.util.UUID;
@@ -29,4 +31,24 @@ public record BedrockData(
     UUID deviceId,
     String playFabId)
     implements AccountData {
+  public static BedrockData fromProto(MinecraftAccountProto.BedrockData data) {
+    return new BedrockData(
+        data.getMojangJwt(),
+        data.getIdentityJwt(),
+        KeyHelper.decodeBase64PublicKey(data.getPublicKey()),
+        KeyHelper.decodeBase64PrivateKey(data.getPrivateKey()),
+        UUID.fromString(data.getDeviceId()),
+        data.getPlayFabId());
+  }
+
+  public MinecraftAccountProto.BedrockData toProto() {
+    return MinecraftAccountProto.BedrockData.newBuilder()
+        .setMojangJwt(mojangJwt)
+        .setIdentityJwt(identityJwt)
+        .setPublicKey(KeyHelper.encodeBase64Key(publicKey))
+        .setPrivateKey(KeyHelper.encodeBase64Key(privateKey))
+        .setDeviceId(deviceId.toString())
+        .setPlayFabId(playFabId)
+        .build();
+  }
 }

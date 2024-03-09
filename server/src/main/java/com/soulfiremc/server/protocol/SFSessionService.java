@@ -52,7 +52,7 @@ public class SFSessionService {
         switch (authType) {
           case MICROSOFT_JAVA -> MOJANG_JOIN_URI;
           case THE_ALTENING -> THE_ALTENING_JOIN_URI;
-          case EASYMC -> EASYMC_JOIN_URI;
+          case EASY_MC -> EASYMC_JOIN_URI;
           default -> throw new IllegalStateException("Unexpected value: " + authType);
         };
     this.proxyData = proxyData;

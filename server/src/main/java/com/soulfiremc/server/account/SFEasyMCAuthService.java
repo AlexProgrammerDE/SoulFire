@@ -64,7 +64,7 @@ public final class SFEasyMCAuthService
                           }
 
                           return new MinecraftAccount(
-                              AuthType.EASYMC,
+                              AuthType.EASY_MC,
                               UUID.fromString(response.uuid()),
                               response.mcName(),
                               new OnlineJavaData(

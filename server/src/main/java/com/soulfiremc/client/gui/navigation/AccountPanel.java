@@ -150,7 +150,7 @@ public class AccountPanel extends NavigationItem {
             menu.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_JAVA));
             menu.add(createAccountLoadButton(guiManager, parent, AuthType.MICROSOFT_BEDROCK));
             menu.add(createAccountLoadButton(guiManager, parent, AuthType.THE_ALTENING));
-            menu.add(createAccountLoadButton(guiManager, parent, AuthType.EASYMC));
+            menu.add(createAccountLoadButton(guiManager, parent, AuthType.EASY_MC));
             menu.show(e.getComponent(), e.getX(), e.getY());
           }
         });
@@ -183,7 +183,7 @@ public class AccountPanel extends NavigationItem {
                 String.format("%s list file", type),
                 guiManager,
                 parent,
-                text -> guiManager.clientSettingsManager().accountRegistry().loadFromString(text, type)));
+                text -> guiManager.clientSettingsManager().accountRegistry().loadFromString(text, type, null)));
 
     return button;
   }

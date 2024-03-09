@@ -40,7 +40,6 @@ import picocli.CommandLine;
 
 @Slf4j
 @Getter
-@SuppressWarnings("unchecked")
 public class CLIManager {
   private final RPCClient rpcClient;
   private final ClientCommandManager clientCommandManager;
@@ -48,15 +47,15 @@ public class CLIManager {
       new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
   private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
-  private final ClientSettingsManager clientSettingsManager = new ClientSettingsManager();
+  private final ClientSettingsManager clientSettingsManager;
 
   public CLIManager(RPCClient rpcClient) {
-    this.rpcClient = rpcClient;
     injector.register(CLIManager.class, this);
     injector.register(RPCClient.class, rpcClient);
     injector.register(ShutdownManager.class, shutdownManager);
-    injector.register(ClientSettingsManager.class, clientSettingsManager);
 
+    this.rpcClient = rpcClient;
+    this.clientSettingsManager = injector.getSingleton(ClientSettingsManager.class);
     this.clientCommandManager = injector.getSingleton(ClientCommandManager.class);
   }
 
@@ -64,6 +63,7 @@ public class CLIManager {
     return input.replace("%", "%%");
   }
 
+  @SuppressWarnings("unchecked")
   public void initCLI(String[] args) {
     var soulFireCommand = new SFCommandDefinition(this);
     var commandLine = new CommandLine(soulFireCommand);
@@ -250,6 +250,7 @@ public class CLIManager {
             .setter(
                 new CommandLine.Model.ISetter() {
                   @Override
+                  @SuppressWarnings("unchecked")
                   public <T> T set(T value) {
                     return (T) (Integer) reference.getAndSet((int) value);
                   }
@@ -278,6 +279,7 @@ public class CLIManager {
             .setter(
                 new CommandLine.Model.ISetter() {
                   @Override
+                  @SuppressWarnings("unchecked")
                   public <T> T set(T value) {
                     return (T) (Double) reference.getAndSet((double) value);
                   }

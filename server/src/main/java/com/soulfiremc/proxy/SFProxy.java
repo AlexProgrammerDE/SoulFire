@@ -17,15 +17,26 @@
  */
 package com.soulfiremc.proxy;
 
+import com.soulfiremc.grpc.generated.ProxyProto;
 import java.net.InetSocketAddress;
 import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 
 public record SFProxy(
     @NonNull ProxyType type,
     @NonNull String host,
     int port,
-    String username,
-    String password) {
+    @Nullable String username,
+    @Nullable String password) {
+  public static SFProxy fromProto(ProxyProto proto) {
+    return new SFProxy(
+        ProxyType.valueOf(proto.getType().name()),
+        proto.getHost(),
+        proto.getPort(),
+        proto.hasUsername() ? proto.getUsername() : null,
+        proto.hasPassword() ? proto.getPassword() : null);
+  }
+
   public SFProxy {
     if (type == ProxyType.SOCKS4 && password != null) {
       throw new IllegalArgumentException("SOCKS4 does not support passwords!");
@@ -40,5 +51,22 @@ public record SFProxy(
 
   public InetSocketAddress getInetSocketAddress() {
     return new InetSocketAddress(host, port);
+  }
+
+  public ProxyProto toProto() {
+    var builder = ProxyProto.newBuilder()
+        .setType(ProxyProto.Type.valueOf(type.name()))
+        .setHost(host)
+        .setPort(port);
+
+    if (username != null) {
+        builder.setUsername(username);
+    }
+
+    if (password != null) {
+        builder.setPassword(password);
+    }
+
+    return builder.build();
   }
 }

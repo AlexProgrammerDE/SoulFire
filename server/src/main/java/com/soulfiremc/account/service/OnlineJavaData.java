@@ -17,9 +17,22 @@
  */
 package com.soulfiremc.account.service;
 
+import com.soulfiremc.grpc.generated.MinecraftAccountProto;
+
 public record OnlineJavaData(String authToken, long tokenExpireAt)
     implements AccountData {
+  public static OnlineJavaData fromProto(MinecraftAccountProto.OnlineJavaData data) {
+    return new OnlineJavaData(data.getAuthToken(), data.getTokenExpireAt());
+  }
+
   public boolean isTokenExpired() {
     return tokenExpireAt != -1 && System.currentTimeMillis() > tokenExpireAt;
+  }
+
+  public MinecraftAccountProto.OnlineJavaData toProto() {
+    return MinecraftAccountProto.OnlineJavaData.newBuilder()
+        .setAuthToken(authToken)
+        .setTokenExpireAt(tokenExpireAt)
+        .build();
   }
 }

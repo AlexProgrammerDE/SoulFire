@@ -19,7 +19,9 @@ package com.soulfiremc.account;
 
 import com.soulfiremc.account.service.AccountData;
 import com.soulfiremc.account.service.BedrockData;
+import com.soulfiremc.account.service.OfflineJavaData;
 import com.soulfiremc.account.service.OnlineJavaData;
+import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 import java.util.UUID;
 import lombok.NonNull;
 
@@ -38,6 +40,15 @@ public record MinecraftAccount(
     @NonNull UUID profileId,
     @NonNull String lastKnownName,
     @NonNull AccountData accountData) {
+  public static MinecraftAccount fromProto(MinecraftAccountProto account) {
+    return new MinecraftAccount(AuthType.valueOf(account.getType().name()), UUID.fromString(account.getProfileId()), account.getLastKnownName(), switch (account.getAccountDataCase()) {
+      case ONLINEJAVADATA -> OnlineJavaData.fromProto(account.getOnlineJavaData());
+      case OFFLINEJAVADATA -> OfflineJavaData.fromProto(account.getOfflineJavaData());
+      case BEDROCKDATA -> BedrockData.fromProto(account.getBedrockData());
+      case ACCOUNTDATA_NOT_SET -> throw new IllegalArgumentException("AccountData not set");
+    });
+  }
+
   @Override
   public String toString() {
     return String.format(
@@ -50,5 +61,27 @@ public record MinecraftAccount(
 
   public boolean isPremiumBedrock() {
     return accountData instanceof BedrockData;
+  }
+
+  public MinecraftAccountProto toProto() {
+    var builder =
+        MinecraftAccountProto.newBuilder()
+            .setType(MinecraftAccountProto.AccountTypeProto.valueOf(authType.name()))
+            .setProfileId(profileId.toString())
+            .setLastKnownName(lastKnownName);
+
+    switch (accountData) {
+      case BedrockData bedrockData -> {
+        builder.setBedrockData(bedrockData.toProto());
+      }
+      case OfflineJavaData offlineJavaData -> {
+        builder.setOfflineJavaData(offlineJavaData.toProto());
+      }
+      case OnlineJavaData onlineJavaData -> {
+        builder.setOnlineJavaData(onlineJavaData.toProto());
+      }
+    }
+
+    return builder.build();
   }
 }

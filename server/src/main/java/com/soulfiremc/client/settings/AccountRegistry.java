@@ -19,26 +19,32 @@ package com.soulfiremc.client.settings;
 
 import com.soulfiremc.account.AuthType;
 import com.soulfiremc.account.MinecraftAccount;
+import com.soulfiremc.client.grpc.RPCClient;
+import com.soulfiremc.grpc.generated.AuthRequest;
+import com.soulfiremc.grpc.generated.MinecraftAccountProto;
+import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.util.EnabledWrapper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class AccountRegistry {
   private final List<EnabledWrapper<MinecraftAccount>> accounts = new ArrayList<>();
   private final List<Runnable> loadHooks = new ArrayList<>();
+  private final RPCClient rpcClient;
 
-  public void loadFromString(String data, AuthType authType) {
+  public void loadFromString(String data, AuthType authType, SFProxy proxy) {
     var newAccounts =
         data.lines()
             .map(String::strip)
             .filter(line -> !line.isBlank())
             .distinct()
-            .map(account -> fromStringSingle(account, authType))
+            .map(account -> fromStringSingle(account, authType, proxy))
             .map(account -> new EnabledWrapper<>(true, account))
             .toList();
 
@@ -53,7 +59,7 @@ public class AccountRegistry {
     log.info("Loaded {} accounts!", newAccounts.size());
   }
 
-  private MinecraftAccount fromStringSingle(String data, AuthType authType) {
+  private MinecraftAccount fromStringSingle(String data, AuthType authType, SFProxy proxy) {
     data = data.trim();
 
     if (data.isBlank()) {
@@ -61,7 +67,18 @@ public class AccountRegistry {
     }
 
     try {
-      return authType.authService().createDataAndLogin(data, null);
+      var request =
+          AuthRequest.newBuilder()
+              .setService(MinecraftAccountProto.AccountTypeProto.valueOf(authType.name()))
+              .setPayload(data);
+
+      if (proxy != null) {
+        request.setProxy(proxy.toProto());
+      }
+
+      return MinecraftAccount.fromProto(rpcClient.mcAuthServiceBlocking()
+          .login(request.build())
+          .getAccount());
     } catch (Exception e) {
       log.error("Failed to load account from string", e);
       throw new RuntimeException(e);
@@ -70,10 +87,6 @@ public class AccountRegistry {
 
   public List<EnabledWrapper<MinecraftAccount>> getAccounts() {
     return Collections.unmodifiableList(accounts);
-  }
-
-  public List<MinecraftAccount> getEnabledAccounts() {
-    return accounts.stream().filter(EnabledWrapper::enabled).map(EnabledWrapper::value).toList();
   }
 
   public void setAccounts(List<EnabledWrapper<MinecraftAccount>> accounts) {

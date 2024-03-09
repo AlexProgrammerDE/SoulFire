@@ -70,6 +70,7 @@ public class RPCServer {
             .addService(injector.getSingleton(ConfigServiceImpl.class))
             .addService(injector.getSingleton(CommandServiceImpl.class))
             .addService(injector.getSingleton(AttackServiceImpl.class))
+            .addService(injector.getSingleton(MCAuthServiceImpl.class))
             .intercept(new JwtServerInterceptor(jwtKey))
             .maxInboundMessageSize(Integer.MAX_VALUE)
             .build();

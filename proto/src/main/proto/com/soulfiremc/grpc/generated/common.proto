@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package com.soulfiremc.grpc.generated;
+
+message ProxyProto {
+  enum Type {
+    HTTP = 0;
+    SOCKS4 = 1;
+    SOCKS5 = 2;
+  }
+
+  Type type = 1;
+  string host = 2;
+  int32 port = 3;
+  optional string username = 4;
+  optional string password = 5;
+}
+
+message MinecraftAccountProto {
+  enum AccountTypeProto {
+    MICROSOFT_JAVA = 0;
+    MICROSOFT_BEDROCK = 1;
+    EASY_MC = 2;
+    THE_ALTENING = 3;
+    OFFLINE = 4;
+  }
+
+  message OnlineJavaData {
+    string authToken = 1;
+    int64 tokenExpireAt = 2;
+  }
+
+  message OfflineJavaData {
+  }
+
+  message BedrockData {
+    string mojangJwt = 1;
+    string identityJwt = 2;
+    string publicKey = 3;
+    string privateKey = 4;
+    string deviceId = 5;
+    string playFabId = 6;
+  }
+
+  AccountTypeProto type = 1;
+  string profileId = 2;
+  string lastKnownName = 3;
+  oneof accountData {
+    OnlineJavaData onlineJavaData = 4;
+    OfflineJavaData offlineJavaData = 5;
+    BedrockData bedrockData = 6;
+  }
+}

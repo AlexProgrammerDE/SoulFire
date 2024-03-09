@@ -48,15 +48,15 @@ public class GUIManager {
       new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
   private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
-  private final ClientSettingsManager clientSettingsManager = new ClientSettingsManager();
+  private final ClientSettingsManager clientSettingsManager;
 
   public GUIManager(RPCClient rpcClient) {
-    this.rpcClient = rpcClient;
     injector.register(GUIManager.class, this);
     injector.register(RPCClient.class, rpcClient);
     injector.register(ShutdownManager.class, shutdownManager);
-    injector.register(ClientSettingsManager.class, clientSettingsManager);
 
+    this.rpcClient = rpcClient;
+    this.clientSettingsManager = injector.getSingleton(ClientSettingsManager.class);
     this.clientCommandManager = injector.getSingleton(ClientCommandManager.class);
   }
 

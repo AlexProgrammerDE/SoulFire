@@ -29,16 +29,19 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import javax.inject.Inject;
 import javax.inject.Provider;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientSettingsManager {
   private final Multimap<PropertyKey, Consumer<JsonElement>> listeners =
       Multimaps.newListMultimap(new LinkedHashMap<>(), ArrayList::new);
   private final Map<PropertyKey, Provider<JsonElement>> providers = new LinkedHashMap<>();
-  @Getter private final AccountRegistry accountRegistry = new AccountRegistry();
+  @Getter private final AccountRegistry accountRegistry;
   @Getter private final ProxyRegistry proxyRegistry = new ProxyRegistry();
 
   public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {

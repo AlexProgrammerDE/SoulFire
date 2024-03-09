@@ -120,7 +120,7 @@ public class SFCommandDefinition implements Callable<Integer> {
         cliManager
             .clientSettingsManager()
             .accountRegistry()
-            .loadFromString(Files.readString(accountFile), authType);
+            .loadFromString(Files.readString(accountFile), authType, null);
       } catch (IOException e) {
         log.error("Failed to load accounts!", e);
         return 1;

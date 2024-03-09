@@ -17,11 +17,20 @@
  */
 package com.soulfiremc.account.service;
 
+import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 public record OfflineJavaData() implements AccountData {
+  public static OfflineJavaData fromProto(MinecraftAccountProto.OfflineJavaData data) {
+    return new OfflineJavaData();
+  }
+
   public static UUID getOfflineUUID(String username) {
     return UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8));
+  }
+
+  public MinecraftAccountProto.OfflineJavaData toProto() {
+    return MinecraftAccountProto.OfflineJavaData.getDefaultInstance();
   }
 }
