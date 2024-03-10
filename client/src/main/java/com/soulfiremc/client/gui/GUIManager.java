@@ -20,7 +20,7 @@ package com.soulfiremc.client.gui;
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import com.soulfiremc.client.ClientCommandManager;
-import com.soulfiremc.client.SFTerminalConsole;
+import com.soulfiremc.client.SFClientTerminalConsole;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
 import com.soulfiremc.util.SFPathConstants;
@@ -79,7 +79,7 @@ public class GUIManager {
       log.error("Failed to create profiles folder!", e);
     }
 
-    SFTerminalConsole.setupTerminalConsole(threadPool, shutdownManager, clientCommandManager);
+    SFClientTerminalConsole.setupTerminalConsole(threadPool, shutdownManager, clientCommandManager);
 
     // Override the title in AWT (GNOME displays the class name otherwise)
     setAppTitle();

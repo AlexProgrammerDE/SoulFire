@@ -11,12 +11,12 @@ plugins {
 
 // Uppercase all artifacts
 tasks.withType<AbstractArchiveTask> {
-    if (archiveBaseName.isPresent && archiveBaseName.get() == "client") {
-        archiveBaseName.set("SoulFireClient")
+    if (archiveBaseName.isPresent && archiveBaseName.get() == "dedicated") {
+        archiveBaseName.set("SoulFireDedicated")
     }
 }
 
-val projectMainClass = "com.soulfiremc.launcher.SoulFireClientJava8Launcher"
+val projectMainClass = "com.soulfiremc.launcher.SoulFireDedicatedJava8Launcher"
 
 application {
     applicationName = "SoulFire"
@@ -32,34 +32,12 @@ dependencies {
     // The java 8 launcher takes care of notifying the user if they are using an unsupported java version
     implementation(projects.j8Launcher)
 
-    // For CLI support
-    implementation(libs.picoli)
-    annotationProcessor(libs.picoli.codegen)
-
-    // For GUI support
-    implementation(libs.bundles.flatlaf)
-    implementation(libs.xchart) {
-        exclude("org.junit.jupiter")
-    }
-    implementation(libs.miglayout.swing)
-    implementation(libs.commons.swing)
-
-    val lwjglVersion = "3.3.3"
-    val lwjglPlatforms = listOf("linux", "macos", "macos-arm64", "windows")
-    lwjglPlatforms.forEach { platform ->
-        implementation("org.lwjgl:lwjgl-nfd:$lwjglVersion:natives-$platform")
-        implementation("org.lwjgl:lwjgl:$lwjglVersion:natives-$platform")
-    }
-    implementation("org.lwjgl:lwjgl-nfd:$lwjglVersion")
-
     api(libs.bundles.mixins)
     api(libs.reflect)
     api(libs.lambdaevents)
 
     // For class injection
     api(libs.injector)
-
-    testImplementation(libs.junit)
 }
 
 fun Manifest.applySFAttributes() {

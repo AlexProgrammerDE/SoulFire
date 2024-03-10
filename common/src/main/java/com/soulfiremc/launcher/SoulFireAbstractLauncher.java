@@ -21,7 +21,7 @@ import com.soulfiremc.util.SFContextClassLoader;
 import java.util.List;
 
 public abstract class SoulFireAbstractLauncher {
-  private final SFContextClassLoader SF_CONTEXT_CLASS_LOADER = new SFContextClassLoader();
+  private static final SFContextClassLoader SF_CONTEXT_CLASS_LOADER = new SFContextClassLoader();
 
   public void run(String[] args) {
     Thread.currentThread().setContextClassLoader(SF_CONTEXT_CLASS_LOADER);

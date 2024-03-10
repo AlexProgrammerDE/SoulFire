@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.client;
+package com.soulfiremc.dedicated;
 
+import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.util.ShutdownManager;
 import java.util.concurrent.ExecutorService;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +32,10 @@ import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.impl.history.DefaultHistory;
 
 @RequiredArgsConstructor
-public class SFTerminalConsole extends SimpleTerminalConsole {
+public class SFDedicatedTerminalConsole extends SimpleTerminalConsole {
   private static final Logger logger = LogManager.getLogger("SoulFire");
   private final ShutdownManager shutdownManager;
-  private final ClientCommandManager clientCommandManager;
+  private final ServerCommandManager serverCommandManager;
 
   /** Sets up {@code System.out} and {@code System.err} to redirect to log4j. */
   public static void setupStreams() {
@@ -45,15 +46,15 @@ public class SFTerminalConsole extends SimpleTerminalConsole {
   public static void setupTerminalConsole(
       ExecutorService threadPool,
       ShutdownManager shutdownManager,
-      ClientCommandManager clientCommandManager) {
-    SFTerminalConsole.setupStreams();
+      ServerCommandManager serverCommandManager) {
+    SFDedicatedTerminalConsole.setupStreams();
 
     if (System.console() == null) {
       logger.debug("No console available, not starting a terminal console.");
       return;
     }
 
-    threadPool.execute(new SFTerminalConsole(shutdownManager, clientCommandManager)::start);
+    threadPool.execute(new SFDedicatedTerminalConsole(shutdownManager, serverCommandManager)::start);
   }
 
   @Override
@@ -63,7 +64,7 @@ public class SFTerminalConsole extends SimpleTerminalConsole {
 
   @Override
   protected void runCommand(String command) {
-    clientCommandManager.execute(command);
+    serverCommandManager.execute(command);
   }
 
   @Override
@@ -74,7 +75,7 @@ public class SFTerminalConsole extends SimpleTerminalConsole {
   @Override
   protected LineReader buildReader(LineReaderBuilder builder) {
     var history = new DefaultHistory();
-    for (var command : clientCommandManager.getCommandHistory()) {
+    for (var command : serverCommandManager.getCommandHistory()) {
       history.add(command.getKey(), command.getValue());
     }
 
@@ -84,7 +85,7 @@ public class SFTerminalConsole extends SimpleTerminalConsole {
             .completer(
                 (reader, parsedLine, list) -> {
                   for (var suggestion :
-                      clientCommandManager.getCompletionSuggestions(parsedLine.line())) {
+                      serverCommandManager.getCompletionSuggestions(parsedLine.line())) {
                     list.add(new Candidate(suggestion));
                   }
                 })

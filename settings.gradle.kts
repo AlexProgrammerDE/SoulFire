@@ -70,6 +70,7 @@ include(
     "proto",
     "common",
     "server",
+    "dedicated",
     "client"
 )
 

@@ -19,7 +19,7 @@ package com.soulfiremc.client.cli;
 
 import com.soulfiremc.account.AuthType;
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.client.SFTerminalConsole;
+import com.soulfiremc.client.SFClientTerminalConsole;
 import com.soulfiremc.proxy.ProxyType;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -112,7 +112,7 @@ public class SFCommandDefinition implements Callable<Integer> {
     }
 
     // Delayed to here, so help and version do not get cut off
-    SFTerminalConsole.setupTerminalConsole(
+    SFClientTerminalConsole.setupTerminalConsole(
         cliManager.threadPool(), cliManager.shutdownManager(), cliManager.clientCommandManager());
 
     if (accountFile != null && authType != null) {
