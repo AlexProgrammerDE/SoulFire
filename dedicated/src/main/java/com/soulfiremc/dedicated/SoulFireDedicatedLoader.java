@@ -22,11 +22,15 @@ import com.soulfiremc.server.SoulFireServer;
 import java.util.concurrent.Executors;
 
 public class SoulFireDedicatedLoader {
-  private SoulFireDedicatedLoader() {
-  }
+  private SoulFireDedicatedLoader() {}
 
   public static void runDedicated(String host, int port) {
-    var soulFire = new SoulFireServer(host, port, SoulFireDedicatedBootstrap.PLUGIN_MANAGER, SoulFireDedicatedBootstrap.START_TIME);
+    var soulFire =
+        new SoulFireServer(
+            host,
+            port,
+            SoulFireDedicatedBootstrap.PLUGIN_MANAGER,
+            SoulFireDedicatedBootstrap.START_TIME);
 
     SFDedicatedTerminalConsole.setupTerminalConsole(
         Executors.newSingleThreadExecutor(),

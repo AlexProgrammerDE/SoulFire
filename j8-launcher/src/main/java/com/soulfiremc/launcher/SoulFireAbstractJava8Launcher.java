@@ -43,6 +43,8 @@ public abstract class SoulFireAbstractJava8Launcher {
     }
   }
 
+  protected abstract String getLauncherClassName();
+
   @SuppressWarnings("CallToPrintStackTrace")
   private static class UnsupportedVersionDialog extends JFrame {
     public UnsupportedVersionDialog() {
@@ -82,6 +84,4 @@ public abstract class SoulFireAbstractJava8Launcher {
       setVisible(true);
     }
   }
-
-  protected abstract String getLauncherClassName();
 }

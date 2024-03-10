@@ -50,7 +50,8 @@ public final class SFEasyMCAuthService
                     .asString()
                     .map(
                         responseText -> {
-                          var response = GsonInstance.GSON.fromJson(responseText, TokenRedeemResponse.class);
+                          var response =
+                              GsonInstance.GSON.fromJson(responseText, TokenRedeemResponse.class);
 
                           if (response.error() != null) {
                             log.error("EasyMC has returned a error: {}", response.error());
@@ -67,8 +68,7 @@ public final class SFEasyMCAuthService
                               AuthType.EASY_MC,
                               UUID.fromString(response.uuid()),
                               response.mcName(),
-                              new OnlineJavaData(
-                                  response.session(), -1));
+                              new OnlineJavaData(response.session(), -1));
                         }))
         .block();
   }

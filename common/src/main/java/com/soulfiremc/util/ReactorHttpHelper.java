@@ -44,26 +44,26 @@ public class ReactorHttpHelper {
     return proxyData == null
         ? base
         : base.proxy(
-        p -> {
-          var spec =
-              p.type(
-                      switch (proxyData.type()) {
-                        case HTTP -> ProxyProvider.Proxy.HTTP;
-                        case SOCKS4 -> ProxyProvider.Proxy.SOCKS4;
-                        case SOCKS5 -> ProxyProvider.Proxy.SOCKS5;
-                      })
-                  .host(proxyData.host())
-                  .port(proxyData.port())
-                  .nonProxyHosts("localhost")
-                  .connectTimeoutMillis(20_000);
+            p -> {
+              var spec =
+                  p.type(
+                          switch (proxyData.type()) {
+                            case HTTP -> ProxyProvider.Proxy.HTTP;
+                            case SOCKS4 -> ProxyProvider.Proxy.SOCKS4;
+                            case SOCKS5 -> ProxyProvider.Proxy.SOCKS5;
+                          })
+                      .host(proxyData.host())
+                      .port(proxyData.port())
+                      .nonProxyHosts("localhost")
+                      .connectTimeoutMillis(20_000);
 
-          if (proxyData.username() != null) {
-            spec.username(proxyData.username());
-          }
+              if (proxyData.username() != null) {
+                spec.username(proxyData.username());
+              }
 
-          if (proxyData.password() != null) {
-            spec.password(s -> proxyData.password());
-          }
-        });
+              if (proxyData.password() != null) {
+                spec.password(s -> proxyData.password());
+              }
+            });
   }
 }

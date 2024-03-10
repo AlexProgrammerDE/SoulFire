@@ -26,7 +26,9 @@ public class SoulFireClientLoader {
   private SoulFireClientLoader() {}
 
   public static void runHeadless(String host, int port, String[] args) {
-    var soulFire = new SoulFireServer(host, port, SoulFireClientBootstrap.PLUGIN_MANAGER, SoulFireClientBootstrap.START_TIME);
+    var soulFire =
+        new SoulFireServer(
+            host, port, SoulFireClientBootstrap.PLUGIN_MANAGER, SoulFireClientBootstrap.START_TIME);
 
     var rpcClient = new RPCClient(host, port, soulFire.generateLocalCliJWT());
     var cliManager = new CLIManager(rpcClient, SoulFireClientBootstrap.PLUGIN_MANAGER);
@@ -34,7 +36,9 @@ public class SoulFireClientLoader {
   }
 
   public static void runGUI(String host, int port) {
-    var soulFire = new SoulFireServer(host, port, SoulFireClientBootstrap.PLUGIN_MANAGER, SoulFireClientBootstrap.START_TIME);
+    var soulFire =
+        new SoulFireServer(
+            host, port, SoulFireClientBootstrap.PLUGIN_MANAGER, SoulFireClientBootstrap.START_TIME);
 
     var rpcClient = new RPCClient(host, port, soulFire.generateAdminJWT());
     var guiManager = new GUIManager(rpcClient, SoulFireClientBootstrap.PLUGIN_MANAGER);

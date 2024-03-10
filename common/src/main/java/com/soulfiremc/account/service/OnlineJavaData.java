@@ -19,8 +19,7 @@ package com.soulfiremc.account.service;
 
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 
-public record OnlineJavaData(String authToken, long tokenExpireAt)
-    implements AccountData {
+public record OnlineJavaData(String authToken, long tokenExpireAt) implements AccountData {
   public static OnlineJavaData fromProto(MinecraftAccountProto.OnlineJavaData data) {
     return new OnlineJavaData(data.getAuthToken(), data.getTokenExpireAt());
   }

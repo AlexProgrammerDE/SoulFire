@@ -23,7 +23,6 @@ import com.soulfiremc.server.util.CustomClassProvider;
 import com.soulfiremc.util.PortHelper;
 import com.soulfiremc.util.SFPathConstants;
 import io.netty.util.ResourceLeakDetector;
-import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
@@ -73,13 +72,10 @@ public class SoulFireDedicatedBootstrap {
 
     initPlugins(classLoaders);
 
-    // We may split client and server mixins in the future
-    var runServer = GraphicsEnvironment.isHeadless() || args.length > 0;
-
-    injectMixinsAndRun(runServer, args);
+    injectMixinsAndRun();
   }
 
-  private static void injectMixinsAndRun(boolean runServer, String[] args) {
+  private static void injectMixinsAndRun() {
     var mixinPaths = new HashSet<String>();
     PLUGIN_MANAGER
         .getExtensions(MixinExtension.class)

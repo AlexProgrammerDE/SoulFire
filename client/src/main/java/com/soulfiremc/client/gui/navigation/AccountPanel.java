@@ -183,7 +183,11 @@ public class AccountPanel extends NavigationItem {
                 String.format("%s list file", type),
                 guiManager,
                 parent,
-                text -> guiManager.clientSettingsManager().accountRegistry().loadFromString(text, type, null)));
+                text ->
+                    guiManager
+                        .clientSettingsManager()
+                        .accountRegistry()
+                        .loadFromString(text, type, null)));
 
     return button;
   }

@@ -232,8 +232,7 @@ public class SFMenuBar extends JMenuBar {
     }
 
     if (desktop.isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
-      desktop.setQuitHandler(
-          (e, response) -> response.performQuit());
+      desktop.setQuitHandler((e, response) -> response.performQuit());
     }
   }
 

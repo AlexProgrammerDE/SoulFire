@@ -42,8 +42,7 @@ public final class SFJavaMicrosoftAuthService
           AuthType.MICROSOFT_JAVA,
           mcProfile.getId(),
           mcProfile.getName(),
-          new OnlineJavaData(
-               mcToken.getAccessToken(), mcToken.getExpireTimeMs()));
+          new OnlineJavaData(mcToken.getAccessToken(), mcToken.getExpireTimeMs()));
     } catch (Exception e) {
       throw new IOException(e);
     }

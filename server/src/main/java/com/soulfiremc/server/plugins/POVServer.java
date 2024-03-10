@@ -342,11 +342,7 @@ public class POVServer implements InternalPlugin {
 
                           var first =
                               attackManager.botConnections().values().stream()
-                                  .filter(
-                                      c ->
-                                          c.meta()
-                                              .accountName()
-                                              .equals(selectedName))
+                                  .filter(c -> c.meta().accountName().equals(selectedName))
                                   .findFirst();
                           if (first.isEmpty()) {
                             session.send(
@@ -424,9 +420,7 @@ public class POVServer implements InternalPlugin {
                                                 .color(NamedTextColor.GREEN)
                                                 .append(
                                                     Component.text(
-                                                            botConnection
-                                                                .meta()
-                                                                .accountName())
+                                                            botConnection.meta().accountName())
                                                         .color(NamedTextColor.AQUA)
                                                         .decorate(TextDecoration.UNDERLINED))
                                                 .append(Component.text("!"))

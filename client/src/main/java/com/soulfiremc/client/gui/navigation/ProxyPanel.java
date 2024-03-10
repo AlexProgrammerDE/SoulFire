@@ -133,7 +133,8 @@ public class ProxyPanel extends NavigationItem {
             var type = (ProxyType) row[4];
             var enabled = (boolean) row[5];
 
-            proxies.add(new EnabledWrapper<>(enabled, new SFProxy(type, host, port, username, password)));
+            proxies.add(
+                new EnabledWrapper<>(enabled, new SFProxy(type, host, port, username, password)));
           }
 
           proxyRegistry.setProxies(proxies);
@@ -191,7 +192,8 @@ public class ProxyPanel extends NavigationItem {
                 String.format("%s list file", type),
                 guiManager,
                 parent,
-                text -> guiManager.clientSettingsManager().proxyRegistry().loadFromString(text, type)));
+                text ->
+                    guiManager.clientSettingsManager().proxyRegistry().loadFromString(text, type)));
 
     return button;
   }

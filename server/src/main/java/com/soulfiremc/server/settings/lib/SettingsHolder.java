@@ -55,22 +55,23 @@ public record SettingsHolder(
     var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
     var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();
 
-    settingsSerialized.handleProperties((propertyKey, settingData) -> {
-      if (settingData.isJsonPrimitive()) {
-        var primitive = settingData.getAsJsonPrimitive();
-        if (primitive.isBoolean()) {
-          booleanProperties.put(propertyKey, primitive.getAsBoolean());
-        } else if (primitive.isNumber()) {
-          numberProperties.put(propertyKey, primitive.getAsNumber());
-        } else if (primitive.isString()) {
-          stringProperties.put(propertyKey, primitive.getAsString());
-        } else {
-          throw new IllegalArgumentException("Unknown primitive type: " + primitive);
-        }
-      } else {
-        throw new IllegalArgumentException("Unknown type: " + settingData);
-      }
-    });
+    settingsSerialized.handleProperties(
+        (propertyKey, settingData) -> {
+          if (settingData.isJsonPrimitive()) {
+            var primitive = settingData.getAsJsonPrimitive();
+            if (primitive.isBoolean()) {
+              booleanProperties.put(propertyKey, primitive.getAsBoolean());
+            } else if (primitive.isNumber()) {
+              numberProperties.put(propertyKey, primitive.getAsNumber());
+            } else if (primitive.isString()) {
+              stringProperties.put(propertyKey, primitive.getAsString());
+            } else {
+              throw new IllegalArgumentException("Unknown primitive type: " + primitive);
+            }
+          } else {
+            throw new IllegalArgumentException("Unknown type: " + settingData);
+          }
+        });
 
     return new SettingsHolder(
         numberProperties,

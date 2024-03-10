@@ -44,7 +44,8 @@ import net.lenni0451.commons.swing.GBC;
 public class GeneratedPanel extends NavigationItem {
   private final ClientPluginSettingsPage settingsPage;
 
-  public GeneratedPanel(ClientSettingsManager clientSettingsManager, ClientPluginSettingsPage settingsPage) {
+  public GeneratedPanel(
+      ClientSettingsManager clientSettingsManager, ClientPluginSettingsPage settingsPage) {
     this.settingsPage = settingsPage;
 
     setLayout(new GridBagLayout());
@@ -73,7 +74,9 @@ public class GeneratedPanel extends NavigationItem {
   }
 
   private static JSpinner createDoubleObject(
-      PropertyKey propertyKey, ClientSettingsManager clientSettingsManager, DoubleSetting doubleSetting) {
+      PropertyKey propertyKey,
+      ClientSettingsManager clientSettingsManager,
+      DoubleSetting doubleSetting) {
     var spinner =
         new JSpinner(
             new SpinnerNumberModel(
@@ -93,7 +96,9 @@ public class GeneratedPanel extends NavigationItem {
   }
 
   public static void addComponents(
-      JPanel panel, ClientPluginSettingsPage settingsPage, ClientSettingsManager clientSettingsManager) {
+      JPanel panel,
+      ClientPluginSettingsPage settingsPage,
+      ClientSettingsManager clientSettingsManager) {
     var row = 0;
     for (var settingEntry : settingsPage.getEntriesList()) {
       switch (settingEntry.getValueCase()) {
@@ -190,7 +195,8 @@ public class GeneratedPanel extends NavigationItem {
               .anchor(GBC.LINE_START)
               .add(
                   new JLabel(min.getUiName()), label -> label.setToolTipText(min.getDescription()));
-          var minSpinner = createIntObject(minPropertyKey, clientSettingsManager, min.getIntSetting());
+          var minSpinner =
+              createIntObject(minPropertyKey, clientSettingsManager, min.getIntSetting());
           GBC.create(panel)
               .grid(1, row++)
               .insets(0, 10, 0, 0)
@@ -206,7 +212,8 @@ public class GeneratedPanel extends NavigationItem {
               .anchor(GBC.LINE_START)
               .add(
                   new JLabel(max.getUiName()), label -> label.setToolTipText(max.getDescription()));
-          var maxSpinner = createIntObject(maxPropertyKey, clientSettingsManager, max.getIntSetting());
+          var maxSpinner =
+              createIntObject(maxPropertyKey, clientSettingsManager, max.getIntSetting());
           GBC.create(panel)
               .grid(1, row++)
               .insets(0, 10, 0, 0)

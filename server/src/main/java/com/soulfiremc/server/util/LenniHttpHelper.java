@@ -109,10 +109,9 @@ public class LenniHttpHelper {
 
                     return content
                         .asByteArray()
-                        .mapNotNull(
-                            bytes -> new HttpResponse(
-                                urlObj, code, bytes, responseHeaders))
-                        .switchIfEmpty(Mono.just(new HttpResponse(urlObj, code, null, responseHeaders)));
+                        .mapNotNull(bytes -> new HttpResponse(urlObj, code, bytes, responseHeaders))
+                        .switchIfEmpty(
+                            Mono.just(new HttpResponse(urlObj, code, null, responseHeaders)));
                   } catch (Exception e) {
                     log.error("Error while handling response", e);
                     return Mono.error(e);

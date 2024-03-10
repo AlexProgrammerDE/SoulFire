@@ -54,7 +54,8 @@ public class SFDedicatedTerminalConsole extends SimpleTerminalConsole {
       return;
     }
 
-    threadPool.execute(new SFDedicatedTerminalConsole(shutdownManager, serverCommandManager)::start);
+    threadPool.execute(
+        new SFDedicatedTerminalConsole(shutdownManager, serverCommandManager)::start);
   }
 
   @Override

@@ -241,6 +241,14 @@ public final class SessionDataManager {
     return list;
   }
 
+  public static void writeChunkSection(
+      ByteBuf buf, MinecraftCodecHelper codec, ChunkSection chunkSection) {
+    buf.writeShort(chunkSection.getBlockCount());
+
+    codec.writeDataPalette(buf, chunkSection.getChunkData());
+    codec.writeDataPalette(buf, chunkSection.getBiomeData());
+  }
+
   @EventHandler
   public void onLoginSuccess(ClientboundGameProfilePacket packet) {
     botProfile = packet.getProfile();
@@ -377,6 +385,10 @@ public final class SessionDataManager {
         new ServerPlayData(packet.getMotd(), packet.getIconBytes(), packet.isEnforcesSecureChat());
   }
 
+  //
+  // Chat packets
+  //
+
   @EventHandler
   public void onPluginMessage(ClientboundCustomPayloadPacket packet) {
     log.debug("Received plugin message on channel {}", packet.getChannel());
@@ -394,10 +406,6 @@ public final class SessionDataManager {
       }
     }
   }
-
-  //
-  // Chat packets
-  //
 
   @EventHandler
   public void onPlayerChat(ClientboundPlayerChatPacket packet) {
@@ -424,14 +432,14 @@ public final class SessionDataManager {
     connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message, null));
   }
 
+  //
+  // Player list packets
+  //
+
   private void onChat(
       long stamp, Component message, ChatMessageReceiveEvent.ChatMessageSender sender) {
     connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message, sender));
   }
-
-  //
-  // Player list packets
-  //
 
   @EventHandler
   public void onPlayerListHeaderFooter(ClientboundTabListPacket packet) {
@@ -461,16 +469,16 @@ public final class SessionDataManager {
     }
   }
 
+  //
+  // Player data packets
+  //
+
   @EventHandler
   public void onPlayerListRemove(ClientboundPlayerInfoRemovePacket packet) {
     for (var profileId : packet.getProfileIds()) {
       playerListState.entries().remove(profileId);
     }
   }
-
-  //
-  // Player data packets
-  //
 
   @EventHandler
   public void onSetSimulationDistance(ClientboundSetSimulationDistancePacket packet) {
@@ -536,6 +544,10 @@ public final class SessionDataManager {
         new ExperienceData(packet.getExperience(), packet.getLevel(), packet.getTotalExperience());
   }
 
+  //
+  // Inventory packets
+  //
+
   @EventHandler
   public void onLevelTime(ClientboundSetTimePacket packet) {
     var level = getCurrentLevel();
@@ -548,10 +560,6 @@ public final class SessionDataManager {
     level.worldAge(packet.getWorldAge());
     level.time(packet.getTime());
   }
-
-  //
-  // Inventory packets
-  //
 
   @EventHandler
   public void onSetContainerContent(ClientboundContainerSetContentPacket packet) {
@@ -668,14 +676,14 @@ public final class SessionDataManager {
     }
   }
 
+  //
+  // Chunk packets
+  //
+
   @EventHandler
   public void onSetCenterChunk(ClientboundSetChunkCacheCenterPacket packet) {
     centerChunk = new ChunkKey(packet.getChunkX(), packet.getChunkZ());
   }
-
-  //
-  // Chunk packets
-  //
 
   @EventHandler
   public void onChunkData(ClientboundLevelChunkWithLightPacket packet) {
@@ -735,6 +743,10 @@ public final class SessionDataManager {
     }
   }
 
+  //
+  // Block packets
+  //
+
   @EventHandler
   public void onChunkForget(ClientboundForgetLevelChunkPacket packet) {
     var level = getCurrentLevel();
@@ -746,10 +758,6 @@ public final class SessionDataManager {
 
     level.chunks().removeChunk(packet.getX(), packet.getZ());
   }
-
-  //
-  // Block packets
-  //
 
   @EventHandler
   public void onSectionBlockUpdate(ClientboundSectionBlocksUpdatePacket packet) {
@@ -798,14 +806,14 @@ public final class SessionDataManager {
     log.debug("Updated block at {} to {}", vector3i, newId);
   }
 
+  //
+  // World border packets
+  //
+
   @EventHandler
   public void onBlockChangedAck(ClientboundBlockChangedAckPacket packet) {
     // TODO: Implement block break
   }
-
-  //
-  // World border packets
-  //
 
   @EventHandler
   public void onBorderInit(ClientboundInitializeBorderPacket packet) {
@@ -845,14 +853,14 @@ public final class SessionDataManager {
     borderState.warningTime(packet.getWarningDelay());
   }
 
+  //
+  // Entity packets
+  //
+
   @EventHandler
   public void onBorderWarningBlocks(ClientboundSetBorderWarningDistancePacket packet) {
     borderState.warningBlocks(packet.getWarningBlocks());
   }
-
-  //
-  // Entity packets
-  //
 
   @EventHandler
   public void onEntitySpawn(ClientboundAddEntityPacket packet) {
@@ -1122,19 +1130,9 @@ public final class SessionDataManager {
   public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {
     int blockCount = buf.readShort();
 
-    var chunkPalette =
-        codec.readDataPalette(
-            buf, PaletteType.CHUNK);
+    var chunkPalette = codec.readDataPalette(buf, PaletteType.CHUNK);
     var biomePalette = codec.readDataPalette(buf, PaletteType.BIOME);
     return new ChunkSection(blockCount, chunkPalette, biomePalette);
-  }
-
-  public static void writeChunkSection(
-      ByteBuf buf, MinecraftCodecHelper codec, ChunkSection chunkSection) {
-    buf.writeShort(chunkSection.getBlockCount());
-
-    codec.writeDataPalette(buf, chunkSection.getChunkData());
-    codec.writeDataPalette(buf, chunkSection.getBiomeData());
   }
 
   public LevelState getCurrentLevel() {

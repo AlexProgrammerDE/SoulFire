@@ -26,9 +26,8 @@ import java.util.UUID;
 import lombok.NonNull;
 
 /**
- * Represents an authenticated MC account.
- * This can be a premium, offline or bedrock account.
- * Beware that the profileId is not a valid online UUID for offline and bedrock accounts.
+ * Represents an authenticated MC account. This can be a premium, offline or bedrock account. Beware
+ * that the profileId is not a valid online UUID for offline and bedrock accounts.
  *
  * @param authType The type of authentication
  * @param profileId Identifier that uniquely identifies the account
@@ -41,18 +40,23 @@ public record MinecraftAccount(
     @NonNull String lastKnownName,
     @NonNull AccountData accountData) {
   public static MinecraftAccount fromProto(MinecraftAccountProto account) {
-    return new MinecraftAccount(AuthType.valueOf(account.getType().name()), UUID.fromString(account.getProfileId()), account.getLastKnownName(), switch (account.getAccountDataCase()) {
-      case ONLINEJAVADATA -> OnlineJavaData.fromProto(account.getOnlineJavaData());
-      case OFFLINEJAVADATA -> OfflineJavaData.fromProto(account.getOfflineJavaData());
-      case BEDROCKDATA -> BedrockData.fromProto(account.getBedrockData());
-      case ACCOUNTDATA_NOT_SET -> throw new IllegalArgumentException("AccountData not set");
-    });
+    return new MinecraftAccount(
+        AuthType.valueOf(account.getType().name()),
+        UUID.fromString(account.getProfileId()),
+        account.getLastKnownName(),
+        switch (account.getAccountDataCase()) {
+          case ONLINEJAVADATA -> OnlineJavaData.fromProto(account.getOnlineJavaData());
+          case OFFLINEJAVADATA -> OfflineJavaData.fromProto(account.getOfflineJavaData());
+          case BEDROCKDATA -> BedrockData.fromProto(account.getBedrockData());
+          case ACCOUNTDATA_NOT_SET -> throw new IllegalArgumentException("AccountData not set");
+        });
   }
 
   @Override
   public String toString() {
     return String.format(
-        "MinecraftAccount(authType=%s, profileId=%s, lastKnownName=%s)", authType, profileId, lastKnownName);
+        "MinecraftAccount(authType=%s, profileId=%s, lastKnownName=%s)",
+        authType, profileId, lastKnownName);
   }
 
   public boolean isPremiumJava() {

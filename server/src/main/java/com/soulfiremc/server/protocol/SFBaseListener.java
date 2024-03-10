@@ -154,7 +154,8 @@ public class SFBaseListener extends SessionAdapter {
 
       if (this.targetState == ProtocolState.LOGIN) {
         session.send(
-            new ServerboundHelloPacket(botConnection.meta().accountName(), botConnection.meta().accountProfileId()));
+            new ServerboundHelloPacket(
+                botConnection.meta().accountName(), botConnection.meta().accountProfileId()));
       } else {
         session.send(new ServerboundStatusRequestPacket());
       }

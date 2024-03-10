@@ -77,7 +77,8 @@ public class RPCClient {
     attackStub = prepareChannel(AttackServiceGrpc.newStub(channel), callCredentials);
     configStubBlocking =
         prepareChannel(ConfigServiceGrpc.newBlockingStub(channel), callCredentials);
-    mcAuthServiceBlocking = prepareChannel(MCAuthServiceGrpc.newBlockingStub(channel), callCredentials);
+    mcAuthServiceBlocking =
+        prepareChannel(MCAuthServiceGrpc.newBlockingStub(channel), callCredentials);
   }
 
   private <T extends AbstractStub<T>> T prepareChannel(T channel, CallCredentials callCredentials) {

@@ -239,9 +239,7 @@ public class ServerCommandManager {
                               bot.sessionDataManager().controlState().resetAll();
 
                               c.getSource()
-                                  .sendInfo(
-                                      "Stopped pathfinding for "
-                                          + bot.meta().accountName());
+                                  .sendInfo("Stopped pathfinding for " + bot.meta().accountName());
                               return Command.SINGLE_SUCCESS;
                             }))));
 
@@ -552,20 +550,27 @@ public class ServerCommandManager {
                           .forEach(
                               version -> {
                                 var nativeVersion =
-                                    SFVersionConstants.CURRENT_PROTOCOL_VERSION == version ? yesEmoji : noEmoji;
-                                var bedrockVersion = SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
-                                var javaVersion = !SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
-                                var snapshotVersion = SFVersionConstants.isAprilFools(version) ? yesEmoji : noEmoji;
-                                var legacyVersion = SFVersionConstants.isLegacy(version) ? yesEmoji : noEmoji;
+                                    SFVersionConstants.CURRENT_PROTOCOL_VERSION == version
+                                        ? yesEmoji
+                                        : noEmoji;
+                                var bedrockVersion =
+                                    SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
+                                var javaVersion =
+                                    !SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
+                                var snapshotVersion =
+                                    SFVersionConstants.isAprilFools(version) ? yesEmoji : noEmoji;
+                                var legacyVersion =
+                                    SFVersionConstants.isLegacy(version) ? yesEmoji : noEmoji;
 
-                                builder.append(String.format(
-                                    "| %s | %s | %s | %s | %s | %s |\n",
-                                    version.getName(),
-                                    nativeVersion,
-                                    javaVersion,
-                                    snapshotVersion,
-                                    legacyVersion,
-                                    bedrockVersion));
+                                builder.append(
+                                    String.format(
+                                        "| %s | %s | %s | %s | %s | %s |\n",
+                                        version.getName(),
+                                        nativeVersion,
+                                        javaVersion,
+                                        snapshotVersion,
+                                        legacyVersion,
+                                        bedrockVersion));
                               });
                       log.info(builder.toString());
 
@@ -721,10 +726,7 @@ public class ServerCommandManager {
             if (printMessages) {
               context
                   .getSource()
-                  .sendInfo(
-                      "--- Running command for bot "
-                          + bot.meta().accountName()
-                          + " ---");
+                  .sendInfo("--- Running command for bot " + bot.meta().accountName() + " ---");
             }
 
             var result = consumer.applyAsInt(bot);

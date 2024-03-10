@@ -231,8 +231,7 @@ public class SoulFireServer {
                     .addClass(ProxySettings.class, "Proxy Settings", true)));
 
     log.info(
-        "Finished loading! (Took {}ms)",
-        Duration.between(startTime, Instant.now()).toMillis());
+        "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
   }
 
   private static void registerInternalServerExtensions() {
@@ -259,12 +258,6 @@ public class SoulFireServer {
     plugins.forEach(SoulFireAPI::registerServerExtension);
   }
 
-  private void registerServerExtensions() {
-    pluginManager
-        .getExtensions(ServerPlugin.class)
-        .forEach(SoulFireAPI::registerServerExtension);
-  }
-
   @SuppressWarnings("UnstableApiUsage")
   public static void setupLoggingAndVia(SettingsHolder settingsHolder) {
     Via.getManager().debugHandler().setEnabled(settingsHolder.get(DevSettings.VIA_DEBUG));
@@ -278,6 +271,10 @@ public class SoulFireServer {
     Configurator.setRootLevel(level);
     Configurator.setLevel("io.netty", nettyLevel);
     Configurator.setLevel("io.grpc", grpcLevel);
+  }
+
+  private void registerServerExtensions() {
+    pluginManager.getExtensions(ServerPlugin.class).forEach(SoulFireAPI::registerServerExtension);
   }
 
   public String generateAdminJWT() {

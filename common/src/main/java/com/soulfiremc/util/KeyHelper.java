@@ -28,6 +28,8 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 public class KeyHelper {
+  private KeyHelper() {}
+
   public static String encodeBase64Key(Key key) {
     return Base64.getEncoder().encodeToString(key.getEncoded());
   }
@@ -35,7 +37,8 @@ public class KeyHelper {
   public static ECPublicKey decodeBase64PublicKey(String key) {
     try {
       var keyFactory = KeyFactory.getInstance("EC");
-      return (ECPublicKey) keyFactory.generatePublic(new X509EncodedKeySpec(decodeBase64String(key)));
+      return (ECPublicKey)
+          keyFactory.generatePublic(new X509EncodedKeySpec(decodeBase64String(key)));
     } catch (GeneralSecurityException e) {
       throw new JsonParseException(e);
     }
@@ -44,7 +47,8 @@ public class KeyHelper {
   public static ECPrivateKey decodeBase64PrivateKey(String key) {
     try {
       var keyFactory = KeyFactory.getInstance("EC");
-      return (ECPrivateKey) keyFactory.generatePrivate(new PKCS8EncodedKeySpec(decodeBase64String(key)));
+      return (ECPrivateKey)
+          keyFactory.generatePrivate(new PKCS8EncodedKeySpec(decodeBase64String(key)));
     } catch (GeneralSecurityException e) {
       throw new JsonParseException(e);
     }
@@ -52,8 +56,5 @@ public class KeyHelper {
 
   private static byte[] decodeBase64String(String key) {
     return Base64.getDecoder().decode(key);
-  }
-
-  private KeyHelper() {
   }
 }

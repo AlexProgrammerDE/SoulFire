@@ -43,8 +43,7 @@ public final class SFTheAlteningAuthService
 
   @Override
   public MinecraftAccount login(TheAlteningAuthData data, SFProxy proxyData) throws IOException {
-    var request =
-        new AuthenticationRequest(data.altToken, PASSWORD, UUID.randomUUID().toString());
+    var request = new AuthenticationRequest(data.altToken, PASSWORD, UUID.randomUUID().toString());
     return ReactorHttpHelper.createReactorClient(proxyData, true)
         .post()
         .uri(AUTHENTICATE_ENDPOINT)
@@ -57,16 +56,13 @@ public final class SFTheAlteningAuthService
                         responseText -> {
                           var response =
                               GsonInstance.GSON.fromJson(
-                                  responseText,
-                                  AuthenticateRefreshResponse.class);
+                                  responseText, AuthenticateRefreshResponse.class);
 
                           return new MinecraftAccount(
                               AuthType.THE_ALTENING,
                               UUIDHelper.convertToDashed(response.selectedProfile().id()),
                               response.selectedProfile().name(),
-                              new OnlineJavaData(
-                                  response.accessToken(),
-                                  -1));
+                              new OnlineJavaData(response.accessToken(), -1));
                         }))
         .block();
   }

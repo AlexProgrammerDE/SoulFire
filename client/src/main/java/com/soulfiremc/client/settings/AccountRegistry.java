@@ -76,9 +76,8 @@ public class AccountRegistry {
         request.setProxy(proxy.toProto());
       }
 
-      return MinecraftAccount.fromProto(rpcClient.mcAuthServiceBlocking()
-          .login(request.build())
-          .getAccount());
+      return MinecraftAccount.fromProto(
+          rpcClient.mcAuthServiceBlocking().login(request.build()).getAccount());
     } catch (Exception e) {
       log.error("Failed to load account from string", e);
       throw new RuntimeException(e);
