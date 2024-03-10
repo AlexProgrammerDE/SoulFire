@@ -21,7 +21,7 @@ import com.soulfiremc.account.AuthType;
 import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.account.service.OnlineJavaData;
 import com.soulfiremc.proxy.SFProxy;
-import com.soulfiremc.util.HttpHelper;
+import com.soulfiremc.server.util.HttpHelper;
 import java.io.IOException;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;

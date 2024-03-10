@@ -15,11 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.util;
+package com.soulfiremc.server.util;
 
 import com.google.gson.JsonObject;
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.server.util.VersionComparator;
+import com.soulfiremc.util.GsonInstance;
 import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

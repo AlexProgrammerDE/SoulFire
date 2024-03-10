@@ -21,7 +21,7 @@ import com.soulfiremc.account.AuthType;
 import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.util.GsonInstance;
-import com.soulfiremc.util.HttpHelper;
+import com.soulfiremc.server.util.HttpHelper;
 import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;

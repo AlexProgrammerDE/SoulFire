@@ -59,7 +59,7 @@ import com.soulfiremc.server.viaversion.platform.SFViaLegacy;
 import com.soulfiremc.server.viaversion.platform.SFViaPlatform;
 import com.soulfiremc.server.viaversion.platform.SFViaRewind;
 import com.soulfiremc.util.SFPathConstants;
-import com.soulfiremc.util.SFUpdateChecker;
+import com.soulfiremc.server.util.SFUpdateChecker;
 import com.soulfiremc.util.ShutdownManager;
 import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;

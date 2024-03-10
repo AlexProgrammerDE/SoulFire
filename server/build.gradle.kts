@@ -1,17 +1,12 @@
-import com.github.jk1.license.filter.LicenseBundleNormalizer
-import com.github.jk1.license.filter.ReduceDuplicateLicensesFilter
-import com.github.jk1.license.render.CsvReportRenderer
-import com.github.jk1.license.render.InventoryHtmlReportRenderer
-
 plugins {
     `sf-java-conventions`
     alias(libs.plugins.jmh)
-    alias(libs.plugins.license.report)
 }
 
 dependencies {
     implementation(projects.buildData)
     implementation(projects.proto)
+    implementation(projects.common)
 
     // Log/Console libraries
     implementation(libs.bundles.log4j)
@@ -71,9 +66,6 @@ dependencies {
     api(libs.bundles.mixins)
     api(libs.reflect)
     api(libs.lambdaevents)
-
-    // For detecting the dir to put data in
-    implementation(libs.appdirs)
 
     // For microsoft account authentication
     api(libs.minecraftauth) {
@@ -137,13 +129,4 @@ publishing {
             name = "codemc"
         }
     }
-}
-
-licenseReport {
-    projects = arrayOf(rootProject)
-
-    renderers = arrayOf(InventoryHtmlReportRenderer(), CsvReportRenderer())
-    filters = arrayOf(LicenseBundleNormalizer(), ReduceDuplicateLicensesFilter())
-
-    excludeBoms = true
 }

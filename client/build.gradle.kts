@@ -6,7 +6,6 @@ import com.github.jk1.license.render.InventoryHtmlReportRenderer
 plugins {
     application
     `sf-java-conventions`
-    alias(libs.plugins.jmh)
     alias(libs.plugins.license.report)
 }
 
@@ -26,6 +25,7 @@ application {
 dependencies {
     implementation(projects.buildData)
     implementation(projects.proto)
+    implementation(projects.common)
     implementation(projects.server)
 
     // The java 8 launcher takes care of notifying the user if they are using an unsupported java version
@@ -77,9 +77,6 @@ dependencies {
     api(libs.bundles.mixins)
     api(libs.reflect)
     api(libs.lambdaevents)
-
-    // For detecting the dir to put data in
-    implementation(libs.appdirs)
 
     // For class injection
     api(libs.injector)
@@ -150,17 +147,6 @@ tasks {
     }
     build {
         dependsOn(uberJar)
-    }
-}
-
-val repoName = if (version.toString().endsWith("SNAPSHOT")) "maven-snapshots" else "maven-releases"
-publishing {
-    repositories {
-        maven("https://repo.codemc.org/repository/${repoName}/") {
-            credentials.username = System.getenv("CODEMC_USERNAME")
-            credentials.password = System.getenv("CODEMC_PASSWORD")
-            name = "codemc"
-        }
     }
 }
 

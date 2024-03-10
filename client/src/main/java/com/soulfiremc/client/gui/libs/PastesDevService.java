@@ -18,7 +18,7 @@
 package com.soulfiremc.client.gui.libs;
 
 import com.soulfiremc.util.GsonInstance;
-import com.soulfiremc.util.HttpHelper;
+import com.soulfiremc.server.util.HttpHelper;
 import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;

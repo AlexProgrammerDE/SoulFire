@@ -23,7 +23,7 @@ import com.soulfiremc.account.service.OnlineJavaData;
 import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.util.GsonInstance;
-import com.soulfiremc.util.HttpHelper;
+import com.soulfiremc.server.util.HttpHelper;
 import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
