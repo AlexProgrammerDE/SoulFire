@@ -38,6 +38,7 @@ import javax.swing.SwingUtilities;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.reflect.Modules;
+import org.pf4j.PluginManager;
 
 @Slf4j
 @Getter
@@ -47,12 +48,14 @@ public class GUIManager {
   private final Injector injector =
       new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
-  private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
+  private final ShutdownManager shutdownManager;
   private final ClientSettingsManager clientSettingsManager;
 
-  public GUIManager(RPCClient rpcClient) {
+  public GUIManager(RPCClient rpcClient, PluginManager pluginManager) {
     injector.register(GUIManager.class, this);
     injector.register(RPCClient.class, rpcClient);
+
+    this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
     injector.register(ShutdownManager.class, shutdownManager);
 
     this.rpcClient = rpcClient;

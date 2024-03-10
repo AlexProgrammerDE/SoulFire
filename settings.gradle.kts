@@ -68,7 +68,8 @@ include(
     "build-data",
     "j8-launcher",
     "proto",
-    "server"
+    "server",
+    "client"
 )
 
 rootProject.name = "soulfire"

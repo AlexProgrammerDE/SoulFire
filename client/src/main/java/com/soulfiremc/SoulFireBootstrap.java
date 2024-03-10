@@ -73,7 +73,6 @@ public class SoulFireBootstrap {
   @SuppressWarnings("unused")
   public static void bootstrap(String[] args, List<ClassLoader> classLoaders) {
     AnsiConsole.systemInstall();
-    setupLogging(SettingsHolder.EMPTY);
 
     injectExceptionHandler();
 
@@ -172,15 +171,6 @@ public class SoulFireBootstrap {
     for (var plugin : PLUGIN_MANAGER.getPlugins()) {
       classLoaders.add(plugin.getPluginClassLoader());
     }
-  }
-
-  public static void setupLogging(SettingsHolder settingsHolder) {
-    var level = settingsHolder.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO;
-    var nettyLevel = settingsHolder.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO;
-    var grpcLevel = settingsHolder.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO;
-    Configurator.setRootLevel(level);
-    Configurator.setLevel("io.netty", nettyLevel);
-    Configurator.setLevel("io.grpc", grpcLevel);
   }
 
   private static String getHost() {

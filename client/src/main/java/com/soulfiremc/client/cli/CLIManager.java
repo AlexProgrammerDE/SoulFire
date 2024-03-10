@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.pf4j.PluginManager;
 import picocli.CommandLine;
 
 @Slf4j
@@ -46,12 +47,14 @@ public class CLIManager {
   private final Injector injector =
       new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
-  private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
+  private final ShutdownManager shutdownManager;
   private final ClientSettingsManager clientSettingsManager;
 
-  public CLIManager(RPCClient rpcClient) {
+  public CLIManager(RPCClient rpcClient, PluginManager pluginManager) {
     injector.register(CLIManager.class, this);
     injector.register(RPCClient.class, rpcClient);
+
+    this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
     injector.register(ShutdownManager.class, shutdownManager);
 
     this.rpcClient = rpcClient;

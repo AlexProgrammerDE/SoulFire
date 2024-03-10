@@ -4,14 +4,32 @@ import com.github.jk1.license.render.CsvReportRenderer
 import com.github.jk1.license.render.InventoryHtmlReportRenderer
 
 plugins {
+    application
     `sf-java-conventions`
     alias(libs.plugins.jmh)
     alias(libs.plugins.license.report)
 }
 
+// Uppercase all artifacts
+tasks.withType<AbstractArchiveTask> {
+    if (archiveBaseName.isPresent && archiveBaseName.get() == "client") {
+        archiveBaseName.set("SoulFire")
+        destinationDirectory = rootProject.file("build/libs")
+    }
+}
+
+application {
+    applicationName = "SoulFire"
+    mainClass = "com.soulfiremc.SoulFireLauncher"
+}
+
 dependencies {
     implementation(projects.buildData)
     implementation(projects.proto)
+    implementation(projects.server)
+
+    // The java 8 launcher takes care of notifying the user if they are using an unsupported java version
+    implementation(projects.j8Launcher)
 
     // Log/Console libraries
     implementation(libs.bundles.log4j)
@@ -25,37 +43,25 @@ dependencies {
     // For command handling
     api(libs.brigadier)
 
-    // Main protocol library
-    api(libs.mcprotocollib)
+    // For CLI support
+    implementation(libs.picoli)
+    annotationProcessor(libs.picoli.codegen)
 
-    // For advanced encryption and compression
-    implementation(libs.velocity.native)
-
-    // Netty raknet support for ViaBedrock
-    implementation(libs.netty.raknet) {
-        isTransitive = false
+    // For GUI support
+    implementation(libs.bundles.flatlaf)
+    implementation(libs.xchart) {
+        exclude("org.junit.jupiter")
     }
+    implementation(libs.miglayout.swing)
+    implementation(libs.commons.swing)
 
-    // For supporting multiple Minecraft versions
-    implementation(libs.via.version) { isTransitive = false }
-    implementation(libs.via.backwards) { isTransitive = false }
-    implementation(libs.via.rewind)
-    implementation(libs.via.legacy)
-    implementation(libs.via.aprilfools)
-    implementation(libs.via.loader) {
-        exclude("org.slf4j", "slf4j-api")
-        exclude("org.yaml", "snakeyaml")
+    val lwjglVersion = "3.3.3"
+    val lwjglPlatforms = listOf("linux", "macos", "macos-arm64", "windows")
+    lwjglPlatforms.forEach { platform ->
+        implementation("org.lwjgl:lwjgl-nfd:$lwjglVersion:natives-$platform")
+        implementation("org.lwjgl:lwjgl:$lwjglVersion:natives-$platform")
     }
-
-    // For Bedrock support
-    implementation(libs.via.bedrock) {
-        exclude("io.netty", "netty-codec-http")
-    }
-
-    // For YAML support (ViaVersion)
-    api(libs.snakeyaml)
-
-    api(libs.bundles.kyori)
+    implementation("org.lwjgl:lwjgl-nfd:$lwjglVersion")
 
     api(libs.commons.validator)
     api(libs.commons.io)
@@ -74,13 +80,6 @@ dependencies {
 
     // For detecting the dir to put data in
     implementation(libs.appdirs)
-
-    // For microsoft account authentication
-    api(libs.minecraftauth) {
-        exclude("com.google.code.gson", "gson")
-        exclude("org.slf4j", "slf4j-api")
-    }
-    api(libs.bundles.reactor.netty)
 
     // For class injection
     api(libs.injector)
@@ -101,6 +100,19 @@ fun Manifest.applySFAttributes() {
 }
 
 tasks {
+    distTar {
+        onlyIf { false }
+    }
+    distZip {
+        onlyIf { false }
+    }
+    startScripts {
+        onlyIf { false }
+    }
+    // So the run task doesn't get marked as up-to-date, ever.
+    run.get().apply {
+        outputs.upToDateWhen { false }
+    }
     withType<Checkstyle> {
         exclude("**/com/soulfiremc/data**")
     }
@@ -120,12 +132,25 @@ tasks {
 
         manifest.applySFAttributes()
     }
-}
+    val uberJar = register<Jar>("uberJar") {
+        dependsOn(jar)
+        from(zipTree(jar.get().outputs.files.singleFile))
 
-jmh {
-    warmupIterations = 2
-    iterations = 2
-    fork = 2
+        manifest.applySFAttributes()
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        dependsOn(configurations.runtimeClasspath)
+        from({
+            configurations.runtimeClasspath.get()
+                .filter { it.name.endsWith("jar") }
+                .filter { !it.toString().contains("build/libs") }
+        }) {
+            into("META-INF/lib")
+        }
+    }
+    build {
+        dependsOn(uberJar)
+    }
 }
 
 val repoName = if (version.toString().endsWith("SNAPSHOT")) "maven-snapshots" else "maven-releases"

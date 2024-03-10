@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.grpc;
 
-import com.soulfiremc.SoulFireBootstrap;
 import com.soulfiremc.grpc.generated.ClientDataRequest;
 import com.soulfiremc.grpc.generated.ClientPlugin;
 import com.soulfiremc.grpc.generated.ConfigServiceGrpc;
@@ -34,9 +33,9 @@ import lombok.RequiredArgsConstructor;
 public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
   private final SoulFireServer soulFireServer;
 
-  private static Collection<ClientPlugin> getExtensions() {
+  private Collection<ClientPlugin> getExtensions() {
     var plugins = new ArrayList<ClientPlugin>();
-    for (var pluginWrapper : SoulFireBootstrap.PLUGIN_MANAGER.getPlugins()) {
+    for (var pluginWrapper : soulFireServer.pluginManager().getPlugins()) {
       var id = pluginWrapper.getPluginId();
       var description = pluginWrapper.getDescriptor().getPluginDescription();
       var version = pluginWrapper.getDescriptor().getVersion();

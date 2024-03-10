@@ -17,16 +17,17 @@
  */
 package com.soulfiremc.util;
 
-import com.soulfiremc.SoulFireBootstrap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.pf4j.PluginManager;
 
 @Slf4j
 @RequiredArgsConstructor
 public class ShutdownManager {
   private final Runnable shutdownHook;
+  private final PluginManager pluginManager;
   private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
   @Getter private boolean shutdown = false;
 
@@ -46,8 +47,8 @@ public class ShutdownManager {
 
     shutdownHook.run();
 
-    SoulFireBootstrap.PLUGIN_MANAGER.stopPlugins();
-    SoulFireBootstrap.PLUGIN_MANAGER.unloadPlugins();
+    pluginManager.stopPlugins();
+    pluginManager.unloadPlugins();
 
     shutdown = true;
 

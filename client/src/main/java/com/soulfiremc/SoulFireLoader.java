@@ -26,18 +26,18 @@ public class SoulFireLoader {
   private SoulFireLoader() {}
 
   public static void runHeadless(String host, int port, String[] args) {
-    var soulFire = new SoulFireServer(host, port);
+    var soulFire = new SoulFireServer(host, port, SoulFireBootstrap.PLUGIN_MANAGER, SoulFireBootstrap.START_TIME);
 
     var rpcClient = new RPCClient(host, port, soulFire.generateLocalCliJWT());
-    var cliManager = new CLIManager(rpcClient);
+    var cliManager = new CLIManager(rpcClient, SoulFireBootstrap.PLUGIN_MANAGER);
     cliManager.initCLI(args);
   }
 
   public static void runGUI(String host, int port) {
-    var soulFire = new SoulFireServer(host, port);
+    var soulFire = new SoulFireServer(host, port, SoulFireBootstrap.PLUGIN_MANAGER, SoulFireBootstrap.START_TIME);
 
     var rpcClient = new RPCClient(host, port, soulFire.generateAdminJWT());
-    var guiManager = new GUIManager(rpcClient);
+    var guiManager = new GUIManager(rpcClient, SoulFireBootstrap.PLUGIN_MANAGER);
     guiManager.initGUI();
   }
 }

@@ -19,7 +19,6 @@ package com.soulfiremc.server;
 
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
-import com.soulfiremc.SoulFireBootstrap;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.server.api.AttackState;
 import com.soulfiremc.server.api.ServerPlugin;
@@ -90,7 +89,10 @@ import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.pf4j.PluginManager;
 
 @Slf4j
 @Getter
@@ -109,11 +111,15 @@ public class SoulFireServer {
   private final Int2ObjectMap<AttackManager> attacks =
       Int2ObjectMaps.synchronize(new Int2ObjectArrayMap<>());
   private final RPCServer rpcServer;
-  private final ShutdownManager shutdownManager = new ShutdownManager(this::shutdownHook);
   private final ServerSettingsRegistry settingsRegistry;
   private final SecretKey jwtSecretKey;
+  private final PluginManager pluginManager;
+  private final ShutdownManager shutdownManager;
 
-  public SoulFireServer(String host, int port) {
+  public SoulFireServer(String host, int port, PluginManager pluginManager, Instant startTime) {
+    this.pluginManager = pluginManager;
+    this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
+
     // Register into injector
     injector.register(SoulFireServer.class, this);
 
@@ -226,7 +232,7 @@ public class SoulFireServer {
 
     log.info(
         "Finished loading! (Took {}ms)",
-        Duration.between(SoulFireBootstrap.START_TIME, Instant.now()).toMillis());
+        Duration.between(startTime, Instant.now()).toMillis());
   }
 
   private static void registerInternalServerExtensions() {
@@ -253,8 +259,8 @@ public class SoulFireServer {
     plugins.forEach(SoulFireAPI::registerServerExtension);
   }
 
-  private static void registerServerExtensions() {
-    SoulFireBootstrap.PLUGIN_MANAGER
+  private void registerServerExtensions() {
+    pluginManager
         .getExtensions(ServerPlugin.class)
         .forEach(SoulFireAPI::registerServerExtension);
   }
@@ -262,7 +268,16 @@ public class SoulFireServer {
   @SuppressWarnings("UnstableApiUsage")
   public static void setupLoggingAndVia(SettingsHolder settingsHolder) {
     Via.getManager().debugHandler().setEnabled(settingsHolder.get(DevSettings.VIA_DEBUG));
-    SoulFireBootstrap.setupLogging(settingsHolder);
+    setupLogging(settingsHolder);
+  }
+
+  public static void setupLogging(SettingsHolder settingsHolder) {
+    var level = settingsHolder.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO;
+    var nettyLevel = settingsHolder.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO;
+    var grpcLevel = settingsHolder.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO;
+    Configurator.setRootLevel(level);
+    Configurator.setLevel("io.netty", nettyLevel);
+    Configurator.setLevel("io.grpc", grpcLevel);
   }
 
   public String generateAdminJWT() {
