@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.util;
 
-import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.util.ReactorHttpHelper;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import java.io.IOException;
@@ -40,53 +40,10 @@ import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufFlux;
-import reactor.netty.transport.ProxyProvider;
 
 @Slf4j
-public class HttpHelper {
-  private HttpHelper() {}
-
-  public static reactor.netty.http.client.HttpClient createReactorClient(
-      SFProxy proxyData, boolean withBody) {
-    var base =
-        reactor.netty.http.client.HttpClient.create()
-            .responseTimeout(Duration.ofSeconds(5))
-            .headers(
-                h -> {
-                  h.add("Accept", "application/json");
-                  if (withBody) {
-                    h.add("Content-Type", "application/json");
-                  }
-
-                  h.add("Accept-Language", "en-US,en");
-                  h.add("User-Agent", "SoulFire/" + BuildData.VERSION);
-                });
-
-    return proxyData == null
-        ? base
-        : base.proxy(
-            p -> {
-              var spec =
-                  p.type(
-                          switch (proxyData.type()) {
-                            case HTTP -> ProxyProvider.Proxy.HTTP;
-                            case SOCKS4 -> ProxyProvider.Proxy.SOCKS4;
-                            case SOCKS5 -> ProxyProvider.Proxy.SOCKS5;
-                          })
-                      .host(proxyData.host())
-                      .port(proxyData.port())
-                      .nonProxyHosts("localhost")
-                      .connectTimeoutMillis(20_000);
-
-              if (proxyData.username() != null) {
-                spec.username(proxyData.username());
-              }
-
-              if (proxyData.password() != null) {
-                spec.password(s -> proxyData.password());
-              }
-            });
-  }
+public class LenniHttpHelper {
+  private LenniHttpHelper() {}
 
   public static HttpClient createLenniMCAuthHttpClient(SFProxy proxyData) {
     return MinecraftAuth.createHttpClient()
@@ -117,7 +74,7 @@ public class HttpHelper {
         var requestHeaders = getHeaders(httpRequest, cookieManager);
 
         var base =
-            createReactorClient(proxyData, false)
+            ReactorHttpHelper.createReactorClient(proxyData, false)
                 .followRedirect(
                     switch (httpRequest.getFollowRedirects()) {
                       case NOT_SET -> client.isFollowRedirects();

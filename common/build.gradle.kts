@@ -7,18 +7,16 @@ dependencies {
     implementation(projects.proto)
 
     // Log/Console libraries
-    implementation(libs.bundles.log4j)
-    implementation(libs.jline)
-    implementation(libs.jansi)
-    implementation(libs.bundles.ansi4j)
-    implementation(libs.terminalconsoleappender)
+    api(libs.bundles.log4j)
+    api(libs.jline)
+    api(libs.jansi)
+    api(libs.bundles.ansi4j)
+    api(libs.terminalconsoleappender)
     api(libs.slf4j)
-    implementation(libs.disruptor)
+    api(libs.disruptor)
 
     // For command handling
     api(libs.brigadier)
-
-    api(libs.bundles.kyori)
 
     api(libs.commons.validator)
     api(libs.commons.io)
@@ -30,6 +28,9 @@ dependencies {
     }
     api(libs.fastutil)
     api(libs.caffeine)
+    api(libs.jetbrains.annotations)
+
+    api(libs.bundles.reactor.netty)
 
     api(libs.bundles.mixins)
     api(libs.reflect)

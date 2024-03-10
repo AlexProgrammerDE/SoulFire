@@ -17,9 +17,11 @@ tasks.withType<AbstractArchiveTask> {
     }
 }
 
+val projectMainClass = "com.soulfiremc.launcher.SoulFireClientLauncher"
+
 application {
     applicationName = "SoulFire"
-    mainClass = "com.soulfiremc.SoulFireLauncher"
+    mainClass = projectMainClass
 }
 
 dependencies {
@@ -30,18 +32,6 @@ dependencies {
 
     // The java 8 launcher takes care of notifying the user if they are using an unsupported java version
     implementation(projects.j8Launcher)
-
-    // Log/Console libraries
-    implementation(libs.bundles.log4j)
-    implementation(libs.jline)
-    implementation(libs.jansi)
-    implementation(libs.bundles.ansi4j)
-    implementation(libs.terminalconsoleappender)
-    api(libs.slf4j)
-    implementation(libs.disruptor)
-
-    // For command handling
-    api(libs.brigadier)
 
     // For CLI support
     implementation(libs.picoli)
@@ -63,17 +53,6 @@ dependencies {
     }
     implementation("org.lwjgl:lwjgl-nfd:$lwjglVersion")
 
-    api(libs.commons.validator)
-    api(libs.commons.io)
-
-    api(libs.guava)
-    api(libs.gson)
-    api(libs.pf4j) {
-        isTransitive = false
-    }
-    api(libs.fastutil)
-    api(libs.caffeine)
-
     api(libs.bundles.mixins)
     api(libs.reflect)
     api(libs.lambdaevents)
@@ -85,7 +64,7 @@ dependencies {
 }
 
 fun Manifest.applySFAttributes() {
-    attributes["Main-Class"] = "com.soulfiremc.launcher.SoulFireJava8Launcher"
+    attributes["Main-Class"] = projectMainClass
     attributes["Name"] = "SoulFire"
     attributes["Specification-Title"] = "SoulFire"
     attributes["Specification-Version"] = version.toString()
@@ -110,13 +89,8 @@ tasks {
     run.get().apply {
         outputs.upToDateWhen { false }
     }
-    withType<Checkstyle> {
-        exclude("**/com/soulfiremc/data**")
-    }
     jar {
         archiveClassifier = "unshaded"
-
-        from(rootProject.file("LICENSE"))
 
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         dependsOn(configurations.runtimeClasspath)

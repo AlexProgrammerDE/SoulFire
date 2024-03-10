@@ -17,15 +17,12 @@
  */
 package com.soulfiremc.server.settings;
 
-import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.util.BuiltinSettingsConstants;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.config.Configurator;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DevSettings implements SettingsObject {

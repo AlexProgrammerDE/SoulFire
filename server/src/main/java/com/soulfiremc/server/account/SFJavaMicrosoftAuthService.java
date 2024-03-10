@@ -21,7 +21,7 @@ import com.soulfiremc.account.AuthType;
 import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.account.service.OnlineJavaData;
 import com.soulfiremc.proxy.SFProxy;
-import com.soulfiremc.server.util.HttpHelper;
+import com.soulfiremc.server.util.LenniHttpHelper;
 import java.io.IOException;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
@@ -34,7 +34,7 @@ public final class SFJavaMicrosoftAuthService
     try {
       var fullJavaSession =
           MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(
-              HttpHelper.createLenniMCAuthHttpClient(proxyData),
+              LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
               new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
       var mcProfile = fullJavaSession.getMcProfile();
       var mcToken = mcProfile.getMcToken();

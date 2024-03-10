@@ -20,6 +20,7 @@ package com.soulfiremc.server.util;
 import com.google.gson.JsonObject;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.util.GsonInstance;
+import com.soulfiremc.util.ReactorHttpHelper;
 import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -55,7 +56,7 @@ public class SFUpdateChecker {
     }
 
     try {
-      return HttpHelper.createReactorClient(null, false)
+      return ReactorHttpHelper.createReactorClient(null, false)
           .get()
           .uri(UPDATE_URL)
           .responseSingle(

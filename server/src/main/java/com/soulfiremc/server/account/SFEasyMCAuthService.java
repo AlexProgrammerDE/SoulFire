@@ -22,7 +22,7 @@ import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.account.service.OnlineJavaData;
 import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
-import com.soulfiremc.server.util.HttpHelper;
+import com.soulfiremc.util.ReactorHttpHelper;
 import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
@@ -40,7 +40,7 @@ public final class SFEasyMCAuthService
   @Override
   public MinecraftAccount login(EasyMCAuthData data, SFProxy proxyData) throws IOException {
     var request = new AuthenticationRequest(data.altToken);
-    return HttpHelper.createReactorClient(null, true)
+    return ReactorHttpHelper.createReactorClient(proxyData, true)
         .post()
         .uri(AUTHENTICATE_ENDPOINT)
         .send(ByteBufFlux.fromString(Flux.just(GsonInstance.GSON.toJson(request))))

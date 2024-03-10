@@ -21,7 +21,7 @@ import com.soulfiremc.account.AuthType;
 import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.util.GsonInstance;
-import com.soulfiremc.server.util.HttpHelper;
+import com.soulfiremc.util.ReactorHttpHelper;
 import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -71,7 +71,7 @@ public class SFSessionService {
   }
 
   public void joinServer(UUID profileId, String authenticationToken, String serverId) {
-    HttpHelper.createReactorClient(proxyData, true)
+    ReactorHttpHelper.createReactorClient(proxyData, true)
         .post()
         .uri(joinEndpoint)
         .send(

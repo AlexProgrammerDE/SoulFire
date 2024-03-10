@@ -13,10 +13,10 @@ import javax.swing.event.HyperlinkEvent;
 
 // Too early to init loggers
 @SuppressWarnings("CallToPrintStackTrace")
-public class SoulFireJava8Launcher {
-  public static void main(String[] args) {
+public class SoulFireJava8LauncherWrapper {
+  public static void mainWrapper(String[] args, String className) {
     try {
-      Class.forName("com.soulfiremc.SoulFireLauncher")
+      Class.forName(className)
           .getMethod("main", String[].class)
           .invoke(null, (Object) args);
     } catch (UnsupportedClassVersionError e) {

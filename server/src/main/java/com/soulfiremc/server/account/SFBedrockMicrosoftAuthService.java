@@ -21,7 +21,7 @@ import com.soulfiremc.account.AuthType;
 import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.account.service.BedrockData;
 import com.soulfiremc.proxy.SFProxy;
-import com.soulfiremc.server.util.HttpHelper;
+import com.soulfiremc.server.util.LenniHttpHelper;
 import java.io.IOException;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
@@ -35,7 +35,7 @@ public final class SFBedrockMicrosoftAuthService
     try {
       var fullBedrockSession =
           MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(
-              HttpHelper.createLenniMCAuthHttpClient(proxyData),
+              LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
               new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
 
       var mcChain = fullBedrockSession.getMcChain();

@@ -18,7 +18,7 @@
 package com.soulfiremc.client.gui.libs;
 
 import com.soulfiremc.util.GsonInstance;
-import com.soulfiremc.server.util.HttpHelper;
+import com.soulfiremc.util.ReactorHttpHelper;
 import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -31,7 +31,7 @@ public class PastesDevService {
   private PastesDevService() {}
 
   public static String upload(String text) {
-    return HttpHelper.createReactorClient(null, true)
+    return ReactorHttpHelper.createReactorClient(null, true)
         .post()
         .uri(PASTES_DEV_URI)
         .send(ByteBufFlux.fromString(Flux.just(text)))
