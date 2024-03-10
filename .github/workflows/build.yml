@@ -27,7 +27,7 @@ jobs:
           projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
 
           mkdir client/build/upload
-          cp client/build/libs/SoulFire-$projectVersion.jar client/build/upload
+          cp client/build/libs/SoulFireClient-$projectVersion.jar client/build/upload
 
           mkdir dedicated/build/upload
           cp dedicated/build/libs/SoulFireDedicated-$projectVersion.jar dedicated/build/upload
