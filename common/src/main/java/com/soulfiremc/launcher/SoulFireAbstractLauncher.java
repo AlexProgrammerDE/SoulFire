@@ -15,28 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc;
+package com.soulfiremc.launcher;
 
 import com.soulfiremc.util.SFContextClassLoader;
 import java.util.List;
 
-/**
- * This class only changes the classLoader for the rest of the program. This is so we can merge
- * plugin and server classes.
- */
-public class SoulFireLauncher {
-  private static final SFContextClassLoader SF_CONTEXT_CLASS_LOADER = new SFContextClassLoader();
+public abstract class SoulFireAbstractLauncher {
+  private final SFContextClassLoader SF_CONTEXT_CLASS_LOADER = new SFContextClassLoader();
 
-  public static void main(String[] args) {
+  public void run(String[] args) {
     Thread.currentThread().setContextClassLoader(SF_CONTEXT_CLASS_LOADER);
 
     try {
       SF_CONTEXT_CLASS_LOADER
-          .loadClass("com.soulfiremc.SoulFireBootstrap")
+          .loadClass(getBootstrapClassName())
           .getDeclaredMethod("bootstrap", String[].class, List.class)
           .invoke(null, args, SF_CONTEXT_CLASS_LOADER.childClassLoaders());
     } catch (ReflectiveOperationException e) {
       throw new RuntimeException(e);
     }
   }
+
+  protected abstract String getBootstrapClassName();
 }

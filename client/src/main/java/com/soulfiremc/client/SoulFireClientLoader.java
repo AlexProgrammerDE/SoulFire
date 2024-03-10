@@ -15,29 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc;
+package com.soulfiremc.client;
 
 import com.soulfiremc.client.cli.CLIManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.gui.GUIManager;
 import com.soulfiremc.server.SoulFireServer;
 
-public class SoulFireLoader {
-  private SoulFireLoader() {}
+public class SoulFireClientLoader {
+  private SoulFireClientLoader() {}
 
   public static void runHeadless(String host, int port, String[] args) {
-    var soulFire = new SoulFireServer(host, port, SoulFireBootstrap.PLUGIN_MANAGER, SoulFireBootstrap.START_TIME);
+    var soulFire = new SoulFireServer(host, port, SoulFireClientBootstrap.PLUGIN_MANAGER, SoulFireClientBootstrap.START_TIME);
 
     var rpcClient = new RPCClient(host, port, soulFire.generateLocalCliJWT());
-    var cliManager = new CLIManager(rpcClient, SoulFireBootstrap.PLUGIN_MANAGER);
+    var cliManager = new CLIManager(rpcClient, SoulFireClientBootstrap.PLUGIN_MANAGER);
     cliManager.initCLI(args);
   }
 
   public static void runGUI(String host, int port) {
-    var soulFire = new SoulFireServer(host, port, SoulFireBootstrap.PLUGIN_MANAGER, SoulFireBootstrap.START_TIME);
+    var soulFire = new SoulFireServer(host, port, SoulFireClientBootstrap.PLUGIN_MANAGER, SoulFireClientBootstrap.START_TIME);
 
     var rpcClient = new RPCClient(host, port, soulFire.generateAdminJWT());
-    var guiManager = new GUIManager(rpcClient, SoulFireBootstrap.PLUGIN_MANAGER);
+    var guiManager = new GUIManager(rpcClient, SoulFireClientBootstrap.PLUGIN_MANAGER);
     guiManager.initGUI();
   }
 }

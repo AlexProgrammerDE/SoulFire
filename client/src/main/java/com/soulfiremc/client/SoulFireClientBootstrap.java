@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc;
+package com.soulfiremc.client;
 
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.client.gui.GUIManager;
@@ -43,7 +43,7 @@ import org.pf4j.PluginManager;
  * This class prepares the earliest work possible, such as loading mixins and setting up logging.
  */
 @Slf4j
-public class SoulFireBootstrap {
+public class SoulFireClientBootstrap {
   public static final Instant START_TIME = Instant.now();
   public static final PluginManager PLUGIN_MANAGER =
       new JarPluginManager(SFPathConstants.PLUGINS_FOLDER);
@@ -64,7 +64,7 @@ public class SoulFireBootstrap {
     }
   }
 
-  private SoulFireBootstrap() {}
+  private SoulFireClientBootstrap() {}
 
   @SuppressWarnings("unused")
   public static void bootstrap(String[] args, List<ClassLoader> classLoaders) {
@@ -96,7 +96,7 @@ public class SoulFireBootstrap {
             });
 
     var classLoaders = new ArrayList<ClassLoader>();
-    classLoaders.add(SoulFireBootstrap.class.getClassLoader());
+    classLoaders.add(SoulFireClientBootstrap.class.getClassLoader());
     PLUGIN_MANAGER
         .getPlugins()
         .forEach(pluginWrapper -> classLoaders.add(pluginWrapper.getPluginClassLoader()));
@@ -122,13 +122,13 @@ public class SoulFireBootstrap {
     var port = getRPCPort();
     if (runServer) {
       log.info("Starting server on {}:{}", host, port);
-      SoulFireLoader.runHeadless(host, port, args);
+      SoulFireClientLoader.runHeadless(host, port, args);
     } else {
       log.info("Starting GUI and server on {}:{}", host, port);
       GUIManager.injectTheme();
       GUIManager.loadGUIProperties();
 
-      SoulFireLoader.runGUI(host, port);
+      SoulFireClientLoader.runGUI(host, port);
     }
   }
 
