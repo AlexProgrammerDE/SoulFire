@@ -385,10 +385,6 @@ public final class SessionDataManager {
         new ServerPlayData(packet.getMotd(), packet.getIconBytes(), packet.isEnforcesSecureChat());
   }
 
-  //
-  // Chat packets
-  //
-
   @EventHandler
   public void onPluginMessage(ClientboundCustomPayloadPacket packet) {
     log.debug("Received plugin message on channel {}", packet.getChannel());
@@ -432,10 +428,6 @@ public final class SessionDataManager {
     connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message, null));
   }
 
-  //
-  // Player list packets
-  //
-
   private void onChat(
       long stamp, Component message, ChatMessageReceiveEvent.ChatMessageSender sender) {
     connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message, sender));
@@ -468,10 +460,6 @@ public final class SessionDataManager {
       }
     }
   }
-
-  //
-  // Player data packets
-  //
 
   @EventHandler
   public void onPlayerListRemove(ClientboundPlayerInfoRemovePacket packet) {
@@ -543,10 +531,6 @@ public final class SessionDataManager {
     experienceData =
         new ExperienceData(packet.getExperience(), packet.getLevel(), packet.getTotalExperience());
   }
-
-  //
-  // Inventory packets
-  //
 
   @EventHandler
   public void onLevelTime(ClientboundSetTimePacket packet) {
@@ -676,10 +660,6 @@ public final class SessionDataManager {
     }
   }
 
-  //
-  // Chunk packets
-  //
-
   @EventHandler
   public void onSetCenterChunk(ClientboundSetChunkCacheCenterPacket packet) {
     centerChunk = new ChunkKey(packet.getChunkX(), packet.getChunkZ());
@@ -743,10 +723,6 @@ public final class SessionDataManager {
     }
   }
 
-  //
-  // Block packets
-  //
-
   @EventHandler
   public void onChunkForget(ClientboundForgetLevelChunkPacket packet) {
     var level = getCurrentLevel();
@@ -806,10 +782,6 @@ public final class SessionDataManager {
     log.debug("Updated block at {} to {}", vector3i, newId);
   }
 
-  //
-  // World border packets
-  //
-
   @EventHandler
   public void onBlockChangedAck(ClientboundBlockChangedAckPacket packet) {
     // TODO: Implement block break
@@ -852,10 +824,6 @@ public final class SessionDataManager {
   public void onBorderWarningTime(ClientboundSetBorderWarningDelayPacket packet) {
     borderState.warningTime(packet.getWarningDelay());
   }
-
-  //
-  // Entity packets
-  //
 
   @EventHandler
   public void onBorderWarningBlocks(ClientboundSetBorderWarningDistancePacket packet) {
