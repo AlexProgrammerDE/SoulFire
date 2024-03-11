@@ -25,32 +25,32 @@ application {
 
 dependencies {
     implementation(projects.buildData)
-    implementation(projects.proto)
-    implementation(projects.common)
-    implementation(projects.server)
+    api(projects.proto)
+    api(projects.common)
+    api(projects.server)
 
     // The java 8 launcher takes care of notifying the user if they are using an unsupported java version
     implementation(projects.j8Launcher)
 
     // For CLI support
-    implementation(libs.picoli)
+    api(libs.picoli)
     annotationProcessor(libs.picoli.codegen)
 
     // For GUI support
-    implementation(libs.bundles.flatlaf)
-    implementation(libs.xchart) {
+    api(libs.bundles.flatlaf)
+    api(libs.xchart) {
         exclude("org.junit.jupiter")
     }
-    implementation(libs.miglayout.swing)
-    implementation(libs.commons.swing)
+    api(libs.miglayout.swing)
+    api(libs.commons.swing)
 
     val lwjglVersion = "3.3.3"
     val lwjglPlatforms = listOf("linux", "macos", "macos-arm64", "windows")
     lwjglPlatforms.forEach { platform ->
-        implementation("org.lwjgl:lwjgl-nfd:$lwjglVersion:natives-$platform")
-        implementation("org.lwjgl:lwjgl:$lwjglVersion:natives-$platform")
+        api("org.lwjgl:lwjgl-nfd:$lwjglVersion:natives-$platform")
+        api("org.lwjgl:lwjgl:$lwjglVersion:natives-$platform")
     }
-    implementation("org.lwjgl:lwjgl-nfd:$lwjglVersion")
+    api("org.lwjgl:lwjgl-nfd:$lwjglVersion")
 }
 
 fun Manifest.applySFAttributes() {
