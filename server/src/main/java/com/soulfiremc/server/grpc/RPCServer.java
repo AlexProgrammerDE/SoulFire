@@ -78,7 +78,7 @@ public class RPCServer {
 
   public void start() throws IOException {
     server.start();
-    log.info("RPC Server started, listening on " + port);
+    log.info("RPC Server started, listening on {}", port);
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(

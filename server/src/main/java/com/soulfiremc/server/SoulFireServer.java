@@ -40,6 +40,7 @@ import com.soulfiremc.server.plugins.ClientBrand;
 import com.soulfiremc.server.plugins.ClientSettings;
 import com.soulfiremc.server.plugins.FakeVirtualHost;
 import com.soulfiremc.server.plugins.ForwardingBypass;
+import com.soulfiremc.server.plugins.InternalPlugin;
 import com.soulfiremc.server.plugins.KillAura;
 import com.soulfiremc.server.plugins.ModLoaderSupport;
 import com.soulfiremc.server.plugins.POVServer;
@@ -59,6 +60,7 @@ import com.soulfiremc.server.viaversion.platform.SFViaBedrock;
 import com.soulfiremc.server.viaversion.platform.SFViaLegacy;
 import com.soulfiremc.server.viaversion.platform.SFViaPlatform;
 import com.soulfiremc.server.viaversion.platform.SFViaRewind;
+import com.soulfiremc.util.SFFeatureFlags;
 import com.soulfiremc.util.SFPathConstants;
 import com.soulfiremc.util.ShutdownManager;
 import com.viaversion.viaversion.ViaManagerImpl;
@@ -74,7 +76,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -236,26 +237,35 @@ public class SoulFireServer {
 
   private static void registerInternalServerExtensions() {
     var plugins =
-        List.of(
-            new BotTicker(),
-            new ClientBrand(),
-            new ClientSettings(),
-            new AutoReconnect(),
-            new AutoRegister(),
-            new AutoRespawn(),
-            new AutoTotem(),
-            new AutoJump(),
-            new AutoArmor(),
-            new AutoEat(),
-            new ChatMessageLogger(),
-            new ServerListBypass(),
-            new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
-            new ModLoaderSupport(), // Needs to be before ForwardingBypass to not break it
-            new ForwardingBypass(),
-            new KillAura(),
-            new POVServer());
+        new InternalPlugin[] {
+          new BotTicker(),
+          new ClientBrand(),
+          new ClientSettings(),
+          new AutoReconnect(),
+          new AutoRegister(),
+          new AutoRespawn(),
+          new AutoTotem(),
+          new AutoJump(),
+          new AutoArmor(),
+          new AutoEat(),
+          new ChatMessageLogger(),
+          new ServerListBypass(),
+          new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
+          SFFeatureFlags.MOD_SUPPORT
+              ? new ModLoaderSupport()
+              : null, // Needs to be before ForwardingBypass to not break it
+          new ForwardingBypass(),
+          new KillAura(),
+          SFFeatureFlags.POV_SERVER ? new POVServer() : null
+        };
 
-    plugins.forEach(SoulFireAPI::registerServerExtension);
+    for (var plugin : plugins) {
+      if (plugin == null) {
+        continue;
+      }
+
+      SoulFireAPI.registerServerExtension(plugin);
+    }
   }
 
   @SuppressWarnings("UnstableApiUsage")
@@ -334,9 +344,5 @@ public class SoulFireServer {
 
   public CompletableFuture<?> stopAttack(int id) {
     return attacks.remove(id).stop();
-  }
-
-  public void shutdown() {
-    shutdownManager.shutdownSoftware(true);
   }
 }
