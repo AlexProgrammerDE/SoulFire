@@ -85,7 +85,7 @@ public class CLIManager {
   }
 
   @SuppressWarnings("unchecked")
-  private void registerOptions(CommandLine. Model. CommandSpec targetCommandSpec) {
+  private void registerOptions(CommandLine.Model.CommandSpec targetCommandSpec) {
     for (var page :
         rpcClient
             .configStubBlocking()

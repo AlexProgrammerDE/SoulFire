@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.brigadier;
 
-
 import com.soulfiremc.util.ShutdownManager;
 import lombok.RequiredArgsConstructor;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
@@ -32,7 +31,7 @@ import org.jline.reader.impl.history.DefaultHistory;
 
 @RequiredArgsConstructor
 public class GenericTerminalConsole extends SimpleTerminalConsole {
-  private static final Logger logger = LogManager.getLogger("SoulFire");
+  private static final Logger logger = LogManager.getLogger("SoulFireConsole");
   private final ShutdownManager shutdownManager;
   private final PlatformCommandManager commandManager;
 
@@ -77,4 +76,3 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
             .history(history));
   }
 }
-
