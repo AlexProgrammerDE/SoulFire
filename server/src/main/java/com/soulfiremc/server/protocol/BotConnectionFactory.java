@@ -19,8 +19,6 @@ package com.soulfiremc.server.protocol;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
-import com.soulfiremc.account.MinecraftAccount;
-import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.server.AttackManager;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
@@ -31,6 +29,8 @@ import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.settings.account.MinecraftAccount;
+import com.soulfiremc.settings.proxy.SFProxy;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import java.util.UUID;

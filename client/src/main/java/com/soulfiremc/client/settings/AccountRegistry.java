@@ -17,12 +17,12 @@
  */
 package com.soulfiremc.client.settings;
 
-import com.soulfiremc.account.AuthType;
-import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.grpc.generated.AuthRequest;
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
-import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.settings.account.AuthType;
+import com.soulfiremc.settings.account.MinecraftAccount;
+import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.EnabledWrapper;
 import java.util.ArrayList;
 import java.util.Collections;

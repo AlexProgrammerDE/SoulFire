@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.server.account;
 
-import com.soulfiremc.account.AuthType;
-import com.soulfiremc.account.MinecraftAccount;
-import com.soulfiremc.account.service.OfflineJavaData;
-import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.settings.account.AuthType;
+import com.soulfiremc.settings.account.MinecraftAccount;
+import com.soulfiremc.settings.account.service.OfflineJavaData;
+import com.soulfiremc.settings.proxy.SFProxy;
 
 public final class SFOfflineAuthService
     implements MCAuthService<SFOfflineAuthService.OfflineAuthData> {

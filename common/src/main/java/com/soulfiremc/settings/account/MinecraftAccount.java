@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.account;
+package com.soulfiremc.settings.account;
 
-import com.soulfiremc.account.service.AccountData;
-import com.soulfiremc.account.service.BedrockData;
-import com.soulfiremc.account.service.OfflineJavaData;
-import com.soulfiremc.account.service.OnlineJavaData;
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
+import com.soulfiremc.settings.account.service.AccountData;
+import com.soulfiremc.settings.account.service.BedrockData;
+import com.soulfiremc.settings.account.service.OfflineJavaData;
+import com.soulfiremc.settings.account.service.OnlineJavaData;
 import java.util.UUID;
 import lombok.NonNull;
 

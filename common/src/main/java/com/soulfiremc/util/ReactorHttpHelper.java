@@ -18,7 +18,7 @@
 package com.soulfiremc.util;
 
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.settings.proxy.SFProxy;
 import java.time.Duration;
 import reactor.netty.transport.ProxyProvider;
 

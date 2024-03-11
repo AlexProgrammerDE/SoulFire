@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.account;
 
-import com.soulfiremc.account.AuthType;
-import com.soulfiremc.account.MinecraftAccount;
-import com.soulfiremc.account.service.OnlineJavaData;
-import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.server.util.LenniHttpHelper;
+import com.soulfiremc.settings.account.AuthType;
+import com.soulfiremc.settings.account.MinecraftAccount;
+import com.soulfiremc.settings.account.service.OnlineJavaData;
+import com.soulfiremc.settings.proxy.SFProxy;
 import java.io.IOException;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;

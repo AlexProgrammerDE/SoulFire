@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.account;
 
-import com.soulfiremc.account.MinecraftAccount;
-import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.settings.account.MinecraftAccount;
+import com.soulfiremc.settings.proxy.SFProxy;
 import java.io.IOException;
 
 public sealed interface MCAuthService<T>

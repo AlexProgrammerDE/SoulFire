@@ -20,8 +20,14 @@ package com.soulfiremc.client.settings;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.JsonElement;
+import com.soulfiremc.grpc.generated.AttackStartRequest;
+import com.soulfiremc.grpc.generated.SettingsEntry;
+import com.soulfiremc.grpc.generated.SettingsNamespace;
 import com.soulfiremc.settings.ProfileDataStructure;
 import com.soulfiremc.settings.PropertyKey;
+import com.soulfiremc.settings.account.MinecraftAccount;
+import com.soulfiremc.settings.proxy.SFProxy;
+import com.soulfiremc.util.EnabledWrapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,12 +46,14 @@ import lombok.extern.slf4j.Slf4j;
 public class ClientSettingsManager {
   private final Multimap<PropertyKey, Consumer<JsonElement>> listeners =
       Multimaps.newListMultimap(new LinkedHashMap<>(), ArrayList::new);
-  private final Map<PropertyKey, Provider<JsonElement>> providers = new LinkedHashMap<>();
+  private final Map<String, Map<String, Provider<JsonElement>>> providers = new LinkedHashMap<>();
   @Getter private final AccountRegistry accountRegistry;
   @Getter private final ProxyRegistry proxyRegistry = new ProxyRegistry();
 
   public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {
-    providers.put(property, provider);
+    providers
+        .computeIfAbsent(property.namespace(), k -> new LinkedHashMap<>())
+        .put(property.key(), provider);
   }
 
   public void registerListener(PropertyKey property, Consumer<JsonElement> listener) {
@@ -76,19 +84,90 @@ public class ClientSettingsManager {
 
   public String exportSettings() {
     var settingsData = new LinkedHashMap<String, Map<String, JsonElement>>();
-    for (var providerEntry : providers.entrySet()) {
-      var property = providerEntry.getKey();
-      var provider = providerEntry.getValue();
+    for (var namespaceEntry : providers.entrySet()) {
+      for (var entry : namespaceEntry.getValue().entrySet()) {
+        var namespace = namespaceEntry.getKey();
+        var key = entry.getKey();
+        var value = entry.getValue().get();
 
-      var namespace = property.namespace();
-      var settingId = property.key();
-      var value = provider.get();
-
-      settingsData.computeIfAbsent(namespace, k -> new LinkedHashMap<>()).put(settingId, value);
+        settingsData.computeIfAbsent(namespace, k -> new LinkedHashMap<>()).put(key, value);
+      }
     }
 
     return new ProfileDataStructure(
             settingsData, accountRegistry.getAccounts(), proxyRegistry.getProxies())
         .serialize();
+  }
+
+  public AttackStartRequest exportSettingsProto() {
+    var namespaces = new ArrayList<SettingsNamespace>();
+
+    for (var namespaceEntry : providers.entrySet()) {
+      var namespace = namespaceEntry.getKey();
+      var namespaceSettings = new ArrayList<SettingsEntry>();
+
+      for (var entry : namespaceEntry.getValue().entrySet()) {
+        var key = entry.getKey();
+        var value = entry.getValue().get();
+
+        if (!value.isJsonPrimitive()) {
+          log.warn("Skipping non-primitive setting: {}#{}", namespace, key);
+          continue;
+        }
+
+        var primitive = value.getAsJsonPrimitive();
+        if (primitive.isBoolean()) {
+          namespaceSettings.add(
+              SettingsEntry.newBuilder()
+                  .setKey(key)
+                  .setBoolValue(primitive.getAsBoolean())
+                  .build());
+        } else if (primitive.isNumber()) {
+          var number = primitive.getAsNumber();
+          if (number instanceof Integer) {
+            namespaceSettings.add(
+                SettingsEntry.newBuilder().setKey(key).setIntValue(number.intValue()).build());
+          } else if (number instanceof Double) {
+            namespaceSettings.add(
+                SettingsEntry.newBuilder()
+                    .setKey(key)
+                    .setDoubleValue(number.doubleValue())
+                    .build());
+          } else {
+            log.warn("Skipping unsupported number setting: {}#{}", namespace, key);
+          }
+        } else if (primitive.isString()) {
+          namespaceSettings.add(
+              SettingsEntry.newBuilder()
+                  .setKey(key)
+                  .setStringValue(primitive.getAsString())
+                  .build());
+        } else {
+          log.warn("Skipping unsupported primitive setting: {}#{}", namespace, key);
+        }
+      }
+
+      namespaces.add(
+          SettingsNamespace.newBuilder()
+              .setNamespace(namespace)
+              .addAllEntries(namespaceSettings)
+              .build());
+    }
+
+    return AttackStartRequest.newBuilder()
+        .addAllSettings(namespaces)
+        .addAllAccounts(
+            accountRegistry.getAccounts().stream()
+                .filter(EnabledWrapper::enabled)
+                .map(EnabledWrapper::value)
+                .map(MinecraftAccount::toProto)
+                .toList())
+        .addAllProxies(
+            proxyRegistry.getProxies().stream()
+                .filter(EnabledWrapper::enabled)
+                .map(EnabledWrapper::value)
+                .map(SFProxy::toProto)
+                .toList())
+        .build();
   }
 }

@@ -94,7 +94,8 @@ public class SFContextClassLoader extends ClassLoader {
           // Ignore
         }
 
-        // In the next step, we pretend we own the classes of either the parent or the child class loaders
+        // In the next step, we pretend we own the classes of either the parent or the child class
+        // loaders
         var parentClassData = getClassBytes(this.getParent(), name);
         if (parentClassData == null) {
           if (lookingThroughPlugins) {

@@ -17,22 +17,20 @@
  */
 package com.soulfiremc.server.settings.lib;
 
-import com.soulfiremc.account.MinecraftAccount;
-import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.grpc.generated.AttackStartRequest;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ComboProperty;
 import com.soulfiremc.server.settings.property.DoubleProperty;
 import com.soulfiremc.server.settings.property.IntProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
-import com.soulfiremc.settings.ProfileDataStructure;
 import com.soulfiremc.settings.PropertyKey;
-import com.soulfiremc.util.EnabledWrapper;
+import com.soulfiremc.settings.account.MinecraftAccount;
+import com.soulfiremc.settings.proxy.SFProxy;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMaps;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -40,45 +38,39 @@ public record SettingsHolder(
     Object2ObjectMap<PropertyKey, Number> numberProperties,
     Object2BooleanMap<PropertyKey> booleanProperties,
     Object2ObjectMap<PropertyKey, String> stringProperties,
-    List<EnabledWrapper<MinecraftAccount>> accounts,
-    List<EnabledWrapper<SFProxy>> proxies) {
-  public static final SettingsHolder EMPTY =
-      new SettingsHolder(
-          Object2ObjectMaps.emptyMap(),
-          Object2BooleanMaps.emptyMap(),
-          Object2ObjectMaps.emptyMap(),
-          List.of(),
-          List.of());
-
-  public static SettingsHolder createSettingsHolder(ProfileDataStructure settingsSerialized) {
+    List<MinecraftAccount> accounts,
+    List<SFProxy> proxies) {
+  public static SettingsHolder deserialize(AttackStartRequest request) {
     var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
     var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
     var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();
 
-    settingsSerialized.handleProperties(
-        (propertyKey, settingData) -> {
-          if (settingData.isJsonPrimitive()) {
-            var primitive = settingData.getAsJsonPrimitive();
-            if (primitive.isBoolean()) {
-              booleanProperties.put(propertyKey, primitive.getAsBoolean());
-            } else if (primitive.isNumber()) {
-              numberProperties.put(propertyKey, primitive.getAsNumber());
-            } else if (primitive.isString()) {
-              stringProperties.put(propertyKey, primitive.getAsString());
-            } else {
-              throw new IllegalArgumentException("Unknown primitive type: " + primitive);
-            }
-          } else {
-            throw new IllegalArgumentException("Unknown type: " + settingData);
-          }
-        });
+    for (var namespace : request.getSettingsList()) {
+      for (var entry : namespace.getEntriesList()) {
+        var propertyKey = new PropertyKey(namespace.getNamespace(), entry.getKey());
+
+        switch (entry.getValueCase()) {
+          case STRINGVALUE -> stringProperties.put(propertyKey, entry.getStringValue());
+          case INTVALUE -> numberProperties.put(propertyKey, entry.getIntValue());
+          case BOOLVALUE -> booleanProperties.put(propertyKey, entry.getBoolValue());
+          case DOUBLEVALUE -> numberProperties.put(propertyKey, entry.getDoubleValue());
+          case VALUE_NOT_SET -> throw new IllegalArgumentException("Value not set");
+        }
+      }
+    }
+
+    var accounts = new ArrayList<MinecraftAccount>();
+    for (var account : request.getAccountsList()) {
+      accounts.add(MinecraftAccount.fromProto(account));
+    }
+
+    var proxies = new ArrayList<SFProxy>();
+    for (var proxy : request.getProxiesList()) {
+      proxies.add(SFProxy.fromProto(proxy));
+    }
 
     return new SettingsHolder(
-        numberProperties,
-        booleanProperties,
-        stringProperties,
-        settingsSerialized.accounts(),
-        settingsSerialized.proxies());
+        numberProperties, booleanProperties, stringProperties, accounts, proxies);
   }
 
   public int get(IntProperty property) {

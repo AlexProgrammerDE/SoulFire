@@ -18,7 +18,7 @@
 package com.soulfiremc.server.protocol.netty;
 
 import com.github.steveice10.packetlib.helper.TransportHelper;
-import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.settings.proxy.SFProxy;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;

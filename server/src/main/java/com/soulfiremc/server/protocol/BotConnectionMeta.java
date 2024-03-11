@@ -18,12 +18,12 @@
 package com.soulfiremc.server.protocol;
 
 import com.github.steveice10.mc.protocol.data.ProtocolState;
-import com.soulfiremc.account.MinecraftAccount;
-import com.soulfiremc.account.service.OnlineJavaData;
-import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.server.protocol.bot.BotControlAPI;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
+import com.soulfiremc.settings.account.MinecraftAccount;
+import com.soulfiremc.settings.account.service.OnlineJavaData;
+import com.soulfiremc.settings.proxy.SFProxy;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import java.util.UUID;
 import lombok.Getter;

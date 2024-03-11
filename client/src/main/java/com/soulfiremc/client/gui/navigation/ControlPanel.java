@@ -18,7 +18,6 @@
 package com.soulfiremc.client.gui.navigation;
 
 import com.soulfiremc.client.gui.GUIManager;
-import com.soulfiremc.grpc.generated.AttackStartRequest;
 import com.soulfiremc.grpc.generated.AttackStartResponse;
 import com.soulfiremc.grpc.generated.AttackStateToggleRequest;
 import com.soulfiremc.grpc.generated.AttackStateToggleResponse;
@@ -65,9 +64,7 @@ public class ControlPanel extends JPanel {
               .rpcClient()
               .attackStub()
               .startAttack(
-                  AttackStartRequest.newBuilder()
-                      .setSettings(guiManager.clientSettingsManager().exportSettings())
-                      .build(),
+                  guiManager.clientSettingsManager().exportSettingsProto(),
                   new StreamObserver<>() {
                     @Override
                     public void onNext(AttackStartResponse value) {

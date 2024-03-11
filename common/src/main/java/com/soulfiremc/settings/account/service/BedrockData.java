@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.account.service;
+package com.soulfiremc.settings.account.service;
 
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 import com.soulfiremc.util.KeyHelper;

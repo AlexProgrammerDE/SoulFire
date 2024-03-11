@@ -27,7 +27,6 @@ import com.soulfiremc.brigadier.ConsoleSubject;
 import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
-import com.soulfiremc.grpc.generated.AttackStartRequest;
 import com.soulfiremc.grpc.generated.AttackStartResponse;
 import com.soulfiremc.grpc.generated.CommandCompletionRequest;
 import com.soulfiremc.grpc.generated.CommandHistoryRequest;
@@ -61,9 +60,7 @@ public class ClientCommandManager implements PlatformCommandManager {
                       rpcClient
                           .attackStub()
                           .startAttack(
-                              AttackStartRequest.newBuilder()
-                                  .setSettings(clientSettingsManager.exportSettings())
-                                  .build(),
+                              clientSettingsManager.exportSettingsProto(),
                               new StreamObserver<>() {
                                 @Override
                                 public void onNext(AttackStartResponse value) {

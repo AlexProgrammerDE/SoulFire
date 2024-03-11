@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.client.gui.navigation;
 
-import com.soulfiremc.account.AuthType;
-import com.soulfiremc.account.MinecraftAccount;
 import com.soulfiremc.client.gui.GUIFrame;
 import com.soulfiremc.client.gui.GUIManager;
 import com.soulfiremc.client.gui.popups.ImportTextDialog;
+import com.soulfiremc.settings.account.AuthType;
+import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.util.BuiltinSettingsConstants;
 import com.soulfiremc.util.EnabledWrapper;
 import com.soulfiremc.util.SFPathConstants;

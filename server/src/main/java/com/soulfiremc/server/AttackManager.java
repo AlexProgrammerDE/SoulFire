@@ -18,8 +18,6 @@
 package com.soulfiremc.server;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
-import com.soulfiremc.account.MinecraftAccount;
-import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.server.account.SFOfflineAuthService;
 import com.soulfiremc.server.api.AttackState;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
@@ -38,7 +36,8 @@ import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.util.RandomUtil;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
-import com.soulfiremc.util.EnabledWrapper;
+import com.soulfiremc.settings.account.MinecraftAccount;
+import com.soulfiremc.settings.proxy.SFProxy;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -57,7 +56,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -135,11 +133,7 @@ public class AttackManager {
     var botsPerProxy =
         settingsHolder.get(ProxySettings.BOTS_PER_PROXY); // How many bots per proxy are allowed
 
-    var proxies =
-        settingsHolder.proxies().stream()
-            .filter(EnabledWrapper::enabled)
-            .map(EnabledWrapper::value)
-            .collect(Collectors.toCollection(ArrayList::new));
+    var proxies = new ArrayList<>(settingsHolder.proxies());
     var availableProxiesCount = proxies.size(); // How many proxies are available?
     var maxBots =
         botsPerProxy > 0
@@ -155,12 +149,7 @@ public class AttackManager {
       botAmount = maxBots;
     }
 
-    var accounts =
-        settingsHolder.accounts().stream()
-            .filter(EnabledWrapper::enabled)
-            .map(EnabledWrapper::value)
-            .collect(Collectors.toCollection(ArrayList::new));
-
+    var accounts = new ArrayList<>(settingsHolder.accounts());
     var availableAccounts = accounts.size();
 
     if (availableAccounts > 0 && botAmount > availableAccounts) {

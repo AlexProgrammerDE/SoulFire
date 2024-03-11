@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.server.account;
 
-import com.soulfiremc.account.AuthType;
-import com.soulfiremc.account.MinecraftAccount;
-import com.soulfiremc.account.service.OnlineJavaData;
-import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.settings.account.AuthType;
+import com.soulfiremc.settings.account.MinecraftAccount;
+import com.soulfiremc.settings.account.service.OnlineJavaData;
+import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ReactorHttpHelper;
 import java.io.IOException;

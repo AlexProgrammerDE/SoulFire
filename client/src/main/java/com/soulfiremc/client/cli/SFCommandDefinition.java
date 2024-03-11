@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.client.cli;
 
-import com.soulfiremc.account.AuthType;
 import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.proxy.ProxyType;
+import com.soulfiremc.settings.account.AuthType;
+import com.soulfiremc.settings.proxy.ProxyType;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

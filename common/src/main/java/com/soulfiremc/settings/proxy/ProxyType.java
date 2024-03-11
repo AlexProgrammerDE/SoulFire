@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.proxy;
+package com.soulfiremc.settings.proxy;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

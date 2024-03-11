@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.client.settings;
 
-import com.soulfiremc.proxy.ProxyType;
-import com.soulfiremc.proxy.SFProxy;
+import com.soulfiremc.settings.proxy.ProxyType;
+import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.EnabledWrapper;
 import java.util.ArrayList;
 import java.util.Collections;

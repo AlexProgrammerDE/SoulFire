@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.server.protocol;
 
-import com.soulfiremc.account.AuthType;
-import com.soulfiremc.proxy.SFProxy;
 import com.soulfiremc.server.util.UUIDHelper;
+import com.soulfiremc.settings.account.AuthType;
+import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ReactorHttpHelper;
 import java.math.BigInteger;
