@@ -33,6 +33,8 @@ public class SFContextClassLoader extends ClassLoader {
   @Getter private final List<ClassLoader> childClassLoaders = new ArrayList<>();
   private final Method findLoadedClassMethod;
   private final ClassLoader platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
+  // Prevent infinite loop when plugins are looking for classes inside this class loader
+  private boolean lookingThroughPlugins = false;
 
   public SFContextClassLoader() {
     super(createLibClassLoader());
@@ -92,13 +94,21 @@ public class SFContextClassLoader extends ClassLoader {
           // Ignore
         }
 
-        var classData = loadClassData(this.getParent(), name);
-        if (classData == null) {
+        // In the next step, we pretend we own the classes of either the parent or the child class loaders
+        var parentClassData = getClassBytes(this.getParent(), name);
+        if (parentClassData == null) {
+          if (lookingThroughPlugins) {
+            throw new ClassNotFoundException(name);
+          }
+
+          lookingThroughPlugins = true;
+
           // Check if child class loaders can load the class
           for (var childClassLoader : childClassLoaders) {
             try {
               var pluginClass = loadClassFromClassLoader(childClassLoader, name, resolve);
               if (pluginClass != null) {
+                lookingThroughPlugins = false;
                 return pluginClass;
               }
             } catch (ClassNotFoundException ignored) {
@@ -106,12 +116,14 @@ public class SFContextClassLoader extends ClassLoader {
             }
           }
 
+          lookingThroughPlugins = false;
           throw new ClassNotFoundException(name);
         }
 
-        c = defineClass(name, classData, 0, classData.length);
+        c = defineClass(name, parentClassData, 0, parentClassData.length);
       }
 
+      // Resolve the class if requested
       if (resolve) {
         resolveClass(c);
       }
@@ -146,7 +158,7 @@ public class SFContextClassLoader extends ClassLoader {
     }
   }
 
-  private byte[] loadClassData(ClassLoader classLoader, String className) {
+  private byte[] getClassBytes(ClassLoader classLoader, String className) {
     var classPath = className.replace('.', '/') + ".class";
 
     try (var inputStream = classLoader.getResourceAsStream(classPath)) {
