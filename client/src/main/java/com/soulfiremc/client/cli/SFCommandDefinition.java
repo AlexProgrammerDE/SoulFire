@@ -18,8 +18,8 @@
 package com.soulfiremc.client.cli;
 
 import com.soulfiremc.account.AuthType;
+import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.client.SFClientTerminalConsole;
 import com.soulfiremc.proxy.ProxyType;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -112,8 +112,7 @@ public class SFCommandDefinition implements Callable<Integer> {
     }
 
     // Delayed to here, so help and version do not get cut off
-    SFClientTerminalConsole.setupTerminalConsole(
-        cliManager.threadPool(), cliManager.shutdownManager(), cliManager.clientCommandManager());
+    GenericTerminalConsole.setupStreams();
 
     if (accountFile != null && authType != null) {
       try {
@@ -154,6 +153,9 @@ public class SFCommandDefinition implements Callable<Integer> {
       log.info(
           "SoulFire is ready to go! Type 'start-attack' to start the attack! (Use --start to start automatically)");
     }
+
+    new GenericTerminalConsole(cliManager.shutdownManager(), cliManager.clientCommandManager())
+        .start();
 
     return 0;
   }

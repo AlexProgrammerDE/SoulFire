@@ -24,6 +24,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.soulfiremc.brigadier.ConsoleSubject;
+import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
 import com.soulfiremc.grpc.generated.AttackStartRequest;
@@ -44,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ClientCommandManager {
+public class ClientCommandManager implements PlatformCommandManager {
   @Getter private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
   private final RPCClient rpcClient;
   private final ClientSettingsManager clientSettingsManager;
@@ -83,6 +84,7 @@ public class ClientCommandManager {
                     })));
   }
 
+  @Override
   public int execute(String command) {
     try {
       if (isClientCommand(command)) {
@@ -107,6 +109,7 @@ public class ClientCommandManager {
     return dispatcher.getRoot().getChild(commandName) != null;
   }
 
+  @Override
   public List<String> getCompletionSuggestions(String command) {
     try {
       return rpcClient
@@ -119,6 +122,7 @@ public class ClientCommandManager {
     }
   }
 
+  @Override
   public List<Map.Entry<Instant, String>> getCommandHistory() {
     var history = new ArrayList<Map.Entry<Instant, String>>();
     for (var entry :

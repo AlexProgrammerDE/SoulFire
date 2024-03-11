@@ -19,8 +19,8 @@ package com.soulfiremc.client.gui;
 
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
+import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.client.ClientCommandManager;
-import com.soulfiremc.client.SFClientTerminalConsole;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
 import com.soulfiremc.util.SFPathConstants;
@@ -73,13 +73,13 @@ public class GUIManager {
   }
 
   public void initGUI() {
+    GenericTerminalConsole.setupStreams();
+
     try {
       Files.createDirectories(SFPathConstants.PROFILES_FOLDER);
     } catch (IOException e) {
       log.error("Failed to create profiles folder!", e);
     }
-
-    SFClientTerminalConsole.setupTerminalConsole(threadPool, shutdownManager, clientCommandManager);
 
     // Override the title in AWT (GNOME displays the class name otherwise)
     setAppTitle();
@@ -94,6 +94,10 @@ public class GUIManager {
     log.info("Opening GUI!");
 
     SwingUtilities.invokeLater(() -> guiFrame.open(injector));
+
+    new GenericTerminalConsole(shutdownManager, clientCommandManager).start();
+
+    shutdownManager.awaitShutdown();
   }
 
   private void shutdownHook() {

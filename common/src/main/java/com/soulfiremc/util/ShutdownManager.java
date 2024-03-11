@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.util;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.pf4j.PluginManager;
@@ -29,7 +29,7 @@ public class ShutdownManager {
   private final Runnable shutdownHook;
   private final PluginManager pluginManager;
   private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
-  @Getter private boolean shutdown = false;
+  private CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
 
   /**
    * Shuts down the software if it is running.
@@ -50,10 +50,18 @@ public class ShutdownManager {
     pluginManager.stopPlugins();
     pluginManager.unloadPlugins();
 
-    shutdown = true;
+    shutdownFuture.complete(null);
 
     if (explicitExit) {
       System.exit(0);
     }
+  }
+
+  public void awaitShutdown() {
+    shutdownFuture.join();
+  }
+
+  public boolean shutdown() {
+    return shutdownFuture.isDone();
   }
 }

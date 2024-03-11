@@ -36,6 +36,7 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.CommandNode;
 import com.soulfiremc.brigadier.CommandHelpWrapper;
 import com.soulfiremc.brigadier.ConsoleSubject;
+import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.brigadier.RedirectHelpWrapper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.EventUtil;
@@ -81,7 +82,7 @@ import org.cloudburstmc.math.vector.Vector3d;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ServerCommandManager {
+public class ServerCommandManager implements PlatformCommandManager {
   @Getter private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
   private final SoulFireServer soulFireServer;
   private final List<Map.Entry<Instant, String>> commandHistory =
@@ -782,12 +783,14 @@ public class ServerCommandManager {
         });
   }
 
+  @Override
   public List<Map.Entry<Instant, String>> getCommandHistory() {
     synchronized (commandHistory) {
       return List.copyOf(commandHistory);
     }
   }
 
+  @Override
   public int execute(String command) {
     command = command.strip();
 
@@ -857,6 +860,7 @@ public class ServerCommandManager {
     }
   }
 
+  @Override
   public List<String> getCompletionSuggestions(String command) {
     return dispatcher
         .getCompletionSuggestions(dispatcher.parse(command, new ConsoleSubject()))

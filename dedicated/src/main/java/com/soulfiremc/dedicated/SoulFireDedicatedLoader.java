@@ -17,14 +17,16 @@
  */
 package com.soulfiremc.dedicated;
 
+import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.SoulFireServer;
-import java.util.concurrent.Executors;
 
 public class SoulFireDedicatedLoader {
   private SoulFireDedicatedLoader() {}
 
   public static void runDedicated(String host, int port) {
+    GenericTerminalConsole.setupStreams();
+
     var soulFire =
         new SoulFireServer(
             host,
@@ -32,9 +34,11 @@ public class SoulFireDedicatedLoader {
             SoulFireDedicatedBootstrap.PLUGIN_MANAGER,
             SoulFireDedicatedBootstrap.START_TIME);
 
-    SFDedicatedTerminalConsole.setupTerminalConsole(
-        Executors.newSingleThreadExecutor(),
-        soulFire.shutdownManager(),
-        soulFire.injector().getSingleton(ServerCommandManager.class));
+    new GenericTerminalConsole(
+            soulFire.shutdownManager(),
+            soulFire.injector().getSingleton(ServerCommandManager.class))
+        .start();
+
+    soulFire.shutdownManager().awaitShutdown();
   }
 }
