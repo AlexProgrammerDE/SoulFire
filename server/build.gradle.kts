@@ -39,18 +39,11 @@ dependencies {
     // For YAML support (ViaVersion)
     api(libs.snakeyaml)
 
-    api(libs.bundles.mixins)
-    api(libs.reflect)
-    api(libs.lambdaevents)
-
     // For microsoft account authentication
     api(libs.minecraftauth) {
         exclude("com.google.code.gson", "gson")
         exclude("org.slf4j", "slf4j-api")
     }
-
-    // For class injection
-    api(libs.injector)
 
     testImplementation(libs.junit)
 }

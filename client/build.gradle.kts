@@ -51,15 +51,6 @@ dependencies {
         implementation("org.lwjgl:lwjgl:$lwjglVersion:natives-$platform")
     }
     implementation("org.lwjgl:lwjgl-nfd:$lwjglVersion")
-
-    api(libs.bundles.mixins)
-    api(libs.reflect)
-    api(libs.lambdaevents)
-
-    // For class injection
-    api(libs.injector)
-
-    testImplementation(libs.junit)
 }
 
 fun Manifest.applySFAttributes() {

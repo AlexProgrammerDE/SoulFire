@@ -31,13 +31,6 @@ dependencies {
 
     // The java 8 launcher takes care of notifying the user if they are using an unsupported java version
     implementation(projects.j8Launcher)
-
-    api(libs.bundles.mixins)
-    api(libs.reflect)
-    api(libs.lambdaevents)
-
-    // For class injection
-    api(libs.injector)
 }
 
 fun Manifest.applySFAttributes() {
