@@ -66,7 +66,6 @@ public class CLIManager {
     return input.replace("%", "%%");
   }
 
-  @SuppressWarnings("unchecked")
   public void initCLI(String[] args) {
     var soulFireCommand = new SFCommandDefinition(this);
     var commandLine = new CommandLine(soulFireCommand);
@@ -80,7 +79,13 @@ public class CLIManager {
           return 1;
         });
 
-    var targetCommandSpec = commandLine.getCommandSpec();
+    registerOptions(commandLine.getCommandSpec());
+
+    commandLine.execute(args);
+  }
+
+  @SuppressWarnings("unchecked")
+  private void registerOptions(CommandLine. Model. CommandSpec targetCommandSpec) {
     for (var page :
         rpcClient
             .configStubBlocking()
@@ -233,8 +238,6 @@ public class CLIManager {
         }
       }
     }
-
-    commandLine.execute(args);
   }
 
   private CommandLine.Model.OptionSpec addIntSetting(

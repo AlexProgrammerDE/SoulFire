@@ -157,6 +157,8 @@ public class SFCommandDefinition implements Callable<Integer> {
     new GenericTerminalConsole(cliManager.shutdownManager(), cliManager.clientCommandManager())
         .start();
 
+    cliManager.shutdownManager().awaitShutdown();
+
     return 0;
   }
 }
