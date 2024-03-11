@@ -5,34 +5,34 @@ plugins {
 
 dependencies {
     implementation(projects.buildData)
-    implementation(projects.proto)
-    implementation(projects.common)
+    api(projects.proto)
+    api(projects.common)
 
     // Main protocol library
     api(libs.mcprotocollib)
     api(libs.bundles.kyori)
 
     // For advanced encryption and compression
-    implementation(libs.velocity.native)
+    api(libs.velocity.native)
 
     // Netty raknet support for ViaBedrock
-    implementation(libs.netty.raknet) {
+    api(libs.netty.raknet) {
         isTransitive = false
     }
 
     // For supporting multiple Minecraft versions
-    implementation(libs.via.version) { isTransitive = false }
-    implementation(libs.via.backwards) { isTransitive = false }
-    implementation(libs.via.rewind)
-    implementation(libs.via.legacy)
-    implementation(libs.via.aprilfools)
-    implementation(libs.via.loader) {
+    api(libs.via.version) { isTransitive = false }
+    api(libs.via.backwards) { isTransitive = false }
+    api(libs.via.rewind)
+    api(libs.via.legacy)
+    api(libs.via.aprilfools)
+    api(libs.via.loader) {
         exclude("org.slf4j", "slf4j-api")
         exclude("org.yaml", "snakeyaml")
     }
 
     // For Bedrock support
-    implementation(libs.via.bedrock) {
+    api(libs.via.bedrock) {
         exclude("io.netty", "netty-codec-http")
     }
 

@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     implementation(projects.buildData)
-    implementation(projects.proto)
+    api(projects.proto)
 
     // Log/Console libraries
     api(libs.bundles.log4j)
@@ -37,7 +37,7 @@ dependencies {
     api(libs.lambdaevents)
 
     // For detecting the dir to put data in
-    implementation(libs.appdirs)
+    api(libs.appdirs)
 
     // For class injection
     api(libs.injector)
