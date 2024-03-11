@@ -17,8 +17,11 @@
  */
 package com.soulfiremc.client;
 
+import com.soulfiremc.client.cli.CLIManager;
+import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.gui.GUIManager;
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
+import com.soulfiremc.server.SoulFireServer;
 import java.awt.GraphicsEnvironment;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +37,26 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
     new SoulFireClientBootstrap().internalBootstrap(args, classLoaders);
   }
 
+  private static void runHeadless(String host, int port, String[] args) {
+    var soulFire =
+        new SoulFireServer(
+            host, port, SoulFireClientBootstrap.PLUGIN_MANAGER, SoulFireClientBootstrap.START_TIME);
+
+    var rpcClient = new RPCClient(host, port, soulFire.generateLocalCliJWT());
+    var cliManager = new CLIManager(rpcClient, SoulFireClientBootstrap.PLUGIN_MANAGER);
+    cliManager.initCLI(args);
+  }
+
+  private static void runGUI(String host, int port) {
+    var soulFire =
+        new SoulFireServer(
+            host, port, SoulFireClientBootstrap.PLUGIN_MANAGER, SoulFireClientBootstrap.START_TIME);
+
+    var rpcClient = new RPCClient(host, port, soulFire.generateAdminJWT());
+    var guiManager = new GUIManager(rpcClient, SoulFireClientBootstrap.PLUGIN_MANAGER);
+    guiManager.initGUI();
+  }
+
   @Override
   protected void postMixinMain(String[] args) {
     var host = getRPCHost();
@@ -44,13 +67,13 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
 
     if (runServer) {
       log.info("Starting server on {}:{}", host, port);
-      SoulFireClientLoader.runHeadless(host, port, args);
+      runHeadless(host, port, args);
     } else {
       log.info("Starting GUI and server on {}:{}", host, port);
       GUIManager.injectTheme();
       GUIManager.loadGUIProperties();
 
-      SoulFireClientLoader.runGUI(host, port);
+      runGUI(host, port);
     }
   }
 }

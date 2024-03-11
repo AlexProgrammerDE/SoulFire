@@ -17,7 +17,10 @@
  */
 package com.soulfiremc.dedicated;
 
+import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
+import com.soulfiremc.server.ServerCommandManager;
+import com.soulfiremc.server.SoulFireServer;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,12 +35,30 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
     new SoulFireDedicatedBootstrap().internalBootstrap(args, classLoaders);
   }
 
+  private static void runDedicated(String host, int port) {
+    GenericTerminalConsole.setupStreams();
+
+    var soulFire =
+        new SoulFireServer(
+            host,
+            port,
+            SoulFireDedicatedBootstrap.PLUGIN_MANAGER,
+            SoulFireDedicatedBootstrap.START_TIME);
+
+    new GenericTerminalConsole(
+            soulFire.shutdownManager(),
+            soulFire.injector().getSingleton(ServerCommandManager.class))
+        .start();
+
+    soulFire.shutdownManager().awaitShutdown();
+  }
+
   @Override
   protected void postMixinMain(String[] args) {
     var host = getRPCHost();
     var port = getRPCPort();
 
     log.info("Starting server on {}:{}", host, port);
-    SoulFireDedicatedLoader.runDedicated(host, port);
+    runDedicated(host, port);
   }
 }
