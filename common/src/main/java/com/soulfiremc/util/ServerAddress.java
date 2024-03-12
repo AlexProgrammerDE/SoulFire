@@ -22,7 +22,7 @@ import java.net.IDN;
 
 public record ServerAddress(HostAndPort hostAndPort) {
   public static ServerAddress fromStringDefaultPort(String address, int defaultPort) {
-    return new ServerAddress(HostAndPort.fromString(address).withDefaultPort(25565));
+    return new ServerAddress(HostAndPort.fromString(address).withDefaultPort(defaultPort));
   }
 
   public static ServerAddress fromStringAndPort(String host, int port) {
