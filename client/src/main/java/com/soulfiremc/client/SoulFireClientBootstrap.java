@@ -22,6 +22,7 @@ import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.gui.GUIManager;
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.grpc.DefaultAuthSystem;
 import java.awt.GraphicsEnvironment;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,11 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
   private static void runHeadless(String host, int port, String[] args) {
     var soulFire =
         new SoulFireServer(
-            host, port, SoulFireClientBootstrap.PLUGIN_MANAGER, SoulFireClientBootstrap.START_TIME);
+            host,
+            port,
+            SoulFireClientBootstrap.PLUGIN_MANAGER,
+            SoulFireClientBootstrap.START_TIME,
+            new DefaultAuthSystem());
 
     var rpcClient = new RPCClient(host, port, soulFire.generateLocalCliJWT());
     var cliManager = new CLIManager(rpcClient, SoulFireClientBootstrap.PLUGIN_MANAGER);
@@ -50,7 +55,11 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
   private static void runGUI(String host, int port) {
     var soulFire =
         new SoulFireServer(
-            host, port, SoulFireClientBootstrap.PLUGIN_MANAGER, SoulFireClientBootstrap.START_TIME);
+            host,
+            port,
+            SoulFireClientBootstrap.PLUGIN_MANAGER,
+            SoulFireClientBootstrap.START_TIME,
+            new DefaultAuthSystem());
 
     var rpcClient = new RPCClient(host, port, soulFire.generateAdminJWT());
     var guiManager = new GUIManager(rpcClient, SoulFireClientBootstrap.PLUGIN_MANAGER);

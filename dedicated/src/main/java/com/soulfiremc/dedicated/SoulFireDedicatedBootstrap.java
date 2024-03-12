@@ -21,6 +21,7 @@ import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.grpc.DefaultAuthSystem;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,7 +44,8 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
             host,
             port,
             SoulFireDedicatedBootstrap.PLUGIN_MANAGER,
-            SoulFireDedicatedBootstrap.START_TIME);
+            SoulFireDedicatedBootstrap.START_TIME,
+            new DefaultAuthSystem());
 
     new GenericTerminalConsole(
             soulFire.shutdownManager(),

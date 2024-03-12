@@ -121,7 +121,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                       return Command.SINGLE_SUCCESS;
                     })));
 
-    // GUI and CLI commands
+    // History commands
     dispatcher.register(
         literal("reload-history")
             .executes(

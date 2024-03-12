@@ -26,6 +26,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.AttackInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import com.soulfiremc.server.data.TranslationMapper;
+import com.soulfiremc.server.grpc.AuthSystem;
 import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.plugins.AutoArmor;
 import com.soulfiremc.server.plugins.AutoEat;
@@ -117,7 +118,7 @@ public class SoulFireServer {
   private final PluginManager pluginManager;
   private final ShutdownManager shutdownManager;
 
-  public SoulFireServer(String host, int port, PluginManager pluginManager, Instant startTime) {
+  public SoulFireServer(String host, int port, PluginManager pluginManager, Instant startTime, AuthSystem authSystem) {
     this.pluginManager = pluginManager;
     this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
 
@@ -141,7 +142,7 @@ public class SoulFireServer {
       throw new RuntimeException(e);
     }
 
-    rpcServer = new RPCServer(host, port, injector, jwtSecretKey);
+    rpcServer = new RPCServer(host, port, injector, jwtSecretKey, authSystem);
     var rpcServerStart =
         CompletableFuture.runAsync(
             () -> {

@@ -44,6 +44,8 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   @Override
   public void subscribe(LogRequest request, StreamObserver<LogResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.SUBSCRIBE_LOGS);
+
     sendPreviousLogs(request.getPrevious(), responseObserver);
     SoulFireAPI.registerListener(SystemLogEvent.class, new LogEventListener(responseObserver));
   }

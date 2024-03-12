@@ -22,7 +22,6 @@ import com.soulfiremc.grpc.generated.ClientPlugin;
 import com.soulfiremc.grpc.generated.ConfigServiceGrpc;
 import com.soulfiremc.grpc.generated.UIClientDataResponse;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.util.RPCConstants;
 import io.grpc.stub.StreamObserver;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,7 +55,9 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
   @Override
   public void getUIClientData(
       ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
-    var username = RPCConstants.CLIENT_ID_CONTEXT_KEY.get();
+    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.SERVER_CONFIG);
+
+    var username = ServerRPCConstants.CLIENT_ID_CONTEXT_KEY.get();
     responseObserver.onNext(
         UIClientDataResponse.newBuilder()
             .setUsername(username)

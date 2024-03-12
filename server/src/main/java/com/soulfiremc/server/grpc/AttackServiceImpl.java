@@ -37,6 +37,8 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
   @Override
   public void startAttack(
       AttackStartRequest request, StreamObserver<AttackStartResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.START_ATTACK);
+
     var settingsHolder = SettingsHolder.deserialize(request);
 
     var id = soulFireServer.startAttack(settingsHolder);
@@ -48,6 +50,8 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
   public void toggleAttackState(
       AttackStateToggleRequest request,
       StreamObserver<AttackStateToggleResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.TOGGLE_ATTACK);
+
     soulFireServer.toggleAttackState(
         request.getId(),
         switch (request.getNewState()) {
@@ -61,6 +65,8 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
   @Override
   public void stopAttack(
       AttackStopRequest request, StreamObserver<AttackStopResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.STOP_ATTACK);
+
     soulFireServer.stopAttack(request.getId());
     responseObserver.onNext(AttackStopResponse.newBuilder().build());
     responseObserver.onCompleted();

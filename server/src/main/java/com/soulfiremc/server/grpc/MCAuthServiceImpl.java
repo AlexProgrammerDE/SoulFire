@@ -58,6 +58,8 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
   @Override
   public void login(AuthRequest request, StreamObserver<AuthResponse> responseObserver) {
     try {
+      ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.AUTHENTICATE_MC_ACCOUNT);
+
       var account =
           (switch (request.getService()) {
                 case MICROSOFT_JAVA -> new SFJavaMicrosoftAuthService();

@@ -36,6 +36,8 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
   @Override
   public void executeCommand(
       CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.COMMAND_EXECUTION);
+
     var code = serverCommandManager.execute(request.getCommand());
 
     responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());
@@ -46,6 +48,8 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
   public void tabCompleteCommand(
       CommandCompletionRequest request,
       StreamObserver<CommandCompletionResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.COMMAND_COMPLETION);
+
     var suggestions = serverCommandManager.getCompletionSuggestions(request.getCommand());
 
     responseObserver.onNext(
@@ -56,6 +60,8 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
   @Override
   public void getCommandHistory(
       CommandHistoryRequest request, StreamObserver<CommandHistoryResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.COMMAND_HISTORY);
+
     var history = serverCommandManager.getCommandHistory();
     var builder = CommandHistoryResponse.newBuilder();
     for (var entry : history) {

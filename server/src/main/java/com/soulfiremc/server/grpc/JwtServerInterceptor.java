@@ -34,9 +34,11 @@ import javax.crypto.SecretKey;
 
 public class JwtServerInterceptor implements ServerInterceptor {
   private final JwtParser parser;
+  private final AuthSystem authSystem;
 
-  public JwtServerInterceptor(SecretKey jwtKey) {
-    parser = Jwts.parser().verifyWith(jwtKey).build();
+  public JwtServerInterceptor(SecretKey jwtKey, AuthSystem authSystem) {
+    this.parser = Jwts.parser().verifyWith(jwtKey).build();
+    this.authSystem = authSystem;
   }
 
   @Override
@@ -65,7 +67,10 @@ public class JwtServerInterceptor implements ServerInterceptor {
         // set client id into current context
         var ctx =
             Context.current()
-                .withValue(RPCConstants.CLIENT_ID_CONTEXT_KEY, claims.getPayload().getSubject());
+                .withValue(ServerRPCConstants.CLIENT_ID_CONTEXT_KEY, claims.getPayload().getSubject())
+                .withValue(
+                    ServerRPCConstants.USER_CONTEXT_KEY,
+                    authSystem.authenticate(claims.getPayload().getSubject(), claims.getPayload().getIssuedAt()));
         return Contexts.interceptCall(ctx, serverCall, metadata, serverCallHandler);
       }
     }
