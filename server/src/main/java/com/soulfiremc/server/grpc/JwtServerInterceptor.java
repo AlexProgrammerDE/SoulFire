@@ -67,10 +67,12 @@ public class JwtServerInterceptor implements ServerInterceptor {
         // set client id into current context
         var ctx =
             Context.current()
-                .withValue(ServerRPCConstants.CLIENT_ID_CONTEXT_KEY, claims.getPayload().getSubject())
+                .withValue(
+                    ServerRPCConstants.CLIENT_ID_CONTEXT_KEY, claims.getPayload().getSubject())
                 .withValue(
                     ServerRPCConstants.USER_CONTEXT_KEY,
-                    authSystem.authenticate(claims.getPayload().getSubject(), claims.getPayload().getIssuedAt()));
+                    authSystem.authenticate(
+                        claims.getPayload().getSubject(), claims.getPayload().getIssuedAt()));
         return Contexts.interceptCall(ctx, serverCall, metadata, serverCallHandler);
       }
     }

@@ -19,7 +19,7 @@ package com.soulfiremc.client.gui.navigation;
 
 import com.google.gson.JsonPrimitive;
 import com.soulfiremc.client.gui.libs.JMinMaxHelper;
-import com.soulfiremc.client.gui.libs.SwingTextUtils;
+import com.soulfiremc.client.gui.libs.SFSwingUtils;
 import com.soulfiremc.client.settings.ClientSettingsManager;
 import com.soulfiremc.grpc.generated.ClientPluginSettingsPage;
 import com.soulfiremc.grpc.generated.ComboOption;
@@ -126,7 +126,7 @@ public class GeneratedPanel extends NavigationItem {
                   clientSettingsManager.registerProvider(
                       propertyKey, () -> new JsonPrimitive(textField.getText()));
 
-                  SwingTextUtils.addUndoRedo(textField);
+                  SFSwingUtils.addUndoRedo(textField);
 
                   yield textField;
                 }

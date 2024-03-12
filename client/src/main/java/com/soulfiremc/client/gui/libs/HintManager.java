@@ -103,7 +103,7 @@ public class HintManager {
       setOpaque(false);
       updateBalloonBorder();
 
-      hintLabel.setText(SwingTextUtils.htmlText(hint.message));
+      hintLabel.setText(SFSwingUtils.htmlText(hint.message));
 
       // grab all mouse events to avoid that components overlapped
       // by the hint panel receive them

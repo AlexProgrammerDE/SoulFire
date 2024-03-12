@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.client.gui.navigation;
 
-import com.soulfiremc.client.gui.libs.SwingTextUtils;
+import com.soulfiremc.client.gui.libs.SFSwingUtils;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import javax.inject.Inject;
@@ -37,7 +37,7 @@ public class PluginListPanel extends NavigationItem {
         continue;
       }
 
-      var button = new JButton(SwingTextUtils.htmlCenterText(item.getPageName()));
+      var button = new JButton(SFSwingUtils.htmlCenterText(item.getPageName()));
 
       button.addActionListener(action -> container.show(item.getNamespace()));
       button.setSize(new Dimension(50, 50));

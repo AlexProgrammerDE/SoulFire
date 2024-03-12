@@ -118,7 +118,12 @@ public class SoulFireServer {
   private final PluginManager pluginManager;
   private final ShutdownManager shutdownManager;
 
-  public SoulFireServer(String host, int port, PluginManager pluginManager, Instant startTime, AuthSystem authSystem) {
+  public SoulFireServer(
+      String host,
+      int port,
+      PluginManager pluginManager,
+      Instant startTime,
+      AuthSystem authSystem) {
     this.pluginManager = pluginManager;
     this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
 

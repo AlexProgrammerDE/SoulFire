@@ -64,17 +64,18 @@ public abstract class SoulFireAbstractBootstrap {
 
   protected SoulFireAbstractBootstrap() {}
 
-  public static int getRPCPort() {
-    var portProperty = System.getProperty("sf.grpc.port");
-    if (portProperty != null) {
-      return Integer.parseInt(portProperty);
-    }
-
-    return PortHelper.getAvailablePort(38765);
+  public static int getRPCPort(int defaultPort) {
+    return Integer.getInteger("sf.grpc.port", defaultPort);
   }
 
-  public static String getRPCHost() {
-    return System.getProperty("sf.grpc.host", "localhost");
+  public static int getRandomRPCPort() {
+    var port = getRPCPort(0);
+
+    return port == 0 ? PortHelper.getRandomAvailablePort() : port;
+  }
+
+  public static String getRPCHost(String defaultHost) {
+    return System.getProperty("sf.grpc.host", defaultHost);
   }
 
   public static void injectExceptionHandler() {

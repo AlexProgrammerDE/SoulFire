@@ -18,7 +18,7 @@
 package com.soulfiremc.client.gui.popups;
 
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.client.gui.libs.SwingTextUtils;
+import com.soulfiremc.client.gui.libs.SFSwingUtils;
 import javax.swing.BoxLayout;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -32,24 +32,24 @@ public class AboutPopup extends JDialog {
     var content = new JPanel();
     content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
-    content.add(SwingTextUtils.createHtmlPane("<b>SoulFire</b>"));
+    content.add(SFSwingUtils.createHtmlPane("<b>SoulFire</b>"));
     content.add(
-        SwingTextUtils.createHtmlPane("Version: <b><code>" + BuildData.VERSION + "</code></b>"));
+        SFSwingUtils.createHtmlPane("Version: <b><code>" + BuildData.VERSION + "</code></b>"));
     content.add(
-        SwingTextUtils.createHtmlPane(
+        SFSwingUtils.createHtmlPane(
             "Author: <b><a href='https://github.com/AlexProgrammerDE'>AlexProgrammerDE</a></b>"));
     content.add(
-        SwingTextUtils.createHtmlPane(
+        SFSwingUtils.createHtmlPane(
             "GitHub: <b><a href='https://github.com/AlexProgrammerDE/SoulFire'>github.com/AlexProgrammerDE/SoulFire</a></b>"));
     content.add(
-        SwingTextUtils.createHtmlPane(
+        SFSwingUtils.createHtmlPane(
             "Website: <b><a href='"
                 + BuildData.URL
                 + "'>"
                 + BuildData.URL.replace("https://", "")
                 + "</a></b>"));
     content.add(
-        SwingTextUtils.createHtmlPane(
+        SFSwingUtils.createHtmlPane(
             "Commit: <b><code>"
                 + BuildData.COMMIT.substring(0, 7)
                 + "</code></b> "

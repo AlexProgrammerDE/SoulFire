@@ -261,8 +261,7 @@ public class MessageLogPanel extends JPanel {
                   "https://pastes.dev/" + PastesDevService.upload(textComponent.getSelectedText());
               JOptionPane.showMessageDialog(
                   this,
-                  SwingTextUtils.createHtmlPane(
-                      "Uploaded to: <a href='" + url + "'>" + url + "</a>"),
+                  SFSwingUtils.createHtmlPane("Uploaded to: <a href='" + url + "'>" + url + "</a>"),
                   "Success",
                   JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception e) {

@@ -18,7 +18,7 @@
 package com.soulfiremc.client.gui;
 
 import com.soulfiremc.client.gui.libs.MessageLogPanel;
-import com.soulfiremc.client.gui.libs.SwingTextUtils;
+import com.soulfiremc.client.gui.libs.SFSwingUtils;
 import com.soulfiremc.grpc.generated.LogRequest;
 import io.grpc.Context;
 import java.awt.BorderLayout;
@@ -76,7 +76,7 @@ public class LogPanel extends JPanel {
 
     putClientProperty("log-panel-command-input", commands);
 
-    var undoManager = SwingTextUtils.addUndoRedo(commands);
+    var undoManager = SFSwingUtils.addUndoRedo(commands);
 
     var commandShellAction = new CommandShellAction(undoManager, commands);
     commandShellAction.initHistory();

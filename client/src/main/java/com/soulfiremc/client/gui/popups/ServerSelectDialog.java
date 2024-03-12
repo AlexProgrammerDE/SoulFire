@@ -17,11 +17,13 @@
  */
 package com.soulfiremc.client.gui.popups;
 
+import com.soulfiremc.client.gui.libs.SFSwingUtils;
+import com.soulfiremc.util.PortHelper;
+import com.soulfiremc.util.ServerAddress;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import javax.swing.BorderFactory;
@@ -37,16 +39,11 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 public class ServerSelectDialog extends JFrame {
-  private final JTextField hostField;
-  private final JTextField portField;
-  private final JPasswordField tokenField;
-
   public ServerSelectDialog(
       Runnable integratedServerRunnable, Consumer<RemoteServerData> remoteServerConsumer) {
     setTitle("Connect to SoulFire Server");
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setSize(400, 300);
-    setLocationRelativeTo(null);
+
+    SFSwingUtils.setLogo(this);
 
     var mainPanel = new JPanel(new GridBagLayout());
     var gbc = new GridBagConstraints();
@@ -84,51 +81,38 @@ public class ServerSelectDialog extends JFrame {
     gbcRight.anchor = GridBagConstraints.WEST;
     gbcRight.insets = new Insets(2, 2, 2, 2);
 
-    var hostLabel = new JLabel("Host:");
-    hostField = new JTextField(10);
-    var portLabel = new JLabel("Port:");
-    portField = new JTextField(10);
-    portField.addKeyListener(
-        new KeyAdapter() {
-          public void keyTyped(KeyEvent e) {
-            var c = e.getKeyChar();
-            if (!(Character.isDigit(c) || c == KeyEvent.VK_BACK_SPACE || c == KeyEvent.VK_DELETE)) {
-              e.consume();
-            }
-          }
-        });
+    var addressLabel = new JLabel("Address:");
+    var addressField = new JTextField(10);
     var tokenLabel = new JLabel("Token:");
-    tokenField = new JPasswordField(10);
-    var submitButton = new JButton("Submit");
+    var tokenField = new JPasswordField(10);
+    var submitButton = new JButton("Connect");
     submitButton.addActionListener(
         e -> {
           // Check if all fields are filled
-          if (hostField.getText().isEmpty()
-              || portField.getText().isEmpty()
-              || tokenField.getPassword().length == 0) {
-            JOptionPane.showMessageDialog(ServerSelectDialog.this, "Please fill in all fields.");
+          if (addressField.getText().isEmpty() || tokenField.getPassword().length == 0) {
+            JOptionPane.showMessageDialog(
+                this, "Please fill in all fields.", "Invalid input", JOptionPane.WARNING_MESSAGE);
           } else {
             // Add action to handle using remote server
-            var host = hostField.getText();
-            var port = portField.getText();
+            var address = addressField.getText();
             var token = new String(tokenField.getPassword());
 
-            Executors.newSingleThreadExecutor().execute(
-                () ->
-                    remoteServerConsumer.accept(
-                        new RemoteServerData(host, Integer.parseInt(port), token)));
+            Executors.newSingleThreadExecutor()
+                .execute(
+                    () ->
+                        remoteServerConsumer.accept(
+                            new RemoteServerData(
+                                ServerAddress.fromStringDefaultPort(
+                                    address, PortHelper.SF_DEFAULT_PORT),
+                                token)));
             setVisible(false);
             dispose();
           }
         });
 
-    rightPanel.add(hostLabel, gbcRight);
+    rightPanel.add(addressLabel, gbcRight);
     gbcRight.gridy++;
-    rightPanel.add(hostField, gbcRight);
-    gbcRight.gridy++;
-    rightPanel.add(portLabel, gbcRight);
-    gbcRight.gridy++;
-    rightPanel.add(portField, gbcRight);
+    rightPanel.add(addressField, gbcRight);
     gbcRight.gridy++;
     rightPanel.add(tokenLabel, gbcRight);
     gbcRight.gridy++;
@@ -142,8 +126,19 @@ public class ServerSelectDialog extends JFrame {
 
     pack();
 
+    // Calculate 16:9 width from height
+    var minFrameHeight = getHeight();
+    var aspectRatio = 16.0 / 9.0;
+    var minFrameWidth = (int) (minFrameHeight * aspectRatio);
+
+    setSize(minFrameWidth, minFrameHeight);
+    setMinimumSize(new Dimension(minFrameWidth, minFrameHeight));
+
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setLocationRelativeTo(null);
+
     setVisible(true);
   }
 
-  public record RemoteServerData(String host, int port, String token) {}
+  public record RemoteServerData(ServerAddress serverAddress, String token) {}
 }

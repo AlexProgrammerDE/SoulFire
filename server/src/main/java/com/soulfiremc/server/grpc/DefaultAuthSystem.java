@@ -22,6 +22,16 @@ import java.util.Date;
 public class DefaultAuthSystem implements AuthSystem {
   @Override
   public AuthenticatedUser authenticate(String subject, Date issuedAt) {
-    return resource -> true;
+    return new AuthenticatedUser() {
+      @Override
+      public String getUsername() {
+        return subject;
+      }
+
+      @Override
+      public boolean canAccess(Resource resource) {
+        return true;
+      }
+    };
   }
 }

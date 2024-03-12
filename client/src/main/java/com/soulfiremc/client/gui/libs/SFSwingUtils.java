@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.client.gui.libs;
 
+import com.formdev.flatlaf.extras.FlatSVGUtils;
 import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -24,6 +25,7 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import javax.swing.AbstractAction;
+import javax.swing.JFrame;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.HyperlinkEvent;
@@ -35,8 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.intellij.lang.annotations.Language;
 
 @Slf4j
-public class SwingTextUtils {
-  private SwingTextUtils() {}
+public class SFSwingUtils {
+  private SFSwingUtils() {}
 
   public static JTextPane createHtmlPane(@Language("html") String text) {
     var pane = new JTextPane();
@@ -114,5 +116,9 @@ public class SwingTextUtils {
     textComponent.getActionMap().put("redo", redoAction);
 
     return undoManager;
+  }
+
+  public static void setLogo(JFrame frame) {
+    frame.setIconImages(FlatSVGUtils.createWindowIconImages("/icons/icon.svg"));
   }
 }

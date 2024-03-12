@@ -42,6 +42,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
+import com.soulfiremc.server.grpc.ServerRPCConstants;
 import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
@@ -89,6 +90,16 @@ public class ServerCommandManager implements PlatformCommandManager {
       Collections.synchronizedList(new ArrayList<>());
   private final Path targetFile = SFPathConstants.DATA_FOLDER.resolve(".command_history");
 
+  private static String getCurrentUsername() {
+    var currentUser = ServerRPCConstants.USER_CONTEXT_KEY.get();
+
+    if (currentUser == null) {
+      return "Console";
+    } else {
+      return currentUser.getUsername();
+    }
+  }
+
   @PostConstruct
   public void postConstruct() {
     loadCommandHistory();
@@ -101,7 +112,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                     "Prints a list of all available commands",
                     c -> {
                       c.getSource().sendInfo("Available commands:");
-                      for (var command : getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
+                      for (var command : getAllUsage(dispatcher.getRoot(), c.getSource())) {
                         c.getSource().sendInfo("{} -> {}", command.command(), command.help());
                       }
 
@@ -112,11 +123,36 @@ public class ServerCommandManager implements PlatformCommandManager {
             .executes(
                 privateCommand(
                     c -> {
-                      for (var command : getAllUsage(dispatcher.getRoot(), c.getSource(), false)) {
+                      for (var command : getAllUsage(dispatcher.getRoot(), c.getSource())) {
                         c.getSource()
                             .sendInfo(
                                 String.format("| `%s` | %s |", command.command(), command.help()));
                       }
+
+                      return Command.SINGLE_SUCCESS;
+                    })));
+
+    // Administration
+    dispatcher.register(
+        literal("generate-token")
+            .executes(
+                help(
+                    "Generate a JWT for other clients to connect to the server",
+                    c -> {
+                      c.getSource()
+                          .sendInfo(
+                              "JWT (This gives full SF access, make sure you only give this to trusted users): {}",
+                              soulFireServer.generateRemoteUserJWT());
+
+                      return Command.SINGLE_SUCCESS;
+                    })));
+    dispatcher.register(
+        literal("whoami")
+            .executes(
+                help(
+                    "See who you are",
+                    c -> {
+                      c.getSource().sendInfo("Username: {}", getCurrentUsername());
 
                       return Command.SINGLE_SUCCESS;
                     })));
@@ -872,11 +908,9 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   private HelpData[] getAllUsage(
-      final CommandNode<ConsoleSubject> node,
-      final ConsoleSubject source,
-      final boolean restricted) {
+      final CommandNode<ConsoleSubject> node, final ConsoleSubject source) {
     final var result = new ArrayList<HelpData>();
-    getAllUsage(node, source, result, "", restricted);
+    getAllUsage(node, source, result, "");
     return result.toArray(new HelpData[0]);
   }
 
@@ -884,9 +918,8 @@ public class ServerCommandManager implements PlatformCommandManager {
       final CommandNode<ConsoleSubject> node,
       final ConsoleSubject source,
       final ArrayList<HelpData> result,
-      final String prefix,
-      final boolean restricted) {
-    if (restricted && !node.canUse(source)) {
+      final String prefix) {
+    if (!node.canUse(source)) {
       return;
     }
 
@@ -919,8 +952,7 @@ public class ServerCommandManager implements PlatformCommandManager {
             result,
             prefix.isEmpty()
                 ? child.getUsageText()
-                : prefix + ARGUMENT_SEPARATOR + child.getUsageText(),
-            restricted);
+                : prefix + ARGUMENT_SEPARATOR + child.getUsageText());
       }
     }
   }

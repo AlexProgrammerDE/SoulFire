@@ -17,11 +17,9 @@
  */
 package com.soulfiremc.server.protocol.netty;
 
-import com.google.common.net.HostAndPort;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
-import io.netty.channel.EventLoopGroup;
-import java.net.IDN;
+import com.soulfiremc.util.ServerAddress;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -34,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ResolveUtil {
   private static final DirContext DIR_CONTEXT;
+  public static int MC_DEFAULT_PORT = 25565;
 
   static {
     try {
@@ -52,14 +51,16 @@ public class ResolveUtil {
   private ResolveUtil() {}
 
   public static Optional<ResolvedAddress> resolveAddress(
-      boolean isBedrock, SettingsHolder settingsHolder, EventLoopGroup eventLoopGroup) {
-    var serverAddress = new ServerAddress(settingsHolder.get(BotSettings.ADDRESS));
+      boolean isBedrock, SettingsHolder settingsHolder) {
+    var serverAddress =
+        ServerAddress.fromStringDefaultPort(
+            settingsHolder.get(BotSettings.ADDRESS), MC_DEFAULT_PORT);
 
     if (settingsHolder.get(BotSettings.RESOLVE_SRV)
-        && serverAddress.port() == 25565
+        && serverAddress.port() == MC_DEFAULT_PORT
         && !isBedrock) {
       // SRVs can override address on Java, but not Bedrock.
-      var resolved = resolveSrv(serverAddress, eventLoopGroup);
+      var resolved = resolveSrv(serverAddress);
       if (resolved.isPresent()) {
         return resolved;
       }
@@ -70,8 +71,7 @@ public class ResolveUtil {
     return resolveByHost(serverAddress).map(e -> new ResolvedAddress(serverAddress, e));
   }
 
-  private static Optional<ResolvedAddress> resolveSrv(
-      ServerAddress serverAddress, EventLoopGroup eventLoopGroup) {
+  private static Optional<ResolvedAddress> resolveSrv(ServerAddress serverAddress) {
     var name = "_minecraft._tcp." + serverAddress.host();
     log.debug("Attempting SRV lookup for \"{}\".", name);
 
@@ -81,7 +81,8 @@ public class ResolveUtil {
         var attributeSplit = srvAttribute.get().toString().split(" ", 4);
         log.debug("SRV lookup resolved \"{}\" to \"{}\".", name, srvAttribute.get().toString());
 
-        return resolveByHost(new ServerAddress(attributeSplit[3], parsePort(attributeSplit[2])))
+        return resolveByHost(
+                ServerAddress.fromStringAndPort(attributeSplit[3], parsePort(attributeSplit[2])))
             .map(e -> new ResolvedAddress(serverAddress, e));
       } else {
         log.debug("SRV lookup for \"{}\" returned no records.", name);
@@ -109,29 +110,7 @@ public class ResolveUtil {
     try {
       return Integer.parseInt(port);
     } catch (NumberFormatException e) {
-      return 25565;
-    }
-  }
-
-  public record ServerAddress(HostAndPort hostAndPort) {
-    public ServerAddress(String address) {
-      this(HostAndPort.fromString(address).withDefaultPort(25565));
-    }
-
-    public ServerAddress(String host, int port) {
-      this(HostAndPort.fromParts(host, port));
-    }
-
-    public String host() {
-      try {
-        return IDN.toASCII(hostAndPort.getHost());
-      } catch (IllegalArgumentException e) {
-        return "";
-      }
-    }
-
-    public int port() {
-      return hostAndPort.getPort();
+      return MC_DEFAULT_PORT;
     }
   }
 

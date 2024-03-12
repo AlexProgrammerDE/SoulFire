@@ -18,9 +18,9 @@
 package com.soulfiremc.client.gui;
 
 import ch.jalu.injector.Injector;
-import com.formdev.flatlaf.extras.FlatSVGUtils;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.client.gui.libs.HintManager;
+import com.soulfiremc.client.gui.libs.SFSwingUtils;
 import com.soulfiremc.client.gui.navigation.CardsContainer;
 import com.soulfiremc.client.gui.navigation.ControlPanel;
 import java.awt.CardLayout;
@@ -115,7 +115,7 @@ public class GUIFrame extends JFrame {
     setResizable(true);
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-    setIconImages(FlatSVGUtils.createWindowIconImages("/icons/icon.svg"));
+    SFSwingUtils.setLogo(this);
     setJMenuBar(injector.getSingleton(SFMenuBar.class));
 
     setLayout(new CardLayout());

@@ -18,7 +18,7 @@
 package com.soulfiremc.client.gui.navigation;
 
 import ch.jalu.injector.Injector;
-import com.soulfiremc.client.gui.libs.SwingTextUtils;
+import com.soulfiremc.client.gui.libs.SFSwingUtils;
 import java.awt.GridLayout;
 import javax.inject.Inject;
 import javax.swing.JButton;
@@ -32,7 +32,7 @@ public class NavigationPanel extends JPanel {
     setLayout(new GridLayout(0, 2, 10, 10));
 
     for (var item : container.panels()) {
-      var button = new JButton(SwingTextUtils.htmlCenterText(item.getNavigationName()));
+      var button = new JButton(SFSwingUtils.htmlCenterText(item.getNavigationName()));
 
       button.addActionListener(action -> container.show(item.getNavigationId()));
       container.putClientProperty(item.getNavigationId() + "-button", button);

@@ -18,6 +18,8 @@
 package com.soulfiremc.server.grpc;
 
 public interface AuthenticatedUser {
+  String getUsername();
+
   boolean canAccess(Resource resource);
 
   default void canAccessOrThrow(Resource resource) {

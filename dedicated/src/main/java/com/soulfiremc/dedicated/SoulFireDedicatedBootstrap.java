@@ -22,6 +22,7 @@ import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.grpc.DefaultAuthSystem;
+import com.soulfiremc.util.PortHelper;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,23 +39,18 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
 
   @Override
   protected void postMixinMain(String[] args) {
-    var host = getRPCHost();
-    var port = getRPCPort();
+    var host = getRPCHost("0.0.0.0");
+    var port = getRPCPort(PortHelper.SF_DEFAULT_PORT);
 
     log.info("Starting dedicated server on {}:{}", host, port);
 
     GenericTerminalConsole.setupStreams();
     var soulFire =
-        new SoulFireServer(
-            host,
-            port,
-            PLUGIN_MANAGER,
-            START_TIME,
-            new DefaultAuthSystem());
+        new SoulFireServer(host, port, PLUGIN_MANAGER, START_TIME, new DefaultAuthSystem());
 
     new GenericTerminalConsole(
-        soulFire.shutdownManager(),
-        soulFire.injector().getSingleton(ServerCommandManager.class))
+            soulFire.shutdownManager(),
+            soulFire.injector().getSingleton(ServerCommandManager.class))
         .start();
 
     soulFire.shutdownManager().awaitShutdown();

@@ -23,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PortHelper {
+  public static int SF_DEFAULT_PORT = 38765;
+
   public static int getAvailablePort(int startPort) {
     while (true) {
       try {
@@ -36,5 +38,16 @@ public class PortHelper {
     }
 
     return startPort;
+  }
+
+  public static int getRandomAvailablePort() {
+    try {
+      var serverSocket = new ServerSocket(0);
+      var port = serverSocket.getLocalPort();
+      serverSocket.close();
+      return port;
+    } catch (IOException e) {
+      throw new RuntimeException("Could not find an available port", e);
+    }
   }
 }

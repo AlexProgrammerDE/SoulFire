@@ -49,24 +49,19 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
       String host;
       int port;
       String jwtToken;
-      if (System.getProperty("soulfire.remoteHost") != null) {
-        host = System.getProperty("soulfire.remoteHost");
-        port = Integer.getInteger("soulfire.remotePort");
+      if (System.getProperty("sf.remoteHost") != null) {
+        host = System.getProperty("sf.remoteHost");
+        port = Integer.getInteger("sf.remotePort");
 
         log.info("Using remote server on {}:{}", host, port);
-        jwtToken = System.getProperty("soulfire.remoteJWT");
+        jwtToken = System.getProperty("sf.remoteJWT");
       } else {
-        host = getRPCHost();
-        port = getRPCPort();
+        host = getRPCHost("localhost");
+        port = getRandomRPCPort();
 
         log.info("Starting integrated server on {}:{}", host, port);
         var soulFire =
-            new SoulFireServer(
-                host,
-                port,
-                SoulFireClientBootstrap.PLUGIN_MANAGER,
-                SoulFireClientBootstrap.START_TIME,
-                new DefaultAuthSystem());
+            new SoulFireServer(host, port, PLUGIN_MANAGER, START_TIME, new DefaultAuthSystem());
 
         jwtToken = soulFire.generateIntegratedUserJWT();
       }
@@ -83,17 +78,13 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
           () ->
               new ServerSelectDialog(
                   () -> {
-                    var host = getRPCHost();
-                    var port = getRPCPort();
+                    var host = getRPCHost("localhost");
+                    var port = getRandomRPCPort();
 
                     log.info("Starting integrated server");
                     var soulFire =
                         new SoulFireServer(
-                            host,
-                            port,
-                            SoulFireClientBootstrap.PLUGIN_MANAGER,
-                            SoulFireClientBootstrap.START_TIME,
-                            new DefaultAuthSystem());
+                            host, port, PLUGIN_MANAGER, START_TIME, new DefaultAuthSystem());
 
                     var jwtToken = soulFire.generateIntegratedUserJWT();
                     var rpcClient = new RPCClient(host, port, jwtToken);
@@ -102,11 +93,11 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
                     var guiManager = new GUIManager(rpcClient, PLUGIN_MANAGER);
                     guiManager.initGUI();
                   },
-                  (remoteServerData) -> {
+                  remoteServerData -> {
                     var rpcClient =
                         new RPCClient(
-                            remoteServerData.host(),
-                            remoteServerData.port(),
+                            remoteServerData.serverAddress().host(),
+                            remoteServerData.serverAddress().port(),
                             remoteServerData.token());
                     log.info("Starting GUI");
                     var guiManager = new GUIManager(rpcClient, PLUGIN_MANAGER);

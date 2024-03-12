@@ -39,7 +39,8 @@ public class RPCServer {
   @Getter private final int port;
   private final Server server;
 
-  public RPCServer(String host, int port, Injector injector, SecretKey jwtKey, AuthSystem authSystem) {
+  public RPCServer(
+      String host, int port, Injector injector, SecretKey jwtKey, AuthSystem authSystem) {
     this(
         jwtKey,
         NettyServerBuilder.forAddress(
@@ -51,7 +52,12 @@ public class RPCServer {
   }
 
   public RPCServer(
-      SecretKey jwtKey, ServerBuilder<?> serverBuilder, String host, int port, Injector injector, AuthSystem authSystem) {
+      SecretKey jwtKey,
+      ServerBuilder<?> serverBuilder,
+      String host,
+      int port,
+      Injector injector,
+      AuthSystem authSystem) {
     this.host = host;
     this.port = port;
     server =
@@ -67,12 +73,12 @@ public class RPCServer {
                     return next.startCall(call, headers);
                   }
                 })
+            .intercept(new JwtServerInterceptor(jwtKey, authSystem))
             .addService(injector.getSingleton(LogServiceImpl.class))
             .addService(injector.getSingleton(ConfigServiceImpl.class))
             .addService(injector.getSingleton(CommandServiceImpl.class))
             .addService(injector.getSingleton(AttackServiceImpl.class))
             .addService(injector.getSingleton(MCAuthServiceImpl.class))
-            .intercept(new JwtServerInterceptor(jwtKey, authSystem))
             .maxInboundMessageSize(Integer.MAX_VALUE)
             .build();
   }

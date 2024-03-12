@@ -177,7 +177,7 @@ public class AttackManager {
     var protocolVersion =
         settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
     var isBedrock = SFVersionConstants.isBedrock(protocolVersion);
-    var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder, attackEventLoopGroup);
+    var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder);
 
     var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
     for (var botId = 1; botId <= botAmount; botId++) {
