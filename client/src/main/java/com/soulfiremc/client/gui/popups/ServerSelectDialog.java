@@ -126,13 +126,7 @@ public class ServerSelectDialog extends JFrame {
 
     pack();
 
-    // Calculate 16:9 width from height
-    var minFrameHeight = getHeight();
-    var aspectRatio = 16.0 / 9.0;
-    var minFrameWidth = (int) (minFrameHeight * aspectRatio);
-
-    setSize(minFrameWidth, minFrameHeight);
-    setMinimumSize(new Dimension(minFrameWidth, minFrameHeight));
+    setMinimumSize(new Dimension(getWidth(), getHeight()));
 
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setLocationRelativeTo(null);
