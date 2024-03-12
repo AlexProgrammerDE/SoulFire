@@ -24,7 +24,7 @@ jobs:
         run: ./gradlew build test --stacktrace
       - name: Prepare Upload
         run: |
-          projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
+          projectVersion=$(grep '^maven_version=' gradle.properties | cut -d'=' -f2)
 
           mkdir client/build/upload
           cp client/build/libs/SoulFireClient-$projectVersion.jar client/build/upload
@@ -65,7 +65,7 @@ jobs:
         run: sudo apt-get install rpm
       - name: Package with jpackage
         run: |
-          projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
+          projectVersion=$(grep '^maven_version=' gradle.properties | cut -d'=' -f2)
           projectVersionStripped=${projectVersion/-SNAPSHOT/}
           jpackage --app-version $projectVersionStripped --main-jar "SoulFireClient-$projectVersion.jar" "@installer/jpackage.cfg" "@installer/jpackage-linux.cfg" --type rpm
           jpackage --app-version $projectVersionStripped --main-jar "SoulFireClient-$projectVersion.jar" "@installer/jpackage.cfg" "@installer/jpackage-linux.cfg" --type deb
@@ -94,7 +94,7 @@ jobs:
           distribution: 'temurin'
       - name: Package with jpackage
         run: |
-          $projectVersion = Select-String -Path gradle.properties -Pattern '^mavenVersion=' | ForEach-Object { $_.ToString().Split('=')[1] }
+          $projectVersion = Select-String -Path gradle.properties -Pattern '^maven_version=' | ForEach-Object { $_.ToString().Split('=')[1] }
           $projectVersionStripped = $projectVersion -replace '-SNAPSHOT', '' 
           jpackage --app-version $projectVersionStripped --main-jar "SoulFireClient-$projectVersion.jar" "@installer/jpackage.cfg" "@installer/jpackage-windows.cfg"
       - name: Upload installer
@@ -122,7 +122,7 @@ jobs:
           distribution: 'temurin'
       - name: Package with jpackage
         run: |
-          projectVersion=$(grep '^mavenVersion=' gradle.properties | cut -d'=' -f2)
+          projectVersion=$(grep '^maven_version=' gradle.properties | cut -d'=' -f2)
           projectVersionStripped=${projectVersion/-SNAPSHOT/}
           jpackage --app-version $projectVersionStripped --main-jar "SoulFireClient-$projectVersion.jar" "@installer/jpackage.cfg" "@installer/jpackage-mac.cfg"
       - name: Upload installer

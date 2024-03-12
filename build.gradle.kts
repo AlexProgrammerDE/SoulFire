@@ -2,10 +2,8 @@ plugins {
     base
 }
 
-val mavenVersion: String by project
-
 allprojects {
     group = "com.soulfiremc"
-    version = mavenVersion
+    version = property("maven_version")!!
     description = "Advanced Minecraft Server-Stresser Tool."
 }
