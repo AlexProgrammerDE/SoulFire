@@ -119,6 +119,7 @@ public class ServerSelectDialog extends JFrame {
     rightPanel.add(tokenField, gbcRight);
     gbcRight.gridy++;
     gbcRight.gridwidth = 2;
+    gbcRight.fill = GridBagConstraints.HORIZONTAL;
     rightPanel.add(submitButton, gbcRight);
     mainPanel.add(rightPanel, gbc);
 
