@@ -20,7 +20,6 @@ hs_err_pid*
 /bin
 /dist
 /manifest.mf
-*.log
 
 # Mac filesystem dust
 .DS_Store

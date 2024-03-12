@@ -6,7 +6,7 @@ COPY --chown=root:root . /soulfire
 # Build soulfire
 WORKDIR /soulfire
 RUN --mount=type=cache,target=/root/.gradle,sharing=locked --mount=type=cache,target=/soulfire/.gradle,sharing=locked --mount=type=cache,target=/soulfire/work,sharing=locked \
-    ./gradlew build --stacktrace
+    ./gradlew :dedicated:build --stacktrace
 
 FROM eclipse-temurin:21-jdk-alpine AS jre-no-javac-builder
 
@@ -37,7 +37,7 @@ ENV JAVA_HOME=/opt/java/openjdk \
 
 # Copy over JRE
 COPY --from=jre-no-javac-builder --chown=soulfire:soulfire /soulfire/java $JAVA_HOME
-COPY --from=soulfire-builder --chown=soulfire:soulfire /soulfire/build/libs/SoulFire-*.jar /soulfire/soulfire.jar
+COPY --from=soulfire-builder --chown=soulfire:soulfire /soulfire/dedicated/build/libs/SoulFireDedicated-*.jar /soulfire/soulfire.jar
 
 # Use the soulfire's home directory as our work directory
 WORKDIR /soulfire
@@ -45,6 +45,8 @@ WORKDIR /soulfire
 # Switch from root to soulfire
 USER soulfire
 
+EXPOSE 38765/tcp
+
 # Start the process using dumb-init
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["/soulfire/java/bin/java", "-jar", "/soulfire/soulfire.jar"]
+CMD ["/opt/java/openjdk/bin/java", "-jar", "/soulfire/soulfire.jar"]
