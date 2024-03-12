@@ -22,12 +22,9 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
 }
 
-indra {
-    javaVersions {
-        target(17)
-        minimumToolchain(17)
-        strictVersions(true)
-        testWith(17)
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 

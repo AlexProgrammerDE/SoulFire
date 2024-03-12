@@ -3,11 +3,8 @@ plugins {
     `java-library`
     `maven-publish`
     id("sf-license-conventions")
-    id("net.kyori.indra")
-    id("net.kyori.indra.publishing")
-    id("net.kyori.indra.git")
-    id("io.freefair.lombok")
     id("sf-checkstyle-conventions")
+    id("io.freefair.lombok")
 }
 
 tasks {
@@ -37,42 +34,9 @@ tasks {
     }
 }
 
-indra {
-    github("AlexProgrammerDE", "SoulFire") {
-        ci(true)
-    }
-
-    gpl3OnlyLicense()
-    publishReleasesTo("codemc-releases", "https://repo.codemc.org/repository/maven-releases/")
-    publishSnapshotsTo("codemc-snapshots", "https://repo.codemc.org/repository/maven-snapshots/")
-
-    configurePublications {
-        pom {
-            name = "SoulFire"
-            url = "https://soulfiremc.com"
-            organization {
-                name = "AlexProgrammerDE"
-                url = "https://pistonmaster.net"
-            }
-            developers {
-                developer {
-                    id = "AlexProgrammerDE"
-                    timezone = "Europe/Berlin"
-                    url = "https://pistonmaster.net"
-                }
-            }
-        }
-
-        versionMapping {
-            usage(Usage.JAVA_API) { fromResolutionOf(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME) }
-            usage(Usage.JAVA_RUNTIME) { fromResolutionResult() }
-        }
-    }
-    javaVersions {
-        target(21)
-        minimumToolchain(21)
-        strictVersions(true)
-        testWith(21)
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -83,6 +47,38 @@ publishing {
             credentials.username = System.getenv("CODEMC_USERNAME")
             credentials.password = System.getenv("CODEMC_PASSWORD")
             name = "codemc"
+        }
+    }
+
+    publications {
+        create<MavenPublication>("mavenJava") {
+            pom {
+                name = "SoulFire"
+                description = rootProject.description
+                url = "https://soulfiremc.com"
+                organization {
+                    name = "AlexProgrammerDE"
+                    url = "https://pistonmaster.net"
+                }
+                developers {
+                    developer {
+                        id = "AlexProgrammerDE"
+                        timezone = "Europe/Berlin"
+                        url = "https://pistonmaster.net"
+                    }
+                }
+                licenses {
+                    license {
+                        name = "GNU General Public License v3.0"
+                        url = "https://www.gnu.org/licenses/gpl-3.0.html"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/AlexProgrammerDE/SoulFire.git"
+                    developerConnection = "scm:git:ssh://github.com/AlexProgrammerDE/SoulFire.git"
+                    url = "https://github.com/AlexProgrammerDE/SoulFire"
+                }
+            }
         }
     }
 }

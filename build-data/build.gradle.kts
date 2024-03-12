@@ -1,5 +1,5 @@
 plugins {
-    id("sf-java-conventions")
+    `sf-java-conventions`
     alias(libs.plugins.blossom)
 }
 
@@ -10,7 +10,7 @@ sourceSets {
                 property("version", rootProject.version.toString())
                 property("description", rootProject.description)
                 property("url", "https://soulfiremc.com")
-                property("commit", indraGit.commit()?.name ?: "unknown")
+                property("commit", latestCommitHash())
             }
         }
     }

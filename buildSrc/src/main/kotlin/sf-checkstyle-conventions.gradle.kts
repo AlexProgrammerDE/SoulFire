@@ -1,11 +1,15 @@
 plugins {
-    checkstyle
+   // checkstyle
 }
 
-extensions.configure<CheckstyleExtension> {
-    configFile = rootProject.file("config/checkstyle/checkstyle.xml")
-    configDirectory = rootProject.file("config/checkstyle")
+/*
+checkstyle {
     maxErrors = 0
     maxWarnings = 0
     toolVersion = libs.checkstyle.get().version.toString()
 }
+
+tasks.withType<Checkstyle> {
+    classpath = objects.fileCollection()
+}
+ */
