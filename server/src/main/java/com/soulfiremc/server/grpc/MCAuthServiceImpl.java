@@ -25,7 +25,6 @@ import com.soulfiremc.server.account.SFEasyMCAuthService;
 import com.soulfiremc.server.account.SFJavaMicrosoftAuthService;
 import com.soulfiremc.server.account.SFOfflineAuthService;
 import com.soulfiremc.server.account.SFTheAlteningAuthService;
-import com.soulfiremc.settings.proxy.ProxyType;
 import com.soulfiremc.settings.proxy.SFProxy;
 import io.grpc.stub.StreamObserver;
 import javax.inject.Inject;
@@ -35,24 +34,11 @@ import org.jetbrains.annotations.Nullable;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
   private static @Nullable SFProxy convertProxy(AuthRequest request) {
-    SFProxy proxy;
-    if (request.hasProxy()) {
-      proxy =
-          new SFProxy(
-              switch (request.getProxy().getType()) {
-                case SOCKS4 -> ProxyType.SOCKS4;
-                case SOCKS5 -> ProxyType.SOCKS5;
-                case HTTP -> ProxyType.HTTP;
-                case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized proxy type");
-              },
-              request.getProxy().getHost(),
-              request.getProxy().getPort(),
-              request.getProxy().hasUsername() ? request.getProxy().getUsername() : null,
-              request.getProxy().hasPassword() ? request.getProxy().getPassword() : null);
-    } else {
-      proxy = null;
+    if (!request.hasProxy()) {
+      return null;
     }
-    return proxy;
+
+    return SFProxy.fromProto(request.getProxy());
   }
 
   @Override

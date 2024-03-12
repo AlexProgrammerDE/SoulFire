@@ -9,7 +9,7 @@ plugins {
     alias(libs.plugins.license.report)
 }
 
-// Uppercase all artifacts
+// Rename all artifacts
 tasks.withType<AbstractArchiveTask> {
     if (archiveBaseName.isPresent && archiveBaseName.get() == "dedicated") {
         archiveBaseName.set("SoulFireDedicated")
@@ -55,8 +55,15 @@ tasks {
     startScripts {
         onlyIf { false }
     }
-    // So the run task doesn't get marked as up-to-date, ever.
+    // So the run task doesn't get marked as up to date, ever.
     run.get().apply {
+        outputs.upToDateWhen { false }
+    }
+    create("runSFDedicated") {
+        group = "application"
+        description = "Runs the SoulFire client"
+        dependsOn("run")
+
         outputs.upToDateWhen { false }
     }
     jar {
