@@ -65,7 +65,7 @@ public abstract class SoulFireAbstractBootstrap {
   protected SoulFireAbstractBootstrap() {}
 
   public static int getRPCPort() {
-    var portProperty = System.getProperty("sw.grpc.port");
+    var portProperty = System.getProperty("sf.grpc.port");
     if (portProperty != null) {
       return Integer.parseInt(portProperty);
     }
@@ -74,7 +74,7 @@ public abstract class SoulFireAbstractBootstrap {
   }
 
   public static String getRPCHost() {
-    return System.getProperty("sw.grpc.host", "localhost");
+    return System.getProperty("sf.grpc.host", "localhost");
   }
 
   public static void injectExceptionHandler() {

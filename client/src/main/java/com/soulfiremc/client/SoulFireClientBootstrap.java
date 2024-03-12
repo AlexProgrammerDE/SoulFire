@@ -38,51 +38,49 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
     new SoulFireClientBootstrap().internalBootstrap(args, classLoaders);
   }
 
-  private static void runHeadless(String host, int port, String[] args) {
-    var soulFire =
-        new SoulFireServer(
-            host,
-            port,
-            SoulFireClientBootstrap.PLUGIN_MANAGER,
-            SoulFireClientBootstrap.START_TIME,
-            new DefaultAuthSystem());
-
-    var rpcClient = new RPCClient(host, port, soulFire.generateLocalCliJWT());
-    var cliManager = new CLIManager(rpcClient, SoulFireClientBootstrap.PLUGIN_MANAGER);
-    cliManager.initCLI(args);
-  }
-
-  private static void runGUI(String host, int port) {
-    var soulFire =
-        new SoulFireServer(
-            host,
-            port,
-            SoulFireClientBootstrap.PLUGIN_MANAGER,
-            SoulFireClientBootstrap.START_TIME,
-            new DefaultAuthSystem());
-
-    var rpcClient = new RPCClient(host, port, soulFire.generateAdminJWT());
-    var guiManager = new GUIManager(rpcClient, SoulFireClientBootstrap.PLUGIN_MANAGER);
-    guiManager.initGUI();
-  }
-
   @Override
   protected void postMixinMain(String[] args) {
-    var host = getRPCHost();
-    var port = getRPCPort();
+    String host;
+    int port;
+    String jwtToken;
+
+    if (System.getProperty("soulfire.remoteHost") != null) {
+      host = System.getProperty("soulfire.remoteHost");
+      port = Integer.getInteger("soulfire.remotePort");
+
+      log.info("Using remote server on {}:{}", host, port);
+      jwtToken = System.getProperty("soulfire.remoteJWT");
+    } else {
+      host = getRPCHost();
+      port = getRPCPort();
+
+      log.info("Starting integrated server on {}:{}", host, port);
+      var soulFire =
+          new SoulFireServer(
+              host,
+              port,
+              SoulFireClientBootstrap.PLUGIN_MANAGER,
+              SoulFireClientBootstrap.START_TIME,
+              new DefaultAuthSystem());
+
+      jwtToken = soulFire.generateIntegratedUserJWT();
+    }
 
     // We may split client and server mixins in the future
-    var runServer = GraphicsEnvironment.isHeadless() || args.length > 0;
+    var runHeadless = GraphicsEnvironment.isHeadless() || args.length > 0;
 
-    if (runServer) {
-      log.info("Starting server on {}:{}", host, port);
-      runHeadless(host, port, args);
+    var rpcClient = new RPCClient(host, port, jwtToken);
+    if (runHeadless) {
+      log.info("Starting CLI");
+      var cliManager = new CLIManager(rpcClient, PLUGIN_MANAGER);
+      cliManager.initCLI(args);
     } else {
-      log.info("Starting GUI and server on {}:{}", host, port);
       GUIManager.injectTheme();
       GUIManager.loadGUIProperties();
 
-      runGUI(host, port);
+      log.info("Starting GUI");
+      var guiManager = new GUIManager(rpcClient, PLUGIN_MANAGER);
+      guiManager.initGUI();
     }
   }
 }

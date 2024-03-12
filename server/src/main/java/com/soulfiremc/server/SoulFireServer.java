@@ -288,12 +288,12 @@ public class SoulFireServer {
     pluginManager.getExtensions(ServerPlugin.class).forEach(SoulFireAPI::registerServerExtension);
   }
 
-  public String generateAdminJWT() {
-    return generateJWT("admin");
+  public String generateRemoteUserJWT() {
+    return generateJWT("remote-user");
   }
 
-  public String generateLocalCliJWT() {
-    return generateJWT("local-cli");
+  public String generateIntegratedUserJWT() {
+    return generateJWT("integrated-user");
   }
 
   private String generateJWT(String subject) {

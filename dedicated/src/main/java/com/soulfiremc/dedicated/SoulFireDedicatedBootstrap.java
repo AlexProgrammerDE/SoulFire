@@ -36,31 +36,27 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
     new SoulFireDedicatedBootstrap().internalBootstrap(args, classLoaders);
   }
 
-  private static void runDedicated(String host, int port) {
-    GenericTerminalConsole.setupStreams();
-
-    var soulFire =
-        new SoulFireServer(
-            host,
-            port,
-            SoulFireDedicatedBootstrap.PLUGIN_MANAGER,
-            SoulFireDedicatedBootstrap.START_TIME,
-            new DefaultAuthSystem());
-
-    new GenericTerminalConsole(
-            soulFire.shutdownManager(),
-            soulFire.injector().getSingleton(ServerCommandManager.class))
-        .start();
-
-    soulFire.shutdownManager().awaitShutdown();
-  }
-
   @Override
   protected void postMixinMain(String[] args) {
     var host = getRPCHost();
     var port = getRPCPort();
 
-    log.info("Starting server on {}:{}", host, port);
-    runDedicated(host, port);
+    log.info("Starting dedicated server on {}:{}", host, port);
+
+    GenericTerminalConsole.setupStreams();
+    var soulFire =
+        new SoulFireServer(
+            host,
+            port,
+            PLUGIN_MANAGER,
+            START_TIME,
+            new DefaultAuthSystem());
+
+    new GenericTerminalConsole(
+        soulFire.shutdownManager(),
+        soulFire.injector().getSingleton(ServerCommandManager.class))
+        .start();
+
+    soulFire.shutdownManager().awaitShutdown();
   }
 }
