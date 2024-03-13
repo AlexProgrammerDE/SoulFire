@@ -39,15 +39,18 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+    withJavadocJar()
+    withSourcesJar()
 }
 
-val repoName = if (version.toString().endsWith("SNAPSHOT")) "maven-snapshots" else "maven-releases"
 publishing {
     repositories {
-        maven("https://repo.codemc.org/repository/${repoName}/") {
-            credentials.username = System.getenv("CODEMC_USERNAME")
-            credentials.password = System.getenv("CODEMC_PASSWORD")
-            name = "codemc"
+        maven("https://maven.pkg.github.com/AlexProgrammerDE/SoulFire") {
+            name = "GitHubPackages"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
         }
     }
 
@@ -75,9 +78,17 @@ publishing {
                     }
                 }
                 scm {
-                    connection = "scm:git:git://github.com/AlexProgrammerDE/SoulFire.git"
-                    developerConnection = "scm:git:ssh://github.com/AlexProgrammerDE/SoulFire.git"
+                    connection = "scm:git:https://github.com/AlexProgrammerDE/SoulFire.git"
+                    developerConnection = "scm:git:ssh://git@github.com/AlexProgrammerDE/SoulFire.git"
                     url = "https://github.com/AlexProgrammerDE/SoulFire"
+                }
+                ciManagement {
+                    system = "GitHub Actions"
+                    url = "https://github.com/AlexProgrammerDE/SoulFire/actions"
+                }
+                issueManagement {
+                    system = "GitHub"
+                    url = "https://github.com/AlexProgrammerDE/SoulFire/issues"
                 }
             }
         }
