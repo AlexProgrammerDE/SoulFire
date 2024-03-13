@@ -5,7 +5,7 @@ import com.github.jk1.license.render.InventoryHtmlReportRenderer
 
 plugins {
     application
-    `sf-java-conventions`
+    `sf-project-conventions`
     alias(libs.plugins.license.report)
 }
 

@@ -1,5 +1,5 @@
 plugins {
-    `sf-java-conventions`
+    `sf-project-conventions`
 }
 
 dependencies {

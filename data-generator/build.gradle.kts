@@ -1,5 +1,5 @@
 plugins {
-    java
+    `sf-java-conventions`
     alias(libs.plugins.loom)
 }
 
