@@ -22,11 +22,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
       - name: Execute Gradle build
         run: ./gradlew build test --stacktrace
-      - name: Publish to GitHub Packages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: ./gradlew publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare Upload
         run: |
           projectVersion=$(grep '^maven_version=' gradle.properties | cut -d'=' -f2)

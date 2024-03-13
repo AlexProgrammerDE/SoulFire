@@ -5,14 +5,16 @@ plugins {
 
 publishing {
     repositories {
-        maven("https://maven.pkg.github.com/AlexProgrammerDE/SoulFire") {
-            name = "GitHubPackages"
+        val repoName = if (version.toString().endsWith("SNAPSHOT")) "maven-snapshots" else "maven-releases"
+        maven("https://repo.codemc.org/repository/${repoName}/") {
+            name = "codemc"
             credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
+                username = System.getenv("CODEMC_USERNAME")
+                password = System.getenv("CODEMC_PASSWORD")
             }
         }
     }
+
     publications {
         register<MavenPublication>("mavenJava") {
             from(components["java"])
