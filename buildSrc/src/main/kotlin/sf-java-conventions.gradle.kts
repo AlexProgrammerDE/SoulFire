@@ -5,6 +5,7 @@ plugins {
     id("sf-license-conventions")
     id("sf-checkstyle-conventions")
     id("io.freefair.lombok")
+    id("net.kyori.indra.git")
 }
 
 tasks {

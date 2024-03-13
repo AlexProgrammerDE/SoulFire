@@ -14,4 +14,5 @@ dependencies {
     implementation(libs.gradle.plugin.shadow)
     implementation(libs.gradle.plugin.licenser)
     implementation(libs.gradle.plugin.lombok)
+    implementation(libs.gradle.plugin.indra.git)
 }
