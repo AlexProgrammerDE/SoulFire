@@ -21,6 +21,7 @@ import com.soulfiremc.client.gui.GUIFrame;
 import com.soulfiremc.client.gui.GUIManager;
 import com.soulfiremc.client.gui.libs.JEnumComboBox;
 import com.soulfiremc.client.gui.popups.ImportTextDialog;
+import com.soulfiremc.client.settings.ProxyParser;
 import com.soulfiremc.settings.proxy.ProxyType;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.BuiltinSettingsConstants;
@@ -160,6 +161,7 @@ public class ProxyPanel extends NavigationItem {
             menu.add(createProxyLoadButton(guiManager, parent, ProxyType.HTTP));
             menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS4));
             menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS5));
+            menu.add(createURLProxyLoadButton(guiManager, parent));
             menu.show(e.getComponent(), e.getX(), e.getY());
           }
         });
@@ -193,7 +195,25 @@ public class ProxyPanel extends NavigationItem {
                 guiManager,
                 parent,
                 text ->
-                    guiManager.clientSettingsManager().proxyRegistry().loadFromString(text, type)));
+                    guiManager.clientSettingsManager().proxyRegistry().loadFromString(text, ProxyParser.typeParser(type))));
+
+    return button;
+  }
+
+  private static JMenuItem createURLProxyLoadButton(
+      GUIManager guiManager, GUIFrame parent) {
+    var button = new JMenuItem("URI");
+
+    button.addActionListener(
+        e ->
+            new ImportTextDialog(
+                SFPathConstants.WORKING_DIRECTORY,
+                "Load URI proxies",
+                "URI list file",
+                guiManager,
+                parent,
+                text ->
+                    guiManager.clientSettingsManager().proxyRegistry().loadFromString(text, ProxyParser.uriParser())));
 
     return button;
   }

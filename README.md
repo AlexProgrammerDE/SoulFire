@@ -163,6 +163,20 @@ ip:port <- no authentication
 ip:port:username:password <- authentication
 ```
 
+#### URI
+
+This format allows you to use multiple proxy types in one file.
+
+<!--suppress HttpUrlsUsage -->
+```text
+socks5://ip:port <- no authentication
+socks5://username:password@ip:port <- authentication
+socks4://ip:port <- no authentication
+socks4://username@ip:port <- authentication
+http://ip:port <- no authentication
+http://username:password@ip:port <- authentication
+```
+
 ## 🧵 Demo
 
 SoulFire has a built-in GUI for easy usage.

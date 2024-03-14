@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.client.settings;
 
-import com.soulfiremc.settings.proxy.ProxyType;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.EnabledWrapper;
 import java.util.ArrayList;
@@ -32,54 +31,32 @@ public class ProxyRegistry {
   private final List<EnabledWrapper<SFProxy>> proxies = new ArrayList<>();
   private final List<Runnable> loadHooks = new ArrayList<>();
 
-  private static <T> T getIndexOrNull(T[] array, int index) {
-    if (index < array.length) {
-      return array[index];
-    } else {
-      return null;
-    }
-  }
-
-  public void loadFromString(String data, ProxyType proxyType) {
-    var newProxies =
-        data.lines()
-            .map(String::strip)
-            .filter(line -> !line.isBlank())
-            .distinct()
-            .map(line -> fromStringSingle(line, proxyType))
-            .toList();
-
-    if (newProxies.isEmpty()) {
-      log.warn("No proxies found in the provided data!");
-      return;
-    }
-
-    this.proxies.addAll(newProxies);
-    callLoadHooks();
-
-    log.info("Loaded {} proxies!", newProxies.size());
-  }
-
-  private EnabledWrapper<SFProxy> fromStringSingle(String data, ProxyType proxyType) {
-    data = data.trim();
-
-    var split = data.split(":");
-
-    if (split.length < 2) {
-      throw new IllegalArgumentException("Proxy must have at least a host and a port!");
-    }
-
+  public void loadFromString(String data, ProxyParser proxyParser) {
     try {
-      var host = split[0];
-      var port = Integer.parseInt(split[1]);
-      var username = getIndexOrNull(split, 2);
-      var password = getIndexOrNull(split, 3);
+      var newProxies =
+          data.lines()
+              .map(String::strip)
+              .filter(line -> !line.isBlank())
+              .distinct()
+              .map(line -> fromStringSingle(line, proxyParser))
+              .toList();
 
-      return new EnabledWrapper<>(true, new SFProxy(proxyType, host, port, username, password));
+      if (newProxies.isEmpty()) {
+        log.warn("No proxies found in the provided data!");
+        return;
+      }
+
+      this.proxies.addAll(newProxies);
+      callLoadHooks();
+
+      log.info("Loaded {} proxies!", newProxies.size());
     } catch (Exception e) {
-      log.error("Failed to load proxy from string.", e);
-      throw new RuntimeException(e);
+      log.error("Failed to load proxies from string!", e);
     }
+  }
+
+  private EnabledWrapper<SFProxy> fromStringSingle(String data, ProxyParser proxyParser) {
+    return new EnabledWrapper<>(true, proxyParser.parse(data));
   }
 
   public List<EnabledWrapper<SFProxy>> getProxies() {

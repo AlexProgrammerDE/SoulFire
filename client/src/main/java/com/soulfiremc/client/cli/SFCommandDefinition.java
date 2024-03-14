@@ -19,6 +19,7 @@ package com.soulfiremc.client.cli;
 
 import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.client.settings.ProxyParser;
 import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.proxy.ProxyType;
 import java.io.IOException;
@@ -126,12 +127,12 @@ public class SFCommandDefinition implements Callable<Integer> {
       }
     }
 
-    if (proxyFile != null && proxyType != null) {
+    if (proxyFile != null) {
       try {
         cliManager
             .clientSettingsManager()
             .proxyRegistry()
-            .loadFromString(Files.readString(proxyFile), proxyType);
+            .loadFromString(Files.readString(proxyFile), proxyType == null ? ProxyParser.uriParser() : ProxyParser.typeParser(proxyType));
       } catch (IOException e) {
         log.error("Failed to load proxies!", e);
         return 1;

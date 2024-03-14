@@ -39,24 +39,28 @@ public class AccountRegistry {
   private final RPCClient rpcClient;
 
   public void loadFromString(String data, AuthType authType, SFProxy proxy) {
-    var newAccounts =
-        data.lines()
-            .map(String::strip)
-            .filter(line -> !line.isBlank())
-            .distinct()
-            .map(account -> fromStringSingle(account, authType, proxy))
-            .map(account -> new EnabledWrapper<>(true, account))
-            .toList();
+    try {
+      var newAccounts =
+          data.lines()
+              .map(String::strip)
+              .filter(line -> !line.isBlank())
+              .distinct()
+              .map(account -> fromStringSingle(account, authType, proxy))
+              .map(account -> new EnabledWrapper<>(true, account))
+              .toList();
 
-    if (newAccounts.isEmpty()) {
-      log.warn("No accounts found in the provided data!");
-      return;
+      if (newAccounts.isEmpty()) {
+        log.warn("No accounts found in the provided data!");
+        return;
+      }
+
+      this.accounts.addAll(newAccounts);
+      callLoadHooks();
+
+      log.info("Loaded {} accounts!", newAccounts.size());
+    } catch (Exception e) {
+      log.error("Failed to load accounts from string!", e);
     }
-
-    this.accounts.addAll(newAccounts);
-    callLoadHooks();
-
-    log.info("Loaded {} accounts!", newAccounts.size());
   }
 
   private MinecraftAccount fromStringSingle(String data, AuthType authType, SFProxy proxy) {
