@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.client.gui.popups;
 
+import com.soulfiremc.client.RemoteServerData;
 import com.soulfiremc.client.gui.libs.SFSwingUtils;
 import com.soulfiremc.util.PortHelper;
 import com.soulfiremc.util.ServerAddress;
@@ -134,6 +135,4 @@ public class ServerSelectDialog extends JFrame {
 
     setVisible(true);
   }
-
-  public record RemoteServerData(ServerAddress serverAddress, String token) {}
 }

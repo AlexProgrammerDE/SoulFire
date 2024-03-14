@@ -24,8 +24,11 @@ import com.soulfiremc.client.gui.popups.ServerSelectDialog;
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.grpc.DefaultAuthSystem;
+import com.soulfiremc.util.ServerAddress;
 import java.awt.GraphicsEnvironment;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,64 +48,67 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
     // We may split client and server mixins in the future
     var runHeadless = GraphicsEnvironment.isHeadless() || args.length > 0;
 
+    Consumer<RemoteServerData> remoteServerConsumer =
+        remoteServerData -> {
+          var rpcClient =
+              new RPCClient(
+                  remoteServerData.serverAddress().host(),
+                  remoteServerData.serverAddress().port(),
+                  remoteServerData.token());
+
+          if (runHeadless) {
+            log.info("Starting CLI");
+            var cliManager = new CLIManager(rpcClient, PLUGIN_MANAGER);
+            cliManager.initCLI(args);
+          } else {
+            log.info("Starting GUI");
+            var guiManager = new GUIManager(rpcClient, PLUGIN_MANAGER);
+            guiManager.initGUI();
+          }
+        };
+    Runnable runIntegratedServer =
+        () -> {
+          var host = getRPCHost("localhost");
+          var port = getRandomRPCPort();
+
+          log.info("Starting integrated server on {}:{}", host, port);
+          var soulFire =
+              new SoulFireServer(host, port, PLUGIN_MANAGER, START_TIME, new DefaultAuthSystem());
+
+          var jwtToken = soulFire.generateIntegratedUserJWT();
+          remoteServerConsumer.accept(
+              new RemoteServerData(ServerAddress.fromStringAndPort(host, port), jwtToken));
+        };
     if (runHeadless) {
-      String host;
-      int port;
-      String jwtToken;
-      if (System.getProperty("sf.remoteHost") != null) {
-        host = System.getProperty("sf.remoteHost");
-        port = Integer.getInteger("sf.remotePort");
+      var host = System.getProperty("sf.remoteHost");
+      if (host == null) {
+        runIntegratedServer.run();
+      } else {
+        var port = Integer.getInteger("sf.remotePort");
+        var token = System.getProperty("sf.remoteToken");
+
+        Objects.requireNonNull(host, "Remote host must be set");
+        Objects.requireNonNull(port, "Remote port must be set");
+        Objects.requireNonNull(token, "Remote token must be set");
 
         log.info("Using remote server on {}:{}", host, port);
-        jwtToken = System.getProperty("sf.remoteJWT");
-      } else {
-        host = getRPCHost("localhost");
-        port = getRandomRPCPort();
 
-        log.info("Starting integrated server on {}:{}", host, port);
-        var soulFire =
-            new SoulFireServer(host, port, PLUGIN_MANAGER, START_TIME, new DefaultAuthSystem());
-
-        jwtToken = soulFire.generateIntegratedUserJWT();
+        remoteServerConsumer.accept(
+            new RemoteServerData(ServerAddress.fromStringAndPort(host, port), token));
       }
-
-      var rpcClient = new RPCClient(host, port, jwtToken);
-      log.info("Starting CLI");
-      var cliManager = new CLIManager(rpcClient, PLUGIN_MANAGER);
-      cliManager.initCLI(args);
     } else {
       GUIManager.injectTheme();
       GUIManager.loadGUIProperties();
 
-      SwingUtilities.invokeLater(
-          () ->
-              new ServerSelectDialog(
-                  () -> {
-                    var host = getRPCHost("localhost");
-                    var port = getRandomRPCPort();
-
-                    log.info("Starting integrated server");
-                    var soulFire =
-                        new SoulFireServer(
-                            host, port, PLUGIN_MANAGER, START_TIME, new DefaultAuthSystem());
-
-                    var jwtToken = soulFire.generateIntegratedUserJWT();
-                    var rpcClient = new RPCClient(host, port, jwtToken);
-
-                    log.info("Starting GUI");
-                    var guiManager = new GUIManager(rpcClient, PLUGIN_MANAGER);
-                    guiManager.initGUI();
-                  },
-                  remoteServerData -> {
-                    var rpcClient =
-                        new RPCClient(
-                            remoteServerData.serverAddress().host(),
-                            remoteServerData.serverAddress().port(),
-                            remoteServerData.token());
-                    log.info("Starting GUI");
-                    var guiManager = new GUIManager(rpcClient, PLUGIN_MANAGER);
-                    guiManager.initGUI();
-                  }));
+      if (Boolean.getBoolean("sf.disableServerSelect")) {
+        runIntegratedServer.run();
+      } else {
+        SwingUtilities.invokeLater(
+            () ->
+                new ServerSelectDialog(
+                    runIntegratedServer,
+                    remoteServerConsumer));
+      }
     }
   }
 }
