@@ -17,4 +17,8 @@
  */
 package com.soulfiremc.util;
 
-public record EnabledWrapper<T>(boolean enabled, T value) {}
+public record EnabledWrapper<T>(boolean enabled, T value) {
+  public static <T> EnabledWrapper<T> defaultTrue(T value) {
+    return new EnabledWrapper<>(true, value);
+  }
+}

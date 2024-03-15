@@ -95,7 +95,7 @@ public class ClientSettingsManager {
     }
 
     return new ProfileDataStructure(
-            settingsData, accountRegistry.getAccounts(), proxyRegistry.getProxies())
+            settingsData, accountRegistry.accounts().stream().toList(), proxyRegistry.proxies().stream().toList())
         .serialize();
   }
 
@@ -157,13 +157,13 @@ public class ClientSettingsManager {
     return AttackStartRequest.newBuilder()
         .addAllSettings(namespaces)
         .addAllAccounts(
-            accountRegistry.getAccounts().stream()
+            accountRegistry.accounts().stream()
                 .filter(EnabledWrapper::enabled)
                 .map(EnabledWrapper::value)
                 .map(MinecraftAccount::toProto)
                 .toList())
         .addAllProxies(
-            proxyRegistry.getProxies().stream()
+            proxyRegistry.proxies().stream()
                 .filter(EnabledWrapper::enabled)
                 .map(EnabledWrapper::value)
                 .map(SFProxy::toProto)

@@ -90,13 +90,11 @@ public class ProxyPanel extends NavigationItem {
         () -> {
           model.getDataVector().removeAllElements();
 
-          var proxies = proxyRegistry.getProxies();
-          var registrySize = proxies.size();
-          var dataVector = new Object[registrySize][];
-          for (var i = 0; i < registrySize; i++) {
-            var proxy = proxies.get(i);
-
-            dataVector[i] =
+          var proxies = proxyRegistry.proxies();
+          var dataVector = new Object[proxies.size()][];
+          var i = 0;
+          for (var proxy : proxies) {
+            dataVector[i++] =
                 new Object[] {
                   proxy.value().host(),
                   proxy.value().port(),

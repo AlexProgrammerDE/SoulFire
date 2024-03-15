@@ -19,16 +19,39 @@ package com.soulfiremc.client.settings;
 
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.EnabledWrapper;
+import it.unimi.dsi.fastutil.Hash;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenCustomHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
+import it.unimi.dsi.fastutil.objects.ObjectSortedSets;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
 public class ProxyRegistry {
-  private final List<EnabledWrapper<SFProxy>> proxies = new ArrayList<>();
+  private final ObjectSortedSet<EnabledWrapper<SFProxy>> proxies = new ObjectLinkedOpenCustomHashSet<>(new Hash.Strategy<>() {
+    @Override
+    public int hashCode(EnabledWrapper<SFProxy> obj) {
+      if (obj == null) {
+        return 0;
+      }
+
+      return obj.value().hashCode();
+    }
+
+    @Override
+    public boolean equals(EnabledWrapper<SFProxy> obj1, EnabledWrapper<SFProxy> obj2) {
+      if (obj1 == null || obj2 == null) {
+        return false;
+      }
+
+      return obj1.value().equals(obj2.value());
+    }
+  });
   private final List<Runnable> loadHooks = new ArrayList<>();
 
   public void loadFromString(String data, ProxyParser proxyParser) {
@@ -36,9 +59,10 @@ public class ProxyRegistry {
       var newProxies =
           data.lines()
               .map(String::strip)
-              .filter(line -> !line.isBlank())
+              .filter(Predicate.not(String::isBlank))
               .distinct()
-              .map(line -> fromStringSingle(line, proxyParser))
+              .map(proxyParser::parse)
+              .map(EnabledWrapper::defaultTrue)
               .toList();
 
       if (newProxies.isEmpty()) {
@@ -55,12 +79,8 @@ public class ProxyRegistry {
     }
   }
 
-  private EnabledWrapper<SFProxy> fromStringSingle(String data, ProxyParser proxyParser) {
-    return new EnabledWrapper<>(true, proxyParser.parse(data));
-  }
-
-  public List<EnabledWrapper<SFProxy>> getProxies() {
-    return Collections.unmodifiableList(proxies);
+  public Collection<EnabledWrapper<SFProxy>> proxies() {
+    return ObjectSortedSets.unmodifiable(proxies);
   }
 
   public void setProxies(List<EnabledWrapper<SFProxy>> proxies) {

@@ -24,9 +24,16 @@ import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.EnabledWrapper;
+import it.unimi.dsi.fastutil.Hash;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenCustomHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
+import it.unimi.dsi.fastutil.objects.ObjectSortedSets;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Predicate;
 import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +41,28 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class AccountRegistry {
-  private final List<EnabledWrapper<MinecraftAccount>> accounts = new ArrayList<>();
+  private final ObjectSortedSet<EnabledWrapper<MinecraftAccount>> accounts =
+      new ObjectLinkedOpenCustomHashSet<>(
+          new Hash.Strategy<>() {
+            @Override
+            public int hashCode(EnabledWrapper<MinecraftAccount> obj) {
+              if (obj == null) {
+                return 0;
+              }
+
+              return obj.value().profileId().hashCode();
+            }
+
+            @Override
+            public boolean equals(
+                EnabledWrapper<MinecraftAccount> obj1, EnabledWrapper<MinecraftAccount> obj2) {
+              if (obj1 == null || obj2 == null) {
+                return false;
+              }
+
+              return obj1.value().profileId().equals(obj2.value().profileId());
+            }
+          });
   private final List<Runnable> loadHooks = new ArrayList<>();
   private final RPCClient rpcClient;
 
@@ -43,10 +71,10 @@ public class AccountRegistry {
       var newAccounts =
           data.lines()
               .map(String::strip)
-              .filter(line -> !line.isBlank())
+              .filter(Predicate.not(String::isBlank))
               .distinct()
               .map(account -> fromStringSingle(account, authType, proxy))
-              .map(account -> new EnabledWrapper<>(true, account))
+              .map(EnabledWrapper::defaultTrue)
               .toList();
 
       if (newAccounts.isEmpty()) {
@@ -64,12 +92,6 @@ public class AccountRegistry {
   }
 
   private MinecraftAccount fromStringSingle(String data, AuthType authType, SFProxy proxy) {
-    data = data.trim();
-
-    if (data.isBlank()) {
-      throw new IllegalArgumentException("Account cannot be empty!");
-    }
-
     try {
       var request =
           AuthRequest.newBuilder()
@@ -88,8 +110,8 @@ public class AccountRegistry {
     }
   }
 
-  public List<EnabledWrapper<MinecraftAccount>> getAccounts() {
-    return Collections.unmodifiableList(accounts);
+  public Collection<EnabledWrapper<MinecraftAccount>> accounts() {
+    return ObjectSortedSets.unmodifiable(accounts);
   }
 
   public void setAccounts(List<EnabledWrapper<MinecraftAccount>> accounts) {
@@ -105,12 +127,10 @@ public class AccountRegistry {
     loadHooks.add(hook);
   }
 
-  public MinecraftAccount getAccount(String username, AuthType authType) {
+  public Optional<MinecraftAccount> getAccount(UUID profileId) {
     return accounts.stream()
         .map(EnabledWrapper::value)
-        .filter(account -> account.authType() == authType)
-        .filter(account -> account.lastKnownName().equals(username))
-        .findFirst()
-        .orElse(null);
+        .filter(account -> account.profileId().equals(profileId))
+        .findFirst();
   }
 }

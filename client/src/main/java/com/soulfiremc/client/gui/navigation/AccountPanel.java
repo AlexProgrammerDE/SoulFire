@@ -84,13 +84,11 @@ public class AccountPanel extends NavigationItem {
         () -> {
           model.getDataVector().removeAllElements();
 
-          var accounts = accountRegistry.getAccounts();
-          var registrySize = accounts.size();
-          var dataVector = new Object[registrySize][];
-          for (var i = 0; i < registrySize; i++) {
-            var account = accounts.get(i);
-
-            dataVector[i] =
+          var accounts = accountRegistry.accounts();
+          var dataVector = new Object[accounts.size()][];
+          var i = 0;
+          for (var account : accounts) {
+            dataVector[i++] =
                 new Object[] {
                   account.value().lastKnownName(),
                   account.value().profileId(),
@@ -118,7 +116,7 @@ public class AccountPanel extends NavigationItem {
             var authType = (AuthType) row[2];
             var enabled = (boolean) row[3];
 
-            var account = accountRegistry.getAccount(username, authType);
+            var account = accountRegistry.getAccount(profileId).orElseThrow();
 
             accounts.add(
                 new EnabledWrapper<>(

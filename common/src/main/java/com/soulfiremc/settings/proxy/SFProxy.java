@@ -31,12 +31,16 @@ public record SFProxy(
   public SFProxy {
     if (type == ProxyType.SOCKS4 && password != null) {
       throw new IllegalArgumentException("SOCKS4 does not support passwords!");
-    } else if (username == null && password != null) {
-      throw new IllegalArgumentException("Username must be set if password is set!");
     } else if (username != null && username.isBlank()) {
-      throw new IllegalArgumentException("Username must not be blank! (Should be null)");
+      // Sanitize empty strings
+      username = null;
     } else if (password != null && password.isBlank()) {
-      throw new IllegalArgumentException("Password must not be blank! (Should be null)");
+        // Sanitize empty strings
+      password = null;
+    }
+
+    if (username == null && password != null) {
+      throw new IllegalArgumentException("Username must be set if password is set!");
     }
   }
 
