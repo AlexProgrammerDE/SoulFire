@@ -26,8 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class ProxyParser {
-  abstract SFProxy parse(String proxyData);
-
   private static <T> T getIndexOrNull(T[] array, int index) {
     if (index < array.length) {
       return array[index];
@@ -95,4 +93,6 @@ public abstract class ProxyParser {
       }
     };
   }
+
+  abstract SFProxy parse(String proxyData);
 }

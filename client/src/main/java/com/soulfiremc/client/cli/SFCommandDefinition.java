@@ -132,7 +132,9 @@ public class SFCommandDefinition implements Callable<Integer> {
         cliManager
             .clientSettingsManager()
             .proxyRegistry()
-            .loadFromString(Files.readString(proxyFile), proxyType == null ? ProxyParser.uriParser() : ProxyParser.typeParser(proxyType));
+            .loadFromString(
+                Files.readString(proxyFile),
+                proxyType == null ? ProxyParser.uriParser() : ProxyParser.typeParser(proxyType));
       } catch (IOException e) {
         log.error("Failed to load proxies!", e);
         return 1;

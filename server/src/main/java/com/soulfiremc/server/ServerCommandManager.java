@@ -58,6 +58,7 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.util.SFPathConstants;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -70,6 +71,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
@@ -533,6 +535,10 @@ public class ServerCommandManager implements PlatformCommandManager {
                             }))));
     dispatcher.register(
         literal("export-map")
+            .executes(
+                help(
+                    "Exports images of all map items. Can be a held item or in a item-frame.",
+                    c -> exportMap(c, bot -> bot.sessionDataManager().mapDataStates().keySet())))
             .then(
                 argument("map_id", IntegerArgumentType.integer())
                     .executes(
@@ -540,38 +546,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                             "Exports a image of a map item by map id. Can be a held item or in a item-frame.",
                             c -> {
                               var mapId = IntegerArgumentType.getInteger(c, "map_id");
-                              var currentTime = System.currentTimeMillis();
-
-                              return forEveryBot(
-                                  c,
-                                  bot -> {
-                                    var mapDataState =
-                                        bot.sessionDataManager().mapDataStates().get(mapId);
-                                    if (mapDataState == null) {
-                                      c.getSource().sendInfo("Map not found!");
-                                      return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    var image = mapDataState.toBufferedImage();
-                                    var fileName =
-                                        "map_"
-                                            + mapId
-                                            + "_"
-                                            + currentTime
-                                            + "_"
-                                            + bot.meta().accountName()
-                                            + ".png";
-                                    try {
-                                      Files.createDirectories(SFPathConstants.MAPS_FOLDER);
-                                      var file = SFPathConstants.MAPS_FOLDER.resolve(fileName);
-                                      ImageIO.write(image, "png", file.toFile());
-                                      c.getSource().sendInfo("Exported map to {}", file);
-                                    } catch (IOException e) {
-                                      c.getSource().sendError("Failed to export map!", e);
-                                    }
-
-                                    return Command.SINGLE_SUCCESS;
-                                  });
+                              return exportMap(c, bot -> IntSet.of(mapId));
                             }))));
     dispatcher.register(
         literal("generate-versions")
@@ -673,6 +648,37 @@ public class ServerCommandManager implements PlatformCommandManager {
                         false)));
 
     SoulFireAPI.postEvent(new CommandManagerInitEvent(this));
+  }
+
+  private int exportMap(
+      CommandContext<ConsoleSubject> context, Function<BotConnection, IntSet> idProvider) {
+    // Inside here to capture a time for the file name
+    var currentTime = System.currentTimeMillis();
+    return forEveryBot(
+        context,
+        bot -> {
+          for (var mapId : idProvider.apply(bot).toIntArray()) {
+            var mapDataState = bot.sessionDataManager().mapDataStates().get(mapId);
+            if (mapDataState == null) {
+              context.getSource().sendInfo("Map not found!");
+              return Command.SINGLE_SUCCESS;
+            }
+
+            var image = mapDataState.toBufferedImage();
+            var fileName =
+                "map_" + currentTime + "_" + mapId + "_" + bot.meta().accountName() + ".png";
+            try {
+              Files.createDirectories(SFPathConstants.MAPS_FOLDER);
+              var file = SFPathConstants.MAPS_FOLDER.resolve(fileName);
+              ImageIO.write(image, "png", file.toFile());
+              context.getSource().sendInfo("Exported map to {}", file);
+            } catch (IOException e) {
+              context.getSource().sendError("Failed to export map!", e);
+            }
+          }
+
+          return Command.SINGLE_SUCCESS;
+        });
   }
 
   public int forEveryAttack(

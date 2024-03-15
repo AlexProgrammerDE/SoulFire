@@ -35,7 +35,7 @@ public record SFProxy(
       // Sanitize empty strings
       username = null;
     } else if (password != null && password.isBlank()) {
-        // Sanitize empty strings
+      // Sanitize empty strings
       password = null;
     }
 

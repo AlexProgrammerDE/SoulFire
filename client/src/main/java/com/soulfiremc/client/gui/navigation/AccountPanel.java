@@ -105,16 +105,18 @@ public class AccountPanel extends NavigationItem {
         () -> {
           var accounts = new ArrayList<EnabledWrapper<MinecraftAccount>>();
 
-          for (var i = 0; i < accountList.getRowCount(); i++) {
-            var row = new Object[accountList.getColumnCount()];
-            for (var j = 0; j < accountList.getColumnCount(); j++) {
-              row[j] = accountList.getValueAt(i, j);
+          var rowCount = accountList.getRowCount();
+          var columnCount = accountList.getColumnCount();
+          for (var row = 0; row < rowCount; row++) {
+            var rowData = new Object[columnCount];
+            for (var column = 0; column < columnCount; column++) {
+              rowData[column] = accountList.getValueAt(row, column);
             }
 
-            var username = (String) row[0];
-            var profileId = (UUID) row[1];
-            var authType = (AuthType) row[2];
-            var enabled = (boolean) row[3];
+            var username = (String) rowData[0];
+            var profileId = (UUID) rowData[1];
+            var authType = (AuthType) rowData[2];
+            var enabled = (boolean) rowData[3];
 
             var account = accountRegistry.getAccount(profileId).orElseThrow();
 

@@ -104,10 +104,7 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
         runIntegratedServer.run();
       } else {
         SwingUtilities.invokeLater(
-            () ->
-                new ServerSelectDialog(
-                    runIntegratedServer,
-                    remoteServerConsumer));
+            () -> new ServerSelectDialog(runIntegratedServer, remoteServerConsumer));
       }
     }
   }

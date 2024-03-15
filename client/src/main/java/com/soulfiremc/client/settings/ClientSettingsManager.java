@@ -95,7 +95,9 @@ public class ClientSettingsManager {
     }
 
     return new ProfileDataStructure(
-            settingsData, accountRegistry.accounts().stream().toList(), proxyRegistry.proxies().stream().toList())
+            settingsData,
+            accountRegistry.accounts().stream().toList(),
+            proxyRegistry.proxies().stream().toList())
         .serialize();
   }
 

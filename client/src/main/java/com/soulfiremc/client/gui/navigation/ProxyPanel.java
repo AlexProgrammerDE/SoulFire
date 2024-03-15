@@ -119,18 +119,20 @@ public class ProxyPanel extends NavigationItem {
         () -> {
           var proxies = new ArrayList<EnabledWrapper<SFProxy>>();
 
-          for (var i = 0; i < proxyList.getRowCount(); i++) {
-            var row = new Object[proxyList.getColumnCount()];
-            for (var j = 0; j < proxyList.getColumnCount(); j++) {
-              row[j] = proxyList.getValueAt(i, j);
+          var rowCount = proxyList.getRowCount();
+          var columnCount = proxyList.getColumnCount();
+          for (var row = 0; row < rowCount; row++) {
+            var rowData = new Object[columnCount];
+            for (var column = 0; column < columnCount; column++) {
+              rowData[column] = proxyList.getValueAt(row, column);
             }
 
-            var host = (String) row[0];
-            var port = (int) row[1];
-            var username = (String) row[2];
-            var password = (String) row[3];
-            var type = (ProxyType) row[4];
-            var enabled = (boolean) row[5];
+            var host = (String) rowData[0];
+            var port = (int) rowData[1];
+            var username = (String) rowData[2];
+            var password = (String) rowData[3];
+            var type = (ProxyType) rowData[4];
+            var enabled = (boolean) rowData[5];
 
             proxies.add(
                 new EnabledWrapper<>(enabled, new SFProxy(type, host, port, username, password)));
@@ -193,13 +195,15 @@ public class ProxyPanel extends NavigationItem {
                 guiManager,
                 parent,
                 text ->
-                    guiManager.clientSettingsManager().proxyRegistry().loadFromString(text, ProxyParser.typeParser(type))));
+                    guiManager
+                        .clientSettingsManager()
+                        .proxyRegistry()
+                        .loadFromString(text, ProxyParser.typeParser(type))));
 
     return button;
   }
 
-  private static JMenuItem createURLProxyLoadButton(
-      GUIManager guiManager, GUIFrame parent) {
+  private static JMenuItem createURLProxyLoadButton(GUIManager guiManager, GUIFrame parent) {
     var button = new JMenuItem("URI");
 
     button.addActionListener(
@@ -211,7 +215,10 @@ public class ProxyPanel extends NavigationItem {
                 guiManager,
                 parent,
                 text ->
-                    guiManager.clientSettingsManager().proxyRegistry().loadFromString(text, ProxyParser.uriParser())));
+                    guiManager
+                        .clientSettingsManager()
+                        .proxyRegistry()
+                        .loadFromString(text, ProxyParser.uriParser())));
 
     return button;
   }
