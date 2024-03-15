@@ -23,7 +23,9 @@ performance.
 ---
 
 > [!WARNING]
-> This is a very powerful tool that shall only be used to attack your own servers. Ensure your own DDoS protection provider and your host are okay with stress-tests. If you use this software to attack others, you make yourself (or your legal guardians) criminally liable, the developers of SoulFire are not responsible for your own actions.
+> This is a very powerful tool that shall only be used to attack your own servers. Ensure your own DDoS protection
+> provider and your host are okay with stress-tests. If you use this software to attack others, you make yourself (or your
+> legal guardians) criminally liable, the developers of SoulFire are not responsible for your own actions.
 
 ---
 
@@ -52,10 +54,11 @@ through [nightly.link](https://nightly.link/AlexProgrammerDE/SoulFire/workflows/
 
 ## 🍿 Version support
 
-SoulFire supports many version of Minecraft, including releases, april fools snapshots, beta, alpha, classic (including [CPE](https://wiki.vg/Classic_Protocol_Extension)) and even Minecraft Bedrock edition,
+SoulFire supports many version of Minecraft, including releases, april fools snapshots, beta, alpha, classic (
+including [CPE](https://wiki.vg/Classic_Protocol_Extension)) and even Minecraft Bedrock edition,
 and that includes every single subversion, not just a few specific versions.
 
-You can find a up-to-date list of supported versions in [VERSIONS.md](./VERSIONS.md).
+You can find a up-to-date list of supported versions in the [documentation](https://soulfiremc.com/docs/usage/versions).
 
 ### How does this work?
 
@@ -73,109 +76,17 @@ which include client-side translation externally.
 
 ## ⌨ Commands
 
-For a list of all available commands, look at [COMMANDS.md](./COMMANDS.md)
+For a list of all available commands, look at the [documentation](https://soulfiremc.com/docs/usage/commands)
 or run `help` in the GUI or CLI.
 
-## 📻 Built-in plugins
+## 📻 Plugins
 
-### AutoRespawn
+You can read about the SoulFire plugins in the [documentation](https://soulfiremc.com/docs/usage/plugins).
 
-Automatically respawns bots with a random delay when they die.
-Bots do not cause a lot of lags when they are dead, so this module is useful for ensuring
-that the bots are always alive and performing their actions.
+## 🗃 Import accounts and proxies
 
-### AutoRegister
-
-Automatically runs `/register` and `/login` on cracked servers.
-Also supports `/captcha` for servers that have it.
-
-### AutoJump
-
-Automatically jumps with a random delay.
-Useful for slowing the server down.
-It will also make the bots send a lot of movement packets,
-which is useful for testing the server's performance.
-
-### ClientSettings & ClientBrand
-
-Configurable client settings like chat visibility, chat colours, skin customization, and more.
-Client brand can also be changed to any string; by default, it's set to "vanilla".
-Useful for bypassing anti-bot plugins that check for client settings.
-
-## 🗃 Import accounts & proxies
-
-### Accounts
-
-SoulFire supports Microsoft, The Altening and Offline accounts.
-
-If no account is selected, SoulFire will generate offline accounts based on the configured name format.
-
-Select the account type in the GUI or CLI and use one of these formats with one account per line:
-
-#### Microsoft
-
-```text
-email:password
-email2:password2
-email3:password3
-```
-
-#### The Altening
-
-```text
-token@alt.com
-token2@alt.com
-token3@alt.com
-```
-
-#### Offline
-
-```text
-Username
-Username2
-Username3
-```
-
-### Proxies
-
-SoulFire supports HTTP, SOCKS4 and SOCKS5 proxies.
-
-Select the proxy type in the GUI or CLI and use one of these formats with one proxy per line:
-
-#### HTTP
-
-```text
-ip:port <- no authentication
-ip:port:username:password <- authentication
-```
-
-#### SOCKS4
-
-```text
-ip:port <- no authentication
-ip:port:username <- authentication (socks4 doesn't support passwords)
-```
-
-#### SOCKS5
-
-```text
-ip:port <- no authentication
-ip:port:username:password <- authentication
-```
-
-#### URI
-
-This format allows you to use multiple proxy types in one file.
-
-<!--suppress HttpUrlsUsage -->
-```text
-socks5://ip:port <- no authentication
-socks5://username:password@ip:port <- authentication
-socks4://ip:port <- no authentication
-socks4://username@ip:port <- authentication
-http://ip:port <- no authentication
-http://username:password@ip:port <- authentication
-```
+You can read about how to import accounts in the [account documentation](https://soulfiremc.com/docs/usage/accounts) and
+how to import proxies in the [proxy documentation](https://soulfiremc.com/docs/usage/proxies).
 
 ## 🧵 Demo
 
@@ -189,7 +100,7 @@ To run SoulFire from the command line without a GUI, enter:
 
 > **Note:** Some features are not available in CLI mode, we recommend using the GUI.
 
-For a list of all available CLI flags, look at [CLI_FLAGS.md](./CLI_FLAGS.md)
+For a list of all available CLI flags, look at the [documentation](https://soulfiremc.com/docs/usage/cli-flags)
 or run `java -jar SoulFire.jar --help`.
 
 ## 🔧 Build from source
@@ -202,9 +113,11 @@ or run `java -jar SoulFire.jar --help`.
 ## 👨‍💻 Developer API
 
 SoulFire offers a Developer API to create your own plugins using the plugin API and mixins.
-The software may regularly have breaking changes, so you'll have to stick to a version of SoulFire or update your plugin regularly.
+The software may regularly have breaking changes, so you'll have to stick to a version of SoulFire or update your plugin
+regularly.
 
-To learn more about the Developer API, take a look at the official [plugin example](https://github.com/AlexProgrammerDE/SoulFirePluginExample).
+To learn more about the Developer API, take a look at the
+official [plugin example](https://github.com/AlexProgrammerDE/SoulFirePluginExample).
 
 ## 🌈 Community
 
