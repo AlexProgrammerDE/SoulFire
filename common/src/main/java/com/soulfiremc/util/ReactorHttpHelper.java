@@ -19,11 +19,21 @@ package com.soulfiremc.util;
 
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.settings.proxy.SFProxy;
+import java.net.URI;
+import java.net.URL;
 import java.time.Duration;
 import reactor.netty.transport.ProxyProvider;
 
 public class ReactorHttpHelper {
   private ReactorHttpHelper() {}
+
+  public static URL createURL(String url) {
+    try {
+      return URI.create(url).toURL();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   public static reactor.netty.http.client.HttpClient createReactorClient(
       SFProxy proxyData, boolean withBody) {

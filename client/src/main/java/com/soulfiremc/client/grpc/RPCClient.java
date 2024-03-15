@@ -23,6 +23,7 @@ import com.soulfiremc.grpc.generated.CommandServiceGrpc;
 import com.soulfiremc.grpc.generated.ConfigServiceGrpc;
 import com.soulfiremc.grpc.generated.LogsServiceGrpc;
 import com.soulfiremc.grpc.generated.MCAuthServiceGrpc;
+import com.soulfiremc.grpc.generated.ProxyCheckServiceGrpc;
 import io.grpc.CallCredentials;
 import io.grpc.Context;
 import io.grpc.Grpc;
@@ -46,6 +47,7 @@ public class RPCClient {
   private final AttackServiceGrpc.AttackServiceStub attackStub;
   private final ConfigServiceGrpc.ConfigServiceBlockingStub configStubBlocking;
   private final MCAuthServiceGrpc.MCAuthServiceBlockingStub mcAuthServiceBlocking;
+  private final ProxyCheckServiceGrpc.ProxyCheckServiceBlockingStub proxyCheckServiceBlocking;
 
   public RPCClient(String host, int port, String jwt) {
     this(
@@ -79,6 +81,8 @@ public class RPCClient {
         prepareChannel(ConfigServiceGrpc.newBlockingStub(channel), callCredentials);
     mcAuthServiceBlocking =
         prepareChannel(MCAuthServiceGrpc.newBlockingStub(channel), callCredentials);
+    proxyCheckServiceBlocking =
+        prepareChannel(ProxyCheckServiceGrpc.newBlockingStub(channel), callCredentials);
   }
 
   private <T extends AbstractStub<T>> T prepareChannel(T channel, CallCredentials callCredentials) {

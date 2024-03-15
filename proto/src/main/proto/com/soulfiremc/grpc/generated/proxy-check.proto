@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+import "com/soulfiremc/grpc/generated/common.proto";
+
+option java_multiple_files = true;
+
+package com.soulfiremc.grpc.generated;
+
+message ProxyCheckRequest {
+  enum Target {
+    IPIFY = 0;
+    AWS = 1;
+  }
+
+  repeated ProxyProto proxy = 1;
+  Target target = 2;
+}
+
+message ProxyCheckResponseSingle {
+  ProxyProto proxy = 1;
+  bool valid = 2;
+  int32 latency = 3;
+  string realIp = 4;
+}
+
+message ProxyCheckResponse {
+  repeated ProxyCheckResponseSingle response = 1;
+}
+
+service ProxyCheckService {
+  rpc check(ProxyCheckRequest) returns (ProxyCheckResponse);
+}

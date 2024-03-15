@@ -79,6 +79,7 @@ public class RPCServer {
             .addService(injector.getSingleton(CommandServiceImpl.class))
             .addService(injector.getSingleton(AttackServiceImpl.class))
             .addService(injector.getSingleton(MCAuthServiceImpl.class))
+            .addService(injector.getSingleton(ProxyCheckServiceImpl.class))
             .maxInboundMessageSize(Integer.MAX_VALUE)
             .build();
   }
