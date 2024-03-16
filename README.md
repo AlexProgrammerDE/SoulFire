@@ -24,8 +24,8 @@ performance.
 
 > [!WARNING]
 > This is a very powerful tool that shall only be used to attack your own servers. Ensure your own DDoS protection
-> provider and your host are okay with stress-tests. If you use this software to attack others, you make yourself (or your
-> legal guardians) criminally liable, the developers of SoulFire are not responsible for your own actions.
+> provider, and your host are okay with stress-tests. If you use this software to attack others, you make yourself (or your
+> legal guardians) criminally liable; the developers of SoulFire are not responsible for your own actions.
 
 ---
 
@@ -38,7 +38,7 @@ performance.
 * Supports [almost every Minecraft version](#-version-support)
 * Use Microsoft, The Altening, EasyMC or Offline accounts
 * Use HTTP/SOCKS4/SOCKS5 proxies
-* Multiple [built-in plugins](#-built-in-plugins) like AutoRespawn, AutoJump, ClientSettings and more
+* Multiple [built-in plugins](#-plugins) like AutoRespawn, AutoJump, ClientSettings and more
 * Console command support
 * A* Pathfinding (Diagonal moves, parkour, mining blocks, placing blocks)
 
@@ -54,11 +54,11 @@ through [nightly.link](https://nightly.link/AlexProgrammerDE/SoulFire/workflows/
 
 ## 🍿 Version support
 
-SoulFire supports many version of Minecraft, including releases, april fools snapshots, beta, alpha, classic (
-including [CPE](https://wiki.vg/Classic_Protocol_Extension)) and even Minecraft Bedrock edition,
+SoulFire supports many versions of Minecraft, including releases, april fools snapshots, beta, alpha,
+classic (including [CPE](https://wiki.vg/Classic_Protocol_Extension)) and even Minecraft Bedrock edition,
 and that includes every single subversion, not just a few specific versions.
 
-You can find a up-to-date list of supported versions in the [documentation](https://soulfiremc.com/docs/usage/versions).
+You can find an up-to-date list of supported versions in the [documentation](https://soulfiremc.com/docs/usage/versions).
 
 ### How does this work?
 
@@ -108,7 +108,7 @@ or run `java -jar SoulFire.jar --help`.
 1. Install Java 21+
 2. Download the latest source code from GitHub
 3. Run `./gradlew build` in the project directory
-4. Get the jar file from `build/libs`
+4. Get the jar file from `client/build/libs`
 
 ## 👨‍💻 Developer API
 
