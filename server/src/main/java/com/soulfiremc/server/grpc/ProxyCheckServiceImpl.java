@@ -34,7 +34,6 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServiceImplBase {
   @Override
-  @SuppressWarnings("HttpUrlsUsage")
   public void check(
       ProxyCheckRequest request, StreamObserver<ProxyCheckResponse> responseObserver) {
     try {
@@ -42,8 +41,8 @@ public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServi
 
       var url =
           switch (request.getTarget()) {
-            case IPIFY -> ReactorHttpHelper.createURL("http://api.ipify.org");
-            case AWS -> ReactorHttpHelper.createURL("http://checkip.amazonaws.com");
+            case IPIFY -> ReactorHttpHelper.createURL("https://api.ipify.org");
+            case AWS -> ReactorHttpHelper.createURL("https://checkip.amazonaws.com");
             case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized target");
           };
 
