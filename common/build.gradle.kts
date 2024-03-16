@@ -30,6 +30,7 @@ dependencies {
     api(libs.caffeine)
     api(libs.jetbrains.annotations)
 
+    api(libs.bundles.armeria)
     api(libs.bundles.reactor.netty)
 
     api(libs.bundles.mixins)

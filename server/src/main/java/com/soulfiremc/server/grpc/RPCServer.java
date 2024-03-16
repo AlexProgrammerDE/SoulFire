@@ -18,17 +18,19 @@
 package com.soulfiremc.server.grpc;
 
 import ch.jalu.injector.Injector;
-import io.grpc.InsecureServerCredentials;
-import io.grpc.Metadata;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.ServerInterceptor;
-import io.grpc.netty.NettyServerBuilder;
+import com.linecorp.armeria.common.HttpHeaderNames;
+import com.linecorp.armeria.common.HttpMethod;
+import com.linecorp.armeria.common.SessionProtocol;
+import com.linecorp.armeria.common.grpc.GrpcSerializationFormats;
+import com.linecorp.armeria.common.grpc.protocol.GrpcHeaderNames;
+import com.linecorp.armeria.server.Server;
+import com.linecorp.armeria.server.ServerBuilder;
+import com.linecorp.armeria.server.cors.CorsService;
+import com.linecorp.armeria.server.grpc.GrpcService;
+import com.linecorp.armeria.server.logging.LoggingService;
+import io.grpc.protobuf.services.ProtoReflectionService;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
 import javax.crypto.SecretKey;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +45,9 @@ public class RPCServer {
       String host, int port, Injector injector, SecretKey jwtKey, AuthSystem authSystem) {
     this(
         jwtKey,
-        NettyServerBuilder.forAddress(
-            new InetSocketAddress(host, port), InsecureServerCredentials.create()),
+        Server.builder()
+            .tlsSelfSigned()
+            .port(new InetSocketAddress(host, port), SessionProtocol.HTTP, SessionProtocol.HTTPS),
         host,
         port,
         injector,
@@ -53,26 +56,27 @@ public class RPCServer {
 
   public RPCServer(
       SecretKey jwtKey,
-      ServerBuilder<?> serverBuilder,
+      ServerBuilder serverBuilder,
       String host,
       int port,
       Injector injector,
       AuthSystem authSystem) {
     this.host = host;
     this.port = port;
-    server =
-        serverBuilder
-            .intercept(
-                new ServerInterceptor() {
-                  @Override
-                  public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
-                      ServerCall<ReqT, RespT> call,
-                      Metadata headers,
-                      ServerCallHandler<ReqT, RespT> next) {
-                    call.setCompression("gzip");
-                    return next.startCall(call, headers);
-                  }
-                })
+
+    var corsBuilder =
+        CorsService.builderForAnyOrigin()
+            .allowRequestMethods(HttpMethod.POST) // Allow POST method.
+            // Allow Content-type and X-GRPC-WEB headers.
+            .allowRequestHeaders(HttpHeaderNames.CONTENT_TYPE, HttpHeaderNames.of("X-GRPC-WEB"))
+            // Expose trailers of the HTTP response to the client.
+            .exposeHeaders(
+                GrpcHeaderNames.GRPC_STATUS,
+                GrpcHeaderNames.GRPC_MESSAGE,
+                GrpcHeaderNames.ARMERIA_GRPC_THROWABLEPROTO_BIN);
+    var grpcService =
+        GrpcService.builder()
+            .autoCompression(true)
             .intercept(new JwtServerInterceptor(jwtKey, authSystem))
             .addService(injector.getSingleton(LogServiceImpl.class))
             .addService(injector.getSingleton(ConfigServiceImpl.class))
@@ -80,32 +84,29 @@ public class RPCServer {
             .addService(injector.getSingleton(AttackServiceImpl.class))
             .addService(injector.getSingleton(MCAuthServiceImpl.class))
             .addService(injector.getSingleton(ProxyCheckServiceImpl.class))
-            .maxInboundMessageSize(Integer.MAX_VALUE)
+            // Allow collecting info about callable methods.
+            .addService(ProtoReflectionService.newInstance())
+            .maxRequestMessageLength(Integer.MAX_VALUE)
+            .maxResponseMessageLength(Integer.MAX_VALUE)
+            .supportedSerializationFormats(GrpcSerializationFormats.values())
+            .enableUnframedRequests(true)
+            .enableHealthCheckService(true)
+            .build();
+    server =
+        serverBuilder
+            .service(grpcService, corsBuilder.newDecorator(), LoggingService.newDecorator())
             .build();
   }
 
   public void start() throws IOException {
-    server.start();
-    log.info("RPC Server started, listening on {}", port);
-    Runtime.getRuntime()
-        .addShutdownHook(
-            new Thread(
-                () -> {
-                  log.info("*** shutting down gRPC server since JVM is shutting down");
-                  try {
-                    shutdown();
-                  } catch (Throwable e) {
-                    log.error("Error while shutting down gRPC server", e);
-                    return;
-                  }
-                  log.info("*** server shut down");
-                }));
+    server.closeOnJvmShutdown();
+
+    server.start().join();
+
+    log.info("RPC Server started, listening on {}", server.activeLocalPort());
   }
 
   public void shutdown() throws InterruptedException {
-    if (!server.shutdown().awaitTermination(3, TimeUnit.SECONDS)
-        && !server.shutdownNow().awaitTermination(3, TimeUnit.SECONDS)) {
-      throw new RuntimeException("Unable to shutdown gRPC server");
-    }
+    server.stop().join();
   }
 }
