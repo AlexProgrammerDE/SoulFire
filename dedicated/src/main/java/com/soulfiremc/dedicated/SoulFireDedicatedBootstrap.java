@@ -48,6 +48,8 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
     var soulFire =
         new SoulFireServer(host, port, PLUGIN_MANAGER, START_TIME, new DefaultAuthSystem());
 
+    log.info("Tip: To generate a new access token, use the command: 'generate-token'");
+
     new GenericTerminalConsole(
             soulFire.shutdownManager(),
             soulFire.injector().getSingleton(ServerCommandManager.class))
