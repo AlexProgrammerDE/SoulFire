@@ -97,8 +97,8 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
             new RemoteServerData(ServerAddress.fromStringAndPort(host, port), token));
       }
     } else {
-      GUIManager.injectTheme();
       GUIManager.loadGUIProperties();
+      GUIManager.injectTheme();
 
       if (Boolean.getBoolean("sf.disableServerSelect")) {
         runIntegratedServer.run();

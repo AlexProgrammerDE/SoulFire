@@ -25,7 +25,6 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,7 +49,7 @@ public class GUIClientProps {
   }
 
   public static void saveSettings() {
-    try (var os = Files.newOutputStream(SETTINGS_PATH, StandardOpenOption.CREATE)) {
+    try (var os = Files.newOutputStream(SETTINGS_PATH)) {
       SETTINGS.store(
           new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8)),
           "SoulFire GUI Settings");
