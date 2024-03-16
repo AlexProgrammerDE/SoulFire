@@ -20,7 +20,6 @@ package com.soulfiremc.client.grpc;
 import com.linecorp.armeria.client.ClientFactory;
 import com.linecorp.armeria.client.grpc.GrpcClientBuilder;
 import com.linecorp.armeria.client.grpc.GrpcClients;
-import com.linecorp.armeria.client.logging.LoggingClient;
 import com.linecorp.armeria.common.HttpHeaderNames;
 import com.linecorp.armeria.common.grpc.GrpcSerializationFormats;
 import com.soulfiremc.builddata.BuildData;
@@ -30,14 +29,11 @@ import com.soulfiremc.grpc.generated.ConfigServiceGrpc;
 import com.soulfiremc.grpc.generated.LogsServiceGrpc;
 import com.soulfiremc.grpc.generated.MCAuthServiceGrpc;
 import com.soulfiremc.grpc.generated.ProxyCheckServiceGrpc;
-import com.soulfiremc.server.util.TimeUtil;
 import io.grpc.Codec;
 import io.grpc.Context;
-import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,7 +53,6 @@ public class RPCClient {
     this(
         GrpcClients.builder(String.format("https://%s:%d", host, port))
             .serializationFormat(GrpcSerializationFormats.PROTO)
-            .decorator(LoggingClient.newDecorator())
             .compressor(new Codec.Gzip())
             .callCredentials(new JwtCredential(jwt))
             .maxRequestMessageLength(Integer.MAX_VALUE)

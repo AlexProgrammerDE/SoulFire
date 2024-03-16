@@ -27,7 +27,6 @@ import com.linecorp.armeria.server.Server;
 import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.cors.CorsService;
 import com.linecorp.armeria.server.grpc.GrpcService;
-import com.linecorp.armeria.server.logging.LoggingService;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -94,7 +93,7 @@ public class RPCServer {
             .build();
     server =
         serverBuilder
-            .service(grpcService, corsBuilder.newDecorator(), LoggingService.newDecorator())
+            .service(grpcService, corsBuilder.newDecorator())
             .build();
   }
 
