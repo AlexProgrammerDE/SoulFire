@@ -67,7 +67,12 @@ public class RPCServer {
         CorsService.builderForAnyOrigin()
             .allowRequestMethods(HttpMethod.POST) // Allow POST method.
             // Allow Content-type and X-GRPC-WEB headers.
-            .allowRequestHeaders(HttpHeaderNames.CONTENT_TYPE, HttpHeaderNames.of("X-GRPC-WEB"))
+            .allowRequestHeaders(
+                HttpHeaderNames.CONTENT_TYPE,
+                HttpHeaderNames.of("X-GRPC-WEB"),
+                HttpHeaderNames.of("X-User-Agent"),
+                HttpHeaderNames.AUTHORIZATION
+            )
             // Expose trailers of the HTTP response to the client.
             .exposeHeaders(
                 GrpcHeaderNames.GRPC_STATUS,

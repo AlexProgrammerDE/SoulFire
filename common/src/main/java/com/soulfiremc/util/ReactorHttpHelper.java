@@ -22,6 +22,7 @@ import com.soulfiremc.settings.proxy.SFProxy;
 import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
+import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.ProxyProvider;
 
 public class ReactorHttpHelper {
@@ -35,10 +36,10 @@ public class ReactorHttpHelper {
     }
   }
 
-  public static reactor.netty.http.client.HttpClient createReactorClient(
+  public static HttpClient createReactorClient(
       SFProxy proxyData, boolean withBody) {
     var base =
-        reactor.netty.http.client.HttpClient.create()
+        HttpClient.create()
             .responseTimeout(Duration.ofSeconds(5))
             .headers(
                 h -> {

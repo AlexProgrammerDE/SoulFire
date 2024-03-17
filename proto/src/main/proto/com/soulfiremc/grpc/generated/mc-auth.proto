@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
 import "com/soulfiremc/grpc/generated/common.proto";
 
 option java_multiple_files = true;
