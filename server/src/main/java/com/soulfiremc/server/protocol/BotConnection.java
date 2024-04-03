@@ -70,7 +70,7 @@ public record BotConnection(
     return meta.botControlAPI();
   }
 
-  public void tick(long ticks, float partialTicks) {
+  public void tick(long ticks) {
     session.tick(); // Ensure all packets are handled before ticking
     for (var i = 0; i < ticks; i++) {
       try {

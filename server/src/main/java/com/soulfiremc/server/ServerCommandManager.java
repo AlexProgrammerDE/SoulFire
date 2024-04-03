@@ -437,11 +437,9 @@ public class ServerCommandManager implements PlatformCommandManager {
                             attackManager -> {
                               var online = new ArrayList<String>();
                               for (var bot : attackManager.botConnections().values()) {
-                                if (!bot.isOnline()) {
-                                  continue;
+                                if (bot.isOnline()) {
+                                  online.add(bot.meta().accountName());
                                 }
-
-                                online.add(bot.meta().accountName());
                               }
 
                               c.getSource()

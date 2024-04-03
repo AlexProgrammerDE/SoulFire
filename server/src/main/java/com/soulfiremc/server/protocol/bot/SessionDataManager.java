@@ -118,6 +118,7 @@ import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.ModifierOperation;
 import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
@@ -393,19 +394,11 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onPluginMessage(ClientboundCustomPayloadPacket packet) {
-    log.debug("Received plugin message on channel {}", packet.getChannel());
-    switch (packet.getChannel()) {
-      case "minecraft:register" ->
-          log.debug(
-              "Received register packet for channels: {}", String.join(", ", readChannels(packet)));
-      case "minecraft:unregister" ->
-          log.debug(
-              "Received unregister packet for channels; {}",
-              String.join(", ", readChannels(packet)));
-      case "minecraft:brand" -> {
-        serverBrand = session.getCodecHelper().readString(Unpooled.wrappedBuffer(packet.getData()));
-        log.debug("Received server brand \"{}\"", serverBrand);
-      }
+    var channelKey = ResourceKey.fromString(packet.getChannel());
+    log.debug("Received plugin message on channel {}", channelKey);
+    if (channelKey.equals(SFProtocolConstants.BRAND_PAYLOAD_KEY)) {
+      serverBrand = session.getCodecHelper().readString(Unpooled.wrappedBuffer(packet.getData()));
+      log.debug("Received server brand \"{}\"", serverBrand);
     }
   }
 

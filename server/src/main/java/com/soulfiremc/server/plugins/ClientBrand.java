@@ -23,6 +23,7 @@ import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.SFPacketSentEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.Property;
@@ -51,7 +52,7 @@ public class ClientBrand implements InternalPlugin {
 
       connection
           .session()
-          .send(new ServerboundCustomPayloadPacket("minecraft:brand", ByteBufUtil.getBytes(buf)));
+          .send(new ServerboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY.toString(), ByteBufUtil.getBytes(buf)));
     }
   }
 

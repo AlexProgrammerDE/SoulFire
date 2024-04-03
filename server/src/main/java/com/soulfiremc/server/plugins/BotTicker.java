@@ -44,7 +44,7 @@ public class BotTicker implements InternalPlugin {
           MDC.put("botName", connection.meta().accountName());
           MDC.put("botUuid", connection.meta().accountProfileId().toString());
           try {
-            connection.tick(tickTimer.ticks, tickTimer.partialTicks);
+            connection.tick(tickTimer.ticks);
           } catch (Throwable t) {
             connection.logger().error("Exception ticking bot", t);
           }

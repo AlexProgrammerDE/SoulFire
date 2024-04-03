@@ -17,10 +17,13 @@
  */
 package com.soulfiremc.server.protocol;
 
+import com.soulfiremc.server.data.ResourceKey;
+
 public class SFProtocolConstants {
   public static final String ENCRYPTION_SECRET_KEY = "encryption-secret-key";
   public static final String VIA_USER_CONNECTION = "via-user-connection";
   public static final String TRAFFIC_HANDLER = "netty-traffic-handler";
+  public static final ResourceKey BRAND_PAYLOAD_KEY = ResourceKey.fromString("minecraft:brand");
 
   private SFProtocolConstants() {}
 }
