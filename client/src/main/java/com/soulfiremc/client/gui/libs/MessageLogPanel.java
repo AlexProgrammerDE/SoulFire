@@ -252,30 +252,30 @@ public class MessageLogPanel extends JPanel {
       var copyItem = new JMenuItem("Copy");
       copyItem.addActionListener(e -> textComponent.copy());
       popupMenu.add(copyItem);
-
-      var uploadItem = new JMenuItem("Upload to mclo.gs");
-      uploadItem.addActionListener(
-          event -> {
-            try {
-              var url = LogsUploadService.upload(textComponent.getSelectedText()).url();
-              JOptionPane.showMessageDialog(
-                  this,
-                  SFSwingUtils.createHtmlPane("Uploaded to: <a href='" + url + "'>" + url + "</a>"),
-                  "Success",
-                  JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception e) {
-              log.error("Failed to upload!", e);
-              JOptionPane.showMessageDialog(
-                  this, "Failed to upload!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-          });
-      popupMenu.add(uploadItem);
     }
 
     // Add divider
     if (popupMenu.getComponentCount() > 0) {
       popupMenu.addSeparator();
     }
+
+    var uploadItem = new JMenuItem("Upload logs");
+    uploadItem.addActionListener(
+        event -> {
+          try {
+            var url = LogsUploadService.upload(textComponent.getText()).url();
+            JOptionPane.showMessageDialog(
+                this,
+                SFSwingUtils.createHtmlPane("Uploaded to: <a href='" + url + "'>" + url + "</a>"),
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
+          } catch (Exception e) {
+            log.error("Failed to upload!", e);
+            JOptionPane.showMessageDialog(
+                this, "Failed to upload!", "Error", JOptionPane.ERROR_MESSAGE);
+          }
+        });
+    popupMenu.add(uploadItem);
 
     var clearItem = new JMenuItem("Clear");
     clearItem.addActionListener(e -> clear());
