@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BlockShapeLoader {
-  public static final Map<String, List<BlockShapeGroup>> BLOCK_SHAPES =
+  public static final Map<ResourceKey, List<BlockShapeGroup>> BLOCK_SHAPES =
       new Object2ObjectOpenHashMap<>();
 
   static {
@@ -40,7 +40,7 @@ public class BlockShapeLoader {
           .forEach(
               line -> {
                 var parts = line.split("\\|");
-                var name = parts[0];
+                var key = ResourceKey.fromString(parts[0]);
 
                 var blockShapeTypes = new ObjectArrayList<BlockShapeGroup>();
                 if (parts.length > 1) {
@@ -54,7 +54,7 @@ public class BlockShapeLoader {
                   }
                 }
 
-                BLOCK_SHAPES.put(name, blockShapeTypes);
+                BLOCK_SHAPES.put(key, blockShapeTypes);
               });
     } catch (IOException e) {
       throw new IllegalStateException(e);

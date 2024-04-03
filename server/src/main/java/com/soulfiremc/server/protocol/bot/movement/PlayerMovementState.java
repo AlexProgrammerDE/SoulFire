@@ -18,6 +18,7 @@
 package com.soulfiremc.server.protocol.bot.movement;
 
 import com.github.steveice10.mc.protocol.data.game.entity.Effect;
+import com.soulfiremc.server.data.EnchantmentType;
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.model.EffectData;
@@ -83,7 +84,7 @@ public class PlayerMovementState {
     levitation = effectState.getEffect(Effect.LEVITATION).map(EffectData::amplifier).orElse(0);
 
     var bootsItem = inventoryContainer.getBoots().item();
-    depthStrider = bootsItem == null ? 0 : bootsItem.getEnchantmentLevel("minecraft:depth_strider");
+    depthStrider = bootsItem == null ? 0 : bootsItem.getEnchantmentLevel(EnchantmentType.DEPTH_STRIDER);
 
     var chestItem = inventoryContainer.getChestplate().item();
     elytraEquipped = chestItem != null && chestItem.type() == ItemType.ELYTRA;

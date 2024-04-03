@@ -29,7 +29,9 @@ public class AttributesDataGenerator implements IDataGenerator {
     var attributeDesc = new JsonObject();
 
     attributeDesc.addProperty(
-        "name", Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(attribute)).getPath());
+        "id", BuiltInRegistries.ATTRIBUTE.getId(attribute));
+    attributeDesc.addProperty(
+        "key", Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(attribute)).toString());
 
     var rangedAttribute = (RangedAttribute) attribute;
     attributeDesc.addProperty("min", rangedAttribute.getMinValue());

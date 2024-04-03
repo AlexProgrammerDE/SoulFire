@@ -39,4 +39,6 @@ public class EntityTypeTags {
   public static final String DEFLECTS_ARROWS = "minecraft:deflects_arrows";
   public static final String DEFLECTS_TRIDENTS = "minecraft:deflects_tridents";
   public static final String CAN_TURN_IN_BOATS = "minecraft:can_turn_in_boats";
+
+  private EntityTypeTags() {}
 }

@@ -38,11 +38,11 @@ public class BlocksJavaGenerator implements IDataGenerator {
             BuiltInRegistries.BLOCK.stream()
                 .map(
                     s -> {
-                      var name = BuiltInRegistries.BLOCK.getKey(s).getPath();
+                      var key = BuiltInRegistries.BLOCK.getKey(s);
                       return "public static final BlockType "
-                          + name.toUpperCase(Locale.ROOT)
+                          + key.getPath().toUpperCase(Locale.ROOT)
                           + " = register(\""
-                          + name
+                          + key
                           + "\");";
                     })
                 .toArray(String[]::new)));

@@ -123,7 +123,7 @@ public class BlockCollisionShapesDataGenerator {
       var resultBuilder = new StringBuilder();
 
       for (var entry : blockCollisionShapes.entrySet()) {
-        resultBuilder.append(BuiltInRegistries.BLOCK.getKey(entry.getKey()).getPath());
+        resultBuilder.append(BuiltInRegistries.BLOCK.getKey(entry.getKey()));
         var blockCollisions = entry.getValue();
         if (!blockCollisions.isEmpty()) {
           resultBuilder.append("|");

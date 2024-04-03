@@ -1,7 +1,7 @@
 [
   {
     "id": 0,
-    "name": "allay",
+    "key": "minecraft:allay",
     "width": 0.35,
     "height": 0.6,
     "category": "creature",
@@ -11,7 +11,7 @@
   },
   {
     "id": 1,
-    "name": "area_effect_cloud",
+    "key": "minecraft:area_effect_cloud",
     "width": 6.0,
     "height": 0.5,
     "category": "misc",
@@ -21,7 +21,7 @@
   },
   {
     "id": 2,
-    "name": "armor_stand",
+    "key": "minecraft:armor_stand",
     "width": 0.5,
     "height": 1.975,
     "category": "misc",
@@ -31,7 +31,7 @@
   },
   {
     "id": 3,
-    "name": "arrow",
+    "key": "minecraft:arrow",
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
@@ -40,7 +40,7 @@
   },
   {
     "id": 4,
-    "name": "axolotl",
+    "key": "minecraft:axolotl",
     "width": 0.75,
     "height": 0.42,
     "category": "axolotls",
@@ -50,7 +50,7 @@
   },
   {
     "id": 5,
-    "name": "bat",
+    "key": "minecraft:bat",
     "width": 0.5,
     "height": 0.9,
     "category": "ambient",
@@ -60,7 +60,7 @@
   },
   {
     "id": 6,
-    "name": "bee",
+    "key": "minecraft:bee",
     "width": 0.7,
     "height": 0.6,
     "category": "creature",
@@ -70,7 +70,7 @@
   },
   {
     "id": 7,
-    "name": "blaze",
+    "key": "minecraft:blaze",
     "width": 0.6,
     "height": 1.8,
     "category": "monster",
@@ -79,7 +79,7 @@
   },
   {
     "id": 8,
-    "name": "block_display",
+    "key": "minecraft:block_display",
     "width": 0.0,
     "height": 0.0,
     "category": "misc",
@@ -89,7 +89,7 @@
   },
   {
     "id": 9,
-    "name": "boat",
+    "key": "minecraft:boat",
     "width": 1.375,
     "height": 0.5625,
     "category": "misc",
@@ -99,7 +99,7 @@
   },
   {
     "id": 10,
-    "name": "breeze",
+    "key": "minecraft:breeze",
     "width": 0.6,
     "height": 1.7,
     "category": "monster",
@@ -108,7 +108,7 @@
   },
   {
     "id": 11,
-    "name": "camel",
+    "key": "minecraft:camel",
     "width": 1.7,
     "height": 2.375,
     "category": "creature",
@@ -118,7 +118,7 @@
   },
   {
     "id": 12,
-    "name": "cat",
+    "key": "minecraft:cat",
     "width": 0.6,
     "height": 0.7,
     "category": "creature",
@@ -128,7 +128,7 @@
   },
   {
     "id": 13,
-    "name": "cave_spider",
+    "key": "minecraft:cave_spider",
     "width": 0.7,
     "height": 0.5,
     "category": "monster",
@@ -137,7 +137,7 @@
   },
   {
     "id": 14,
-    "name": "chest_boat",
+    "key": "minecraft:chest_boat",
     "width": 1.375,
     "height": 0.5625,
     "category": "misc",
@@ -147,7 +147,7 @@
   },
   {
     "id": 15,
-    "name": "chest_minecart",
+    "key": "minecraft:chest_minecart",
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
@@ -157,7 +157,7 @@
   },
   {
     "id": 16,
-    "name": "chicken",
+    "key": "minecraft:chicken",
     "width": 0.4,
     "height": 0.7,
     "category": "creature",
@@ -167,7 +167,7 @@
   },
   {
     "id": 17,
-    "name": "cod",
+    "key": "minecraft:cod",
     "width": 0.5,
     "height": 0.3,
     "category": "water_ambient",
@@ -177,7 +177,7 @@
   },
   {
     "id": 18,
-    "name": "command_block_minecart",
+    "key": "minecraft:command_block_minecart",
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
@@ -187,7 +187,7 @@
   },
   {
     "id": 19,
-    "name": "cow",
+    "key": "minecraft:cow",
     "width": 0.9,
     "height": 1.4,
     "category": "creature",
@@ -197,7 +197,7 @@
   },
   {
     "id": 20,
-    "name": "creeper",
+    "key": "minecraft:creeper",
     "width": 0.6,
     "height": 1.7,
     "category": "monster",
@@ -206,7 +206,7 @@
   },
   {
     "id": 21,
-    "name": "dolphin",
+    "key": "minecraft:dolphin",
     "width": 0.9,
     "height": 0.6,
     "category": "water_creature",
@@ -216,7 +216,7 @@
   },
   {
     "id": 22,
-    "name": "donkey",
+    "key": "minecraft:donkey",
     "width": 1.3964844,
     "height": 1.5,
     "category": "creature",
@@ -226,7 +226,7 @@
   },
   {
     "id": 23,
-    "name": "dragon_fireball",
+    "key": "minecraft:dragon_fireball",
     "width": 1.0,
     "height": 1.0,
     "category": "misc",
@@ -236,7 +236,7 @@
   },
   {
     "id": 24,
-    "name": "drowned",
+    "key": "minecraft:drowned",
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
@@ -245,7 +245,7 @@
   },
   {
     "id": 25,
-    "name": "egg",
+    "key": "minecraft:egg",
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
@@ -255,7 +255,7 @@
   },
   {
     "id": 26,
-    "name": "elder_guardian",
+    "key": "minecraft:elder_guardian",
     "width": 1.9975,
     "height": 1.9975,
     "category": "monster",
@@ -264,7 +264,7 @@
   },
   {
     "id": 27,
-    "name": "end_crystal",
+    "key": "minecraft:end_crystal",
     "width": 2.0,
     "height": 2.0,
     "category": "misc",
@@ -274,7 +274,7 @@
   },
   {
     "id": 28,
-    "name": "ender_dragon",
+    "key": "minecraft:ender_dragon",
     "width": 16.0,
     "height": 8.0,
     "category": "monster",
@@ -283,7 +283,7 @@
   },
   {
     "id": 29,
-    "name": "ender_pearl",
+    "key": "minecraft:ender_pearl",
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
@@ -293,7 +293,7 @@
   },
   {
     "id": 30,
-    "name": "enderman",
+    "key": "minecraft:enderman",
     "width": 0.6,
     "height": 2.9,
     "category": "monster",
@@ -302,7 +302,7 @@
   },
   {
     "id": 31,
-    "name": "endermite",
+    "key": "minecraft:endermite",
     "width": 0.4,
     "height": 0.3,
     "category": "monster",
@@ -311,7 +311,7 @@
   },
   {
     "id": 32,
-    "name": "evoker",
+    "key": "minecraft:evoker",
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
@@ -320,7 +320,7 @@
   },
   {
     "id": 33,
-    "name": "evoker_fangs",
+    "key": "minecraft:evoker_fangs",
     "width": 0.5,
     "height": 0.8,
     "category": "misc",
@@ -330,7 +330,7 @@
   },
   {
     "id": 34,
-    "name": "experience_bottle",
+    "key": "minecraft:experience_bottle",
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
@@ -340,7 +340,7 @@
   },
   {
     "id": 35,
-    "name": "experience_orb",
+    "key": "minecraft:experience_orb",
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
@@ -349,7 +349,7 @@
   },
   {
     "id": 36,
-    "name": "eye_of_ender",
+    "key": "minecraft:eye_of_ender",
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
@@ -358,7 +358,7 @@
   },
   {
     "id": 37,
-    "name": "falling_block",
+    "key": "minecraft:falling_block",
     "width": 0.98,
     "height": 0.98,
     "category": "misc",
@@ -367,7 +367,7 @@
   },
   {
     "id": 38,
-    "name": "firework_rocket",
+    "key": "minecraft:firework_rocket",
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
@@ -376,7 +376,7 @@
   },
   {
     "id": 39,
-    "name": "fox",
+    "key": "minecraft:fox",
     "width": 0.6,
     "height": 0.7,
     "category": "creature",
@@ -386,7 +386,7 @@
   },
   {
     "id": 40,
-    "name": "frog",
+    "key": "minecraft:frog",
     "width": 0.5,
     "height": 0.5,
     "category": "creature",
@@ -396,7 +396,7 @@
   },
   {
     "id": 41,
-    "name": "furnace_minecart",
+    "key": "minecraft:furnace_minecart",
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
@@ -406,7 +406,7 @@
   },
   {
     "id": 42,
-    "name": "ghast",
+    "key": "minecraft:ghast",
     "width": 4.0,
     "height": 4.0,
     "category": "monster",
@@ -415,7 +415,7 @@
   },
   {
     "id": 43,
-    "name": "giant",
+    "key": "minecraft:giant",
     "width": 3.6,
     "height": 12.0,
     "category": "monster",
@@ -424,7 +424,7 @@
   },
   {
     "id": 44,
-    "name": "glow_item_frame",
+    "key": "minecraft:glow_item_frame",
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
@@ -434,7 +434,7 @@
   },
   {
     "id": 45,
-    "name": "glow_squid",
+    "key": "minecraft:glow_squid",
     "width": 0.8,
     "height": 0.8,
     "category": "underground_water_creature",
@@ -444,7 +444,7 @@
   },
   {
     "id": 46,
-    "name": "goat",
+    "key": "minecraft:goat",
     "width": 0.9,
     "height": 1.3,
     "category": "creature",
@@ -454,7 +454,7 @@
   },
   {
     "id": 47,
-    "name": "guardian",
+    "key": "minecraft:guardian",
     "width": 0.85,
     "height": 0.85,
     "category": "monster",
@@ -463,7 +463,7 @@
   },
   {
     "id": 48,
-    "name": "hoglin",
+    "key": "minecraft:hoglin",
     "width": 1.3964844,
     "height": 1.4,
     "category": "monster",
@@ -472,7 +472,7 @@
   },
   {
     "id": 49,
-    "name": "hopper_minecart",
+    "key": "minecraft:hopper_minecart",
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
@@ -482,7 +482,7 @@
   },
   {
     "id": 50,
-    "name": "horse",
+    "key": "minecraft:horse",
     "width": 1.3964844,
     "height": 1.6,
     "category": "creature",
@@ -492,7 +492,7 @@
   },
   {
     "id": 51,
-    "name": "husk",
+    "key": "minecraft:husk",
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
@@ -501,7 +501,7 @@
   },
   {
     "id": 52,
-    "name": "illusioner",
+    "key": "minecraft:illusioner",
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
@@ -510,7 +510,7 @@
   },
   {
     "id": 53,
-    "name": "interaction",
+    "key": "minecraft:interaction",
     "width": 0.0,
     "height": 0.0,
     "category": "misc",
@@ -520,7 +520,7 @@
   },
   {
     "id": 54,
-    "name": "iron_golem",
+    "key": "minecraft:iron_golem",
     "width": 1.4,
     "height": 2.7,
     "category": "misc",
@@ -530,7 +530,7 @@
   },
   {
     "id": 55,
-    "name": "item",
+    "key": "minecraft:item",
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
@@ -539,7 +539,7 @@
   },
   {
     "id": 56,
-    "name": "item_display",
+    "key": "minecraft:item_display",
     "width": 0.0,
     "height": 0.0,
     "category": "misc",
@@ -549,7 +549,7 @@
   },
   {
     "id": 57,
-    "name": "item_frame",
+    "key": "minecraft:item_frame",
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
@@ -559,7 +559,7 @@
   },
   {
     "id": 58,
-    "name": "fireball",
+    "key": "minecraft:fireball",
     "width": 1.0,
     "height": 1.0,
     "category": "misc",
@@ -569,7 +569,7 @@
   },
   {
     "id": 59,
-    "name": "leash_knot",
+    "key": "minecraft:leash_knot",
     "width": 0.375,
     "height": 0.5,
     "category": "misc",
@@ -579,7 +579,7 @@
   },
   {
     "id": 60,
-    "name": "lightning_bolt",
+    "key": "minecraft:lightning_bolt",
     "width": 0.0,
     "height": 0.0,
     "category": "misc",
@@ -589,7 +589,7 @@
   },
   {
     "id": 61,
-    "name": "llama",
+    "key": "minecraft:llama",
     "width": 0.9,
     "height": 1.87,
     "category": "creature",
@@ -599,7 +599,7 @@
   },
   {
     "id": 62,
-    "name": "llama_spit",
+    "key": "minecraft:llama_spit",
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
@@ -609,7 +609,7 @@
   },
   {
     "id": 63,
-    "name": "magma_cube",
+    "key": "minecraft:magma_cube",
     "width": 2.04,
     "height": 2.04,
     "category": "monster",
@@ -618,7 +618,7 @@
   },
   {
     "id": 64,
-    "name": "marker",
+    "key": "minecraft:marker",
     "width": 0.0,
     "height": 0.0,
     "category": "misc",
@@ -628,7 +628,7 @@
   },
   {
     "id": 65,
-    "name": "minecart",
+    "key": "minecraft:minecart",
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
@@ -638,7 +638,7 @@
   },
   {
     "id": 66,
-    "name": "mooshroom",
+    "key": "minecraft:mooshroom",
     "width": 0.9,
     "height": 1.4,
     "category": "creature",
@@ -648,7 +648,7 @@
   },
   {
     "id": 67,
-    "name": "mule",
+    "key": "minecraft:mule",
     "width": 1.3964844,
     "height": 1.6,
     "category": "creature",
@@ -658,7 +658,7 @@
   },
   {
     "id": 68,
-    "name": "ocelot",
+    "key": "minecraft:ocelot",
     "width": 0.6,
     "height": 0.7,
     "category": "creature",
@@ -668,7 +668,7 @@
   },
   {
     "id": 69,
-    "name": "painting",
+    "key": "minecraft:painting",
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
@@ -678,7 +678,7 @@
   },
   {
     "id": 70,
-    "name": "panda",
+    "key": "minecraft:panda",
     "width": 1.3,
     "height": 1.25,
     "category": "creature",
@@ -688,7 +688,7 @@
   },
   {
     "id": 71,
-    "name": "parrot",
+    "key": "minecraft:parrot",
     "width": 0.5,
     "height": 0.9,
     "category": "creature",
@@ -698,7 +698,7 @@
   },
   {
     "id": 72,
-    "name": "phantom",
+    "key": "minecraft:phantom",
     "width": 0.9,
     "height": 0.5,
     "category": "monster",
@@ -707,7 +707,7 @@
   },
   {
     "id": 73,
-    "name": "pig",
+    "key": "minecraft:pig",
     "width": 0.9,
     "height": 0.9,
     "category": "creature",
@@ -717,7 +717,7 @@
   },
   {
     "id": 74,
-    "name": "piglin",
+    "key": "minecraft:piglin",
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
@@ -726,7 +726,7 @@
   },
   {
     "id": 75,
-    "name": "piglin_brute",
+    "key": "minecraft:piglin_brute",
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
@@ -735,7 +735,7 @@
   },
   {
     "id": 76,
-    "name": "pillager",
+    "key": "minecraft:pillager",
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
@@ -744,7 +744,7 @@
   },
   {
     "id": 77,
-    "name": "polar_bear",
+    "key": "minecraft:polar_bear",
     "width": 1.4,
     "height": 1.4,
     "category": "creature",
@@ -754,7 +754,7 @@
   },
   {
     "id": 78,
-    "name": "potion",
+    "key": "minecraft:potion",
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
@@ -764,7 +764,7 @@
   },
   {
     "id": 79,
-    "name": "pufferfish",
+    "key": "minecraft:pufferfish",
     "width": 0.7,
     "height": 0.7,
     "category": "water_ambient",
@@ -774,7 +774,7 @@
   },
   {
     "id": 80,
-    "name": "rabbit",
+    "key": "minecraft:rabbit",
     "width": 0.4,
     "height": 0.5,
     "category": "creature",
@@ -784,7 +784,7 @@
   },
   {
     "id": 81,
-    "name": "ravager",
+    "key": "minecraft:ravager",
     "width": 1.95,
     "height": 2.2,
     "category": "monster",
@@ -793,7 +793,7 @@
   },
   {
     "id": 82,
-    "name": "salmon",
+    "key": "minecraft:salmon",
     "width": 0.7,
     "height": 0.4,
     "category": "water_ambient",
@@ -803,7 +803,7 @@
   },
   {
     "id": 83,
-    "name": "sheep",
+    "key": "minecraft:sheep",
     "width": 0.9,
     "height": 1.3,
     "category": "creature",
@@ -813,7 +813,7 @@
   },
   {
     "id": 84,
-    "name": "shulker",
+    "key": "minecraft:shulker",
     "width": 1.0,
     "height": 1.0,
     "category": "monster",
@@ -822,7 +822,7 @@
   },
   {
     "id": 85,
-    "name": "shulker_bullet",
+    "key": "minecraft:shulker_bullet",
     "width": 0.3125,
     "height": 0.3125,
     "category": "misc",
@@ -832,7 +832,7 @@
   },
   {
     "id": 86,
-    "name": "silverfish",
+    "key": "minecraft:silverfish",
     "width": 0.4,
     "height": 0.3,
     "category": "monster",
@@ -841,7 +841,7 @@
   },
   {
     "id": 87,
-    "name": "skeleton",
+    "key": "minecraft:skeleton",
     "width": 0.6,
     "height": 1.99,
     "category": "monster",
@@ -850,7 +850,7 @@
   },
   {
     "id": 88,
-    "name": "skeleton_horse",
+    "key": "minecraft:skeleton_horse",
     "width": 1.3964844,
     "height": 1.6,
     "category": "creature",
@@ -860,7 +860,7 @@
   },
   {
     "id": 89,
-    "name": "slime",
+    "key": "minecraft:slime",
     "width": 2.04,
     "height": 2.04,
     "category": "monster",
@@ -869,7 +869,7 @@
   },
   {
     "id": 90,
-    "name": "small_fireball",
+    "key": "minecraft:small_fireball",
     "width": 0.3125,
     "height": 0.3125,
     "category": "misc",
@@ -879,7 +879,7 @@
   },
   {
     "id": 91,
-    "name": "sniffer",
+    "key": "minecraft:sniffer",
     "width": 1.9,
     "height": 1.75,
     "category": "creature",
@@ -889,7 +889,7 @@
   },
   {
     "id": 92,
-    "name": "snow_golem",
+    "key": "minecraft:snow_golem",
     "width": 0.7,
     "height": 1.9,
     "category": "misc",
@@ -899,7 +899,7 @@
   },
   {
     "id": 93,
-    "name": "snowball",
+    "key": "minecraft:snowball",
     "width": 0.25,
     "height": 0.25,
     "category": "misc",
@@ -909,7 +909,7 @@
   },
   {
     "id": 94,
-    "name": "spawner_minecart",
+    "key": "minecraft:spawner_minecart",
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
@@ -919,7 +919,7 @@
   },
   {
     "id": 95,
-    "name": "spectral_arrow",
+    "key": "minecraft:spectral_arrow",
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
@@ -928,7 +928,7 @@
   },
   {
     "id": 96,
-    "name": "spider",
+    "key": "minecraft:spider",
     "width": 1.4,
     "height": 0.9,
     "category": "monster",
@@ -937,7 +937,7 @@
   },
   {
     "id": 97,
-    "name": "squid",
+    "key": "minecraft:squid",
     "width": 0.8,
     "height": 0.8,
     "category": "water_creature",
@@ -947,7 +947,7 @@
   },
   {
     "id": 98,
-    "name": "stray",
+    "key": "minecraft:stray",
     "width": 0.6,
     "height": 1.99,
     "category": "monster",
@@ -956,7 +956,7 @@
   },
   {
     "id": 99,
-    "name": "strider",
+    "key": "minecraft:strider",
     "width": 0.9,
     "height": 1.7,
     "category": "creature",
@@ -966,7 +966,7 @@
   },
   {
     "id": 100,
-    "name": "tadpole",
+    "key": "minecraft:tadpole",
     "width": 0.4,
     "height": 0.3,
     "category": "creature",
@@ -976,7 +976,7 @@
   },
   {
     "id": 101,
-    "name": "text_display",
+    "key": "minecraft:text_display",
     "width": 0.0,
     "height": 0.0,
     "category": "misc",
@@ -986,7 +986,7 @@
   },
   {
     "id": 102,
-    "name": "tnt",
+    "key": "minecraft:tnt",
     "width": 0.98,
     "height": 0.98,
     "category": "misc",
@@ -996,7 +996,7 @@
   },
   {
     "id": 103,
-    "name": "tnt_minecart",
+    "key": "minecraft:tnt_minecart",
     "width": 0.98,
     "height": 0.7,
     "category": "misc",
@@ -1006,7 +1006,7 @@
   },
   {
     "id": 104,
-    "name": "trader_llama",
+    "key": "minecraft:trader_llama",
     "width": 0.9,
     "height": 1.87,
     "category": "creature",
@@ -1016,7 +1016,7 @@
   },
   {
     "id": 105,
-    "name": "trident",
+    "key": "minecraft:trident",
     "width": 0.5,
     "height": 0.5,
     "category": "misc",
@@ -1025,7 +1025,7 @@
   },
   {
     "id": 106,
-    "name": "tropical_fish",
+    "key": "minecraft:tropical_fish",
     "width": 0.5,
     "height": 0.4,
     "category": "water_ambient",
@@ -1035,7 +1035,7 @@
   },
   {
     "id": 107,
-    "name": "turtle",
+    "key": "minecraft:turtle",
     "width": 1.2,
     "height": 0.4,
     "category": "creature",
@@ -1045,7 +1045,7 @@
   },
   {
     "id": 108,
-    "name": "vex",
+    "key": "minecraft:vex",
     "width": 0.4,
     "height": 0.8,
     "category": "monster",
@@ -1054,7 +1054,7 @@
   },
   {
     "id": 109,
-    "name": "villager",
+    "key": "minecraft:villager",
     "width": 0.6,
     "height": 1.95,
     "category": "misc",
@@ -1064,7 +1064,7 @@
   },
   {
     "id": 110,
-    "name": "vindicator",
+    "key": "minecraft:vindicator",
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
@@ -1073,7 +1073,7 @@
   },
   {
     "id": 111,
-    "name": "wandering_trader",
+    "key": "minecraft:wandering_trader",
     "width": 0.6,
     "height": 1.95,
     "category": "creature",
@@ -1083,7 +1083,7 @@
   },
   {
     "id": 112,
-    "name": "warden",
+    "key": "minecraft:warden",
     "width": 0.9,
     "height": 2.9,
     "category": "monster",
@@ -1092,7 +1092,7 @@
   },
   {
     "id": 113,
-    "name": "wind_charge",
+    "key": "minecraft:wind_charge",
     "width": 0.3125,
     "height": 0.3125,
     "category": "misc",
@@ -1102,7 +1102,7 @@
   },
   {
     "id": 114,
-    "name": "witch",
+    "key": "minecraft:witch",
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
@@ -1111,7 +1111,7 @@
   },
   {
     "id": 115,
-    "name": "wither",
+    "key": "minecraft:wither",
     "width": 0.9,
     "height": 3.5,
     "category": "monster",
@@ -1120,7 +1120,7 @@
   },
   {
     "id": 116,
-    "name": "wither_skeleton",
+    "key": "minecraft:wither_skeleton",
     "width": 0.7,
     "height": 2.4,
     "category": "monster",
@@ -1129,7 +1129,7 @@
   },
   {
     "id": 117,
-    "name": "wither_skull",
+    "key": "minecraft:wither_skull",
     "width": 0.3125,
     "height": 0.3125,
     "category": "misc",
@@ -1139,7 +1139,7 @@
   },
   {
     "id": 118,
-    "name": "wolf",
+    "key": "minecraft:wolf",
     "width": 0.6,
     "height": 0.85,
     "category": "creature",
@@ -1149,7 +1149,7 @@
   },
   {
     "id": 119,
-    "name": "zoglin",
+    "key": "minecraft:zoglin",
     "width": 1.3964844,
     "height": 1.4,
     "category": "monster",
@@ -1158,7 +1158,7 @@
   },
   {
     "id": 120,
-    "name": "zombie",
+    "key": "minecraft:zombie",
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
@@ -1167,7 +1167,7 @@
   },
   {
     "id": 121,
-    "name": "zombie_horse",
+    "key": "minecraft:zombie_horse",
     "width": 1.3964844,
     "height": 1.6,
     "category": "creature",
@@ -1177,7 +1177,7 @@
   },
   {
     "id": 122,
-    "name": "zombie_villager",
+    "key": "minecraft:zombie_villager",
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
@@ -1186,7 +1186,7 @@
   },
   {
     "id": 123,
-    "name": "zombified_piglin",
+    "key": "minecraft:zombified_piglin",
     "width": 0.6,
     "height": 1.95,
     "category": "monster",
@@ -1195,7 +1195,7 @@
   },
   {
     "id": 124,
-    "name": "player",
+    "key": "minecraft:player",
     "width": 0.6,
     "height": 1.8,
     "category": "misc",
@@ -1204,7 +1204,7 @@
   },
   {
     "id": 125,
-    "name": "fishing_bobber",
+    "key": "minecraft:fishing_bobber",
     "width": 0.25,
     "height": 0.25,
     "category": "misc",

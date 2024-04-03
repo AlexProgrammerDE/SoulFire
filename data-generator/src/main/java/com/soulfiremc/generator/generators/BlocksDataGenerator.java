@@ -31,7 +31,7 @@ public class BlocksDataGenerator implements IDataGenerator {
     var blockDesc = new JsonObject();
 
     blockDesc.addProperty("id", BuiltInRegistries.BLOCK.getId(block));
-    blockDesc.addProperty("name", BuiltInRegistries.BLOCK.getKey(block).getPath());
+    blockDesc.addProperty("key", BuiltInRegistries.BLOCK.getKey(block).toString());
 
     blockDesc.addProperty("destroyTime", block.defaultDestroyTime());
     blockDesc.addProperty("explosionResistance", block.getExplosionResistance());

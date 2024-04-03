@@ -22,7 +22,9 @@ import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
 import com.github.steveice10.opennbt.tag.builtin.ListTag;
 import com.github.steveice10.opennbt.tag.builtin.ShortTag;
 import com.github.steveice10.opennbt.tag.builtin.StringTag;
+import com.soulfiremc.server.data.EnchantmentType;
 import com.soulfiremc.server.data.ItemType;
+import com.soulfiremc.server.data.ResourceKey;
 import it.unimi.dsi.fastutil.objects.Object2ShortArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ShortMap;
 import it.unimi.dsi.fastutil.objects.Object2ShortMaps;
@@ -32,7 +34,7 @@ import lombok.Getter;
 @Getter
 public class SFItemStack extends ItemStack {
   private final ItemType type;
-  private final Object2ShortMap<String> enchantments;
+  private final Object2ShortMap<ResourceKey> enchantments;
   private final int precalculatedHash;
 
   private SFItemStack(SFItemStack clone, int amount) {
@@ -56,7 +58,7 @@ public class SFItemStack extends ItemStack {
           var enchantmentCompound = (CompoundTag) enchantment;
 
           this.enchantments.put(
-              enchantmentCompound.<StringTag>get("id").getValue(),
+              ResourceKey.fromString(enchantmentCompound.<StringTag>get("id").getValue()),
               enchantmentCompound.<ShortTag>get("lvl").getValue().shortValue());
         }
       } else {
@@ -90,8 +92,8 @@ public class SFItemStack extends ItemStack {
     return new SFItemStack(itemType, itemType.stackSize());
   }
 
-  public short getEnchantmentLevel(String enchantment) {
-    return this.enchantments.getShort(enchantment);
+  public short getEnchantmentLevel(EnchantmentType enchantment) {
+    return this.enchantments.getShort(enchantment.key());
   }
 
   public SFItemStack withAmount(int amount) {

@@ -31,7 +31,7 @@ public class BlockItems {
 
         // Let's not use bedrock as a building block
         if (BlockTypeHelper.isDiggable(blockType)
-            && itemType.name().equals(blockType.name())
+            && itemType.key().equals(blockType.key())
             && blockShapeTypes.isFullBlock()) {
           VALUES[itemType.id()] = blockType;
           VALUES_REVERSE[blockType.id()] = itemType;

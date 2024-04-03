@@ -24,9 +24,8 @@ import java.util.List;
 @SuppressWarnings("unused")
 public record ItemType(
     int id,
-    String name,
+    ResourceKey key,
     int stackSize,
-    List<String> enchantCategories,
     DepletionData depletionData,
     FoodProperties foodProperties,
     EquipmentSlot attributeSlot,
@@ -35,10 +34,10 @@ public record ItemType(
 
   // VALUES REPLACE
 
-  public static ItemType register(String name) {
-    var itemType = GsonDataHelper.fromJson("/minecraft/items.json", name, ItemType.class);
-    FROM_ID.put(itemType.id(), itemType);
-    return itemType;
+  public static ItemType register(String key) {
+    var instance = GsonDataHelper.fromJson("/minecraft/items.json", key, ItemType.class);
+    FROM_ID.put(instance.id(), instance);
+    return instance;
   }
 
   public static ItemType getById(int id) {
@@ -50,10 +49,10 @@ public record ItemType(
     if (this == o) {
       return true;
     }
-    if (!(o instanceof ItemType itemType)) {
+    if (!(o instanceof ItemType other)) {
       return false;
     }
-    return id == itemType.id;
+    return id == other.id;
   }
 
   @Override

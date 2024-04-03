@@ -38,11 +38,11 @@ public class ItemsJavaGenerator implements IDataGenerator {
             BuiltInRegistries.ITEM.stream()
                 .map(
                     s -> {
-                      var name = BuiltInRegistries.ITEM.getKey(s).getPath();
+                      var key = BuiltInRegistries.ITEM.getKey(s);
                       return "public static final ItemType "
-                          + name.toUpperCase(Locale.ROOT)
+                          + key.getPath().toUpperCase(Locale.ROOT)
                           + " = register(\""
-                          + name
+                          + key
                           + "\");";
                     })
                 .toArray(String[]::new)));

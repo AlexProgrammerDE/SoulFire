@@ -116,6 +116,7 @@ import com.soulfiremc.server.data.Attribute;
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.ModifierOperation;
+import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
@@ -892,9 +893,10 @@ public final class SessionDataManager {
     }
 
     for (var entry : packet.getAttributes()) {
-      var attributeType = AttributeType.getByName(entry.getType().getIdentifier());
+      var key = ResourceKey.fromString(entry.getType().getIdentifier());
+      var attributeType = AttributeType.getByKey(key);
       if (attributeType == null) {
-        log.warn("Received unknown attribute type {}", entry.getType().getIdentifier());
+        log.warn("Received unknown attribute type {}", key);
         continue;
       }
 

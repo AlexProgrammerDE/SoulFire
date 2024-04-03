@@ -17,14 +17,36 @@
  */
 package com.soulfiremc.server.data;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.soulfiremc.util.GsonInstance;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.soulfiremc.util.ResourceHelper;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class GsonDataHelper {
   private static final Map<String, JsonArray> LOADED_DATA = new HashMap<>();
+  private static final Gson GSON =
+      new GsonBuilder()
+          .registerTypeAdapter(
+              ResourceKey.class,
+              new TypeAdapter<ResourceKey>() {
+                @Override
+                public void write(JsonWriter out, ResourceKey value) throws IOException {
+                  out.value(value.formatted());
+                }
+
+                @Override
+                public ResourceKey read(JsonReader in) throws IOException {
+                  var key = in.nextString();
+                  return ResourceKey.fromString(key);
+                }
+              })
+          .create();
 
   public static <T> T fromJson(String dataFile, String dataKey, Class<T> clazz) {
     var array =
@@ -34,15 +56,15 @@ public class GsonDataHelper {
               var data = new JsonArray();
               try {
                 data =
-                    GsonInstance.GSON.fromJson(ResourceHelper.getResource(file), JsonArray.class);
+                    GSON.fromJson(ResourceHelper.getResource(file), JsonArray.class);
               } catch (Exception e) {
-                e.printStackTrace();
+                throw new RuntimeException("Failed to load data file " + file, e);
               }
               return data;
             });
     for (var element : array) {
-      if (element.getAsJsonObject().get("name").getAsString().equals(dataKey)) {
-        return GsonInstance.GSON.fromJson(element, clazz);
+      if (element.getAsJsonObject().get("key").getAsString().equals(dataKey)) {
+        return GSON.fromJson(element, clazz);
       }
     }
 

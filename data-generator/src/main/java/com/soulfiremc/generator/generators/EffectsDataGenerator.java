@@ -25,15 +25,22 @@ import net.minecraft.world.effect.MobEffect;
 
 public class EffectsDataGenerator implements IDataGenerator {
 
-  public static JsonObject generateEffect(MobEffect statusEffect) {
+  public static JsonObject generateEffect(MobEffect effect) {
     var effectDesc = new JsonObject();
 
-    effectDesc.addProperty("id", BuiltInRegistries.MOB_EFFECT.getId(statusEffect));
+    effectDesc.addProperty("id", BuiltInRegistries.MOB_EFFECT.getId(effect));
     effectDesc.addProperty(
-        "name",
-        Objects.requireNonNull(BuiltInRegistries.MOB_EFFECT.getKey(statusEffect)).getPath());
+        "key",
+        Objects.requireNonNull(BuiltInRegistries.MOB_EFFECT.getKey(effect)).toString());
 
-    effectDesc.addProperty("type", statusEffect.isBeneficial() ? "good" : "bad");
+    if (effect.isBeneficial()) {
+      effectDesc.addProperty("beneficial", true);
+    }
+
+    if (effect.isInstantenous()) {
+      effectDesc.addProperty("instantenous", true);
+    }
+
     return effectDesc;
   }
 

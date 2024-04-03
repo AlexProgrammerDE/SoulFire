@@ -29,7 +29,7 @@ import lombok.With;
 @With(value = AccessLevel.PRIVATE)
 public record BlockType(
     int id,
-    String name,
+    ResourceKey key,
     float destroyTime,
     float explosionResistance,
     boolean air,
@@ -40,31 +40,31 @@ public record BlockType(
     OffsetData offsetData,
     BlockStates statesData) {
   public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
-  public static final Object2ReferenceMap<String, BlockType> FROM_NAME =
+  public static final Object2ReferenceMap<ResourceKey, BlockType> FROM_KEY =
       new Object2ReferenceOpenHashMap<>();
 
   // VALUES REPLACE
 
-  public static BlockType register(String name) {
-    var blockType = GsonDataHelper.fromJson("/minecraft/blocks.json", name, BlockType.class);
-    blockType =
-        blockType.withStatesData(
+  public static BlockType register(String key) {
+    var instance = GsonDataHelper.fromJson("/minecraft/blocks.json", key, BlockType.class);
+    instance =
+        instance.withStatesData(
             BlockStates.fromJsonArray(
-                blockType,
-                GsonDataHelper.fromJson("/minecraft/blocks.json", name, JsonObject.class)
+                instance,
+                GsonDataHelper.fromJson("/minecraft/blocks.json", key, JsonObject.class)
                     .getAsJsonArray("states")));
 
-    FROM_ID.put(blockType.id(), blockType);
-    FROM_NAME.put(blockType.name(), blockType);
-    return blockType;
+    FROM_ID.put(instance.id(), instance);
+    FROM_KEY.put(instance.key(), instance);
+    return instance;
   }
 
   public static BlockType getById(int id) {
     return FROM_ID.get(id);
   }
 
-  public static BlockType getByName(String name) {
-    return FROM_NAME.get(name.replace("minecraft:", ""));
+  public static BlockType getByKey(ResourceKey key) {
+    return FROM_KEY.get(key);
   }
 
   @Override
@@ -72,10 +72,10 @@ public record BlockType(
     if (this == o) {
       return true;
     }
-    if (!(o instanceof BlockType blockType)) {
+    if (!(o instanceof BlockType other)) {
       return false;
     }
-    return id == blockType.id;
+    return id == other.id;
   }
 
   @Override

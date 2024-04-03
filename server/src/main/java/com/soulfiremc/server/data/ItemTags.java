@@ -82,8 +82,7 @@ public class ItemTags {
   public static final String CANDLES = "minecraft:candles";
   public static final String DIRT = "minecraft:dirt";
   public static final String TERRACOTTA = "minecraft:terracotta";
-  public static final String COMPLETES_FIND_TREE_TUTORIAL =
-      "minecraft:completes_find_tree_tutorial";
+  public static final String COMPLETES_FIND_TREE_TUTORIAL = "minecraft:completes_find_tree_tutorial";
   public static final String BOATS = "minecraft:boats";
   public static final String CHEST_BOATS = "minecraft:chest_boats";
   public static final String FISHES = "minecraft:fishes";
@@ -119,4 +118,6 @@ public class ItemTags {
   public static final String TOOLS = "minecraft:tools";
   public static final String BREAKS_DECORATED_POTS = "minecraft:breaks_decorated_pots";
   public static final String VILLAGER_PLANTABLE_SEEDS = "minecraft:villager_plantable_seeds";
+
+  private ItemTags() {}
 }

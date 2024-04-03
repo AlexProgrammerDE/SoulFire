@@ -39,12 +39,12 @@ public class AttributesJavaGenerator implements IDataGenerator {
             BuiltInRegistries.ATTRIBUTE.stream()
                 .map(
                     s -> {
-                      var name =
-                          Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(s)).getPath();
+                      var key =
+                          Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(s));
                       return "public static final AttributeType "
-                          + name.toUpperCase(Locale.ROOT).replace(".", "_")
+                          + key.getPath().toUpperCase(Locale.ROOT).replace(".", "_")
                           + " = register(\""
-                          + name
+                          + key
                           + "\");";
                     })
                 .toArray(String[]::new)));

@@ -23,7 +23,7 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 @SuppressWarnings("unused")
 public record EntityType(
     int id,
-    String name,
+    ResourceKey key,
     float width,
     float height,
     String category,
@@ -34,10 +34,10 @@ public record EntityType(
 
   // VALUES REPLACE
 
-  public static EntityType register(String name) {
-    var entityType = GsonDataHelper.fromJson("/minecraft/entities.json", name, EntityType.class);
-    FROM_ID.put(entityType.id(), entityType);
-    return entityType;
+  public static EntityType register(String key) {
+    var instance = GsonDataHelper.fromJson("/minecraft/entities.json", key, EntityType.class);
+    FROM_ID.put(instance.id(), instance);
+    return instance;
   }
 
   public static EntityType getById(int id) {
@@ -49,10 +49,10 @@ public record EntityType(
     if (this == o) {
       return true;
     }
-    if (!(o instanceof EntityType entityType)) {
+    if (!(o instanceof EntityType other)) {
       return false;
     }
-    return id == entityType.id;
+    return id == other.id;
   }
 
   @Override

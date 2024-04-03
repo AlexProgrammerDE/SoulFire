@@ -24,22 +24,22 @@ import lombok.With;
 
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
-public record AttributeType(String name, double min, double max, double defaultValue) {
-  public static final Object2ReferenceMap<String, AttributeType> FROM_NAME =
+public record AttributeType(int id, ResourceKey key, double min, double max, double defaultValue) {
+  public static final Object2ReferenceMap<ResourceKey, AttributeType> FROM_KEY =
       new Object2ReferenceOpenHashMap<>();
 
   // VALUES REPLACE
 
-  public static AttributeType register(String name) {
-    var attributeType =
-        GsonDataHelper.fromJson("/minecraft/attributes.json", name, AttributeType.class);
+  public static AttributeType register(String key) {
+    var instance =
+        GsonDataHelper.fromJson("/minecraft/attributes.json", key, AttributeType.class);
 
-    FROM_NAME.put(attributeType.name(), attributeType);
-    return attributeType;
+    FROM_KEY.put(instance.key(), instance);
+    return instance;
   }
 
-  public static AttributeType getByName(String name) {
-    return FROM_NAME.get(name.replace("minecraft:", ""));
+  public static AttributeType getByKey(ResourceKey key) {
+    return FROM_KEY.get(key);
   }
 
   @Override
@@ -47,14 +47,14 @@ public record AttributeType(String name, double min, double max, double defaultV
     if (this == o) {
       return true;
     }
-    if (!(o instanceof AttributeType attributeType)) {
+    if (!(o instanceof AttributeType other)) {
       return false;
     }
-    return name.equals(attributeType.name);
+    return id == other.id;
   }
 
   @Override
   public int hashCode() {
-    return name.hashCode();
+    return id;
   }
 }

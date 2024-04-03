@@ -30,7 +30,7 @@ public class EntitiesDataGenerator implements IDataGenerator {
     var entityDesc = new JsonObject();
 
     entityDesc.addProperty("id", BuiltInRegistries.ENTITY_TYPE.getId(entityType));
-    entityDesc.addProperty("name", BuiltInRegistries.ENTITY_TYPE.getKey(entityType).getPath());
+    entityDesc.addProperty("key", BuiltInRegistries.ENTITY_TYPE.getKey(entityType).toString());
 
     var dimensions = entityType.getDimensions();
 

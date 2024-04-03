@@ -41,7 +41,7 @@ public record BlockState(
   }
 
   private static BlockShapeGroup getBlockShapeGroup(BlockType blockType, int stateIndex) {
-    var shapeGroups = BlockShapeLoader.BLOCK_SHAPES.get(blockType.name());
+    var shapeGroups = BlockShapeLoader.BLOCK_SHAPES.get(blockType.key());
     var size = shapeGroups.size();
     if (size == 0) {
       // This block has no shape stored, this is for example for air or grass

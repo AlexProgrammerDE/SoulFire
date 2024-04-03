@@ -38,11 +38,11 @@ public class EntitiesJavaGenerator implements IDataGenerator {
             BuiltInRegistries.ENTITY_TYPE.stream()
                 .map(
                     s -> {
-                      var name = BuiltInRegistries.ENTITY_TYPE.getKey(s).getPath();
+                      var key = BuiltInRegistries.ENTITY_TYPE.getKey(s);
                       return "public static final EntityType "
-                          + name.toUpperCase(Locale.ROOT)
+                          + key.getPath().toUpperCase(Locale.ROOT)
                           + " = register(\""
-                          + name
+                          + key
                           + "\");";
                     })
                 .toArray(String[]::new)));

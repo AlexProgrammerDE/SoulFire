@@ -56,7 +56,7 @@ public class WorldExporterGenerator implements IDataGenerator {
       var definitionArray = new String[BuiltInRegistries.BLOCK.size()];
       for (var blockState : BuiltInRegistries.BLOCK) {
         definitionArray[BuiltInRegistries.BLOCK.getId(blockState)] =
-            BuiltInRegistries.BLOCK.getKey(blockState).getPath();
+            BuiltInRegistries.BLOCK.getKey(blockState).toString();
       }
       jsonObject.add("definitions", GsonInstance.GSON.toJsonTree(definitionArray));
 

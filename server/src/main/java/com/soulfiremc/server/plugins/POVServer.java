@@ -888,7 +888,7 @@ public class POVServer implements InternalPlugin {
                                         attributeState ->
                                             new Attribute(
                                                 new AttributeType.Custom(
-                                                    "minecraft:" + attributeState.type().name()),
+                                                    attributeState.type().toString()),
                                                 attributeState.baseValue(),
                                                 attributeState.modifiers().values().stream()
                                                     .map(

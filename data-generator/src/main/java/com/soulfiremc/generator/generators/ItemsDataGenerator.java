@@ -20,7 +20,6 @@ package com.soulfiremc.generator.generators;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -30,10 +29,8 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.EnchantmentCategory;
 
 public class ItemsDataGenerator implements IDataGenerator {
-
   private static List<Item> calculateItemsToRepairWith(Item sourceItem) {
     var sourceItemStack = sourceItem.getDefaultInstance();
     return BuiltInRegistries.ITEM.stream()
@@ -43,30 +40,13 @@ public class ItemsDataGenerator implements IDataGenerator {
         .collect(Collectors.toList());
   }
 
-  private static List<EnchantmentCategory> getApplicableEnchantmentTargets(Item sourceItem) {
-    return Arrays.stream(EnchantmentCategory.values())
-        .filter(target -> target.canEnchant(sourceItem))
-        .collect(Collectors.toList());
-  }
-
   public static JsonObject generateItem(Item item) {
     var itemDesc = new JsonObject();
 
     itemDesc.addProperty("id", BuiltInRegistries.ITEM.getId(item));
-    itemDesc.addProperty("name", BuiltInRegistries.ITEM.getKey(item).getPath());
+    itemDesc.addProperty("key", BuiltInRegistries.ITEM.getKey(item).toString());
 
     itemDesc.addProperty("maxStackSize", item.getMaxStackSize());
-
-    var enchantmentTargets = getApplicableEnchantmentTargets(item);
-
-    var enchantCategoriesArray = new JsonArray();
-    for (var target : enchantmentTargets) {
-      enchantCategoriesArray.add(EnchantmentsDataGenerator.getEnchantmentTargetName(target));
-    }
-
-    if (!enchantCategoriesArray.isEmpty()) {
-      itemDesc.add("enchantCategories", enchantCategoriesArray);
-    }
 
     if (item.canBeDepleted()) {
       var depletionData = new JsonObject();
