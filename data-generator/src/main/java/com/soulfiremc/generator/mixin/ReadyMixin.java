@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.generator.mixin;
 
+import com.soulfiremc.generator.DataGenerators;
 import com.soulfiremc.generator.Main;
-import com.soulfiremc.generator.generators.DataGenerators;
 import java.nio.file.Path;
 import net.minecraft.DetectedVersion;
 import net.minecraft.server.MinecraftServer;

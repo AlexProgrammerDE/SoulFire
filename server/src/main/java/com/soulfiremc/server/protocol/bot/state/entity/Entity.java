@@ -87,8 +87,11 @@ public abstract class Entity {
     log.debug("Unhandled entity event for entity {}: {}", entityId, event.name());
   }
 
-  public void lookAt(RotationOrigin origin, RotationOrigin entityOrigin, Entity entity) {
-    lookAt(origin, entityOrigin == RotationOrigin.EYES ? entity.getEyePosition() : entity.pos());
+  public Vector3d originPosition(RotationOrigin origin) {
+    return switch (origin) {
+      case EYES -> eyePosition();
+      case FEET -> pos();
+    };
   }
 
   /**
@@ -98,11 +101,11 @@ public abstract class Entity {
    * @param position The block or location to look at.
    */
   public void lookAt(RotationOrigin origin, Vector3d position) {
-    var eyes = origin == RotationOrigin.EYES;
+    var originPosition = originPosition(origin);
 
-    var dx = position.getX() - x;
-    var dy = position.getY() - (eyes ? y + getEyeHeight() : y);
-    var dz = position.getZ() - z;
+    var dx = position.getX() - originPosition.getX();
+    var dy = position.getY() - originPosition.getY();
+    var dz = position.getZ() - originPosition.getZ();
 
     var sqr = Math.sqrt(dx * dx + dz * dz);
 
@@ -112,15 +115,15 @@ public abstract class Entity {
         MathHelper.wrapDegrees((float) (Math.atan2(dz, dx) * 180.0F / (float) Math.PI) - 90.0F);
   }
 
-  public double getEyeHeight() {
+  public double eyeHeight() {
     return 1.62F;
   }
 
-  public Vector3d getEyePosition() {
-    return Vector3d.from(x, y + getEyeHeight(), z);
+  public Vector3d eyePosition() {
+    return Vector3d.from(x, y + eyeHeight(), z);
   }
 
-  public Vector3d getRotationVector() {
+  public Vector3d rotationVector() {
     var yawRadians = (float) Math.toRadians(yaw);
     var pitchRadians = (float) Math.toRadians(pitch);
     var x = -Math.sin(yawRadians) * Math.cos(pitchRadians);
@@ -159,7 +162,7 @@ public abstract class Entity {
     return new AABB(x - w, y, z - w, x + w, y + h, z + w);
   }
 
-  public double getAttributeValue(AttributeType type) {
+  public double attributeValue(AttributeType type) {
     return attributeState.getOrCreateAttribute(type).calculateValue();
   }
 }

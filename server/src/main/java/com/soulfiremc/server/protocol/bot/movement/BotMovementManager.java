@@ -499,7 +499,7 @@ public class BotMovementManager {
       playerSpeedAttribute.modifiers().remove(physics.sprintingUUID);
     }
 
-    return (float) clientEntity.getAttributeValue(AttributeType.GENERIC_MOVEMENT_SPEED);
+    return (float) clientEntity.attributeValue(AttributeType.GENERIC_MOVEMENT_SPEED);
   }
 
   public void moveEntity(LevelState world, double dx, double dy, double dz) {

@@ -348,10 +348,15 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onLookAt(ClientboundPlayerLookAtPacket packet) {
-    clientEntity.lookAt(
-        packet.getOrigin(), Vector3d.from(packet.getX(), packet.getY(), packet.getZ()));
+    var targetPosition = Vector3d.from(packet.getX(), packet.getY(), packet.getZ());
+    if (packet.getTargetEntityOrigin() != null) {
+      var entity = entityTrackerState.getEntity(packet.getTargetEntityId());
+      if (entity != null) {
+        targetPosition = entity.originPosition(packet.getTargetEntityOrigin());
+      }
+    }
 
-    // TODO: Implement entity look at
+    clientEntity.lookAt(packet.getOrigin(), targetPosition);
   }
 
   @EventHandler

@@ -15,11 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.generator.generators;
+package com.soulfiremc.generator;
 
 import com.google.gson.JsonElement;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
+import com.soulfiremc.generator.generators.AttributesDataGenerator;
+import com.soulfiremc.generator.generators.AttributesJavaGenerator;
+import com.soulfiremc.generator.generators.BlockCollisionShapesDataGenerator;
+import com.soulfiremc.generator.generators.BlocksDataGenerator;
+import com.soulfiremc.generator.generators.BlocksJavaGenerator;
+import com.soulfiremc.generator.generators.EffectsDataGenerator;
+import com.soulfiremc.generator.generators.EnchantmentsDataGenerator;
+import com.soulfiremc.generator.generators.EntitiesDataGenerator;
+import com.soulfiremc.generator.generators.EntitiesJavaGenerator;
+import com.soulfiremc.generator.generators.IDataGenerator;
+import com.soulfiremc.generator.generators.ItemsDataGenerator;
+import com.soulfiremc.generator.generators.ItemsJavaGenerator;
+import com.soulfiremc.generator.generators.LanguageDataGenerator;
+import com.soulfiremc.generator.generators.MapColorJavaGenerator;
+import com.soulfiremc.generator.generators.TagsDataGenerator;
+import com.soulfiremc.generator.generators.WorldExporterGenerator;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

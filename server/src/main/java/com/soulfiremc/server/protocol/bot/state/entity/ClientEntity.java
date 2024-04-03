@@ -125,7 +125,7 @@ public class ClientEntity extends Entity {
   }
 
   @Override
-  public double getEyeHeight() {
+  public double eyeHeight() {
     if (this.controlState.sneaking()) {
       return sessionDataManager
               .connection()

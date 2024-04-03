@@ -168,7 +168,7 @@ public class BotControlAPI {
       }
     }
 
-    var eye = dataManager.clientEntity().getEyePosition();
+    var eye = dataManager.clientEntity().eyePosition();
 
     // sort by distance to the bot
     points.sort(Comparator.comparingDouble(eye::distance));
@@ -287,7 +287,7 @@ public class BotControlAPI {
       return false;
     }
 
-    var eye = dataManager.clientEntity().getEyePosition();
+    var eye = dataManager.clientEntity().eyePosition();
     var distance = eye.distance(vec);
     if (distance >= 256) {
       return false;
@@ -312,7 +312,7 @@ public class BotControlAPI {
 
     return (float)
         (1.0
-            / dataManager.clientEntity().getAttributeValue(AttributeType.GENERIC_ATTACK_SPEED)
+            / dataManager.clientEntity().attributeValue(AttributeType.GENERIC_ATTACK_SPEED)
             * 20.0);
   }
 }

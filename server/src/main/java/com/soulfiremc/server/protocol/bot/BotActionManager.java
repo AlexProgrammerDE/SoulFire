@@ -112,7 +112,7 @@ public class BotActionManager {
       return;
     }
 
-    var eyePosition = clientEntity.getEyePosition();
+    var eyePosition = clientEntity.eyePosition();
 
     var againstPlacePosition = getMiddleBlockFace(againstBlock, againstFace);
 
@@ -127,7 +127,7 @@ public class BotActionManager {
         rayCastToBlock(
             levelState.getBlockStateAt(againstBlock),
             eyePosition,
-            clientEntity.getRotationVector(),
+            clientEntity.rotationVector(),
             againstBlock);
     if (rayCast.isEmpty()) {
       return;
@@ -166,8 +166,8 @@ public class BotActionManager {
 
   public Direction getBlockFaceLookedAt(Vector3i blockPos) {
     var clientEntity = dataManager.clientEntity();
-    var eyePosition = clientEntity.getEyePosition();
-    var headRotation = clientEntity.getRotationVector();
+    var eyePosition = clientEntity.eyePosition();
+    var headRotation = clientEntity.rotationVector();
     var blockPosDouble = blockPos.toDouble();
     var blockBoundingBox = new AABB(blockPosDouble, blockPosDouble.add(1, 1, 1));
     var intersection =

@@ -80,12 +80,12 @@ public class KillAura implements InternalPlugin {
           var bestVisiblePoint = control.getEntityVisiblePoint(target);
           if (bestVisiblePoint != null) {
             distance =
-                bestVisiblePoint.distance(bot.sessionDataManager().clientEntity().getEyePosition());
+                bestVisiblePoint.distance(bot.sessionDataManager().clientEntity().eyePosition());
           } else {
             distance =
                 target
-                    .getEyePosition()
-                    .distance(bot.sessionDataManager().clientEntity().getEyePosition());
+                    .eyePosition()
+                    .distance(bot.sessionDataManager().clientEntity().eyePosition());
           }
 
           if (distance > lookRange) {
@@ -97,7 +97,7 @@ public class KillAura implements InternalPlugin {
           } else {
             bot.sessionDataManager()
                 .clientEntity()
-                .lookAt(RotationOrigin.EYES, RotationOrigin.EYES, target);
+                .lookAt(RotationOrigin.EYES, target.originPosition(RotationOrigin.EYES));
           }
 
           TickHookContext.INSTANCE
