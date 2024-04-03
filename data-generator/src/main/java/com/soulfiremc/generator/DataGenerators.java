@@ -35,6 +35,7 @@ import com.soulfiremc.generator.generators.ItemsDataGenerator;
 import com.soulfiremc.generator.generators.ItemsJavaGenerator;
 import com.soulfiremc.generator.generators.LanguageDataGenerator;
 import com.soulfiremc.generator.generators.MapColorJavaGenerator;
+import com.soulfiremc.generator.generators.RegistryKeysDataGenerator;
 import com.soulfiremc.generator.generators.TagsDataGenerator;
 import com.soulfiremc.generator.generators.WorldExporterGenerator;
 import java.io.IOException;
@@ -48,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DataGenerators {
   private static final List<IDataGenerator> GENERATORS =
       List.of(
+          new RegistryKeysDataGenerator(),
           new BlockCollisionShapesDataGenerator.BlockShapesGenerator(),
           new BlockCollisionShapesDataGenerator.BlockStatesGenerator(),
           new BlocksDataGenerator(),

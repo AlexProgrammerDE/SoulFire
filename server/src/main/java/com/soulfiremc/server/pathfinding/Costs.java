@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding;
 import com.github.steveice10.mc.protocol.data.game.entity.Effect;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
+import com.soulfiremc.server.data.EnchantmentType;
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.data.ToolSpeedType;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
@@ -97,8 +98,7 @@ public class Costs {
     }
 
     if (itemStack != null && speedMultiplier > 1) {
-      var efficiency = itemStack.enchantments().getOrDefault("minecraft:efficiency", (short) 0);
-
+      var efficiency = itemStack.getEnchantmentLevel(EnchantmentType.EFFICIENCY);
       if (efficiency > 0) {
         // Efficiency is capped at 255
         efficiency = MathHelper.shortClamp(efficiency, (short) 0, (short) 255);

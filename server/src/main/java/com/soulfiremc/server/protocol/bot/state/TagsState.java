@@ -20,6 +20,8 @@ package com.soulfiremc.server.protocol.bot.state;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.ItemType;
+import com.soulfiremc.server.data.RegistryKeys;
+import com.soulfiremc.server.data.ResourceKey;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -28,34 +30,34 @@ import lombok.Getter;
 
 @Getter
 public class TagsState {
-  private final Map<String, Map<String, IntSet>> tags = new Object2ObjectOpenHashMap<>();
+  private final Map<ResourceKey, Map<ResourceKey, IntSet>> tags = new Object2ObjectOpenHashMap<>();
 
   public void handleTagData(Map<String, Map<String, int[]>> updateTags) {
     for (var entry : updateTags.entrySet()) {
-      var tagMap = new Object2ObjectOpenHashMap<String, IntSet>();
+      var tagMap = new Object2ObjectOpenHashMap<ResourceKey, IntSet>();
       for (var tagEntry : entry.getValue().entrySet()) {
         var set = new IntOpenHashSet(tagEntry.getValue());
-        tagMap.put(tagEntry.getKey(), set);
+        tagMap.put(ResourceKey.fromString(tagEntry.getKey()), set);
       }
-      tags.put(entry.getKey(), tagMap);
+      tags.put(ResourceKey.fromString(entry.getKey()), tagMap);
     }
   }
 
-  public boolean isBlockInTag(BlockType blockType, String tagName) {
-    return tags.getOrDefault("minecraft:block", Map.of())
-        .getOrDefault(tagName, IntSet.of())
+  public boolean isBlockInTag(BlockType blockType, ResourceKey tagKey) {
+    return tags.getOrDefault(RegistryKeys.BLOCK, Map.of())
+        .getOrDefault(tagKey, IntSet.of())
         .contains(blockType.id());
   }
 
-  public boolean isItemInTag(ItemType itemType, String tagName) {
-    return tags.getOrDefault("minecraft:item", Map.of())
-        .getOrDefault(tagName, IntSet.of())
+  public boolean isItemInTag(ItemType itemType, ResourceKey tagKey) {
+    return tags.getOrDefault(RegistryKeys.ITEM, Map.of())
+        .getOrDefault(tagKey, IntSet.of())
         .contains(itemType.id());
   }
 
-  public boolean isEntityInTag(EntityType entityType, String tagName) {
-    return tags.getOrDefault("minecraft:entity_type", Map.of())
-        .getOrDefault(tagName, IntSet.of())
+  public boolean isEntityInTag(EntityType entityType, ResourceKey tagKey) {
+    return tags.getOrDefault(RegistryKeys.ENTITY_TYPE, Map.of())
+        .getOrDefault(tagKey, IntSet.of())
         .contains(entityType.id());
   }
 
@@ -64,9 +66,9 @@ public class TagsState {
     for (var entry : tags.entrySet()) {
       var tagMap = new Object2ObjectOpenHashMap<String, int[]>();
       for (var tagEntry : entry.getValue().entrySet()) {
-        tagMap.put(tagEntry.getKey(), tagEntry.getValue().toIntArray());
+        tagMap.put(tagEntry.getKey().toString(), tagEntry.getValue().toIntArray());
       }
-      result.put(entry.getKey(), tagMap);
+      result.put(entry.getKey().toString(), tagMap);
     }
     return result;
   }

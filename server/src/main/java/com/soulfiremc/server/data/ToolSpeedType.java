@@ -62,7 +62,7 @@ public class ToolSpeedType {
         continue;
       }
 
-      var tagName = MineableType.getFromTool(itemType).orElseThrow().tagName();
+      var tagName = MineableType.getFromTool(itemType).orElseThrow().tagKey();
       if (tagsState.isBlockInTag(blockType, tagName)) {
         return toolSpeedType.miningSpeed();
       } else {
@@ -98,7 +98,7 @@ public class ToolSpeedType {
       }
 
       return MineableType.getFromTool(itemType)
-          .filter(type -> tagsState.isBlockInTag(blockType, type.tagName()))
+          .filter(type -> tagsState.isBlockInTag(blockType, type.tagKey()))
           .isPresent();
     }
   }

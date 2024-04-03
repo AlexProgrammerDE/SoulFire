@@ -62,7 +62,7 @@ public enum MineableType {
       BlockTags.MINEABLE_WITH_HOE);
 
   private final Set<ItemType> tools;
-  @Getter private final String tagName;
+  @Getter private final ResourceKey tagKey;
 
   public static Optional<MineableType> getFromTool(ItemType itemType) {
     for (var mineableType : MineableType.values()) {

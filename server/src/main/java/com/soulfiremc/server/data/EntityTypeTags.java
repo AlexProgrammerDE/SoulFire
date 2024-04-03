@@ -19,26 +19,26 @@ package com.soulfiremc.server.data;
 
 @SuppressWarnings("unused")
 public class EntityTypeTags {
-  public static final String SKELETONS = "minecraft:skeletons";
-  public static final String ZOMBIES = "minecraft:zombies";
-  public static final String RAIDERS = "minecraft:raiders";
-  public static final String UNDEAD = "minecraft:undead";
-  public static final String BEEHIVE_INHABITORS = "minecraft:beehive_inhabitors";
-  public static final String ARROWS = "minecraft:arrows";
-  public static final String IMPACT_PROJECTILES = "minecraft:impact_projectiles";
-  public static final String POWDER_SNOW_WALKABLE_MOBS = "minecraft:powder_snow_walkable_mobs";
-  public static final String AXOLOTL_ALWAYS_HOSTILES = "minecraft:axolotl_always_hostiles";
-  public static final String AXOLOTL_HUNT_TARGETS = "minecraft:axolotl_hunt_targets";
-  public static final String FREEZE_IMMUNE_ENTITY_TYPES = "minecraft:freeze_immune_entity_types";
-  public static final String FREEZE_HURTS_EXTRA_TYPES = "minecraft:freeze_hurts_extra_types";
-  public static final String CAN_BREATHE_UNDER_WATER = "minecraft:can_breathe_under_water";
-  public static final String FROG_FOOD = "minecraft:frog_food";
-  public static final String FALL_DAMAGE_IMMUNE = "minecraft:fall_damage_immune";
-  public static final String DISMOUNTS_UNDERWATER = "minecraft:dismounts_underwater";
-  public static final String NON_CONTROLLING_RIDER = "minecraft:non_controlling_rider";
-  public static final String DEFLECTS_ARROWS = "minecraft:deflects_arrows";
-  public static final String DEFLECTS_TRIDENTS = "minecraft:deflects_tridents";
-  public static final String CAN_TURN_IN_BOATS = "minecraft:can_turn_in_boats";
+  public static final ResourceKey SKELETONS = ResourceKey.fromString("minecraft:skeletons");
+  public static final ResourceKey ZOMBIES = ResourceKey.fromString("minecraft:zombies");
+  public static final ResourceKey RAIDERS = ResourceKey.fromString("minecraft:raiders");
+  public static final ResourceKey UNDEAD = ResourceKey.fromString("minecraft:undead");
+  public static final ResourceKey BEEHIVE_INHABITORS = ResourceKey.fromString("minecraft:beehive_inhabitors");
+  public static final ResourceKey ARROWS = ResourceKey.fromString("minecraft:arrows");
+  public static final ResourceKey IMPACT_PROJECTILES = ResourceKey.fromString("minecraft:impact_projectiles");
+  public static final ResourceKey POWDER_SNOW_WALKABLE_MOBS = ResourceKey.fromString("minecraft:powder_snow_walkable_mobs");
+  public static final ResourceKey AXOLOTL_ALWAYS_HOSTILES = ResourceKey.fromString("minecraft:axolotl_always_hostiles");
+  public static final ResourceKey AXOLOTL_HUNT_TARGETS = ResourceKey.fromString("minecraft:axolotl_hunt_targets");
+  public static final ResourceKey FREEZE_IMMUNE_ENTITY_TYPES = ResourceKey.fromString("minecraft:freeze_immune_entity_types");
+  public static final ResourceKey FREEZE_HURTS_EXTRA_TYPES = ResourceKey.fromString("minecraft:freeze_hurts_extra_types");
+  public static final ResourceKey CAN_BREATHE_UNDER_WATER = ResourceKey.fromString("minecraft:can_breathe_under_water");
+  public static final ResourceKey FROG_FOOD = ResourceKey.fromString("minecraft:frog_food");
+  public static final ResourceKey FALL_DAMAGE_IMMUNE = ResourceKey.fromString("minecraft:fall_damage_immune");
+  public static final ResourceKey DISMOUNTS_UNDERWATER = ResourceKey.fromString("minecraft:dismounts_underwater");
+  public static final ResourceKey NON_CONTROLLING_RIDER = ResourceKey.fromString("minecraft:non_controlling_rider");
+  public static final ResourceKey DEFLECTS_ARROWS = ResourceKey.fromString("minecraft:deflects_arrows");
+  public static final ResourceKey DEFLECTS_TRIDENTS = ResourceKey.fromString("minecraft:deflects_tridents");
+  public static final ResourceKey CAN_TURN_IN_BOATS = ResourceKey.fromString("minecraft:can_turn_in_boats");
 
   private EntityTypeTags() {}
 }

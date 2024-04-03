@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
@@ -32,12 +33,12 @@ import net.minecraft.tags.TagKey;
 public class TagsDataGenerator {
   private TagsDataGenerator() {}
 
-  public static List<String> generateTag(Class<?> tagClass) {
-    var resultArray = new ArrayList<String>();
+  public static List<ResourceLocation> generateTag(Class<?> tagClass) {
+    var resultArray = new ArrayList<ResourceLocation>();
     for (var field : tagClass.getDeclaredFields()) {
       try {
         var tag = (TagKey<?>) field.get(null);
-        resultArray.add(tag.location().getPath());
+        resultArray.add(tag.location());
       } catch (IllegalAccessException e) {
         log.error("Failed to generate tag", e);
       }
@@ -61,11 +62,11 @@ public class TagsDataGenerator {
               generateTag(BlockTags.class).stream()
                   .map(
                       s ->
-                          "public static final String "
-                              + s.toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                              + " = \"minecraft:"
+                          "public static final ResourceKey "
+                              + s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
+                              + " = ResourceKey.fromString(\""
                               + s
-                              + "\";")
+                              + "\");")
                   .toArray(String[]::new)));
     }
   }
@@ -86,11 +87,11 @@ public class TagsDataGenerator {
               generateTag(ItemTags.class).stream()
                   .map(
                       s ->
-                          "public static final String "
-                              + s.toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                              + " = \"minecraft:"
+                          "public static final ResourceKey "
+                              + s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
+                              + " = ResourceKey.fromString(\""
                               + s
-                              + "\";")
+                              + "\");")
                   .toArray(String[]::new)));
     }
   }
@@ -111,11 +112,11 @@ public class TagsDataGenerator {
               generateTag(EntityTypeTags.class).stream()
                   .map(
                       s ->
-                          "public static final String "
-                              + s.toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                              + " = \"minecraft:"
+                          "public static final ResourceKey "
+                              + s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
+                              + " = ResourceKey.fromString(\""
                               + s
-                              + "\";")
+                              + "\");")
                   .toArray(String[]::new)));
     }
   }

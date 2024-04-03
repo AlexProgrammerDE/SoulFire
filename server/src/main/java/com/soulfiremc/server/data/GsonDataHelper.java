@@ -37,7 +37,7 @@ public class GsonDataHelper {
               new TypeAdapter<ResourceKey>() {
                 @Override
                 public void write(JsonWriter out, ResourceKey value) throws IOException {
-                  out.value(value.formatted());
+                  out.value(value.toString());
                 }
 
                 @Override

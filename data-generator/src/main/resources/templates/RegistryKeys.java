@@ -15,16 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.data;
+package com.soulfiremc.data;
 
-public record ResourceKey(String namespace, String path) {
-  public static ResourceKey fromString(String formatted) {
-    var split = formatted.split(":", 2);
-    return new ResourceKey(split[0], split[1]);
-  }
+@SuppressWarnings("unused")
+public class RegistryKeys {
+  // VALUES REPLACE
 
-  @Override
-  public String toString() {
-    return namespace + ":" + path;
-  }
+  private RegistryKeys() {}
 }
