@@ -253,12 +253,11 @@ public class MessageLogPanel extends JPanel {
       copyItem.addActionListener(e -> textComponent.copy());
       popupMenu.add(copyItem);
 
-      var uploadItem = new JMenuItem("Upload to pastes.dev");
+      var uploadItem = new JMenuItem("Upload to mclo.gs");
       uploadItem.addActionListener(
           event -> {
             try {
-              var url =
-                  "https://pastes.dev/" + PastesDevService.upload(textComponent.getSelectedText());
+              var url = LogsUploadService.upload(textComponent.getSelectedText()).url();
               JOptionPane.showMessageDialog(
                   this,
                   SFSwingUtils.createHtmlPane("Uploaded to: <a href='" + url + "'>" + url + "</a>"),

@@ -19,25 +19,25 @@ package com.soulfiremc.client.gui.libs;
 
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ReactorHttpHelper;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
-import reactor.netty.ByteBufFlux;
 
 @Slf4j
-public class PastesDevService {
-  private static final URI PASTES_DEV_URI = URI.create("https://api.pastes.dev/post");
+public class LogsUploadService {
+  private static final URI UPLOAD_URI = URI.create("https://api.mclo.gs/1/log");
 
-  private PastesDevService() {}
+  private LogsUploadService() {}
 
-  public static String upload(String text) {
+  public static McLogsResponse upload(String text) {
     return ReactorHttpHelper.createReactorClient(null, true)
+        .headers(h -> h.set(HttpHeaderNames.CONTENT_TYPE, "application/x-www-form-urlencoded"))
         .post()
-        .uri(PASTES_DEV_URI)
-        .send(ByteBufFlux.fromString(Flux.just(text)))
+        .uri(UPLOAD_URI)
+        .sendForm((request, form) -> form.attr("content", text))
         .responseSingle(
             (res, content) -> {
-              if (res.status().code() != 201) {
+              if (res.status().code() != 200) {
                 log.warn("Failed to upload: {}", res.status().code());
                 throw new RuntimeException("Failed to upload");
               }
@@ -46,13 +46,17 @@ public class PastesDevService {
                   .asString()
                   .map(
                       responseText -> {
-                        var response =
-                            GsonInstance.GSON.fromJson(responseText, BytebinResponse.class);
-                        return response.key();
+                        var response = GsonInstance.GSON.fromJson(responseText, McLogsResponse.class);
+                        if (!response.success()) {
+                            log.warn("Failed to upload: {}", response.error());
+                            throw new RuntimeException("Failed to upload");
+                        }
+
+                        return response;
                       });
             })
         .block();
   }
 
-  private record BytebinResponse(String key) {}
+  public record McLogsResponse(boolean success, String id, String url, String raw, String error) {}
 }

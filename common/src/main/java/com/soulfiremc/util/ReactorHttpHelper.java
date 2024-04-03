@@ -19,6 +19,7 @@ package com.soulfiremc.util;
 
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.settings.proxy.SFProxy;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
@@ -43,13 +44,13 @@ public class ReactorHttpHelper {
             .responseTimeout(Duration.ofSeconds(5))
             .headers(
                 h -> {
-                  h.add("Accept", "application/json");
+                  h.set(HttpHeaderNames.ACCEPT, "application/json");
                   if (withBody) {
-                    h.add("Content-Type", "application/json");
+                    h.set(HttpHeaderNames.CONTENT_TYPE, "application/json");
                   }
 
-                  h.add("Accept-Language", "en-US,en");
-                  h.add("User-Agent", "SoulFire/" + BuildData.VERSION);
+                  h.set(HttpHeaderNames.ACCEPT_LANGUAGE, "en-US,en");
+                  h.set(HttpHeaderNames.USER_AGENT, "SoulFire/" + BuildData.VERSION);
                 });
 
     return proxyData == null

@@ -102,7 +102,7 @@ public class GUIFrame extends JFrame {
 
     var logsHint =
         new HintManager.Hint(
-            "Here are all logs of the software displayed. You can select text and right click it to upload it to pastes.dev",
+            "Here are all logs of the software displayed. You can select text and right click it to upload it to mclo.gs",
             logPanel,
             SwingConstants.LEFT,
             "hint.logPanel",

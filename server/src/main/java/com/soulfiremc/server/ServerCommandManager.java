@@ -90,7 +90,7 @@ public class ServerCommandManager implements PlatformCommandManager {
   private final SoulFireServer soulFireServer;
   private final List<Map.Entry<Instant, String>> commandHistory =
       Collections.synchronizedList(new ArrayList<>());
-  private final Path targetFile = SFPathConstants.DATA_FOLDER.resolve(".command_history");
+  private static final Path HISTORY_FILE = SFPathConstants.DATA_FOLDER.resolve(".command_history");
 
   private static String getCurrentUsername() {
     var currentUser = ServerRPCConstants.USER_CONTEXT_KEY.get();
@@ -856,11 +856,11 @@ public class ServerCommandManager implements PlatformCommandManager {
     synchronized (commandHistory) {
       commandHistory.clear();
       try {
-        if (!Files.exists(targetFile)) {
+        if (!Files.exists(HISTORY_FILE)) {
           return;
         }
 
-        var lines = Files.readAllLines(targetFile);
+        var lines = Files.readAllLines(HISTORY_FILE);
         for (var line : lines) {
           var firstColon = line.indexOf(':');
           if (firstColon == -1) {
@@ -881,10 +881,10 @@ public class ServerCommandManager implements PlatformCommandManager {
   private void newCommandHistoryEntry(String command) {
     synchronized (commandHistory) {
       try {
-        Files.createDirectories(targetFile.getParent());
+        Files.createDirectories(HISTORY_FILE.getParent());
         var newLine = Instant.now().getEpochSecond() + ":" + command + System.lineSeparator();
         Files.writeString(
-            targetFile, newLine, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            HISTORY_FILE, newLine, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
       } catch (IOException e) {
         log.error("Failed to create command history file!", e);
       }
@@ -894,7 +894,7 @@ public class ServerCommandManager implements PlatformCommandManager {
   private void clearCommandHistory() {
     synchronized (commandHistory) {
       try {
-        Files.deleteIfExists(targetFile);
+        Files.deleteIfExists(HISTORY_FILE);
         commandHistory.clear();
       } catch (IOException e) {
         log.error("Failed to delete command history file!", e);
