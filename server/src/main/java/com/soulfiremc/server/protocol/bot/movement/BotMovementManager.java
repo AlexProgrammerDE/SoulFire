@@ -728,7 +728,7 @@ public class BotMovementManager {
       return -1;
     }
 
-    var level = meta.properties().getInt("level");
+    var level = meta.properties().getNumber("level");
     return level >= 8 ? 0 : level;
   }
 
@@ -759,7 +759,7 @@ public class BotMovementManager {
       }
     }
 
-    if (meta.properties().getInt("level") >= 8) {
+    if (meta.properties().getNumber("level") >= 8) {
       for (var combination :
           new int[][] {new int[] {0, 1}, new int[] {-1, 0}, new int[] {0, -1}, new int[] {1, 0}}) {
         var dx = combination[0];

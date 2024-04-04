@@ -18,24 +18,22 @@
 package com.soulfiremc.server.data;
 
 import com.google.gson.JsonObject;
-import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.ToString;
 
 @ToString
 public class BlockStateProperties {
   private final Object2BooleanMap<String> booleanProperties;
-  private final Object2IntMap<String> intProperties;
+  private final Object2ObjectMap<String, Number> numberProperties;
   private final Object2ObjectMap<String, String> stringProperties;
 
   public BlockStateProperties(JsonObject properties) {
-    this.booleanProperties = new Object2BooleanArrayMap<>();
-    this.intProperties = new Object2IntArrayMap<>();
-    this.stringProperties = new Object2ObjectArrayMap<>();
+    this.booleanProperties = new Object2BooleanOpenHashMap<>();
+    this.numberProperties = new Object2ObjectOpenHashMap<>();
+    this.stringProperties = new Object2ObjectOpenHashMap<>();
 
     if (properties == null) {
       return;
@@ -43,24 +41,15 @@ public class BlockStateProperties {
 
     for (var property : properties.entrySet()) {
       var key = property.getKey();
-      var value = property.getValue().toString();
+      var value = property.getValue().getAsJsonPrimitive();
 
-      if (value.equals("true") || value.equals("false")) {
-        booleanProperties.put(key, Boolean.parseBoolean(value));
-      } else if (isNumeric(value)) {
-        intProperties.put(key, Integer.parseInt(value));
+      if (value.isBoolean()) {
+        booleanProperties.put(key, value.getAsBoolean());
+      } else if (value.isNumber()) {
+        numberProperties.put(key, value.getAsNumber());
       } else {
-        stringProperties.put(key, value);
+        stringProperties.put(key, value.getAsString());
       }
-    }
-  }
-
-  private static boolean isNumeric(String strNum) {
-    try {
-      Integer.parseInt(strNum);
-      return true;
-    } catch (NumberFormatException nfe) {
-      return false;
     }
   }
 
@@ -68,8 +57,8 @@ public class BlockStateProperties {
     return booleanProperties.getBoolean(key);
   }
 
-  public int getInt(String key) {
-    return intProperties.getInt(key);
+  public Number getNumber(String key) {
+    return numberProperties.get(key);
   }
 
   public String getString(String key) {
