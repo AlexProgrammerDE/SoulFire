@@ -40,24 +40,24 @@ import org.jetbrains.annotations.Nullable;
  */
 public class Costs {
   /**
-   * A normal server runs at 20 ticks per second
+   * A normal server runs at 20 ticks per second.
    */
   public static final double TICKS_PER_SECOND = 20;
   /**
-   * Normal player walking speed in blocks per second
+   * Normal player walking speed in blocks per second.
    */
   public static final double BLOCKS_PER_SECOND = 4.317;
   /**
-   * Multiply calculated ticks using this number to get a good relative heuristic
+   * Multiply calculated ticks using this number to get a good relative heuristic.
    */
   public static final double TICKS_PER_BLOCK = TICKS_PER_SECOND / BLOCKS_PER_SECOND;
   /**
-   * The distance in blocks between two points that are directly next to each other
+   * The distance in blocks between two points that are directly next to each other.
    */
   public static final double STRAIGHT = 1;
   /**
    * The distance in blocks between two points that are diagonal to each other.
-   * Calculated using the Pythagorean theorem
+   * Calculated using the Pythagorean theorem.
    */
   public static final double DIAGONAL = Math.sqrt(2);
   /**
@@ -73,23 +73,23 @@ public class Costs {
    */
   public static final double ONE_GAP_JUMP = JUMP_LAND_GROUND + STRAIGHT + STRAIGHT;
   /**
-   * Falling 1 block takes ~5.63 ticks
+   * Falling 1 block takes ~5.63 ticks.
    */
   public static final double FALL_1 = 5.63 / TICKS_PER_BLOCK;
   /**
-   * Falling 2 blocks takes ~7.79 ticks
+   * Falling 2 blocks takes ~7.79 ticks.
    */
   public static final double FALL_2 = 7.79 / TICKS_PER_BLOCK;
   /**
-   * Falling 3 blocks takes ~9.48 ticks
+   * Falling 3 blocks takes ~9.48 ticks.
    */
   public static final double FALL_3 = 9.48 / TICKS_PER_BLOCK;
   /**
-   * We don't want a bot that frequently tries to break blocks instead of walking around them
+   * We don't want a bot that frequently tries to break blocks instead of walking around them.
    */
   public static final double BREAK_BLOCK_ADDITION = 2;
   /**
-   * We don't want a bot that frequently tries to place blocks instead of finding smarter paths
+   * We don't want a bot that frequently tries to place blocks instead of finding smarter paths.
    */
   public static final double PLACE_BLOCK = 5;
   public static final double JUMP_UP_AND_PLACE_BELOW = JUMP_UP_BLOCK + PLACE_BLOCK;
