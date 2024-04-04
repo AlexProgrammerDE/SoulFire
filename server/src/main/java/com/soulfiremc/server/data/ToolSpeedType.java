@@ -27,10 +27,10 @@ public class ToolSpeedType {
     if (tagsState.isItemInTag(itemType, ItemTags.SWORDS)) {
       if (blockType == BlockType.COBWEB) {
         return 15;
-      } else if (tagsState.isBlockInTag(blockType, BlockTags.LEAVES)) {
-        return 1;
-      } else {
+      } else if (tagsState.isBlockInTag(blockType, BlockTags.SWORD_EFFICIENT)) {
         return 1.5F;
+      } else {
+        return 1;
       }
     } else if (itemType == ItemType.SHEARS) {
       if (blockType == BlockType.COBWEB || tagsState.isBlockInTag(blockType, BlockTags.LEAVES)) {

@@ -116,10 +116,10 @@ public record MapColor(int id, int col) {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof MapColor mapColor)) {
+    if (!(o instanceof MapColor other)) {
       return false;
     }
-    return id == mapColor.id;
+    return id == other.id;
   }
 
   @Override
