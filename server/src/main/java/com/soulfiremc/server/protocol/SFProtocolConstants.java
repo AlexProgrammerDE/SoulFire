@@ -24,6 +24,8 @@ public class SFProtocolConstants {
   public static final String VIA_USER_CONNECTION = "via-user-connection";
   public static final String TRAFFIC_HANDLER = "netty-traffic-handler";
   public static final ResourceKey BRAND_PAYLOAD_KEY = ResourceKey.fromString("minecraft:brand");
+  public static final ResourceKey REGISTER_KEY = ResourceKey.fromString("minecraft:register");
+  public static final ResourceKey UNREGISTER_KEY = ResourceKey.fromString("minecraft:unregister");
 
   private SFProtocolConstants() {}
 }

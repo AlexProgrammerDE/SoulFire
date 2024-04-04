@@ -20,9 +20,9 @@ package com.soulfiremc.server.data;
 import com.google.gson.JsonObject;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.util.GsonInstance;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -46,7 +46,7 @@ public class TranslationMapper implements Function<TranslatableComponent, String
       throw new IllegalStateException(e);
     }
 
-    var mojangTranslations = new HashMap<String, String>();
+    var mojangTranslations = new Object2ObjectOpenHashMap<String, String>();
     for (var translationEntry : translations.entrySet()) {
       mojangTranslations.put(translationEntry.getKey(), translationEntry.getValue().getAsString());
     }

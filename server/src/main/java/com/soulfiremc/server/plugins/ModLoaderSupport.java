@@ -25,6 +25,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.ComboProperty;
@@ -41,6 +42,13 @@ import net.lenni0451.lambdaevents.EventHandler;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ModLoaderSupport implements InternalPlugin {
+  private static final ResourceKey FML_HS_KEY = ResourceKey.fromString("fml:hs");
+  private static final ResourceKey FML_FML_KEY = ResourceKey.fromString("fml:fml");
+  private static final ResourceKey FML_MP_KEY = ResourceKey.fromString("fml:mp");
+  private static final ResourceKey FML_FORGE_KEY = ResourceKey.fromString("fml:forge");
+  private static final ResourceKey FML2_LOGIN_WRAPPER_KEY =
+      ResourceKey.fromString("fml:loginwrapper");
+  private static final ResourceKey FML2_HANDSHAKE_KEY = ResourceKey.fromString("fml:handshake");
   private static final char HOSTNAME_SEPARATOR = '\0';
 
   @EventHandler
@@ -84,25 +92,27 @@ public class ModLoaderSupport implements InternalPlugin {
     var settingsHolder = connection.settingsHolder();
 
     if (event.packet() instanceof ClientboundCustomPayloadPacket pluginMessage) {
+      var channelKey = ResourceKey.fromString(pluginMessage.getChannel());
       if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
           == ModLoaderSettings.ModLoaderMode.FML) {
-        handleFMLPluginMessage(event.connection(), pluginMessage);
+        handleFMLPluginMessage(event.connection(), channelKey, pluginMessage.getData());
       }
     } else if (event.packet() instanceof ClientboundCustomQueryPacket loginPluginMessage) {
+      var channelKey = ResourceKey.fromString(loginPluginMessage.getChannel());
       if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
           == ModLoaderSettings.ModLoaderMode.FML2) {
-        handleFML2PluginMessage(loginPluginMessage);
+        handleFML2PluginMessage(event.connection(), channelKey, loginPluginMessage.getData());
       }
     }
   }
 
   private void handleFMLPluginMessage(
-      BotConnection botConnection, ClientboundCustomPayloadPacket pluginMessage) {
-    if (!pluginMessage.getChannel().equals("fml:hs")) {
+      BotConnection botConnection, ResourceKey channelKey, byte[] data) {
+    if (!channelKey.equals(FML_HS_KEY)) {
       return;
     }
 
-    var buffer = Unpooled.wrappedBuffer(pluginMessage.getData());
+    var buffer = Unpooled.wrappedBuffer(data);
     var discriminator = buffer.readByte();
     switch (discriminator) {
       case 0 -> { // ServerHello
@@ -115,7 +125,8 @@ public class ModLoaderSupport implements InternalPlugin {
 
         botConnection
             .botControl()
-            .registerPluginChannels("fml:hs", "fml:fml", "fml:mp", "fml:fml", "fml:forge");
+            .registerPluginChannels(
+                FML_HS_KEY, FML_FML_KEY, FML_MP_KEY, FML_FML_KEY, FML_FORGE_KEY);
         sendFMLClientHello(botConnection, fmlProtocolVersion);
         sendFMLModList(botConnection, List.of());
       }
@@ -150,7 +161,7 @@ public class ModLoaderSupport implements InternalPlugin {
     buffer.writeByte(1);
     buffer.writeByte(fmlProtocolVersion);
 
-    botConnection.botControl().sendPluginMessage("fml:hs", buffer);
+    botConnection.botControl().sendPluginMessage(FML_HS_KEY, buffer);
   }
 
   private void sendFMLModList(BotConnection botConnection, List<Mod> mods) {
@@ -163,7 +174,7 @@ public class ModLoaderSupport implements InternalPlugin {
       helper.writeString(buffer, mod.version);
     }
 
-    botConnection.botControl().sendPluginMessage("fml:hs", buffer);
+    botConnection.botControl().sendPluginMessage(FML_HS_KEY, buffer);
   }
 
   private void sendFMLHandshakeAck(BotConnection botConnection, byte phase) {
@@ -171,11 +182,51 @@ public class ModLoaderSupport implements InternalPlugin {
     buffer.writeByte(-1);
     buffer.writeByte(phase);
 
-    botConnection.botControl().sendPluginMessage("fml:hs", buffer);
+    botConnection.botControl().sendPluginMessage(FML_HS_KEY, buffer);
   }
 
-  private void handleFML2PluginMessage(ClientboundCustomQueryPacket loginPluginMessage) {
-    var buffer = Unpooled.wrappedBuffer(loginPluginMessage.getData());
+  private void handleFML2PluginMessage(
+      BotConnection botConnection, ResourceKey channelKey, byte[] data) {
+    if (!channelKey.equals(FML2_LOGIN_WRAPPER_KEY)) {
+      return;
+    }
+
+    var helper = botConnection.session().getCodecHelper();
+    var buffer = Unpooled.wrappedBuffer(data);
+
+    var innerChannel = helper.readString(buffer);
+    var innerChannelKey = ResourceKey.fromString(innerChannel);
+    if (!innerChannelKey.equals(FML2_HANDSHAKE_KEY)) {
+      return;
+    }
+
+    var length = helper.readVarInt(buffer);
+    var innerBuffer = buffer.readBytes(length);
+    var packetId = helper.readVarInt(innerBuffer);
+    var packetContentBuffer = innerBuffer.readBytes(innerBuffer.readableBytes());
+    switch (packetId) {
+      case 1 -> {
+        var packetContentBytes = new byte[packetContentBuffer.readableBytes()];
+        packetContentBuffer.readBytes(packetContentBytes);
+        sendFML2HandshakeResponse(botConnection, 2, packetContentBytes);
+      }
+      case 3, 4 -> sendFML2HandshakeResponse(botConnection, 99, new byte[0]);
+    }
+  }
+
+  private void sendFML2HandshakeResponse(
+      BotConnection botConnection, int packetId, byte[] packetContent) {
+    var helper = botConnection.session().getCodecHelper();
+    var innerBuffer = Unpooled.buffer();
+    helper.writeVarInt(innerBuffer, packetId);
+    innerBuffer.writeBytes(packetContent);
+
+    var buffer = Unpooled.buffer();
+    helper.writeString(buffer, FML2_HANDSHAKE_KEY.toString());
+    helper.writeVarInt(buffer, innerBuffer.readableBytes());
+    buffer.writeBytes(innerBuffer);
+
+    botConnection.botControl().sendPluginMessage(FML2_LOGIN_WRAPPER_KEY, buffer);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)

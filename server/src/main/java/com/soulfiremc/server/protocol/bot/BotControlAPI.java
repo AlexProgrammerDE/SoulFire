@@ -29,6 +29,8 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundSwingPacket;
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.data.ResourceKey;
+import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.util.Segment;
@@ -123,29 +125,29 @@ public class BotControlAPI {
     }
   }
 
-  public void registerPluginChannels(String... channels) {
+  public void registerPluginChannels(ResourceKey... channels) {
     var buffer = Unpooled.buffer();
     for (var i = 0; i < channels.length; i++) {
       var channel = channels[i];
-      buffer.writeBytes(channel.getBytes(StandardCharsets.UTF_8));
+      buffer.writeBytes(channel.toString().getBytes(StandardCharsets.UTF_8));
 
       if (i != channels.length - 1) {
         buffer.writeByte(0);
       }
     }
 
-    sendPluginMessage("minecraft:register", buffer);
+    sendPluginMessage(SFProtocolConstants.REGISTER_KEY, buffer);
   }
 
-  public void sendPluginMessage(String channel, ByteBuf data) {
+  public void sendPluginMessage(ResourceKey channel, ByteBuf data) {
     var array = new byte[data.readableBytes()];
     data.readBytes(array);
 
     sendPluginMessage(channel, array);
   }
 
-  public void sendPluginMessage(String channel, byte[] data) {
-    dataManager.sendPacket(new ServerboundCustomPayloadPacket(channel, data));
+  public void sendPluginMessage(ResourceKey channel, byte[] data) {
+    dataManager.sendPacket(new ServerboundCustomPayloadPacket(channel.toString(), data));
   }
 
   public Vector3d getEntityVisiblePoint(Entity entity) {

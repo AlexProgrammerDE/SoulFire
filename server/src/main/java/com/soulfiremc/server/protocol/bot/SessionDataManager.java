@@ -399,6 +399,13 @@ public final class SessionDataManager {
     if (channelKey.equals(SFProtocolConstants.BRAND_PAYLOAD_KEY)) {
       serverBrand = session.getCodecHelper().readString(Unpooled.wrappedBuffer(packet.getData()));
       log.debug("Received server brand \"{}\"", serverBrand);
+    } else if (channelKey.equals(SFProtocolConstants.REGISTER_KEY)) {
+      log.debug(
+          "Received register packet for channels: {}", String.join(", ", readChannels(packet)));
+    } else if (channelKey.equals(SFProtocolConstants.UNREGISTER_KEY)) {
+      log.debug(
+          "Received unregister packet for channels; {}",
+          String.join(", ", readChannels(packet)));
     }
   }
 
